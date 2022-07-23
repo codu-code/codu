@@ -13,7 +13,7 @@ const navigation = [
 
 const Nav: NextPage = () => {
   return (
-    <Popover as="header" className="relative">
+    <Popover as="header" className="relative" style={{zIndex: 10}}>
       <div className="pt-6">
         <nav
           className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6"
