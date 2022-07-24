@@ -1,15 +1,12 @@
 import type { NextPage } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
 
-const navigation = [
-  { name: "Home", href: "#" },
-  { name: "Blog", href: "#" },
-  { name: "Sponsorship", href: "#" },
-  { name: "Contact", href: "#" },
-];
+import { navigation, discordInviteUrl } from "../../config/site_settings";
 
 const Nav: NextPage = () => {
   return (
@@ -21,12 +18,17 @@ const Nav: NextPage = () => {
         >
           <div className="flex items-center flex-1 justify-between">
             <div className="flex items-center justify-between w-full md:w-auto">
-              <a href="#">
-                <span className="sr-only">Codú</span>
-                <span>
-                  <img src="/images/codu.png" alt="Codù logo" className="h-8" />
-                </span>
-              </a>
+              <Link href="/">
+                <a>
+                  <span className="sr-only">Codú</span>
+                  <Image
+                    src="/images/codu.png"
+                    alt="Codù logo"
+                    height={30}
+                    width={94.5}
+                  />
+                </a>
+              </Link>
               <div className="-mr-2 flex items-center md:hidden">
                 <Popover.Button className=" rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:bg-gray-800 focus:outline-none focus:ring-2 focus-ring-inset focus:ring-white">
                   <span className="sr-only">Open main menu</span>
@@ -64,11 +66,18 @@ const Nav: NextPage = () => {
         >
           <div className="rounded-lg shadow-md bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
             <div className="px-5 pt-4 flex items-center justify-between">
-              <div>
-                <img className="h-8 w-auto" src="/images/cloud.png" alt="" />
-              </div>
+              <Link href="/">
+                <a className="hover:bg-slate-50 border-r">
+                  <Image
+                    src="/images/codu-black.png"
+                    alt="Codù logo"
+                    height={24}
+                    width={75.6}
+                  />
+                </a>
+              </Link>
               <div className="-mr-2">
-                <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-600">
+                <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-pink-600">
                   <span className="sr-only">Close menu</span>
                   <XIcon className="h-6 w-6" aria-hidden="true" />
                 </Popover.Button>
@@ -77,30 +86,22 @@ const Nav: NextPage = () => {
             <div className="pt-5 pb-6">
               <div className="px-2 space-y-1">
                 {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-gray-50"
-                  >
-                    {item.name}
-                  </a>
+                  <Link key={item.name} href={item.href}>
+                    <a className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-50">
+                      {item.name}
+                    </a>
+                  </Link>
                 ))}
               </div>
               <div className="mt-6 px-5"></div>
               <a
-                href="#"
-                className="block text-center w-full py-3 px-4 rounded-md shadow bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-medium hover:from-teal-600 hover:to-cyan-700"
+                href={discordInviteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-center mx-4 py-3 px-4 rounded-md shadow bg-gradient-to-r from-orange-400 to-pink-600 text-white font-medium hover:from-orange-500 hover:to-pink-700"
               >
-                Start free trial
+                Join the community
               </a>
-              <div className="mt-6 px-5">
-                <p className="text-center text-base font-medium text-gray-500">
-                  Existing customer?{" "}
-                  <a href="#" className="text-gray-900 hover:underline">
-                    Login
-                  </a>
-                </p>
-              </div>
             </div>
           </div>
         </Popover.Panel>

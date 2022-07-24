@@ -1,113 +1,27 @@
 import type { NextPage } from "next";
-import { Fragment } from "react";
-
 import Head from "next/head";
-
 import Layout from "../components/Layout/Layout";
-
 import { ArrowRightIcon } from "@heroicons/react/outline";
 
-const people = [
-  {
-    name: "Leonard Krasner",
-    role: "Senior Designer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-    twitterUrl: "#",
-    linkedinUrl: "#",
-  },
-  {
-    name: "Leonard Krasner",
-    role: "Senior Designer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-    twitterUrl: "#",
-    linkedinUrl: "#",
-  },
-  {
-    name: "Leonard Krasner",
-    role: "Senior Designer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-    twitterUrl: "#",
-    linkedinUrl: "#",
-  },
-  {
-    name: "Leonard Krasner",
-    role: "Senior Designer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-    twitterUrl: "#",
-    linkedinUrl: "#",
-  },
-  {
-    name: "Leonard Krasner",
-    role: "Senior Designer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-    twitterUrl: "#",
-    linkedinUrl: "#",
-  },
-  {
-    name: "Leonard Krasner",
-    role: "Senior Designer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
-    twitterUrl: "#",
-    linkedinUrl: "#",
-  },
-];
-
-const services = [
-  {
-    title: "Job opportunities",
-    body: "Launching a product is complex. Our product strategy services help you define where to focus your effort.",
-    url: "#",
-  },
-  {
-    title: "Mentorship",
-    body: "Unsure about quality? If you outsourced a tech project it's not easy to understand the quality of the solution.",
-    url: "#",
-  },
-  {
-    title: "Open Source Software",
-    body: "Building together is fun! Contribute to open source software with other members.",
-    url: "#",
-  },
-];
-
-const steps = [
-  {
-    title: "Introduce yourself!",
-    body: "Please introduce yourself, a little about you such as your current job, your goals and where you are from when you enter the group! We want you to share who you are and where you’re from.",
-  },
-  {
-    title: "Be kind and respectful",
-    body: "Together let’s build a positive, welcoming environment where everyone feels safe to share ideas, thoughts, and feedback. Let’s be supportive, respect individual opinions, and report inappropriate posts if needed.",
-  },
-  {
-    title: "Give more than you take",
-    body: "There will always be opportunities to help another person with so many people and levels. We are here to support you, so make sure you try to support others in the community too.",
-  },
-
-  {
-    title: "Don't double post",
-    body: "When asking questions or posting things, look for the most relevant channel and post it there — posting across channels or repeating questions pollutes the conversations for everyone.",
-  },
-];
+import {
+  rules,
+  benefits,
+  highlighted_members,
+  discordInviteUrl,
+} from "../config/site_settings";
 
 const Home: NextPage = () => {
   return (
     <>
       <Head>
         <title>Codú | Homepage</title>
-        <meta name="description" content="Codú | New Site Coming Soon" />
+        <meta name="description" content="Codú | Web Developer Community" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
         <div className="relative">
           <main>
-            <div className="pt-10 sm:pt-16 lg:pt-8 lg:pb-14">
+            <div className="pt-10 sm:pt-16 lg:pt-8 pb-14">
               <div className="mx-auto max-w-6xl lg:px-8">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-8">
                   <div className="lg:hidden -mt-20 lg:m-0 lg:relative">
@@ -133,8 +47,10 @@ const Home: NextPage = () => {
                         most supportive community of developers out there!
                       </p>
                       <a
-                        href="#"
+                        href={discordInviteUrl}
                         className="mt-4 inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-gradient-to-r from-orange-400 to-pink-600 hover:from-orange-500 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         Join the community
                         <svg
@@ -162,20 +78,19 @@ const Home: NextPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="grid sm:grid-cols-1 lg:grid-cols-3 mt-10 sm:mt-12 lg:gap-16 lg:max-w-6xl py-20 sm:px-6 px-4 max-w-prose mx-auto">
-                  {services.map(({ title, body, url }) => (
-                    <div key={url} className="mt-8 flex flex-col">
-                      <h2 className=" text-2xl font-semibold">{title}</h2>
-                      <p className="my-2">{body}</p>
-                      <a className="font-semibold underline" href={url}>
-                        Read more
-                        <ArrowRightIcon
-                          className="inline  ml-2 h-4 w-4 text-white"
-                          aria-hidden="true"
-                        />
-                      </a>
-                    </div>
-                  ))}
+                <div className="mx-auto max-w-prose lg:max-w-none lg:mx-0">
+                  <h3 className="mt-10 sm:mt-12 pt-20 text-xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">
+                    Benefits
+                  </h3>
+
+                  <div className="grid sm:grid-cols-1 lg:grid-cols-3 lg:gap-16 lg:max-w-6xl">
+                    {benefits.map(({ title, body }) => (
+                      <div key={title} className="mt-8 flex flex-col">
+                        <h2 className=" text-2xl font-semibold">{title}</h2>
+                        <p className="my-2">{body}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -186,7 +101,7 @@ const Home: NextPage = () => {
                 <img
                   className="h-56 w-full object-cover lg:absolute lg:h-full"
                   src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1567&q=80"
-                  alt=""
+                  alt="Developers working on their laptops at a table"
                 />
               </div>
             </div>
@@ -230,10 +145,10 @@ const Home: NextPage = () => {
               Our hourse rules
             </h2>
             <div className="lg:grid grid-cols-2 gap-16 py-4">
-              {steps.map(({ title, body }, i) => (
+              {rules.map(({ title, body }, i) => (
                 <div className="flex flex-col mb-8 lg:mb-0" key={title}>
                   <div className="text-lg text-gray-400">{`${i + 1}/${
-                    steps.length
+                    rules.length
                   }`}</div>
                   <h4 className="text-3xl leading-8 font-extrabold tracking-tight sm:text-5xl">
                     {title}
@@ -259,67 +174,104 @@ const Home: NextPage = () => {
                   role="list"
                   className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-6 sm:space-y-0 lg:grid-cols-3 lg:gap-8"
                 >
-                  {people.map((person) => (
+                  {highlighted_members.map((person) => (
                     <li
                       key={person.imageUrl}
-                      className="py-10 px-6 bg-white text-center rounded-lg xl:px-10 xl:text-left border border-r border-black"
+                      className="py-10 px-6 text-center xl:px-10 xl:text-left bg-black rounded-tr-[60px] rounded-bl-[60px]"
                     >
                       <div className="space-y-6 xl:space-y-10">
                         <img
                           className="mx-auto h-40 w-40 rounded-full xl:w-56 xl:h-56 border border-black"
                           src={person.imageUrl}
-                          alt=""
+                          alt={`Profile picture for ${person.name}`}
                         />
-                        <div className="space-y-2 xl:flex xl:items-center xl:justify-between">
+                        <div className="text-center">
                           <div className="font-medium text-lg leading-6 space-y-1">
                             <h3 className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold text-xl">
                               {person.name}
+                              {person.emoji && (
+                                <span className="ml-2 text-black">
+                                  {person.emoji}
+                                </span>
+                              )}
                             </h3>
-                            <p className="text-gray-800 font-light">
+                            <p className="text-gray-500 font-light">
                               {person.role}
                             </p>
                           </div>
 
                           <ul
                             role="list"
-                            className="flex justify-center space-x-5"
+                            className="flex justify-center space-x-5 mt-2"
                           >
-                            <li>
-                              <a
-                                href={person.twitterUrl}
-                                className="text-black hover:text-gray-800"
-                              >
-                                <span className="sr-only">Twitter</span>
-                                <svg
-                                  className="w-5 h-5"
-                                  aria-hidden="true"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
+                            {person.twitterUrl && (
+                              <li>
+                                <a
+                                  href={person.twitterUrl}
+                                  className="text-gray-500 hover:text-gray-400"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                 >
-                                  <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                                </svg>
-                              </a>
-                            </li>
-                            <li>
-                              <a
-                                href={person.linkedinUrl}
-                                className="text-black hover:text-gray-800"
-                              >
-                                <span className="sr-only">LinkedIn</span>
-                                <svg
-                                  className="w-5 h-5"
-                                  aria-hidden="true"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
+                                  <span className="sr-only">Twitter</span>
+                                  <svg
+                                    className="w-5 h-5"
+                                    aria-hidden="true"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
+                                  </svg>
+                                </a>
+                              </li>
+                            )}
+                            {person.linkedinUrl && (
+                              <li>
+                                <a
+                                  href={person.linkedinUrl}
+                                  className="text-gray-500 hover:text-gray-400"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
                                 >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              </a>
-                            </li>
+                                  <span className="sr-only">LinkedIn</span>
+                                  <svg
+                                    className="w-5 h-5"
+                                    aria-hidden="true"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </a>
+                              </li>
+                            )}
+                            {person.githubUrl && (
+                              <li>
+                                <a
+                                  href={person.githubUrl}
+                                  className="text-gray-500 hover:text-gray-400"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <span className="sr-only">GitHub</span>
+                                  <svg
+                                    fill="currentColor"
+                                    viewBox="0 0 24 24"
+                                    className="w-6 h-6"
+                                    aria-hidden="true"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </a>
+                              </li>
+                            )}
                           </ul>
                         </div>
                       </div>
