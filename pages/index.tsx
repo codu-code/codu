@@ -142,7 +142,7 @@ const Home: NextPage = () => {
           </section>
           <section className="lg:max-w-6xl py-20 sm:px-6 px-4 max-w-prose mx-auto">
             <h2 className="text-xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">
-              Our hourse rules
+              Our house rules
             </h2>
             <div className="lg:grid grid-cols-2 gap-16 py-4">
               {rules.map(({ title, body }, i) => (
