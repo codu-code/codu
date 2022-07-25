@@ -177,11 +177,11 @@ const Home: NextPage = () => {
                   {highlighted_members.map((person) => (
                     <li
                       key={person.imageUrl}
-                      className="py-10 px-6 text-center xl:px-10 xl:text-left bg-black rounded-tr-[60px] rounded-bl-[60px]"
+                      className="py-10 px-6 text-center xl:px-10 xl:text-left bg-black rounded-tr-[60px] rounded-bl-[60px] max-w-sm sm:max-w-none mx-auto sm:mx-0"
                     >
-                      <div className="space-y-6 xl:space-y-10">
+                      <div className="space-y-6">
                         <img
-                          className="mx-auto h-40 w-40 rounded-full xl:w-56 xl:h-56 border border-black"
+                          className="mx-auto h-40 w-40 rounded-full border border-black"
                           src={person.imageUrl}
                           alt={`Profile picture for ${person.name}`}
                         />
