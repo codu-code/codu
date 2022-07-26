@@ -16,9 +16,13 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
       </Head>
       <Layout>
         <section className="relative">
-        {articles.map((article: any) => {
-          return <h1><Link href={`/articles/${article.slug}`}>{article.title}</Link></h1>;
-        })}
+          {articles.map((article: any) => {
+            return (
+              <h1 key={article.slug}>
+                <Link href={`/articles/${article.slug}`}>{article.title}</Link>
+              </h1>
+            );
+          })}
         </section>
       </Layout>
     </>
