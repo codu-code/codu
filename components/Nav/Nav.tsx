@@ -23,7 +23,7 @@ const Nav: NextPage = () => {
                   <span className="sr-only">Codú</span>
                   <Image
                     src="/images/codu.png"
-                    alt="Codù logo"
+                    alt="Codú logo"
                     height={30}
                     width={94.5}
                   />
@@ -70,7 +70,7 @@ const Nav: NextPage = () => {
                 <a className="hover:bg-slate-50 border-r">
                   <Image
                     src="/images/codu-black.png"
-                    alt="Codù logo"
+                    alt="Codú logo"
                     height={24}
                     width={75.6}
                   />
