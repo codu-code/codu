@@ -86,16 +86,18 @@ export const rules = [
 
 export const footerNav = [
   { name: "Home", href: "/" },
-  { name: "Blog", href: "/blog" },
+  { name: "Articles", href: "/articles" },
+  { name: "Workshops", href: "/workshops" },
+  { name: "Events", href: "/events" },
   { name: "Sponsorship", href: "/sponsorship" },
-  { name: "Contact", href: "/contact" },
 ];
 
 export const navigation = [
   { name: "Home", href: "/" },
-  { name: "Blog", href: "/blog" },
-  { name: "Sponsorship", href: "/sponsorship" },
-  { name: "Contact", href: "/contact" },
+  { name: "Articles", href: "/articles" },
+  { name: "Workshops", href: "/workshops" },
+  { name: "Events", href: "/events" },
+  { name: "Support us", href: "/sponsorship" },
 ];
 
 export const discordInviteUrl = "https://discord.gg/NxSkYtZ";

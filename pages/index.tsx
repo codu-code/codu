@@ -16,7 +16,6 @@ const Home: NextPage = () => {
       <Head>
         <title>Codú | Homepage</title>
         <meta name="description" content="Codú | Web Developer Community" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
         <div className="relative">

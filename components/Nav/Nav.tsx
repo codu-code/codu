@@ -13,7 +13,7 @@ const Nav: NextPage = () => {
     <Popover as="header" className="relative z-10">
       <div className="pt-6">
         <nav
-          className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6"
+          className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 pb-4"
           aria-label="Global"
         >
           <div className="flex items-center flex-1 justify-between">
