@@ -13,7 +13,7 @@ const Nav: NextPage = () => {
     <Popover as="header" className="relative z-10">
       <div className="pt-6">
         <nav
-          className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6"
+          className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 pb-4"
           aria-label="Global"
         >
           <div className="flex items-center flex-1 justify-between">
@@ -23,7 +23,7 @@ const Nav: NextPage = () => {
                   <span className="sr-only">Codú</span>
                   <Image
                     src="/images/codu.png"
-                    alt="Codù logo"
+                    alt="Codú logo"
                     height={30}
                     width={94.5}
                   />
@@ -70,7 +70,7 @@ const Nav: NextPage = () => {
                 <a className="hover:bg-slate-50 border-r">
                   <Image
                     src="/images/codu-black.png"
-                    alt="Codù logo"
+                    alt="Codú logo"
                     height={24}
                     width={75.6}
                   />
