@@ -1,7 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Layout from "../components/Layout/Layout";
-import { ArrowRightIcon } from "@heroicons/react/outline";
 
 import {
   rules,
