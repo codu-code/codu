@@ -93,7 +93,7 @@ export const footerNav = [
 
 export const navigation = [
   { name: "Home", href: "/" },
-  { name: "Blog", href: "/blog" },
+  { name: "Blog", href: "/articles" },
   { name: "Sponsorship", href: "/sponsorship" },
   { name: "Contact", href: "/contact" },
 ];
@@ -101,3 +101,5 @@ export const navigation = [
 export const discordInviteUrl = "https://discord.gg/NxSkYtZ";
 export const githubUrl = "https://github.com/codu-code/codu";
 export const twitterUrl = "https://twitter.com/coducommunity";
+
+export const articlesDirectory = "/content/articles";
