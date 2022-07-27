@@ -4,22 +4,26 @@ import matter from "gray-matter";
 import markdownIt from "markdown-it";
 import { articlesDirectory } from "../config/site_settings";
 
-const MDIT = new markdownIt().use(require('markdown-it-prism'))
+const MDIT = new markdownIt().use(require("markdown-it-prism"));
 
-export const getAllArticlesMetadata = async () : Promise<Record<string, any>[]> => {
+export const getAllArticlesMetadata = async (): Promise<
+  Record<string, any>[]
+> => {
   try {
     const metadata: Record<string, any>[] = [];
     const dir = await readdir(path.join(process.cwd(), articlesDirectory));
 
-    for(let i = 0; i < dir.length; i++) {
-        const file = dir[i];
-        const content = await readFile(path.join(process.cwd(), articlesDirectory, file));
+    for (let i = 0; i < dir.length; i++) {
+      const file = dir[i];
+      const content = await readFile(
+        path.join(process.cwd(), articlesDirectory, file)
+      );
 
-        metadata.push({
-            ...matter(content).data,
-            slug: file.replace(".md", "")
-        });
-    };
+      metadata.push({
+        ...matter(content).data,
+        slug: file.replace(".md", ""),
+      });
+    }
 
     return metadata;
   } catch (error: any) {
@@ -27,20 +31,23 @@ export const getAllArticlesMetadata = async () : Promise<Record<string, any>[]> 
   }
 };
 
-export const getAllArticlePaths = async () : Promise<string[]> => {
-    const files = await readdir(path.join(process.cwd(), articlesDirectory));
+export const getAllArticlePaths = async (): Promise<string[]> => {
+  const files = await readdir(path.join(process.cwd(), articlesDirectory));
 
-    return files.map(file => `/articles/${file.replace(".md", "")}`);
-}
+  return files.map((file) => `/articles/${file.replace(".md", "")}`);
+};
 
-export const getArticle = async (slug: string) : Promise<{ content: string, frontmatter: any}> => {
-    
-    const rawArticle = await readFile(path.join(process.cwd(), articlesDirectory, `${slug}.md`));
+export const getArticle = async (
+  slug: string
+): Promise<{ content: string; frontmatter: any }> => {
+  const rawArticle = await readFile(
+    path.join(process.cwd(), articlesDirectory, `${slug}.md`)
+  );
 
-    const parsedContent = matter(rawArticle);
+  const parsedContent = matter(rawArticle);
 
-    return {
-        content: MDIT.render(parsedContent.content),
-        frontmatter: parsedContent.data
-    }
-}
+  return {
+    content: MDIT.render(parsedContent.content),
+    frontmatter: parsedContent.data,
+  };
+};
