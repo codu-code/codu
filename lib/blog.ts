@@ -27,7 +27,6 @@ export const getAllArticlesMetadata = async (): Promise<
 
     return metadata;
   } catch (error: any) {
-    console.log(error);
     throw new Error("Error while reading articles...", { cause: error });
   }
 };
