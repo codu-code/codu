@@ -63,11 +63,22 @@ const Footer: NextPage = () => {
         >
           {navigation.main.map((item) => (
             <div key={item.name} className="px-5 py-2">
-              <Link href={item.href}>
-                <a className="text-base text-gray-500 hover:text-gray-400">
+              {item.href.includes("http") ? (
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-base text-gray-500 hover:text-gray-400"
+                >
                   {item.name}
                 </a>
-              </Link>
+              ) : (
+                <Link href={item.href}>
+                  <a className="text-base text-gray-500 hover:text-gray-400">
+                    {item.name}
+                  </a>
+                </Link>
+              )}
             </div>
           ))}
         </nav>

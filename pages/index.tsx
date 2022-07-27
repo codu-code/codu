@@ -27,7 +27,7 @@ const Home: NextPage = () => {
                       <img
                         className="w-full lg:absolute lg:inset-y-0 lg:h-full lg:w-auto lg:max-w-none"
                         src="/images/cloud.png"
-                        alt=""
+                        alt="A grey cloud"
                       />
                     </div>
                   </div>
@@ -71,7 +71,7 @@ const Home: NextPage = () => {
                       <img
                         className="w-full lg:absolute lg:inset-y-0 lg:w-auto lg:max-w-full"
                         src="/images/cloud.png"
-                        alt=""
+                        alt="A grey cloud"
                       />
                     </div>
                   </div>
