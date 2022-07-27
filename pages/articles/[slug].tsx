@@ -14,11 +14,9 @@ const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <section className="flex flex-col items-start max-w-3xl mx-auto">
-        <h2 className="my-6 sm:my-10 pt-10 text-3xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">{article.frontmatter.title}</h2>
-        <article className="max-w-none prose prose-invert" dangerouslySetInnerHTML={{ __html: article.content}}>
-
-        </article>
+        <section className="mx-auto px-4 max-w-xl">
+        <h2 className="my-6 sm:my-5 pt-5 text-3xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">{article.frontmatter.title}</h2>
+        <article className="prose prose-invert" dangerouslySetInnerHTML={{ __html: article.content}} />
         </section>
       </Layout>
     </>

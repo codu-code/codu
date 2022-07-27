@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import Card from "../../components/Article/Card";
 import Layout from "../../components/Layout/Layout";
 import { getAllArticlesMetadata } from "../../lib/blog";
 
@@ -15,14 +16,18 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <section className="relative">
-          {articles.map((article: any) => {
-            return (
-              <h1 key={article.slug}>
-                <Link href={`/articles/${article.slug}`}>{article.title}</Link>
-              </h1>
-            );
-          })}
+        <section className="relative max-w-2xl mx-auto py-4 px-3">
+          <h3 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-6xl pb-8 border-b-2">
+            Recent Articles
+          </h3>
+          {articles.map(({ slug, title, description }: any) => (
+            <Card
+              key={slug}
+              slug={slug}
+              title={title}
+              description={description}
+            />
+          ))}
         </section>
       </Layout>
     </>
