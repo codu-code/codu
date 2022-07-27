@@ -9,6 +9,10 @@ module.exports = {
     return config;
   },
   images: {
-    domains: ["images.ctfassets.net", "images.unsplash.com"],
+    domains: [
+      "images.ctfassets.net",
+      "images.unsplash.com",
+      "avatars.githubusercontent.com",
+    ],
   },
 };
