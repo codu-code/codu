@@ -95,13 +95,25 @@ const Nav: NextPage = () => {
             </div>
             <div className="pt-5 pb-6">
               <div className="px-2 space-y-1">
-                {navigation.map((item) => (
-                  <Link key={item.name} href={item.href}>
-                    <a className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-50">
+                {navigation.map((item) =>
+                  item.href.includes("http") ? (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-50"
+                    >
                       {item.name}
                     </a>
-                  </Link>
-                ))}
+                  ) : (
+                    <Link key={item.name} href={item.href}>
+                      <a className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-50">
+                        {item.name}
+                      </a>
+                    </Link>
+                  )
+                )}
               </div>
               <div className="mt-6 px-5"></div>
               <a
