@@ -19,19 +19,19 @@ const Home: NextPage = () => {
       <Layout>
         <div className="relative">
           <main>
-            <div className="pt-10 sm:pt-16 lg:pt-8 pb-14">
-              <div className="mx-auto max-w-6xl lg:px-8">
+            <div className="pt-10 sm:pt-16 lg:pt-8 pb-14 px-4 sm:px-6 lg:px-8 lg:max-w-6xl lg:mx-auto">
+              <div className="mx-auto max-w-6xl">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-8">
                   <div className="lg:hidden -mt-20 lg:m-0 lg:relative">
-                    <div className="relative mx-auto max-w-md px-4 sm:max-w-2xl sm:px-6 lg:max-w-none lg:px-0">
+                    <div className="relative mx-auto max-w-md sm:max-w-2xl sm:px-6 lg:max-w-none lg:px-0">
                       <img
                         className="w-full lg:absolute lg:inset-y-0 lg:h-full lg:w-auto lg:max-w-none"
                         src="/images/cloud.png"
-                        alt=""
+                        alt="A grey cloud"
                       />
                     </div>
                   </div>
-                  <div className="-mt-20 lg:mt-0 mx-auto max-w-md px-4 sm:max-w-2xl sm:px-6 sm:text-center lg:px-0 lg:text-left lg:flex lg:items-center">
+                  <div className="-mt-20 lg:mt-0 mx-auto max-w-md sm:max-w-2xl text-center lg:px-0 lg:text-left lg:flex lg:items-center">
                     <div className="lg:py-24">
                       <h1 className="mt-4 text-4xl tracking-tight font-extrabold text-white sm:mt-5 sm:text-6xl lg:mt-6 xl:text-6xl">
                         A space for{" "}
@@ -71,7 +71,7 @@ const Home: NextPage = () => {
                       <img
                         className="w-full lg:absolute lg:inset-y-0 lg:w-auto lg:max-w-full"
                         src="/images/cloud.png"
-                        alt=""
+                        alt="A grey cloud"
                       />
                     </div>
                   </div>
