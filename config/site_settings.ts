@@ -101,6 +101,27 @@ export const navigation = [
   { name: "Support us", href: "/sponsorship" },
 ];
 
+type Authors = {
+  [index: string]: any;
+};
+
+export const authors: Authors = {
+  pkspyder007: {
+    name: "Praveen Kumar",
+    role: "Full-Stack Developer",
+    emoji: "🛠️",
+    bio: "Full Stack @ Quizizz, Google Developer Students Lead, Moderator Codú Community",
+    imageUrl: "https://avatars.githubusercontent.com/u/19896788?v=4",
+  },
+  nialljoemaher: {
+    name: "Niall Maher",
+    role: "Codú Community Founder",
+    emoji: "🛠️",
+    bio: "I've worked in nearly every corner of technology businesses; Lead Developer, Software Architect, Product Manager, CTO and now happily a Founder @ Codú.",
+    imageUrl: "https://avatars.githubusercontent.com/u/12615742?v=4",
+  },
+};
+
 export const discordInviteUrl = "https://discord.gg/NxSkYtZ";
 export const githubUrl = "https://github.com/codu-code/codu";
 export const twitterUrl = "https://twitter.com/coducommunity";
