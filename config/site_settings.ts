@@ -87,8 +87,7 @@ export const rules = [
 export const footerNav = [
   { name: "Home", href: "/" },
   { name: "Articles", href: "/articles" },
-  { name: "Workshops", href: "/workshops" },
-  { name: "Events", href: "/events" },
+  { name: "Events", href: "https://www.meetup.com/codu-community/" },
   { name: "Sponsorship", href: "/sponsorship" },
 ];
 
@@ -98,7 +97,8 @@ export const navigation = [
   { name: "Contact", href: "/contact" },
   { name: "Articles", href: "/articles" },
   { name: "Workshops", href: "/workshops" },
-  { name: "Events", href: "/events" },
+  { name: "Events", href: "https://www.meetup.com/codu-community/" },
+  { name: "Support us", href: "/sponsorship" },
 ];
 
 export const discordInviteUrl = "https://discord.gg/NxSkYtZ";
