@@ -93,7 +93,10 @@ export const footerNav = [
 
 export const navigation = [
   { name: "Home", href: "/" },
+  { name: "Sponsorship", href: "/sponsorship" },
+  { name: "Contact", href: "/contact" },
   { name: "Articles", href: "/articles" },
+  { name: "Workshops", href: "/workshops" },
   { name: "Events", href: "https://www.meetup.com/codu-community/" },
   { name: "Support us", href: "/sponsorship" },
 ];
@@ -101,3 +104,5 @@ export const navigation = [
 export const discordInviteUrl = "https://discord.gg/NxSkYtZ";
 export const githubUrl = "https://github.com/codu-code/codu";
 export const twitterUrl = "https://twitter.com/coducommunity";
+
+export const articlesDirectory = "/content/articles";
