@@ -76,7 +76,7 @@ const Home: NextPage = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mx-auto max-w-prose lg:max-w-none lg:mx-0 px-4 sm:px-0">
+                <div className="mx-auto max-w-prose lg:max-w-none lg:mx-0 sm:px-6 px-4">
                   <h3 className="mt-10 sm:mt-12 pt-20 text-xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">
                     Benefits
                   </h3>
