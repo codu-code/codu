@@ -148,10 +148,10 @@ const Home: NextPage = () => {
                   <div className="text-lg text-gray-400">{`${i + 1}/${
                     rules.length
                   }`}</div>
-                  <h4 className="text-3xl leading-8 font-extrabold tracking-tight sm:text-5xl">
+                  <h4 className="text-3xl leading-8 font-extrabold tracking-tight sm:text-4xl mt-2">
                     {title}
                   </h4>
-                  <p className="text-md mt-3">{body}</p>
+                  <p className="text-md mt-2">{body}</p>
                 </div>
               ))}
             </div>

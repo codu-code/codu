@@ -52,30 +52,30 @@ export const highlighted_members = [
 export const benefits = [
   {
     title: "Job opportunities",
-    body: "Exclusive job oppurtunities posted by members in the community and a job board coming soon.",
+    body: "Exclusive job opportunities posted by community members and a job board are coming soon.",
   },
   {
     title: "Mentorship",
-    body: "It's easier to learn to code with a little push. Get access to top web develoeprs for when you need help.",
+    body: "It’s easier to learn to code with a little push. Get access to top web developers for when you need help.",
   },
   {
     title: "Open Source Software",
-    body: "Building together is fun! Contribute to open source software with other members.",
+    body: "Building together is fun! Contribute to open-source software with other members.",
   },
 ];
 
 export const rules = [
   {
     title: "Introduce yourself!",
-    body: "Please introduce yourself, a little about you such as your current job, your goals and where you are from when you enter the group! We want you to share who you are and where you’re from.",
+    body: "Please introduce yourself and a little about you, such as your current job, goals, and where you are from when you enter the group! We want you to share who you are and where you’re from.",
   },
   {
     title: "Be kind and respectful",
-    body: "Together let’s build a positive, welcoming environment where everyone feels safe to share ideas, thoughts, and feedback. Let’s be supportive, respect individual opinions, and report inappropriate posts if needed.",
+    body: "Let’s build a positive, welcoming environment where everyone feels safe to share ideas, thoughts, and feedback. Let’s be supportive, respect individual opinions, and report inappropriate posts if needed.",
   },
   {
     title: "Give more than you take",
-    body: "There will always be opportunities to help another person with so many people and levels. We are here to support you, so make sure you try to support others in the community too.",
+    body: "There will always be opportunities to help another person with many people and levels. We are here to support you, so make sure you try to support others in the community.",
   },
 
   {
