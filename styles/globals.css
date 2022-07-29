@@ -8,8 +8,15 @@ body {
 @tailwind components;
 @tailwind utilities;
 
+.fancy-link {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 tracking-wide cursor-pointer;
+  
+}
 
+.fancy-link:hover {
+  @apply from-orange-300 to-pink-500;
 
+}
 
 .prose .anchor {
   @apply absolute invisible no-underline;

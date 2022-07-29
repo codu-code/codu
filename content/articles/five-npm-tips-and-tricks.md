@@ -4,11 +4,12 @@ author: Niall Maher
 description: A small showcase of some of the useful underused things you can do with npm to boost your productivity. 
 cover_image: https://media.giphy.com/media/uA0EqAq95yY8aw0NhW/giphy.gif
 canonical_url: https://www.freecodecamp.org/news/5-npm-tips-and-tricks/
-userId: nialljoemaher
+user_id: nialljoemaher
 keywords: javascript, webdev, beginner, codenewbie
 tags:
   - JAVASCRIPT
 date: "2021-01-17"
+read_time: 3 min
 ---
 
 Well, this article might boost your productivity but at the very least it will impress some of your colleagues with your new skills. People will now perceive you as smarter and potentially more attractive *- this may be slight dramatics to gain a few more clicks*. 🙈

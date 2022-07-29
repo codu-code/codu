@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-import Card from "../../components/Article/Card";
+import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import Layout from "../../components/Layout/Layout";
 import { getAllArticlesMetadata } from "../../lib/blog";
+import { authors } from "../../config/site_settings";
 
 const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
   articles,
@@ -16,19 +16,35 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <section className="relative max-w-2xl mx-auto py-4 px-3">
-          <h3 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-6xl pb-8 border-b-2">
-            Recent Articles
-          </h3>
-          {articles.map(({ slug, title, description }: any) => (
-            <Card
-              key={slug}
-              slug={slug}
-              title={title}
-              description={description}
-            />
-          ))}
-        </section>
+        <div className="border-t-2 border-white">
+          <div className="relative sm:mx-auto max-w-2xl mx-4">
+            <h1 className="text-3xl tracking-tight font-extrabold text-gray-50 sm:text-4xl my-8">
+              Articles
+            </h1>
+            <section>
+              {articles.map(
+                ({
+                  slug,
+                  title,
+                  description,
+                  user_id,
+                  read_time,
+                  date,
+                }: any) => (
+                  <ArticlePreview
+                    key={slug}
+                    slug={slug}
+                    title={title}
+                    description={description}
+                    author={authors[user_id]}
+                    date={date}
+                    readTime={read_time}
+                  />
+                )
+              )}
+            </section>
+          </div>
+        </div>
       </Layout>
     </>
   );
