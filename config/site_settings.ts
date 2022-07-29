@@ -122,5 +122,6 @@ export const authors: Authors = {
 export const discordInviteUrl = "https://discord.gg/NxSkYtZ";
 export const githubUrl = "https://github.com/codu-code/codu";
 export const twitterUrl = "https://twitter.com/coducommunity";
+export const youtubeUrl = "https://www.youtube.com/c/Cod%C3%BACommunity";
 
 export const articlesDirectory = "/content/articles";
