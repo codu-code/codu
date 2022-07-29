@@ -15,7 +15,7 @@ const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
       </Head>
       <Layout>
         <div className="border-t-2">
-          <section className="mx-auto pb-4 max-w-xl">
+          <section className="mx-auto pb-4 max-w-xl px-4 sm:px-0">
             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
               {article.frontmatter.title}
             </h2>
@@ -24,7 +24,7 @@ const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
           </section>
-          <BioBar userId={article.frontmatter.userId} />
+          <BioBar userId={article.frontmatter.user_id} />
         </div>
       </Layout>
     </>
