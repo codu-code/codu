@@ -46,11 +46,13 @@ const ArticlePreview: NextPage<Props> = ({
         </header>
       </Link>
       <p className="tracking-wide text-sm md:text-base my-3">{description}</p>
-      <div className="flex justify-between content-center">
+      <div className="sm:flex justify-between content-center">
         <div className="flex items-center">
-          <a className="fancy-link semibold text-lg">Read full article</a>
+          <Link href={`/articles/${slug}`}>
+            <a className="fancy-link semibold text-lg">Read full article</a>
+          </Link>
         </div>
-        <div className="flex justify-center items-center">
+        <div className="flex justify-end items-center">
           <p className="text-sm font-medium text-gray-500">
             Written by{" "}
             <span className="text-gray-400 font-semibold">{author.name}</span>
