@@ -14,9 +14,9 @@ const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
         <title>Codú | {article.frontmatter.title}</title>
       </Head>
       <Layout>
-        <>
-          <section className="mx-auto px-4 max-w-xl">
-            <h2 className="my-6 sm:my-5 pt-5 text-3xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">
+        <div className="border-t-2">
+          <section className="mx-auto pb-4 max-w-xl">
+            <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
               {article.frontmatter.title}
             </h2>
             <article
@@ -25,7 +25,7 @@ const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
             />
           </section>
           <BioBar userId={article.frontmatter.userId} />
-        </>
+        </div>
       </Layout>
     </>
   );
