@@ -1,12 +1,13 @@
 ---
 title: "Ternary operator in Javascript"
 author: "Praveen Kumar"
-userId: "pkspyder007"
+user_id: "pkspyder007"
 description: "We all have that model in our mind that a variable is a box containing some value e.g. let a contains 10. Let me ask you a simple question. What is a variable? You might have answered that variable is a box in memory that holds some value and you have pictured something as below in your mind."
 keywords: "Javascript, unboxing, variable, box, memory, value"
 tags:
   - JAVASCRIPT
 date: "2021-09-30"
+read_time: 2 min
 ---
 
 This is the situation that you can never avoid as a developer. Assigning value to a variable based on a condition.
