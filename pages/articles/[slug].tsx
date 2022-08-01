@@ -4,10 +4,12 @@ import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
 
 import { getAllArticlePaths, getArticle } from "../../lib/blog";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import rehypePrism from "rehype-prism";
 
-const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
-  article,
-}) => {
+const ArticlePage: NextPage<{
+  article: { content: string; frontmatter: any };
+}> = ({ article }) => {
   return (
     <>
       <Head>
@@ -19,10 +21,13 @@ const ArticlePage: NextPage<{ article: Record<string, any> }> = ({
             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
               {article.frontmatter.title}
             </h2>
-            <article
-              className="prose prose-invert"
-              dangerouslySetInnerHTML={{ __html: article.content }}
-            />
+            <article className="prose prose-invert">
+              <ReactMarkdown
+                rehypePlugins={[rehypePrism]}
+              >
+                {article.content}
+              </ReactMarkdown>
+            </article>
           </section>
           <BioBar userId={article.frontmatter.user_id} />
         </div>

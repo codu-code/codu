@@ -1,10 +1,8 @@
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
-import markdownIt from "markdown-it";
-import { articlesDirectory } from "../config/site_settings";
 
-const MDIT = new markdownIt().use(require("markdown-it-prism"));
+import { articlesDirectory } from "../config/site_settings";
 
 export const getAllArticlesMetadata = async (): Promise<
   Record<string, any>[]
@@ -39,7 +37,7 @@ export const getAllArticlePaths = async (): Promise<string[]> => {
 
 export const getArticle = async (
   slug: string
-): Promise<{ content: string; frontmatter: any }> => {
+): Promise<{ content: string; frontmatter: any}> => {
   const rawArticle = await readFile(
     path.join(process.cwd(), articlesDirectory, `${slug}.md`)
   );
@@ -47,7 +45,7 @@ export const getArticle = async (
   const parsedContent = matter(rawArticle);
 
   return {
-    content: MDIT.render(parsedContent.content),
     frontmatter: parsedContent.data,
+    content: parsedContent.content,
   };
 };
