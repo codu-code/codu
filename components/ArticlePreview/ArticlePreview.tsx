@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   title: string;
@@ -59,7 +60,7 @@ const ArticlePreview: NextPage<Props> = ({
           </p>
           <div>
             <span className="sr-only">{author.name}</span>
-            <img
+            <Image
               className="ml-3 h-10 w-10 rounded-full"
               src={author.imageUrl}
               alt={`${author.name}'s avatar`}

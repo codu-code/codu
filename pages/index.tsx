@@ -1,5 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
+import Image from 'next/image';
+
 import Layout from "../components/Layout/Layout";
 
 import {
@@ -24,7 +26,7 @@ const Home: NextPage = () => {
                 <div className="lg:grid lg:grid-cols-2 lg:gap-8">
                   <div className="lg:hidden -mt-20 lg:m-0 lg:relative">
                     <div className="relative mx-auto max-w-md sm:max-w-2xl sm:px-6 lg:max-w-none lg:px-0">
-                      <img
+                      <Image
                         className="w-full lg:absolute lg:inset-y-0 lg:h-full lg:w-auto lg:max-w-none"
                         src="/images/cloud.png"
                         alt="A grey cloud"
@@ -68,7 +70,7 @@ const Home: NextPage = () => {
 
                   <div className="hidden lg:block mt-12 -mb-16 sm:-mb-48 lg:m-0 lg:relative">
                     <div className="mx-auto max-w-md px-4 sm:max-w-2xl sm:px-6 lg:max-w-none lg:px-0">
-                      <img
+                      <Image
                         className="w-full lg:absolute lg:inset-y-0 lg:w-auto lg:max-w-full"
                         src="/images/cloud.png"
                         alt="A grey cloud"
@@ -96,7 +98,7 @@ const Home: NextPage = () => {
           <section className="relative bg-white">
             <div className="lg:absolute lg:inset-0">
               <div className="lg:absolute lg:inset-y-0 lg:left-0 lg:w-1/2">
-                <img
+                <Image
                   className="h-56 w-full object-cover lg:absolute lg:h-full"
                   src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1567&q=80"
                   alt="Developers working on their laptops at a table"
@@ -178,7 +180,7 @@ const Home: NextPage = () => {
                       className="py-10 px-6 text-center xl:px-10 xl:text-left bg-black rounded-tr-[60px] rounded-bl-[60px] max-w-sm sm:max-w-none mx-auto sm:mx-0"
                     >
                       <div className="space-y-6">
-                        <img
+                        <Image
                           className="mx-auto h-40 w-40 rounded-full border border-black"
                           src={person.imageUrl}
                           alt={`Profile picture for ${person.name}`}

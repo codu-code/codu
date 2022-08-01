@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+import Image from "next/image";
 
 import Layout from "../components/Layout/Layout";
 
@@ -43,7 +44,7 @@ const Sponsorship: NextPage = () => {
           </div>
           <div className="lg:absolute lg:inset-0 -z-10 bg-white">
             <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-black">
-              <img
+              <Image
                 className="h-56 w-full object-cover lg:absolute lg:h-full"
                 src="/images/workshops/workshop-class.jpeg"
                 alt="Developers working on their laptops at a table"
@@ -59,21 +60,21 @@ const Sponsorship: NextPage = () => {
             <div className="flow-root mt-8 lg:mt-10">
               <div className="-mt-4 -ml-8 flex flex-wrap justify-between lg:-ml-4">
                 <div className="mt-4 ml-8 flex flex-grow flex-shrink-0 lg:flex-grow-0 lg:ml-4">
-                  <img
+                  <Image
                     className="h-16 my-auto"
                     src="/images/sponsors/harveynash.png"
                     alt="StaticKit"
                   />
                 </div>
                 <div className="mt-4 ml-8 flex flex-grow flex-shrink-0 lg:flex-grow-0 lg:ml-4">
-                  <img
+                  <Image
                     className="h-16 my-auto"
                     src="/images/sponsors/version1.png"
                     alt="Version 1"
                   />
                 </div>
                 <div className="mt-4 ml-8 flex flex-grow flex-shrink-0 lg:flex-grow-0 lg:ml-4">
-                  <img
+                  <Image
                     className="h-12 my-auto"
                     src="/images/sponsors/offerzen.png"
                     alt="Mirage"
@@ -81,14 +82,14 @@ const Sponsorship: NextPage = () => {
                 </div>
 
                 <div className="mt-4 ml-8 flex flex-grow flex-shrink-0 lg:flex-grow-0 lg:ml-4">
-                  <img
+                  <Image
                     className="h-12 my-auto"
                     src="/images/sponsors/learnupon.png"
                     alt="Transistor"
                   />
                 </div>
                 <div className="mt-4 ml-8 flex flex-grow flex-shrink-0 lg:flex-grow-0 lg:ml-4">
-                  <img
+                  <Image
                     className="h-12 my-auto"
                     src="/images/sponsors/wework.png"
                     alt="Workcation"
