@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import Link from "next/link";
+import { Temporal } from '@js-temporal/polyfill';
 
 type Props = {
   title: string;
@@ -22,8 +23,8 @@ const ArticlePreview: NextPage<Props> = ({
   date,
   readTime,
 }) => {
-  const dateTime = new Date(date).toTimeString();
-  const readableDate = new Date(date).toLocaleDateString(undefined, {
+  const dateTime = Temporal.PlainDate.from(date);
+  const readableDate = dateTime.toLocaleString(['en-IE'], {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -32,7 +33,7 @@ const ArticlePreview: NextPage<Props> = ({
   return (
     <article className="p-4 border-2 border-white my-4 shadow-lg shadow-pink-500/50">
       <div className="flex space-x-1 text-sm text-gray-500 mb-2">
-        <time dateTime={dateTime}>{readableDate}</time>
+        <time dateTime={dateTime.toString()}>{readableDate}</time>
         {readTime && (
           <>
             <span aria-hidden="true">&middot;</span>
