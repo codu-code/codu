@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Link from "next/link";
 import { SVGProps } from "react";
+import { Temporal } from "@js-temporal/polyfill";
 
 import {
   footerNav,
@@ -116,7 +117,7 @@ const Footer: NextPage = () => {
           ))}
         </div>
         <p className="mt-8 text-center text-base text-gray-500">
-          &copy; {new Date().getFullYear()} Codú Software Solutions, Ltd.
+          &copy; {Temporal.Now.plainDateISO().year} Codú Software Solutions, Ltd.
         </p>
       </div>
     </footer>
