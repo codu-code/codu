@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import * as Fathom from "fathom-client";
+import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 
@@ -29,7 +30,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     };
   }, []);
 
-  return <Component {...pageProps} />;
+  return (
+    <SessionProvider session={pageProps.session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  );
 }
 
 export default MyApp;

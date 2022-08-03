@@ -1,3 +1,5 @@
+import { signOut } from "next-auth/react";
+
 export const highlighted_members = [
   {
     name: "Praveen Kumar",
@@ -92,10 +94,25 @@ export const footerNav = [
 ];
 
 export const navigation = [
-  { name: "Home", href: "/" },
   { name: "Articles", href: "/articles" },
   { name: "Events", href: "https://www.meetup.com/codu-community/" },
   { name: "Support us", href: "/sponsorship" },
+];
+
+export const userNavigation = [
+  { name: "Your Profile", href: "/profile" },
+  { name: "Settings", href: "/settings" },
+  { name: "Sign out", onClick: () => signOut() },
+];
+
+export const userSubNav = [
+  { name: "Drafts", href: "/profile" },
+  { name: "New Post", href: "/new", fancy: true },
+];
+
+export const subNav = [
+  { name: "Sign in", href: "/get-started" },
+  { name: "Sign up for free", href: "/get-started", fancy: true },
 ];
 
 type Authors = {
