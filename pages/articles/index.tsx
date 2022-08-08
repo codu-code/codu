@@ -4,10 +4,32 @@ import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import Layout from "../../components/Layout/Layout";
 import { getAllArticlesMetadata } from "../../lib/blog";
 import { authors } from "../../config/site_settings";
+import { useEffect, useState } from "react";
+import { Temporal } from "@js-temporal/polyfill";
 
 const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
   articles,
 }) => {
+  const [sortedarticle,setsortarticle]=useState([]);
+  useEffect(()=>{
+    const sort = articles.map((obj: { date: Date; }) => {
+      var d=obj.date;
+      obj.date=new Date(d);
+    
+      return obj;
+    });
+    const sortedarticl= sort.sort((a: { date: number; }, b: { date: number; }) => b.date - a.date);
+  
+    const sortt = sortedarticl.map((obj: { date: any; }) => {
+      var d=obj.date;
+      var x=d.toISOString().split("T")[0];
+      obj.date=x.toString();
+      return obj;
+    });
+    console.log(sortt);
+    setsortarticle(sortedarticl);
+ 
+  },[]);
   return (
     <>
       <Head>
@@ -22,7 +44,7 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
               Articles
             </h1>
             <section>
-              {articles.map(
+              {sortedarticle.map(
                 ({
                   slug,
                   title,
