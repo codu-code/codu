@@ -5,6 +5,7 @@ import Layout from "../../components/Layout/Layout";
 import { getAllArticlesMetadata } from "../../lib/blog";
 import { authors } from "../../config/site_settings";
 
+
 const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
   articles,
 }) => {
