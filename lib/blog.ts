@@ -10,7 +10,6 @@ export const getAllArticlesMetadata = async (): Promise<
   try {
     const metadata: Record<string, any>[] = [];
     const dir = await readdir(path.join(process.cwd(), articlesDirectory));
-
     for (let i = 0; i < dir.length; i++) {
       const file = dir[i];
       const content = await readFile(
@@ -21,9 +20,13 @@ export const getAllArticlesMetadata = async (): Promise<
         ...matter(content).data,
         slug: file.replace(".md", ""),
       });
+  
+     
     }
 
-    return metadata;
+    return metadata.sort((a, b) => {
+      return (new Date(b.date).valueOf() - new Date(a.date).valueOf());
+ });
   } catch (error: any) {
     throw new Error("Error while reading articles...", { cause: error });
   }

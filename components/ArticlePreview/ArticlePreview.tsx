@@ -22,7 +22,7 @@ const ArticlePreview: NextPage<Props> = ({
   date,
   readTime,
 }) => {
-  const dateTime = Temporal.Instant.from(date);
+  const dateTime = Temporal.PlainDate.from(date);
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
     month: "long",

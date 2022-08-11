@@ -7,6 +7,7 @@ import { serialize } from "superjson";
 import { authors } from "../../config/site_settings";
 import prisma from "../../server/db/client";
 
+
 const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
   articles,
 }) => {
