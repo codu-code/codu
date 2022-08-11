@@ -4,6 +4,16 @@ import * as Fathom from "fathom-client";
 import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
+import { withTRPC } from "@trpc/next";
+import superjson from "superjson";
+import { AppRouter } from "../server/trpc/router";
+
+const getBaseUrl = () => {
+  if (typeof window !== "undefined") return ""; // browser should use relative url
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+
+  return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+};
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -37,4 +47,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp;
+export default withTRPC<AppRouter>({
+  config() {
+    return {
+      url: `${getBaseUrl()}/api/trpc`,
+      transformer: superjson,
+    };
+  },
+  ssr: false,
+})(MyApp);

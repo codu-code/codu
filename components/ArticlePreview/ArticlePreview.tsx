@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Link from "next/link";
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from "@js-temporal/polyfill";
 
 type Props = {
   title: string;
@@ -10,8 +10,7 @@ type Props = {
   readTime: string;
   author: {
     name: string;
-    href: string;
-    imageUrl: string;
+    image: string;
   };
 };
 
@@ -23,15 +22,15 @@ const ArticlePreview: NextPage<Props> = ({
   date,
   readTime,
 }) => {
-  const dateTime = Temporal.PlainDate.from(date);
-  const readableDate = dateTime.toLocaleString(['en-IE'], {
+  const dateTime = Temporal.Instant.from(date);
+  const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
   return (
-    <article className="p-4 border-2 border-white my-4 shadow-lg shadow-pink-500/50">
+    <article className="p-4 my-4 shadow-lg shadow-pink-500/50 border-2 light:border-black border-white">
       <div className="flex space-x-1 text-sm text-gray-500 mb-2">
         <time dateTime={dateTime.toString()}>{readableDate}</time>
         {readTime && (
@@ -62,7 +61,7 @@ const ArticlePreview: NextPage<Props> = ({
             <span className="sr-only">{author.name}</span>
             <img
               className="ml-3 h-10 w-10 rounded-full"
-              src={author.imageUrl}
+              src={author.image}
               alt={`${author.name}'s avatar`}
             />
           </div>

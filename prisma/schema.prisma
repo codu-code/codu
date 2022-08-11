@@ -11,17 +11,19 @@ datasource db {
 }
 
 model Post {
-  id         String   @id @default(cuid())
-  title      String
-  coverImage String?
-  approved   Boolean  @default(true)
-  content    String?
-  published  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  slug       String   @unique
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
+  id           String   @id @unique
+  title        String
+  coverImage   String?
+  approved     Boolean  @default(true)
+  body         String   @db.Text()
+  excerpt      String?  @db.VarChar(140)
+  readTimeMins Int
+  published    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  slug         String?  @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
 }
 
 model Account {
@@ -30,12 +32,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -43,12 +45,17 @@ model Account {
 }
 
 model Profile {
-  id        Int      @id @default(autoincrement())
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  bio       String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String   @id @unique @db.VarChar(40)
+  firstName          String?
+  lastName           String?
+  userId             String   @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  bio                String?  @db.VarChar(200)
+  location           String?
+  emailNotifications Boolean  @default(true)
+  newsletter         Boolean  @default(true)
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Session {

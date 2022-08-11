@@ -2,10 +2,9 @@ import type { NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
-import { useRouter } from "next/router";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
+import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { PlusSmIcon } from "@heroicons/react/solid";
 import {
   navigation,
@@ -19,7 +18,7 @@ function classNames(...classes: String[]) {
 }
 
 const Nav: NextPage = () => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   return (
     <Disclosure as="nav" className="bg-black">
@@ -86,8 +85,9 @@ const Nav: NextPage = () => {
                           Drafts
                         </a>
                       </Link>
-                      <Link href="/new-post">
-                        <a className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300">
+                      <Link href="/create">
+                        <a className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300">
+                          <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
                           New Post
                         </a>
                       </Link>
@@ -290,150 +290,6 @@ const Nav: NextPage = () => {
       )}
     </Disclosure>
   );
-  // <Popover as="header" className="relative z-10">
-  //   <div className="pt-6">
-  //     <nav
-  //       className="relative mx-auto flex items-center justify-between px-4 sm:px-6 pb-4"
-  //       aria-label="Global"
-  //     >
-  //       <div className="flex items-center flex-1 justify-between">
-  //         <div className="flex items-center justify-between w-full md:w-auto">
-  //           <Link href="/">
-  //             <a>
-  //               <span className="sr-only">Codú</span>
-  //               <Image
-  //                 src="/images/codu.png"
-  //                 alt="Codú logo"
-  //                 height={30}
-  //                 width={94.5}
-  //               />
-  //             </a>
-  //           </Link>
-  //           <div className="-mr-2 flex items-center md:hidden">
-  //             <Popover.Button className=" rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:bg-gray-800 focus:outline-none focus:ring-2 focus-ring-inset focus:ring-white">
-  //               <span className="sr-only">Open main menu</span>
-  //               <MenuIcon className="h-6 w-6" aria-hidden="true" />
-  //             </Popover.Button>
-  //           </div>
-  //         </div>
-  //         <div className="hidden space-x-8 md:flex md:ml-10">
-  //           {navigation.map((item) =>
-  //             item.href.includes("http") ? (
-  //               <a
-  //                 key={item.name}
-  //                 href={item.href}
-  //                 target="_blank"
-  //                 rel="noopener noreferrer"
-  //                 className="text-base font-medium text-white hover:text-gray-300"
-  //               >
-  //                 {item.name}
-  //               </a>
-  //             ) : (
-  //               <Link key={item.name} href={item.href}>
-  //                 <a className="text-base font-medium text-white hover:text-gray-300">
-  //                   {item.name}
-  //                 </a>
-  //               </Link>
-  //             )
-  //           )}
-  //         </div>
-  //         <div className="hidden md:flex items-center">
-  //           {!session && (
-  //             <>
-  //               <Link href="/get-started">
-  //                 <a className="text-base font-medium text-white hover:text-gray-300">
-  //                   Sign in
-  //                 </a>
-  //               </Link>
-  //               <Link href="/get-started">
-  //                 <a className="ml-6 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300">
-  //                   Join for free
-  //                 </a>
-  //               </Link>
-  //             </>
-  //           )}
-  //           {session && (
-  //             <button
-  //               onClick={signOut}
-  //               className="text-base font-medium text-white hover:text-gray-300"
-  //             >
-  //               Sign out
-  //             </button>
-  //           )}
-  //         </div>
-  //       </div>
-  //     </nav>
-  //   </div>
-
-  //   <Transition
-  //     as={Fragment}
-  //     enter="duration-150 ease-out"
-  //     enterFrom="opacity-0 scale-95"
-  //     enterTo="opacity-100 scale-100"
-  //     leave="duration-100 ease-in"
-  //     leaveFrom="opacity-100 scale-100"
-  //     leaveTo="opacity-0 scale-95"
-  //   >
-  //     <Popover.Panel
-  //       focus
-  //       className="absolute top-0 inset-x-0 p-2 transition transform origin-top md:hidden"
-  //     >
-  //       <div className="rounded-lg shadow-md bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
-  //         <div className="px-5 pt-4 flex items-center justify-between">
-  //           <Link href="/">
-  //             <a className="hover:bg-slate-50 border-r">
-  //               <Image
-  //                 src="/images/codu-black.png"
-  //                 alt="Codú logo"
-  //                 height={24}
-  //                 width={75.6}
-  //               />
-  //             </a>
-  //           </Link>
-  //           <div className="-mr-2">
-  //             <Popover.Button className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-pink-600">
-  //               <span className="sr-only">Close menu</span>
-  //               <XIcon className="h-6 w-6" aria-hidden="true" />
-  //             </Popover.Button>
-  //           </div>
-  //         </div>
-  //         <div className="pt-5 pb-6">
-  //           <div className="px-2 space-y-1">
-  //             {navigation.map((item) =>
-  //               item.href.includes("http") ? (
-  //                 <a
-  //                   key={item.name}
-  //                   href={item.href}
-  //                   target="_blank"
-  //                   rel="noopener noreferrer"
-  //                   className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-50"
-  //                 >
-  //                   {item.name}
-  //                 </a>
-  //               ) : (
-  //                 <Link key={item.name} href={item.href}>
-  //                   <a className="block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-50">
-  //                     {item.name}
-  //                   </a>
-  //                 </Link>
-  //               )
-  //             )}
-  //           </div>
-  //           <div className="mt-6 px-5"></div>
-  //           <a
-  //             href={discordInviteUrl}
-  //             target="_blank"
-  //             rel="noopener noreferrer"
-  //             className="block text-center mx-4 py-3 px-4 rounded-md shadow bg-gradient-to-r from-orange-400 to-pink-600 text-white font-medium hover:from-orange-500 hover:to-pink-700"
-  //           >
-  //             Join the community
-  //           </a>
-  //         </div>
-  //       </div>
-  //     </Popover.Panel>
-  //   </Transition>
-  // </Popover>
-  // );
 };
 
 export default Nav;

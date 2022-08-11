@@ -107,7 +107,7 @@ export const userNavigation = [
 
 export const userSubNav = [
   { name: "Drafts", href: "/profile" },
-  { name: "New Post", href: "/new", fancy: true },
+  { name: "New Post", href: "/create", fancy: true },
 ];
 
 export const subNav = [

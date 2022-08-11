@@ -1,13 +1,13 @@
 import { NextPage } from "next";
 
-import Layout from "../components/Layout/Layout";
+import Layout from "../../components/Layout/Layout";
 
 const Sponsorship: NextPage = () => {
   return (
     <Layout>
       <div className="">
-        <main className="bg-transparent relative">
-          <div className="relative pt-12 pb-16 px-4 sm:pt-16 sm:px-6 lg:px-8 lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2">
+        <main className="bg-white lg:bg-transparent relative">
+          <div className="relative pt-12 pb-16 px-4 sm:pt-16 sm:px-6 lg:px-8 lg:max-w-7xl lg:mx-auto lg:grid lg:grid-cols-2 ">
             <div className="lg:pl-8">
               <div className="text-base max-w-prose mx-auto lg:max-w-lg lg:ml-0 lg:mr-16">
                 <h2 className="text-xl leading-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide uppercase">
