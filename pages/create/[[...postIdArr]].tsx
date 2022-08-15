@@ -1,6 +1,8 @@
-import { NextPage } from "next";
+import { NextPage, GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
+import { unstable_getServerSession } from "next-auth/next";
+import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
 import Router from "next/router";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
@@ -295,6 +297,27 @@ const Create: NextPage = () => {
       </>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/get-started",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
 };
 
 export default Create;
