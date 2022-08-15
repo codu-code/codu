@@ -4,25 +4,24 @@ import { Temporal } from "@js-temporal/polyfill";
 
 type Props = {
   title: string;
-  description: string;
+  excerpt: string;
   slug: string;
   date: string;
-  readTime: string;
-  author: {
-    name: string;
-    image: string;
-  };
+  readTime: number;
+  name: string;
+  image: string;
 };
 
 const ArticlePreview: NextPage<Props> = ({
   title,
-  description,
+  excerpt,
   slug,
-  author,
+  name,
+  image,
   date,
   readTime,
 }) => {
-  const dateTime = Temporal.PlainDate.from(date);
+  const dateTime = Temporal.Instant.from(date);
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
     month: "long",
@@ -36,7 +35,7 @@ const ArticlePreview: NextPage<Props> = ({
         {readTime && (
           <>
             <span aria-hidden="true">&middot;</span>
-            <span>{readTime} read</span>
+            <span>{readTime} min read</span>
           </>
         )}
       </div>
@@ -45,7 +44,7 @@ const ArticlePreview: NextPage<Props> = ({
           {title}
         </header>
       </Link>
-      <p className="tracking-wide text-sm md:text-base my-3">{description}</p>
+      <p className="tracking-wide text-sm md:text-lg my-3">{excerpt}</p>
       <div className="sm:flex justify-between content-center">
         <div className="flex items-center">
           <Link href={`/articles/${slug}`}>
@@ -55,14 +54,14 @@ const ArticlePreview: NextPage<Props> = ({
         <div className="flex justify-end items-center">
           <p className="text-sm font-medium text-gray-500">
             Written by{" "}
-            <span className="text-gray-400 font-semibold">{author.name}</span>
+            <span className="text-gray-400 font-semibold">{name}</span>
           </p>
           <div>
-            <span className="sr-only">{author.name}</span>
+            <span className="sr-only">{name}</span>
             <img
               className="ml-3 h-10 w-10 rounded-full"
-              src={author.image}
-              alt={`${author.name}'s avatar`}
+              src={image}
+              alt={`${name}'s avatar`}
             />
           </div>
         </div>

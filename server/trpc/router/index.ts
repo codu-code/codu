@@ -3,6 +3,7 @@
  */
 import { createRouter } from "../createRouter";
 import { postRouter } from "./post";
+import { profileRouter } from "./profile";
 import { Subscription } from "@trpc/server";
 import superjson from "superjson";
 import { clearInterval } from "timers";
@@ -30,6 +31,7 @@ export const appRouter = createRouter()
     },
   })
   .merge("post.", postRouter)
+  .merge("profile.", profileRouter)
   .subscription("randomNumber", {
     resolve() {
       return new Subscription<number>((emit) => {

@@ -16,12 +16,12 @@ model Post {
   coverImage   String?
   approved     Boolean  @default(true)
   body         String   @db.Text()
-  excerpt      String?  @db.VarChar(140)
+  excerpt      String   @default("") @db.VarChar(140)
   readTimeMins Int
   published    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  slug         String?  @unique
+  slug         String   @unique
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
 }
@@ -44,20 +44,6 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-model Profile {
-  id                 String   @id @unique @db.VarChar(40)
-  firstName          String?
-  lastName           String?
-  userId             String   @unique
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  bio                String?  @db.VarChar(200)
-  location           String?
-  emailNotifications Boolean  @default(true)
-  newsletter         Boolean  @default(true)
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -67,15 +53,25 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  Post          Post[]
-  Profile       Profile?
+  id                 String    @id @default(cuid())
+  username           String?   @unique @db.VarChar(40)
+  name               String    @default("")
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String    @default("/images/person.png")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  bio                String    @default("") @db.VarChar(200)
+  location           String    @default("")
+  websiteUrl         String    @default("")
+  emailNotifications Boolean   @default(true)
+  newsletter         Boolean   @default(true)
+  accounts           Account[]
+  sessions           Session[]
+  posts              Post[]
+  role               Role      @default(USER)
+
+  @@index(fields: [username, id])
 }
 
 model VerificationToken {
@@ -89,4 +85,5 @@ model VerificationToken {
 enum Role {
   USER
   ADMIN
+  MODERATOR
 }

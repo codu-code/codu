@@ -15,11 +15,15 @@ export const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/get-started",
+    newUser: "/settings",
   },
   callbacks: {
-    session({ session, user }) {
+    async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        if (user.username) {
+          session.user.username = user.username;
+        }
       }
       return session;
     },

@@ -1,20 +1,16 @@
-import type { NextPage, GetStaticProps } from "next";
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import Layout from "../../components/Layout/Layout";
-import { getAllArticlesMetadata } from "../../lib/blog";
-import { serialize } from "superjson";
-import { authors } from "../../config/site_settings";
 import prisma from "../../server/db/client";
 
-
-const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
+const ArticlesPage = ({
   articles,
-}) => {
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <>
       <Head>
-        <title>Codú | Blog</title>
+        <title>Codú | Articles - View our latest web developer articles</title>
         <meta name="description" content="Codú | Web Developer Community" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -26,15 +22,23 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
             </h1>
             <section>
               {articles.map(
-                ({ slug, title, description, user, createdAt }: any) => (
+                ({
+                  slug,
+                  title,
+                  excerpt,
+                  user: { name, image },
+                  updatedAt,
+                  readTimeMins,
+                }) => (
                   <ArticlePreview
                     key={title}
                     slug={slug}
                     title={title}
-                    description={description}
-                    author={user}
-                    date={createdAt}
-                    readTime={"3 mins"}
+                    excerpt={excerpt}
+                    name={name}
+                    image={image}
+                    date={updatedAt}
+                    readTime={readTimeMins}
                   />
                 )
               )}
@@ -46,25 +50,41 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
   );
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+interface PostsWithStringDates {
+  updatedAt: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  readTimeMins: number;
+  user: {
+    name: string;
+    image: string;
+  };
+}
+
+export const getServerSideProps = async () => {
   const response = await prisma.post.findMany({
     where: { published: true },
     select: {
       title: true,
       body: true,
-      createdAt: true,
+      updatedAt: true,
+      readTimeMins: true,
       slug: true,
+      excerpt: true,
       user: {
         select: { name: true, image: true },
       },
     },
   });
 
-  const { json } = serialize(response);
+  const posts: PostsWithStringDates[] = response.map((post) => {
+    return { ...post, updatedAt: post.updatedAt.toISOString() };
+  });
 
   return {
     props: {
-      articles: json,
+      articles: posts,
     },
   };
 };

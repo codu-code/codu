@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
+
 import { createRouter } from "../createRouter";
 import { readingTime } from "../../../utils/readingTime";
 import {
@@ -64,6 +65,10 @@ export const postRouter = createRouter()
           ...input,
           readTimeMins: readingTime(body),
           slug: `${title.replace(/\W+/g, "-")}${id}`.toLowerCase(),
+          excerpt:
+            body.length < 140
+              ? body
+              : body.replace(/\s+/g, " ").trim().slice(0, 137) + "...",
         },
       });
       return post;
@@ -111,10 +116,44 @@ export const postRouter = createRouter()
       });
     },
   })
+  .query("my-posts", {
+    resolve({ ctx }) {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not authenticated",
+        });
+      }
+
+      return ctx.prisma.post.findMany({
+        where: {
+          published: true,
+          userId: ctx.session.user.id,
+        },
+      });
+    },
+  })
+  .query("drafts", {
+    resolve({ ctx }) {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not authenticated",
+        });
+      }
+
+      return ctx.prisma.post.findMany({
+        where: {
+          published: false,
+          userId: ctx.session.user.id,
+        },
+      });
+    },
+  })
   .query("single-draft", {
     input: getSinglePostSchema,
     async resolve({ ctx, input }) {
-      if (!ctx.session || !ctx.session.user) {
+      if (!ctx.session?.user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "User is not authenticated",

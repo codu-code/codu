@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
@@ -6,12 +7,7 @@ import { useSession } from "next-auth/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { PlusSmIcon } from "@heroicons/react/solid";
-import {
-  navigation,
-  userNavigation,
-  subNav,
-  userSubNav,
-} from "../../config/site_settings";
+import { navigation, subNav, userSubNav } from "../../config/site_settings";
 
 function classNames(...classes: String[]) {
   return classes.filter(Boolean).join(" ");
@@ -19,6 +15,15 @@ function classNames(...classes: String[]) {
 
 const Nav: NextPage = () => {
   const { data: session } = useSession();
+
+  const userNavigation = [
+    {
+      name: "Your Profile",
+      href: `/${(session && session.user?.username) || "settings"}`,
+    },
+    { name: "Settings", href: "/settings" },
+    { name: "Sign out", onClick: () => signOut() },
+  ];
 
   return (
     <Disclosure as="nav" className="bg-black">

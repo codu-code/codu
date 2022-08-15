@@ -1,30 +1,79 @@
-import type { NextPage } from "next";
+import type {
+  NextPage,
+  GetServerSideProps,
+  InferGetServerSidePropsType,
+} from "next";
+import { useRouter } from "next/router";
+import { customAlphabet } from "nanoid";
+import { unstable_getServerSession } from "next-auth/next";
+import { authOptions } from "../api/auth/[...nextauth]";
 import { useState } from "react";
-import Layout from "../../components/Layout/Layout";
 import { Switch } from "@headlessui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { trpc } from "../../utils/trpc";
+import prisma from "../../server/db/client";
+import toast, { Toaster } from "react-hot-toast";
 
-const user = {
-  name: "Debbie Lewis",
-  handle: "deblewis",
-  email: "debbielewis@example.com",
-  imageUrl:
-    "https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=320&h=320&q=80",
-};
+import Layout from "../../components/Layout/Layout";
+import { saveSettingsSchema, saveSettingsInput } from "../../schema/profile";
+import superjson from "superjson";
 
 function classNames(...classes: String[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Settings: NextPage = () => {
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [weeklyNewsletter, setWeeklyNewsletter] = useState(false);
+const Settings: NextPage = ({
+  profile,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<saveSettingsInput>({
+    resolver: zodResolver(saveSettingsSchema),
+    defaultValues: { ...profile },
+  });
+
+  const bio = watch("bio");
+  const username = watch("username");
+
+  const router = useRouter();
+
+  const { emailNotifications: eNotifications, newsletter } = profile;
+
+  const [emailNotifications, setEmailNotifications] = useState(eNotifications);
+  const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
+
+  const { mutate } = trpc.useMutation(["profile.profile"], {
+    onError() {
+      toast.error("Something went wrong saving settings.");
+    },
+    onSuccess() {
+      router.push(`/${username}`);
+    },
+  });
+
+  const onSubmit: SubmitHandler<saveSettingsInput> = (values) => {
+    mutate({ ...values, newsletter: weeklyNewsletter, emailNotifications });
+  };
 
   return (
     <Layout>
       <div className="bg-gray-200 py-8">
-        <div className="mx-auto lg:col-span-9 max-w-5xl flex-grow flex flex-col justify-center w-full px-4 sm:px-6">
+        <Toaster
+          toastOptions={{
+            style: {
+              borderRadius: 0,
+              border: "2px solid black",
+              background: "white",
+            },
+          }}
+        />
+        <div className="mx-auto lg:col-span-9 max-w-2xl flex-grow flex flex-col justify-center w-full px-4 sm:px-6">
           <div className="bg-white text-gray-800 border-2 border-black shadow-xl">
-            <form action="#" method="POST">
+            <form onSubmit={handleSubmit(onSubmit)}>
               {/* Profile section */}
               <div className="py-6 px-4 sm:p-6 lg:pb-8">
                 <div>
@@ -40,24 +89,18 @@ const Settings: NextPage = () => {
                 <div>
                   <div className="flex-grow space-y-6">
                     <div className="mt-6 grid grid-cols-12 gap-6">
-                      <div className="col-span-12 sm:col-span-6">
-                        <label htmlFor="first-name">First name</label>
+                      <div className="col-span-12 sm:col-span-9">
+                        <label htmlFor="name">Full Name</label>
                         <input
                           type="text"
-                          name="first-name"
-                          id="first-name"
+                          {...register("name")}
                           autoComplete="given-name"
                         />
-                      </div>
-
-                      <div className="col-span-12 sm:col-span-6">
-                        <label htmlFor="website">Last name</label>
-                        <input
-                          type="text"
-                          name="website"
-                          id="website"
-                          autoComplete="family-name"
-                        />
+                        {errors.name && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {`${errors.name.message || "Required"}`}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div>
@@ -66,30 +109,36 @@ const Settings: NextPage = () => {
                         <span className="mt-1  bg-black px-3 items-center text-white text-sm font-semibold flex">
                           codu.co/
                         </span>
-                        <input
-                          type="text"
-                          name="username"
-                          id="username"
-                          autoComplete="username"
-                          defaultValue={user.handle}
-                        />
+                        <input type="text" {...register("username")} />
                       </div>
+                      {errors.username && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {`${errors.username.message || "Required"}`}
+                        </p>
+                      )}
                     </div>
 
                     <div>
-                      <label htmlFor="about">Short bio</label>
+                      <label htmlFor="bio">Short bio</label>
                       <div className="mt-1">
                         <textarea
-                          id="about"
-                          name="about"
+                          {...register("bio")}
                           rows={2}
                           defaultValue={""}
                           maxLength={200}
                         />
                       </div>
                       <div className="mt-2 text-sm text-gray-600 flex justify-between">
-                        <p>Brief description for your profile.</p>
-                        <span>{`${100}/200`}</span>
+                        {errors.bio ? (
+                          <p className="mt-1 text-sm text-red-600">
+                            {`${errors.bio.message || "Required"}`}
+                          </p>
+                        ) : (
+                          <>
+                            <p>Brief description for your profile.</p>
+                            <span>{`${bio?.length || 0}/200`}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="mt-6 grid grid-cols-12 gap-6">
@@ -97,22 +146,36 @@ const Settings: NextPage = () => {
                         <label htmlFor="location">Location</label>
                         <input
                           type="text"
-                          name="location"
-                          id="location"
+                          {...register("location")}
                           placeholder="The moon 🌙"
                           autoComplete="country-name"
                         />
+                        {errors.location && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {`${
+                              errors.location.message ||
+                              "Something is wrong with the input"
+                            }`}
+                          </p>
+                        )}
                       </div>
 
                       <div className="col-span-12 sm:col-span-9">
-                        <label htmlFor="website">Website URL</label>
+                        <label htmlFor="websiteUrl">Website URL</label>
                         <input
                           type="text"
-                          name="website"
-                          id="website"
+                          {...register("websiteUrl")}
                           autoComplete="url"
                           placeholder="https://codu.co/"
                         />
+                        {errors.websiteUrl && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {`${
+                              errors.websiteUrl.message ||
+                              "Something is wrong with the input"
+                            }`}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -224,6 +287,61 @@ const Settings: NextPage = () => {
       </div>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
+
+  if (!session?.user?.id) {
+    return {
+      redirect: {
+        destination: "/get-started",
+        permanent: false,
+      },
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+  });
+
+  if (!user?.username) {
+    const nanoid = customAlphabet("1234567890abcdef", 3);
+    const initialUsername = `${(session.user.name || "").replace(
+      /\s/g,
+      "-"
+    )}-${nanoid()}`.toLowerCase();
+
+    const rawData = await prisma.user.update({
+      where: {
+        id: session.user.id,
+      },
+      data: {
+        username: initialUsername,
+      },
+    });
+    const { json } = superjson.serialize(rawData);
+
+    return {
+      props: {
+        profile: json,
+      },
+    };
+  }
+
+  const { json } = superjson.serialize(user);
+
+  return {
+    props: {
+      profile: json,
+    },
+  };
 };
 
 export default Settings;

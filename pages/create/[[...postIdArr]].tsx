@@ -77,6 +77,7 @@ const Create: NextPage = () => {
           }
         );
       },
+      enabled: !!postId,
     }
   );
 
@@ -101,6 +102,7 @@ const Create: NextPage = () => {
 
   useEffect(() => {
     if ((title + body).length < 5) return;
+    if (debouncedValue === (data?.title || "") + data?.body) return;
     savePost({ title, body });
   }, [debouncedValue]);
 
@@ -224,6 +226,7 @@ const Create: NextPage = () => {
                                   </p>
                                 )}
                               </>
+                              <div />
 
                               <div className="flex">
                                 <button
