@@ -16,13 +16,16 @@ const Drafts: NextPage = () => {
             <h1 className="text-2xl leading-6 font-medium">Drafts</h1>
           </div>
           <div>
-            {status === "loading" && <p>Fetching your drafts...</p>}
+            {status === "loading" && (
+              <p className="font-medium py-4">Fetching your drafts...</p>
+            )}
             {status === "error" && (
-              <p>Something went wrong... Refresh the page.</p>
+              <p className="font-medium py-4">
+                Something went wrong... Refresh the page.
+              </p>
             )}
             {status === "success" &&
-              data.length &&
-              data.map(({ id, title, excerpt, readTimeMins, slug }) => (
+              data.map(({ id, title, excerpt, readTimeMins }) => (
                 <article className="border-2 p-4 mb-4" key={id}>
                   <h2 className=" text-2xl font-semibold mb-2">{title}</h2>
                   <p>{excerpt || "No excerpt yet... Write more to see one."}</p>
@@ -30,7 +33,7 @@ const Drafts: NextPage = () => {
                     Read time so far: {readTimeMins} mins
                   </p>
                   <div className="flex justify-end">
-                    <Link href={`/create/${slug}`}>
+                    <Link href={`/create/${id}`}>
                       <a className="fancy-link">Edit</a>
                     </Link>
                   </div>

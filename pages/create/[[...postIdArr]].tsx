@@ -69,7 +69,7 @@ const Create: NextPage = () => {
   );
 
   const { data, status: dataStatus } = trpc.useQuery(
-    ["post.single-draft", { id: postId }],
+    ["post.edit-draft", { id: postId }],
     {
       onError() {
         toast.error(
@@ -91,10 +91,25 @@ const Create: NextPage = () => {
     }
   };
 
+  const hasLoadingState =
+    publishStatus === "loading" ||
+    saveStatus === "loading" ||
+    dataStatus === "loading";
+
   const published = data?.published || false;
 
   const onSubmit = () => {
-    publish({ id: postId, published: !published });
+    if (!published) {
+      return publish(
+        { id: postId, published: !published },
+        {
+          onSuccess() {
+            data?.slug && router.push(`/articles/${data.slug}`);
+          },
+        }
+      );
+    }
+    savePost({ title, body });
   };
 
   useEffect(() => {
@@ -103,6 +118,7 @@ const Create: NextPage = () => {
   }, [data]);
 
   useEffect(() => {
+    if (published) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     savePost({ title, body });
@@ -224,7 +240,7 @@ const Create: NextPage = () => {
                                 )}
                                 {saveStatus === "success" && savedTime && (
                                   <p className="text-gray-600 text-xs lg:text-sm">
-                                    {`Auto-saved: ${savedTime.toString()}`}
+                                    {`Saved: ${savedTime.toString()}`}
                                   </p>
                                 )}
                               </>
@@ -232,17 +248,20 @@ const Create: NextPage = () => {
 
                               <div className="flex">
                                 <button
-                                  type="button"
-                                  onClick={() => Router.push("/")}
-                                  className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                                >
-                                  Cancel
-                                </button>
-                                <button
                                   type="submit"
-                                  className="ml-5 w-20 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                  className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                                 >
-                                  {published ? "Unpublish" : "Publish"}
+                                  {hasLoadingState ? (
+                                    <>
+                                      <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-700 border-t-white rounded-full" />
+                                      {"Saving"}
+                                    </>
+                                  ) : (
+                                    <>
+                                      {!data?.published && "Publish"}
+                                      {data?.published && "Save Changes"}
+                                    </>
+                                  )}
                                 </button>
                               </div>
                             </div>

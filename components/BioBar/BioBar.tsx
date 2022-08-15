@@ -1,10 +1,19 @@
 import Image from "next/image";
-import { authors } from "../../config/site_settings";
+import Link from "next/link";
 
-const BioFooter = ({ userId = "" }) => {
-  if (!authors[userId]) return null;
+interface Props {
+  author: {
+    image: string;
+    bio: string;
+    name: string;
+    username: string | null;
+  };
+}
 
-  const { name, imageUrl, bio, emoji } = authors[userId];
+const BioFooter = ({ author }: Props) => {
+  if (!author) return null;
+
+  const { name, image, bio, username } = author;
   return (
     <div className="max-w-xl px-4 mx-auto  text-gray-700 dark:text-gray-300 mt-6">
       <div className="flex mx-2 sm:mx-6 md:mx-auto px-4 border-t-2 pt-6 border-gray-300 dark:border-gray-800">
@@ -14,13 +23,18 @@ const BioFooter = ({ userId = "" }) => {
             height={70}
             width={70}
             alt={`Avatar for ${name}`}
-            src={imageUrl}
+            src={image}
           />
         </div>
         <div className="flex flex-col justify-center">
-          <h4 className="text-lg md:text-xl font-bold">
-            Written by {name} • {emoji}
-          </h4>
+          {username && (
+            <h4 className="text-lg md:text-xl font-semibold text-gray-200">
+              Written by{" "}
+              <Link href={`/${username}`}>
+                <a className="underline font-semibold text-white">{name}</a>
+              </Link>
+            </h4>
+          )}
           <p className="mt-1">{bio}</p>
         </div>
       </div>

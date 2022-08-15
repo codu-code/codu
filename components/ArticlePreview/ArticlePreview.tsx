@@ -10,6 +10,8 @@ type Props = {
   readTime: number;
   name: string;
   image: string;
+  id?: string;
+  canEdit?: boolean;
 };
 
 const ArticlePreview: NextPage<Props> = ({
@@ -20,6 +22,8 @@ const ArticlePreview: NextPage<Props> = ({
   image,
   date,
   readTime,
+  id,
+  canEdit,
 }) => {
   const dateTime = Temporal.Instant.from(date);
   const readableDate = dateTime.toLocaleString(["en-IE"], {
@@ -30,20 +34,32 @@ const ArticlePreview: NextPage<Props> = ({
 
   return (
     <article className="p-4 my-4 shadow-lg shadow-pink-500/50 border-2 light:border-black border-white">
-      <div className="flex space-x-1 text-sm text-gray-500 mb-2">
-        <time dateTime={dateTime.toString()}>{readableDate}</time>
-        {readTime && (
-          <>
-            <span aria-hidden="true">&middot;</span>
-            <span>{readTime} min read</span>
-          </>
+      <div className="flex text-sm text-gray-500 mb-2">
+        <div className="flex space-x-1">
+          <time dateTime={dateTime.toString()}>{readableDate}</time>
+          {readTime && (
+            <>
+              <span aria-hidden="true">&middot;</span>
+              <span>{readTime} min read</span>
+            </>
+          )}
+        </div>
+
+        {canEdit && id && (
+          <div className="ml-auto">
+            <Link href={`/create/${id}`}>
+              <a className="bg-white text-black px-2 py-1">Edit</a>
+            </Link>
+          </div>
         )}
       </div>
+
       <Link href={`/articles/${slug}`}>
         <header className="text-2xl leading-6 font-semibold tracking-wide cursor-pointer hover:underline">
           {title}
         </header>
       </Link>
+
       <p className="tracking-wide text-sm md:text-lg my-3">{excerpt}</p>
       <div className="sm:flex justify-between content-center">
         <div className="flex items-center">

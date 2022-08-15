@@ -150,7 +150,7 @@ export const postRouter = createRouter()
       });
     },
   })
-  .query("single-draft", {
+  .query("edit-draft", {
     input: getSinglePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {

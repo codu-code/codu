@@ -3,12 +3,15 @@ import type {
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
 import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
 
 interface ParsedPost {
   updatedAt: string;
+  id: string;
   slug: string;
   title: string;
   excerpt: string;
@@ -29,6 +32,7 @@ interface ParsedUser {
 
 const Profile: NextPage = ({
   profile,
+  isOwner,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   if (!profile) return null; // Should never happen because of serverside fetch or redirect
 
@@ -60,20 +64,24 @@ const Profile: NextPage = ({
             </h3>
           </div>
           {posts ? (
-            posts.map(({ slug, title, excerpt, readTimeMins, updatedAt }) => {
-              return (
-                <ArticlePreview
-                  key={slug}
-                  slug={slug}
-                  title={title}
-                  excerpt={excerpt}
-                  name={name}
-                  image={image}
-                  date={updatedAt}
-                  readTime={readTimeMins}
-                />
-              );
-            })
+            posts.map(
+              ({ slug, title, excerpt, readTimeMins, updatedAt, id }) => {
+                return (
+                  <ArticlePreview
+                    key={slug}
+                    slug={slug}
+                    title={title}
+                    excerpt={excerpt}
+                    name={name}
+                    image={image}
+                    date={updatedAt}
+                    readTime={readTimeMins}
+                    canEdit={isOwner}
+                    id={id}
+                  />
+                );
+              }
+            )
           ) : (
             <p className="font-medium py-4">Nothing published yet... 🥲</p>
           )}
@@ -98,6 +106,12 @@ export const getServerSideProps = async (
     };
   }
 
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
+
   const profileWithDrafts = await prisma.user.findUnique({
     where: {
       username,
@@ -119,6 +133,7 @@ export const getServerSideProps = async (
           slug: true,
           readTimeMins: true,
           published: true,
+          id: true,
         },
       },
     },
@@ -146,6 +161,7 @@ export const getServerSideProps = async (
   return {
     props: {
       profile,
+      isOwner: session?.user?.username === username,
     },
   };
 };
