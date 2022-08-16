@@ -27,6 +27,10 @@ export const ConfirmPostSchema = z.object({
     .min(4, "Title is too short. Minimum of 4 characters."),
 });
 
+export const DeletePostSchema = z.object({
+  id: z.string(),
+});
+
 export type SavePostInput = z.TypeOf<typeof savePostSchema>;
 
 export const getSinglePostSchema = z.object({

@@ -8,6 +8,7 @@ import {
   getSinglePostSchema,
   savePostSchema,
   createPostSchema,
+  DeletePostSchema,
 } from "../../../schema/post";
 
 export const postRouter = createRouter()
@@ -102,6 +103,36 @@ export const postRouter = createRouter()
         },
         data: {
           published,
+        },
+      });
+      return post;
+    },
+  })
+  .mutation("delete-post", {
+    input: DeletePostSchema,
+    async resolve({ ctx, input }) {
+      if (!ctx.session || !ctx.session.user) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not authenticated",
+        });
+      }
+
+      const { id } = input;
+
+      const currentPost = await ctx.prisma.post.findUnique({
+        where: { id },
+      });
+
+      if (currentPost?.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+
+      const post = await ctx.prisma.post.delete({
+        where: {
+          id,
         },
       });
       return post;

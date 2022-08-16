@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
-import Router from "next/router";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import rehypePrism from "rehype-prism";
 import TextareaAutosize from "react-textarea-autosize";
@@ -12,6 +11,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 import { SavePostInput } from "../../schema/post";
 import Layout from "../../components/Layout/Layout";
+
 import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
 

@@ -13,7 +13,7 @@ function classNames(...classes: String[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Nav: NextPage = () => {
+const Nav = () => {
   const { data: session } = useSession();
 
   const userNavigation = [
