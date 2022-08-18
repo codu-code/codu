@@ -9,6 +9,7 @@ import {
   savePostSchema,
   createPostSchema,
   DeletePostSchema,
+  GetPostsSchema,
 } from "../../../schema/post";
 
 export const postRouter = createRouter()
@@ -139,10 +140,12 @@ export const postRouter = createRouter()
     },
   })
   .query("posts", {
-    resolve({ ctx }) {
+    input: GetPostsSchema,
+    resolve({ ctx, input }) {
       return ctx.prisma.post.findMany({
         where: {
           published: true,
+          ...input,
         },
       });
     },

@@ -57,6 +57,7 @@ const Nav = () => {
                     </a>
                   </Link>
                 </div>
+
                 <div className="hidden md:block md:ml-6 text-sm lg:text-base font-medium">
                   <div className="flex space-x-4">
                     {navigation.map((item) =>
@@ -85,9 +86,9 @@ const Nav = () => {
                 <div className="flex items-center text-sm lg:text-base font-medium">
                   {session ? (
                     <>
-                      <Link href="/drafts">
+                      <Link href="/my-posts">
                         <a className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md">
-                          Drafts
+                          Your Posts
                         </a>
                       </Link>
                       <Link href="/create">

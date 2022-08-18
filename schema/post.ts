@@ -31,6 +31,10 @@ export const DeletePostSchema = z.object({
   id: z.string(),
 });
 
+export const GetPostsSchema = z.object({
+  userId: z.string().optional(),
+});
+
 export type SavePostInput = z.TypeOf<typeof savePostSchema>;
 
 export const getSinglePostSchema = z.object({
