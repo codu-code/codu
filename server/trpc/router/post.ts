@@ -93,9 +93,9 @@ export const postRouter = createRouter()
         where: { id },
       });
 
-      ConfirmPostSchema.parse(currentPost);
+      const parsed = ConfirmPostSchema.safeParse(currentPost);
 
-      if (currentPost?.userId !== ctx.session.user.id) {
+      if (!parsed.success || currentPost?.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });
