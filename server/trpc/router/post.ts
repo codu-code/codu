@@ -93,9 +93,7 @@ export const postRouter = createRouter()
         where: { id },
       });
 
-      const parsedPost = ConfirmPostSchema.parse(currentPost);
-
-      console.log({ parsedPost });
+      ConfirmPostSchema.parse(currentPost);
 
       if (currentPost?.userId !== ctx.session.user.id) {
         throw new TRPCError({
