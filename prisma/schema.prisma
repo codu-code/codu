@@ -11,18 +11,18 @@ datasource db {
 }
 
 model Post {
-  id           String   @id @unique
+  id           String    @id @unique
   title        String
   coverImage   String?
-  approved     Boolean  @default(true)
-  body         String   @db.Text()
-  excerpt      String   @default("") @db.VarChar(140)
+  approved     Boolean   @default(true)
+  body         String    @db.Text()
+  excerpt      String    @default("") @db.VarChar(140)
   readTimeMins Int
-  published    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  slug         String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  published    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  slug         String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
 }
 

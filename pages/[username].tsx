@@ -9,27 +9,6 @@ import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
 
-interface ParsedPost {
-  updatedAt: string;
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  readTimeMins: number;
-}
-
-interface ParsedUser {
-  id: string;
-  username: string | null;
-  image: string;
-  name: string;
-  bio: string;
-  location: string;
-  websiteUrl: string;
-  role: string;
-  posts: ParsedPost[];
-}
-
 const Profile: NextPage = ({
   profile,
   isOwner,
@@ -65,7 +44,8 @@ const Profile: NextPage = ({
           </div>
           {posts ? (
             posts.map(
-              ({ slug, title, excerpt, readTimeMins, updatedAt, id }) => {
+              ({ slug, title, excerpt, readTimeMins, published, id }) => {
+                if (!published) return;
                 return (
                   <ArticlePreview
                     key={slug}
@@ -74,7 +54,7 @@ const Profile: NextPage = ({
                     excerpt={excerpt}
                     name={name}
                     image={image}
-                    date={updatedAt}
+                    date={published}
                     readTime={readTimeMins}
                     canEdit={isOwner}
                     id={id}
@@ -112,24 +92,27 @@ export const getServerSideProps = async (
     authOptions
   );
 
-  const profileWithDrafts = await prisma.user.findUnique({
+  const profile = await prisma.user.findUnique({
     where: {
       username,
     },
     select: {
-      id: true,
-      username: true,
-      image: true,
-      name: true,
       bio: true,
-      location: true,
-      websiteUrl: true,
-      role: true,
+      username: true,
+      name: true,
+      image: true,
       posts: {
+        where: {
+          NOT: {
+            published: null,
+          },
+        },
+        orderBy: {
+          published: "desc",
+        },
         select: {
           title: true,
           excerpt: true,
-          updatedAt: true,
           slug: true,
           readTimeMins: true,
           published: true,
@@ -139,7 +122,7 @@ export const getServerSideProps = async (
     },
   });
 
-  if (!profileWithDrafts) {
+  if (!profile) {
     return {
       redirect: {
         destination: "/404",
@@ -149,18 +132,15 @@ export const getServerSideProps = async (
     };
   }
 
-  const profile: ParsedUser = {
-    ...profileWithDrafts,
-    posts: profileWithDrafts.posts
-      .filter((post) => post.published)
-      .map((post): ParsedPost => {
-        return { ...post, updatedAt: post.updatedAt.toISOString() };
-      }),
-  };
-
   return {
     props: {
-      profile,
+      profile: {
+        ...profile,
+        posts: profile.posts.map((post) => ({
+          ...post,
+          published: post.published?.toISOString(),
+        })),
+      },
       isOwner: session?.user?.username === username,
     },
   };

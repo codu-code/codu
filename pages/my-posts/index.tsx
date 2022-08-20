@@ -42,6 +42,7 @@ const MyPosts: NextPage = ({
       onSuccess() {
         setSelectedArticleToDelete(undefined);
         drafts.refetch();
+        published.refetch();
       },
     }
   );
@@ -179,9 +180,19 @@ const MyPosts: NextPage = ({
 
             {selectedTabData.status === "success" &&
               selectedTabData.data?.map(
-                ({ id, title, excerpt, readTimeMins }) => (
+                ({ id, title, excerpt, readTimeMins, slug }) => (
                   <article className="border-2 p-4 mb-4" key={id}>
-                    <h2 className=" text-2xl font-semibold mb-2">{title}</h2>
+                    {tab === "published" ? (
+                      <Link href={`articles/${slug}`}>
+                        <a>
+                          <h2 className="text-2xl font-semibold mb-2 hover:underline">
+                            {title}
+                          </h2>
+                        </a>
+                      </Link>
+                    ) : (
+                      <h2 className=" text-2xl font-semibold mb-2">{title}</h2>
+                    )}
                     <p>
                       {excerpt || "No excerpt yet... Write more to see one."}
                     </p>

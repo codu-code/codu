@@ -4,17 +4,18 @@ import { TRPCError } from "@trpc/server";
 import { createRouter } from "../createRouter";
 import { readingTime } from "../../../utils/readingTime";
 import {
-  publishPostSchema,
-  getSinglePostSchema,
-  savePostSchema,
-  createPostSchema,
+  PublishPostSchema,
+  GetSinglePostSchema,
+  SavePostSchema,
+  CreatePostSchema,
   DeletePostSchema,
   GetPostsSchema,
+  ConfirmPostSchema,
 } from "../../../schema/post";
 
 export const postRouter = createRouter()
   .mutation("create-post", {
-    input: createPostSchema,
+    input: CreatePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -38,7 +39,7 @@ export const postRouter = createRouter()
     },
   })
   .mutation("save-post", {
-    input: savePostSchema,
+    input: SavePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -66,7 +67,7 @@ export const postRouter = createRouter()
         data: {
           ...input,
           readTimeMins: readingTime(body),
-          slug: `${title.replace(/\W+/g, "-")}${id}`.toLowerCase(),
+          slug: `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
           excerpt:
             body.length < 140
               ? body
@@ -77,7 +78,7 @@ export const postRouter = createRouter()
     },
   })
   .mutation("publish-post", {
-    input: publishPostSchema,
+    input: PublishPostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session || !ctx.session.user) {
         throw new TRPCError({
@@ -92,18 +93,24 @@ export const postRouter = createRouter()
         where: { id },
       });
 
+      const parsedPost = ConfirmPostSchema.parse(currentPost);
+
+      console.log({ parsedPost });
+
       if (currentPost?.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });
       }
 
+      const publishedValue = published ? new Date().toISOString() : null;
+
       const post = await ctx.prisma.post.update({
         where: {
           id,
         },
         data: {
-          published,
+          published: publishedValue,
         },
       });
       return post;
@@ -144,8 +151,11 @@ export const postRouter = createRouter()
     resolve({ ctx, input }) {
       return ctx.prisma.post.findMany({
         where: {
-          published: true,
+          NOT: [{ published: null }],
           ...input,
+        },
+        orderBy: {
+          published: "desc",
         },
       });
     },
@@ -161,8 +171,11 @@ export const postRouter = createRouter()
 
       return ctx.prisma.post.findMany({
         where: {
-          published: true,
+          NOT: [{ published: null }],
           userId: ctx.session.user.id,
+        },
+        orderBy: {
+          published: "desc",
         },
       });
     },
@@ -178,14 +191,17 @@ export const postRouter = createRouter()
 
       return ctx.prisma.post.findMany({
         where: {
-          published: false,
+          published: null,
           userId: ctx.session.user.id,
+        },
+        orderBy: {
+          updatedAt: "desc",
         },
       });
     },
   })
   .query("edit-draft", {
-    input: getSinglePostSchema,
+    input: GetSinglePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -210,7 +226,7 @@ export const postRouter = createRouter()
     },
   })
   .query("single-post", {
-    input: getSinglePostSchema,
+    input: GetSinglePostSchema,
     resolve({ ctx, input }) {
       return ctx.prisma.post.findUnique({
         where: {

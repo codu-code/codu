@@ -9,7 +9,7 @@ import rehypePrism from "rehype-prism";
 import TextareaAutosize from "react-textarea-autosize";
 import toast, { Toaster } from "react-hot-toast";
 
-import { SavePostInput } from "../../schema/post";
+import { SavePostInput, ConfirmPostSchema } from "../../schema/post";
 import Layout from "../../components/Layout/Layout";
 
 import { trpc } from "../../utils/trpc";
@@ -96,9 +96,19 @@ const Create: NextPage = () => {
     saveStatus === "loading" ||
     dataStatus === "loading";
 
-  const published = data?.published || false;
+  const published = !!data?.published || false;
 
   const onSubmit = () => {
+    const parsed = ConfirmPostSchema.safeParse({ title, body });
+    if (!parsed.success) {
+      return toast.error(
+        `Unable to publish: ${parsed.error.issues[0].message}`,
+        {
+          duration: 5000,
+        }
+      );
+    }
+
     if (!published) {
       return publish(
         { id: postId, published: !published },

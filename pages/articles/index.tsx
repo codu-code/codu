@@ -50,21 +50,16 @@ const ArticlesPage = ({
   );
 };
 
-interface PostsWithStringDates {
-  updatedAt: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  readTimeMins: number;
-  user: {
-    name: string;
-    image: string;
-  };
-}
-
 export const getServerSideProps = async () => {
   const response = await prisma.post.findMany({
-    where: { published: true },
+    where: {
+      NOT: {
+        published: null,
+      },
+    },
+    orderBy: {
+      published: "desc",
+    },
     select: {
       title: true,
       body: true,
@@ -78,7 +73,7 @@ export const getServerSideProps = async () => {
     },
   });
 
-  const posts: PostsWithStringDates[] = response.map((post) => {
+  const posts = response.map((post) => {
     return { ...post, updatedAt: post.updatedAt.toISOString() };
   });
 
