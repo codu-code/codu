@@ -1,18 +1,16 @@
-import type { NextPage } from "next";
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import Layout from "../../components/Layout/Layout";
-import { getAllArticlesMetadata } from "../../lib/blog";
-import { authors } from "../../config/site_settings";
+import prisma from "../../server/db/client";
 
-
-const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
+const ArticlesPage = ({
   articles,
-}) => {
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <>
       <Head>
-        <title>Codú | Blog</title>
+        <title>Codú | Articles - View our latest web developer articles</title>
         <meta name="description" content="Codú | Web Developer Community" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -27,19 +25,20 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
                 ({
                   slug,
                   title,
-                  description,
-                  user_id,
-                  read_time,
-                  date,
-                }: any) => (
+                  excerpt,
+                  user: { name, image },
+                  updatedAt,
+                  readTimeMins,
+                }) => (
                   <ArticlePreview
-                    key={slug}
+                    key={title}
                     slug={slug}
                     title={title}
-                    description={description}
-                    author={authors[user_id]}
-                    date={date}
-                    readTime={read_time}
+                    excerpt={excerpt}
+                    name={name}
+                    image={image}
+                    date={updatedAt}
+                    readTime={readTimeMins}
                   />
                 )
               )}
@@ -51,12 +50,36 @@ const ArticlesPage: NextPage<{ articles: Record<string, any> }> = ({
   );
 };
 
-export const getStaticProps = async () => {
-  const metadata = await getAllArticlesMetadata();
+export const getServerSideProps = async () => {
+  const response = await prisma.post.findMany({
+    where: {
+      NOT: {
+        published: null,
+      },
+    },
+    orderBy: {
+      published: "desc",
+    },
+    select: {
+      title: true,
+      body: true,
+      updatedAt: true,
+      readTimeMins: true,
+      slug: true,
+      excerpt: true,
+      user: {
+        select: { name: true, image: true },
+      },
+    },
+  });
+
+  const posts = response.map((post) => {
+    return { ...post, updatedAt: post.updatedAt.toISOString() };
+  });
 
   return {
     props: {
-      articles: metadata,
+      articles: posts,
     },
   };
 };
