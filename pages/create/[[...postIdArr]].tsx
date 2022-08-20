@@ -113,8 +113,8 @@ const Create: NextPage = () => {
       return publish(
         { id: postId, published: !published },
         {
-          onSuccess() {
-            data?.slug && router.push(`/articles/${data.slug}`);
+          onSuccess(response) {
+            response?.slug && router.push(`/articles/${response.slug}`);
           },
         }
       );
