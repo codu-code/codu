@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import * as Fathom from "fathom-client";
 import { SessionProvider } from "next-auth/react";
@@ -7,6 +7,7 @@ import type { AppProps } from "next/app";
 import { withTRPC } from "@trpc/next";
 import superjson from "superjson";
 import { AppRouter } from "../server/trpc/router";
+import ProgressBar from "../components/ProgressBar/ProgressBar";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
@@ -18,6 +19,8 @@ const getBaseUrl = () => {
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+
   useEffect(() => {
     const env = process.env.NODE_ENV;
     const siteId = process.env.NEXT_PUBLIC_FATHOM_SITE_ID;
@@ -28,20 +31,65 @@ function MyApp({ Component, pageProps }: AppProps) {
       includedDomains: ["codu.co"],
     });
 
+    function onRouteChangeStart() {
+      console.log("START");
+      setIsAnimating(true);
+    }
+
     function onRouteChangeComplete() {
+      console.log("END");
+      setIsAnimating(false);
       Fathom.trackPageview();
     }
+
+    router.events.on("routeChangeStart", onRouteChangeStart);
     // Record a pageview when route changes
     router.events.on("routeChangeComplete", onRouteChangeComplete);
 
     // Unassign event listener
     return () => {
       router.events.off("routeChangeComplete", onRouteChangeComplete);
+      router.events.off("routeChangeStart", onRouteChangeStart);
     };
-  }, []);
+  }, [router]);
+
+  useEffect(() => {
+    const env = process.env.NODE_ENV;
+    const siteId = process.env.NEXT_PUBLIC_FATHOM_SITE_ID;
+
+    const enableAnalytics = env === "production" && siteId;
+
+    if (enableAnalytics) {
+      Fathom.load(siteId, {
+        includedDomains: ["codu.co"],
+      });
+    }
+
+    function onRouteChangeStart() {
+      setIsAnimating(true);
+    }
+
+    function onRouteChangeComplete() {
+      setIsAnimating(false);
+      if (enableAnalytics) {
+        Fathom.trackPageview();
+      }
+    }
+
+    router.events.on("routeChangeStart", onRouteChangeStart);
+    router.events.on("routeChangeError", onRouteChangeComplete);
+    // Record a pageview when route changes
+    router.events.on("routeChangeComplete", onRouteChangeComplete);
+    // Unassign event listener
+    return () => {
+      router.events.off("routeChangeComplete", onRouteChangeComplete);
+      router.events.off("routeChangeStart", onRouteChangeStart);
+    };
+  }, [router]);
 
   return (
     <SessionProvider session={pageProps.session}>
+      <ProgressBar isAnimating={isAnimating} />
       <Component {...pageProps} />
     </SessionProvider>
   );
