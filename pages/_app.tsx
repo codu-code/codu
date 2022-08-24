@@ -84,6 +84,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     return () => {
       router.events.off("routeChangeComplete", onRouteChangeComplete);
       router.events.off("routeChangeStart", onRouteChangeStart);
+      router.events.off("routeChangeError", onRouteChangeComplete);
     };
   }, [router]);
 
