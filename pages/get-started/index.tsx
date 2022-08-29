@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSession, signIn, getProviders } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { LockClosedIcon } from "@heroicons/react/solid";
 
 const GetStarted: NextPage = () => {
@@ -28,6 +28,7 @@ const GetStarted: NextPage = () => {
                   height={60}
                   width={189}
                 />
+                <span className="ml-2 text-base font-semibold">Beta</span>
               </a>
             </Link>
           </div>
