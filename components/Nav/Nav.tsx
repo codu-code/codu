@@ -41,6 +41,7 @@ const Nav = () => {
                         alt="Codú logo"
                         height={30}
                         width={94.5}
+						priority={true}
                       />{" "}
                       <span className="text-xs font-semibold">Beta</span>
                     </a>
