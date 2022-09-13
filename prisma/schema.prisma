@@ -10,22 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id           String    @id @unique
-  title        String
-  coverImage   String?
-  approved     Boolean   @default(true)
-  body         String    @db.Text()
-  excerpt      String    @default("") @db.VarChar(140)
-  readTimeMins Int
-  published    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  slug         String    @unique
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-}
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -42,6 +26,41 @@ model Account {
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model Post {
+  id           String    @id @unique
+  title        String
+  canonicalUrl String?
+  coverImage   String?
+  approved     Boolean   @default(true)
+  body         String    @db.Text()
+  excerpt      String    @default("") @db.VarChar(156)
+  readTimeMins Int
+  published    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  slug         String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  tags         PostTag[]
+}
+
+model Tag {
+  createdAt DateTime  @default(now())
+  id        Int       @id @default(autoincrement())
+  title     String    @unique @db.VarChar(20)
+  PostTag   PostTag[]
+}
+
+model PostTag {
+  id     Int    @id @default(autoincrement())
+  tagId  Int
+  postId String
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([tagId, postId])
 }
 
 model Session {
