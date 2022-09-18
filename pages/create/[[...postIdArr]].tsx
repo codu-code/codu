@@ -192,6 +192,8 @@ const Create: NextPage = () => {
 
   const hasContent = title.length >= 5 && body.length >= 10;
 
+  const isDisabled = hasLoadingState || !hasContent;
+
   return (
     <Layout>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -306,8 +308,10 @@ const Create: NextPage = () => {
                     {!data?.published && (
                       <button
                         type="button"
+                        disabled={isDisabled}
                         className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                         onClick={async () => {
+                          if (isDisabled) return;
                           await savePost();
                           router.push("/my-posts?tab=drafts");
                         }}
@@ -317,6 +321,7 @@ const Create: NextPage = () => {
                     )}
                     <button
                       type="submit"
+                      disabled={isDisabled}
                       className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                     >
                       {hasLoadingState ? (
@@ -450,21 +455,12 @@ const Create: NextPage = () => {
                             <div className="flex">
                               <button
                                 type="button"
-                                disabled={!hasContent}
+                                disabled={isDisabled}
                                 className="disabled:opacity-50 ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                                 onClick={() => setOpen(true)}
                               >
-                                {hasLoadingState ? (
-                                  <>
-                                    <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-700 border-t-white rounded-full" />
-                                    {"Saving"}
-                                  </>
-                                ) : (
-                                  <>
-                                    {!data?.published && "Publish"}
-                                    {data?.published && "Save Changes"}
-                                  </>
-                                )}
+                                {!data?.published && "Publish"}
+                                {data?.published && "Save Changes"}
                               </button>
                             </div>
                           </div>
