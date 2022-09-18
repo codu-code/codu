@@ -10,8 +10,8 @@ import {
   CreatePostSchema,
   DeletePostSchema,
   GetPostsSchema,
-  ConfirmPostSchema,
 } from "../../../schema/post";
+import { removeMarkdown } from "../../../utils/removeMarkdown";
 
 export const postRouter = createRouter()
   .mutation("create-post", {
@@ -48,7 +48,7 @@ export const postRouter = createRouter()
         });
       }
 
-      const { id, body, title } = input;
+      const { id, body, title, excerpt = "", canonicalUrl, tags = [] } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
@@ -60,18 +60,52 @@ export const postRouter = createRouter()
         });
       }
 
+      const tagResponse = await Promise.all(
+        tags.map((tag) =>
+          ctx.prisma.tag.upsert({
+            where: {
+              title: tag,
+            },
+            update: {},
+            create: { title: tag },
+          })
+        )
+      );
+
+      await ctx.prisma.postTag.deleteMany({
+        where: {
+          postId: id,
+        },
+      });
+
+      await Promise.all(
+        tagResponse.map((tag) =>
+          ctx.prisma.postTag.create({
+            data: {
+              tagId: tag.id,
+              postId: id,
+            },
+          })
+        )
+      );
+
+      const excerptOrCreatedExcerpt =
+        excerpt.length > 0
+          ? excerpt
+          : removeMarkdown(currentPost.body, {}).substring(0, 156);
+
       const post = await ctx.prisma.post.update({
         where: {
           id,
         },
         data: {
-          ...input,
+          id,
+          body,
+          title,
+          excerpt: excerptOrCreatedExcerpt,
           readTimeMins: readingTime(body),
           slug: `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
-          excerpt:
-            body.length < 140
-              ? body
-              : body.replace(/\s+/g, " ").trim().slice(0, 137) + "...",
+          ...(canonicalUrl ? { canonicalUrl } : {}),
         },
       });
       return post;
@@ -93,9 +127,7 @@ export const postRouter = createRouter()
         where: { id },
       });
 
-      const parsed = ConfirmPostSchema.safeParse(currentPost);
-
-      if (!parsed.success || currentPost?.userId !== ctx.session.user.id) {
+      if (currentPost?.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });
@@ -212,6 +244,17 @@ export const postRouter = createRouter()
 
       const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
+        include: {
+          tags: {
+            select: {
+              tag: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       if (currentPost?.userId !== ctx.session.user.id) {

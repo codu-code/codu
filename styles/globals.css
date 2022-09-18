@@ -28,7 +28,7 @@ body {
   [multiple],
   textarea,
   select {
-    @apply mt-1 focus:outline-none focus:ring-2 focus:ring-pink-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-black border-2 px-2 py-2;
+    @apply mt-1 focus:outline-none focus:ring-2 focus:ring-gray-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-black border-2 px-2 py-2 disabled:opacity-50;
   }
 
   label {

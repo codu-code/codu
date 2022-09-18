@@ -9,6 +9,13 @@ export const SavePostSchema = z.object({
   body: z.string().trim(),
   id: z.string(),
   title: z.string().trim().max(100, "Max title length is 100 characters."),
+  excerpt: z
+    .string()
+    .trim()
+    .max(156, "Max length is 156 characters.")
+    .optional(),
+  canonicalUrl: z.string().trim().url().optional(),
+  tags: z.string().array().max(5).optional(),
 });
 
 export const PublishPostSchema = z.object({
@@ -26,6 +33,13 @@ export const ConfirmPostSchema = z.object({
     .trim()
     .max(100, "Max title length is 100 characters.")
     .min(10, "Title is too short. Minimum of 10 characters."),
+  excerpt: z
+    .string()
+    .trim()
+    .max(156, "Max length is 156 characters.")
+    .optional(),
+  canonicalUrl: z.string().trim().url().optional(),
+  tags: z.string().array().max(5).optional(),
 });
 
 export const DeletePostSchema = z.object({
@@ -37,6 +51,7 @@ export const GetPostsSchema = z.object({
 });
 
 export type SavePostInput = z.TypeOf<typeof SavePostSchema>;
+export type ConfirmPostInput = z.TypeOf<typeof ConfirmPostSchema>;
 
 export const GetSinglePostSchema = z.object({
   id: z.string(),
