@@ -32,12 +32,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     });
 
     function onRouteChangeStart() {
-      console.log("START");
       setIsAnimating(true);
     }
 
     function onRouteChangeComplete() {
-      console.log("END");
       setIsAnimating(false);
       Fathom.trackPageview();
     }

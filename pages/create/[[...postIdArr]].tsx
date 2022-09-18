@@ -1,6 +1,7 @@
 import { NextPage, GetServerSideProps } from "next";
+import { ZodError } from "zod";
 import { useRouter } from "next/router";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
@@ -8,6 +9,8 @@ import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import rehypePrism from "rehype-prism";
 import TextareaAutosize from "react-textarea-autosize";
 import toast, { Toaster } from "react-hot-toast";
+import { Disclosure, Transition } from "@headlessui/react";
+import { ChevronUpIcon } from "@heroicons/react/solid";
 
 import { SavePostInput, ConfirmPostSchema } from "../../schema/post";
 import Layout from "../../components/Layout/Layout";
@@ -22,9 +25,20 @@ const Create: NextPage = () => {
   const postId = postIdArr?.[0] || "";
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
-  const [savedTime, setSavedTime] = useState<string>();
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagValue, setTagValue] = useState<string>("");
+  const [savedTime, setSavedTime] = useState<string>("");
+  const [open, setOpen] = useState<boolean>(false);
 
-  const { handleSubmit, register, watch, reset } = useForm<SavePostInput>({
+  const {
+    handleSubmit,
+    register,
+    watch,
+    reset,
+    getValues,
+    formState: { errors, isValid },
+  } = useForm<SavePostInput>({
+    mode: "onSubmit",
     defaultValues: {
       title: "",
       body: "",
@@ -83,11 +97,14 @@ const Create: NextPage = () => {
     }
   );
 
-  const savePost = async (values: { title: string; body: string }) => {
-    if (!postId) {
-      create({ ...values });
+  const savePost = async () => {
+    const data = getValues();
+    const formData = { ...data, tags };
+
+    if (!formData.id) {
+      create({ ...formData });
     } else {
-      save({ ...values, id: postId });
+      save({ ...formData, id: postId });
     }
   };
 
@@ -98,40 +115,74 @@ const Create: NextPage = () => {
 
   const published = !!data?.published || false;
 
-  const onSubmit = () => {
-    const parsed = ConfirmPostSchema.safeParse({ title, body });
-    if (!parsed.success) {
-      return toast.error(
-        `Unable to publish: ${parsed.error.issues[0].message}`,
-        {
-          duration: 5000,
-        }
-      );
-    }
-
+  const onSubmit = async (data: SavePostInput) => {
     if (!published) {
-      return publish(
-        { id: postId, published: !published },
-        {
-          onSuccess(response) {
-            response?.slug && router.push(`/articles/${response.slug}`);
-          },
+      try {
+        const data = getValues();
+        const formData = { ...data, tags };
+        ConfirmPostSchema.parse(formData);
+        await savePost();
+        return await publish(
+          { id: postId, published: !published },
+          {
+            onSuccess(response) {
+              response?.slug && router.push(`/articles/${response.slug}`);
+            },
+            onError() {
+              toast.error("Something went wrong publishing, please try again.");
+            },
+          }
+        );
+      } catch (err) {
+        if (err instanceof ZodError) {
+          return toast.error(err.issues[0].message);
+        } else {
+          return toast.error("Something went when trying to publish.");
         }
-      );
+      }
     }
-    savePost({ title, body });
+    await savePost();
+  };
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const { value } = e.target;
+    setTagValue(value);
+  };
+
+  const onDelete = (tag: string) => {
+    setTags((t) => t.filter((t) => t !== tag));
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const { key } = e;
+    const trimmedInput = tagValue
+      .trim()
+      .toUpperCase()
+      .replace(/[^\w\s]/gi, "");
+    if (
+      (key === "," || key === "." || key === "Enter") &&
+      trimmedInput.length &&
+      !tags.includes(trimmedInput)
+    ) {
+      e.preventDefault();
+      setTags((prevState) => [...prevState, trimmedInput]);
+      setTagValue("");
+    }
   };
 
   useEffect(() => {
     if (!data) return;
-    reset(data);
+    const { body, excerpt, title, id, tags } = data;
+    setTags(tags.map(({ tag }) => tag.title));
+    reset({ body, excerpt, title, id });
   }, [data]);
 
   useEffect(() => {
     if (published) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
-    savePost({ title, body });
+    savePost();
   }, [debouncedValue]);
 
   useEffect(() => {
@@ -139,9 +190,158 @@ const Create: NextPage = () => {
     router.push(createData.id);
   }, [createData]);
 
+  const hasContent = title.length >= 5 && body.length >= 10;
+
+  const isDisabled = hasLoadingState || !hasContent;
+
   return (
     <Layout>
-      <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Transition.Root show={open} as={Fragment}>
+          <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-white text-black">
+            <button
+              type="button"
+              className="absolute right-8 top-8 underline cursor-pointer z-50"
+              onClick={() => setOpen(false)}
+            >
+              Close
+            </button>
+            <div className="relative mx-4 flex flex-col justify-center items-center h-full overflow-y-scroll">
+              <div className="pt-16 pb-8">
+                <div className="block sm:grid gap-6 sm:grid-cols-12 w-full max-w-2xl">
+                  <div className="sm:col-span-6 mt-8 sm:mt-0">
+                    {" "}
+                    <label htmlFor="excerpt">Excerpt</label>
+                    <textarea
+                      maxLength={156}
+                      id="excerpt"
+                      rows={3}
+                      {...register("excerpt")}
+                    />
+                    <p className="mt-2 text-sm text-gray-500">
+                      What readers will see before they click on your article.
+                      Good SEO descriptions utilize keywords, summarize the
+                      story and are between 140-156 characters long.
+                    </p>
+                  </div>
+                  <div className="sm:col-span-6 my-4 sm:my-0">
+                    <label htmlFor="tags">Topics</label>
+                    <input
+                      id="tag"
+                      name="tag"
+                      disabled={tags.length >= 5}
+                      placeholder={
+                        tags.length >= 5
+                          ? "Maximum 5 tags"
+                          : "Comma seperated tags"
+                      }
+                      type="text"
+                      onChange={(e) => onChange(e)}
+                      value={tagValue}
+                      onKeyDown={onKeyDown}
+                    />
+                    {tags.map((tag) => (
+                      <div
+                        key={tag}
+                        className="bg-gray-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
+                      >
+                        <span
+                          className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs"
+                          x-text="tag"
+                        >
+                          {tag}
+                        </span>
+                        <button
+                          onClick={() => onDelete(tag)}
+                          className="w-6 h-6 inline-block align-middle text-white bg-gray-600 focus:outline-none"
+                        >
+                          <svg
+                            className="w-6 h-6 fill-current mx-auto"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                    <p className="mt-2 text-sm text-gray-500">
+                      Tag with up to 5 topics. This makes it easier for readers
+                      to find and know what your story is about.
+                    </p>
+                  </div>
+                  <div className="col-span-12  border-b border-gray-300 pb-4">
+                    <Disclosure>
+                      {({ open }) => (
+                        <>
+                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-gray-900 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
+                            <span>View advanced settings</span>
+                            <ChevronUpIcon
+                              className={`${
+                                open ? "rotate-180 transform" : ""
+                              } h-5 w-5 text-gray-500`}
+                            />
+                          </Disclosure.Button>
+                          <Disclosure.Panel className="pt-4 pb-2">
+                            <label htmlFor="canonicalUrl">Canonical URL</label>
+                            <input
+                              id="canonicalUrl"
+                              type="text"
+                              placeholder="https://www.somesite.com/i-posted-here-first"
+                              defaultValue=""
+                              {...register("canonicalUrl")}
+                            />
+                            <p className="mt-2 text-sm text-gray-500">
+                              Add this if the post was originally published
+                              elsewhere and you want to link to it as the
+                              original source.
+                            </p>
+                          </Disclosure.Panel>
+                        </>
+                      )}
+                    </Disclosure>
+                  </div>
+                  <div className="mt-4 sm:mt-0 sm:col-span-12 flex justify-end w-full">
+                    {!data?.published && (
+                      <button
+                        type="button"
+                        disabled={isDisabled}
+                        className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        onClick={async () => {
+                          if (isDisabled) return;
+                          await savePost();
+                          router.push("/my-posts?tab=drafts");
+                        }}
+                      >
+                        Save Draft
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isDisabled}
+                      className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                    >
+                      {hasLoadingState ? (
+                        <>
+                          <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-700 border-t-white rounded-full" />
+                          {"Saving"}
+                        </>
+                      ) : (
+                        <>
+                          {!data?.published && "Publish"}
+                          {data?.published && "Save Changes"}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Transition.Root>
         <Toaster
           toastOptions={{
             style: {
@@ -198,7 +398,6 @@ const Create: NextPage = () => {
                   {/* End left column area */}
                 </div>
               </div>
-
               <div className="lg:min-w-0 lg:flex-1">
                 <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
                   {/* Start main area*/}
@@ -219,64 +418,53 @@ const Create: NextPage = () => {
                           </article>
                         </section>
                       ) : (
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                          <div className="py-6 px-4 sm:p-6 lg:pb-8">
-                            <input
-                              autoFocus
-                              className="border-none text-2xl leading-5 outline-none"
-                              placeholder="Your great title..."
-                              type="text"
-                              aria-label="Post Content"
-                              {...register("title")}
-                              defaultValue=""
-                            />
+                        <div className="py-6 px-4 sm:p-6 lg:pb-8">
+                          <input
+                            autoFocus
+                            className="border-none text-2xl leading-5 outline-none"
+                            placeholder="Your great title..."
+                            type="text"
+                            aria-label="Post Content"
+                            {...register("title")}
+                          />
 
-                            <TextareaAutosize
-                              placeholder="Enter your content here 💖"
-                              className="border-none text-lg outline-none shadow-none mb-8"
-                              minRows={25}
-                              {...register("body")}
-                              defaultValue=""
-                            />
-                            <div className="flex justify-between items-center">
-                              <>
-                                {saveStatus === "loading" && (
-                                  <p>Auto-saving...</p>
-                                )}
-                                {saveStatus === "error" && savedTime && (
-                                  <p className="text-red-600 text-xs lg:text-sm">
-                                    {`Error saving, last saved: ${savedTime.toString()}`}
-                                  </p>
-                                )}
-                                {saveStatus === "success" && savedTime && (
-                                  <p className="text-gray-600 text-xs lg:text-sm">
-                                    {`Saved: ${savedTime.toString()}`}
-                                  </p>
-                                )}
-                              </>
-                              <div />
+                          <TextareaAutosize
+                            placeholder="Enter your content here 💖"
+                            className="border-none text-lg outline-none shadow-none mb-8"
+                            minRows={25}
+                            {...register("body")}
+                          />
+                          <div className="flex justify-between items-center">
+                            <>
+                              {saveStatus === "loading" && (
+                                <p>Auto-saving...</p>
+                              )}
+                              {saveStatus === "error" && savedTime && (
+                                <p className="text-red-600 text-xs lg:text-sm">
+                                  {`Error saving, last saved: ${savedTime.toString()}`}
+                                </p>
+                              )}
+                              {saveStatus === "success" && savedTime && (
+                                <p className="text-gray-600 text-xs lg:text-sm">
+                                  {`Saved: ${savedTime.toString()}`}
+                                </p>
+                              )}
+                            </>
+                            <div />
 
-                              <div className="flex">
-                                <button
-                                  type="submit"
-                                  className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                                >
-                                  {hasLoadingState ? (
-                                    <>
-                                      <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-700 border-t-white rounded-full" />
-                                      {"Saving"}
-                                    </>
-                                  ) : (
-                                    <>
-                                      {!data?.published && "Publish"}
-                                      {data?.published && "Save Changes"}
-                                    </>
-                                  )}
-                                </button>
-                              </div>
+                            <div className="flex">
+                              <button
+                                type="button"
+                                disabled={isDisabled}
+                                className="disabled:opacity-50 ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                onClick={() => setOpen(true)}
+                              >
+                                {!data?.published && "Publish"}
+                                {data?.published && "Save Changes"}
+                              </button>
                             </div>
                           </div>
-                        </form>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -284,11 +472,9 @@ const Create: NextPage = () => {
                 </div>
               </div>
             </div>
-
             <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
               <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
                 {/* Start right column area */}
-
                 <div className="bg-white text-gray-800 border-2 border-black shadow-xl p-6">
                   <h3 className="text-xl tracking-tight font-semibold text-black">
                     How to use the editor
@@ -317,13 +503,12 @@ const Create: NextPage = () => {
                     .
                   </p>
                 </div>
-
                 {/* End right column area */}
               </div>
             </div>
           </div>
         </div>
-      </>
+      </form>
     </Layout>
   );
 };
