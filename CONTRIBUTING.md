@@ -1,7 +1,6 @@
-
 ## 👨‍💻 Prerequisite Skills to Contribute
 
-- [Git](https://git-scm.com/) 
+- [Git](https://git-scm.com/)
 
 #### Contribute in Documents
 
@@ -18,7 +17,6 @@
 ## 💥 How to Contribute
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/codu-code/codu/pulls)
-
 
 - Take a look at the existing [Issues](https://github.com/codu-code/codu/issues) or [create a new issue](https://github.com/codu-code/codu/issues/new/choose)!
 - [Fork the Repo](https://github.com/codu-code/codu/fork). Then, create a branch for any issue that you are working on. Finally, commit your work.
@@ -67,7 +65,7 @@ git fetch upstream
 ```
 
 ```bash
-git merge upstream/main
+git rebase upstream/develop
 ```
 
 ### [Github Docs](https://docs.github.com/en/github/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-on-github) for Syncing
@@ -116,7 +114,7 @@ git push origin YourBranchName
 
 ## Run tests
 
-⚠️ ***Tests need to be added. When commands are added update the docs here.*** ⚠️
+⚠️ **_Tests need to be added. When commands are added update the docs here._** ⚠️
 
 After making changes make sure that tests passes
 
@@ -155,6 +153,5 @@ yarn test
 In order to discuss changes, you are welcome to [open an issue](https://github.com/codu-code/codu/issues/new/choose) about what you would like to contribute. Enhancements are always encouraged and appreciated.
 
 [![forthebadge](https://forthebadge.com/images/badges/works-on-my-machine.svg)](https://forthebadge.com)
-
 
 [![Open Source Love](https://badges.frapsoft.com/os/v2/open-source-150x25.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
