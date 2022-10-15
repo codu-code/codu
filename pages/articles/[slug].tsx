@@ -33,7 +33,7 @@ const ArticlePage: NextPage = ({
                 {post.tags.map((tag) => (
                   <div
                     key={tag.id}
-                    className="bg-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded-full text-xs"
+                    className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded-full text-xs"
                   >
                     {tag.title}
                   </div>
