@@ -60,7 +60,9 @@ const ArticlePreview: NextPage<Props> = ({
         </header>
       </Link>
 
-      <p className="tracking-wide text-sm md:text-lg my-3">{excerpt}</p>
+      <p className="tracking-wide text-sm md:text-lg my-3 break-words">
+        {excerpt}
+      </p>
       <div className="sm:flex justify-between content-center">
         <div className="flex items-center">
           <Link href={`/articles/${slug}`}>
