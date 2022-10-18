@@ -27,6 +27,20 @@ const ArticlePage: NextPage = ({
             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
               {post.title}
             </h2>
+
+            {post.tags.length > 0 && (
+              <section className="flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <div
+                    key={tag.id}
+                    className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded-full text-xs"
+                  >
+                    {tag.title}
+                  </div>
+                ))}
+              </section>
+            )}
+
             <article className="prose prose-invert">
               <ReactMarkdown rehypePlugins={[rehypePrism]}>
                 {post.body}
@@ -48,6 +62,7 @@ export const getServerSideProps = async (
       slug: ctx.params?.slug,
     },
     select: {
+      id: true,
       title: true,
       body: true,
       user: {
@@ -58,6 +73,19 @@ export const getServerSideProps = async (
           username: true,
         },
       },
+      tags: true,
+    },
+  });
+
+  const tags = await prisma.tag.findMany({
+    where: {
+      id: {
+        in: post?.tags.map((tag) => tag.tagId),
+      },
+    },
+    select: {
+      id: true,
+      title: true,
     },
   });
 
@@ -73,7 +101,10 @@ export const getServerSideProps = async (
 
   return {
     props: {
-      post,
+      post: {
+        ...post,
+        tags,
+      },
     },
   };
 };
