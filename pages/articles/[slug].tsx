@@ -20,6 +20,18 @@ const ArticlePage: NextPage = ({
     <>
       <Head>
         <title>Codú | {post.title}</title>
+        <meta key="og:title" property="og:title" content={post.title} />
+        <meta
+          key="og:description"
+          property="og:description"
+          content={post.excerpt}
+        />
+        <meta key="description" property="description" content={post.excerpt} />
+        <meta property="og:type" content="article" />
+        <meta
+          property="og:url"
+          content={`https://codu.co/articles/${post.slug}`}
+        />
       </Head>
       <Layout>
         <div className="border-t-2">
@@ -65,6 +77,8 @@ export const getServerSideProps = async (
       id: true,
       title: true,
       body: true,
+      excerpt: true,
+      slug: true,
       user: {
         select: {
           name: true,
