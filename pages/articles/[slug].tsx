@@ -14,6 +14,7 @@ import rehypePrism from "rehype-prism";
 const ArticlePage: NextPage = ({
   post,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  console.log({ post });
   if (!post) return null;
 
   return (
@@ -28,10 +29,7 @@ const ArticlePage: NextPage = ({
         />
         <meta key="description" property="description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <meta
-          property="og:url"
-          content={`https://codu.co/articles/${post.slug}`}
-        />
+        <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
         <div className="border-t-2">
