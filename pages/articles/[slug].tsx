@@ -30,7 +30,7 @@ const ArticlePage: NextPage = ({
         <meta property="og:type" content="article" />
         <meta
           property="og:url"
-          content={`https://codu.co/articles${post.slug}`}
+          content={`https://codu.co/articles/${post.slug}`}
         />
       </Head>
       <Layout>
