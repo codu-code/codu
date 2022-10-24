@@ -14,7 +14,6 @@ import rehypePrism from "rehype-prism";
 const ArticlePage: NextPage = ({
   post,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log({ post });
   if (!post) return null;
 
   return (
