@@ -42,7 +42,7 @@ const Profile: NextPage = ({
               Published articles
             </h3>
           </div>
-          {posts ? (
+          {posts.length ? (
             posts.map(
               ({ slug, title, excerpt, readTimeMins, published, id }) => {
                 if (!published) return;
