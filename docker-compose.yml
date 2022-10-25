@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  db:
+    container_name: codu-db
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+  # Uncomment if you want an instance of pgadmin to explore data 👇 - https://www.pgadmin.org/
+  # pgadmin:
+  #   container_name: pgadmin4_container
+  #   # https://hub.docker.com/r/dpage/pgadmin4/
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #     PGADMIN_DEFAULT_PASSWORD: secret
+  #   ports:
+  #     - "5050:80"
+volumes:
+  db:
+    driver: local
