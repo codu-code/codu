@@ -1,9 +1,8 @@
+# [Codú](https://www.codu.co)
+
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/codu-code/codu/pulls)
 
-
 ![Codu Logo](https://raw.githubusercontent.com/codu-code/codu/develop/public/images/codu-gradient.png)
-
-# 🔗 [Codú](https://www.codu.co)
 
 > A space for coders
 
@@ -36,6 +35,7 @@ npm install
   GITHUB_SECRET=YOUR_GITHUB_APP_SECRET
   NEXTAUTH_URL=http://localhost:3000/api/auth
   ```
+  
   For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
 
 6. [Make sure your database is running](#database_url) and setup the tables in the database with Prisma by running: 
@@ -70,13 +70,15 @@ To run this file, make sure you have [Docker installed](https://docs.docker.com/
   
 Run the command `docker compose up`.
 
-Alternatievly, if you have PostgreSQL running locally then you can use your local connection string or grab one from a free service like [Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres#finding-your-connection-string).
+Alternatively, if you have PostgreSQL running locally then you can use your local connection string or grab one from a free service like [Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres#finding-your-connection-string).
 
 ### GITHUB_ID and GITHUB_SECRET
+
 Currently, we only allow authentication via GitHub. To enable this you need to have a `GITHUB_ID` and `GITHUB_SECRET` value.
 
-Setup your GitHub ID & Secret on GitHub: 
-- https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps
+Setup your GitHub ID & Secret on GitHub:
+
+- [https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps)
 
 **Shortcut** - [Click here](https://github.com/settings/applications/new) to setup New OAuth App.
 
@@ -100,7 +102,9 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
 
 ## 👨‍💻 Contribution Guidelines
--  Contributions are **greatly appreciated**. Contributions make the open-source community an amazing place to learn, inspire, and create.
+
+- Contributions are **greatly appreciated**. Contributions make the open-source community an amazing place to learn, inspire, and create.
+
 - Check out our [contribution guidelines](/CONTRIBUTING.md) for contributiong to our repo. It includes 
   - How to Contribute
   - How to create a Pull Request
