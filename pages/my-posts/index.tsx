@@ -150,18 +150,18 @@ const MyPosts: NextPage = ({
             <div className="hidden sm:block">
               <nav className="flex" aria-label="Tabs">
                 {tabs.map((tab) => (
-                  <Link key={tab.name} href={tab.href}>
-                    <a
-                      className={classNames(
-                        tab.current
-                          ? "bg-gray-100 text-gray-700"
-                          : "text-gray-200 hover:text-gray-400",
-                        "px-4 py-2 font-medium text-base rounded-t-md"
-                      )}
-                      aria-current={tab.current ? "page" : undefined}
-                    >
-                      {tab.name}
-                    </a>
+                  <Link
+                    className={classNames(
+                      tab.current
+                        ? "bg-gray-100 text-gray-700"
+                        : "text-gray-200 hover:text-gray-400",
+                      "px-4 py-2 font-medium text-base rounded-t-md"
+                    )}
+                    aria-current={tab.current ? "page" : undefined}
+                    key={tab.name}
+                    href={tab.href}
+                  >
+                    {tab.name}
                   </Link>
                 ))}
               </nav>
@@ -184,11 +184,9 @@ const MyPosts: NextPage = ({
                   <article className="border-2 p-4 mb-4" key={id}>
                     {tab === "published" ? (
                       <Link href={`articles/${slug}`}>
-                        <a>
-                          <h2 className="text-2xl font-semibold mb-2 hover:underline">
-                            {title}
-                          </h2>
-                        </a>
+                        <h2 className="text-2xl font-semibold mb-2 hover:underline">
+                          {title}
+                        </h2>
                       </Link>
                     ) : (
                       <h2 className=" text-2xl font-semibold mb-2">{title}</h2>
@@ -227,21 +225,20 @@ const MyPosts: NextPage = ({
                             <div className="py-1">
                               <Menu.Item>
                                 {({ active }) => (
-                                  <Link href={`/create/${id}`}>
-                                    <a
-                                      className={classNames(
-                                        active
-                                          ? "bg-gray-100 text-gray-900"
-                                          : "text-gray-700",
-                                        "group flex items-center px-4 py-2 text-sm"
-                                      )}
-                                    >
-                                      <PencilAltIcon
-                                        className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
-                                        aria-hidden="true"
-                                      />
-                                      Edit
-                                    </a>
+                                  <Link
+                                    className={classNames(
+                                      active
+                                        ? "bg-gray-100 text-gray-900"
+                                        : "text-gray-700",
+                                      "group flex items-center px-4 py-2 text-sm"
+                                    )}
+                                    href={`/create/${id}`}
+                                  >
+                                    <PencilAltIcon
+                                      className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                                      aria-hidden="true"
+                                    />
+                                    Edit
                                   </Link>
                                 )}
                               </Menu.Item>

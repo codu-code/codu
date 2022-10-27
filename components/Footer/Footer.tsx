@@ -56,7 +56,12 @@ const navigation = {
       name: "Youtube",
       href: youtubeUrl,
       icon: (props: SVGProps<any>) => (
-        <svg fill="currentColor" viewBox="0 0 96.875 96.875" height={24} width={24}>
+        <svg
+          fill="currentColor"
+          viewBox="0 0 96.875 96.875"
+          height={24}
+          width={24}
+        >
           <g>
             <path
               d="M95.201,25.538c-1.186-5.152-5.4-8.953-10.473-9.52c-12.013-1.341-24.172-1.348-36.275-1.341
@@ -93,10 +98,11 @@ const Footer: NextPage = () => {
                   {item.name}
                 </a>
               ) : (
-                <Link href={item.href}>
-                  <a className="text-base text-gray-500 hover:text-gray-400">
-                    {item.name}
-                  </a>
+                <Link
+                  className="text-base text-gray-500 hover:text-gray-400"
+                  href={item.href}
+                >
+                  {item.name}
                 </Link>
               )}
             </div>
@@ -117,7 +123,8 @@ const Footer: NextPage = () => {
           ))}
         </div>
         <p className="mt-8 text-center text-base text-gray-500">
-          &copy; {Temporal.Now.plainDateISO().year} Codú Software Solutions, Ltd.
+          &copy; {Temporal.Now.plainDateISO().year} Codú Software Solutions,
+          Ltd.
         </p>
       </div>
     </footer>

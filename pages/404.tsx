@@ -9,15 +9,13 @@ const FourOhFour: NextPage = () => {
       <main className="bg-white flex-grow flex flex-col justify-center w-full px-4 sm:px-6 lg:py-40 py-20">
         <div className="flex-shrink-0 flex justify-center">
           <Link href="/">
-            <a>
-              <span className="sr-only">Codú</span>
-              <Image
-                src="/images/codu-black.png"
-                alt="Codú logo"
-                height={60}
-                width={189}
-              />
-            </a>
+            <span className="sr-only">Codú</span>
+            <Image
+              src="/images/codu-black.png"
+              alt="Codú logo"
+              height={60}
+              width={189}
+            />
           </Link>
         </div>
         <div className="py-16">
@@ -32,10 +30,11 @@ const FourOhFour: NextPage = () => {
               Sorry, we couldn’t find the page you’re looking for.
             </p>
             <div className="mt-6">
-              <Link href="/">
-                <a className="text-base bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide">
-                  Go back home<span aria-hidden="true"> &rarr;</span>
-                </a>
+              <Link
+                className="text-base bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide"
+                href="/"
+              >
+                Go back home<span aria-hidden="true"> &rarr;</span>
               </Link>
             </div>
           </div>

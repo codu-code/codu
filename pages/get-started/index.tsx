@@ -20,16 +20,14 @@ const GetStarted: NextPage = () => {
         <div>
           <div className="flex justify-center mb-12">
             <Link href="/">
-              <a>
-                <span className="sr-only">Codú</span>
-                <Image
-                  src="/images/codu.png"
-                  alt="Codú logo"
-                  height={60}
-                  width={189}
-                />
-                <span className="ml-2 text-base font-semibold">Beta</span>
-              </a>
+              <span className="sr-only">Codú</span>
+              <Image
+                src="/images/codu.png"
+                alt="Codú logo"
+                height={60}
+                width={189}
+              />
+              <span className="ml-2 text-base font-semibold">Beta</span>
             </Link>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
@@ -37,8 +35,8 @@ const GetStarted: NextPage = () => {
           </h2>
           <p className="mt-2 text-center text-base text-gray-500">
             Or{" "}
-            <Link href="/">
-              <a className="font-medium fancy-link">go back home</a>
+            <Link className="font-medium fancy-link" href="/">
+              go back home
             </Link>
           </p>
         </div>

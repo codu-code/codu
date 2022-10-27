@@ -34,31 +34,30 @@ const Nav = () => {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <span className="sr-only">Codú</span>
-                  <Link href="/">
-                    <a className="hidden lg:block h-8 w-auto">
-                      <Image
-                        src="/images/codu.png"
-                        alt="Codú logo"
-                        height={30}
-                        width={94.5}
-                        priority={true}
-                      />{" "}
-                      <span className="text-xs font-semibold">Beta</span>
-                    </a>
+                  <Link
+                    className="hidden lg:flex items-baseline h-8 w-auto"
+                    href="/"
+                  >
+                    <Image
+                      src="/images/codu.png"
+                      alt="Codú logo"
+                      height={30}
+                      width={94.5}
+                      priority={true}
+                    />{" "}
+                    <span className="ml-2 text-xs font-semibold">Beta</span>
                   </Link>
                   <div className="flex">
-                    <Link href="/">
-                      <a className="flex lg:hidden w-auto items-end">
-                        <span className="sr-only">Codú</span>
-                        <svg className="h-8" viewBox="0 0 694 829" fill="none">
-                          <path
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                            d="M674.287 736.808C600.91 796.992 508.826 829.601 413.972 828.992C299.426 828.992 201.794 788.584 121.077 707.77C40.3589 626.955 0 529.206 0 414.523C0 300.208 40.3589 202.624 121.077 121.773C201.794 40.9216 299.426 0.330605 413.972 0C512.007 0 600.504 32.3074 679.46 96.9223C684.376 101.861 688.203 107.777 690.696 114.287C693.189 120.797 694.292 127.758 693.934 134.722C694.032 142.18 692.628 149.582 689.807 156.486C687.101 162.973 683.157 168.869 678.194 173.843C673.163 178.876 667.174 182.848 660.583 185.524C650.668 189.611 639.776 190.709 629.246 188.682C618.716 186.656 609.006 181.594 601.311 174.119C575.29 153.479 545.988 137.367 514.631 126.456C482.257 115.271 448.218 109.682 413.972 109.926C373.998 109.875 334.407 117.721 297.466 133.013C260.526 148.305 226.961 170.744 198.695 199.043C170.429 227.343 148.018 260.948 132.744 297.933C117.47 334.918 109.634 374.557 109.684 414.578C109.684 499.066 139.183 570.918 198.18 630.133C251.394 683.086 322.202 714.596 397.119 718.66C472.037 722.724 545.831 699.06 604.448 652.173C613.944 645.823 625.113 642.447 636.533 642.475C643.828 642.424 651.05 643.927 657.721 646.883C664.132 649.742 669.998 653.694 675.057 658.565C680.128 663.517 684.185 669.413 687 675.922C689.92 682.706 691.4 690.024 691.348 697.411C691.282 704.787 689.739 712.074 686.808 718.842C683.878 725.609 679.62 731.719 674.287 736.808Z"
-                            fill="white"
-                          />
-                        </svg>
-                      </a>
+                    <Link className="flex lg:hidden w-auto items-end" href="/">
+                      <span className="sr-only">Codú</span>
+                      <svg className="h-8" viewBox="0 0 694 829" fill="none">
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M674.287 736.808C600.91 796.992 508.826 829.601 413.972 828.992C299.426 828.992 201.794 788.584 121.077 707.77C40.3589 626.955 0 529.206 0 414.523C0 300.208 40.3589 202.624 121.077 121.773C201.794 40.9216 299.426 0.330605 413.972 0C512.007 0 600.504 32.3074 679.46 96.9223C684.376 101.861 688.203 107.777 690.696 114.287C693.189 120.797 694.292 127.758 693.934 134.722C694.032 142.18 692.628 149.582 689.807 156.486C687.101 162.973 683.157 168.869 678.194 173.843C673.163 178.876 667.174 182.848 660.583 185.524C650.668 189.611 639.776 190.709 629.246 188.682C618.716 186.656 609.006 181.594 601.311 174.119C575.29 153.479 545.988 137.367 514.631 126.456C482.257 115.271 448.218 109.682 413.972 109.926C373.998 109.875 334.407 117.721 297.466 133.013C260.526 148.305 226.961 170.744 198.695 199.043C170.429 227.343 148.018 260.948 132.744 297.933C117.47 334.918 109.634 374.557 109.684 414.578C109.684 499.066 139.183 570.918 198.18 630.133C251.394 683.086 322.202 714.596 397.119 718.66C472.037 722.724 545.831 699.06 604.448 652.173C613.944 645.823 625.113 642.447 636.533 642.475C643.828 642.424 651.05 643.927 657.721 646.883C664.132 649.742 669.998 653.694 675.057 658.565C680.128 663.517 684.185 669.413 687 675.922C689.92 682.706 691.4 690.024 691.348 697.411C691.282 704.787 689.739 712.074 686.808 718.842C683.878 725.609 679.62 731.719 674.287 736.808Z"
+                          fill="white"
+                        />
+                      </svg>
                     </Link>
                   </div>
                 </div>
@@ -77,10 +76,12 @@ const Nav = () => {
                           {item.name}
                         </a>
                       ) : (
-                        <Link key={item.name} href={item.href}>
-                          <a className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md">
-                            {item.name}
-                          </a>
+                        <Link
+                          className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                          key={item.name}
+                          href={item.href}
+                        >
+                          {item.name}
                         </Link>
                       )
                     )}
@@ -91,29 +92,33 @@ const Nav = () => {
                 <div className="flex items-center text-sm lg:text-base font-medium">
                   {session ? (
                     <>
-                      <Link href="/my-posts">
-                        <a className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md">
-                          Your Posts
-                        </a>
+                      <Link
+                        className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                        href="/my-posts"
+                      >
+                        Your Posts
                       </Link>
-                      <Link href="/create">
-                        <a className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300">
-                          <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
-                          New Post
-                        </a>
+                      <Link
+                        className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        href="/create"
+                      >
+                        <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                        New Post
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link href="/get-started">
-                        <a className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md">
-                          Sign in
-                        </a>
+                      <Link
+                        className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                        href="/get-started"
+                      >
+                        Sign in
                       </Link>
-                      <Link href="/get-started">
-                        <a className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300">
-                          Sign up for free
-                        </a>
+                      <Link
+                        className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        href="/get-started"
+                      >
+                        Sign up for free
                       </Link>
                     </>
                   )}
@@ -153,14 +158,11 @@ const Nav = () => {
                                   {item.name}
                                 </button>
                               ) : (
-                                <Link href={item.href || ""}>
-                                  <a
-                                    className={
-                                      "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded"
-                                    }
-                                  >
-                                    {item.name}
-                                  </a>
+                                <Link
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded"
+                                  href={item.href || ""}
+                                >
+                                  {item.name}
                                 </Link>
                               )}
                             </Menu.Item>
@@ -202,7 +204,7 @@ const Nav = () => {
                 ) : (
                   <Link key={item.name} href={item.href}>
                     <Disclosure.Button
-                      as="a"
+                      as="div"
                       className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                     >
                       {item.name}
@@ -215,34 +217,34 @@ const Nav = () => {
                 {session ? (
                   <>
                     {userSubNav.map((item) => (
-                      <Link key={item.name} href={item.href}>
-                        <a
-                          className={classNames(
-                            item.fancy
-                              ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                              : "text-gray-300 hover:bg-gray-900 hover:text-white block px-3",
-                            "rounded-md text-base font-medium py-2"
-                          )}
-                        >
-                          {item.name}
-                        </a>
+                      <Link
+                        className={classNames(
+                          item.fancy
+                            ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                            : "text-gray-300 hover:bg-gray-900 hover:text-white block px-3",
+                          "rounded-md text-base font-medium py-2"
+                        )}
+                        key={item.name}
+                        href={item.href}
+                      >
+                        {item.name}
                       </Link>
                     ))}
                   </>
                 ) : (
                   <>
                     {subNav.map((item) => (
-                      <Link key={item.name} href={item.href}>
-                        <a
-                          className={classNames(
-                            item.fancy
-                              ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                              : "text-gray-300 hover:bg-gray-900 hover:text-white block px-3",
-                            "rounded-md text-base font-medium py-2"
-                          )}
-                        >
-                          {item.name}
-                        </a>
+                      <Link
+                        className={classNames(
+                          item.fancy
+                            ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                            : "text-gray-300 hover:bg-gray-900 hover:text-white block px-3",
+                          "rounded-md text-base font-medium py-2"
+                        )}
+                        key={item.name}
+                        href={item.href}
+                      >
+                        {item.name}
                       </Link>
                     ))}
                   </>
@@ -284,7 +286,7 @@ const Nav = () => {
                       ) : (
                         <Link key={item.name} href={item.href}>
                           <Disclosure.Button
-                            as="a"
+                            as="div"
                             className="cursor-pointer block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-900"
                           >
                             {item.name}
