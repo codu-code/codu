@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@headlessui/react": "^1.6.1",
@@ -39,6 +40,7 @@
     "zod": "^3.17.10"
   },
   "devDependencies": {
+    "@playwright/test": "^1.27.1",
     "@svgr/webpack": "^6.2.1",
     "@tailwindcss/typography": "^0.5.4",
     "@types/markdown-it": "^12.2.3",

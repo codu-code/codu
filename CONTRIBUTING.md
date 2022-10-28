@@ -114,9 +114,13 @@ git push origin YourBranchName
 
 ## Run tests
 
-⚠️ **_Tests need to be added. When commands are added update the docs here._** ⚠️
+⚠️ **_Tests are WIP. When commands are added update the docs here._** ⚠️
+
+For e2e tests we are using playwright
 
 After making changes make sure that tests passes
+
+To create a e2e test make a file in `/e2e` directory 
 
 **1.** Start the codu application by typing this command:
 
@@ -124,11 +128,14 @@ After making changes make sure that tests passes
 yarn dev
 ```
 
-**2.** Perform the tests by typing this command:
+**2.** Perform the e2e tests by typing this command:
 
 ```bash
-yarn test
+yarn test:e2e
 ```
+
+Read Playwright [documentation](https://playwright.dev/)
+
 
 ---
 
