@@ -47,26 +47,35 @@ const ArticlePreview: NextPage<Props> = ({
 
         {canEdit && id && (
           <div className="ml-auto">
-            <Link href={`/create/${id}`}>
-              <a className="bg-white text-black px-2 py-1">Edit</a>
+            <Link
+              className="bg-white text-black px-2 py-1"
+              href={`/create/${id}`}
+            >
+              Edit
             </Link>
           </div>
         )}
       </div>
 
-      <Link href={`/articles/${slug}`}>
-        <header className="text-2xl leading-6 font-semibold tracking-wide cursor-pointer hover:underline">
+      <header>
+        <Link
+          className="text-2xl leading-6 font-semibold tracking-wide cursor-pointer hover:underline"
+          href={`/articles/${slug}`}
+        >
           {title}
-        </header>
-      </Link>
+        </Link>
+      </header>
 
       <p className="tracking-wide text-sm md:text-lg my-3 break-words">
         {excerpt}
       </p>
       <div className="sm:flex justify-between content-center">
         <div className="flex items-center">
-          <Link href={`/articles/${slug}`}>
-            <a className="fancy-link semibold text-lg">Read full article</a>
+          <Link
+            className="fancy-link semibold text-lg"
+            href={`/articles/${slug}`}
+          >
+            Read full article
           </Link>
         </div>
         <div className="flex justify-end items-center">
