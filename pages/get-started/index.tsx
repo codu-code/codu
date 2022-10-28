@@ -36,7 +36,7 @@ const GetStarted: NextPage = () => {
           <p className="mt-2 text-center text-base text-gray-500">
             Or{" "}
             <Link className="font-medium fancy-link" href="/">
-              go back home
+              Return home
             </Link>
           </p>
         </div>

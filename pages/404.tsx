@@ -34,7 +34,7 @@ const FourOhFour: NextPage = () => {
                 className="text-base bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 font-semibold tracking-wide"
                 href="/"
               >
-                Go back home<span aria-hidden="true"> &rarr;</span>
+                Return home<span aria-hidden="true"> &rarr;</span>
               </Link>
             </div>
           </div>
