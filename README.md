@@ -25,7 +25,8 @@ We have a fantastic community growing on Discord. Click [here](https://discord.g
 ```bash
 npm install
 ```
-5. Setup the `.env.development` variables.
+  - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
+5. Create a `.env.development` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env.development`.
   ```
   # This default value is if you run our local docker-compose.yml file to create the database.
   DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres
@@ -35,10 +36,10 @@ npm install
   GITHUB_SECRET=YOUR_GITHUB_APP_SECRET
   NEXTAUTH_URL=http://localhost:3000/api/auth
   ```
-  
+
   For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
 
-6. [Make sure your database is running](#database_url) and setup the tables in the database with Prisma by running: 
+6. [Make sure your database is running](#database_url) and setup the tables in the database with Prisma by running:
 ```bash
 npx prisma db push
 ```
@@ -62,12 +63,12 @@ Learn more about API routes [here](https://nextjs.org/docs/api-routes/introducti
 
 ### DATABASE_URL
 
-The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15.0). 
+The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15.0).
 
 By default, we point to a database running locally with Docker from our `docker-compose.yml` file.
 
 To run this file, make sure you have [Docker installed](https://docs.docker.com/get-docker/) and that Docker is running.
-  
+
 Run the command `docker compose up`.
 
 Alternatively, if you have PostgreSQL running locally then you can use your local connection string or grab one from a free service like [Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres#finding-your-connection-string).
@@ -105,7 +106,7 @@ For more information, you can read the documentation [here](https://next-auth.js
 
 - Contributions are **greatly appreciated**. Contributions make the open-source community an amazing place to learn, inspire, and create.
 
-- Check out our [contribution guidelines](/CONTRIBUTING.md) for contributiong to our repo. It includes 
+- Check out our [contribution guidelines](/CONTRIBUTING.md) for contributiong to our repo. It includes
   - How to Contribute
   - How to create a Pull Request
   - Run Tests
@@ -113,7 +114,7 @@ For more information, you can read the documentation [here](https://next-auth.js
 
 ## 📙 Prerequisite Skills to Contribute
 
-- [Git](https://git-scm.com/) 
+- [Git](https://git-scm.com/)
 
 ### 📃 Documentation Contributions
 
