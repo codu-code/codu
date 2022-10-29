@@ -23,6 +23,7 @@
     "@trpc/next": "^9.26.2",
     "@trpc/react": "^9.26.2",
     "@trpc/server": "^9.26.2",
+    "@vercel/og": "^0.0.20",
     "clsx": "^1.2.1",
     "fathom-client": "^3.5.0",
     "nanoid": "^4.0.0",

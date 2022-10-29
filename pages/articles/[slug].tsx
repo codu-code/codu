@@ -32,6 +32,10 @@ const ArticlePage: NextPage = ({
           property="og:url"
           content={`https://codu.co/articles/${post.slug}`}
         />
+        <meta
+          property="og:image"
+          content={`https://codu.co/api/og?title=${post.title}`}
+        />
       </Head>
       <Layout>
         <div className="border-t-2">
