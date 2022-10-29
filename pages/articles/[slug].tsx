@@ -13,6 +13,7 @@ import BioBar from "../../components/BioBar/BioBar";
 import prisma from "../../server/db/client";
 
 import { markdocComponents } from "../../markdoc/components";
+import { config } from "../../markdoc/config";
 
 const ArticlePage: NextPage = ({
   post,
@@ -129,14 +130,7 @@ export const getServerSideProps = async (
 
   const ast = Markdoc.parse(post.body);
 
-  const content = Markdoc.transform(ast, {
-    nodes: {
-      ...markdocNodes,
-    },
-    tags: {
-      ...markdocTags,
-    },
-  });
+  const content = Markdoc.transform(ast, config);
 
   return {
     props: {

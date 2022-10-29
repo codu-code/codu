@@ -178,7 +178,7 @@ export default function Code({ children, language }: any) {
             border-radius: 4px;
             border: none;
             font-size: 15px;
-            background: #d9cdcd;
+            background: rgb(243 244 246);
             padding: 2px 2px 0px 4px;
           }
         `}
