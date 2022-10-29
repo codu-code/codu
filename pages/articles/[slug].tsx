@@ -34,7 +34,7 @@ const ArticlePage: NextPage = ({
         />
         <meta
           property="og:image"
-          content={`https://codu.co/api/og?title=${post.title}`}
+          content={`${process.env.BASE_URL || `http://localhost:3000`}/api/og?title=${post.title}`}
         />
       </Head>
       <Layout>
