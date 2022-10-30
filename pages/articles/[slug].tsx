@@ -13,9 +13,9 @@ import rehypePrism from "rehype-prism";
 
 const ArticlePage: NextPage = ({
   post,
+  host,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   if (!post) return null;
-
   return (
     <>
       <Head>
@@ -28,13 +28,10 @@ const ArticlePage: NextPage = ({
         />
         <meta key="description" property="description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <meta
-          property="og:url"
-          content={`https://codu.co/articles/${post.slug}`}
-        />
+        <meta property="og:url" content={`${host}/articles/${post.slug}`} />
         <meta
           property="og:image"
-          content={`${process.env.BASE_URL || `http://localhost:3000`}/api/og?title=${post.title}`}
+          content={`${host}/api/og?title=${post.title}`}
         />
       </Head>
       <Layout>
@@ -117,8 +114,11 @@ export const getServerSideProps = async (
     };
   }
 
+  const host = ctx.req.headers.host || "";
+
   return {
     props: {
+      host,
       post: {
         ...post,
         tags,

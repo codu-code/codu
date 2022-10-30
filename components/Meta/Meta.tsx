@@ -45,7 +45,7 @@ const Meta: NextPage = () => {
         key="og:image"
       />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://niall.af" />
+      <meta property="og:url" content="https://codu.co" />
     </Head>
   );
 };
