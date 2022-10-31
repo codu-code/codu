@@ -14,7 +14,7 @@ export const SavePostSchema = z.object({
     .trim()
     .max(156, "Max length is 156 characters.")
     .optional(),
-  canonicalUrl: z.string().trim().url().optional(),
+  canonicalUrl: z.string().trim().url().or(z.string().length(0)).optional(),
   tags: z.string().array().max(5).optional(),
 });
 
