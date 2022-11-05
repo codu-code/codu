@@ -26,7 +26,7 @@ We have a fantastic community growing on Discord. Click [here](https://discord.g
 npm install
 ```
   - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
-5. Create a `.env.development` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env.development`.
+5. Create a `.env` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env`.
   ```
   # This default value is if you run our local docker-compose.yml file to create the database.
   DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres
@@ -89,7 +89,7 @@ For development, make sure you setup this with a **Homepage URL** of `http://loc
 
 After you click the "Register application" button you should see the `GITHUB_ID` and be able to generate a new client secret. You can see this in the screenshot below. 👇
 ![Screenshot 2022-10-25 at 08 23 22](https://user-images.githubusercontent.com/12615742/197710695-d3ef9cb7-fe66-4a53-8b3e-d66064434068.png)
-After generating the secret, make sure you copy this value to your `.env.development` file as this value can not be seen again once you refresh the page. 👇
+After generating the secret, make sure you copy this value to your `.env` file as this value can not be seen again once you refresh the page. 👇
 ![Screenshot 2022-10-25 at 08 26 04](https://user-images.githubusercontent.com/12615742/197710697-ef791d9e-b205-4667-a97c-477148917897.png)
 
 ### NEXTAUTH_URL
