@@ -19,4 +19,8 @@ module.exports = withBundleAnalyzer({
       "avatars.githubusercontent.com",
     ],
   },
+  i18n: {
+    locales: ["en"],
+    defaultLocale: "en",
+  },
 });
