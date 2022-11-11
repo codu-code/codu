@@ -43,7 +43,11 @@ npm install
 ```bash
 npx prisma db push
 ```
-7. Finally, run the development server:
+7. Seed the database with some mock data by running:
+```bash
+npx prisma db seed
+```
+8. Finally, run the development server:
 
 ```bash
 npm run dev
