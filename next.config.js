@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-})
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
 
 module.exports = withBundleAnalyzer({
   webpack(config) {
@@ -17,6 +17,7 @@ module.exports = withBundleAnalyzer({
       "images.ctfassets.net",
       "images.unsplash.com",
       "avatars.githubusercontent.com",
+      "www.gravatar.com",
     ],
   },
   i18n: {
