@@ -408,10 +408,7 @@ const Create: NextPage = () => {
                           <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
                             {title}
                           </h2>
-                          <article
-                            className="prose whitespace-pre-wrap"
-                            style={{ whiteSpace: "pre-wrap" }}
-                          >
+                          <article className="prose">
                             <ReactMarkdown rehypePlugins={[rehypePrism]}>
                               {body}
                             </ReactMarkdown>
