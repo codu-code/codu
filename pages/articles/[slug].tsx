@@ -119,14 +119,6 @@ export const getServerSideProps = async (
   }
 
   const host = ctx.req.headers.host || "";
-  const fence = {
-    render: "Fence",
-    attributes: {
-      language: {
-        type: String,
-      },
-    },
-  };
 
   const ast = Markdoc.parse(post.body);
 
