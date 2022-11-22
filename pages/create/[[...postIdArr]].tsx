@@ -5,8 +5,6 @@ import React, { useState, useEffect, Fragment } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import rehypePrism from "rehype-prism";
 import TextareaAutosize from "react-textarea-autosize";
 import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
@@ -17,6 +15,11 @@ import Layout from "../../components/Layout/Layout";
 
 import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
+import Markdoc from "@markdoc/markdoc";
+import { markdocComponents } from "../../markdoc/components";
+import * as markdocTags from "../../markdoc/tags";
+import * as markdocNodes from "../../markdoc/nodes";
+import { config } from "../../markdoc/config";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -116,6 +119,17 @@ const Create: NextPage = () => {
   const published = !!data?.published || false;
 
   const onSubmit = async (data: SavePostInput) => {
+    // vaidate markdoc syntax
+    const ast = Markdoc.parse(data.body);
+    const errors = Markdoc.validate(ast, config).filter(e => e.error.level === 'critical');
+    
+    if(errors.length > 0) {
+      console.log(errors);
+      errors.forEach(err => {
+        toast.error(err.error.message)
+      });
+      return;
+    }
     if (!published) {
       try {
         const data = getValues();
@@ -412,9 +426,13 @@ const Create: NextPage = () => {
                             className="prose whitespace-pre-wrap"
                             style={{ whiteSpace: "pre-wrap" }}
                           >
-                            <ReactMarkdown rehypePlugins={[rehypePrism]}>
-                              {body}
-                            </ReactMarkdown>
+                            {Markdoc.renderers.react(
+                              Markdoc.transform(Markdoc.parse(body), config),
+                              React,
+                              {
+                                components: markdocComponents,
+                              }
+                            )}
                           </article>
                         </section>
                       ) : (

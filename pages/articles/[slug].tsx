@@ -1,3 +1,7 @@
+import React from "react";
+import Markdoc from "@markdoc/markdoc";
+import * as markdocTags from "../../markdoc/tags";
+import * as markdocNodes from "../../markdoc/nodes";
 import type {
   NextPage,
   InferGetServerSidePropsType,
@@ -8,8 +12,8 @@ import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
 import prisma from "../../server/db/client";
 
-import { ReactMarkdown } from "react-markdown/lib/react-markdown";
-import rehypePrism from "rehype-prism";
+import { markdocComponents } from "../../markdoc/components";
+import { config } from "../../markdoc/config";
 
 const ArticlePage: NextPage = ({
   post,
@@ -55,9 +59,9 @@ const ArticlePage: NextPage = ({
             )}
 
             <article className="prose prose-invert">
-              <ReactMarkdown rehypePlugins={[rehypePrism]}>
-                {post.body}
-              </ReactMarkdown>
+              {Markdoc.renderers.react(JSON.parse(post.body), React, {
+                components: markdocComponents,
+              })}
             </article>
           </section>
           <BioBar author={post.user} />
@@ -116,11 +120,16 @@ export const getServerSideProps = async (
 
   const host = ctx.req.headers.host || "";
 
+  const ast = Markdoc.parse(post.body);
+
+  const content = Markdoc.transform(ast, config);
+
   return {
     props: {
       host,
       post: {
         ...post,
+        body: JSON.stringify(content),
         tags,
       },
     },
