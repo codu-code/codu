@@ -19,7 +19,7 @@ const GetStarted: NextPage = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="flex justify-center mb-12">
-            <Link href="/">
+            <Link className="flex items-end" href="/">
               <span className="sr-only">Codú</span>
               <Image
                 src="/images/codu.png"
@@ -27,7 +27,7 @@ const GetStarted: NextPage = () => {
                 height={60}
                 width={189}
               />
-              <span className="ml-2 text-base font-semibold">Beta</span>
+              <span className="ml-2 -mb-2 text-base font-semibold">Beta</span>
             </Link>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
