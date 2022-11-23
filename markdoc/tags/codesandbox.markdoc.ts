@@ -1,4 +1,4 @@
-import { CodeSandbox } from "../../components/CodeSandbox/CodeSandbox";
+import { CodeSandbox } from "../../components/markdocNodes/CodeSandbox/CodeSandbox";
 
 const codesandbox = {
   render: "CodeSandbox",
@@ -7,10 +7,6 @@ const codesandbox = {
     src: {
       type: String,
       required: true,
-    },
-    width: {
-      type: String,
-      default: "100%",
     },
   },
 };

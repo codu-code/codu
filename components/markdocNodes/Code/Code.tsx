@@ -6,7 +6,7 @@ import Prism from "prismjs";
 
 const svgs = {
   copied: (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <svg viewBox="0 0 512 512">
       <title>Copied</title>
       <path
         fill="none"
@@ -33,7 +33,7 @@ const svgs = {
     </svg>
   ),
   copy: (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <svg viewBox="0 0 512 512">
       <title>Copy</title>
       <rect
         x="128"
@@ -96,8 +96,8 @@ function Icon({
   );
 }
 
-Prism.languages.ts = Prism.languages.js
-Prism.languages.jsx = Prism.languages.html
+Prism.languages.ts = Prism.languages.js;
+Prism.languages.jsx = Prism.languages.html;
 
 Prism.languages.markdoc = {
   tag: {
@@ -131,7 +131,6 @@ Prism.languages.markdoc = {
 };
 
 export default function Code({ children, language }: any) {
-    
   const [copied, setCopied] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -154,14 +153,10 @@ export default function Code({ children, language }: any) {
 
   return (
     <div className="code" aria-live="polite">
-      <pre
-        key={children}
-        ref={ref}
-        className={`language-${lang}`}
-      >
+      <pre key={children} ref={ref} className={`language-${lang}`}>
         {children}
       </pre>
-      <button onClick={() => setCopied(true)}>
+      <button type="button" onClick={() => setCopied(true)}>
         <Icon icon={copied ? "copied" : "copy"} color="#fb923c" />
       </button>
       <style jsx>

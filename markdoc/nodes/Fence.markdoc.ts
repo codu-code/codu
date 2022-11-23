@@ -1,4 +1,4 @@
-import Code from "../../components/Code/Code";
+import Code from "../../components/markdocNodes/Code/Code";
 
 const fence = {
   render: "Code",
