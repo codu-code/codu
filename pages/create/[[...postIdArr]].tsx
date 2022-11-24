@@ -17,8 +17,6 @@ import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
 import Markdoc from "@markdoc/markdoc";
 import { markdocComponents } from "../../markdoc/components";
-import * as markdocTags from "../../markdoc/tags";
-import * as markdocNodes from "../../markdoc/nodes";
 import { config } from "../../markdoc/config";
 
 const Create: NextPage = () => {
@@ -121,12 +119,14 @@ const Create: NextPage = () => {
   const onSubmit = async (data: SavePostInput) => {
     // vaidate markdoc syntax
     const ast = Markdoc.parse(data.body);
-    const errors = Markdoc.validate(ast, config).filter(e => e.error.level === 'critical');
-    
-    if(errors.length > 0) {
-      console.log(errors);
-      errors.forEach(err => {
-        toast.error(err.error.message)
+    const errors = Markdoc.validate(ast, config).filter(
+      (e) => e.error.level === "critical"
+    );
+
+    if (errors.length > 0) {
+      console.error(errors);
+      errors.forEach((err) => {
+        toast.error(err.error.message);
       });
       return;
     }
