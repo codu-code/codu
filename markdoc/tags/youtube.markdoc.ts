@@ -1,4 +1,4 @@
-import { YouTube } from "../../components/Youtube/Youtube";
+import { YouTube } from "../../components/markdocNodes/Youtube/Youtube";
 
 const youtube = {
   render: "Youtube",
@@ -7,14 +7,6 @@ const youtube = {
     src: {
       type: String,
       required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    width: {
-      type: String,
-      default: "100%",
     },
   },
 };
