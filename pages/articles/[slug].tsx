@@ -142,9 +142,7 @@ const ArticlePage: NextPage = ({
             ) : (
               <button
                 className="p-2 rounded-full hover:bg-neutral-800"
-                onClick={() =>
-                  console.log("I don't do anything yet... FIX ME PLEASE!")
-                }
+                onClick={() => bookmarkPost(post.id)}
               >
                 <svg
                   fill="none"
@@ -165,7 +163,9 @@ const ArticlePage: NextPage = ({
           <div>
             <button
               className="p-2 rounded-full hover:bg-neutral-800"
-              onClick={() => likePost(post.id)}
+              onClick={() =>
+                console.log("I don't do anything yet... FIX ME PLEASE!")
+              }
             >
               <svg
                 fill="none"
