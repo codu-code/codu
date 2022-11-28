@@ -21,6 +21,10 @@ export const SavePostSchema = z.object({
 export const PublishPostSchema = z.object({
   id: z.string(),
   published: z.boolean(),
+  excerpt: z.string()
+  .trim()
+  .max(156, "Max length is 156 characters.")
+  .optional()
 });
 
 export const ConfirmPostSchema = z.object({

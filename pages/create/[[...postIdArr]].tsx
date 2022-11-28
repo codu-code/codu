@@ -18,6 +18,7 @@ import { useDebounce } from "../../hooks/useDebounce";
 import Markdoc from "@markdoc/markdoc";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
+import { maybeGenerateExerpt } from "../../utils/maybeGenerateExerpt";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -133,11 +134,12 @@ const Create: NextPage = () => {
     if (!published) {
       try {
         const data = getValues();
+        const { excerpt } = maybeGenerateExerpt(data);
         const formData = { ...data, tags };
         ConfirmPostSchema.parse(formData);
         await savePost();
         return await publish(
-          { id: postId, published: !published },
+          { id: postId, published: !published, excerpt },
           {
             onSuccess(response) {
               response?.slug && router.push(`/articles/${response.slug}`);
@@ -212,18 +214,18 @@ const Create: NextPage = () => {
     <Layout>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
-          <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-white text-black">
+          <div className="fixed top-0 bottom-0 left-0 z-50 w-full h-screen text-black bg-white">
             <button
               type="button"
-              className="absolute right-8 top-8 underline cursor-pointer z-50"
+              className="absolute z-50 underline cursor-pointer right-8 top-8"
               onClick={() => setOpen(false)}
             >
               Close
             </button>
-            <div className="relative mx-4 flex flex-col justify-center items-center h-full overflow-y-scroll">
+            <div className="relative flex flex-col items-center justify-center h-full mx-4 overflow-y-scroll">
               <div className="pt-16 pb-8">
-                <div className="block sm:grid gap-6 sm:grid-cols-12 w-full max-w-2xl">
-                  <div className="sm:col-span-6 mt-8 sm:mt-0">
+                <div className="block w-full max-w-2xl gap-6 sm:grid sm:grid-cols-12">
+                  <div className="mt-8 sm:col-span-6 sm:mt-0">
                     {" "}
                     <label htmlFor="excerpt">Excerpt</label>
                     <textarea
@@ -238,7 +240,7 @@ const Create: NextPage = () => {
                       story and are between 140-156 characters long.
                     </p>
                   </div>
-                  <div className="sm:col-span-6 my-4 sm:my-0">
+                  <div className="my-4 sm:col-span-6 sm:my-0">
                     <label htmlFor="tags">Topics</label>
                     <input
                       id="tag"
@@ -257,20 +259,20 @@ const Create: NextPage = () => {
                     {tags.map((tag) => (
                       <div
                         key={tag}
-                        className="bg-gray-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
+                        className="inline-flex items-center mt-2 mr-1 overflow-hidden text-sm bg-gray-300"
                       >
                         <span
-                          className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs"
+                          className="max-w-xs px-1 ml-2 mr-1 text-xs leading-relaxed truncate"
                           x-text="tag"
                         >
                           {tag}
                         </span>
                         <button
                           onClick={() => onDelete(tag)}
-                          className="w-6 h-6 inline-block align-middle text-white bg-gray-600 focus:outline-none"
+                          className="inline-block w-6 h-6 text-white align-middle bg-gray-600 focus:outline-none"
                         >
                           <svg
-                            className="w-6 h-6 fill-current mx-auto"
+                            className="w-6 h-6 mx-auto fill-current"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                           >
@@ -287,16 +289,15 @@ const Create: NextPage = () => {
                       to find and know what your story is about.
                     </p>
                   </div>
-                  <div className="col-span-12  border-b border-gray-300 pb-4">
+                  <div className="col-span-12 pb-4 border-b border-gray-300">
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-gray-900 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
+                          <Disclosure.Button className="flex justify-between w-full py-2 text-sm font-medium text-left text-gray-900 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
-                              className={`${
-                                open ? "rotate-180 transform" : ""
-                              } h-5 w-5 text-gray-500`}
+                              className={`${open ? "rotate-180 transform" : ""
+                                } h-5 w-5 text-gray-500`}
                             />
                           </Disclosure.Button>
                           <Disclosure.Panel className="pt-4 pb-2">
@@ -318,12 +319,12 @@ const Create: NextPage = () => {
                       )}
                     </Disclosure>
                   </div>
-                  <div className="mt-4 sm:mt-0 sm:col-span-12 flex justify-end w-full">
+                  <div className="flex justify-end w-full mt-4 sm:mt-0 sm:col-span-12">
                     {!data?.published && (
                       <button
                         type="button"
                         disabled={isDisabled}
-                        className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
@@ -336,11 +337,11 @@ const Create: NextPage = () => {
                     <button
                       type="submit"
                       disabled={isDisabled}
-                      className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                      className="inline-flex justify-center px-4 py-2 ml-5 text-sm font-medium text-white shadow-sm bg-gradient-to-r from-orange-400 to-pink-600 hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                     >
                       {hasLoadingState ? (
                         <>
-                          <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-700 border-t-white rounded-full" />
+                          <div className="w-5 h-5 mr-2 border-2 border-orange-700 rounded-full animate-spin border-t-white" />
                           {"Saving"}
                         </>
                       ) : (
@@ -366,31 +367,31 @@ const Create: NextPage = () => {
           }}
         />
         {dataStatus === "loading" && postId && (
-          <div className="fixed top-0 left-0 z-40 w-screen h-screen flex items-center justify-center bg-gray ">
-            <div className="bg-white z-50 py-2 px-5 flex items-center flex-col border-2 border-black opacity-100">
-              <div className="loader-dots block relative w-20 h-5 mt-2">
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+          <div className="fixed top-0 left-0 z-40 flex items-center justify-center w-screen h-screen bg-gray ">
+            <div className="z-50 flex flex-col items-center px-5 py-2 bg-white border-2 border-black opacity-100">
+              <div className="relative block w-20 h-5 mt-2 loader-dots">
+                <div className="absolute top-0 w-3 h-3 mt-1 rounded-full shadow-sm bg-gradient-to-r from-orange-400 to-pink-600"></div>
+                <div className="absolute top-0 w-3 h-3 mt-1 rounded-full shadow-sm bg-gradient-to-r from-orange-400 to-pink-600"></div>
+                <div className="absolute top-0 w-3 h-3 mt-1 rounded-full shadow-sm bg-gradient-to-r from-orange-400 to-pink-600"></div>
+                <div className="absolute top-0 w-3 h-3 mt-1 rounded-full shadow-sm bg-gradient-to-r from-orange-400 to-pink-600"></div>
               </div>
-              <div className="text-gray-500 text-xs font-medium mt-2 text-center">
+              <div className="mt-2 text-xs font-medium text-center text-gray-500">
                 Fetching post data.
               </div>
             </div>
-            <div className="absolute bg-black top-0 bottom-0 left-0 right-0 opacity-25 z-60" />
+            <div className="absolute top-0 bottom-0 left-0 right-0 bg-black opacity-25 z-60" />
           </div>
         )}
         <div className="bg-gray-100">
-          <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
+          <div className="flex-grow w-full mx-auto text-black max-w-7xl xl:px-8 lg:flex">
             {/* Left sidebar & main wrapper */}
             <div className="flex-1 min-w-0 xl:flex">
               <div className="xl:flex-shrink-0 xl:w-64 ">
-                <div className="h-full pl-4 pr-6 py-6 sm:pl-6 xl:pl-0  lg:px-4">
+                <div className="h-full py-6 pl-4 pr-6 sm:pl-6 xl:pl-0 lg:px-4">
                   {/* Start left column area */}
-                  <div className="h-full relative">
-                    <div className="bg-white text-gray-800 border-2 border-black shadow-xl p-6">
-                      <h1 className="text-3xl tracking-tight font-extrabold text-black">
+                  <div className="relative h-full">
+                    <div className="p-6 text-gray-800 bg-white border-2 border-black shadow-xl">
+                      <h1 className="text-3xl font-extrabold tracking-tight text-black">
                         {viewPreview ? "Previewing" : "Editing"} your post
                       </h1>
                       <p className="mt-1 text-gray-600">
@@ -401,7 +402,7 @@ const Create: NextPage = () => {
                       <div className="flex">
                         <button
                           type="button"
-                          className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
+                          className="inline-flex justify-center px-4 py-2 mt-4 text-sm font-medium text-gray-700 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                           onClick={() => setViewPreview((current) => !current)}
                         >
                           {viewPreview ? "Back to editing" : "View preview"}
@@ -413,13 +414,13 @@ const Create: NextPage = () => {
                 </div>
               </div>
               <div className="lg:min-w-0 lg:flex-1">
-                <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
+                <div className="h-full px-4 py-0 lg:py-6 sm:px-6 lg:px-4 ">
                   {/* Start main area*/}
                   <div className="relative h-full">
-                    <div className="bg-white text-gray-800 border-2 border-black shadow-xl">
+                    <div className="text-gray-800 bg-white border-2 border-black shadow-xl">
                       {viewPreview ? (
-                        <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
-                          <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
+                        <section className="max-w-xl px-4 py-6 pb-4 mx-auto sm:p-6 lg:pb-8">
+                          <h2 className="pt-4 text-3xl font-bold leading-tight sm:my-5">
                             {title}
                           </h2>
                           <article
@@ -436,10 +437,10 @@ const Create: NextPage = () => {
                           </article>
                         </section>
                       ) : (
-                        <div className="py-6 px-4 sm:p-6 lg:pb-8">
+                        <div className="px-4 py-6 sm:p-6 lg:pb-8">
                           <input
                             autoFocus
-                            className="border-none text-2xl leading-5 outline-none"
+                            className="text-2xl leading-5 border-none outline-none"
                             placeholder="Your great title..."
                             type="text"
                             aria-label="Post Content"
@@ -448,22 +449,22 @@ const Create: NextPage = () => {
 
                           <TextareaAutosize
                             placeholder="Enter your content here 💖"
-                            className="border-none text-lg outline-none shadow-none mb-8"
+                            className="mb-8 text-lg border-none shadow-none outline-none"
                             minRows={25}
                             {...register("body")}
                           />
-                          <div className="flex justify-between items-center">
+                          <div className="flex items-center justify-between">
                             <>
                               {saveStatus === "loading" && (
                                 <p>Auto-saving...</p>
                               )}
                               {saveStatus === "error" && savedTime && (
-                                <p className="text-red-600 text-xs lg:text-sm">
+                                <p className="text-xs text-red-600 lg:text-sm">
                                   {`Error saving, last saved: ${savedTime.toString()}`}
                                 </p>
                               )}
                               {saveStatus === "success" && savedTime && (
-                                <p className="text-gray-600 text-xs lg:text-sm">
+                                <p className="text-xs text-gray-600 lg:text-sm">
                                   {`Saved: ${savedTime.toString()}`}
                                 </p>
                               )}
@@ -474,7 +475,7 @@ const Create: NextPage = () => {
                               <button
                                 type="button"
                                 disabled={isDisabled}
-                                className="disabled:opacity-50 ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                className="inline-flex justify-center px-4 py-2 ml-5 text-sm font-medium text-white shadow-sm disabled:opacity-50 bg-gradient-to-r from-orange-400 to-pink-600 hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                                 onClick={() => setOpen(true)}
                               >
                                 {!data?.published && "Publish"}
@@ -491,10 +492,10 @@ const Create: NextPage = () => {
               </div>
             </div>
             <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
-              <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
+              <div className="h-full py-6 pl-4 sm:pl-6 xl:pl-4 lg:w-80">
                 {/* Start right column area */}
-                <div className="bg-white text-gray-800 border-2 border-black shadow-xl p-6">
-                  <h3 className="text-xl tracking-tight font-semibold text-black">
+                <div className="p-6 text-gray-800 bg-white border-2 border-black shadow-xl">
+                  <h3 className="text-xl font-semibold tracking-tight text-black">
                     How to use the editor
                   </h3>
                   <p className="mt-1 text-gray-600">

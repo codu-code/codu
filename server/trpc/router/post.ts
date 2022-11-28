@@ -11,7 +11,6 @@ import {
   DeletePostSchema,
   GetPostsSchema,
 } from "../../../schema/post";
-import { removeMarkdown } from "../../../utils/removeMarkdown";
 
 export const postRouter = createRouter()
   .mutation("create-post", {
@@ -89,11 +88,6 @@ export const postRouter = createRouter()
         )
       );
 
-      const excerptOrCreatedExcerpt =
-        excerpt.length > 0
-          ? excerpt
-          : removeMarkdown(currentPost.body, {}).substring(0, 156);
-
       const post = await ctx.prisma.post.update({
         where: {
           id,
@@ -102,7 +96,7 @@ export const postRouter = createRouter()
           id,
           body,
           title,
-          excerpt: excerptOrCreatedExcerpt,
+          excerpt,
           readTimeMins: readingTime(body),
           slug: `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
           ...(canonicalUrl ? { canonicalUrl } : {}),
@@ -121,7 +115,7 @@ export const postRouter = createRouter()
         });
       }
 
-      const { published, id } = input;
+      const { published, id, excerpt } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
@@ -141,6 +135,7 @@ export const postRouter = createRouter()
         },
         data: {
           published: publishedValue,
+          excerpt,
         },
       });
       return post;
