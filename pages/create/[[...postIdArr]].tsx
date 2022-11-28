@@ -31,31 +31,25 @@ const Create: NextPage = () => {
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
 
-  const {
-    handleSubmit,
-    register,
-    watch,
-    reset,
-    getValues,
-    formState: { errors, isValid },
-  } = useForm<SavePostInput>({
-    mode: "onSubmit",
-    defaultValues: {
-      title: "",
-      body: "",
-    },
-  });
+  const { handleSubmit, register, watch, reset, getValues } =
+    useForm<SavePostInput>({
+      mode: "onSubmit",
+      defaultValues: {
+        title: "",
+        body: "",
+      },
+    });
 
   const { title, body } = watch();
 
   const debouncedValue = useDebounce(title + body, 1500);
 
   const { mutate: publish, status: publishStatus } = trpc.useMutation([
-    "post.publish-post",
+    "post.publish",
   ]);
 
   const { mutate: save, status: saveStatus } = trpc.useMutation(
-    ["post.save-post"],
+    ["post.update"],
     {
       onError() {
         toast.error("Something went wrong auto-saving");
@@ -72,7 +66,7 @@ const Create: NextPage = () => {
     }
   );
   const { mutate: create, data: createData } = trpc.useMutation(
-    ["post.create-post"],
+    ["post.create"],
     {
       onError() {
         toast.error("Something went wrong creating draft");
@@ -83,8 +77,10 @@ const Create: NextPage = () => {
     }
   );
 
+  // TODO get rid of this for standard get post
+  // Should be allowed get draft post through regular mechanism if you own it
   const { data, status: dataStatus } = trpc.useQuery(
-    ["post.edit-draft", { id: postId }],
+    ["post.editDraft", { id: postId }],
     {
       onError() {
         toast.error(

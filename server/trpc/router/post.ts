@@ -10,11 +10,13 @@ import {
   CreatePostSchema,
   DeletePostSchema,
   GetPostsSchema,
+  LikePostSchema,
+  BookmarkPostSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 
 export const postRouter = createRouter()
-  .mutation("create-post", {
+  .mutation("create", {
     input: CreatePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
@@ -38,7 +40,7 @@ export const postRouter = createRouter()
       return post;
     },
   })
-  .mutation("save-post", {
+  .mutation("update", {
     input: SavePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
@@ -111,7 +113,7 @@ export const postRouter = createRouter()
       return post;
     },
   })
-  .mutation("publish-post", {
+  .mutation("publish", {
     input: PublishPostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session || !ctx.session.user) {
@@ -146,7 +148,7 @@ export const postRouter = createRouter()
       return post;
     },
   })
-  .mutation("delete-post", {
+  .mutation("delete", {
     input: DeletePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session || !ctx.session.user) {
@@ -176,7 +178,99 @@ export const postRouter = createRouter()
       return post;
     },
   })
-  .query("posts", {
+  .mutation("like", {
+    input: LikePostSchema,
+    async resolve({ ctx, input }) {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not authenticated",
+        });
+      }
+
+      const { postId, setLiked } = input;
+
+      if (setLiked) {
+        const res = await ctx.prisma.like.create({
+          data: {
+            postId,
+            userId: ctx.session?.user?.id,
+          },
+        });
+        return res;
+      }
+      const res = await ctx.prisma.like.deleteMany({
+        where: {
+          AND: [{ postId }, { userId: ctx.session?.user?.id }],
+        },
+      });
+      return res;
+    },
+  })
+  .mutation("bookmark", {
+    input: BookmarkPostSchema,
+    async resolve({ ctx, input }) {
+      if (!ctx.session?.user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User is not authenticated",
+        });
+      }
+
+      const { postId, setBookmarked } = input;
+
+      if (setBookmarked) {
+        const res = await ctx.prisma.bookmark.create({
+          data: {
+            postId,
+            userId: ctx.session?.user?.id,
+          },
+        });
+        return res;
+      }
+      const res = await ctx.prisma.bookmark.deleteMany({
+        where: {
+          AND: [{ postId }, { userId: ctx.session?.user?.id }],
+        },
+      });
+      return res;
+    },
+  })
+  .query("sidebarData", {
+    input: GetSinglePostSchema,
+    async resolve({ ctx, input }) {
+      const { id } = input;
+
+      const [likes, currentUserLikedCount, currentUserBookmarkedCount] =
+        await Promise.all([
+          ctx.prisma.like.count({
+            where: {
+              postId: id,
+            },
+          }),
+          ctx.prisma.like.count({
+            where: {
+              postId: id,
+              userId: ctx.session?.user?.id,
+            },
+          }),
+          ctx.prisma.bookmark.count({
+            where: {
+              postId: id,
+              userId: ctx.session?.user?.id,
+            },
+          }),
+        ]);
+
+      return {
+        likes,
+        currentUserLiked: !!ctx.session?.user?.id && !!currentUserLikedCount,
+        currentUserBookmarked:
+          !!ctx.session?.user?.id && !!currentUserBookmarkedCount,
+      };
+    },
+  })
+  .query("all", {
     input: GetPostsSchema,
     resolve({ ctx, input }) {
       return ctx.prisma.post.findMany({
@@ -184,13 +278,20 @@ export const postRouter = createRouter()
           NOT: [{ published: null }],
           ...input,
         },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+            },
+          },
+        },
         orderBy: {
           published: "desc",
         },
       });
     },
   })
-  .query("my-posts", {
+  .query("myPosts", {
     resolve({ ctx }) {
       if (!ctx.session?.user?.id) {
         throw new TRPCError({
@@ -203,6 +304,13 @@ export const postRouter = createRouter()
         where: {
           NOT: [{ published: null }],
           userId: ctx.session.user.id,
+        },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+            },
+          },
         },
         orderBy: {
           published: "desc",
@@ -230,7 +338,7 @@ export const postRouter = createRouter()
       });
     },
   })
-  .query("edit-draft", {
+  .query("editDraft", {
     input: GetSinglePostSchema,
     async resolve({ ctx, input }) {
       if (!ctx.session?.user?.id) {
@@ -266,12 +374,19 @@ export const postRouter = createRouter()
       return currentPost;
     },
   })
-  .query("single-post", {
+  .query("getById", {
     input: GetSinglePostSchema,
     resolve({ ctx, input }) {
       return ctx.prisma.post.findUnique({
         where: {
           id: input.id,
+        },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+            },
+          },
         },
       });
     },
