@@ -4,7 +4,7 @@ import * as Fathom from "fathom-client";
 import { SessionProvider } from "next-auth/react";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
-import { withTRPC } from "@trpc/next";
+import { trpc } from "../utils/trpc";
 import superjson from "superjson";
 import { AppRouter } from "../server/trpc/router";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
@@ -94,12 +94,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default withTRPC<AppRouter>({
-  config() {
-    return {
-      url: `${getBaseUrl()}/api/trpc`,
-      transformer: superjson,
-    };
-  },
-  ssr: false,
-})(MyApp);
+export default trpc.withTRPC(MyApp);
