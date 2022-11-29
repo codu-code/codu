@@ -13,6 +13,11 @@ import { trpc } from "../../utils/trpc";
 
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
+import {
+  HeartIcon,
+  BookmarkIcon,
+  DotsHorizontalIcon,
+} from "@heroicons/react/outline";
 
 const ArticlePage: NextPage = ({
   post,
@@ -74,86 +79,36 @@ const ArticlePage: NextPage = ({
       <div className="bg-black border-t-2 border-white fixed bottom-0 w-full py-2 z-10">
         <div className="flex justify-evenly">
           <div className="flex items-center">
-            {data?.currentUserLiked ? (
-              <button
-                className="p-2 rounded-full hover:bg-neutral-800"
-                onClick={() => likePost(post.id, false)}
-              >
-                <svg
-                  className="fill-red-400 w-6 h-6"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-                  />
-                </svg>
-              </button>
-            ) : (
-              <button
-                className="p-2 rounded-full hover:bg-neutral-800"
-                onClick={() => likePost(post.id)}
-              >
-                <svg
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-                  />
-                </svg>
-              </button>
-            )}
+            <button
+              className="p-2 rounded-full hover:bg-neutral-800"
+              onClick={() => {
+                if (data?.currentUserLiked) return likePost(post.id, false);
+                likePost(post.id);
+              }}
+            >
+              <HeartIcon
+                className={`w-6 h-6${
+                  data?.currentUserLiked ? " fill-red-400" : ""
+                }`}
+              />
+            </button>
             <span className="w-4 ml-2">{data?.likes}</span>
           </div>
           <div>
-            {data?.currentUserBookmarked ? (
-              <button
-                className="p-2 rounded-full hover:bg-neutral-800"
-                onClick={() => bookmarkPost(post.id, false)}
-              >
-                <svg
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="fill-blue-400 w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"
-                  />
-                </svg>
-              </button>
-            ) : (
-              <button
-                className="p-2 rounded-full hover:bg-neutral-800"
-                onClick={() => bookmarkPost(post.id)}
-              >
-                <svg
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"
-                  />
-                </svg>
-              </button>
-            )}
+            <button
+              className="p-2 rounded-full hover:bg-neutral-800"
+              onClick={() => {
+                if (data?.currentUserBookmarked)
+                  return bookmarkPost(post.id, false);
+                bookmarkPost(post.id);
+              }}
+            >
+              <BookmarkIcon
+                className={`w-6 h-6${
+                  data?.currentUserBookmarked ? " fill-blue-400" : ""
+                }`}
+              />
+            </button>
           </div>
           <div>
             <button
@@ -162,19 +117,7 @@ const ArticlePage: NextPage = ({
                 console.log("I don't do anything yet... FIX ME PLEASE!")
               }
             >
-              <svg
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                />
-              </svg>
+              <DotsHorizontalIcon className="w-6 h-6" />
             </button>
           </div>
         </div>
