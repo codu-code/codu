@@ -20,25 +20,20 @@ const ArticlePage: NextPage = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   if (!post) return null;
 
-  const { data, refetch } = trpc.useQuery([
-    "post.sidebarData",
-    { id: post.id },
-  ]);
+  const { data, refetch } = trpc.post.sidebarData.useQuery({ id: post.id });
 
-  const { mutate: like, status: likeStatus } = trpc.useMutation(["post.like"], {
+  const { mutate: like, status: likeStatus } = trpc.post.like.useMutation({
     onSettled() {
       refetch();
     },
   });
 
-  const { mutate: bookmark, status: bookmarkStatus } = trpc.useMutation(
-    ["post.bookmark"],
-    {
+  const { mutate: bookmark, status: bookmarkStatus } =
+    trpc.post.bookmark.useMutation({
       onSettled() {
         refetch();
       },
-    }
-  );
+    });
 
   const likePost = async (postId: string, setLiked = true) => {
     if (likeStatus === "loading") return;

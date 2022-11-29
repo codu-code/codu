@@ -46,7 +46,7 @@ const Settings: NextPage = ({
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
 
-  const { mutate } = trpc.useMutation(["profile.profile"], {
+  const { mutate } = trpc.profile.edit.useMutation({
     onError() {
       toast.error("Something went wrong saving settings.");
     },

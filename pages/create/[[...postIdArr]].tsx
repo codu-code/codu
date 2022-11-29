@@ -44,43 +44,36 @@ const Create: NextPage = () => {
 
   const debouncedValue = useDebounce(title + body, 1500);
 
-  const { mutate: publish, status: publishStatus } = trpc.useMutation([
-    "post.publish",
-  ]);
+  const { mutate: publish, status: publishStatus } =
+    trpc.post.publish.useMutation();
 
-  const { mutate: save, status: saveStatus } = trpc.useMutation(
-    ["post.update"],
-    {
-      onError() {
-        toast.error("Something went wrong auto-saving");
-      },
-      onSuccess() {
-        toast.success("Saved");
-        setSavedTime(
-          new Date().toLocaleString(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short",
-          })
-        );
-      },
-    }
-  );
-  const { mutate: create, data: createData } = trpc.useMutation(
-    ["post.create"],
-    {
-      onError() {
-        toast.error("Something went wrong creating draft");
-      },
-      onSuccess() {
-        toast.success("Saved draft");
-      },
-    }
-  );
+  const { mutate: save, status: saveStatus } = trpc.post.update.useMutation({
+    onError() {
+      toast.error("Something went wrong auto-saving");
+    },
+    onSuccess() {
+      toast.success("Saved");
+      setSavedTime(
+        new Date().toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      );
+    },
+  });
+  const { mutate: create, data: createData } = trpc.post.create.useMutation({
+    onError() {
+      toast.error("Something went wrong creating draft");
+    },
+    onSuccess() {
+      toast.success("Saved draft");
+    },
+  });
 
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
-  const { data, status: dataStatus } = trpc.useQuery(
-    ["post.editDraft", { id: postId }],
+  const { data, status: dataStatus } = trpc.post.editDraft.useQuery(
+    { id: postId },
     {
       onError() {
         toast.error(

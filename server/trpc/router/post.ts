@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-
-import { createRouter } from "../createRouter";
 import { readingTime } from "../../../utils/readingTime";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
+
 import {
   PublishPostSchema,
   GetSinglePostSchema,
@@ -15,17 +15,10 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 
-export const postRouter = createRouter()
-  .mutation("create", {
-    input: CreatePostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+export const postRouter = router({
+  create: protectedProcedure
+    .input(CreatePostSchema)
+    .mutation(async ({ input, ctx }) => {
       const { body } = input;
       const id = nanoid(8);
       const post = await ctx.prisma.post.create({
@@ -38,18 +31,10 @@ export const postRouter = createRouter()
         },
       });
       return post;
-    },
-  })
-  .mutation("update", {
-    input: SavePostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+    }),
+  update: protectedProcedure
+    .input(SavePostSchema)
+    .mutation(async ({ input, ctx }) => {
       const { id, body, title, excerpt = "", canonicalUrl, tags = [] } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
@@ -111,18 +96,10 @@ export const postRouter = createRouter()
         },
       });
       return post;
-    },
-  })
-  .mutation("publish", {
-    input: PublishPostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session || !ctx.session.user) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+    }),
+  publish: protectedProcedure
+    .input(PublishPostSchema)
+    .mutation(async ({ input, ctx }) => {
       const { published, id } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
@@ -146,18 +123,10 @@ export const postRouter = createRouter()
         },
       });
       return post;
-    },
-  })
-  .mutation("delete", {
-    input: DeletePostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session || !ctx.session.user) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+    }),
+  delete: protectedProcedure
+    .input(DeletePostSchema)
+    .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
@@ -176,18 +145,10 @@ export const postRouter = createRouter()
         },
       });
       return post;
-    },
-  })
-  .mutation("like", {
-    input: LikePostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+    }),
+  like: protectedProcedure
+    .input(LikePostSchema)
+    .mutation(async ({ input, ctx }) => {
       const { postId, setLiked } = input;
 
       if (setLiked) {
@@ -205,18 +166,10 @@ export const postRouter = createRouter()
         },
       });
       return res;
-    },
-  })
-  .mutation("bookmark", {
-    input: BookmarkPostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+    }),
+  bookmark: protectedProcedure
+    .input(BookmarkPostSchema)
+    .mutation(async ({ input, ctx }) => {
       const { postId, setBookmarked } = input;
 
       if (setBookmarked) {
@@ -234,11 +187,10 @@ export const postRouter = createRouter()
         },
       });
       return res;
-    },
-  })
-  .query("sidebarData", {
-    input: GetSinglePostSchema,
-    async resolve({ ctx, input }) {
+    }),
+  sidebarData: publicProcedure
+    .input(GetSinglePostSchema)
+    .query(async ({ input, ctx }) => {
       const { id } = input;
 
       const [likes, currentUserLikedCount, currentUserBookmarkedCount] =
@@ -268,86 +220,57 @@ export const postRouter = createRouter()
         currentUserBookmarked:
           !!ctx.session?.user?.id && !!currentUserBookmarkedCount,
       };
-    },
-  })
-  .query("all", {
-    input: GetPostsSchema,
-    resolve({ ctx, input }) {
-      return ctx.prisma.post.findMany({
-        where: {
-          NOT: [{ published: null }],
-          ...input,
-        },
-        include: {
-          _count: {
-            select: {
-              likes: true,
-            },
+    }),
+  all: publicProcedure.input(GetPostsSchema).query(async ({ input, ctx }) => {
+    return ctx.prisma.post.findMany({
+      where: {
+        NOT: [{ published: null }],
+        ...input,
+      },
+      include: {
+        _count: {
+          select: {
+            likes: true,
           },
         },
-        orderBy: {
-          published: "desc",
-        },
-      });
-    },
-  })
-  .query("myPosts", {
-    resolve({ ctx }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
-      return ctx.prisma.post.findMany({
-        where: {
-          NOT: [{ published: null }],
-          userId: ctx.session.user.id,
-        },
-        include: {
-          _count: {
-            select: {
-              likes: true,
-            },
+      },
+      orderBy: {
+        published: "desc",
+      },
+    });
+  }),
+  myPosts: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.post.findMany({
+      where: {
+        NOT: [{ published: null }],
+        userId: ctx?.session?.user?.id,
+      },
+      include: {
+        _count: {
+          select: {
+            likes: true,
           },
         },
-        orderBy: {
-          published: "desc",
-        },
-      });
-    },
-  })
-  .query("drafts", {
-    resolve({ ctx }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
-      return ctx.prisma.post.findMany({
-        where: {
-          published: null,
-          userId: ctx.session.user.id,
-        },
-        orderBy: {
-          updatedAt: "desc",
-        },
-      });
-    },
-  })
-  .query("editDraft", {
-    input: GetSinglePostSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
-
+      },
+      orderBy: {
+        published: "desc",
+      },
+    });
+  }),
+  drafts: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.post.findMany({
+      where: {
+        published: null,
+        userId: ctx.session.user.id,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+  }),
+  editDraft: protectedProcedure
+    .input(GetSinglePostSchema)
+    .query(async ({ input, ctx }) => {
       const { id } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
@@ -372,11 +295,10 @@ export const postRouter = createRouter()
       }
 
       return currentPost;
-    },
-  })
-  .query("getById", {
-    input: GetSinglePostSchema,
-    resolve({ ctx, input }) {
+    }),
+  getById: publicProcedure
+    .input(GetSinglePostSchema)
+    .query(async ({ input, ctx }) => {
       return ctx.prisma.post.findUnique({
         where: {
           id: input.id,
@@ -389,5 +311,5 @@ export const postRouter = createRouter()
           },
         },
       });
-    },
-  });
+    }),
+});

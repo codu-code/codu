@@ -33,19 +33,16 @@ const MyPosts: NextPage = ({
 
   const [selectedArticleToDelete, setSelectedArticleToDelete] =
     useState<string>();
-  const drafts = trpc.useQuery(["post.drafts"]);
-  const published = trpc.useQuery(["post.posts", { userId }]);
+  const drafts = trpc.post.drafts.useQuery();
+  const published = trpc.post.all.useQuery({ userId });
 
-  const { mutate, status: deleteStatus } = trpc.useMutation(
-    ["post.delete-post"],
-    {
-      onSuccess() {
-        setSelectedArticleToDelete(undefined);
-        drafts.refetch();
-        published.refetch();
-      },
-    }
-  );
+  const { mutate, status: deleteStatus } = trpc.post.delete.useMutation({
+    onSuccess() {
+      setSelectedArticleToDelete(undefined);
+      drafts.refetch();
+      published.refetch();
+    },
+  });
 
   const tabs = [
     {
