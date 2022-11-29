@@ -14,7 +14,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     if (env !== "production" || !siteId) return;
 
     Fathom.load(siteId, {
-      includedDomains: ["codu.co"],
+      includedDomains: ["codu.co", "www.codu.co"],
     });
 
     function onRouteChangeComplete() {
