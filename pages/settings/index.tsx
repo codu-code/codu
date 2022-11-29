@@ -19,7 +19,7 @@ import Layout from "../../components/Layout/Layout";
 import { saveSettingsSchema, saveSettingsInput } from "../../schema/profile";
 import superjson from "superjson";
 
-function classNames(...classes: String[]) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 

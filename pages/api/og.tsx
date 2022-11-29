@@ -21,8 +21,8 @@ export default function handler(req) {
           style={{ padding: "0 88px" }}
         >
           <svg
-            tw="absolute"
             style={{
+              position: "absolute",
               height: "28px",
               width: "86px",
               top: "88px",
@@ -54,12 +54,12 @@ export default function handler(req) {
             <div
               style={{
                 color: "white",
-                "font-size": "64px",
+                fontSize: "64px",
                 lineHeight: 1,
                 fontWeight: "800",
                 letterSpacing: "-.025em",
                 fontFamily: "sans-serif",
-                "-webkit-line-clamp": 3,
+                lineClamp: 3,
               }}
             >
               {title}
@@ -79,8 +79,13 @@ export default function handler(req) {
         height: 630,
       }
     );
-  } catch (e) {
-    console.log(`${e.message}`);
+  } catch (err) {
+    if (err instanceof Error) {
+      // ✅ TypeScript knows err is Error
+      console.log(err.message);
+    } else {
+      console.log("Unexpected error", err);
+    }
     return new Response(`Failed to generate the image`, {
       status: 500,
     });

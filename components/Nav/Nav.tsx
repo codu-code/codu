@@ -9,7 +9,7 @@ import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { PlusSmIcon } from "@heroicons/react/solid";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 
-function classNames(...classes: String[]) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
