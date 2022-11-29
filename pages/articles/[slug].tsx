@@ -1,10 +1,11 @@
-import React from "react";
+import React, { Fragment } from "react";
 import Markdoc from "@markdoc/markdoc";
 import type {
   NextPage,
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
+import { Menu, Transition } from "@headlessui/react";
 import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
@@ -18,6 +19,17 @@ import {
   BookmarkIcon,
   DotsHorizontalIcon,
 } from "@heroicons/react/outline";
+
+const createMenuData = (title: string, username: string, url: string) => [
+  {
+    label: "Share to Twitter",
+    href: `https://twitter.com/intent/tweet?text="${title}", by ${username}&hashtags=coducommunity,codu&url=${url}`,
+  },
+  {
+    label: "Share to LinkedIn",
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+  },
+];
 
 const ArticlePage: NextPage = ({
   post,
@@ -57,6 +69,12 @@ const ArticlePage: NextPage = ({
       console.error(err);
     }
   };
+
+  const optionsData = createMenuData(
+    "Test",
+    "nialljoemaher",
+    `https://${host}/${post.slug}`
+  );
 
   return (
     <>
@@ -111,14 +129,38 @@ const ArticlePage: NextPage = ({
             </button>
           </div>
           <div>
-            <button
-              className="p-2 rounded-full hover:bg-neutral-800"
-              onClick={() =>
-                console.log("I don't do anything yet... FIX ME PLEASE!")
-              }
-            >
-              <DotsHorizontalIcon className="w-6 h-6" />
-            </button>
+            <Menu as="div" className="ml-4 relative">
+              <div>
+                <Menu.Button className="p-2 rounded-full hover:bg-neutral-800">
+                  <span className="sr-only">Open user menu</span>
+                  <DotsHorizontalIcon className="w-6 h-6" />
+                </Menu.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="origin-top-right absolute bottom-14 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                  {optionsData.map((item) => (
+                    <Menu.Item key={item.label}>
+                      <a
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                        target="blank"
+                        rel="noopener noreferrer"
+                        href={encodeURI(item.href)}
+                      >
+                        {item.label}
+                      </a>
+                    </Menu.Item>
+                  ))}
+                </Menu.Items>
+              </Transition>
+            </Menu>
           </div>
         </div>
       </div>
