@@ -5,6 +5,16 @@ export const CreatePostSchema = z.object({
   title: z.string().trim().max(100, "Max title length is 100 characters."),
 });
 
+export const LikePostSchema = z.object({
+  postId: z.string(),
+  setLiked: z.boolean(),
+});
+
+export const BookmarkPostSchema = z.object({
+  postId: z.string(),
+  setBookmarked: z.boolean(),
+});
+
 export const SavePostSchema = z.object({
   body: z.string().trim(),
   id: z.string(),

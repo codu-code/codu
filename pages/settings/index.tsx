@@ -19,7 +19,7 @@ import Layout from "../../components/Layout/Layout";
 import { saveSettingsSchema, saveSettingsInput } from "../../schema/profile";
 import superjson from "superjson";
 
-function classNames(...classes: String[]) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -46,7 +46,7 @@ const Settings: NextPage = ({
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
 
-  const { mutate } = trpc.useMutation(["profile.profile"], {
+  const { mutate } = trpc.profile.edit.useMutation({
     onError() {
       toast.error("Something went wrong saving settings.");
     },

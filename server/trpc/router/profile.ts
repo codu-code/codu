@@ -1,18 +1,11 @@
-import { TRPCError } from "@trpc/server";
-import { createRouter } from "../createRouter";
 import { saveSettingsSchema, getProfileSchema } from "../../../schema/profile";
 
-export const profileRouter = createRouter()
-  .mutation("profile", {
-    input: saveSettingsSchema,
-    async resolve({ ctx, input }) {
-      if (!ctx.session?.user?.id) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "User is not authenticated",
-        });
-      }
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 
+export const profileRouter = router({
+  edit: protectedProcedure
+    .input(saveSettingsSchema)
+    .mutation(async ({ input, ctx }) => {
       const profile = await ctx.prisma.user.update({
         where: {
           id: ctx.session.user.id,
@@ -22,16 +15,13 @@ export const profileRouter = createRouter()
         },
       });
       return profile;
-    },
-  })
-  .query("profile", {
-    input: getProfileSchema,
-    resolve({ ctx, input }) {
-      const { username } = input;
-      return ctx.prisma.user.findUnique({
-        where: {
-          username,
-        },
-      });
-    },
-  });
+    }),
+  get: publicProcedure.input(getProfileSchema).query(({ ctx, input }) => {
+    const { username } = input;
+    return ctx.prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
+  }),
+});

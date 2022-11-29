@@ -1,36 +1,39 @@
-import { ImageResponse } from '@vercel/og'
+import { ImageResponse } from "@vercel/og";
+import { NextRequest } from "next/server";
 
 export const config = {
-  runtime: 'experimental-edge',
-}
+  runtime: "experimental-edge",
+};
 
-export default function handler(req) {
+export default function handler(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url)
+    const { searchParams } = new URL(req.url);
 
     // ?title=<title>
-    const hasTitle = searchParams.has('title')
+    const hasTitle = searchParams.has("title");
     const title = hasTitle
-      ? searchParams.get('title')?.slice(0, 100)
-      : 'My default title'
+      ? searchParams.get("title")?.slice(0, 100)
+      : "My default title";
 
     return new ImageResponse(
       (
         <div
           tw="bg-black flex flex-col h-full w-full justify-center"
-          style={{ padding: '0 88px' }}>
+          style={{ padding: "0 88px" }}
+        >
           <svg
-            tw="absolute"
             style={{
-              height: '28px',
-              width: '86px',
-              top: '88px',
-              left: '86px',
+              position: "absolute",
+              height: "28px",
+              width: "86px",
+              top: "88px",
+              left: "86px",
             }}
             viewBox="0 0 479 151"
             preserveAspectRatio="none"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg">
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M115.66 116.604C116.986 116.595 118.298 116.867 119.51 117.404C120.675 117.923 121.741 118.64 122.66 119.524C123.581 120.423 124.319 121.493 124.83 122.674C125.361 123.905 125.63 125.233 125.62 126.574C125.608 127.913 125.328 129.235 124.795 130.463C124.263 131.692 123.489 132.8 122.52 133.724C109.187 144.647 92.4553 150.565 75.22 150.454C54.4067 150.454 36.6667 143.121 22 128.454C7.33333 113.787 0 96.0472 0 75.2339C0 54.4873 7.33333 36.7772 22 22.1039C36.6667 7.43058 54.4067 0.0639063 75.22 0.00390625C93.0333 0.00390625 109.113 5.86724 123.46 17.5939C124.353 18.4903 125.049 19.5638 125.502 20.7454C125.955 21.9269 126.155 23.1902 126.09 24.4539C126.108 25.8076 125.853 27.151 125.34 28.4039C124.848 29.5812 124.132 30.6513 123.23 31.5539C122.316 32.4673 121.228 33.1882 120.03 33.6739C118.228 34.4156 116.249 34.6148 114.336 34.247C112.423 33.8793 110.658 32.9606 109.26 31.6039C104.532 27.8582 99.2077 24.9341 93.51 22.9539C87.6276 20.924 81.4427 19.9095 75.22 19.9539C67.9566 19.9447 60.7628 21.3685 54.0505 24.1438C47.3383 26.9191 41.2395 30.9914 36.1035 36.1274C30.9675 41.2634 26.8953 47.3622 24.1199 54.0744C21.3446 60.7867 19.9208 67.9805 19.93 75.2439C19.93 90.5772 25.29 103.617 36.01 114.364C45.6791 123.974 58.5451 129.693 72.1578 130.43C85.7705 131.168 99.1791 126.873 109.83 118.364C111.556 117.211 113.585 116.599 115.66 116.604Z"
               fill="white"
@@ -51,22 +54,24 @@ export default function handler(req) {
           <div tw="flex relative">
             <div
               style={{
-                color: 'white',
-                'font-size': '64px',
+                color: "white",
+                fontSize: "64px",
                 lineHeight: 1,
-                fontWeight: '800',
-                letterSpacing: '-.025em',
-                fontFamily: 'sans-serif',
-                '-webkit-line-clamp': 3,
-              }}>
+                fontWeight: "800",
+                letterSpacing: "-.025em",
+                fontFamily: "sans-serif",
+                lineClamp: 3,
+              }}
+            >
               {title}
             </div>
             <div
               tw="h-4 w-72 absolute left-0 bg-gradient-to-r bg-red-500"
               style={{
-                bottom: '-3rem',
-                backgroundImage: 'linear-gradient(to right, #fb923c, #db2777)',
-              }}></div>
+                bottom: "-3rem",
+                backgroundImage: "linear-gradient(to right, #fb923c, #db2777)",
+              }}
+            ></div>
           </div>
         </div>
       ),
@@ -74,11 +79,16 @@ export default function handler(req) {
         width: 1200,
         height: 630,
       }
-    )
-  } catch (e) {
-    console.log(`${e.message}`)
+    );
+  } catch (err) {
+    if (err instanceof Error) {
+      // ✅ TypeScript knows err is Error
+      console.log(err.message);
+    } else {
+      console.log("Unexpected error", err);
+    }
     return new Response(`Failed to generate the image`, {
       status: 500,
-    })
+    });
   }
 }
