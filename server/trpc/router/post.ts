@@ -114,7 +114,6 @@ export const postRouter = createRouter()
           message: "User is not authenticated",
         });
       }
-
       const { published, id, excerpt } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({

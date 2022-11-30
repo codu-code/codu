@@ -138,6 +138,7 @@ const Create: NextPage = () => {
         const formData = { ...data, tags };
         ConfirmPostSchema.parse(formData);
         await savePost();
+        debugger;
         return await publish(
           { id: postId, published: !published, excerpt },
           {
