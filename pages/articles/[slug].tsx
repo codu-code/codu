@@ -94,11 +94,11 @@ const ArticlePage: NextPage = ({
           content={`${host}/api/og?title=${post.title}`}
         />
       </Head>
-      <div className="bg-black border-t-2 border-white fixed bottom-0 w-full py-2 z-10">
-        <div className="flex justify-evenly">
-          <div className="flex items-center">
+      <div className="bg-black border-t-2 border-white fixed lg:w-20 lg:border-r-2 lg:border-b-2 bottom-0 w-full py-2 z-20 lg:rounded-r-lg lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
+        <div className="flex justify-evenly lg:flex-col h-full">
+          <div className="flex items-center lg:flex-col">
             <button
-              className="p-2 rounded-full hover:bg-neutral-800"
+              className="p-1 rounded-full hover:bg-neutral-800"
               onClick={() => {
                 if (data?.currentUserLiked) return likePost(post.id, false);
                 likePost(post.id);
@@ -112,58 +112,56 @@ const ArticlePage: NextPage = ({
             </button>
             <span className="w-4 ml-2">{data?.likes}</span>
           </div>
-          <div>
-            <button
-              className="p-2 rounded-full hover:bg-neutral-800"
-              onClick={() => {
-                if (data?.currentUserBookmarked)
-                  return bookmarkPost(post.id, false);
-                bookmarkPost(post.id);
-              }}
+
+          <button
+            className="lg:mx-auto p-1 rounded-full hover:bg-neutral-800"
+            onClick={() => {
+              if (data?.currentUserBookmarked)
+                return bookmarkPost(post.id, false);
+              bookmarkPost(post.id);
+            }}
+          >
+            <BookmarkIcon
+              className={`w-6 h-6${
+                data?.currentUserBookmarked ? " fill-blue-400" : ""
+              }`}
+            />
+          </button>
+          <Menu as="div" className="ml-4 relative">
+            <div>
+              <Menu.Button className="p-1 rounded-full hover:bg-neutral-800">
+                <span className="sr-only">Open user menu</span>
+                <DotsHorizontalIcon className="w-6 h-6" />
+              </Menu.Button>
+            </div>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
             >
-              <BookmarkIcon
-                className={`w-6 h-6${
-                  data?.currentUserBookmarked ? " fill-blue-400" : ""
-                }`}
-              />
-            </button>
-          </div>
-          <div>
-            <Menu as="div" className="ml-4 relative">
-              <div>
-                <Menu.Button className="p-2 rounded-full hover:bg-neutral-800">
-                  <span className="sr-only">Open user menu</span>
-                  <DotsHorizontalIcon className="w-6 h-6" />
-                </Menu.Button>
-              </div>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items className="origin-top-right absolute bottom-14 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
-                  {optionsData.map((item) => (
-                    <Menu.Item key={item.label}>
-                      <a
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
-                        target="blank"
-                        rel="noopener noreferrer"
-                        href={encodeURI(item.href)}
-                      >
-                        {item.label}
-                      </a>
-                    </Menu.Item>
-                  ))}
-                </Menu.Items>
-              </Transition>
-            </Menu>
-          </div>
+              <Menu.Items className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                {optionsData.map((item) => (
+                  <Menu.Item key={item.label}>
+                    <a
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                      target="blank"
+                      rel="noopener noreferrer"
+                      href={encodeURI(item.href)}
+                    >
+                      {item.label}
+                    </a>
+                  </Menu.Item>
+                ))}
+              </Menu.Items>
+            </Transition>
+          </Menu>
         </div>
       </div>
+
       <Layout>
         <div className="border-t-2">
           <section className="mx-auto pb-4 max-w-xl px-4 sm:px-0">
