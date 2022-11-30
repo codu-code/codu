@@ -29,21 +29,23 @@ model Account {
 }
 
 model Post {
-  id           String    @id @unique
+  id           String     @id @unique
   title        String
   canonicalUrl String?
   coverImage   String?
-  approved     Boolean   @default(true)
-  body         String    @db.Text()
-  excerpt      String    @default("") @db.VarChar(156)
+  approved     Boolean    @default(true)
+  body         String     @db.Text()
+  excerpt      String     @default("") @db.VarChar(156)
   readTimeMins Int
   published    DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  slug         String    @unique
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  slug         String     @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
   tags         PostTag[]
+  likes        Like[]
+  bookmarks    Bookmark[]
 }
 
 model Tag {
@@ -60,7 +62,7 @@ model PostTag {
   tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@unique([tagId, postId])
+  @@unique(fields: [tagId, postId])
 }
 
 model Session {
@@ -72,23 +74,25 @@ model Session {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  username           String?   @unique @db.VarChar(40)
-  name               String    @default("")
-  email              String?   @unique
+  id                 String     @id @default(cuid())
+  username           String?    @unique @db.VarChar(40)
+  name               String     @default("")
+  email              String?    @unique
   emailVerified      DateTime?
-  image              String    @default("/images/person.png")
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  bio                String    @default("") @db.VarChar(200)
-  location           String    @default("")
-  websiteUrl         String    @default("")
-  emailNotifications Boolean   @default(true)
-  newsletter         Boolean   @default(true)
+  image              String     @default("/images/person.png")
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  bio                String     @default("") @db.VarChar(200)
+  location           String     @default("")
+  websiteUrl         String     @default("")
+  emailNotifications Boolean    @default(true)
+  newsletter         Boolean    @default(true)
   accounts           Account[]
   sessions           Session[]
   posts              Post[]
-  role               Role      @default(USER)
+  role               Role       @default(USER)
+  likes              Like[]
+  bookmarks          Bookmark[]
 
   @@index(fields: [username, id])
 }
@@ -105,4 +109,25 @@ enum Role {
   USER
   ADMIN
   MODERATOR
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model Bookmark {
+  id     Int    @id @default(autoincrement())
+  postId String
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
 }
