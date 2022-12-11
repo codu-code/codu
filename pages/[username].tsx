@@ -8,6 +8,7 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
+import PageHeading from "../components/PageHeading/PageHeading";
 
 const Profile: NextPage = ({
   profile,
@@ -20,7 +21,7 @@ const Profile: NextPage = ({
   return (
     <Layout>
       <div className="border-t-2">
-        <div className="max-w-xl px-4 mx-auto text-white">
+        <div className="max-w-2xl px-4 mx-auto text-white">
           <main className="flex pt-6">
             <div className="mr-4 flex-shrink-0 self-center">
               {image && (
@@ -37,11 +38,9 @@ const Profile: NextPage = ({
               <p className="mt-1">{bio}</p>
             </div>
           </main>
-          <div className="pb-3 border-b border-gray-200 pt-8">
-            <h3 className="text-2xl leading-6 font-medium">
-              Published articles
-            </h3>
-          </div>
+
+          <PageHeading>Published articles</PageHeading>
+
           {posts.length ? (
             posts.map(
               ({ slug, title, excerpt, readTimeMins, published, id }) => {
@@ -53,10 +52,17 @@ const Profile: NextPage = ({
                     title={title}
                     excerpt={excerpt}
                     name={name}
+                    username={username || ""}
                     image={image}
                     date={published}
                     readTime={readTimeMins}
                     canEdit={isOwner}
+                    menuOptions={
+                      isOwner
+                        ? [{ label: "Edit", href: `/create/${id}`, postId: id }]
+                        : []
+                    }
+                    showBookmark={!isOwner}
                     id={id}
                   />
                 );

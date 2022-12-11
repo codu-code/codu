@@ -21,6 +21,10 @@ const Nav = () => {
       name: "Your Profile",
       href: `/${(session && session.user?.username) || "settings"}`,
     },
+    {
+      name: "Saved posts",
+      href: "/saved",
+    },
     { name: "Settings", href: "/settings" },
     { name: "Sign out", onClick: () => signOut() },
   ];
