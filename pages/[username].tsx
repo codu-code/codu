@@ -56,11 +56,10 @@ const Profile: NextPage = ({
                     image={image}
                     date={published}
                     readTime={readTimeMins}
-                    canEdit={isOwner}
                     menuOptions={
                       isOwner
                         ? [{ label: "Edit", href: `/create/${id}`, postId: id }]
-                        : []
+                        : undefined
                     }
                     showBookmark={!isOwner}
                     id={id}
