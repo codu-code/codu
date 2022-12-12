@@ -14,7 +14,6 @@ import {
   BookmarkPostSchema,
   GetByIdSchema,
 } from "../../../schema/post";
-import { removeMarkdown } from "../../../utils/removeMarkdown";
 
 export const postRouter = router({
   create: protectedProcedure
@@ -77,11 +76,6 @@ export const postRouter = router({
         )
       );
 
-      const excerptOrCreatedExcerpt =
-        excerpt.length > 0
-          ? excerpt
-          : removeMarkdown(currentPost.body, {}).substring(0, 156);
-
       const post = await ctx.prisma.post.update({
         where: {
           id,
@@ -90,7 +84,7 @@ export const postRouter = router({
           id,
           body,
           title,
-          excerpt: excerptOrCreatedExcerpt,
+          excerpt,
           readTimeMins: readingTime(body),
           slug: `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
           ...(canonicalUrl ? { canonicalUrl } : {}),
@@ -101,7 +95,7 @@ export const postRouter = router({
   publish: protectedProcedure
     .input(PublishPostSchema)
     .mutation(async ({ input, ctx }) => {
-      const { published, id } = input;
+      const { published, id, excerpt } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
@@ -121,6 +115,7 @@ export const postRouter = router({
         },
         data: {
           published: publishedValue,
+          excerpt,
         },
       });
       return post;
