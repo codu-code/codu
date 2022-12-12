@@ -1,12 +1,30 @@
-import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { Children, Fragment, useEffect } from "react";
+
 import Head from "next/head";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
+import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
 import Layout from "../../components/Layout/Layout";
-import prisma from "../../server/db/client";
+import PageHeading from "../../components/PageHeading/PageHeading";
+import { trpc } from "../../utils/trpc";
+import { useInView } from "react-intersection-observer";
 
-const ArticlesPage = ({
-  articles,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const ArticlesPage = () => {
+  const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    trpc.post.all.useInfiniteQuery(
+      { limit: 15 },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
+    );
+
+  const { ref, inView } = useInView();
+
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView]);
+
   return (
     <>
       <Head>
@@ -15,73 +33,62 @@ const ArticlesPage = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <div className="border-t-2 border-white">
+        <div className="border-t border-white">
           <div className="relative sm:mx-auto max-w-2xl mx-4">
-            <h1 className="text-3xl tracking-tight font-extrabold text-gray-50 sm:text-4xl my-8">
-              Articles
-            </h1>
+            <PageHeading>Articles</PageHeading>
             <section>
-              {articles.map(
-                ({
-                  slug,
-                  title,
-                  excerpt,
-                  user: { name, image },
-                  updatedAt,
-                  readTimeMins,
-                }) => (
-                  <ArticlePreview
-                    key={title}
-                    slug={slug}
-                    title={title}
-                    excerpt={excerpt}
-                    name={name}
-                    image={image}
-                    date={updatedAt}
-                    readTime={readTimeMins}
-                  />
-                )
+              {status === "error" && (
+                <div>Something went wrong... Please refresh your page.</div>
               )}
+              {status === "loading" &&
+                Children.toArray(
+                  Array.from({ length: 7 }, () => {
+                    return <ArticleLoading />;
+                  })
+                )}
+              {status === "success" &&
+                data.pages.map((page) => {
+                  return (
+                    <Fragment key={page.nextCursor ?? "lastPage"}>
+                      {page.posts.map(
+                        ({
+                          slug,
+                          title,
+                          excerpt,
+                          user: { name, image, username },
+                          updatedAt,
+                          readTimeMins,
+                          id,
+                          currentUserLikesPost,
+                        }) => (
+                          <ArticlePreview
+                            key={title}
+                            id={id}
+                            slug={slug}
+                            title={title}
+                            excerpt={excerpt}
+                            name={name}
+                            username={username || ""}
+                            image={image}
+                            date={updatedAt.toISOString()}
+                            readTime={readTimeMins}
+                            bookmarkedInitialState={currentUserLikesPost}
+                          />
+                        )
+                      )}
+                    </Fragment>
+                  );
+                })}
+              {isFetchingNextPage ? <ArticleLoading /> : null}
+              <span className="invisible" ref={ref}>
+                intersection observer marker
+              </span>
             </section>
           </div>
         </div>
       </Layout>
     </>
   );
-};
-
-export const getServerSideProps = async () => {
-  const response = await prisma.post.findMany({
-    where: {
-      NOT: {
-        published: null,
-      },
-    },
-    orderBy: {
-      published: "desc",
-    },
-    select: {
-      title: true,
-      body: true,
-      updatedAt: true,
-      readTimeMins: true,
-      slug: true,
-      excerpt: true,
-      user: {
-        select: { name: true, image: true },
-      },
-    },
-  });
-
-  const posts = response.map((post) => {
-    return { ...post, updatedAt: post.updatedAt.toISOString() };
-  });
-
-  return {
-    props: {
-      articles: posts,
-    },
-  };
 };
 
 export default ArticlesPage;
