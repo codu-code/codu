@@ -12,6 +12,7 @@ import {
   GetPostsSchema,
   LikePostSchema,
   BookmarkPostSchema,
+  GetByIdSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 
@@ -189,7 +190,7 @@ export const postRouter = router({
       return res;
     }),
   sidebarData: publicProcedure
-    .input(GetSinglePostSchema)
+    .input(GetByIdSchema)
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
@@ -221,23 +222,51 @@ export const postRouter = router({
           !!ctx.session?.user?.id && !!currentUserBookmarkedCount,
       };
     }),
-  all: publicProcedure.input(GetPostsSchema).query(async ({ input, ctx }) => {
-    return ctx.prisma.post.findMany({
+  all: publicProcedure.input(GetPostsSchema).query(async ({ ctx, input }) => {
+    const userId = ctx.session?.user?.id;
+    const limit = input?.limit ?? 50;
+    const { cursor } = input;
+    const response = await ctx.prisma.post.findMany({
+      take: limit + 1,
       where: {
-        NOT: [{ published: null }],
-        ...input,
-      },
-      include: {
-        _count: {
-          select: {
-            likes: true,
-          },
+        NOT: {
+          published: null,
         },
       },
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+        readTimeMins: true,
+        slug: true,
+        excerpt: true,
+        user: {
+          select: { name: true, image: true, username: true },
+        },
+        bookmarks: {
+          select: { userId: true },
+          where: { userId: userId },
+        },
+      },
+      cursor: cursor ? { id: cursor } : undefined,
       orderBy: {
         published: "desc",
       },
     });
+
+    const cleaned = response.map((post) => {
+      const currentUserLikesPost = !!post.bookmarks.length;
+      post.bookmarks = [];
+      return { ...post, currentUserLikesPost };
+    });
+
+    let nextCursor: typeof cursor | undefined = undefined;
+    if (response.length > limit) {
+      const nextItem = response.pop();
+      nextCursor = nextItem!.id;
+    }
+
+    return { posts: cleaned, nextCursor };
   }),
   myPosts: protectedProcedure.query(async ({ ctx }) => {
     return ctx.prisma.post.findMany({
@@ -269,7 +298,7 @@ export const postRouter = router({
     });
   }),
   editDraft: protectedProcedure
-    .input(GetSinglePostSchema)
+    .input(GetByIdSchema)
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
@@ -296,20 +325,46 @@ export const postRouter = router({
 
       return currentPost;
     }),
-  getById: publicProcedure
+  bySlug: publicProcedure
     .input(GetSinglePostSchema)
     .query(async ({ input, ctx }) => {
       return ctx.prisma.post.findUnique({
         where: {
-          id: input.id,
+          slug: input.slug,
         },
         include: {
-          _count: {
+          user: {
             select: {
-              likes: true,
+              username: true,
+              name: true,
+              image: true,
+              bio: true,
+            },
+          },
+          tags: {
+            select: {
+              id: true,
+              tag: {
+                select: {
+                  title: true,
+                },
+              },
             },
           },
         },
       });
     }),
+  myBookmarks: protectedProcedure.query(async ({ ctx }) => {
+    const response = await ctx.prisma.bookmark.findMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
+      include: {
+        post: {
+          include: { user: true },
+        },
+      },
+    });
+    return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
+  }),
 });

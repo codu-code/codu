@@ -1,5 +1,5 @@
 import { useState, Fragment } from "react";
-import {
+import type {
   NextPage,
   GetServerSideProps,
   InferGetServerSidePropsType,
@@ -34,7 +34,7 @@ const MyPosts: NextPage = ({
   const [selectedArticleToDelete, setSelectedArticleToDelete] =
     useState<string>();
   const drafts = trpc.post.drafts.useQuery();
-  const published = trpc.post.all.useQuery({ userId });
+  const published = trpc.post.myPosts.useQuery();
 
   const { mutate, status: deleteStatus } = trpc.post.delete.useMutation({
     onSuccess() {
@@ -126,7 +126,7 @@ const MyPosts: NextPage = ({
             </button>
           </div>
         </Modal>
-        <div className="max-w-xl px-4 mx-auto text-white">
+        <div className="relative sm:mx-auto max-w-2xl mx-4">
           <div className="border-b border-gray-200 mt-8 mb-4">
             <div className="sm:hidden">
               <label htmlFor="tabs" className="sr-only">
