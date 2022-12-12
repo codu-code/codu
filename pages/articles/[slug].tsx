@@ -223,7 +223,6 @@ const ArticlePage: NextPage = ({
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext<{ slug: string }>
 ) => {
-  console.log();
   const session = await getServerAuthSession(ctx);
 
   const ssg = createProxySSGHelpers({
