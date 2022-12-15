@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "ci-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "migrate": "npx prisma migrate"
   },
   "prisma": {
     "seed": "npx tsx ./prisma/seed.ts"

@@ -1,4 +1,4 @@
-import { NextPage, GetServerSideProps } from "next";
+import type { NextPage, GetServerSideProps } from "next";
 import { ZodError } from "zod";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, Fragment } from "react";
@@ -10,7 +10,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 
-import { SavePostInput, ConfirmPostSchema } from "../../schema/post";
+import type { SavePostInput } from "../../schema/post";
+import { ConfirmPostSchema } from "../../schema/post";
 import Layout from "../../components/Layout/Layout";
 
 import { trpc } from "../../utils/trpc";
@@ -201,7 +202,7 @@ const Create: NextPage = () => {
     <Layout>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
-          <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-white text-black">
+          <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-smoke">
             <button
               type="button"
               className="absolute right-8 top-8 underline cursor-pointer z-50"
@@ -221,7 +222,7 @@ const Create: NextPage = () => {
                       rows={3}
                       {...register("excerpt")}
                     />
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-gray-400">
                       What readers will see before they click on your article.
                       Good SEO descriptions utilize keywords, summarize the
                       story and are between 140-156 characters long.
@@ -249,7 +250,7 @@ const Create: NextPage = () => {
                         className="bg-gray-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
                       >
                         <span
-                          className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs"
+                          className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-smoke font-semibold"
                           x-text="tag"
                         >
                           {tag}
@@ -271,7 +272,7 @@ const Create: NextPage = () => {
                         </button>
                       </div>
                     ))}
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-gray-400">
                       Tag with up to 5 topics. This makes it easier for readers
                       to find and know what your story is about.
                     </p>
@@ -280,12 +281,12 @@ const Create: NextPage = () => {
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-gray-900 focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
+                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
                                 open ? "rotate-180 transform" : ""
-                              } h-5 w-5 text-gray-500`}
+                              } h-5 w-5 text-gray-400`}
                             />
                           </Disclosure.Button>
                           <Disclosure.Panel className="pt-4 pb-2">
@@ -297,7 +298,7 @@ const Create: NextPage = () => {
                               defaultValue=""
                               {...register("canonicalUrl")}
                             />
-                            <p className="mt-2 text-sm text-gray-500">
+                            <p className="mt-2 text-sm text-gray-400">
                               Add this if the post was originally published
                               elsewhere and you want to link to it as the
                               original source.
@@ -363,14 +364,14 @@ const Create: NextPage = () => {
                 <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
                 <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
               </div>
-              <div className="text-gray-500 text-xs font-medium mt-2 text-center">
+              <div className="text-gray-400 text-xs font-medium mt-2 text-center">
                 Fetching post data.
               </div>
             </div>
             <div className="absolute bg-black top-0 bottom-0 left-0 right-0 opacity-25 z-60" />
           </div>
         )}
-        <div className="bg-gray-100">
+        <div className="bg-black">
           <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
             {/* Left sidebar & main wrapper */}
             <div className="flex-1 min-w-0 xl:flex">
@@ -378,11 +379,11 @@ const Create: NextPage = () => {
                 <div className="h-full pl-4 pr-6 py-6 sm:pl-6 xl:pl-0  lg:px-4">
                   {/* Start left column area */}
                   <div className="h-full relative">
-                    <div className="bg-white text-gray-800 border-2 border-black shadow-xl p-6">
-                      <h1 className="text-3xl tracking-tight font-extrabold text-black">
+                    <div className="bg-smoke text-gray-800 border-2 border-white shadow-xl p-6">
+                      <h1 className="text-3xl tracking-tight font-extrabold text-white">
                         {viewPreview ? "Previewing" : "Editing"} your post
                       </h1>
-                      <p className="mt-1 text-gray-600">
+                      <p className="mt-1 text-gray-400">
                         The body of your content can be edited using markdown.
                         Your post remains private until you
                         &#8220;publish&#8221; the article.
@@ -405,14 +406,14 @@ const Create: NextPage = () => {
                 <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
                   {/* Start main area*/}
                   <div className="relative h-full">
-                    <div className="bg-white text-gray-800 border-2 border-black shadow-xl">
+                    <div className="bg-smoke text-white border-2 border-white shadow-xl">
                       {viewPreview ? (
                         <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
                           <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
                             {title}
                           </h2>
                           <article
-                            className="prose whitespace-pre-wrap"
+                            className="prose prose-invert"
                             style={{ whiteSpace: "pre-wrap" }}
                           >
                             {Markdoc.renderers.react(
@@ -428,8 +429,8 @@ const Create: NextPage = () => {
                         <div className="py-6 px-4 sm:p-6 lg:pb-8">
                           <input
                             autoFocus
-                            className="border-none text-2xl leading-5 outline-none"
-                            placeholder="Your great title..."
+                            className="border-none text-2xl leading-5 outline-none bg-smoke focus:bg-black"
+                            placeholder="Article title"
                             type="text"
                             aria-label="Post Content"
                             {...register("title")}
@@ -437,7 +438,7 @@ const Create: NextPage = () => {
 
                           <TextareaAutosize
                             placeholder="Enter your content here 💖"
-                            className="border-none text-lg outline-none shadow-none mb-8"
+                            className="border-none text-lg outline-none shadow-none mb-8 bg-smoke focus:bg-black"
                             minRows={25}
                             {...register("body")}
                           />
@@ -452,7 +453,7 @@ const Create: NextPage = () => {
                                 </p>
                               )}
                               {saveStatus === "success" && savedTime && (
-                                <p className="text-gray-600 text-xs lg:text-sm">
+                                <p className="text-gray-400 text-xs lg:text-sm">
                                   {`Saved: ${savedTime.toString()}`}
                                 </p>
                               )}
@@ -482,11 +483,11 @@ const Create: NextPage = () => {
             <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
               <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
                 {/* Start right column area */}
-                <div className="bg-white text-gray-800 border-2 border-black shadow-xl p-6">
-                  <h3 className="text-xl tracking-tight font-semibold text-black">
+                <div className="bg-smoke text-gray-800 border-2 border-white shadow-xl p-6">
+                  <h3 className="text-xl tracking-tight font-semibold text-white">
                     How to use the editor
                   </h3>
-                  <p className="mt-1 text-gray-600">
+                  <p className="mt-1 text-gray-400">
                     You can edit and format the main content of your article
                     using Markdown. If you have never used Markdown, you can
                     check out{" "}

@@ -90,7 +90,7 @@ const MyPosts: NextPage = ({
             <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
               <Dialog.Title
                 as="h3"
-                className="text-lg leading-6 font-medium text-gray-900"
+                className="text-lg leading-6 font-medium text-smoke"
               >
                 Delete article
               </Dialog.Title>
@@ -178,7 +178,7 @@ const MyPosts: NextPage = ({
             {selectedTabData.status === "success" &&
               selectedTabData.data?.map(
                 ({ id, title, excerpt, readTimeMins, slug }) => (
-                  <article className="border-2 p-4 mb-4" key={id}>
+                  <article className="border-2 p-4 mb-4 bg-smoke" key={id}>
                     {tab === "published" ? (
                       <Link href={`articles/${slug}`}>
                         <h2 className="text-2xl font-semibold mb-2 hover:underline">
@@ -225,7 +225,7 @@ const MyPosts: NextPage = ({
                                   <Link
                                     className={classNames(
                                       active
-                                        ? "bg-gray-100 text-gray-900"
+                                        ? "bg-gray-100 text-smoke"
                                         : "text-gray-700",
                                       "group flex items-center px-4 py-2 text-sm"
                                     )}
@@ -248,7 +248,7 @@ const MyPosts: NextPage = ({
                                     }
                                     className={classNames(
                                       active
-                                        ? "bg-gray-100 text-gray-900"
+                                        ? "bg-gray-100 text-smoke"
                                         : "text-gray-700",
                                       "group flex items-center px-4 py-2 text-sm w-full"
                                     )}

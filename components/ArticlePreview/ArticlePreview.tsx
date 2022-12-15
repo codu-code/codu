@@ -69,7 +69,7 @@ const ArticlePreview: NextPage<Props> = ({
   };
 
   return (
-    <article className="p-4 my-4 shadow-lg border-2 border-white">
+    <article className="p-4 my-4 shadow-lg border-2 border-white bg-smoke">
       <div className="flex justify-between">
         <div className="flex items-center mb-4">
           <span className="sr-only">{name}</span>

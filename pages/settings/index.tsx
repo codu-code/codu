@@ -10,13 +10,15 @@ import { authOptions } from "../api/auth/[...nextauth]";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { trpc } from "../../utils/trpc";
 import prisma from "../../server/db/client";
 import toast, { Toaster } from "react-hot-toast";
 
 import Layout from "../../components/Layout/Layout";
-import { saveSettingsSchema, saveSettingsInput } from "../../schema/profile";
+import type { saveSettingsInput } from "../../schema/profile";
+import { saveSettingsSchema } from "../../schema/profile";
 import superjson from "superjson";
 
 function classNames(...classes: string[]) {
@@ -61,7 +63,7 @@ const Settings: NextPage = ({
 
   return (
     <Layout>
-      <div className="bg-gray-200 py-8">
+      <div className="bg-black py-8">
         <Toaster
           toastOptions={{
             style: {
@@ -72,15 +74,15 @@ const Settings: NextPage = ({
           }}
         />
         <div className="mx-auto lg:col-span-9 max-w-2xl flex-grow flex flex-col justify-center w-full px-4 sm:px-6">
-          <div className="bg-white text-gray-800 border-2 border-black shadow-xl">
+          <div className="bg-smoke text-gray-800 border-2 border-white shadow shadow-slate-50">
             <form onSubmit={handleSubmit(onSubmit)}>
               {/* Profile section */}
               <div className="py-6 px-4 sm:p-6 lg:pb-8">
                 <div>
-                  <h2 className="text-3xl tracking-tight font-extrabold text-black">
+                  <h2 className="text-3xl tracking-tight font-extrabold text-white">
                     Profile Settings
                   </h2>
-                  <p className="mt-1 text-gray-600">
+                  <p className="mt-1 text-gray-400">
                     This information will be displayed publicly so be careful
                     what you share.
                   </p>
@@ -106,7 +108,7 @@ const Settings: NextPage = ({
                     <div>
                       <label htmlFor="username">Username</label>
                       <div className="mt-1 shadow-sm flex">
-                        <span className="mt-1  bg-black px-3 items-center text-white text-sm font-semibold flex">
+                        <span className="mt-1  bg-white px-3 items-center text-black text-sm font-semibold flex">
                           codu.co/
                         </span>
                         <input type="text" {...register("username")} />
@@ -128,7 +130,7 @@ const Settings: NextPage = ({
                           maxLength={200}
                         />
                       </div>
-                      <div className="mt-2 text-sm text-gray-600 flex justify-between">
+                      <div className="mt-2 text-sm text-gray-400 flex justify-between">
                         {errors.bio ? (
                           <p className="mt-1 text-sm text-red-600">
                             {`${errors.bio.message || "Required"}`}
@@ -182,10 +184,10 @@ const Settings: NextPage = ({
                   <div className="pt-6 divide-y divide-gray-200">
                     <div>
                       <div>
-                        <h2 className="text-xl tracking-tight font-bold text-black">
+                        <h2 className="text-xl tracking-tight font-bold text-white">
                           Privacy
                         </h2>
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-400">
                           We respect your privacy, change your settings here.
                         </p>
                       </div>
@@ -194,15 +196,11 @@ const Settings: NextPage = ({
                           as="li"
                           className="py-4 flex items-center justify-between"
                         >
-                          <div className="flex flex-col">
-                            <Switch.Label
-                              as="p"
-                              className="text-sm font-medium text-gray-900"
-                              passive
-                            >
+                          <div className="flex flex-col items-center">
+                            <Switch.Label as="p" className="sr-only" passive>
                               Email notifications
                             </Switch.Label>
-                            <Switch.Description className="text-sm text-gray-600">
+                            <Switch.Description className="text-sm text-gray-400">
                               Occasional email notifications from the platform.
                             </Switch.Description>
                           </div>
@@ -212,7 +210,7 @@ const Settings: NextPage = ({
                             className={classNames(
                               emailNotifications
                                 ? "bg-green-600"
-                                : "bg-gray-200",
+                                : "bg-gray-400",
                               "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                             )}
                           >
@@ -229,17 +227,13 @@ const Settings: NextPage = ({
                         </Switch.Group>
                         <Switch.Group
                           as="li"
-                          className="py-4 flex items-center justify-between"
+                          className="py-4 flex items-center justify-between mt-2"
                         >
                           <div className="flex flex-col">
-                            <Switch.Label
-                              as="p"
-                              className="text-sm font-medium text-gray-900"
-                              passive
-                            >
+                            <Switch.Label as="p" className="sr-only" passive>
                               Weekly newsletter
                             </Switch.Label>
-                            <Switch.Description className="text-sm text-gray-600">
+                            <Switch.Description className="text-sm text-gray-400">
                               Opt-in to our weekly newsletter.
                             </Switch.Description>
                           </div>
@@ -247,7 +241,7 @@ const Settings: NextPage = ({
                             checked={weeklyNewsletter}
                             onChange={setWeeklyNewsletter}
                             className={classNames(
-                              weeklyNewsletter ? "bg-green-600" : "bg-gray-200",
+                              weeklyNewsletter ? "bg-green-600" : "bg-gray-400",
                               "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                             )}
                           >
@@ -264,7 +258,7 @@ const Settings: NextPage = ({
                         </Switch.Group>
                       </ul>
                     </div>
-                    <div className="mt-4 py-4 flex justify-end">
+                    <div className="mt-2 py-4 flex justify-end">
                       <button
                         type="button"
                         className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"

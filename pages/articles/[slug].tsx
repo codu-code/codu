@@ -14,7 +14,6 @@ import { Menu, Transition } from "@headlessui/react";
 import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
-import prisma from "../../server/db/client";
 import { trpc } from "../../utils/trpc";
 
 import { markdocComponents } from "../../markdoc/components";
@@ -48,8 +47,6 @@ const ArticlePage: NextPage = ({
     { id: post?.id || "" },
     { enabled: !!post }
   );
-
-  console.log({ post, data });
 
   const { mutate: like, status: likeStatus } = trpc.post.like.useMutation({
     onSettled() {
@@ -118,7 +115,7 @@ const ArticlePage: NextPage = ({
         enterFrom="transform opacity-0 scale-75"
         enterTo="transform opacity-100 scale-100"
       >
-        <div className="bg-black border-t-2 border-white fixed lg:w-20 lg:border-r-2 lg:border-b-2 bottom-0 w-full py-2 z-20 lg:rounded-r-lg lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
+        <div className="bg-smoke border-t-2 border-white fixed lg:w-20 lg:border-r-2 lg:border-b-2 bottom-0 w-full py-2 z-20 lg:rounded-r-lg lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
           <div className="flex justify-evenly lg:flex-col h-full">
             <div className="flex items-center lg:flex-col">
               <button
