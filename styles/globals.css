@@ -28,11 +28,11 @@ body {
   [multiple],
   textarea,
   select {
-    @apply mt-1 focus:outline-none focus:ring-2 focus:ring-gray-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-black border-2 px-2 py-2 disabled:opacity-50;
+    @apply mt-1 bg-black focus:outline-none focus:ring-2 focus:ring-gray-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-white border-2 px-2 py-2 disabled:opacity-50 text-white;
   }
 
   label {
-    @apply block text-sm font-medium text-black;
+    @apply block text-sm font-medium text-white;
   }
 }
 
@@ -75,11 +75,11 @@ body {
 }
 
 .prose pre {
-  @apply border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-900;
+  @apply border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-smoke;
 }
 
 .prose code {
-  @apply text-gray-800 dark:text-gray-200 px-1 py-0.5 border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-100 dark:bg-gray-900;
+  @apply text-gray-800 dark:text-gray-200 px-1 py-0.5 border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-100 dark:bg-smoke;
 }
 
 .prose pre code {

@@ -1,5 +1,5 @@
 const ArticleLoading = () => (
-  <div className="border-white border-2 shadow p-4 w-full my-4">
+  <div className="border-white border-2 shadow p-4 w-full my-4 bg-smoke">
     <div className="animate-pulse">
       <div className="flex space-x-4">
         <div className="rounded-full bg-gray-800 h-10 w-10"></div>
