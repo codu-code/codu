@@ -1,4 +1,3 @@
-import type { NextPage } from "next";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -75,13 +74,13 @@ const Nav = () => {
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                          className="text-gray-300 hover:bg-smoke hover:text-white px-3 py-2 rounded-md"
                         >
                           {item.name}
                         </a>
                       ) : (
                         <Link
-                          className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                          className="text-gray-300 hover:bg-smoke hover:text-white px-3 py-2 rounded-md"
                           key={item.name}
                           href={item.href}
                         >
@@ -97,7 +96,7 @@ const Nav = () => {
                   {session ? (
                     <>
                       <Link
-                        className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                        className="text-gray-300 hover:bg-smoke hover:text-white px-3 py-2 rounded-md"
                         href="/my-posts"
                       >
                         Your Posts
@@ -113,7 +112,7 @@ const Nav = () => {
                   ) : (
                     <>
                       <Link
-                        className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md"
+                        className="text-gray-300 hover:bg-smoke hover:text-white px-3 py-2 rounded-md"
                         href="/get-started"
                       >
                         Sign in
@@ -130,7 +129,7 @@ const Nav = () => {
                   {session && (
                     <Menu as="div" className="ml-4 relative">
                       <div>
-                        <Menu.Button className="bg-gray-900 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <Menu.Button className="bg-smoke flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                           <span className="sr-only">Open user menu</span>
 
                           <img
@@ -179,7 +178,7 @@ const Nav = () => {
               </div>
               <div className="-mr-2 flex md:hidden">
                 {/* Mobile menu button */}
-                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-smoke focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -201,7 +200,7 @@ const Nav = () => {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                    className="text-gray-300 hover:bg-smoke hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                   >
                     {item.name}
                   </Disclosure.Button>
@@ -209,7 +208,7 @@ const Nav = () => {
                   <Link key={item.name} href={item.href}>
                     <Disclosure.Button
                       as="div"
-                      className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                      className="text-gray-300 hover:bg-smoke hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                     >
                       {item.name}
                     </Disclosure.Button>
@@ -225,7 +224,7 @@ const Nav = () => {
                         className={classNames(
                           item.fancy
                             ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                            : "text-gray-300 hover:bg-gray-900 hover:text-white block px-3",
+                            : "text-gray-300 hover:bg-smoke hover:text-white block px-3",
                           "rounded-md text-base font-medium py-2"
                         )}
                         key={item.name}
@@ -242,7 +241,7 @@ const Nav = () => {
                         className={classNames(
                           item.fancy
                             ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                            : "text-gray-300 hover:bg-gray-900 hover:text-white block px-3",
+                            : "text-gray-300 hover:bg-smoke hover:text-white block px-3",
                           "rounded-md text-base font-medium py-2"
                         )}
                         key={item.name}
@@ -283,7 +282,7 @@ const Nav = () => {
                           key={item.name}
                           as="button"
                           onClick={item.onClick}
-                          className="cursor-pointer block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-900"
+                          className="cursor-pointer block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-smoke"
                         >
                           {item.name}
                         </Disclosure.Button>
@@ -291,7 +290,7 @@ const Nav = () => {
                         <Link key={item.name} href={item.href}>
                           <Disclosure.Button
                             as="div"
-                            className="cursor-pointer block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-900"
+                            className="cursor-pointer block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-smoke"
                           >
                             {item.name}
                           </Disclosure.Button>
