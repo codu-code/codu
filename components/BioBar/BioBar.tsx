@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
@@ -17,11 +16,9 @@ const BioFooter = ({ author }: Props) => {
   return (
     <div className="max-w-xl mx-auto text-gray-700 dark:text-gray-300 mt-6">
       <div className="flex mx-2 sm:mx-6 md:mx-auto border-t-2 pt-6 border-gray-300 dark:border-gray-800">
-        <div className="mr-4 flex-shrink-0 self-center">
-          <Image
-            className="rounded-full"
-            height={70}
-            width={70}
+        <div className="flex items-center">
+          <img
+            className="mr-4 rounded-full h-20 w-20 object-cover bg-slate-700"
             alt={`Avatar for ${name}`}
             src={image}
           />

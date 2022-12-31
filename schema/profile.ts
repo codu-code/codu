@@ -17,4 +17,13 @@ export const getProfileSchema = z.object({
   username: z.string(),
 });
 
+export const uploadPhotoUrlSchema = z.object({
+  type: z.string(),
+  size: z.number(),
+});
+
+export const updateProfilePhotoUrlSchema = z.object({
+  url: z.string().url(),
+});
+
 export type saveSettingsInput = z.TypeOf<typeof saveSettingsSchema>;

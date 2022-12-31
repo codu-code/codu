@@ -3,6 +3,7 @@ import type {
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
+
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import prisma from "../server/db/client";
@@ -26,7 +27,7 @@ const Profile: NextPage = ({
             <div className="mr-4 flex-shrink-0 self-center">
               {image && (
                 <img
-                  className="rounded-full h-28 w-28"
+                  className="rounded-full object-cover h-32 w-32"
                   alt={`Avatar for ${name}`}
                   src={image}
                 />
