@@ -46,7 +46,8 @@ const Nav = () => {
                       alt="Codú logo"
                       height={30}
                       width={94.5}
-                      priority={true}
+                      priority
+                      sizes="(max-width: 94px) 100vw"
                     />{" "}
                     <span className="ml-2 text-xs font-semibold">Beta</span>
                   </Link>
@@ -131,12 +132,17 @@ const Nav = () => {
                       <div>
                         <Menu.Button className="bg-smoke flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                           <span className="sr-only">Open user menu</span>
-
-                          <img
-                            className="h-10 w-10 rounded-full bg-gray-300"
-                            src={session?.user?.image || "/images/person.png"}
-                            alt={`${session.user?.name}'s avatar`}
-                          />
+                          {session.user?.image ? (
+                            <img
+                              className="h-10 w-10 rounded-full bg-gray-300 object-cover"
+                              src={session?.user?.image}
+                              alt={`${session.user?.name}'s avatar`}
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-smoke flex justify-center items-center">
+                              {session.user?.name?.[0] || "C"}
+                            </div>
+                          )}
                         </Menu.Button>
                       </div>
                       <Transition

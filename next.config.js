@@ -18,6 +18,8 @@ module.exports = withBundleAnalyzer({
       "images.unsplash.com",
       "avatars.githubusercontent.com",
       "www.gravatar.com",
+      // Temporary wildcard
+      "*.s3.eu-west-1.amazonaws.com",
     ],
   },
   i18n: {

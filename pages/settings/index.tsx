@@ -3,6 +3,7 @@ import type {
   GetServerSideProps,
   InferGetServerSidePropsType,
 } from "next";
+
 import { useRouter } from "next/router";
 import { customAlphabet } from "nanoid";
 import { unstable_getServerSession } from "next-auth/next";
@@ -20,10 +21,16 @@ import Layout from "../../components/Layout/Layout";
 import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";
 import superjson from "superjson";
+import { uploadFile } from "../../utils/s3helpers";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+type ProfilePhoto = {
+  status: "success" | "error" | "loading" | "idle";
+  url: string;
+};
 
 const Settings: NextPage = ({
   profile,
@@ -48,6 +55,11 @@ const Settings: NextPage = ({
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
 
+  const [profilePhoto, setProfilePhoto] = useState<ProfilePhoto>({
+    status: "idle",
+    url: profile.image,
+  });
+
   const { mutate } = trpc.profile.edit.useMutation({
     onError() {
       toast.error("Something went wrong saving settings.");
@@ -57,8 +69,59 @@ const Settings: NextPage = ({
     },
   });
 
+  const { mutate: getUploadUrl } = trpc.profile.getUploadUrl.useMutation();
+  const { mutate: updateUserPhotoUrl } =
+    trpc.profile.updateProfilePhotoUrl.useMutation();
+
   const onSubmit: SubmitHandler<saveSettingsInput> = (values) => {
     mutate({ ...values, newsletter: weeklyNewsletter, emailNotifications });
+  };
+
+  const uploadToUrl = async (signedUrl: string, file: File) => {
+    setProfilePhoto({ status: "loading", url: "" });
+
+    if (!file) {
+      setProfilePhoto({ status: "error", url: "" });
+      toast.error("Invalid file upload.");
+      return;
+    }
+
+    const response = await uploadFile(signedUrl, file);
+    const { fileLocation } = response;
+    await updateUserPhotoUrl({
+      url: fileLocation,
+    });
+
+    return fileLocation;
+  };
+
+  const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const { size, type } = file;
+
+      await getUploadUrl(
+        { size, type },
+        {
+          onError(error) {
+            console.error(error);
+            return toast.error(
+              "Something went wrong uploading the photo, please retry."
+            );
+          },
+          async onSuccess(signedUrl) {
+            const url = await uploadToUrl(signedUrl, file);
+            if (!url) {
+              return toast.error(
+                "Something went wrong uploading the photo, please retry."
+              );
+            }
+            setProfilePhoto({ status: "success", url });
+            toast.success("Profile photo successfully updated.");
+          },
+        }
+      );
+    }
   };
 
   return (
@@ -89,38 +152,126 @@ const Settings: NextPage = ({
                 </div>
 
                 <div>
-                  <div className="flex-grow space-y-6">
-                    <div className="mt-6 grid grid-cols-12 gap-6">
-                      <div className="col-span-12 sm:col-span-9">
-                        <label htmlFor="name">Full Name</label>
-                        <input
-                          type="text"
-                          {...register("name")}
-                          autoComplete="given-name"
-                        />
-                        {errors.name && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {`${errors.name.message || "Required"}`}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="username">Username</label>
-                      <div className="mt-1 shadow-sm flex">
-                        <span className="mt-1  bg-white px-3 items-center text-black text-sm font-semibold flex">
-                          codu.co/
-                        </span>
-                        <input type="text" {...register("username")} />
-                      </div>
-                      {errors.username && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {`${errors.username.message || "Required"}`}
-                        </p>
-                      )}
-                    </div>
+                  <div>
+                    <div className="mt-6 flex flex-col lg:flex-row">
+                      <div className="flex-grow space-y-6">
+                        <div>
+                          <label htmlFor="name">Full Name</label>
+                          <input
+                            type="text"
+                            {...register("name")}
+                            autoComplete="given-name"
+                          />
+                          {errors.name && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {`${errors.name.message || "Required"}`}
+                            </p>
+                          )}
+                        </div>
 
-                    <div>
+                        <div>
+                          <label htmlFor="username">Username</label>
+                          <div className="mt-1 shadow-sm flex">
+                            <span className="mt-1  bg-white px-3 items-center text-black text-sm font-semibold flex">
+                              codu.co/
+                            </span>
+                            <input type="text" {...register("username")} />
+                          </div>
+                          {errors.username && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {`${errors.username.message || "Required"}`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Photo upload */}
+
+                      <div className="mt-6 flex-grow lg:mt-0 lg:ml-6 lg:flex-shrink-0 lg:flex-grow-0">
+                        <p
+                          className="text-sm font-medium text-white"
+                          aria-hidden="true"
+                        >
+                          Photo{" "}
+                        </p>
+                        <div className="mt-1 lg:hidden">
+                          <div className="flex items-center">
+                            <div
+                              className="relative flex-shrink-0 overflow-hidden rounded-full h-16 w-16 "
+                              aria-hidden="true"
+                            >
+                              {profilePhoto.status === "error" ||
+                              profilePhoto.status === "loading" ? (
+                                <div className="rounded-full border-2 h-full w-full bg-black" />
+                              ) : (
+                                <img
+                                  className="rounded-full border-2 border-white object-cover h-full w-full"
+                                  src={`${
+                                    profilePhoto.url
+                                  }?t=${new Date().getTime()}`}
+                                  alt="Profile photo upload section"
+                                />
+                              )}
+                            </div>
+                            <div className="ml-5 rounded-md shadow-sm">
+                              <div className="group relative flex items-center justify-center border-white border-2 py-2 px-3 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:bg-black">
+                                <label
+                                  htmlFor="mobile-user-photo"
+                                  className="relative text-sm font-medium leading-4 text-white"
+                                >
+                                  <span>Change</span>
+                                  <span className="sr-only">user photo</span>
+                                </label>
+                                <input
+                                  id="mobile-user-photo"
+                                  name="user-photo"
+                                  type="file"
+                                  accept="image/png, image/gif, image/jpeg, image/webp"
+                                  onChange={imageChange}
+                                  className="absolute h-full w-full cursor-pointer rounded-md border-gray-300 opacity-0"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="relative hidden overflow-hidden lg:block rounded-full h-32 w-32">
+                          {profilePhoto.status === "error" ||
+                          profilePhoto.status === "loading" ? (
+                            <div className="rounded-full border-2 h-full w-full bg-black h-100 w-100" />
+                          ) : (
+                            <img
+                              className="relative rounded-full border-2 border-white object-cover h-full w-full"
+                              src={`${
+                                profilePhoto.url
+                              }?t=${new Date().getTime()}`}
+                              alt="Profile photo upload section"
+                              sizes="(max-width: 768px) 10vw"
+                            />
+                          )}
+                          <label
+                            htmlFor="desktop-user-photo"
+                            className="absolute inset-0 flex h-full w-full items-center justify-center bg-black bg-opacity-75 text-sm font-medium text-white opacity-0 focus-within:opacity-100 hover:opacity-100"
+                          >
+                            <div className=" text-center text-xs">
+                              Change Photo
+                            </div>
+                            <span className="sr-only"> user photo</span>
+                            <input
+                              type="file"
+                              id="desktop-user-photo"
+                              name="user-photo"
+                              onChange={imageChange}
+                              className="absolute inset-0 h-full w-full cursor-pointer rounded-md border-gray-300 opacity-0"
+                            />
+                          </label>
+                        </div>
+
+                        {/* Photo end  */}
+                      </div>
+                      {/*  */}
+                    </div>
+                    <div className="mt-6">
                       <label htmlFor="bio">Short bio</label>
                       <div className="mt-1">
                         <textarea
