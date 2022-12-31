@@ -34,7 +34,6 @@ const MyPosts: NextPage = ({
   });
 
   const removeSavedItem = async (postId: string) => {
-    console.log({ postId });
     try {
       await bookmark({ postId, setBookmarked: false });
     } catch (err) {

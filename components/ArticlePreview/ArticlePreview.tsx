@@ -53,8 +53,7 @@ const ArticlePreview: NextPage<Props> = ({
 
   const { mutate: bookmark, status: bookmarkStatus } =
     trpc.post.bookmark.useMutation({
-      onSettled(response) {
-        console.log(response);
+      onSettled() {
         setIsBookmarked((isBookmarked) => !isBookmarked);
       },
     });
@@ -74,7 +73,7 @@ const ArticlePreview: NextPage<Props> = ({
         <div className="flex items-center mb-4">
           <span className="sr-only">{name}</span>
           <img
-            className="mr-3 h-10 w-10 rounded-full"
+            className="mr-3 rounded-full object-cover h-12 w-12"
             src={image}
             alt={`${name}'s avatar`}
           />
