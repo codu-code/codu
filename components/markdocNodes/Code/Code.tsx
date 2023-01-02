@@ -1,6 +1,4 @@
-/* global Prism */
-
-import * as React from "react";
+import React, { useEffect } from "react";
 import copy from "copy-to-clipboard";
 import Prism from "prismjs";
 
@@ -130,15 +128,20 @@ Prism.languages.markdoc = {
   },
 };
 
-export default function Code({ children, language }: any) {
+interface Props {
+  children: string;
+  language: string;
+}
+
+export default function Code({ children, language }: Props) {
   const [copied, setCopied] = React.useState(false);
   const ref = React.useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (ref.current) Prism.highlightElement(ref.current, false);
   }, [children]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (copied && ref && ref.current) {
       copy((ref.current as HTMLElement).innerText);
       const to = setTimeout(setCopied, 1000, false);
