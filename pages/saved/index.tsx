@@ -1,4 +1,4 @@
-import { Children, Fragment } from "react";
+import { Children } from "react";
 import type {
   NextPage,
   GetServerSideProps,
@@ -6,7 +6,6 @@ import type {
 } from "next";
 import { useRouter } from "next/router";
 import { unstable_getServerSession } from "next-auth";
-import Link from "next/link";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import Layout from "../../components/Layout/Layout";
 import { authOptions } from "../api/auth/[...nextauth]";
