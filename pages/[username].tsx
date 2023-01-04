@@ -3,38 +3,19 @@ import type {
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
-import { useRouter } from "next/router";
 
-import superjson from "superjson";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
+import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
 import PageHeading from "../components/PageHeading/PageHeading";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { appRouter } from "../server/trpc/router";
-import { createContextInner } from "../server/trpc/context";
-import { getServerAuthSession } from "../server/common/get-server-auth-session";
-import { trpc } from "../utils/trpc";
 
 const Profile: NextPage = ({
+  profile,
   isOwner,
-  profileRoute,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const router = useRouter();
-
-  const { data: profile } = trpc.profile.get.useQuery(
-    {
-      username: profileRoute || "",
-    },
-    {
-      retry: false,
-      onError: () => {
-        router.push("/404");
-      },
-    }
-  );
-
-  // @TODO Can be made more elegant later
-  if (!profile) return null;
+  if (!profile) return null; // Should never happen because of serverside fetch or redirect
 
   const { name, username, image, bio, posts } = profile;
 
@@ -74,7 +55,7 @@ const Profile: NextPage = ({
                     name={name}
                     username={username || ""}
                     image={image}
-                    date={published.toISOString()}
+                    date={published}
                     readTime={readTimeMins}
                     menuOptions={
                       isOwner
@@ -97,9 +78,9 @@ const Profile: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext<{ username: string }>
+  context: GetServerSidePropsContext<{ username: string }>
 ) => {
-  const username = ctx.params?.username;
+  const username = context.params?.username;
 
   if (!username) {
     return {
@@ -111,23 +92,62 @@ export const getServerSideProps = async (
     };
   }
 
-  const session = await getServerAuthSession(ctx);
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
 
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: await createContextInner({
-      session,
-    }),
-    transformer: superjson,
+  const profile = await prisma.user.findUnique({
+    where: {
+      username,
+    },
+    select: {
+      bio: true,
+      username: true,
+      name: true,
+      image: true,
+      posts: {
+        where: {
+          NOT: {
+            published: null,
+          },
+        },
+        orderBy: {
+          published: "desc",
+        },
+        select: {
+          title: true,
+          excerpt: true,
+          slug: true,
+          readTimeMins: true,
+          published: true,
+          id: true,
+        },
+      },
+    },
   });
 
-  await ssg.profile.get.prefetch({ username });
+  if (!profile) {
+    return {
+      redirect: {
+        destination: "/404",
+        permanent: false,
+      },
+      props: {},
+    };
+  }
 
   return {
     props: {
-      trpcState: ssg.dehydrate(),
+      profile: {
+        ...profile,
+        posts: profile.posts.map((post) => ({
+          ...post,
+          published: post.published?.toISOString(),
+        })),
+      },
       isOwner: session?.user?.username === username,
-      profileRoute: username,
     },
   };
 };

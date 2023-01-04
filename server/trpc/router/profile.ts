@@ -61,45 +61,12 @@ export const profileRouter = router({
 
       return response;
     }),
-  get: publicProcedure.input(getProfileSchema).query(async ({ ctx, input }) => {
+  get: publicProcedure.input(getProfileSchema).query(({ ctx, input }) => {
     const { username } = input;
-    const profile = await ctx.prisma.user.findUnique({
+    return ctx.prisma.user.findUnique({
       where: {
         username,
       },
-      select: {
-        bio: true,
-        username: true,
-        name: true,
-        image: true,
-        posts: {
-          where: {
-            NOT: {
-              published: null,
-            },
-          },
-          orderBy: {
-            published: "desc",
-          },
-          select: {
-            title: true,
-            excerpt: true,
-            slug: true,
-            readTimeMins: true,
-            published: true,
-            id: true,
-          },
-        },
-      },
     });
-
-    if (!profile) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Profile not found",
-      });
-    }
-
-    return profile;
   }),
 });
