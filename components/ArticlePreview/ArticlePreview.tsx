@@ -5,6 +5,7 @@ import { Temporal } from "@js-temporal/polyfill";
 import { BookmarkIcon, DotsHorizontalIcon } from "@heroicons/react/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { trpc } from "../../utils/trpc";
+import { signIn, useSession } from "next-auth/react";
 
 type ButtonOptions = {
   label: string;
@@ -43,6 +44,7 @@ const ArticlePreview: NextPage<Props> = ({
   bookmarkedInitialState = false,
 }) => {
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
+  const { data: session } = useSession();
 
   const dateTime = Temporal.Instant.from(date);
   const readableDate = dateTime.toLocaleString(["en-IE"], {
@@ -62,7 +64,10 @@ const ArticlePreview: NextPage<Props> = ({
   const bookmarkPost = async (postId: string, setBookmarked = true) => {
     if (bookmarkStatus === "loading") return;
     try {
-      await bookmark({ postId, setBookmarked });
+      if (!session) {
+        signIn();
+      }
+      return await bookmark({ postId, setBookmarked });
     } catch (err) {
       console.error(err);
     }
@@ -127,6 +132,9 @@ const ArticlePreview: NextPage<Props> = ({
                 onClick={() => {
                   if (bookmarked) return bookmarkPost(id, false);
                   bookmarkPost(id);
+                  if (!session) {
+                    signIn();
+                  }
                 }}
               >
                 <BookmarkIcon
