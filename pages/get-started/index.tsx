@@ -9,8 +9,6 @@ import { LockClosedIcon } from "@heroicons/react/solid";
 const GetStarted: NextPage = () => {
   const { callbackUrl } = useRouter().query;
 
-  console.log(callbackUrl);
-
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
 
