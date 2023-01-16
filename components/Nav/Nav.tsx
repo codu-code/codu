@@ -17,8 +17,6 @@ const Nav = () => {
   const { data: session } = useSession();
   const { route } = useRouter();
 
-  console.log(route);
-
   const userNavigation = [
     {
       name: "Your Profile",
