@@ -1,4 +1,4 @@
-import { signOut } from "next-auth/react";
+import { signOut, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
@@ -7,6 +7,7 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { PlusSmIcon } from "@heroicons/react/solid";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
+import { useRouter } from "next/router";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -14,6 +15,9 @@ function classNames(...classes: string[]) {
 
 const Nav = () => {
   const { data: session } = useSession();
+  const { route } = useRouter();
+
+  console.log(route);
 
   const userNavigation = [
     {
@@ -111,18 +115,18 @@ const Nav = () => {
                     </>
                   ) : (
                     <>
-                      <Link
+                      <button
                         className="text-gray-300 hover:bg-smoke hover:text-white px-3 py-2 rounded-md"
-                        href="/get-started"
+                        onClick={() => signIn()}
                       >
                         Sign in
-                      </Link>
-                      <Link
+                      </button>
+                      <button
                         className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                        href="/get-started"
+                        onClick={() => signIn()}
                       >
                         Sign up for free
-                      </Link>
+                      </button>
                     </>
                   )}
                   {/* Profile dropdown */}
@@ -220,7 +224,7 @@ const Nav = () => {
                 {session ? (
                   <>
                     {userSubNav.map((item) => (
-                      <Link
+                      <button
                         className={classNames(
                           item.fancy
                             ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
@@ -228,16 +232,16 @@ const Nav = () => {
                           "rounded-md text-base font-medium py-2"
                         )}
                         key={item.name}
-                        href={item.href}
+                        onClick={() => signIn()}
                       >
                         {item.name}
-                      </Link>
+                      </button>
                     ))}
                   </>
                 ) : (
                   <>
                     {subNav.map((item) => (
-                      <Link
+                      <button
                         className={classNames(
                           item.fancy
                             ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
@@ -245,10 +249,10 @@ const Nav = () => {
                           "rounded-md text-base font-medium py-2"
                         )}
                         key={item.name}
-                        href={item.href}
+                        onClick={() => signIn()}
                       >
                         {item.name}
-                      </Link>
+                      </button>
                     ))}
                   </>
                 )}
