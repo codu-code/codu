@@ -38,3 +38,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 # Env Variables
+
+
+# Prisma generated client
+/prisma/generated
