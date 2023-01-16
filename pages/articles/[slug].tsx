@@ -15,6 +15,7 @@ import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
 import { trpc } from "../../utils/trpc";
+import { signIn, useSession } from "next-auth/react";
 
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
@@ -39,6 +40,7 @@ const ArticlePage: NextPage = ({
   slug,
   host,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const { data: session } = useSession();
   if (!slug) return null;
 
   const { data: post } = trpc.post.bySlug.useQuery({ slug });
@@ -123,6 +125,9 @@ const ArticlePage: NextPage = ({
                 onClick={() => {
                   if (data?.currentUserLiked) return likePost(post.id, false);
                   likePost(post.id);
+                  if (!session) {
+                    signIn();
+                  }
                 }}
               >
                 <HeartIcon
@@ -137,6 +142,9 @@ const ArticlePage: NextPage = ({
             <button
               className="lg:mx-auto p-1 rounded-full hover:bg-neutral-800"
               onClick={() => {
+                if (!session) {
+                  signIn();
+                }
                 if (data?.currentUserBookmarked)
                   return bookmarkPost(post.id, false);
                 bookmarkPost(post.id);
