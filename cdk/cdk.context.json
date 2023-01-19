@@ -1,1 +1,10 @@
-{}
+{
+  "ssm:account=764918915129:parameterName=/env/dev/accountId:region=eu-west-1": "802956189746",
+  "availability-zones:account=802956189746:region=eu-west-1": [
+    "eu-west-1a",
+    "eu-west-1b",
+    "eu-west-1c"
+  ],
+  "ssm:account=764918915129:parameterName=/env/dev/domainName:region=eu-west-1": "dev1.codu.co",
+  "ssm:account=764918915129:parameterName=/env/dev/hostedZoneId:region=eu-west-1": "Z09797183E6CQSVU1LFVP"
+}
