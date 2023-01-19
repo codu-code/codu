@@ -25,27 +25,24 @@ export class PipelineStack extends cdk.Stack {
     });
 
     const getConfig = (env: "dev" | "prod") => {
-      const accountId = ssm.StringParameter.valueForStringParameter(
+      const accountId = ssm.StringParameter.valueFromLookup(
         this,
-        `/env/${env}/accountId`,
-        1
+        `/env/${env}/accountId`
       );
 
-      const domainName = ssm.StringParameter.valueForStringParameter(
+      const domainName = ssm.StringParameter.valueFromLookup(
         this,
-        `/env/${env}/domainName`,
-        1
+        `/env/${env}/domainName`
       );
 
-      const hostedZoneId = ssm.StringParameter.valueForStringParameter(
+      const hostedZoneId = ssm.StringParameter.valueFromLookup(
         this,
-        `/env/${env}/hostedZoneId`,
-        1
+        `/env/${env}/hostedZoneId`
       );
 
       return {
         env: {
-          // Because on first synth we have a dummy value that doesn't allow the synth to resolve
+          // Dummy value on synth prep that causes fail
           account: accountId.includes("dummy-value") ? "123456789" : accountId,
           region: "eu-west-1",
         },
