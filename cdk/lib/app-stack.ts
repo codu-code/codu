@@ -14,8 +14,6 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import { HttpsRedirect } from "aws-cdk-lib/aws-route53-patterns";
 
 interface Props extends cdk.StageProps {
-  domainName: string;
-  hostedZoneId: string;
   db: cdk.aws_rds.DatabaseInstance;
   production?: boolean;
 }
@@ -27,7 +25,19 @@ export class AppStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
-    const { domainName, hostedZoneId, db } = props;
+    const { db } = props;
+
+    const domainName = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/env/domainName`,
+      1
+    );
+
+    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/env/hostedZoneId`,
+      1
+    );
 
     const cluster = new ecs.Cluster(this, "ServiceCluster");
 
