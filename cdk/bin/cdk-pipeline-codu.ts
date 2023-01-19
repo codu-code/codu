@@ -7,8 +7,8 @@ const app = new cdk.App();
 
 new PipelineStack(app, "CoduPipeline", {
   env: {
-    region: "eu-west-1",
-    account: "764918915129",
+    account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION,
   },
   crossRegionReferences: true,
 });

@@ -19,7 +19,6 @@ export class StorageStack extends cdk.Stack {
 
     const vpc = new ec2.Vpc(this, "StackVpc");
     // s3 bucket
-
     const bucketName = ssm.StringParameter.valueForStringParameter(
       this,
       "/env/bucketname"

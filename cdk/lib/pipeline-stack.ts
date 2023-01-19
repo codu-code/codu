@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
+import type { Construct } from "constructs";
 import { AppStage } from "./app-stage";
 import {
   CodePipeline,
@@ -14,7 +14,7 @@ export class PipelineStack extends cdk.Stack {
 
     const synthAction = new ShellStep("Synth", {
       input: CodePipelineSource.gitHub("codu-code/codu", "develop"),
-      commands: ["npm ci", "npm run build", "npx cdk synth"],
+      commands: ["cd cdk", "ls", "npm ci", "npm run build", "npx cdk synth"],
     });
 
     const pipeline = new CodePipeline(this, "Pipeline", {
@@ -24,19 +24,22 @@ export class PipelineStack extends cdk.Stack {
     });
 
     const getConfig = (env: "dev" | "prod") => {
-      const accountId = ssm.StringParameter.valueFromLookup(
+      const accountId = ssm.StringParameter.valueForStringParameter(
         this,
-        `/env/${env}/accountId`
+        `/env/${env}/accountId`,
+        1
       );
 
-      const domainName = ssm.StringParameter.valueFromLookup(
+      const domainName = ssm.StringParameter.valueForStringParameter(
         this,
-        `/env/${env}/domainName`
+        `/env/${env}/domainName`,
+        1
       );
 
-      const hostedZoneId = ssm.StringParameter.valueFromLookup(
+      const hostedZoneId = ssm.StringParameter.valueForStringParameter(
         this,
-        `/env/${env}/hostedZoneId`
+        `/env/${env}/hostedZoneId`,
+        1
       );
 
       return {

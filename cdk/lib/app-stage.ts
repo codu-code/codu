@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
+import type { Construct } from "constructs";
 import { StorageStack } from "./storage-stack";
 import { AppStack } from "./app-stack";
 

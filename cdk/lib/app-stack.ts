@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import { Construct } from "constructs";
+import type { Construct } from "constructs";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import * as ecrAssets from "aws-cdk-lib/aws-ecr-assets";
@@ -73,6 +73,7 @@ export class AppStack extends cdk.Stack {
               }
             )
           ),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           DB_TEST: ecs.Secret.fromSecretsManager(db.secret!, "username"),
         },
 
