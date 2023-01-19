@@ -30,24 +30,12 @@ export class PipelineStack extends cdk.Stack {
         `/env/${env}/accountId`
       );
 
-      const domainName = ssm.StringParameter.valueFromLookup(
-        this,
-        `/env/${env}/domainName`
-      );
-
-      const hostedZoneId = ssm.StringParameter.valueFromLookup(
-        this,
-        `/env/${env}/hostedZoneId`
-      );
-
       return {
         env: {
           // Dummy value on synth prep that causes fail
           account: accountId.includes("dummy-value") ? "123456789" : accountId,
           region: "eu-west-1",
         },
-        domainName: domainName,
-        hostedZoneId: hostedZoneId,
       };
     };
 
