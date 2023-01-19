@@ -21,7 +21,8 @@ export class StorageStack extends cdk.Stack {
     // s3 bucket
     const bucketName = ssm.StringParameter.valueForStringParameter(
       this,
-      "/env/bucketname"
+      "/env/bucketname",
+      1
     );
 
     this.bucket = new s3.Bucket(this, "demo-bucket", {
@@ -43,12 +44,14 @@ export class StorageStack extends cdk.Stack {
 
     const dbUsername = ssm.StringParameter.valueForStringParameter(
       this,
-      "/env/db/username"
+      "/env/db/username",
+      1
     );
 
     const dbName = ssm.StringParameter.valueForStringParameter(
       this,
-      "/env/db/name"
+      "/env/db/name",
+      1
     );
 
     // RDS
