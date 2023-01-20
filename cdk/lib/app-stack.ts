@@ -11,10 +11,12 @@ import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { HttpsRedirect } from "aws-cdk-lib/aws-route53-patterns";
 
 interface Props extends cdk.StageProps {
   db: cdk.aws_rds.DatabaseInstance;
+  bucket: cdk.aws_s3.Bucket;
   production?: boolean;
 }
 
@@ -25,7 +27,7 @@ export class AppStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
-    const { db } = props;
+    const { db, bucket, production } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -47,7 +49,9 @@ export class AppStack extends cdk.Stack {
       cluster,
       domainName,
       hostedZoneId,
-      db
+      db,
+      bucket,
+      !!production
     );
 
     this.appLoadBalancerDNS = new cdk.CfnOutput(this, "AppLoadBalancerDNS", {
@@ -59,32 +63,96 @@ export class AppStack extends cdk.Stack {
     cluster: ecs.Cluster,
     domainName: string,
     hostedZoneId: string,
-    db: cdk.aws_rds.DatabaseInstance
+    db: cdk.aws_rds.DatabaseInstance,
+    bucket: cdk.aws_s3.Bucket,
+    production: boolean
   ) {
+    if (!db.secret) throw new Error("DB Secret required");
+    const wwwDomainName = `www.${domainName}`;
+
     const appAsset = new ecrAssets.DockerImageAsset(this, "app", {
-      directory: "./app",
+      directory: "../",
       file: "Dockerfile",
     });
 
     const taskDef = new ecs.FargateTaskDefinition(this, "ecs-taskdef");
 
+    taskDef.addToTaskRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:*Object"],
+        resources: ["arn:aws:s3:::*"],
+      })
+    );
+
+    const fatomPublicId = production
+      ? ssm.StringParameter.valueForStringParameter(
+          this,
+          `/env/fatomPublicId`,
+          1
+        )
+      : "";
+
     taskDef
       .addContainer("app", {
         image: ecs.ContainerImage.fromDockerImageAsset(appAsset),
         essential: true,
-        // environment: { REDIS_URL: this.redisServiceUrl }, // Plain text not for secrets
+        environment: {
+          BASE_URL: `https://${wwwDomainName}`,
+          NEXT_PUBLIC_FATHOM_SITE_ID: fatomPublicId,
+          S3_BUCKET_NAME: bucket.bucketName,
+        }, // Plain text not for secrets
         secrets: {
-          TEST: ecs.Secret.fromSsmParameter(
+          DB_USERNAME: ecs.Secret.fromSecretsManager(db.secret, "username"),
+          DB_HOST: ecs.Secret.fromSecretsManager(db.secret, "host"),
+          DB_PORT: ecs.Secret.fromSecretsManager(db.secret, "port"),
+          DB_NAME: ecs.Secret.fromSecretsManager(db.secret, "dbname"),
+          DB_PASSWORD: ecs.Secret.fromSecretsManager(db.secret, "password"),
+          GITHUB_ID: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromSecureStringParameterAttributes(
               this,
-              "test",
+              "githubId",
               {
-                parameterName: "test",
+                parameterName: "/env/githubId",
               }
             )
           ),
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          DB_TEST: ecs.Secret.fromSecretsManager(db.secret!, "username"),
+          GITHUB_SECRET: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "githubSecret",
+              {
+                parameterName: "/env/githubSecret",
+              }
+            )
+          ),
+          NEXTAUTH_SECRET: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "nextauthSecret",
+              {
+                parameterName: "/env/nextauthSecret",
+              }
+            )
+          ),
+          // ACCESS_KEY: ecs.Secret.fromSsmParameter(
+          //   ssm.StringParameter.fromSecureStringParameterAttributes(
+          //     this,
+          //     "accessKey",
+          //     {
+          //       parameterName: "/env/accessKey",
+          //     }
+          //   )
+          // ),
+          // SECRET_KEY: ecs.Secret.fromSsmParameter(
+          //   ssm.StringParameter.fromSecureStringParameterAttributes(
+          //     this,
+          //     "secretKey",
+          //     {
+          //       parameterName: "/env/secretKey",
+          //     }
+          //   )
+          // ),
         },
 
         logging: ecs.LogDrivers.awsLogs({
@@ -107,8 +175,6 @@ export class AppStack extends cdk.Stack {
         }
       );
 
-    fargateService.service;
-
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: 3,
@@ -126,8 +192,6 @@ export class AppStack extends cdk.Stack {
       ec2.Port.tcp(this.appPort),
       "app-inbound"
     );
-
-    const wwwDomainName = `www.${domainName}`;
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
       hostedZoneId,
