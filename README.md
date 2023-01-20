@@ -29,7 +29,7 @@ npm install
 5. Create a `.env` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env`.
   ```
   # This default value is if you run our local docker-compose.yml file to create the database.
-  DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres
+  DB_CONNECTION=postgresql://postgres:secret@127.0.0.1:5432/postgres
   # Setup your GitHub ID & Secret on GitHub: https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps
   # For development, make sure you set up this with a Homepage URL of http://localhost:3000/ and an Authorization callback URL of http://localhost:3000/api/auth
   GITHUB_ID=YOUR_GITHUB_APP_ID
@@ -65,9 +65,9 @@ Learn more about API routes [here](https://nextjs.org/docs/api-routes/introducti
 
 ## Environment Variables
 
-### DATABASE_URL
+### DB_CONNECTION
 
-The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15.0).
+The `DB_CONNECTION` is a connection string to a PostgreSQL database (version 15.0).
 
 By default, we point to a database running locally with Docker from our `docker-compose.yml` file.
 
