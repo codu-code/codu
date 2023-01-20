@@ -22,7 +22,7 @@ interface Props extends cdk.StageProps {
 
 export class AppStack extends cdk.Stack {
   public readonly appLoadBalancerDNS: cdk.CfnOutput;
-  public readonly appPort: number = 8080;
+  public readonly appPort: number = 3000;
   public readonly cloudMapNamespace = "service.internal";
 
   constructor(scope: Construct, id: string, props: Props) {
