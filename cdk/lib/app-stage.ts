@@ -10,6 +10,7 @@ export class AppStage extends cdk.Stage {
     const storageStack = new StorageStack(this, "StorageStack");
     new AppStack(this, "AppStack", {
       db: storageStack.db,
+      bucket: storageStack.bucket,
     }).addDependency(storageStack);
   }
 }

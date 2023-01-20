@@ -14,3 +14,4 @@ ISSUE_TEMPLATE.md
 .next
 *.swp
 /scripts
+cdk*
