@@ -76,30 +76,24 @@ export class AppStack extends cdk.Stack {
           DB_NAME: ecs.Secret.fromSecretsManager(db.secret, "dbname"),
           DB_PASSWORD: ecs.Secret.fromSecretsManager(db.secret, "password"),
           GITHUB_ID: ecs.Secret.fromSsmParameter(
-            ssm.StringParameter.fromSecureStringParameterAttributes(
+            ssm.StringParameter.fromStringParameterName(
               this,
               "githubId",
-              {
-                parameterName: "/env/githubId",
-              }
+              "/env/githubId"
             )
           ),
           GITHUB_SECRET: ecs.Secret.fromSsmParameter(
-            ssm.StringParameter.fromSecureStringParameterAttributes(
+            ssm.StringParameter.fromStringParameterName(
               this,
               "githubSecret",
-              {
-                parameterName: "/env/githubSecret",
-              }
+              "/env/githubSecret"
             )
           ),
           NEXTAUTH_SECRET: ecs.Secret.fromSsmParameter(
-            ssm.StringParameter.fromSecureStringParameterAttributes(
+            ssm.StringParameter.fromStringParameterName(
               this,
               "nextauthSecret",
-              {
-                parameterName: "/env/nextauthSecret",
-              }
+              "/env/nextauthSecret"
             )
           ),
           // ACCESS_KEY: ecs.Secret.fromSsmParameter(
