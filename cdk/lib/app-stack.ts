@@ -99,6 +99,7 @@ export class AppStack extends cdk.Stack {
         essential: true,
         environment: {
           BASE_URL: `https://${wwwDomainName}`,
+          NEXTAUTH_URL: `https://${wwwDomainName}`,
           NEXT_PUBLIC_FATHOM_SITE_ID: fatomPublicId,
           S3_BUCKET_NAME: bucket.bucketName,
         }, // Plain text not for secrets
