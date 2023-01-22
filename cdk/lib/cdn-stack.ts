@@ -36,6 +36,16 @@ export class CdnStack extends cdk.Stack {
       1
     );
 
+    const customHeaderValue =
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        "customHeaderValue",
+        {
+          parameterName: "/env/cf/customHeaderValue",
+          version: 1,
+        }
+      ).stringValue;
+
     const wwwDomainName = `www.${domainName}`;
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
@@ -54,6 +64,27 @@ export class CdnStack extends cdk.Stack {
       domainNames: [wwwDomainName],
       certificate,
       defaultBehavior: {
+        responseHeadersPolicy: new cloudfront.ResponseHeadersPolicy(
+          this,
+          "CustomHeadersPolicy",
+          {
+            customHeadersBehavior: {
+              customHeaders: [
+                { header: "X-Forwarded-Port", value: "443", override: true },
+                {
+                  header: "X-Forwarded-Ssl",
+                  value: "on",
+                  override: true,
+                },
+                {
+                  header: "X-FCTL-FRWD",
+                  value: customHeaderValue,
+                  override: true,
+                },
+              ],
+            },
+          }
+        ),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         origin: new origins.LoadBalancerV2Origin(loadBalancer, {
