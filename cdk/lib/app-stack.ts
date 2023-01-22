@@ -98,24 +98,6 @@ export class AppStack extends cdk.Stack {
               "/env/nextauthSecret"
             )
           ),
-          // ACCESS_KEY: ecs.Secret.fromSsmParameter(
-          //   ssm.StringParameter.fromSecureStringParameterAttributes(
-          //     this,
-          //     "accessKey",
-          //     {
-          //       parameterName: "/env/accessKey",
-          //     }
-          //   )
-          // ),
-          // SECRET_KEY: ecs.Secret.fromSsmParameter(
-          //   ssm.StringParameter.fromSecureStringParameterAttributes(
-          //     this,
-          //     "secretKey",
-          //     {
-          //       parameterName: "/env/secretKey",
-          //     }
-          //   )
-          // ),
         },
 
         logging: ecs.LogDrivers.awsLogs({

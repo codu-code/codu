@@ -58,7 +58,9 @@ export class CdnStack extends cdk.Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         origin: new origins.LoadBalancerV2Origin(loadBalancer, {
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          originShieldRegion: "eu-west-1",
         }),
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         functionAssociations: [
           {
             function: new cloudfront.Function(this, "Function", {
