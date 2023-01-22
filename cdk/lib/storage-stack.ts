@@ -13,11 +13,13 @@ interface Props extends cdk.StackProps {
 export class StorageStack extends cdk.Stack {
   public readonly bucket;
   public readonly db;
+  public readonly vpc;
 
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
 
-    const vpc = new ec2.Vpc(this, "StackVpc");
+    this.vpc = new ec2.Vpc(this, "StorageStackVpc");
+    const { vpc } = this;
     // s3 bucket
     const bucketName = ssm.StringParameter.valueForStringParameter(
       this,
