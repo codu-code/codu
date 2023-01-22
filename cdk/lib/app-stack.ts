@@ -33,7 +33,6 @@ export class AppStack extends cdk.Stack {
 
     cluster.addDefaultCloudMapNamespace({ name: this.cloudMapNamespace });
 
-    if (!db.secret) throw new Error("DB Secret required");
     const wwwDomainName = `www.${domainName}`;
 
     const appAsset = new ecrAssets.DockerImageAsset(this, "app", {
@@ -73,7 +72,7 @@ export class AppStack extends cdk.Stack {
           DATABASE_URL: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromSecureStringParameterAttributes(
               this,
-              "githubSecret",
+              "dbUrl",
               { parameterName: "/env/db/dbUrl", version: 1 }
             )
           ),
