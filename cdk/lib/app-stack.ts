@@ -126,11 +126,8 @@ export class AppStack extends cdk.Stack {
           publicLoadBalancer: true,
         }
       );
-    const listener = fargateService.loadBalancer.addListener("Listener", {
-      port: 80,
-    });
 
-    listener.addAction("ListenerRule", {
+    fargateService.listener.addAction("ListenerRule", {
       priority: 1,
       conditions: [
         elbv2.ListenerCondition.httpHeader("X-FCTL-FRWD", [customHeaderValue]),
@@ -138,7 +135,7 @@ export class AppStack extends cdk.Stack {
       action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
     });
 
-    listener.addAction("DefaultListenerRule", {
+    fargateService.listener.addAction("DefaultListenerRule", {
       action: elbv2.ListenerAction.fixedResponse(500, {
         contentType: "text/plain",
         messageBody: "Not Allowed",
