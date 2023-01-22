@@ -56,12 +56,15 @@ export class StorageStack extends cdk.Stack {
 
     // RDS
     this.db = new rds.DatabaseInstance(this, "db-instance", {
-      databaseName: dbName,
       instanceIdentifier: "codu-rds",
+      databaseName: dbName,
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_14_5,
       }),
-      credentials: rds.Credentials.fromGeneratedSecret(dbUsername),
+      credentials: rds.Credentials.fromPassword(
+        dbUsername,
+        cdk.SecretValue.ssmSecure("/env/db/password", "1")
+      ),
       vpc: vpc,
       vpcSubnets: vpc.selectSubnets({
         subnetType: ec2.SubnetType.PUBLIC,

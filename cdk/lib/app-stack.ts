@@ -70,16 +70,11 @@ export class AppStack extends cdk.Stack {
           S3_BUCKET_NAME: bucket.bucketName,
         }, // Plain text not for secrets
         secrets: {
-          DB_USERNAME: ecs.Secret.fromSecretsManager(db.secret, "username"),
-          DB_HOST: ecs.Secret.fromSecretsManager(db.secret, "host"),
-          DB_PORT: ecs.Secret.fromSecretsManager(db.secret, "port"),
-          DB_NAME: ecs.Secret.fromSecretsManager(db.secret, "dbname"),
-          DB_PASSWORD: ecs.Secret.fromSecretsManager(db.secret, "password"),
-          GITHUB_ID: ecs.Secret.fromSsmParameter(
-            ssm.StringParameter.fromStringParameterName(
+          DATABASE_URL: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
               this,
-              "githubId",
-              "/env/githubId"
+              "githubSecret",
+              { parameterName: "/env/db/dbUrl", version: 1 }
             )
           ),
           GITHUB_SECRET: ecs.Secret.fromSsmParameter(
@@ -87,6 +82,13 @@ export class AppStack extends cdk.Stack {
               this,
               "githubSecret",
               "/env/githubSecret"
+            )
+          ),
+          GITHUB_ID: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "githubId",
+              "/env/githubId"
             )
           ),
           NEXTAUTH_SECRET: ecs.Secret.fromSsmParameter(
