@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { aws_elasticloadbalancingv2 as elbv2 } from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import type { IVpc } from "aws-cdk-lib/aws-ec2";
 import type { Construct } from "constructs";
@@ -30,6 +31,16 @@ export class AppStack extends cdk.Stack {
       `/env/domainName`,
       1
     );
+
+    const customHeaderValue =
+      ssm.StringParameter.fromSecureStringParameterAttributes(
+        this,
+        "customHeaderValue",
+        {
+          parameterName: "/env/cf/customHeaderValue",
+          version: 1,
+        }
+      ).stringValue;
 
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
@@ -119,6 +130,24 @@ export class AppStack extends cdk.Stack {
           publicLoadBalancer: true,
         }
       );
+    const listener = fargateService.loadBalancer.addListener("Listener", {
+      port: 80,
+    });
+
+    listener.addAction("ListenerRule", {
+      priority: 1,
+      conditions: [
+        elbv2.ListenerCondition.httpHeader("X-FCTL-FRWD", [customHeaderValue]),
+      ],
+      action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
+    });
+
+    listener.addAction("DefaultListenerRule", {
+      action: elbv2.ListenerAction.fixedResponse(500, {
+        contentType: "text/plain",
+        messageBody: "Not Allowed",
+      }),
+    });
 
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
