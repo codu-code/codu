@@ -32,15 +32,11 @@ export class AppStack extends cdk.Stack {
       1
     );
 
-    const customHeaderValue =
-      ssm.StringParameter.fromSecureStringParameterAttributes(
-        this,
-        "customHeaderValue",
-        {
-          parameterName: "/env/cf/customHeaderValue",
-          version: 1,
-        }
-      ).stringValue;
+    const customHeaderValue = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/env/cf/customHeaderValue`,
+      1
+    );
 
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
