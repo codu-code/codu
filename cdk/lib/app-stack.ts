@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import type { IVpc } from "aws-cdk-lib/aws-ec2";
 import type { Construct } from "constructs";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
@@ -11,6 +12,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 interface Props extends cdk.StageProps {
   db: cdk.aws_rds.DatabaseInstance;
   bucket: cdk.aws_s3.Bucket;
+  vpc: IVpc;
   production?: boolean;
 }
 
@@ -21,7 +23,7 @@ export class AppStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
-    const { db, bucket, production } = props;
+    const { db, bucket, production, vpc } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -29,7 +31,7 @@ export class AppStack extends cdk.Stack {
       1
     );
 
-    const cluster = new ecs.Cluster(this, "ServiceCluster");
+    const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
     cluster.addDefaultCloudMapNamespace({ name: this.cloudMapNamespace });
 
@@ -45,8 +47,8 @@ export class AppStack extends cdk.Stack {
     taskDef.addToTaskRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: ["s3:*Object"],
-        resources: ["arn:aws:s3:::*"],
+        actions: ["s3:*Object", "SES:*"],
+        resources: ["*"],
       })
     );
 
@@ -61,7 +63,6 @@ export class AppStack extends cdk.Stack {
     taskDef
       .addContainer("app", {
         image: ecs.ContainerImage.fromDockerImageAsset(appAsset),
-        essential: true,
         environment: {
           BASE_URL: `https://${wwwDomainName}`,
           NEXTAUTH_URL: `https://${wwwDomainName}`,
