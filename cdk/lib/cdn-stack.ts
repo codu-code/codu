@@ -60,32 +60,16 @@ export class CdnStack extends cdk.Stack {
       domainNames: [wwwDomainName],
       certificate,
       defaultBehavior: {
-        responseHeadersPolicy: new cloudfront.ResponseHeadersPolicy(
-          this,
-          "CustomHeadersPolicy",
-          {
-            customHeadersBehavior: {
-              customHeaders: [
-                { header: "X-Forwarded-Port", value: "443", override: true },
-                {
-                  header: "X-Forwarded-Ssl",
-                  value: "on",
-                  override: true,
-                },
-                {
-                  header: "X-FCTL-FRWD",
-                  value: customHeaderValue,
-                  override: true,
-                },
-              ],
-            },
-          }
-        ),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         origin: new origins.LoadBalancerV2Origin(loadBalancer, {
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
           originShieldRegion: "eu-west-1",
+          customHeaders: {
+            "X-Forwarded-Port": "443",
+            "X-Forwarded-Ssl": "on",
+            "X-FCTL-FRWD": customHeaderValue,
+          },
         }),
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         functionAssociations: [
