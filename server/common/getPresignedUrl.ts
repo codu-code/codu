@@ -10,7 +10,7 @@ export const getPresignedUrl = async (
   const extension = fileType.split("/")[1];
   if (!extension) throw new Error("Invalid file type provided");
 
-  const Key = `avatar.${userId}.${extension}`;
+  const Key = `u/${userId}.${extension}`;
 
   const putCommand = new PutObjectCommand({
     Bucket: process.env.S3_BUCKET_NAME,
