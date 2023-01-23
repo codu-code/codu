@@ -75,8 +75,11 @@ export class CdnStack extends cdk.Stack {
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         functionAssociations: [
           {
-            function: new cloudfront.Function(this, "Function", {
-              code: cloudfront.FunctionCode.fromInline(`
+            function: new cloudfront.Function(
+              this,
+              "WebCfDistributionFunction",
+              {
+                code: cloudfront.FunctionCode.fromInline(`
                   function handler(event) {
                     var host = event.request.headers.host.value;
                     var request = event.request;
@@ -90,7 +93,8 @@ export class CdnStack extends cdk.Stack {
                     return request;
                   }                  
                 `),
-            }),
+              }
+            ),
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           },
         ],
@@ -107,8 +111,11 @@ export class CdnStack extends cdk.Stack {
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         functionAssociations: [
           {
-            function: new cloudfront.Function(this, "Function", {
-              code: cloudfront.FunctionCode.fromInline(`
+            function: new cloudfront.Function(
+              this,
+              "UploadCfDistributionFunction",
+              {
+                code: cloudfront.FunctionCode.fromInline(`
                     function handler(event) {
                       var host = event.request.headers.host.value;
                       var request = event.request;
@@ -122,7 +129,8 @@ export class CdnStack extends cdk.Stack {
                       return request;
                     }                  
                   `),
-            }),
+              }
+            ),
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           },
         ],
