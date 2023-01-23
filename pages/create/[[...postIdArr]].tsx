@@ -31,6 +31,7 @@ const Create: NextPage = () => {
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
 
   const { handleSubmit, register, watch, reset, getValues } =
     useForm<SavePostInput>({
@@ -84,9 +85,15 @@ const Create: NextPage = () => {
           }
         );
       },
-      enabled: !!postId,
+      enabled: !!postId && shouldRefetch,
     }
   );
+
+  useEffect(() => {
+    if (shouldRefetch) {
+      setShouldRefetch(!(dataStatus === "success"));
+    }
+  }, [dataStatus, shouldRefetch]);
 
   const savePost = async () => {
     const data = getValues();
