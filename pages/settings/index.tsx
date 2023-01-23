@@ -117,7 +117,9 @@ const Settings: NextPage = ({
               );
             }
             setProfilePhoto({ status: "success", url });
-            toast.success("Profile photo successfully updated.");
+            toast.success(
+              "Profile photo successfully updated. This may take a few minutes to update around the site."
+            );
           },
         }
       );

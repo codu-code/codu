@@ -9,6 +9,7 @@ import { getPresignedUrl } from "../../common/getPresignedUrl";
 
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { nanoid } from "nanoid";
 
 export const profileRouter = router({
   edit: protectedProcedure
@@ -32,7 +33,7 @@ export const profileRouter = router({
           id: ctx.session.user.id,
         },
         data: {
-          image: input.url,
+          image: `${input.url}?id=${nanoid(3)}`,
         },
       });
       return profile;

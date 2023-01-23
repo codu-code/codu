@@ -1,6 +1,5 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { nanoid } from "nanoid";
 import { s3Client } from "../../utils/s3helpers";
 
 export const getPresignedUrl = async (
@@ -11,7 +10,7 @@ export const getPresignedUrl = async (
   const extension = fileType.split("/")[1];
   if (!extension) throw new Error("Invalid file type provided");
 
-  const Key = `${userId}-${nanoid(20)}.${extension}`;
+  const Key = `avatar.${userId}.${extension}`;
 
   const putCommand = new PutObjectCommand({
     Bucket: process.env.S3_BUCKET_NAME,
