@@ -104,7 +104,7 @@ const Settings: NextPage = ({
         { size, type },
         {
           onError(error) {
-            console.error(error);
+            if (error) return toast.error(error.message);
             return toast.error(
               "Something went wrong uploading the photo, please retry."
             );

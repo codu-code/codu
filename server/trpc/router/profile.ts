@@ -43,17 +43,21 @@ export const profileRouter = router({
       const { size, type } = input;
       const extension = type.split("/")[1];
 
-      if (!["jpg", "jpeg", "gif", "png", "webp"].includes(extension)) {
+      const acceptedFormats = ["jpg", "jpeg", "gif", "png", "webp"];
+
+      if (!acceptedFormats.includes(extension)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid file format.",
+          message: `Invalid file. Accepted file formats: ${acceptedFormats.join(
+            ", "
+          )}.`,
         });
       }
 
-      if (size > 8388608) {
+      if (size > 1048576) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Maximum file size 8mb",
+          message: "Maximum file size 1mb",
         });
       }
 
