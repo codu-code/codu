@@ -12,7 +12,7 @@ import { HttpsRedirect } from "aws-cdk-lib/aws-route53-patterns";
 interface Props extends cdk.StageProps {
   loadBalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer;
   bucket: cdk.aws_s3.Bucket;
-  production?: boolean;
+  originAccessIdentity: cdk.aws_cloudfront.OriginAccessIdentity;
 }
 
 export class CdnStack extends cdk.Stack {
@@ -22,7 +22,7 @@ export class CdnStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
-    const { bucket, loadBalancer } = props;
+    const { bucket, loadBalancer, originAccessIdentity } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -60,6 +60,7 @@ export class CdnStack extends cdk.Stack {
     const webCf = new cloudfront.Distribution(this, "WebCfDistribution", {
       domainNames: [wwwDomainName],
       certificate,
+
       defaultBehavior: {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
@@ -107,7 +108,9 @@ export class CdnStack extends cdk.Stack {
       defaultBehavior: {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-        origin: new origins.S3Origin(bucket),
+        origin: new origins.S3Origin(bucket, {
+          originAccessIdentity,
+        }),
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
         functionAssociations: [
           {
@@ -153,7 +156,7 @@ export class CdnStack extends cdk.Stack {
       zone,
     });
 
-    new route53.AaaaRecord(this, "Alias", {
+    new route53.AaaaRecord(this, "AaaaAlias", {
       zone,
       recordName: wwwDomainName,
       target: route53.RecordTarget.fromAlias(
@@ -161,7 +164,7 @@ export class CdnStack extends cdk.Stack {
       ),
     });
 
-    new HttpsRedirect(this, "Redirect", {
+    new HttpsRedirect(this, "RedirectToWww", {
       recordNames: [domainName],
       targetDomain: wwwDomainName,
       zone: route53.HostedZone.fromHostedZoneAttributes(this, "HostedZone", {
