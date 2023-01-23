@@ -31,6 +31,7 @@ const Create: NextPage = () => {
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
 
   const { handleSubmit, register, watch, reset, getValues } =
     useForm<SavePostInput>({
@@ -50,7 +51,8 @@ const Create: NextPage = () => {
 
   const { mutate: save, status: saveStatus } = trpc.post.update.useMutation({
     onError() {
-      toast.error("Something went wrong auto-saving");
+      // TODO: Add error messages from field validations
+      return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
       toast.success("Saved");
@@ -84,13 +86,29 @@ const Create: NextPage = () => {
           }
         );
       },
-      enabled: !!postId,
+      enabled: !!postId && shouldRefetch,
     }
   );
 
-  const savePost = async () => {
+  useEffect(() => {
+    if (shouldRefetch) {
+      setShouldRefetch(!(dataStatus === "success"));
+    }
+  }, [dataStatus, shouldRefetch]);
+
+  const getFormData = () => {
     const data = getValues();
-    const formData = { ...data, tags };
+    const formData = {
+      ...data,
+      tags,
+      canonicalUrl: data.canonicalUrl || undefined,
+      excerpt: data.excerpt || undefined,
+    };
+    return formData;
+  };
+
+  const savePost = async () => {
+    const formData = getFormData();
 
     if (!formData.id) {
       create({ ...formData });
@@ -122,8 +140,7 @@ const Create: NextPage = () => {
     }
     if (!published) {
       try {
-        const data = getValues();
-        const formData = { ...data, tags };
+        const formData = getFormData();
         ConfirmPostSchema.parse(formData);
         await savePost();
         return await publish(
