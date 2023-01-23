@@ -43,6 +43,7 @@ export class CdnStack extends cdk.Stack {
     );
 
     const wwwDomainName = `www.${domainName}`;
+    const uploadDomainName = `uploads.${domainName}`;
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
       hostedZoneId,
@@ -56,7 +57,7 @@ export class CdnStack extends cdk.Stack {
       region: "us-east-1",
     });
 
-    const webCf = new cloudfront.Distribution(this, "myDist", {
+    const webCf = new cloudfront.Distribution(this, "WebCfDistribution", {
       domainNames: [wwwDomainName],
       certificate,
       defaultBehavior: {
@@ -96,10 +97,50 @@ export class CdnStack extends cdk.Stack {
       },
     });
 
+    const uploadCf = new cloudfront.Distribution(this, "UploadCfDistribution", {
+      domainNames: [uploadDomainName],
+      certificate,
+      defaultBehavior: {
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.HTTPS_ONLY,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+        origin: new origins.S3Origin(bucket),
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
+        functionAssociations: [
+          {
+            function: new cloudfront.Function(this, "Function", {
+              code: cloudfront.FunctionCode.fromInline(`
+                    function handler(event) {
+                      var host = event.request.headers.host.value;
+                      var request = event.request;
+                      if (host.includes("cloudfront")) {
+                        var response = {
+                          statusCode: 404,
+                          statusDescription: "Not found",
+                        };
+                        return response;
+                      }
+                      return request;
+                    }                  
+                  `),
+            }),
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ],
+      },
+    });
+
     new route53.ARecord(this, "SiteAliasRecord", {
       recordName: wwwDomainName,
       target: route53.RecordTarget.fromAlias(
         new targets.CloudFrontTarget(webCf)
+      ),
+      zone,
+    });
+
+    new route53.ARecord(this, "UploadAliasRecord", {
+      recordName: uploadDomainName,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(uploadCf)
       ),
       zone,
     });

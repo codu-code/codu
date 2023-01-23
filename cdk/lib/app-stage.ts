@@ -14,7 +14,7 @@ export class AppStage extends cdk.Stage {
       db: storageStack.db,
       bucket: storageStack.bucket,
     });
-    new CdnStack(this, "CdnnStack", {
+    new CdnStack(this, "CdnStack", {
       loadBalancer: appStack.loadbalancer,
       bucket: storageStack.bucket,
     });
