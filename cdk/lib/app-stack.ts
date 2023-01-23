@@ -9,9 +9,10 @@ import * as ecrAssets from "aws-cdk-lib/aws-ecr-assets";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 
 interface Props extends cdk.StageProps {
-  db: cdk.aws_rds.DatabaseInstance;
   bucket: cdk.aws_s3.Bucket;
   vpc: IVpc;
   production?: boolean;
@@ -24,7 +25,7 @@ export class AppStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
-    const { db, bucket, production, vpc } = props;
+    const { bucket, production, vpc } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -38,11 +39,31 @@ export class AppStack extends cdk.Stack {
       1
     );
 
+    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/env/hostedZoneId`,
+      1
+    );
+
+    const wwwDomainName = `www.${domainName}`;
+
+    const lbDomainName = `lb.${domainName}`;
+
+    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
+      hostedZoneId,
+      zoneName: domainName,
+    });
+
+    const certificate = new acm.DnsValidatedCertificate(this, "LbCertificate", {
+      domainName,
+      subjectAlternativeNames: [`lb.${domainName}`],
+      hostedZone: zone,
+      region: "us-east-1",
+    });
+
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
     cluster.addDefaultCloudMapNamespace({ name: this.cloudMapNamespace });
-
-    const wwwDomainName = `www.${domainName}`;
 
     const appAsset = new ecrAssets.DockerImageAsset(this, "app", {
       directory: "../",
@@ -106,7 +127,6 @@ export class AppStack extends cdk.Stack {
             )
           ),
         },
-
         logging: ecs.LogDrivers.awsLogs({
           streamPrefix: "AppContainer",
           logRetention: logs.RetentionDays.THREE_DAYS,
@@ -124,8 +144,14 @@ export class AppStack extends cdk.Stack {
           memoryLimitMiB: 512,
           cpu: 256,
           publicLoadBalancer: true,
+          protocol: elbv2.ApplicationProtocol.HTTPS,
+          certificate,
+          domainZone: zone,
+          domainName: lbDomainName,
         }
       );
+
+    fargateService.listener;
 
     fargateService.listener.addAction("ListenerRule", {
       priority: 1,

@@ -5,13 +5,15 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import { OriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
 
 interface Props extends cdk.StackProps {
-  prod?: boolean;
+  production?: boolean;
 }
 
 export class StorageStack extends cdk.Stack {
   public readonly bucket;
+  public readonly originAccessIdentity;
   public readonly db;
   public readonly vpc;
 
@@ -27,9 +29,15 @@ export class StorageStack extends cdk.Stack {
       1
     );
 
-    this.bucket = new s3.Bucket(this, "demo-bucket", {
+    this.originAccessIdentity = new OriginAccessIdentity(this, "OAI", {
+      comment: "Created by cdk",
+    });
+
+    this.bucket = new s3.Bucket(this, "uploadBucket", {
       bucketName,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: props?.production
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
       publicReadAccess: true,
       versioned: false,
       encryption: s3.BucketEncryption.S3_MANAGED,
@@ -43,6 +51,7 @@ export class StorageStack extends cdk.Stack {
     });
 
     this.bucket.grantRead(new iam.AccountRootPrincipal());
+    this.bucket.grantRead(this.originAccessIdentity);
 
     const dbUsername = ssm.StringParameter.valueForStringParameter(
       this,
@@ -80,7 +89,7 @@ export class StorageStack extends cdk.Stack {
       publiclyAccessible: true,
       deletionProtection: false,
       autoMinorVersionUpgrade: true,
-      backupRetention: cdk.Duration.days(props?.prod ? 3 : 0),
+      backupRetention: cdk.Duration.days(props?.production ? 3 : 0),
     });
     // Allow connections on default port from any IPV4
     // TODO: Lock down on prod
