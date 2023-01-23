@@ -2,7 +2,6 @@ import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { readingTime } from "../../../utils/readingTime";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
-
 import {
   PublishPostSchema,
   GetSinglePostSchema,
@@ -36,7 +35,7 @@ export const postRouter = router({
   update: protectedProcedure
     .input(SavePostSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, body, title, excerpt = "", canonicalUrl, tags = [] } = input;
+      const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
@@ -77,10 +76,14 @@ export const postRouter = router({
         )
       );
 
-      const excerptOrCreatedExcerpt =
-        excerpt.length > 0
-          ? excerpt
-          : removeMarkdown(currentPost.body, {}).substring(0, 156);
+      const getExcerptValue = (): string | undefined => {
+        if (currentPost.published) {
+          return excerpt && excerpt.length > 0
+            ? excerpt
+            : removeMarkdown(currentPost.body, {}).substring(0, 156);
+        }
+        return excerpt;
+      };
 
       const post = await ctx.prisma.post.update({
         where: {
@@ -90,10 +93,10 @@ export const postRouter = router({
           id,
           body,
           title,
-          excerpt: excerptOrCreatedExcerpt,
+          excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
           slug: `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
-          ...(canonicalUrl ? { canonicalUrl } : {}),
+          canonicalUrl,
         },
       });
       return post;
@@ -113,7 +116,14 @@ export const postRouter = router({
         });
       }
 
+      const { excerpt } = currentPost;
+
       const publishedValue = published ? new Date().toISOString() : null;
+
+      const excerptOrCreatedExcerpt: string =
+        excerpt.length > 0
+          ? excerpt
+          : removeMarkdown(currentPost.body, {}).substring(0, 156);
 
       const post = await ctx.prisma.post.update({
         where: {
@@ -121,6 +131,7 @@ export const postRouter = router({
         },
         data: {
           published: publishedValue,
+          excerpt: excerptOrCreatedExcerpt,
         },
       });
       return post;

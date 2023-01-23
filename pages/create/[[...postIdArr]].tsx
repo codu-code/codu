@@ -51,7 +51,8 @@ const Create: NextPage = () => {
 
   const { mutate: save, status: saveStatus } = trpc.post.update.useMutation({
     onError() {
-      toast.error("Something went wrong auto-saving");
+      // TODO: Add error messages from field validations
+      return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
       toast.success("Saved");
@@ -95,9 +96,19 @@ const Create: NextPage = () => {
     }
   }, [dataStatus, shouldRefetch]);
 
-  const savePost = async () => {
+  const getFormData = () => {
     const data = getValues();
-    const formData = { ...data, tags };
+    const formData = {
+      ...data,
+      tags,
+      canonicalUrl: data.canonicalUrl || undefined,
+      excerpt: data.excerpt || undefined,
+    };
+    return formData;
+  };
+
+  const savePost = async () => {
+    const formData = getFormData();
 
     if (!formData.id) {
       create({ ...formData });
@@ -129,8 +140,7 @@ const Create: NextPage = () => {
     }
     if (!published) {
       try {
-        const data = getValues();
-        const formData = { ...data, tags };
+        const formData = getFormData();
         ConfirmPostSchema.parse(formData);
         await savePost();
         return await publish(
