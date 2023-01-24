@@ -151,6 +151,7 @@ export class AppStack extends cdk.Stack {
           protocol: elbv2.ApplicationProtocol.HTTPS,
           certificate,
           domainZone: zone,
+          redirectHTTP: true,
           domainName: wwwDomainName,
         }
       );
