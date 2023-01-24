@@ -58,7 +58,7 @@ export class AppStack extends cdk.Stack {
       domainName,
       subjectAlternativeNames: [`lb.${domainName}`],
       hostedZone: zone,
-      region: "us-east-1",
+      region: "eu-west-1",
     });
 
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
