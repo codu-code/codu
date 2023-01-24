@@ -59,6 +59,12 @@ export class AppStack extends cdk.Stack {
       region: "eu-west-1",
     });
 
+    // new route53.CnameRecord(this, "Cname", {
+    //   zone,
+    //   recordName: wwwDomainName,
+    //   target: domainName,
+    // });
+
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
     cluster.addDefaultCloudMapNamespace({ name: this.cloudMapNamespace });
@@ -145,6 +151,7 @@ export class AppStack extends cdk.Stack {
           protocol: elbv2.ApplicationProtocol.HTTPS,
           certificate,
           domainZone: zone,
+          domainName: wwwDomainName,
         }
       );
 
