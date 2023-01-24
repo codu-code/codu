@@ -45,10 +45,10 @@ export class CdnStack extends cdk.Stack {
     const wwwDomainName = `www.${domainName}`;
     // const uploadDomainName = `uploads.${domainName}`;
 
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
-      hostedZoneId,
-      zoneName: domainName,
-    });
+    // const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
+    //   hostedZoneId,
+    //   zoneName: domainName,
+    // });
 
     // const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
     //   domainName,
