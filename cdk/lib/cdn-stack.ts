@@ -65,7 +65,7 @@ export class CdnStack extends cdk.Stack {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         origin: new origins.LoadBalancerV2Origin(loadBalancer, {
-          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
           originShieldRegion: "eu-west-1",
           customHeaders: {
             "X-Forwarded-Port": "443",

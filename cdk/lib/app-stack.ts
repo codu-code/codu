@@ -47,8 +47,6 @@ export class AppStack extends cdk.Stack {
 
     const wwwDomainName = `www.${domainName}`;
 
-    const lbDomainName = `lb.${domainName}`;
-
     const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
       hostedZoneId,
       zoneName: domainName,
@@ -56,7 +54,7 @@ export class AppStack extends cdk.Stack {
 
     const certificate = new acm.DnsValidatedCertificate(this, "LbCertificate", {
       domainName,
-      subjectAlternativeNames: [`lb.${domainName}`],
+      subjectAlternativeNames: [`*.${domainName}`],
       hostedZone: zone,
       region: "eu-west-1",
     });
@@ -147,7 +145,6 @@ export class AppStack extends cdk.Stack {
           protocol: elbv2.ApplicationProtocol.HTTPS,
           certificate,
           domainZone: zone,
-          domainName: lbDomainName,
         }
       );
 
