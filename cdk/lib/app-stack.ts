@@ -33,11 +33,11 @@ export class AppStack extends cdk.Stack {
       1
     );
 
-    const customHeaderValue = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/env/cf/customHeaderValue`,
-      1
-    );
+    // const customHeaderValue = ssm.StringParameter.valueForStringParameter(
+    //   this,
+    //   `/env/cf/customHeaderValue`,
+    //   1
+    // );
 
     const hostedZoneId = ssm.StringParameter.valueForStringParameter(
       this,
@@ -157,20 +157,20 @@ export class AppStack extends cdk.Stack {
 
     fargateService.listener;
 
-    fargateService.listener.addAction("ListenerRule", {
-      priority: 1,
-      conditions: [
-        elbv2.ListenerCondition.httpHeader("X-FCTL-FRWD", [customHeaderValue]),
-      ],
-      action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
-    });
+    // fargateService.listener.addAction("ListenerRule", {
+    //   priority: 1,
+    //   conditions: [
+    //     elbv2.ListenerCondition.httpHeader("X-FCTL-FRWD", [customHeaderValue]),
+    //   ],
+    //   action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
+    // });
 
-    fargateService.listener.addAction("DefaultListenerRule", {
-      action: elbv2.ListenerAction.fixedResponse(500, {
-        contentType: "text/plain",
-        messageBody: "Not Allowed",
-      }),
-    });
+    // fargateService.listener.addAction("DefaultListenerRule", {
+    //   action: elbv2.ListenerAction.fixedResponse(500, {
+    //     contentType: "text/plain",
+    //     messageBody: "Not Allowed",
+    //   }),
+    // });
 
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
