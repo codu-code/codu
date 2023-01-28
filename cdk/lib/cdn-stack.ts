@@ -15,9 +15,10 @@ export class CdnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const domainName = ssm.StringParameter.valueFromLookup(
+    const domainName = ssm.StringParameter.valueForStringParameter(
       this,
-      `/env/domainName`
+      `/env/domainName`,
+      1
     );
 
     const hostedZoneId = ssm.StringParameter.valueForStringParameter(
