@@ -12,7 +12,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 
-interface Props extends cdk.StageProps {
+interface Props extends cdk.StackProps {
   bucket: cdk.aws_s3.Bucket;
   vpc: IVpc;
   production?: boolean;
