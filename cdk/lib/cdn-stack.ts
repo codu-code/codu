@@ -78,7 +78,7 @@ export class CdnStack extends cdk.Stack {
 
     const redirectRecordProps = {
       zone,
-      recordName: wwwDomainName,
+      recordName: domainName,
       target: route53.RecordTarget.fromAlias(
         new targets.CloudFrontTarget(redirectDist)
       ),
