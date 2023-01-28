@@ -8,9 +8,6 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 
 export class CdnStack extends cdk.Stack {
-  public readonly appLoadBalancerDNS: cdk.CfnOutput;
-  public readonly appPort: number = 3000;
-  public readonly cloudMapNamespace = "service.internal";
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
