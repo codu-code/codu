@@ -31,6 +31,20 @@ const ArticlesPage = () => {
         <title>Codú | Articles - View our latest web developer articles</title>
         <meta name="description" content="Codú | Web Developer Community" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="manifest" href="site.webmanifest" />
+        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#000000" />
+        <link rel="shortcut icon" href="favicon.ico" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-config" content="browserconfig.xml" />
+        <meta name="theme-color" content="#000" />
+        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+        <meta
+          property="og:image"
+          content="/images/og/home-og.png"
+          key="og:image"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
         <div className="border-t border-white">
