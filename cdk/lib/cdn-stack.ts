@@ -171,8 +171,5 @@ export class CdnStack extends cdk.Stack {
         zoneName: domainName,
       }),
     });
-
-    const cfnRedirect = redirect.node.defaultChild as cdk.CfnElement;
-    cfnRedirect.overrideLogicalId("OverriddentIdforHttpsRedirectToWww");
   }
 }
