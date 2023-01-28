@@ -40,14 +40,7 @@ export class PipelineStack extends cdk.Stack {
     };
 
     const dev = new AppStage(this, "Dev", getConfig("dev"));
-    const prod = new AppStage(this, "Prod", {
-      ...getConfig("prod"),
-      production: true,
-    });
 
     pipeline.addStage(dev);
-    pipeline.addStage(prod, {
-      pre: [new cdk.pipelines.ManualApprovalStep("Deploy to production")],
-    });
   }
 }
