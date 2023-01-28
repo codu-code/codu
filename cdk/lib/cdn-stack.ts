@@ -24,10 +24,9 @@ export class CdnStack extends cdk.Stack {
     super(scope, id, props);
     const { bucket, loadBalancer, originAccessIdentity } = props;
 
-    const domainName = ssm.StringParameter.valueForStringParameter(
+    const domainName = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/domainName`,
-      1
+      `/env/domainName`
     );
 
     const hostedZoneId = ssm.StringParameter.valueForStringParameter(
@@ -164,7 +163,7 @@ export class CdnStack extends cdk.Stack {
     //   ),
     // });
 
-    new HttpsRedirect(this, "RedirectToWww", {
+    const redirect = new HttpsRedirect(this, "HttpsRedirectToWww", {
       recordNames: [domainName],
       targetDomain: wwwDomainName,
       zone: route53.HostedZone.fromHostedZoneAttributes(this, "HostedZone", {
@@ -172,5 +171,8 @@ export class CdnStack extends cdk.Stack {
         zoneName: domainName,
       }),
     });
+
+    const cfnRedirect = redirect.node.defaultChild as cdk.CfnElement;
+    cfnRedirect.overrideLogicalId("OverriddentIdforHttpsRedirectToWww");
   }
 }
