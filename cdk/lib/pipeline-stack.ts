@@ -32,8 +32,7 @@ export class PipelineStack extends cdk.Stack {
 
       return {
         env: {
-          // Dummy value on synth prep that causes fail
-          account: accountId.includes("dummy-value") ? "123456789" : accountId,
+          account: accountId,
           region: "eu-west-1",
         },
       };
