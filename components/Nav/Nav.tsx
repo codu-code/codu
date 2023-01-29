@@ -228,18 +228,18 @@ const Nav = () => {
                 {session ? (
                   <>
                     {userSubNav.map((item) => (
-                      <button
+                      <Link
                         className={classNames(
                           item.fancy
                             ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                             : "text-gray-300 hover:bg-smoke hover:text-white block px-3",
-                          "rounded-md text-base font-medium py-2"
+                          "rounded-md text-base font-medium py-2 text-center"
                         )}
                         key={item.name}
-                        onClick={() => signIn()}
+                        href={item.href}
                       >
                         {item.name}
-                      </button>
+                      </Link>
                     ))}
                   </>
                 ) : (
