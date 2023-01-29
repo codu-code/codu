@@ -5,8 +5,8 @@
     "eu-west-1b",
     "eu-west-1c"
   ],
-  "ssm:account=764918915129:parameterName=/env/prod/accountId:region=eu-west-1": "281989296348",
-  "availability-zones:account=281989296348:region=eu-west-1": [
+  "ssm:account=764918915129:parameterName=/env/prod/accountId:region=eu-west-1": "689829343490",
+  "availability-zones:account=689829343490:region=eu-west-1": [
     "eu-west-1a",
     "eu-west-1b",
     "eu-west-1c"
