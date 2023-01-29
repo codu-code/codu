@@ -102,7 +102,9 @@ const ArticlePage: NextPage = ({
           property="og:description"
           content={post.excerpt}
         />
-        <meta key="description" property="description" content={post.excerpt} />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-config" content="browserconfig.xml" />
+        <meta name="theme-color" content="#000" />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${host}/articles/${post.slug}`} />
         <meta
