@@ -109,7 +109,9 @@ const ArticlePage: NextPage = ({
         <meta property="og:url" content={`${host}/articles/${post.slug}`} />
         <meta
           property="og:image"
-          content={`${host}/api/og?title=${post.title}`}
+          content={encodeURIComponent(
+            `http://${host}/api/og?title=${post.title}`
+          )}
         />
       </Head>
       <Transition
