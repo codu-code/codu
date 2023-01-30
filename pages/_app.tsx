@@ -16,7 +16,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     const env = process.env.NODE_ENV;
     const siteId = process.env.NEXT_PUBLIC_FATHOM_SITE_ID;
 
-    if (env !== "production" || !siteId) return;
+    if (env !== "production" || !siteId) {
+      console.error(siteId, "not found", env);
+      return;
+    }
 
     Fathom.load(siteId, {
       includedDomains: ["codu.co"],
