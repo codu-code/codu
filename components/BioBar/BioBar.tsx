@@ -14,11 +14,11 @@ const BioFooter = ({ author }: Props) => {
 
   const { name, image, bio, username } = author;
   return (
-    <div className="max-w-xl mx-auto text-gray-700 dark:text-gray-300 mt-6">
-      <div className="flex mx-2 sm:mx-6 md:mx-auto border-t-2 pt-6 border-gray-300 dark:border-gray-800">
-        <div className="flex items-center">
+    <div className="max-w-xl mx-4 sm:mx-auto text-gray-700 dark:text-gray-300 mt-6">
+      <div className="flex md:mx-auto border-t-2 pt-6 border-gray-300 dark:border-gray-800">
+        <div className="shrink-0">
           <img
-            className="mr-4 rounded-full h-20 w-20 object-cover bg-slate-700"
+            className="mr-4 rounded-full object-cover bg-slate-700 h-24 w-25"
             alt={`Avatar for ${name}`}
             src={image}
           />
