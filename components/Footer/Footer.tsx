@@ -41,7 +41,7 @@ const navigation = {
   ],
 };
 
-const Footer: NextPage = () => {
+const Footer = () => {
   return (
     <footer className="bg-black">
       <div className="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
