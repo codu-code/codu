@@ -147,8 +147,6 @@ export class AppStack extends cdk.Stack {
         }
       );
 
-    fargateService.listener;
-
     // fargateService.listener.addAction("ListenerRule", {
     //   priority: 1,
     //   conditions: [
@@ -163,6 +161,18 @@ export class AppStack extends cdk.Stack {
     //     messageBody: "Not Allowed",
     //   }),
     // });
+
+    if (!production) {
+      fargateService.listener.addAction("ListenerRule", {
+        priority: 10,
+        conditions: [elbv2.ListenerCondition.pathPatterns(["/robots.txt"])],
+        action: elbv2.ListenerAction.fixedResponse(200, {
+          contentType: "text/plain",
+          messageBody: `User-agent: *
+                        Disallow: /`,
+        }),
+      });
+    }
 
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
