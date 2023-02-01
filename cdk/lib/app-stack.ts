@@ -169,7 +169,7 @@ export class AppStack extends cdk.Stack {
         action: elbv2.ListenerAction.fixedResponse(200, {
           contentType: "text/plain",
           messageBody: `User-agent: *
-                        Disallow: /`,
+                        Disallow: /`.replace(/  +/g, ""),
         }),
       });
     }
