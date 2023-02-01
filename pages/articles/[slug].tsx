@@ -86,7 +86,7 @@ const ArticlePage: NextPage = ({
   const optionsData = createMenuData(
     post.title || "",
     post.user.name || "",
-    `https://${host}/${post.slug}`
+    `https://${host}/articles/${post.slug}`
   );
 
   const ast = Markdoc.parse(post.body);
