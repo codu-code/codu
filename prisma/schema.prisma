@@ -46,6 +46,7 @@ model Post {
   tags         PostTag[]
   likes        Like[]
   bookmarks    Bookmark[]
+  comments     Comment[]
 }
 
 model Tag {
@@ -93,6 +94,7 @@ model User {
   role               Role       @default(USER)
   likes              Like[]
   bookmarks          Bookmark[]
+  comments           Comment[]
 
   @@index(fields: [username, id])
 }
@@ -130,4 +132,18 @@ model Bookmark {
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  body      String    @db.Text()
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  postId    String
+  userId    String
+  parentId  Int?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  children  Comment[] @relation("Comment_Children")
+  parent    Comment?  @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
 }
