@@ -95,7 +95,6 @@ export const postRouter = router({
           title,
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
-          slug: `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
           canonicalUrl,
         },
       });
@@ -116,7 +115,7 @@ export const postRouter = router({
         });
       }
 
-      const { excerpt } = currentPost;
+      const { excerpt, title } = currentPost;
 
       const publishedValue = published ? new Date().toISOString() : null;
 
@@ -130,6 +129,9 @@ export const postRouter = router({
           id,
         },
         data: {
+          slug: `${title.replace(/\W+/g, "-")}-${id}`
+            .toLowerCase()
+            .replace(/^-+|-+(?=-|$)/g, ""),
           published: publishedValue,
           excerpt: excerptOrCreatedExcerpt,
         },
@@ -339,7 +341,7 @@ export const postRouter = router({
   bySlug: publicProcedure
     .input(GetSinglePostSchema)
     .query(async ({ input, ctx }) => {
-      return ctx.prisma.post.findUnique({
+      const post = await ctx.prisma.post.findUnique({
         where: {
           slug: input.slug,
         },
@@ -364,6 +366,12 @@ export const postRouter = router({
           },
         },
       });
+      if (!post) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+      return post;
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
     const response = await ctx.prisma.bookmark.findMany({
