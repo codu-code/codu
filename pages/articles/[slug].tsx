@@ -120,10 +120,11 @@ const ArticlePage: NextPage = ({
         <meta property="og:url" content={`${host}/articles/${post.slug}`} />
         <meta
           property="og:image"
-          content={`http://${host}/api/og?title=${encodeURIComponent(
+          content={`https://${host}/api/og?title=${encodeURIComponent(
             post.title
           )}`}
         />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <Transition
         show={!!data}
