@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 interface Props {
   user: string;
   slugHash: string;
@@ -5,21 +7,23 @@ interface Props {
 }
 
 export function CodePen({ user, slugHash, defaultTab = 'result' }: Props) {
-  const codePenSrc = new URL(`https://codepen.io/${user}/embed/${slugHash}`);
-  codePenSrc.searchParams.set('default-tab', defaultTab);
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cpwebassets.codepen.io/assets/embed/ei.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   return (
-    <iframe
-      height={400}
+    <p
+      className="codepen"
+      data-default-tab={defaultTab}
+      data-user={user}
+      data-slug-hash={slugHash}
       style={{ width: '100%' }}
-      scrolling="no"
-      src={codePenSrc.toString()}
-      frameBorder="no"
-      loading="lazy"
-      allowTransparency
-      allowFullScreen
+      data-height={400}
     >
       See the Pen <a href={`https://codepen.io/${user}/pen/${slugHash}`}>Responsive app showcase</a> by <a href={`https://codepen.io/${user}`}>@{user}</a> on <a href="https://codepen.io">CodePen</a>.
-    </iframe>
+    </p>
   )
 }
