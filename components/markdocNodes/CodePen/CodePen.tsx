@@ -4,9 +4,15 @@ interface Props {
   user: string;
   slugHash: string;
   defaultTab?: string;
+  height?: string;
 }
 
-export function CodePen({ user, slugHash, defaultTab = 'result' }: Props) {
+export function CodePen({
+  user,
+  slugHash,
+  defaultTab = 'result',
+  height = '400px',
+}: Props) {
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://cpwebassets.codepen.io/assets/embed/ei.js';
@@ -21,7 +27,7 @@ export function CodePen({ user, slugHash, defaultTab = 'result' }: Props) {
       data-user={user}
       data-slug-hash={slugHash}
       style={{ width: '100%' }}
-      data-height={400}
+      data-height={height}
     >
       See the Pen <a href={`https://codepen.io/${user}/pen/${slugHash}`}>Responsive app showcase</a> by <a href={`https://codepen.io/${user}`}>@{user}</a> on <a href="https://codepen.io">CodePen</a>.
     </p>

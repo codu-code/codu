@@ -1,5 +1,5 @@
 const codepen = {
-  render: "CodePen",
+  render: 'CodePen',
   attributes: {
     user: {
       type: String,
@@ -10,6 +10,9 @@ const codepen = {
       required: true,
     },
     defaultTab: {
+      type: String,
+    },
+    height: {
       type: String,
     },
   },
