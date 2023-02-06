@@ -29,7 +29,7 @@ export function CodePen({
       style={{ width: '100%' }}
       data-height={height}
     >
-      See the Pen <a href={`https://codepen.io/${user}/pen/${slugHash}`}>Responsive app showcase</a> by <a href={`https://codepen.io/${user}`}>@{user}</a> on <a href="https://codepen.io">CodePen</a>.
+      See the <a href={`https://codepen.io/${user}/pen/${slugHash}`}>Pen</a> by <a href={`https://codepen.io/${user}`}>@{user}</a> on <a href="https://codepen.io">CodePen</a>.
     </p>
   )
 }
