@@ -22,7 +22,6 @@ export function CodePen({
       src={codePenSrc.toString()}
       frameBorder="no"
       loading="lazy"
-      allowTransparency
       allowFullScreen
     />
   );
