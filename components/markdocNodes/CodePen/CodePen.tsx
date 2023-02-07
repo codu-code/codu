@@ -6,7 +6,7 @@ interface Props {
 
 export function CodePen({
   src,
-  defaultTab = 'result',
+  defaultTab = 'html,result',
   height = '300px',
 }: Props) {
   const codePenSrc = new URL(src);
