@@ -11,7 +11,7 @@ export function CodePen({
   user,
   slugHash,
   defaultTab = 'result',
-  height = '400px',
+  height = '300px',
 }: Props) {
   useEffect(() => {
     const script = document.createElement('script');
