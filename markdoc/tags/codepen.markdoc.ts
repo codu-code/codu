@@ -1,11 +1,7 @@
 const codepen = {
   render: 'CodePen',
   attributes: {
-    user: {
-      type: String,
-      required: true,
-    },
-    slugHash: {
+    src: {
       type: String,
       required: true,
     },
