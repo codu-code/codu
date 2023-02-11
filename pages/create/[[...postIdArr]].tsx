@@ -13,7 +13,7 @@ import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../schema/post";
 import { ConfirmPostSchema } from "../../schema/post";
 import Layout from "../../components/Layout/Layout";
-import { PromptDialog } from "../../components/PromptService/promptService";
+import { PromptDialog } from "../../components/PromptService/PromptService";
 
 import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
