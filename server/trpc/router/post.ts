@@ -262,6 +262,7 @@ export const postRouter = router({
         },
       },
       cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : 0,
       orderBy: {
         published: "desc",
       },
