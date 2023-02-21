@@ -25,7 +25,7 @@ import {
   DotsHorizontalIcon,
 } from "@heroicons/react/outline";
 
-import CommentsTab from "../../components/CommentsTab/CommentsTab";
+import CommentsTab from "../../components/Comments/CommentsArea";
 
 const createMenuData = (title: string, username: string, url: string) => [
   {
@@ -226,7 +226,7 @@ const ArticlePage: NextPage = ({
 
           <BioBar author={post.user} />
           <div className="mx-auto mt-8 pb-4 max-w-xl px-4 sm:px-0">
-            <CommentsTab postId={post.id} />
+          <CommentsTab postId={post.id} postOwnerId={post.userId} />
           </div>
         </div>
       </Layout>

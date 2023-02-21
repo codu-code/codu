@@ -113,17 +113,6 @@ enum Role {
   MODERATOR
 }
 
-model Like {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  userId    String
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, postId])
-}
-
 model Bookmark {
   id     Int    @id @default(autoincrement())
   postId String
@@ -146,4 +135,19 @@ model Comment {
   post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   children  Comment[] @relation("Comment_Children")
   parent    Comment?  @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
+  likes     Like[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String?
+  commentId Int?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@unique([userId, postId])
 }
