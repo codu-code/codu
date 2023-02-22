@@ -39,11 +39,10 @@ interface Props {
 const CommentsTab = ({ postId, postOwnerId }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<number | null>(null);
   const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
+  const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
   const [initiallyLoaded, setInitiallyLoaded] = useState<boolean>(false);
 
   const { data: session } = useSession();
-
-  const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
 
   const { handleSubmit, register, getValues, resetField, setValue } =
     useForm<SaveInput>({
@@ -125,7 +124,6 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
     );
 
     if (errors.length > 0) {
-      console.error(errors);
       errors.forEach((err) => {
         toast.error(err.error.message);
       });
@@ -221,12 +219,12 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
                       {name}
                     </Link>
                     {isCurrentUser && !isAuthor && (
-                      <div className="ml-2 border rounded text-xs px-1 py-[2px] border-orange-400 text-orange-400">
+                      <div className="border rounded text-xs px-1 py-[2px] border-orange-400 text-orange-400">
                         YOU
                       </div>
                     )}
                     {isAuthor && (
-                      <div className="ml-2 border rounded text-xs px-1 py-[2px] border-pink-500 text-pink-500">
+                      <div className="border rounded text-xs px-1 py-[2px] border-pink-500 text-pink-500">
                         AUTHOR
                       </div>
                     )}
@@ -263,7 +261,6 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
                               <button
                                 className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded w-full text-left text-sm"
                                 onClick={() => {
-                                  console.log({ id, showCommentBoxId, body });
                                   if (id !== editCommentBoxId) {
                                     setValue("edit", body);
                                   }
@@ -457,15 +454,6 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
             </button>
           )}
         </div>
-        <Toaster
-          toastOptions={{
-            style: {
-              borderRadius: 0,
-              border: "2px solid black",
-              background: "white",
-            },
-          }}
-        />
       </form>
     );
   };
@@ -489,6 +477,15 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
         <CommentArea id={0} name="comment" />
       </div>
       <div className="mx-4 mb-8">{generateComments(comments)}</div>
+      <Toaster
+        toastOptions={{
+          style: {
+            borderRadius: 0,
+            border: "2px solid black",
+            background: "white",
+          },
+        }}
+      />
     </section>
   );
 };
