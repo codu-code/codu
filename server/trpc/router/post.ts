@@ -164,12 +164,13 @@ export const postRouter = router({
     .input(LikePostSchema)
     .mutation(async ({ input, ctx }) => {
       const { postId, setLiked } = input;
+      const userId = ctx.session.user.id;
 
       if (setLiked) {
         const res = await ctx.prisma.like.create({
           data: {
             postId,
-            userId: ctx.session?.user?.id,
+            userId,
           },
         });
         return res;
@@ -277,7 +278,7 @@ export const postRouter = router({
     let nextCursor: typeof cursor | undefined = undefined;
     if (response.length > limit) {
       const nextItem = response.pop();
-      nextCursor = nextItem!.id;
+      nextCursor = nextItem?.id;
     }
 
     return { posts: cleaned, nextCursor };
