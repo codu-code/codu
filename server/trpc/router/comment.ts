@@ -208,8 +208,9 @@ export const commentRouter = router({
             _count: likeCount,
             ...rest
           } = comment;
+
           const shaped = {
-            youLikedThis: !!youLikeThis.length,
+            youLikedThis: youLikeThis.some((obj) => obj.userId === userId),
             likeCount: likeCount.likes,
             ...rest,
           };

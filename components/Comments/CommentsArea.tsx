@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
 import { Fragment, useState } from "react";
@@ -76,6 +76,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   });
 
   const likeComment = async (commentId: number) => {
+    if (!session) return signIn();
     if (likeStatus === "loading") return;
     try {
       await like({ commentId });
@@ -313,6 +314,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-slate-800"
                         onClick={() => {
+                          if (!session) return signIn();
                           if (showCommentBoxId !== id) {
                             // TODO: Add alert to confirm reset if there is already content being written
                             resetField("reply");
@@ -459,7 +461,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   };
 
   return (
-    <section className="w-full bg-smoke border-2 border-white z-10 relative">
+    <section className="w-full bg-smoke border sm:border-2 border-white z-10 relative">
       {!initiallyLoaded && (
         <div className="top-0 bottom-0 left-0 right-0 absolute z-20">
           <div className="flex justify-center items-center h-full">
@@ -468,15 +470,32 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
           </div>
         </div>
       )}
-      <h2 className="mx-4 mt-6 pb-2 text-xl border-b border-gray-800">
+      <h2 className="mx-2 sm:mx-4 mt-4 pb-2 text-xl border-b border-gray-800">
         {initiallyLoaded
           ? `Discussion (${commentsResponse?.count || 0})`
           : "Fetching comments"}
       </h2>
-      <div className="mx-4 mt-4">
-        <CommentArea id={0} name="comment" />
+      <div className="mx-2 sm:mx-4 mt-4">
+        {session ? (
+          <CommentArea id={0} name="comment" />
+        ) : (
+          <div className="mb-4 text-lg pb-4 border-b border-gray-800">
+            <p className="mb-2">Hey! 👋</p>
+            <p className="mb-2">Got something to say?</p>
+            <p>
+              <button onClick={() => signIn()} className="fancy-link">
+                Sign in
+              </button>{" "}
+              or{" "}
+              <button onClick={() => signIn()} className="fancy-link">
+                sign up
+              </button>{" "}
+              to leave a comment.
+            </p>
+          </div>
+        )}
       </div>
-      <div className="mx-4 mb-8">{generateComments(comments)}</div>
+      <div className="mx-2 sm:mx-4 mb-8">{generateComments(comments)}</div>
       <Toaster
         toastOptions={{
           style: {
