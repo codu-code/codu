@@ -36,7 +36,7 @@ interface Props {
   postOwnerId: string;
 }
 
-const CommentsTab = ({ postId, postOwnerId }: Props) => {
+const CommentsArea = ({ postId, postOwnerId }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<number | null>(null);
   const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
   const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
@@ -490,4 +490,4 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
   );
 };
 
-export default CommentsTab;
+export default CommentsArea;
