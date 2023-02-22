@@ -116,7 +116,7 @@ export const postRouter = router({
         });
       }
 
-      const { excerpt } = currentPost;
+      const { excerpt, title } = currentPost;
 
       const publishedValue = published ? new Date().toISOString() : null;
 
@@ -130,6 +130,9 @@ export const postRouter = router({
           id,
         },
         data: {
+          slug: `${title.replace(/\W+/g, "-")}-${id}`
+            .toLowerCase()
+            .replace(/^-+|-+(?=-|$)/g, ""),
           published: publishedValue,
           excerpt: excerptOrCreatedExcerpt,
         },
@@ -261,6 +264,7 @@ export const postRouter = router({
         },
       },
       cursor: cursor ? { id: cursor } : undefined,
+      skip: cursor ? 1 : 0,
       orderBy: {
         published: "desc",
       },

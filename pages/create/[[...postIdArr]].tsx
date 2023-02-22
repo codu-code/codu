@@ -431,7 +431,10 @@ const Create: NextPage = () => {
                           </h2>
                           <article
                             className="prose prose-invert"
-                            style={{ whiteSpace: "pre-wrap" }}
+                            style={{
+                              whiteSpace: "pre-wrap",
+                              overflowWrap: "anywhere",
+                            }}
                           >
                             {Markdoc.renderers.react(
                               Markdoc.transform(Markdoc.parse(body), config),

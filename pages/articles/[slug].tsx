@@ -16,7 +16,7 @@ import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
 import { trpc } from "../../utils/trpc";
 import { signIn, useSession } from "next-auth/react";
-
+import { useRouter } from "next/router";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import {
@@ -43,9 +43,20 @@ const ArticlePage: NextPage = ({
   host,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session } = useSession();
+
+  const router = useRouter();
+
   if (!slug) return null;
 
-  const { data: post } = trpc.post.bySlug.useQuery({ slug });
+  const { data: post } = trpc.post.bySlug.useQuery(
+    { slug },
+    {
+      onError() {
+        router.push("/404");
+      },
+      retry: false,
+    }
+  );
 
   const { data, refetch } = trpc.post.sidebarData.useQuery(
     { id: post?.id || "" },
@@ -111,10 +122,11 @@ const ArticlePage: NextPage = ({
         <meta property="og:url" content={`${host}/articles/${post.slug}`} />
         <meta
           property="og:image"
-          content={`http://${host}/api/og?title=${encodeURIComponent(
+          content={`https://${host}/api/og?title=${encodeURIComponent(
             post.title
           )}`}
         />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <Transition
         show={!!data}

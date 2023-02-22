@@ -48,6 +48,7 @@ const MyPosts: NextPage = ({
     {
       name: "Drafts",
       href: "?tab=drafts",
+      value: "drafts",
       data: drafts.data,
       status: drafts.status,
       current: tab !== "published",
@@ -55,6 +56,7 @@ const MyPosts: NextPage = ({
     {
       name: "Published",
       href: "?tab=published",
+      value: "published",
       data: published.data,
       status: published.status,
       current: tab === "published",
@@ -136,11 +138,17 @@ const MyPosts: NextPage = ({
               <select
                 id="tabs"
                 name="tabs"
-                className="block w-full text-black"
+                className="block w-full text-white"
+                onChange={(e) => {
+                  const { value } = e.target;
+                  router.push(`?tab=${value.toLowerCase()}`);
+                }}
                 defaultValue={tabs.find((tab) => tab.current)?.name}
               >
                 {tabs.map((tab) => (
-                  <option key={tab.name}>{tab.name}</option>
+                  <option key={tab.name} value={tab.value}>
+                    {tab.name}
+                  </option>
                 ))}
               </select>
             </div>
