@@ -45,23 +45,15 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
 
   const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
 
-  const {
-    handleSubmit,
-    register,
-    getValues,
-    resetField,
-    setValue,
-    formState: { errors },
-  } = useForm<SaveInput>({
-    mode: "onSubmit",
-    defaultValues: {
-      comment: "",
-      reply: "",
-      edit: "",
-    },
-  });
-
-  console.log(errors);
+  const { handleSubmit, register, getValues, resetField, setValue } =
+    useForm<SaveInput>({
+      mode: "onSubmit",
+      defaultValues: {
+        comment: "",
+        reply: "",
+        edit: "",
+      },
+    });
 
   const {
     data: commentsResponse,
