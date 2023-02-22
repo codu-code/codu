@@ -43,27 +43,33 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
 
   const { data: session } = useSession();
 
-  const [viewPreview, setViewPreview] = useState<boolean>(false);
+  const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
 
-  const { handleSubmit, register, getValues, resetField, setValue } =
-    useForm<SaveInput>({
-      mode: "onSubmit",
-      defaultValues: {
-        comment: "",
-        reply: "",
-        edit: "",
-      },
-    });
+  const {
+    handleSubmit,
+    register,
+    getValues,
+    resetField,
+    setValue,
+    formState: { errors },
+  } = useForm<SaveInput>({
+    mode: "onSubmit",
+    defaultValues: {
+      comment: "",
+      reply: "",
+      edit: "",
+    },
+  });
+
+  console.log(errors);
 
   const {
     data: commentsResponse,
     refetch,
     status: commentStatus,
-  } = trpc.comment.get.useQuery(
-    {
-      postId,
-    },
-  );
+  } = trpc.comment.get.useQuery({
+    postId,
+  });
   const { mutate, status: createCommentStatus } =
     trpc.comment.create.useMutation({
       onSuccess: () => {
@@ -142,7 +148,7 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
         await editComment({ body: body || "", id: editCommentBoxId });
         resetField(fieldName);
         setEditCommentBoxId(null);
-        setViewPreview(false);
+        setViewPreviewId(null);
         return;
       } catch (err) {
         if (err instanceof ZodError) {
@@ -156,7 +162,7 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
       SaveSchema.parse({ body });
       await mutate({ body: body || "", postId, parentId });
       resetField(fieldName);
-      setViewPreview(false);
+      setViewPreviewId(null);
     } catch (err) {
       if (err instanceof ZodError) {
         return toast.error(err.issues[0].message);
@@ -192,14 +198,14 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
           ["en-IE"],
           isCurrentYear
             ? {
-              month: "long",
-              day: "numeric",
-            }
+                month: "long",
+                day: "numeric",
+              }
             : {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }
         );
 
         const commentUpdated =
@@ -260,7 +266,6 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
                         leaveTo="transform opacity-0 scale-95"
                       >
                         <Menu.Items className="origin-top-right absolute bottom-10 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
-
                           <>
                             <Menu.Item>
                               <button
@@ -307,8 +312,9 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
                       onClick={() => likeComment(id)}
                     >
                       <HeartIcon
-                        className={`w-6 h-6${youLikedThis ? " fill-red-400" : ""
-                          }`}
+                        className={`w-6 h-6${
+                          youLikedThis ? " fill-red-400" : ""
+                        }`}
                       />
                     </button>
                     <span className="text-xs font-semibold mr-4 flex">
@@ -336,9 +342,14 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
                     {showCommentBoxId === id && (
                       <div className="mt-4">
                         <CommentArea
+                          id={id}
                           name="reply"
                           parentId={id}
-                          onCancel={() => setEditCommentBoxId(null)}
+                          onCancel={() => {
+                            // TODO: Add alert to confirm reset if there is already content being written
+                            resetField("reply");
+                            setShowCommentBoxId(null);
+                          }}
                           loading={createCommentStatus === "loading"}
                         />
                       </div>
@@ -350,7 +361,7 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
             ) : (
               <CommentArea
                 name="edit"
-                parentId={id}
+                id={id}
                 editMode
                 loading={editStatus === "loading"}
                 onCancel={() => setEditCommentBoxId(null)}
@@ -365,6 +376,7 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
   interface CommentAreaProps {
     onCancel?: () => void;
     parentId?: number;
+    id: number | null;
     name: FieldName;
     editMode?: boolean;
     loading?: boolean;
@@ -373,6 +385,7 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
   const CommentArea = ({
     onCancel,
     parentId,
+    id,
     name,
     editMode = false,
     loading = false,
@@ -399,7 +412,7 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
             <div>{session.user.name}</div>
           </div>
         )}
-        {viewPreview ? (
+        {viewPreviewId === id ? (
           <article
             className="prose prose-invert text-sm"
             style={{ whiteSpace: "pre-wrap" }}
@@ -433,9 +446,14 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
             disabled={createCommentStatus === "loading"}
             type="submit"
             className="secondary-button text-sm ml-2"
-            onClick={() => setViewPreview((current) => !current)}
+            onClick={() =>
+              setViewPreviewId((current) => {
+                if (current === id) return null;
+                return id;
+              })
+            }
           >
-            {viewPreview ? "Edit" : "Preview"}
+            {viewPreviewId === id ? "Edit" : "Preview"}
           </button>
           {onCancel && (
             <button
@@ -470,10 +488,13 @@ const CommentsTab = ({ postId, postOwnerId }: Props) => {
           </div>
         </div>
       )}
-      <h2 className="mx-4 mt-6 pb-2 text-xl border-b border-gray-800">{initiallyLoaded ? `Discussion (${commentsResponse?.count || 0
-        })` : "Fetching comments"}</h2>
+      <h2 className="mx-4 mt-6 pb-2 text-xl border-b border-gray-800">
+        {initiallyLoaded
+          ? `Discussion (${commentsResponse?.count || 0})`
+          : "Fetching comments"}
+      </h2>
       <div className="mx-4 mt-4">
-        <CommentArea name="comment" />
+        <CommentArea id={0} name="comment" />
       </div>
       <div className="mx-4 mb-8">{generateComments(comments)}</div>
     </section>
