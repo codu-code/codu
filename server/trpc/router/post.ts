@@ -95,7 +95,6 @@ export const postRouter = router({
           title,
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
-          slug: currentPost.slug ? currentPost.slug : `${title.replace(/\W+/g, "-")}-${id}`.toLowerCase(),
           canonicalUrl,
         },
       });
