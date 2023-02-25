@@ -31,4 +31,14 @@ module.exports = withBundleAnalyzer({
     // Temporary to check pipelines due to weird error I can only get on CodePipeline
     ignoreBuildErrors: true,
   },
+  experimental: {
+    swcPlugins: [
+      [
+        "next-superjson-plugin",
+        {
+          excluded: [],
+        },
+      ],
+    ],
+  },
 });

@@ -5,26 +5,20 @@ import type {
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import superjson from "superjson";
-import { appRouter } from "../../server/trpc/router";
-import { getServerAuthSession } from "../../server/common/get-server-auth-session";
-import { createContextInner } from "../../server/trpc/context";
 import { Menu, Transition } from "@headlessui/react";
 import Head from "next/head";
-import Layout from "../../components/Layout/Layout";
-import BioBar from "../../components/BioBar/BioBar";
-import { trpc } from "../../utils/trpc";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { markdocComponents } from "../../markdoc/components";
-import { config } from "../../markdoc/config";
 import {
   HeartIcon,
   BookmarkIcon,
   DotsHorizontalIcon,
 } from "@heroicons/react/outline";
-
+import prisma from "../../server/db/client";
+import Layout from "../../components/Layout/Layout";
+import BioBar from "../../components/BioBar/BioBar";
+import { trpc } from "../../utils/trpc";
+import { signIn, useSession } from "next-auth/react";
+import { markdocComponents } from "../../markdoc/components";
+import { config } from "../../markdoc/config";
 import CommentsArea from "../../components/Comments/CommentsArea";
 
 const createMenuData = (title: string, username: string, url: string) => [
@@ -41,27 +35,15 @@ const createMenuData = (title: string, username: string, url: string) => [
 const ArticlePage: NextPage = ({
   slug,
   host,
+  post,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session } = useSession();
 
-  const router = useRouter();
-
   if (!slug) return null;
 
-  const { data: post } = trpc.post.bySlug.useQuery(
-    { slug },
-    {
-      onError() {
-        router.push("/404");
-      },
-      retry: false,
-    }
-  );
-
-  const { data, refetch } = trpc.post.sidebarData.useQuery(
-    { id: post?.id || "" },
-    { enabled: !!post }
-  );
+  const { data, refetch } = trpc.post.sidebarData.useQuery({
+    id: post?.id || "",
+  });
 
   const { mutate: like, status: likeStatus } = trpc.post.like.useMutation({
     onSettled() {
@@ -249,19 +231,49 @@ const ArticlePage: NextPage = ({
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext<{ slug: string }>
 ) => {
-  const session = await getServerAuthSession(ctx);
+  try {
+    const { params } = ctx;
 
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: await createContextInner({
-      session,
-    }),
-    transformer: superjson,
-  });
+    if (!params?.slug) {
+      throw new Error("No slug");
+    }
 
-  const { params } = ctx;
+    const post = await prisma.post.findUnique({
+      where: {
+        slug: params.slug,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            name: true,
+            image: true,
+            bio: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            tag: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-  if (!params?.slug) {
+    if (!post) throw new Error("Post not found");
+
+    return {
+      props: {
+        post,
+        slug: params.slug,
+        host: ctx.req.headers.host || "",
+      },
+    };
+  } catch {
     return {
       redirect: {
         destination: "/404",
@@ -270,16 +282,6 @@ export const getServerSideProps = async (
       props: {},
     };
   }
-
-  await ssg.post.bySlug.prefetch({ slug: params.slug });
-
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-      slug: params.slug,
-      host: ctx.req.headers.host || "",
-    },
-  };
 };
 
 export default ArticlePage;
