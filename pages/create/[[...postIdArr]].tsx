@@ -236,7 +236,7 @@ const Create: NextPage = () => {
         break;
       case 'cancel':
         setDelayDebounce(false);
-        savePost()
+        !published && savePost()
         break;
       default:
         // setting allowUpdate in this case
