@@ -151,3 +151,9 @@ model Like {
   @@unique([userId, commentId])
   @@unique([userId, postId])
 }
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  message   String
+}

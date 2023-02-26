@@ -5,9 +5,8 @@ import { Fragment } from "react";
 import { useSession } from "next-auth/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
-import { PlusSmIcon } from "@heroicons/react/solid";
+import { PlusSmIcon, BellIcon } from "@heroicons/react/solid";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
-import { useRouter } from "next/router";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -15,7 +14,6 @@ function classNames(...classes: string[]) {
 
 const Nav = () => {
   const { data: session } = useSession();
-  const { route } = useRouter();
 
   const userNavigation = [
     {
@@ -29,6 +27,8 @@ const Nav = () => {
     { name: "Settings", href: "/settings" },
     { name: "Sign out", onClick: () => signOut() },
   ];
+
+  const hasNotifications = true;
 
   return (
     <Disclosure as="nav" className="bg-black">
@@ -130,57 +130,69 @@ const Nav = () => {
                   )}
                   {/* Profile dropdown */}
                   {session && (
-                    <Menu as="div" className="ml-4 relative">
-                      <div>
-                        <Menu.Button className="bg-smoke flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                          <span className="sr-only">Open user menu</span>
-                          {session.user?.image ? (
-                            <img
-                              className="h-10 w-10 rounded-full bg-gray-300 object-cover"
-                              src={session?.user?.image}
-                              alt={`${session.user?.name}'s avatar`}
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-smoke flex justify-center items-center">
-                              {session.user?.name?.[0] || "C"}
-                            </div>
-                          )}
-                        </Menu.Button>
-                      </div>
-                      <Transition
-                        as={Fragment}
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
+                    <>
+                      <Link
+                        href="/notifications"
+                        className="relative ml-3 flex-shrink-0 rounded-full bg-black p-1 text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                       >
-                        <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
-                          {userNavigation.map((item) => (
-                            <Menu.Item key={item.name}>
-                              {item.onClick ? (
-                                <button
-                                  className={
-                                    "flex text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded"
-                                  }
-                                  onClick={item.onClick}
-                                >
-                                  {item.name}
-                                </button>
-                              ) : (
-                                <Link
-                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded"
-                                  href={item.href || ""}
-                                >
-                                  {item.name}
-                                </Link>
-                              )}
-                            </Menu.Item>
-                          ))}
-                        </Menu.Items>
-                      </Transition>
-                    </Menu>
+                        <span className="sr-only">View notifications</span>
+                        {hasNotifications && (
+                          <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                        )}
+                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      </Link>
+                      <Menu as="div" className="ml-4 relative">
+                        <div>
+                          <Menu.Button className="bg-smoke flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <span className="sr-only">Open user menu</span>
+                            {session.user?.image ? (
+                              <img
+                                className="h-10 w-10 rounded-full bg-gray-300 object-cover"
+                                src={session?.user?.image}
+                                alt={`${session.user?.name}'s avatar`}
+                              />
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-smoke flex justify-center items-center">
+                                {session.user?.name?.[0] || "C"}
+                              </div>
+                            )}
+                          </Menu.Button>
+                        </div>
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                            {userNavigation.map((item) => (
+                              <Menu.Item key={item.name}>
+                                {item.onClick ? (
+                                  <button
+                                    className={
+                                      "flex text-left w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded"
+                                    }
+                                    onClick={item.onClick}
+                                  >
+                                    {item.name}
+                                  </button>
+                                ) : (
+                                  <Link
+                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded"
+                                    href={item.href || ""}
+                                  >
+                                    {item.name}
+                                  </Link>
+                                )}
+                              </Menu.Item>
+                            ))}
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
+                    </>
                   )}
                 </div>
               </div>
