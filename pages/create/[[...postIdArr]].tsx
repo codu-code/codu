@@ -259,7 +259,7 @@ const Create: NextPage = () => {
               >
                 Close
               </button>
-              <div className="relative mx-4 flex flex-col justify-center items-center h-full overflow-y-scroll">
+              <div className="relative mx-4 flex flex-col justify-center items-center h-full overflow-y-auto">
                 <div className="pt-16 pb-8">
                   <div className="block sm:grid gap-6 sm:grid-cols-12 w-full max-w-2xl">
                     <div className="sm:col-span-6 mt-8 sm:mt-0">
