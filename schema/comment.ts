@@ -4,6 +4,7 @@ export const SaveCommentSchema = z.object({
   body: z.string().trim().min(1).max(5000),
   parentId: z.number().optional(),
   postId: z.string(),
+  commentId: z.number().optional(),
 });
 
 export const EditCommentSchema = z.object({

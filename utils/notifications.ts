@@ -1,0 +1,1 @@
+export const [NEW_COMMENT_ON_YOUR_POST, NEW_REPLY_TO_YOUR_COMMENT] = [0, 1];
