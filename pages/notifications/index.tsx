@@ -12,6 +12,9 @@ import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import PageHeading from "../../components/PageHeading/PageHeading";
 import { trpc } from "../../utils/trpc";
+import { authOptions } from "../api/auth/[...nextauth]";
+import { unstable_getServerSession } from "next-auth";
+import { GetServerSideProps } from "next/types";
 
 const Notifications = () => {
   const {
@@ -228,6 +231,27 @@ const Notifications = () => {
       </Layout>
     </>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  );
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/get-started",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
 };
 
 export default Notifications;
