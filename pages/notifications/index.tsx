@@ -1,5 +1,4 @@
 import { Children, Fragment, useEffect } from "react";
-
 import { useInView } from "react-intersection-observer";
 import { CheckIcon } from "@heroicons/react/solid";
 import { Temporal } from "@js-temporal/polyfill";
@@ -113,7 +112,7 @@ const Notifications = () => {
                     return <Placeholder />;
                   })
                 )}
-              {noNotifications && (
+              {status !== "loading" && noNotifications && (
                 <p className=" text-lg font-semibold">
                   No new notifications. ✅{" "}
                 </p>
