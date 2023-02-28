@@ -7,21 +7,73 @@ import {
   GetCommentsSchema,
   LikeCommentSchema,
 } from "../../../schema/comment";
+import {
+  NEW_COMMENT_ON_YOUR_POST,
+  NEW_REPLY_TO_YOUR_COMMENT,
+} from "../../../utils/notifications";
 
 export const commentRouter = router({
   create: protectedProcedure
     .input(SaveCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, postId, parentId } = input;
-      const comment = await ctx.prisma.comment.create({
+      const userId = ctx.session.user.id;
+
+      const postData = await ctx.prisma.post.findUnique({
+        where: {
+          id: postId,
+        },
+        select: {
+          userId: true,
+        },
+      });
+
+      const postOwnerId = postData?.userId;
+
+      const { id } = await ctx.prisma.comment.create({
         data: {
-          userId: ctx.session.user.id,
+          userId,
           body,
           postId,
           parentId,
         },
       });
-      return comment;
+
+      if (parentId) {
+        const commentData = await ctx.prisma.comment.findUnique({
+          where: {
+            id: parentId,
+          },
+          select: {
+            userId: true,
+          },
+        });
+        if (commentData?.userId && commentData?.userId !== userId) {
+          await ctx.prisma.notification.create({
+            data: {
+              notifierId: userId,
+              type: NEW_REPLY_TO_YOUR_COMMENT,
+              postId,
+              userId: commentData.userId,
+              commentId: id,
+            },
+          });
+        }
+      }
+
+      if (!parentId && postOwnerId && postOwnerId !== userId) {
+        await ctx.prisma.notification.create({
+          data: {
+            notifierId: userId,
+            type: NEW_COMMENT_ON_YOUR_POST,
+            postId,
+            userId: postOwnerId,
+            commentId: id,
+          },
+        });
+      }
+
+      return id;
     }),
   edit: protectedProcedure
     .input(EditCommentSchema)

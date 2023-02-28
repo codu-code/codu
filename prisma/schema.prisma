@@ -29,24 +29,25 @@ model Account {
 }
 
 model Post {
-  id           String     @id @unique
-  title        String
-  canonicalUrl String?
-  coverImage   String?
-  approved     Boolean    @default(true)
-  body         String     @db.Text()
-  excerpt      String     @default("") @db.VarChar(156)
-  readTimeMins Int
-  published    DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  slug         String     @unique
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
-  tags         PostTag[]
-  likes        Like[]
-  bookmarks    Bookmark[]
-  comments     Comment[]
+  id            String         @id @unique
+  title         String
+  canonicalUrl  String?
+  coverImage    String?
+  approved      Boolean        @default(true)
+  body          String         @db.Text()
+  excerpt       String         @default("") @db.VarChar(156)
+  readTimeMins  Int
+  published     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  slug          String         @unique
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  tags          PostTag[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  comments      Comment[]
+  notifications Notification[]
 }
 
 model Tag {
@@ -75,26 +76,28 @@ model Session {
 }
 
 model User {
-  id                 String     @id @default(cuid())
-  username           String?    @unique @db.VarChar(40)
-  name               String     @default("")
-  email              String?    @unique
+  id                 String         @id @default(cuid())
+  username           String?        @unique @db.VarChar(40)
+  name               String         @default("")
+  email              String?        @unique
   emailVerified      DateTime?
-  image              String     @default("/images/person.png")
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  bio                String     @default("") @db.VarChar(200)
-  location           String     @default("")
-  websiteUrl         String     @default("")
-  emailNotifications Boolean    @default(true)
-  newsletter         Boolean    @default(true)
+  image              String         @default("/images/person.png")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  bio                String         @default("") @db.VarChar(200)
+  location           String         @default("")
+  websiteUrl         String         @default("")
+  emailNotifications Boolean        @default(true)
+  newsletter         Boolean        @default(true)
   accounts           Account[]
   sessions           Session[]
   posts              Post[]
-  role               Role       @default(USER)
+  role               Role           @default(USER)
   likes              Like[]
   bookmarks          Bookmark[]
   comments           Comment[]
+  notification       Notification[]
+  notfier            Notification[] @relation("notifier")
 
   @@index(fields: [username, id])
 }
@@ -124,18 +127,19 @@ model Bookmark {
 }
 
 model Comment {
-  id        Int       @id @default(autoincrement())
-  body      String    @db.Text()
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  postId    String
-  userId    String
-  parentId  Int?
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  children  Comment[] @relation("Comment_Children")
-  parent    Comment?  @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
-  likes     Like[]
+  id           Int            @id @default(autoincrement())
+  body         String         @db.Text()
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  postId       String
+  userId       String
+  parentId     Int?
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  children     Comment[]      @relation("Comment_Children")
+  parent       Comment?       @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
+  likes        Like[]
+  Notification Notification[]
 }
 
 model Like {
@@ -150,4 +154,19 @@ model Like {
 
   @@unique([userId, commentId])
   @@unique([userId, postId])
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  type       Int
+  userId     String
+  postId     String?
+  commentId  Int?
+  notifierId String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  notifier   User?    @relation(name: "notifier", fields: [notifierId], references: [id], onDelete: Cascade)
 }
