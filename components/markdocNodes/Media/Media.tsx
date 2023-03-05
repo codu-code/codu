@@ -126,6 +126,5 @@ export function Media(props: React.ReactPropTypes) {
   };
 
   const processedProps = processMedia(props);
-  console.log(processedProps);
   return renderMediaComponent(type.current, processedProps);
 }
