@@ -65,18 +65,17 @@ export function Media(props: React.ReactPropTypes) {
   };
 
   const processYoutube = (mediaProps: MediaProps) => {
-    console.log('youtube...')
     const isEmbedUrl = embedUrlRegex.test(mediaProps.src);
     // If not, reformat the URL to the embed URL format
-    if(!isEmbedUrl){mediaProps.src = formatEmbed(mediaProps.src)}
+    const src = isEmbedUrl ? mediaProps.src : formatEmbed(mediaProps.src);
     type.current = MEDIA_TYPES.YOUTUBE;
     return {
-      ...mediaProps
+      ...mediaProps,
+      src
     };
   };
 
   const processCodeSandbox = (mediaProps: MediaProps) => {
-    console.log('code sandbox...')
     type.current = MEDIA_TYPES.CODESANDBOX;
     return {
       ...mediaProps,
@@ -84,7 +83,6 @@ export function Media(props: React.ReactPropTypes) {
   };
 
   const processCodePen = (mediaProps: MediaProps) => {
-    console.log('code pen...')
     type.current = MEDIA_TYPES.CODEPEN;
     return {
       ...mediaProps,
@@ -92,7 +90,6 @@ export function Media(props: React.ReactPropTypes) {
   };
 
   const processFallback = (mediaProps: MediaProps) => {
-    console.log('fallback...')
     return {
       ...mediaProps,
     };
