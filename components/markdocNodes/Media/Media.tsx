@@ -14,7 +14,7 @@ interface MediaProps {
 }
 
 const getYoutubeRegex = () =>
-  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?(?=.*v=\w+)|youtu\.be\/)([\w-]{11})(?:\S+)?$/i;
+/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?=.*v=\w+)|embed\/)|youtu\.be\/)/i;
 
 const getEmbedUrlRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([\w-]{11})(?:\S+)?$/i;
@@ -46,59 +46,55 @@ export function Media(props: React.ReactPropTypes) {
   const type = React.useRef(MEDIA_TYPES.FALLBACK);
 
   const processMedia = (mediaProps: MediaProps) => {
+    const src = checkProtocol(mediaProps.src);
     // Regex test, parse the src url and determine which
     // media type user is trying to use before we perform
     // some operations. This is a necessary step because we we
     // need to make sure src url is valid and also account for
     // varying amounts of props for each component
-    let match;
     switch (true) {
-      case Boolean((match = mediaProps.src.match(youtubeRegex))):
-        return processYoutube({ ...mediaProps });
-      case Boolean((match = mediaProps.src.match(codesandboxRegex))):
-        return processCodeSandbox({ ...mediaProps });
-      case Boolean((match = mediaProps.src.match(codepenRegex))):
-        return processCodePen({ ...mediaProps });
+      case !!mediaProps.src.match(youtubeRegex):
+        return processYoutube({ ...mediaProps, src });
+      case !!mediaProps.src.match(codesandboxRegex):
+        return processCodeSandbox({ ...mediaProps, src });
+      case !!mediaProps.src.match(codepenRegex):
+        return processCodePen({ ...mediaProps, src });
       default:
-        return processFallback({ ...mediaProps });
+        return processFallback({ ...mediaProps, src });
     }
   };
 
   const processYoutube = (mediaProps: MediaProps) => {
-    let src = mediaProps.src
-    const isEmbedUrl = embedUrlRegex.test(src);
+    console.log('youtube...')
+    const isEmbedUrl = embedUrlRegex.test(mediaProps.src);
     // If not, reformat the URL to the embed URL format
-    isEmbedUrl ? (src = checkProtocol(src)) : (src = formatEmbed(src));
+    if(!isEmbedUrl){mediaProps.src = formatEmbed(mediaProps.src)}
     type.current = MEDIA_TYPES.YOUTUBE;
     return {
-      ...mediaProps,
-      src,
+      ...mediaProps
     };
   };
 
   const processCodeSandbox = (mediaProps: MediaProps) => {
-    const src = checkProtocol(mediaProps.src);
+    console.log('code sandbox...')
     type.current = MEDIA_TYPES.CODESANDBOX;
     return {
       ...mediaProps,
-      src,
     };
   };
 
   const processCodePen = (mediaProps: MediaProps) => {
-    const src = checkProtocol(mediaProps.src);
+    console.log('code pen...')
     type.current = MEDIA_TYPES.CODEPEN;
     return {
       ...mediaProps,
-      src,
     };
   };
 
   const processFallback = (mediaProps: MediaProps) => {
-    const src = checkProtocol(mediaProps.src);
+    console.log('fallback...')
     return {
       ...mediaProps,
-      src,
     };
   };
 
