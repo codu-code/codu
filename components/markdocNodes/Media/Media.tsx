@@ -11,7 +11,7 @@ const codepenRegex = /{%\s*media\s*src="https?:\/\/codepen\.io\/([\w-]+)\/embed\
 
 export function Media(props: React.ReactPropTypes) {
 
-    const [type, setType] = React.useState('fallback')
+    // const [type, setType] = React.useState('fallback')
 
 
     const processMedia = (mediaProps) => {
@@ -29,9 +29,11 @@ export function Media(props: React.ReactPropTypes) {
       
       const processYoutube = (mediaProps) => {
         let src = checkProtocol(mediaProps.src)
+        const type = 'youtube'
         return {
             ...mediaProps,
             src,
+            type
         }
 
     }
@@ -39,7 +41,7 @@ export function Media(props: React.ReactPropTypes) {
       
       const processCodeSandbox = (mediaProps) => {
         let src = checkProtocol(mediaProps.src)
-        setType('codesandbox')
+        // setType('codesandbox')
         return {
             ...mediaProps,
             src,
@@ -49,7 +51,7 @@ export function Media(props: React.ReactPropTypes) {
       
       const processCodePen = (mediaProps) => {
         let src = checkProtocol(mediaProps.src)
-        setType('codepen')
+        // setType('codepen')
         return {
             ...mediaProps,
             src,
@@ -59,7 +61,7 @@ export function Media(props: React.ReactPropTypes) {
       
       const processFallback = (mediaProps) => {
         const src = checkProtocol(mediaProps.src);
-        setType('fallback')
+        // setType('fallback')
         return {
             ...mediaProps,
             src,
@@ -90,5 +92,5 @@ export function Media(props: React.ReactPropTypes) {
     
     const processedProps = processMedia(props)
     console.log(processedProps)
-    return renderMediaComponent(type, processedProps)
+    return renderMediaComponent(processedProps.type, processedProps)
 }
