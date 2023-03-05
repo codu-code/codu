@@ -1,7 +1,7 @@
 import * as React from "react";
 import { YouTube } from "../Youtube/Youtube";
-import { CodePen } from "../Codepen/CodePen";
-import { CodeSandbox } from "../Codesandbox/CodeSandbox";
+import { CodePen } from "../CodePen/CodePen";
+import { CodeSandbox } from "../CodeSandbox/CodeSandbox";
 import { FallbackMedia } from "../FallbackMedia/FallbackMedia";
 
 
