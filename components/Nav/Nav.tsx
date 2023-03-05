@@ -137,7 +137,7 @@ const Nav = () => {
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative ml-3 flex-shrink-0 rounded-full bg-black p-1 text-gray-500 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                        className="relative ml-3 flex-shrink-0 rounded-full bg-black p-1 text-gray-400 hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
@@ -204,7 +204,7 @@ const Nav = () => {
                 <Link
                   title="Notifications"
                   href="/notifications"
-                  className="relative block mr-3 flex-shrink-0 rounded-md bg-black p-2 text-gray-500 hover:text-gray-300 hover:bg-smoke focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
+                  className="relative block mr-3 flex-shrink-0 rounded-md bg-black p-2 text-gray-400 hover:text-gray-300 hover:bg-smoke focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
