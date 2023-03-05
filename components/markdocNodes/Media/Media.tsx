@@ -20,7 +20,7 @@ const getEmbedUrlRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([\w-]{11})(?:\S+)?$/i;
 
 const getCodesandboxRegex = () =>
-  /^https?:\/\/codesandbox\.io\/s\/([\w-]+)(?:\?.*)?$/i;
+/^https?:\/\/codesandbox\.io\/(?:embed|s)\/([\w-]+)(?:\?.*)?$/i;
 
 const getCodepenRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?codepen\.io\/[\w-]+\/(?:embed|pen)\/([\w-]+)(?:\S+)?$/i;
