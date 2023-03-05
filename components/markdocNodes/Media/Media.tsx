@@ -12,7 +12,7 @@ const codepenRegex = /{%\s*media\s*src="https?:\/\/codepen\.io\/([\w-]+)\/embed\
 export function Media(props: React.ReactPropTypes) {
 
     // const [type, setType] = React.useState('fallback')
-
+    const type = React.useRef('fallback')
 
     const processMedia = (mediaProps) => {
         let match;
@@ -29,7 +29,7 @@ export function Media(props: React.ReactPropTypes) {
       
       const processYoutube = (mediaProps) => {
         let src = checkProtocol(mediaProps.src)
-        const type = 'youtube'
+        type.current = 'youtube'
         return {
             ...mediaProps,
             src,
@@ -92,5 +92,5 @@ export function Media(props: React.ReactPropTypes) {
     
     const processedProps = processMedia(props)
     console.log(processedProps)
-    return renderMediaComponent(processedProps.type, processedProps)
+    return renderMediaComponent(type.current, processedProps)
 }
