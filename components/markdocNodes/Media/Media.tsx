@@ -83,9 +83,17 @@ export function Media(props: React.ReactPropTypes) {
   };
 
   const processCodePen = (mediaProps: MediaProps) => {
+    let src = mediaProps.src;
+
+    // Check if the URL contains /pen/ and replace it with /embed/
+    if (src.includes("/pen/")) {
+      src = src.replace("/pen/", "/embed/");
+    }
+
     type.current = MEDIA_TYPES.CODEPEN;
     return {
       ...mediaProps,
+      src
     };
   };
 
