@@ -3,7 +3,7 @@ import type {
   GetServerSideProps,
   InferGetServerSidePropsType,
 } from "next";
-
+import Fathom from 'fathom-client';
 import { useRouter } from "next/router";
 import { customAlphabet } from "nanoid";
 import { unstable_getServerSession } from "next-auth/next";
@@ -474,7 +474,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
     });
     const { json } = superjson.serialize(rawData);
-
+    Fathom.trackPageview('sign-up-complete', 0)
     return {
       props: {
         profile: json,
