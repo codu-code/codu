@@ -2,24 +2,14 @@ import * as React from "react";
 
 export function CodeSandbox(props: React.ReactPropTypes) {
   return (
-    <div>
+    <div style={{marginInline: '16px 0px'}}>
       <iframe
         {...props}
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
+        style={{width: '100%', aspectRatio: '16 / 9'}}
       />
-      <style jsx>
-        {`
-          div {
-            margin: 16px 0px;
-          }
-          iframe {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-          }
-        `}
-      </style>
     </div>
   );
 }
