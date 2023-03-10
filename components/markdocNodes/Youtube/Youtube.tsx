@@ -8,15 +8,8 @@ export function YouTube(props: React.ReactPropTypes) {
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
+        style={{width: '100%', aspectRatio: '16 / 9'}}
       />
-      <style jsx>
-        {`
-          iframe {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-          }
-        `}
-      </style>
     </div>
   );
 }
