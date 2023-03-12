@@ -10,6 +10,7 @@ import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
 import PageHeading from "../components/PageHeading/PageHeading";
+import Head from "next/head";
 
 const Profile: NextPage = ({
   profile,
@@ -20,60 +21,88 @@ const Profile: NextPage = ({
   const { name, username, image, bio, posts } = profile;
 
   return (
-    <Layout>
-      <div className="border-t-2">
-        <div className="max-w-2xl px-4 mx-auto text-white">
-          <main className="flex pt-6">
-            <div className="mr-4 flex-shrink-0 self-center">
-              {image && (
-                <img
-                  className="rounded-full object-cover h-32 w-32"
-                  alt={`Avatar for ${name}`}
-                  src={image}
-                />
-              )}
-            </div>
-            <div className="flex flex-col justify-center">
-              <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
-              <h2 className="text-gray-400 font-bold text-sm">@{username}</h2>
-              <p className="mt-1">{bio}</p>
-            </div>
-          </main>
-
-          <PageHeading>Published articles</PageHeading>
-
-          {posts.length ? (
-            posts.map(
-              ({ slug, title, excerpt, readTimeMins, published, id }) => {
-                if (!published) return;
-                return (
-                  <ArticlePreview
-                    key={slug}
-                    slug={slug}
-                    title={title}
-                    excerpt={excerpt}
-                    name={name}
-                    username={username || ""}
-                    image={image}
-                    date={published}
-                    readTime={readTimeMins}
-                    menuOptions={
-                      isOwner
-                        ? [{ label: "Edit", href: `/create/${id}`, postId: id }]
-                        : undefined
-                    }
-                    showBookmark={!isOwner}
-                    id={id}
+    <>
+      <Head>
+        <title>{`${name} - Codú`}</title>
+        <meta name="description" content={`${name}'s profile on Codú`} />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="manifest" href="site.webmanifest" />
+        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#000000" />
+        <link rel="shortcut icon" href="favicon.ico" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-config" content="browserconfig.xml" />
+        <meta name="theme-color" content="#000" />
+        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+        <meta
+          name="image"
+          property="og:image"
+          content={`/api/og?title=${encodeURIComponent(
+            `${name} - Codú Profile`
+          )}`}
+        />
+        <meta property="og:type" content="website" />
+      </Head>
+      <Layout>
+        <div className="border-t-2">
+          <div className="max-w-2xl px-4 mx-auto text-white">
+            <main className="flex pt-6">
+              <div className="mr-4 flex-shrink-0 self-center">
+                {image && (
+                  <img
+                    className="rounded-full object-cover h-32 w-32"
+                    alt={`Avatar for ${name}`}
+                    src={image}
                   />
-                );
-              }
-            )
-          ) : (
-            <p className="font-medium py-4">Nothing published yet... 🥲</p>
-          )}
+                )}
+              </div>
+              <div className="flex flex-col justify-center">
+                <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
+                <h2 className="text-gray-400 font-bold text-sm">@{username}</h2>
+                <p className="mt-1">{bio}</p>
+              </div>
+            </main>
+
+            <PageHeading>Published articles</PageHeading>
+
+            {posts.length ? (
+              posts.map(
+                ({ slug, title, excerpt, readTimeMins, published, id }) => {
+                  if (!published) return;
+                  return (
+                    <ArticlePreview
+                      key={slug}
+                      slug={slug}
+                      title={title}
+                      excerpt={excerpt}
+                      name={name}
+                      username={username || ""}
+                      image={image}
+                      date={published}
+                      readTime={readTimeMins}
+                      menuOptions={
+                        isOwner
+                          ? [
+                              {
+                                label: "Edit",
+                                href: `/create/${id}`,
+                                postId: id,
+                              },
+                            ]
+                          : undefined
+                      }
+                      showBookmark={!isOwner}
+                      id={id}
+                    />
+                  );
+                }
+              )
+            ) : (
+              <p className="font-medium py-4">Nothing published yet... 🥲</p>
+            )}
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    </>
   );
 };
 
