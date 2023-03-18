@@ -91,6 +91,7 @@ const ArticlePage: NextPage = ({
     <>
       <Head>
         <title>{post.title}</title>
+        <meta name="author" content={post.user.name}></meta>
         <meta key="og:title" property="og:title" content={post.title} />
         <meta
           key="og:description"
@@ -103,6 +104,7 @@ const ArticlePage: NextPage = ({
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${host}/articles/${post.slug}`} />
         <meta
+          name="image"
           property="og:image"
           content={`https://${host}/api/og?title=${encodeURIComponent(
             post.title
