@@ -15,6 +15,7 @@ This guide provides an overview of the available hotkeys and shortcuts for the c
 | `Meta+s`        | Code Snippet                 |
 | `Meta+shift+c`  | Code Block                   |
 | `Meta+Shift+.`  | Block Quote                  |
+| `Meta+u`        | URL                          |
 | `Meta+l`        | Link                         |
 | `Meta+Shift+i`  | Image                        |
 
