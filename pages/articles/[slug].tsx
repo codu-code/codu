@@ -102,7 +102,7 @@ const ArticlePage: NextPage = ({
         <meta name="msapplication-config" content="browserconfig.xml" />
         <meta name="theme-color" content="#000" />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${host}/articles/${post.slug}`} />
+        <meta property="og:url" content={`https://${host}/articles/${post.slug}`} />
         <meta
           name="image"
           property="og:image"
