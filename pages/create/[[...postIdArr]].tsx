@@ -1,11 +1,11 @@
 import type { NextPage, GetServerSideProps } from "next";
 import { ZodError } from "zod";
 import { useRouter } from "next/router";
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, useRef } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
-import TextareaAutosize from "react-textarea-autosize";
+import CustomTextareaAutosize from "../../components/CustomTextareAutosize/CustomTextareaAutosize";
 import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
@@ -18,6 +18,8 @@ import { PromptDialog } from "../../components/PromptService/PromptService";
 import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
 import Markdoc from "@markdoc/markdoc";
+import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
+import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 
@@ -36,7 +38,11 @@ const Create: NextPage = () => {
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
   const allowUpdate = unsavedChanges && !delayDebounce
-  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useMarkdownHotkeys(textareaRef);
+  useMarkdownShortcuts(textareaRef);
+
   const { handleSubmit, register, watch, reset, getValues, formState: {isDirty} } =
     useForm<SavePostInput>({
       mode: "onSubmit",
@@ -488,12 +494,14 @@ const Create: NextPage = () => {
                               {...register("title")}
                             />
 
-                            <TextareaAutosize
+                            <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
                               className="border-none text-lg outline-none shadow-none mb-8 bg-smoke focus:bg-black"
                               minRows={25}
                               {...register("body")}
+                              inputRef={textareaRef}
                             />
+
                             <div className="flex justify-between items-center">
                               <>
                                 {saveStatus === "loading" && (

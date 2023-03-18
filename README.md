@@ -138,6 +138,12 @@ To learn more about Next.js, take a look at the following resources:
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
+### Editor Doc
+
+To learn about the editor shortcuts and hotkeys you can check out this document
+
+- [Markdoc Editor Hotkeys and Shortcus](/EDITOR_SHORTCUTS.MD)
+
 ## 💥 Issues
 
 You are welcome to [open issues](https://github.com/codu-code/codu/issues/new/choose) to discuss ideas about improving our Codú. Enhancements are encouraged and appreciated.
