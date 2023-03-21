@@ -14,6 +14,7 @@ import {
   GetByIdSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
+import { Prisma } from "@prisma/client";
 
 export const postRouter = router({
   create: protectedProcedure
@@ -239,7 +240,22 @@ export const postRouter = router({
   all: publicProcedure.input(GetPostsSchema).query(async ({ ctx, input }) => {
     const userId = ctx.session?.user?.id;
     const limit = input?.limit ?? 50;
-    const { cursor } = input;
+    const { cursor, sort } = input;
+    const orderMapping = {
+      newest: {
+        published: "desc" as Prisma.SortOrder,
+      },
+      oldest: {
+        published: "asc" as Prisma.SortOrder,
+      },
+      top: {
+        likes: {
+          _count: "desc" as Prisma.SortOrder,
+        },
+      },
+    };
+    const orderBy = orderMapping[sort] || orderMapping["newest"];
+
     const response = await ctx.prisma.post.findMany({
       take: limit + 1,
       where: {
@@ -264,9 +280,7 @@ export const postRouter = router({
       },
       cursor: cursor ? { id: cursor } : undefined,
       skip: cursor ? 1 : 0,
-      orderBy: {
-        published: "desc",
-      },
+      orderBy,
     });
 
     const cleaned = response.map((post) => {
