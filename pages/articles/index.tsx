@@ -12,10 +12,8 @@ const ArticlesPage = () => {
 
   const { filter } = router.query;
 
-  const [NEWEST, OLDEST, TOP] = ["newest", "oldest", "top"];
-
   type Filter = "newest" | "oldest" | "top";
-  const filters = [NEWEST, OLDEST, TOP];
+  const filters: Filter[] = ["newest", "oldest", "top"];
 
   const getSortBy = () => {
     if (typeof filter === "string") {
