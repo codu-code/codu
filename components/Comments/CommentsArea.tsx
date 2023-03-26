@@ -208,11 +208,13 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
               <>
                 <div className="flex items-center mb-2 justify-between">
                   <div className="flex items-center space-x-2 text-sm text-slate-500">
-                    <img
-                      className="rounded-full object-cover bg-slate-700 h-8 w-8"
-                      alt={`Avatar for ${name}`}
-                      src={image}
-                    />
+                    <Link href={`/${username}`}>
+                      <img
+                        className="rounded-full object-cover bg-slate-700 h-8 w-8"
+                        alt={`Avatar for ${name}`}
+                        src={image}
+                      />
+                    </Link>
                     <Link
                       className="hover:underline text-white"
                       href={`/${username}`}
