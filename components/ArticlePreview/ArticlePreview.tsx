@@ -77,11 +77,13 @@ const ArticlePreview: NextPage<Props> = ({
       <div className="flex justify-between">
         <div className="flex items-center mb-4">
           <span className="sr-only">{name}</span>
-          <img
-            className="mr-3 rounded-full object-cover h-12 w-12"
-            src={image}
-            alt={`${name}'s avatar`}
-          />
+          <Link href={`/${username}`}>
+            <img
+              className="mr-3 rounded-full object-cover h-12 w-12"
+              src={image}
+              alt={`${name}'s avatar`}
+            />
+          </Link>
           <div className="flex text-xs text-gray-500 flex-col justify-center">
             <p className="font-medium text-gray-500">
               Written by{" "}

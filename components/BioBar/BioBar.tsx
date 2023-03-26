@@ -16,13 +16,14 @@ const BioFooter = ({ author }: Props) => {
   return (
     <div className="mx-auto pb-4 max-w-xl px-4 sm:px-0">
       <div className="flex flex-col sm:flex-row md:mx-auto border-t-2 pt-6 border-gray-300 dark:border-gray-800">
-        <div className="shrink-0">
+        <Link href={`/${username}`} className="shrink-0">
           <img
             className="mr-4 rounded-full object-cover bg-slate-700 h-20 w-20 sm:h-24 sm:w-24 sm:mb-0 mb-2"
             alt={`Avatar for ${name}`}
             src={image}
           />
-        </div>
+        </Link>
+
         <div className="flex flex-col justify-center">
           {username && (
             <h4 className="text-lg md:text-xl font-bold text-gray-200">
