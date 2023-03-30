@@ -240,7 +240,8 @@ export const postRouter = router({
   all: publicProcedure.input(GetPostsSchema).query(async ({ ctx, input }) => {
     const userId = ctx.session?.user?.id;
     const limit = input?.limit ?? 50;
-    const { cursor, sort } = input;
+    const { cursor, sort, tag } = input;
+
     const orderMapping = {
       newest: {
         published: "desc" as Prisma.SortOrder,
@@ -262,6 +263,19 @@ export const postRouter = router({
         NOT: {
           published: null,
         },
+        ...(tag
+          ? {
+              tags: {
+                some: {
+                  tag: {
+                    title: {
+                      contains: tag?.toUpperCase() || "",
+                    },
+                  },
+                },
+              },
+            }
+          : {}),
       },
       select: {
         id: true,

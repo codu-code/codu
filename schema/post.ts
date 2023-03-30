@@ -59,6 +59,7 @@ export const GetPostsSchema = z.object({
   limit: z.number().min(1).max(100).nullish(),
   cursor: z.string().nullish(),
   sort: z.enum(["newest", "oldest", "top"]),
+  tag: z.string().nullish(),
 });
 
 export type SavePostInput = z.TypeOf<typeof SavePostSchema>;

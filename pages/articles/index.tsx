@@ -1,5 +1,6 @@
 import { Children, Fragment, useEffect } from "react";
 import Head from "next/head";
+import { TagIcon } from "@heroicons/react/outline";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
 import Layout from "../../components/Layout/Layout";
@@ -10,7 +11,8 @@ import { useRouter } from "next/router";
 const ArticlesPage = () => {
   const router = useRouter();
 
-  const { filter } = router.query;
+  const { filter, tag: dirtyTag } = router.query;
+  const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
 
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
@@ -27,7 +29,7 @@ const ArticlesPage = () => {
 
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     trpc.post.all.useInfiniteQuery(
-      { limit: 15, sort: selectedSortFilter },
+      { limit: 15, sort: selectedSortFilter, tag },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       }
@@ -40,6 +42,10 @@ const ArticlesPage = () => {
       fetchNextPage();
     }
   }, [inView]);
+
+  // @TODO make a list of words like "JavaScript" that we can map the words to if they exist
+  const capitalize = (str: string) =>
+    str.replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
 
   return (
     <>
@@ -67,7 +73,14 @@ const ArticlesPage = () => {
           <div className="relative sm:mx-auto max-w-2xl mx-4">
             <div className="my-8 border-b-2 pb-4 flex justify-between items-center">
               <h1 className="text-3xl tracking-tight font-extrabold text-gray-50 sm:text-4xl ">
-                Articles
+                {typeof tag === "string" ? (
+                  <div className="flex justify-center items-center">
+                    <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
+                    {capitalize(tag)}
+                  </div>
+                ) : (
+                  "Articles"
+                )}
               </h1>
               <div>
                 <label htmlFor="filter" className="sr-only">
@@ -78,7 +91,11 @@ const ArticlesPage = () => {
                   name="filter"
                   className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
                   onChange={(e) => {
-                    router.push(`/articles?filter=${e.target.value}`);
+                    router.push(
+                      `/articles?filter=${e.target.value}${
+                        tag ? `&tag=${tag}` : ""
+                      }`
+                    );
                   }}
                   value={selectedSortFilter}
                 >
@@ -131,6 +148,9 @@ const ArticlesPage = () => {
                     </Fragment>
                   );
                 })}
+              {status === "success" && !data.pages[0].posts.length && (
+                <h2 className="text-lg">No results founds</h2>
+              )}
               {isFetchingNextPage ? <ArticleLoading /> : null}
               <span className="invisible" ref={ref}>
                 intersection observer marker
