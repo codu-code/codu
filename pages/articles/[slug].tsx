@@ -6,6 +6,7 @@ import type {
   GetServerSidePropsContext,
 } from "next";
 import { Menu, Transition } from "@headlessui/react";
+import Link from "next/link";
 import Head from "next/head";
 import {
   HeartIcon,
@@ -102,7 +103,10 @@ const ArticlePage: NextPage = ({
         <meta name="msapplication-config" content="browserconfig.xml" />
         <meta name="theme-color" content="#000" />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://${host}/articles/${post.slug}`} />
+        <meta
+          property="og:url"
+          content={`https://${host}/articles/${post.slug}`}
+        />
         <meta
           name="image"
           property="og:image"
@@ -209,12 +213,13 @@ const ArticlePage: NextPage = ({
             {post.tags.length > 0 && (
               <section className="flex flex-wrap gap-3">
                 {post.tags.map(({ tag }) => (
-                  <div
+                  <Link
+                    href={`/articles?tag=${tag.title.toLowerCase()}`}
                     key={tag.title}
                     className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold"
                   >
                     {tag.title}
-                  </div>
+                  </Link>
                 ))}
               </section>
             )}
