@@ -398,8 +398,8 @@ export const createWelcomeEmailTemplate = (fullName?: string | null) =>
                                         "
                                       >
                                         Hey there${
-                                            fullName ? " " + fullName : ""
-                                          },<br /><br />
+                                          fullName ? " " + fullName : ""
+                                        },<br /><br />
                                       </p>
                                       <p
                                         style="
@@ -455,7 +455,9 @@ export const createWelcomeEmailTemplate = (fullName?: string | null) =>
                                     >
                                       <!--[if mso
                                         ]><a
-                                          href="https://discord.gg/NxSkYtZ"
+                                          href="${
+                                            process.env.DISCORD_INVITE_URL || ""
+                                          }"
                                           target="_blank"
                                           hidden
                                         >
@@ -463,7 +465,10 @@ export const createWelcomeEmailTemplate = (fullName?: string | null) =>
                                             xmlns:v="urn:schemas-microsoft-com:vml"
                                             xmlns:w="urn:schemas-microsoft-com:office:word"
                                             esdevVmlButton
-                                            href="https://discord.gg/NxSkYtZ"
+                                            href="${
+                                              process.env.DISCORD_INVITE_URL ||
+                                              ""
+                                            }"
                                             style="
                                               height: 39px;
                                               v-text-anchor: middle;
@@ -504,7 +509,9 @@ export const createWelcomeEmailTemplate = (fullName?: string | null) =>
                                           mso-hide: all;
                                         "
                                         ><a
-                                          href="https://discord.gg/NxSkYtZ"
+                                          href="${
+                                            process.env.DISCORD_INVITE_URL || ""
+                                          }"
                                           class="es-button es-button-1"
                                           target="_blank"
                                           style="
