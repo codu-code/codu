@@ -14,7 +14,7 @@ import {
   GetByIdSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 export const postRouter = router({
   create: protectedProcedure
