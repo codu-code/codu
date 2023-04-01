@@ -121,6 +121,13 @@ export class AppStack extends cdk.Stack {
               "/env/nextauthSecret"
             )
           ),
+          DISCORD_INVITE_URL: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "discordInviteUrl",
+              "/env/discordInviteUrl"
+            )
+          ),
         },
         logging: ecs.LogDrivers.awsLogs({
           streamPrefix: "AppContainer",

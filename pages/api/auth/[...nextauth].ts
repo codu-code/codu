@@ -1,8 +1,10 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { createWelcomeEmailTemplate } from "../../../utils/createEmailTemplate";
 
 import prisma from "../../../server/db/client";
+import sendEmail from "../../../utils/sendEmail";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -25,6 +27,20 @@ export const authOptions: NextAuthOptions = {
         }
       }
       return session;
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      if (!user.email) {
+        console.error("Missing user.email so cannot send welcome email");
+        return;
+      }
+      const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
+      sendEmail({
+        recipient: user.email,
+        htmlMessage,
+        subject: "Welcome to Codú 🎉 | Here is your community invite 💌",
+      });
     },
   },
 };
