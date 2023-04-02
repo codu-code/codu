@@ -36,11 +36,15 @@ export const authOptions: NextAuthOptions = {
         return;
       }
       const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
-      sendEmail({
-        recipient: user.email,
-        htmlMessage,
-        subject: "Welcome to Codú 🎉 | Here is your community invite 💌",
-      });
+      try {
+        sendEmail({
+          recipient: user.email,
+          htmlMessage,
+          subject: "Welcome to Codú 🎉 | Here is your community invite 💌",
+        });
+      } catch (error) {
+        console.log("Error in createUser event:", error);
+      }
     },
   },
 };

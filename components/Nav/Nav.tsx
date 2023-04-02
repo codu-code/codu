@@ -16,7 +16,9 @@ function classNames(...classes: string[]) {
 const Nav = () => {
   const { data: session } = useSession();
 
-  const { data: count } = trpc.notification.getCount.useQuery();
+  const { data: count } = trpc.notification.getCount.useQuery(undefined, {
+    enabled: session ? true : false,
+  });
 
   const userNavigation = [
     {
