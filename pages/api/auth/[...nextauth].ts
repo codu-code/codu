@@ -29,24 +29,25 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  events: {
-    async createUser({ user }) {
-      if (!user.email) {
-        console.error("Missing user.email so cannot send welcome email");
-        return;
-      }
-      const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
-      try {
-        sendEmail({
-          recipient: user.email,
-          htmlMessage,
-          subject: "Welcome to Codú 🎉 | Here is your community invite 💌",
-        });
-      } catch (error) {
-        console.log("Error in createUser event:", error);
-      }
-    },
-  },
+  // DISABLED UNTIL AWS PROMOTE SES TO PRODUCTION
+  // events: {
+  //   async createUser({ user }) {
+  //     if (!user.email) {
+  //       console.error("Missing user.email so cannot send welcome email");
+  //       return;
+  //     }
+  //     const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
+  //     try {
+  //       sendEmail({
+  //         recipient: user.email,
+  //         htmlMessage,
+  //         subject: "Welcome to Codú 🎉 | Here is your community invite 💌",
+  //       });
+  //     } catch (error) {
+  //       console.log("Error in createUser event:", error);
+  //     }
+  //   },
+  // },
 };
 
 export default NextAuth(authOptions);
