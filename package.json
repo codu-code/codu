@@ -34,7 +34,7 @@
     "@trpc/client": "^10.16.0",
     "@trpc/next": "^10.4.1",
     "@trpc/react-query": "^10.4.1",
-    "@trpc/server": "^10.4.1",
+    "@trpc/server": "^10.16.0",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.2",
     "fathom-client": "^3.5.0",
