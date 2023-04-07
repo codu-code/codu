@@ -200,7 +200,7 @@ const ArticlePage: NextPage = ({
 
       <Layout>
         <div className="border-t-2">
-          <section className="mx-auto pb-4 max-w-xl px-4 sm:px-0">
+          <section className="mx-auto pb-4 max-w-xl px-4 sm:px-0 break-words">
             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
               {post.title}
             </h2>
