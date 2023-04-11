@@ -39,25 +39,25 @@ export class AppStack extends cdk.Stack {
     //   1
     // );
 
-    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/env/hostedZoneId`,
-      1
-    );
+    // const hostedZoneId = ssm.StringParameter.valueForStringParameter(
+    //   this,
+    //   `/env/hostedZoneId`,
+    //   1
+    // );
 
     const wwwDomainName = `www.${domainName}`;
 
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
-      hostedZoneId,
-      zoneName: domainName,
-    });
+    // const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
+    //   hostedZoneId,
+    //   zoneName: domainName,
+    // });
 
-    const certificate = new acm.DnsValidatedCertificate(this, "LbCertificate", {
-      domainName,
-      subjectAlternativeNames: [`*.${domainName}`],
-      hostedZone: zone,
-      region: "eu-west-1",
-    });
+    // const certificate = new acm.DnsValidatedCertificate(this, "LbCertificate", {
+    //   domainName,
+    //   subjectAlternativeNames: [`*.${domainName}`],
+    //   hostedZone: zone,
+    //   region: "eu-west-1",
+    // });
 
     // new route53.CnameRecord(this, "Cname", {
     //   zone,
@@ -146,11 +146,11 @@ export class AppStack extends cdk.Stack {
           memoryLimitMiB: production ? 512 : 512, // Can alter if need more
           cpu: production ? 256 : 256, // Can alter if need more
           publicLoadBalancer: true,
-          protocol: elbv2.ApplicationProtocol.HTTPS,
-          certificate,
-          domainZone: zone,
-          redirectHTTP: true,
-          domainName: wwwDomainName,
+          protocol: elbv2.ApplicationProtocol.HTTP,
+          // certificate,
+          // domainZone: zone,
+          // redirectHTTP: true,
+          // domainName: wwwDomainName,
         }
       );
 
@@ -187,11 +187,11 @@ export class AppStack extends cdk.Stack {
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 60,
+      targetUtilizationPercent: 70,
     });
 
     scaling.scaleOnMemoryUtilization("MemoryScaling", {
-      targetUtilizationPercent: 60,
+      targetUtilizationPercent: 70,
     });
 
     fargateService.service.connections.allowFromAnyIpv4(

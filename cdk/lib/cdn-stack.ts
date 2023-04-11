@@ -6,11 +6,17 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
+import * as origin from "aws-cdk-lib/aws-cloudfront-origins";
+
+interface Props extends cdk.StackProps {
+  loadbalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer;
+}
 
 export class CdnStack extends cdk.Stack {
-
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
+
+    const { loadbalancer } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -70,6 +76,34 @@ export class CdnStack extends cdk.Stack {
         comment: `Redirect to ${wwwDomainName} from ${domainName}`,
         priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      }
+    );
+
+    const webDistribution = new cloudfront.Distribution(
+      this,
+      "WebAppDistribution",
+      {
+        domainNames: [wwwDomainName],
+        certificate,
+        defaultBehavior: {
+          origin: new origin.LoadBalancerV2Origin(loadbalancer),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
+          cachePolicy: new cloudfront.CachePolicy(
+            this,
+            "CloudfrontAppCachePolicy",
+            {
+              cookieBehavior: cloudfront.CacheCookieBehavior.allowList("*"),
+              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+              headerBehavior:
+                cloudfront.CacheHeaderBehavior.allowList("Authorization"),
+              defaultTtl: cdk.Duration.days(1),
+              maxTtl: cdk.Duration.days(365),
+              minTtl: cdk.Duration.seconds(0),
+              enableAcceptEncodingGzip: true,
+              enableAcceptEncodingBrotli: true,
+            }
+          ),
+        },
       }
     );
 
