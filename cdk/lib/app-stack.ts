@@ -143,8 +143,8 @@ export class AppStack extends cdk.Stack {
         {
           cluster,
           taskDefinition: taskDef,
-          memoryLimitMiB: production ? 1024 : 512,
-          cpu: production ? 512 : 256,
+          memoryLimitMiB: production ? 512 : 512, // Can alter if need more
+          cpu: production ? 256 : 256, // Can alter if need more
           publicLoadBalancer: true,
           protocol: elbv2.ApplicationProtocol.HTTPS,
           certificate,
@@ -183,7 +183,7 @@ export class AppStack extends cdk.Stack {
 
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
-      maxCapacity: 5,
+      maxCapacity: production ? 3 : 1,
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {
