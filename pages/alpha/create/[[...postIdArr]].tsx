@@ -75,7 +75,6 @@ const Create: NextPage = () => {
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
-      toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -441,21 +440,16 @@ const Create: NextPage = () => {
               <div className="absolute bg-black top-0 bottom-0 left-0 right-0 opacity-25 z-60" />
             </div>
           )}
-          <div className="bg-black">
-            <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
-              {/* Left sidebar & main wrapper */}
-              <div className="flex-1 min-w-0 xl:flex">
-                <div className="lg:min-w-0 lg:flex-1">
-                  <div className="editor-actions bg-black sticky z-20 top-0 flex justify-end items-center py-4 lg:py-6 px-4 sm:px-6 g:px-4">
+          <div className="editor-actions bg-black sticky z-20 top-0 flex justify-end items-center py-4 lg:py-6 px-4 sm:px-6 g:px-4">
                     <p className="mr-4">
-                      {saveStatus === "loading" && <span>Auto-saving...</span>}
+                      {saveStatus === "loading" && <span className="text-gray-400 text-xs lg:text-sm">Saving...</span>}
                       {saveStatus === "error" && savedTime && (
                         <span className="text-red-600 text-xs lg:text-sm">
                           {`Error saving, last saved: ${savedTime.toString()}`}
                         </span>
                       )}
                       {saveStatus === "success" && savedTime && (
-                        <span 
+                        <span
                           className="text-gray-400 text-xs lg:text-sm"
                           title={savedTime.toString()}
                         >
@@ -492,20 +486,16 @@ const Create: NextPage = () => {
                       {!data?.published && "Publish"}
                       {data?.published && "Save Changes"}
                     </button>
-
-                    <button
-                      type="button"
-                      className="disabled:opacity-50 py-2 px-3 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm  inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none"
-                      onClick={() => console.log("click")}
-                    >
-                      {"i"}
-                    </button>
                   </div>
-
+          <div className="bg-smoke">
+            <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
+              {/* Left sidebar & main wrapper */}
+              <div className="flex-1 min-w-0 xl:flex">
+                <div className="lg:min-w-0 lg:flex-1">
                   <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
                     {/* Start main area*/}
                     <div className="relative h-full">
-                      <div className="bg-smoke text-white border-2 border-white shadow-xl">
+                      <div className="text-white border-white shadow-xl">
                         {viewPreview ? (
                           <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
                             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
@@ -528,10 +518,10 @@ const Create: NextPage = () => {
                             </article>
                           </section>
                         ) : (
-                          <div className="py-6 px-4 sm:p-6 lg:pb-8">
+                          <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
                             <input
                               autoFocus
-                              className="border-none text-2xl leading-5 outline-none bg-smoke focus:bg-black"
+                              className="bg-smoke border-none text-2xl leading-5 outline-none focus:ring-0"
                               placeholder="Article title"
                               type="text"
                               aria-label="Post Content"
@@ -540,12 +530,12 @@ const Create: NextPage = () => {
 
                             <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
-                              className="border-none text-lg outline-none shadow-none mb-8 bg-smoke focus:bg-black"
+                              className="bg-smoke border-none focus:ring-0 text-lg outline-none shadow-none mb-8"
                               minRows={25}
                               {...register("body")}
                               inputRef={textareaRef}
                             />
-                          </div>
+                          </section>
                         )}
                       </div>
                     </div>
