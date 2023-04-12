@@ -6,7 +6,6 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
-import * as origin from "aws-cdk-lib/aws-cloudfront-origins";
 
 interface Props extends cdk.StackProps {
   loadbalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer;
@@ -83,6 +82,7 @@ export class CdnStack extends cdk.Stack {
       this,
       "WebDistribution",
       {
+        defaultRootObject: "",
         originConfigs: [
           {
             behaviors: [
