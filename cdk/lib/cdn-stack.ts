@@ -96,8 +96,17 @@ export class CdnStack extends cdk.Stack {
                   cookies: {
                     forward: "all",
                   },
-                  headers: ["Origin", "Authorization", "Content-Type"],
+                  headers: [
+                    "Origin",
+                    "Authorization",
+                    "Content-Type",
+                    "Referer",
+                    "Host",
+                  ],
                 },
+                defaultTtl: cdk.Duration.seconds(0),
+                maxTtl: cdk.Duration.seconds(0),
+                minTtl: cdk.Duration.seconds(0),
               },
             ],
             customOriginSource: {
