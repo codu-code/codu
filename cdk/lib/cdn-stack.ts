@@ -92,7 +92,7 @@ export class CdnStack extends cdk.Stack {
             this,
             "CloudfrontAppCachePolicy",
             {
-              cookieBehavior: cloudfront.CacheCookieBehavior.allowList("*"),
+              cookieBehavior: cloudfront.CacheCookieBehavior.all(),
               queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
               headerBehavior:
                 cloudfront.CacheHeaderBehavior.allowList("Authorization"),
