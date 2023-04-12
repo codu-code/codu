@@ -79,31 +79,42 @@ export class CdnStack extends cdk.Stack {
       }
     );
 
-    const webDistribution = new cloudfront.Distribution(
+    const webDistribution = new cloudfront.CloudFrontWebDistribution(
       this,
-      "WebAppDistribution",
+      "WebDistribution",
       {
-        domainNames: [wwwDomainName],
-        certificate,
-        defaultBehavior: {
-          origin: new origin.LoadBalancerV2Origin(loadbalancer),
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.ALLOW_ALL,
-          cachePolicy: new cloudfront.CachePolicy(
-            this,
-            "CloudfrontAppCachePolicy",
-            {
-              cookieBehavior: cloudfront.CacheCookieBehavior.all(),
-              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-              headerBehavior:
-                cloudfront.CacheHeaderBehavior.allowList("Authorization"),
-              defaultTtl: cdk.Duration.days(1),
-              maxTtl: cdk.Duration.days(365),
-              minTtl: cdk.Duration.seconds(0),
-              enableAcceptEncodingGzip: true,
-              enableAcceptEncodingBrotli: true,
-            }
-          ),
-        },
+        originConfigs: [
+          {
+            behaviors: [
+              {
+                isDefaultBehavior: true,
+                allowedMethods: cloudfront.CloudFrontAllowedMethods.ALL,
+                cachedMethods:
+                  cloudfront.CloudFrontAllowedCachedMethods.GET_HEAD_OPTIONS,
+                forwardedValues: {
+                  queryString: true,
+                  cookies: {
+                    forward: "all",
+                  },
+                  headers: ["Origin", "Authorization", "Content-Type"],
+                },
+              },
+            ],
+            customOriginSource: {
+              domainName: loadbalancer.loadBalancerDnsName,
+              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+            },
+          },
+        ],
+        viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(
+          certificate,
+          {
+            aliases: [wwwDomainName],
+          }
+        ),
+        comment: `Web distribution for ${wwwDomainName}`,
+        priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       }
     );
 
@@ -121,5 +132,16 @@ export class CdnStack extends cdk.Stack {
       "AaaaRedirectAliasRecord",
       redirectRecordProps
     );
+
+    const recordProps = {
+      zone,
+      recordName: wwwDomainName,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(webDistribution)
+      ),
+    };
+
+    new route53.ARecord(this, "WebAliasRecord", recordProps);
+    new route53.AaaaRecord(this, "AaaaWebAliasRecord", recordProps);
   }
 }
