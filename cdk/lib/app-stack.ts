@@ -121,7 +121,7 @@ export class AppStack extends cdk.Stack {
     const fargateService =
       new ecsPatterns.ApplicationLoadBalancedFargateService(
         this,
-        "next-ecs-service",
+        "ecs-service",
         {
           cluster,
           taskDefinition: taskDef,
