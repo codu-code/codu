@@ -102,6 +102,7 @@ export class CdnStack extends cdk.Stack {
                     "Content-Type",
                     "Referer",
                     "Host",
+                    "CloudFront-Viewer-Country",
                   ],
                 },
                 defaultTtl: cdk.Duration.seconds(0),
