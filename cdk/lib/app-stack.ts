@@ -47,24 +47,6 @@ export class AppStack extends cdk.Stack {
 
     const wwwDomainName = `www.${domainName}`;
 
-    // const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
-    //   hostedZoneId,
-    //   zoneName: domainName,
-    // });
-
-    // const certificate = new acm.DnsValidatedCertificate(this, "LbCertificate", {
-    //   domainName,
-    //   subjectAlternativeNames: [`*.${domainName}`],
-    //   hostedZone: zone,
-    //   region: "eu-west-1",
-    // });
-
-    // new route53.CnameRecord(this, "Cname", {
-    //   zone,
-    //   recordName: wwwDomainName,
-    //   target: domainName,
-    // });
-
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
     cluster.addDefaultCloudMapNamespace({ name: this.cloudMapNamespace });
@@ -139,7 +121,7 @@ export class AppStack extends cdk.Stack {
     const fargateService =
       new ecsPatterns.ApplicationLoadBalancedFargateService(
         this,
-        "ecs-service",
+        "next-ecs-service",
         {
           cluster,
           taskDefinition: taskDef,
@@ -147,10 +129,6 @@ export class AppStack extends cdk.Stack {
           cpu: production ? 256 : 256, // Can alter if need more
           publicLoadBalancer: true,
           protocol: elbv2.ApplicationProtocol.HTTP,
-          // certificate,
-          // domainZone: zone,
-          // redirectHTTP: true,
-          // domainName: wwwDomainName,
         }
       );
 
