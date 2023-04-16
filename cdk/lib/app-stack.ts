@@ -140,12 +140,12 @@ export class AppStack extends cdk.Stack {
     //   action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
     // });
 
-    // fargateService.listener.addAction("DefaultListenerRule", {
-    //   action: elbv2.ListenerAction.fixedResponse(500, {
-    //     contentType: "text/plain",
-    //     messageBody: "Not Allowed",
-    //   }),
-    // });
+    fargateService.listener.addAction("DefaultListenerRule", {
+      action: elbv2.ListenerAction.fixedResponse(500, {
+        contentType: "text/plain",
+        messageBody: "Not Allowed",
+      }),
+    });
 
     if (!production) {
       fargateService.listener.addAction("ListenerRule", {
