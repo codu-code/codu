@@ -159,6 +159,12 @@ export class AppStack extends cdk.Stack {
       });
     }
 
+    fargateService.listener.addAction("HostListenerRule", {
+      priority: 1,
+      conditions: [elbv2.ListenerCondition.hostHeaders(["*.codu.co"])],
+      action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
+    });
+
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: production ? 3 : 1,
