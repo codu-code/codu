@@ -292,7 +292,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                 </div>
 
                 <div className="border-l-2 border-slate-700 ml-4 pl-2 -mt-2">
-                  <div className="prose prose-invert text-sm">
+                  <div className="prose prose-invert text-sm overflow-x-scroll">
                     {Markdoc.renderers.react(content, React, {
                       components: markdocComponents,
                     })}
@@ -407,7 +407,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         )}
         {viewPreviewId === id ? (
           <article
-            className="prose prose-invert text-sm"
+            className="prose prose-invert text-sm overflow-x-scroll"
             style={{ whiteSpace: "pre-wrap" }}
           >
             {Markdoc.renderers.react(
