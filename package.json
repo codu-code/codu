@@ -39,7 +39,7 @@
     "copy-to-clipboard": "^3.3.2",
     "fathom-client": "^3.5.0",
     "nanoid": "^4.0.0",
-    "next": "^13.3.0",
+    "next": "^13.2.3",
     "next-auth": "^4.22.0",
     "next-superjson-plugin": "^0.5.5",
     "nodemailer": "^6.9.1",
@@ -83,7 +83,7 @@
   },
   "volta": {
     "node": "18.16.0",
-    "npm": "9.5.1"
+    "npm": "9.6.4"
   },
   "overrides": {
     "json5@<1.0.2": "1.0.2",
