@@ -69,6 +69,9 @@ body {
 .prose a {
   @apply transition-all;
 }
+.prose blockquote p::before {
+  content: none;
+}
 
 .prose .anchor:after {
   @apply text-neutral-300 dark:text-neutral-700;
