@@ -138,15 +138,18 @@ const Settings: NextPage = ({
           }}
         />
         <div className="mx-auto lg:col-span-9 max-w-2xl flex-grow flex flex-col justify-center w-full px-4 sm:px-6">
-          <div className="bg-smoke text-gray-800 border-2 border-white shadow shadow-slate-50">
-            <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="bg-neutral-900 text-neutral-700 shadow-xl">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="border border-neutral-900"
+            >
               {/* Profile section */}
-              <div className="py-6 px-4 sm:p-6 lg:pb-8">
+              <div className="py-6 px-4 sm:p-6 lg:pb-8 ">
                 <div>
                   <h2 className="text-3xl tracking-tight font-extrabold text-white">
                     Profile Settings
                   </h2>
-                  <p className="mt-1 text-gray-400">
+                  <p className="mt-1 text-neutral-400">
                     This information will be displayed publicly so be careful
                     what you share.
                   </p>
@@ -229,7 +232,7 @@ const Settings: NextPage = ({
                                   type="file"
                                   accept="image/png, image/gif, image/jpeg, image/webp"
                                   onChange={imageChange}
-                                  className="absolute h-full w-full cursor-pointer rounded-md border-gray-300 opacity-0"
+                                  className="absolute h-full w-full cursor-pointer rounded-md border-neutral-300 opacity-0"
                                 />
                               </div>
                             </div>
@@ -263,7 +266,7 @@ const Settings: NextPage = ({
                               id="desktop-user-photo"
                               name="user-photo"
                               onChange={imageChange}
-                              className="absolute inset-0 h-full w-full cursor-pointer rounded-md border-gray-300 opacity-0"
+                              className="absolute inset-0 h-full w-full cursor-pointer rounded-md border-neutral-300 opacity-0"
                             />
                           </label>
                         </div>
@@ -282,7 +285,7 @@ const Settings: NextPage = ({
                           maxLength={200}
                         />
                       </div>
-                      <div className="mt-2 text-sm text-gray-400 flex justify-between">
+                      <div className="mt-2 text-sm text-neutral-400 flex justify-between">
                         {errors.bio ? (
                           <p className="mt-1 text-sm text-red-600">
                             {`${errors.bio.message || "Required"}`}
@@ -333,17 +336,20 @@ const Settings: NextPage = ({
                       </div>
                     </div>
                   </div>
-                  <div className="pt-6 divide-y divide-gray-200">
+                  <div className="pt-6 divide-y divide-neutral-200">
                     <div>
                       <div>
                         <h2 className="text-xl tracking-tight font-bold text-white">
                           Privacy
                         </h2>
-                        <p className="mt-1 text-sm text-gray-400">
+                        <p className="mt-1 text-sm text-neutral-400">
                           We respect your privacy, change your settings here.
                         </p>
                       </div>
-                      <ul role="list" className="mt-2 divide-y divide-gray-200">
+                      <ul
+                        role="list"
+                        className="mt-2 divide-y divide-neutral-200"
+                      >
                         <Switch.Group
                           as="li"
                           className="py-4 flex items-center justify-between"
@@ -352,7 +358,7 @@ const Settings: NextPage = ({
                             <Switch.Label as="p" className="sr-only" passive>
                               Email notifications
                             </Switch.Label>
-                            <Switch.Description className="text-sm text-gray-400">
+                            <Switch.Description className="text-sm text-neutral-400">
                               Occasional email notifications from the platform.
                             </Switch.Description>
                           </div>
@@ -362,7 +368,7 @@ const Settings: NextPage = ({
                             className={classNames(
                               emailNotifications
                                 ? "bg-green-600"
-                                : "bg-gray-400",
+                                : "bg-neutral-400",
                               "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                             )}
                           >
@@ -385,7 +391,7 @@ const Settings: NextPage = ({
                             <Switch.Label as="p" className="sr-only" passive>
                               Weekly newsletter
                             </Switch.Label>
-                            <Switch.Description className="text-sm text-gray-400">
+                            <Switch.Description className="text-sm text-neutral-400">
                               Opt-in to our weekly newsletter.
                             </Switch.Description>
                           </div>
@@ -393,7 +399,9 @@ const Settings: NextPage = ({
                             checked={weeklyNewsletter}
                             onChange={setWeeklyNewsletter}
                             className={classNames(
-                              weeklyNewsletter ? "bg-green-600" : "bg-gray-400",
+                              weeklyNewsletter
+                                ? "bg-green-600"
+                                : "bg-neutral-400",
                               "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                             )}
                           >
@@ -413,7 +421,7 @@ const Settings: NextPage = ({
                     <div className="mt-2 py-4 flex justify-end">
                       <button
                         type="button"
-                        className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                       >
                         Cancel
                       </button>

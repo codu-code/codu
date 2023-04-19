@@ -56,13 +56,13 @@ const Footer = () => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-base text-gray-500 hover:text-gray-400"
+                  className="text-base text-neutral-500 hover:text-neutral-400"
                 >
                   {item.name}
                 </a>
               ) : (
                 <Link
-                  className="text-base text-gray-500 hover:text-gray-400"
+                  className="text-base text-neutral-500 hover:text-neutral-400"
                   href={item.href}
                 >
                   {item.name}
@@ -78,14 +78,14 @@ const Footer = () => {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-500 hover:text-gray-400"
+              className="text-neutral-500 hover:text-neutral-400"
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
             </a>
           ))}
         </div>
-        <p className="mt-8 text-center text-base text-gray-500">
+        <p className="mt-8 text-center text-base text-neutral-500">
           &copy; {Temporal.Now.plainDateISO().year} Codú Software Solutions,
           Ltd.
         </p>

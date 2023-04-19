@@ -16,17 +16,17 @@ const Sponsorship: NextPage = () => {
                 <h3 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-black sm:text-6xl pb-8 border-b-2">
                   Sponsor Codú
                 </h3>
-                <p className="mt-8 text-lg text-gray-500">
+                <p className="mt-8 text-lg text-neutral-500">
                   Our work and events would not be possible without the support
                   of our partners.
                 </p>
-                <p className="mt-3 text-lg text-gray-500">
+                <p className="mt-3 text-lg text-neutral-500">
                   {`Codú is the perfect place to show your company's support of open source software, find new developers and fund the next generation of avid learners.`}
                 </p>
-                <p className="mt-3 text-lg text-gray-500">
+                <p className="mt-3 text-lg text-neutral-500">
                   {`Sponsors can post jobs to our network of thousands of developers (and growing), brand at our events, and advertise in our newsletter.`}
                 </p>
-                <p className="mt-3 text-lg text-gray-500"></p>
+                <p className="mt-3 text-lg text-neutral-500"></p>
                 <div className="relative">
                   <p className="text-black mt-8 text-lg font-semibold">
                     For more info contact us:

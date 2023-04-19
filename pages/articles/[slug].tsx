@@ -123,11 +123,11 @@ const ArticlePage: NextPage = ({
         enterFrom="transform opacity-0 scale-75"
         enterTo="transform opacity-100 scale-100"
       >
-        <div className="bg-smoke border-t-2 border-white fixed lg:w-20 lg:border-r-2 lg:border-b-2 bottom-0 w-full py-2 z-20 lg:rounded-r-lg lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
+        <div className="bg-neutral-900 border-t border-neutral-700 fixed lg:w-20 lg:border-r lg:border-b bottom-0 w-full py-2 z-20 lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
           <div className="flex justify-evenly lg:flex-col h-full">
             <div className="flex items-center lg:flex-col">
               <button
-                className="p-1 rounded-full hover:bg-slate-800"
+                className="p-1 rounded-full hover:bg-neutral-800"
                 onClick={() => {
                   if (data?.currentUserLiked) return likePost(post.id, false);
                   likePost(post.id);
@@ -146,7 +146,7 @@ const ArticlePage: NextPage = ({
             </div>
 
             <button
-              className="lg:mx-auto p-1 rounded-full hover:bg-slate-800"
+              className="lg:mx-auto p-1 rounded-full hover:bg-neutral-800"
               onClick={() => {
                 if (!session) {
                   signIn();
@@ -182,7 +182,7 @@ const ArticlePage: NextPage = ({
                   {optionsData.map((item) => (
                     <Menu.Item key={item.label}>
                       <a
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded"
+                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded"
                         target="blank"
                         rel="noopener noreferrer"
                         href={encodeURI(item.href)}
@@ -200,12 +200,9 @@ const ArticlePage: NextPage = ({
 
       <Layout>
         <div className="border-t-2">
-          <section className="mx-auto pb-4 max-w-xl px-4 sm:px-0 break-words">
-            <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
-              {post.title}
-            </h2>
-
-            <article className="prose prose-invert">
+          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
+            <article className="prose prose-invert lg:prose-lg">
+              <h1>{post.title}</h1>
               {Markdoc.renderers.react(content, React, {
                 components: markdocComponents,
               })}
@@ -223,10 +220,9 @@ const ArticlePage: NextPage = ({
                 ))}
               </section>
             )}
-          </section>
-
-          <BioBar author={post.user} />
-          <div className="mx-auto mt-8 pb-4 max-w-xl px-4 sm:px-0">
+          </div>
+          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
+            <BioBar author={post.user} />
             <CommentsArea postId={post.id} postOwnerId={post.userId} />
           </div>
         </div>

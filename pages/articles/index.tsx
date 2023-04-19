@@ -70,9 +70,9 @@ const ArticlesPage = () => {
       </Head>
       <Layout>
         <div className="border-t border-white">
-          <div className="relative sm:mx-auto max-w-2xl mx-4">
+          <div className="relative sm:mx-auto max-w-2xl mx-2">
             <div className="my-8 border-b-2 pb-4 flex justify-between items-center">
-              <h1 className="text-3xl tracking-tight font-extrabold text-gray-50 sm:text-4xl ">
+              <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
                 {typeof tag === "string" ? (
                   <div className="flex justify-center items-center">
                     <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
@@ -89,7 +89,7 @@ const ArticlesPage = () => {
                 <select
                   id="filter"
                   name="filter"
-                  className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
+                  className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
                   onChange={(e) => {
                     router.push(
                       `/articles?filter=${e.target.value}${
