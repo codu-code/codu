@@ -77,7 +77,7 @@ const Home: NextPage = () => {
                         </span>
                         .
                       </h1>
-                      <p className="pt-2 text-base text-gray-300 sm:text-xl lg:text-lg xl:text-xl">
+                      <p className="pt-2 text-base text-neutral-300 sm:text-xl lg:text-lg xl:text-xl">
                         Join the Codú community today and become part of the
                         most supportive community of developers out there!
                       </p>
@@ -149,19 +149,19 @@ const Home: NextPage = () => {
                   <h3 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-black sm:text-6xl pb-8 border-b-2">
                     Why Codú?
                   </h3>
-                  <p className="mt-8 text-lg text-gray-500">
+                  <p className="mt-8 text-lg text-neutral-500">
                     Developers, rejoice! Codú is the ultimate community for web
                     developers. Here you can learn from your peers, get support
                     when you need it, and collaborate on projects big and small.
                   </p>
-                  <p className="mt-3 text-lg text-gray-500">
+                  <p className="mt-3 text-lg text-neutral-500">
                     {`Codú is the perfect place to sharpen your skills and build
                     your portfolio. With Codú, there's no such thing as a stupid
                     question - we're all here to help each other grow as
                     developers. Plus, our community makes it easy to find
                     collaborators for your next big project.`}
                   </p>
-                  <p className="mt-3 text-lg text-gray-500">
+                  <p className="mt-3 text-lg text-neutral-500">
                     So what are you waiting for? Join Codú today and become part
                     of the most supportive community of developers out there!
                   </p>
@@ -182,7 +182,7 @@ const Home: NextPage = () => {
             <div className="lg:grid grid-cols-2 gap-16 py-4">
               {rules.map(({ title, body }, i) => (
                 <div className="flex flex-col mb-8 lg:mb-0" key={title}>
-                  <div className="text-lg text-gray-400">{`${i + 1}/${
+                  <div className="text-lg text-neutral-400">{`${i + 1}/${
                     rules.length
                   }`}</div>
                   <h4 className="text-3xl leading-8 font-extrabold tracking-tight sm:text-4xl mt-2">
@@ -200,7 +200,7 @@ const Home: NextPage = () => {
                   <h2 className="text-3xl font-extrabold text-black tracking-tight sm:text-4xl">
                     Highlighted members
                   </h2>
-                  <p className="text-xl text-gray-500">
+                  <p className="text-xl text-neutral-500">
                     Our members are better than yours. 😉 This is where we give
                     a little spotlight to some of our awesome members.
                   </p>
@@ -230,7 +230,7 @@ const Home: NextPage = () => {
                                 </span>
                               )}
                             </h3>
-                            <p className="text-gray-500 font-light">
+                            <p className="text-neutral-500 font-light">
                               {person.role}
                             </p>
                           </div>
@@ -243,7 +243,7 @@ const Home: NextPage = () => {
                               <li>
                                 <a
                                   href={person.twitterUrl}
-                                  className="text-gray-500 hover:text-gray-400"
+                                  className="text-neutral-500 hover:text-neutral-400"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
@@ -263,7 +263,7 @@ const Home: NextPage = () => {
                               <li>
                                 <a
                                   href={person.linkedinUrl}
-                                  className="text-gray-500 hover:text-gray-400"
+                                  className="text-neutral-500 hover:text-neutral-400"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
@@ -287,7 +287,7 @@ const Home: NextPage = () => {
                               <li>
                                 <a
                                   href={person.githubUrl}
-                                  className="text-gray-500 hover:text-gray-400"
+                                  className="text-neutral-500 hover:text-neutral-400"
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >

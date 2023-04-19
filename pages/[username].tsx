@@ -57,7 +57,9 @@ const Profile: NextPage = ({
               </div>
               <div className="flex flex-col justify-center">
                 <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
-                <h2 className="text-gray-400 font-bold text-sm">@{username}</h2>
+                <h2 className="text-neutral-400 font-bold text-sm">
+                  @{username}
+                </h2>
                 <p className="mt-1">{bio}</p>
               </div>
             </main>

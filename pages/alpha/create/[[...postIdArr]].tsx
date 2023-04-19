@@ -38,20 +38,26 @@ const Create: NextPage = () => {
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
-  const allowUpdate = unsavedChanges && !delayDebounce
+  const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useMarkdownHotkeys(textareaRef);
   useMarkdownShortcuts(textareaRef);
 
-  const { handleSubmit, register, watch, reset, getValues, formState: {isDirty} } =
-    useForm<SavePostInput>({
-      mode: "onSubmit",
-      defaultValues: {
-        title: "",
-        body: "",
-      },
-    });
+  const {
+    handleSubmit,
+    register,
+    watch,
+    reset,
+    getValues,
+    formState: { isDirty },
+  } = useForm<SavePostInput>({
+    mode: "onSubmit",
+    defaultValues: {
+      title: "",
+      body: "",
+    },
+  });
 
   const { title, body } = watch();
 
@@ -126,7 +132,7 @@ const Create: NextPage = () => {
     } else {
       save({ ...formData, id: postId });
     }
-    setUnsavedChanges(false)
+    setUnsavedChanges(false);
   };
 
   const hasLoadingState =
@@ -210,12 +216,12 @@ const Create: NextPage = () => {
     setTags(tags.map(({ tag }) => tag.title));
     reset({ body, excerpt, title, id });
   }, [data]);
-  
+
   useEffect(() => {
     if (published) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
-    if(allowUpdate)savePost();
+    if (allowUpdate) savePost();
   }, [debouncedValue]);
 
   useEffect(() => {
@@ -229,36 +235,39 @@ const Create: NextPage = () => {
 
   useEffect(() => {
     if ((title + body).length < 5) return;
-    if(isDirty)setUnsavedChanges(true)
-  }, [title, body])
+    if (isDirty) setUnsavedChanges(true);
+  }, [title, body]);
 
   const handleOpenDialog = (res: string) => {
-    switch(res) {
-      case 'initial':
+    switch (res) {
+      case "initial":
         setDelayDebounce(true);
         break;
-      case 'confirm':
+      case "confirm":
         setUnsavedChanges(false);
         setDelayDebounce(false);
         break;
-      case 'cancel':
+      case "cancel":
         setDelayDebounce(false);
-        !published && savePost()
+        !published && savePost();
         break;
       default:
         // setting allowUpdate in this case
         setDelayDebounce(false);
         setUnsavedChanges(true);
     }
-  }  
+  };
 
   return (
     <Layout>
       <Fragment>
-        <PromptDialog shouldConfirmLeave={unsavedChanges} updateParent={handleOpenDialog}/>
+        <PromptDialog
+          shouldConfirmLeave={unsavedChanges}
+          updateParent={handleOpenDialog}
+        />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Transition.Root show={open} as={Fragment}>
-            <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-smoke">
+            <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-black">
               <button
                 type="button"
                 className="absolute right-8 top-8 underline cursor-pointer z-50"
@@ -278,7 +287,7 @@ const Create: NextPage = () => {
                         rows={3}
                         {...register("excerpt")}
                       />
-                      <p className="mt-2 text-sm text-gray-400">
+                      <p className="mt-2 text-sm text-neutral-400">
                         What readers will see before they click on your article.
                         Good SEO descriptions utilize keywords, summarize the
                         story and are between 140-156 characters long.
@@ -303,17 +312,17 @@ const Create: NextPage = () => {
                       {tags.map((tag) => (
                         <div
                           key={tag}
-                          className="bg-gray-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
+                          className="bg-neutral-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
                         >
                           <span
-                            className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-smoke font-semibold"
+                            className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-black font-semibold"
                             x-text="tag"
                           >
                             {tag}
                           </span>
                           <button
                             onClick={() => onDelete(tag)}
-                            className="w-6 h-6 inline-block align-middle text-white bg-gray-600 focus:outline-none"
+                            className="w-6 h-6 inline-block align-middle text-white bg-neutral-600 focus:outline-none"
                           >
                             <svg
                               className="w-6 h-6 fill-current mx-auto"
@@ -328,12 +337,12 @@ const Create: NextPage = () => {
                           </button>
                         </div>
                       ))}
-                      <p className="mt-2 text-sm text-gray-400">
-                        Tag with up to 5 topics. This makes it easier for readers
-                        to find and know what your story is about.
+                      <p className="mt-2 text-sm text-neutral-400">
+                        Tag with up to 5 topics. This makes it easier for
+                        readers to find and know what your story is about.
                       </p>
                     </div>
-                    <div className="col-span-12  border-b border-gray-300 pb-4">
+                    <div className="col-span-12  border-b border-neutral-300 pb-4">
                       <Disclosure>
                         {({ open }) => (
                           <>
@@ -342,11 +351,13 @@ const Create: NextPage = () => {
                               <ChevronUpIcon
                                 className={`${
                                   open ? "rotate-180 transform" : ""
-                                } h-5 w-5 text-gray-400`}
+                                } h-5 w-5 text-neutral-400`}
                               />
                             </Disclosure.Button>
                             <Disclosure.Panel className="pt-4 pb-2">
-                              <label htmlFor="canonicalUrl">Canonical URL</label>
+                              <label htmlFor="canonicalUrl">
+                                Canonical URL
+                              </label>
                               <input
                                 id="canonicalUrl"
                                 type="text"
@@ -354,7 +365,7 @@ const Create: NextPage = () => {
                                 defaultValue=""
                                 {...register("canonicalUrl")}
                               />
-                              <p className="mt-2 text-sm text-gray-400">
+                              <p className="mt-2 text-sm text-neutral-400">
                                 Add this if the post was originally published
                                 elsewhere and you want to link to it as the
                                 original source.
@@ -369,7 +380,7 @@ const Create: NextPage = () => {
                         <button
                           type="button"
                           disabled={isDisabled}
-                          className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                          className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                           onClick={async () => {
                             if (isDisabled) return;
                             await savePost();
@@ -420,7 +431,7 @@ const Create: NextPage = () => {
                   <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
                   <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
                 </div>
-                <div className="text-gray-400 text-xs font-medium mt-2 text-center">
+                <div className="text-neutral-400 text-xs font-medium mt-2 text-center">
                   Fetching post data.
                 </div>
               </div>
@@ -435,11 +446,11 @@ const Create: NextPage = () => {
                   <div className="h-full pl-4 pr-6 py-6 sm:pl-6 xl:pl-0  lg:px-4">
                     {/* Start left column area */}
                     <div className="h-full relative">
-                      <div className="bg-smoke text-gray-800 border-2 border-white shadow-xl p-6">
+                      <div className="bg-black text-neutral-800 border-2 border-white shadow-xl p-6">
                         <h1 className="text-3xl tracking-tight font-extrabold text-white">
                           {viewPreview ? "Previewing" : "Editing"} your post
                         </h1>
-                        <p className="mt-1 text-gray-400">
+                        <p className="mt-1 text-neutral-400">
                           The body of your content can be edited using markdown.
                           Your post remains private until you
                           &#8220;publish&#8221; the article.
@@ -447,8 +458,10 @@ const Create: NextPage = () => {
                         <div className="flex">
                           <button
                             type="button"
-                            className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
-                            onClick={() => setViewPreview((current) => !current)}
+                            className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
+                            onClick={() =>
+                              setViewPreview((current) => !current)
+                            }
                           >
                             {viewPreview ? "Back to editing" : "View preview"}
                           </button>
@@ -462,7 +475,7 @@ const Create: NextPage = () => {
                   <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
                     {/* Start main area*/}
                     <div className="relative h-full">
-                      <div className="bg-smoke text-white border-2 border-white shadow-xl">
+                      <div className="bg-black text-white border-2 border-white shadow-xl">
                         {viewPreview ? (
                           <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
                             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
@@ -488,7 +501,7 @@ const Create: NextPage = () => {
                           <div className="py-6 px-4 sm:p-6 lg:pb-8">
                             <input
                               autoFocus
-                              className="border-none text-2xl leading-5 outline-none bg-smoke focus:bg-black"
+                              className="border-none text-2xl leading-5 outline-none bg-black focus:bg-black"
                               placeholder="Article title"
                               type="text"
                               aria-label="Post Content"
@@ -497,7 +510,7 @@ const Create: NextPage = () => {
 
                             <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
-                              className="border-none text-lg outline-none shadow-none mb-8 bg-smoke focus:bg-black"
+                              className="border-none text-lg outline-none shadow-none mb-8 bg-black focus:bg-black"
                               minRows={25}
                               {...register("body")}
                               inputRef={textareaRef}
@@ -514,7 +527,7 @@ const Create: NextPage = () => {
                                   </p>
                                 )}
                                 {saveStatus === "success" && savedTime && (
-                                  <p className="text-gray-400 text-xs lg:text-sm">
+                                  <p className="text-neutral-400 text-xs lg:text-sm">
                                     {`Saved: ${savedTime.toString()}`}
                                   </p>
                                 )}
@@ -544,11 +557,11 @@ const Create: NextPage = () => {
               <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
                 <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
                   {/* Start right column area */}
-                  <div className="bg-smoke text-gray-800 border-2 border-white shadow-xl p-6">
+                  <div className="bg-black text-neutral-800 border-2 border-white shadow-xl p-6">
                     <h3 className="text-xl tracking-tight font-semibold text-white">
                       How to use the editor
                     </h3>
-                    <p className="mt-1 text-gray-400">
+                    <p className="mt-1 text-neutral-400">
                       You can edit and format the main content of your article
                       using Markdown. If you have never used Markdown, you can
                       check out{" "}

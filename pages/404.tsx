@@ -26,7 +26,7 @@ const FourOhFour: NextPage = () => {
             <h1 className="mt-2 text-4xl font-extrabold text-black tracking-tight sm:text-5xl">
               Page not found.
             </h1>
-            <p className="mt-2 text-base text-gray-500">
+            <p className="mt-2 text-base text-neutral-500">
               Sorry, we couldn’t find the page you’re looking for.
             </p>
             <div className="mt-6">

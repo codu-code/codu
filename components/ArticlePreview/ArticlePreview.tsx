@@ -73,7 +73,7 @@ const ArticlePreview: NextPage<Props> = ({
   };
 
   return (
-    <article className="p-4 my-4 shadow-lg border-2 border-white bg-smoke">
+    <article className="border-l-4 border-l-pink-600 p-4 my-4 shadow-lg bg-neutral-900">
       <div className="flex justify-between">
         <div className="flex items-center mb-4">
           <span className="sr-only">{name}</span>
@@ -84,12 +84,12 @@ const ArticlePreview: NextPage<Props> = ({
               alt={`${name}'s avatar`}
             />
           </Link>
-          <div className="flex text-xs text-gray-500 flex-col justify-center">
-            <p className="font-medium text-gray-500">
+          <div className="flex text-xs text-neutral-500 flex-col justify-center">
+            <p className="font-medium text-neutral-500">
               Written by{" "}
               <Link
                 href={`/${username}`}
-                className="text-gray-400 font-semibold"
+                className="text-neutral-400 font-semibold"
               >
                 {name}
               </Link>
@@ -129,7 +129,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
-                className="lg:mx-auto p-1 rounded-full hover:bg-slate-800"
+                className="lg:mx-auto p-1 rounded-full hover:bg-neutral-800"
                 onClick={() => {
                   if (bookmarked) return bookmarkPost(id, false);
                   bookmarkPost(id);
@@ -146,7 +146,7 @@ const ArticlePreview: NextPage<Props> = ({
             {menuOptions && (
               <Menu as="div" className="relative">
                 <div>
-                  <Menu.Button className="p-1 rounded-full hover:bg-slate-800">
+                  <Menu.Button className="p-1 rounded-full hover:bg-neutral-800">
                     <span className="sr-only">Open user menu</span>
                     <DotsHorizontalIcon className="w-6 h-6" />
                   </Menu.Button>
@@ -165,7 +165,7 @@ const ArticlePreview: NextPage<Props> = ({
                       <Menu.Item key={item.label}>
                         {"href" in item ? (
                           <Link
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded w-full text-left"
+                            className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded w-full text-left"
                             key={item.label}
                             href={item.href}
                           >
@@ -173,7 +173,7 @@ const ArticlePreview: NextPage<Props> = ({
                           </Link>
                         ) : (
                           <button
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded w-full text-left"
+                            className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded w-full text-left"
                             onClick={item.onClick}
                           >
                             {item.label}

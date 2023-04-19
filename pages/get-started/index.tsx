@@ -31,7 +31,7 @@ const GetStarted: NextPage = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Sign in or create your account
           </h2>
-          <p className="mt-2 text-center text-base text-gray-500">
+          <p className="mt-2 text-center text-base text-neutral-500">
             Or{" "}
             <Link className="font-medium fancy-link" href="/">
               return home

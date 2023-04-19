@@ -75,7 +75,7 @@ const MyPosts: NextPage = ({
           <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
             <button
               type="button"
-              className="bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="bg-white text-neutral-400 hover:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               onClick={() => setSelectedArticleToDelete(undefined)}
             >
               <span className="sr-only">Close</span>
@@ -92,15 +92,15 @@ const MyPosts: NextPage = ({
             <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
               <Dialog.Title
                 as="h3"
-                className="text-lg leading-6 font-medium text-smoke"
+                className="text-lg leading-6 font-medium text-black"
               >
                 Delete article
               </Dialog.Title>
               <div className="mt-2">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-neutral-500">
                   Are you sure you want to delete this article?
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-neutral-500 mt-2">
                   All of the data will be permanently removed from our servers
                   forever. This action cannot be undone.
                 </p>
@@ -121,7 +121,7 @@ const MyPosts: NextPage = ({
             </button>
             <button
               type="button"
-              className="mt-3 w-full inline-flex justify-center border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+              className="mt-3 w-full inline-flex justify-center border border-neutral-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-neutral-700 hover:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
               onClick={() => setSelectedArticleToDelete(undefined)}
             >
               Cancel
@@ -129,7 +129,7 @@ const MyPosts: NextPage = ({
           </div>
         </Modal>
         <div className="relative sm:mx-auto max-w-2xl mx-4">
-          <div className="border-b border-gray-200 mt-8 mb-4">
+          <div className="border-b border-neutral-200 mt-8 mb-4">
             <div className="sm:hidden">
               <label htmlFor="tabs" className="sr-only">
                 Select a tab
@@ -158,8 +158,8 @@ const MyPosts: NextPage = ({
                   <Link
                     className={classNames(
                       tab.current
-                        ? "bg-gray-100 text-gray-700"
-                        : "text-gray-200 hover:text-gray-400",
+                        ? "bg-neutral-100 text-neutral-700"
+                        : "text-neutral-200 hover:text-neutral-400",
                       "px-4 py-2 font-medium text-base rounded-t-md"
                     )}
                     aria-current={tab.current ? "page" : undefined}
@@ -186,7 +186,7 @@ const MyPosts: NextPage = ({
             {selectedTabData.status === "success" &&
               selectedTabData.data?.map(
                 ({ id, title, excerpt, readTimeMins, slug }) => (
-                  <article className="border-2 p-4 mb-4 bg-smoke" key={id}>
+                  <article className="border-2 p-4 mb-4 bg-black" key={id}>
                     {tab === "published" ? (
                       <Link href={`articles/${slug}`}>
                         <h2 className="text-2xl font-semibold mb-2 hover:underline">
@@ -199,7 +199,7 @@ const MyPosts: NextPage = ({
                     <p>
                       {excerpt || "No excerpt yet... Write more to see one."}
                     </p>
-                    <p className="mt-2 font-light text-sm text-gray-400">
+                    <p className="mt-2 font-light text-sm text-neutral-400">
                       Read time so far: {readTimeMins} mins
                     </p>
                     <div className="flex justify-end">
@@ -208,7 +208,7 @@ const MyPosts: NextPage = ({
                         className="relative inline-block text-left"
                       >
                         <div>
-                          <Menu.Button className="inline-flex justify-center w-full border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+                          <Menu.Button className="inline-flex justify-center w-full border border-neutral-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-100 focus:ring-indigo-500">
                             Options
                             <ChevronDownIcon
                               className="-mr-1 ml-2 h-5 w-5"
@@ -226,21 +226,21 @@ const MyPosts: NextPage = ({
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-40 shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none">
+                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-40 shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-neutral-100 focus:outline-none">
                             <div className="py-1">
                               <Menu.Item>
                                 {({ active }) => (
                                   <Link
                                     className={classNames(
                                       active
-                                        ? "bg-gray-100 text-smoke"
-                                        : "text-gray-700",
+                                        ? "bg-neutral-100 text-black"
+                                        : "text-neutral-700",
                                       "group flex items-center px-4 py-2 text-sm"
                                     )}
                                     href={`/create/${id}`}
                                   >
                                     <PencilAltIcon
-                                      className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                                      className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
                                       aria-hidden="true"
                                     />
                                     Edit
@@ -256,13 +256,13 @@ const MyPosts: NextPage = ({
                                     }
                                     className={classNames(
                                       active
-                                        ? "bg-gray-100 text-smoke"
-                                        : "text-gray-700",
+                                        ? "bg-neutral-100 text-black"
+                                        : "text-neutral-700",
                                       "group flex items-center px-4 py-2 text-sm w-full"
                                     )}
                                   >
                                     <TrashIcon
-                                      className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                                      className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
                                       aria-hidden="true"
                                     />
                                     Delete
