@@ -1,8 +1,7 @@
 @tailwind base;
 
 body {
-  background-color: #000;
-  color: #fff;
+  @apply bg-black text-white;
 }
 
 #__next {
@@ -28,7 +27,7 @@ body {
   [multiple],
   textarea,
   select {
-    @apply mt-1 bg-black focus:outline-none focus:ring-2 focus:ring-gray-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-white border-2 px-2 py-2 disabled:opacity-50 text-white;
+    @apply mt-1 bg-black focus:outline-none focus:ring-2 focus:ring-neutral-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-white border-2 px-2 py-2 disabled:opacity-50 text-white;
   }
 
   label {
@@ -37,11 +36,11 @@ body {
 }
 
 .primary-button {
-  @apply items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 disabled:from-slate-500 disabled:to-slate-700 disabled:border-slate-300 disabled:text-slate-300 disabled:hover:text-slate-300 transition-colors;
+  @apply items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 disabled:from-neutral-500 disabled:to-neutral-700 disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:text-neutral-300 transition-colors;
 }
 
 .secondary-button {
-  @apply items-center border-2 hover:bg-slate-700 bg-gradient-to-r rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300;
+  @apply items-center border-2 hover:bg-neutral-700 bg-gradient-to-r rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300;
 }
 
 .fancy-link {
@@ -72,7 +71,7 @@ body {
 }
 
 .prose .anchor:after {
-  @apply text-gray-300 dark:text-gray-700;
+  @apply text-neutral-300 dark:text-neutral-700;
   content: "#";
 }
 
@@ -81,11 +80,11 @@ body {
 }
 
 .prose pre {
-  @apply border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-smoke;
+  @apply border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-black;
 }
 
 .prose code {
-  @apply text-gray-800 dark:text-gray-200 px-1 py-0.5 border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-100 dark:bg-smoke font-mono;
+  @apply text-neutral-800 dark:text-neutral-200 px-1 py-0.5 border border-neutral-100 dark:border-neutral-800 rounded-lg bg-neutral-100 dark:bg-black font-mono;
 }
 
 .prose code:after {
@@ -97,7 +96,7 @@ body {
 }
 
 .prose pre code {
-  @apply text-gray-800 dark:text-gray-200 p-0;
+  @apply text-neutral-800 dark:text-neutral-200 p-0;
   border: initial;
 }
 
@@ -116,11 +115,11 @@ body {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-  @apply text-gray-700 dark:text-gray-300;
+  @apply text-neutral-700 dark:text-neutral-300;
 }
 
 .token.punctuation {
-  @apply text-gray-700 dark:text-gray-300;
+  @apply text-neutral-700 dark:text-neutral-300;
 }
 
 .token.property,
@@ -169,7 +168,7 @@ body {
 
 code[class*="language-"],
 pre[class*="language-"] {
-  @apply text-gray-800 dark:text-gray-50;
+  @apply text-neutral-800 dark:text-neutral-50;
 }
 
 pre::-webkit-scrollbar {
@@ -182,7 +181,7 @@ pre {
 }
 
 .rehype-code-title {
-  @apply px-5 py-3 font-mono text-sm font-bold text-gray-800 bg-gray-200 border border-b-0 border-gray-200 rounded-t-lg dark:text-gray-200 dark:border-gray-700 dark:bg-gray-800;
+  @apply px-5 py-3 font-mono text-sm font-bold text-neutral-800 bg-neutral-200 border border-b-0 border-neutral-200 rounded-t-lg dark:text-neutral-200 dark:border-neutral-700 dark:bg-neutral-800;
 }
 
 .rehype-code-title + pre {
@@ -190,7 +189,7 @@ pre {
 }
 
 .highlight-line {
-  @apply block px-4 -mx-4 bg-gray-100 border-l-4 border-blue-500 dark:bg-gray-800;
+  @apply block px-4 -mx-4 bg-neutral-100 border-l-4 border-blue-500 dark:bg-neutral-800;
 }
 
 /* Remove Safari input shadow on mobile */
