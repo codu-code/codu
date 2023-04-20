@@ -69,94 +69,92 @@ const ArticlesPage = () => {
         <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
-        <div className="border-t border-white">
-          <div className="relative sm:mx-auto max-w-2xl mx-2">
-            <div className="my-8 border-b-2 pb-4 flex justify-between items-center">
-              <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
-                {typeof tag === "string" ? (
-                  <div className="flex justify-center items-center">
-                    <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
-                    {capitalize(tag)}
-                  </div>
-                ) : (
-                  "Articles"
-                )}
-              </h1>
-              <div>
-                <label htmlFor="filter" className="sr-only">
-                  Location
-                </label>
-                <select
-                  id="filter"
-                  name="filter"
-                  className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
-                  onChange={(e) => {
-                    router.push(
-                      `/articles?filter=${e.target.value}${
-                        tag ? `&tag=${tag}` : ""
-                      }`
-                    );
-                  }}
-                  value={selectedSortFilter}
-                >
-                  <option>newest</option>
-                  <option>oldest</option>
-                  <option>top</option>
-                </select>
-              </div>
-            </div>
-            <section>
-              {status === "error" && (
-                <div>Something went wrong... Please refresh your page.</div>
+        <div className="relative sm:mx-auto max-w-2xl mx-2">
+          <div className="my-8 border-b-2 pb-4 flex justify-between items-center">
+            <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
+              {typeof tag === "string" ? (
+                <div className="flex justify-center items-center">
+                  <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
+                  {capitalize(tag)}
+                </div>
+              ) : (
+                "Articles"
               )}
-              {status === "loading" &&
-                Children.toArray(
-                  Array.from({ length: 7 }, () => {
-                    return <ArticleLoading />;
-                  })
-                )}
-              {status === "success" &&
-                data.pages.map((page) => {
-                  return (
-                    <Fragment key={page.nextCursor ?? "lastPage"}>
-                      {page.posts.map(
-                        ({
-                          slug,
-                          title,
-                          excerpt,
-                          user: { name, image, username },
-                          updatedAt,
-                          readTimeMins,
-                          id,
-                          currentUserLikesPost,
-                        }) => (
-                          <ArticlePreview
-                            key={title}
-                            id={id}
-                            slug={slug}
-                            title={title}
-                            excerpt={excerpt}
-                            name={name}
-                            username={username || ""}
-                            image={image}
-                            date={updatedAt.toISOString()}
-                            readTime={readTimeMins}
-                            bookmarkedInitialState={currentUserLikesPost}
-                          />
-                        )
-                      )}
-                    </Fragment>
+            </h1>
+            <div>
+              <label htmlFor="filter" className="sr-only">
+                Location
+              </label>
+              <select
+                id="filter"
+                name="filter"
+                className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
+                onChange={(e) => {
+                  router.push(
+                    `/articles?filter=${e.target.value}${
+                      tag ? `&tag=${tag}` : ""
+                    }`
                   );
-                })}
-              {status === "success" && !data.pages[0].posts.length && (
-                <h2 className="text-lg">No results founds</h2>
-              )}
-              {isFetchingNextPage ? <ArticleLoading /> : null}
-              <span className="invisible" ref={ref}>
-                intersection observer marker
-              </span>
-            </section>
+                }}
+                value={selectedSortFilter}
+              >
+                <option>newest</option>
+                <option>oldest</option>
+                <option>top</option>
+              </select>
+            </div>
           </div>
+          <section>
+            {status === "error" && (
+              <div>Something went wrong... Please refresh your page.</div>
+            )}
+            {status === "loading" &&
+              Children.toArray(
+                Array.from({ length: 7 }, () => {
+                  return <ArticleLoading />;
+                })
+              )}
+            {status === "success" &&
+              data.pages.map((page) => {
+                return (
+                  <Fragment key={page.nextCursor ?? "lastPage"}>
+                    {page.posts.map(
+                      ({
+                        slug,
+                        title,
+                        excerpt,
+                        user: { name, image, username },
+                        updatedAt,
+                        readTimeMins,
+                        id,
+                        currentUserLikesPost,
+                      }) => (
+                        <ArticlePreview
+                          key={title}
+                          id={id}
+                          slug={slug}
+                          title={title}
+                          excerpt={excerpt}
+                          name={name}
+                          username={username || ""}
+                          image={image}
+                          date={updatedAt.toISOString()}
+                          readTime={readTimeMins}
+                          bookmarkedInitialState={currentUserLikesPost}
+                        />
+                      )
+                    )}
+                  </Fragment>
+                );
+              })}
+            {status === "success" && !data.pages[0].posts.length && (
+              <h2 className="text-lg">No results founds</h2>
+            )}
+            {isFetchingNextPage ? <ArticleLoading /> : null}
+            <span className="invisible" ref={ref}>
+              intersection observer marker
+            </span>
+          </section>
         </div>
       </Layout>
     </>

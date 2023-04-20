@@ -42,65 +42,63 @@ const MyPosts: NextPage = ({
 
   return (
     <Layout>
-      <div className="border-t-2">
-        <div className="relative sm:mx-auto max-w-2xl mx-4">
-          <PageHeading>Saved items</PageHeading>
-          <div>
-            {bookmarkStatus === "loading" &&
-              Children.toArray(
-                Array.from({ length: 7 }, () => {
-                  return <ArticleLoading />;
-                })
-              )}
-            {bookmarkStatus === "error" && (
-              <p className="font-medium py-4">
-                Something went wrong fetching your saved posts... Refresh the
-                page.
-              </p>
+      <div className="relative sm:mx-auto max-w-2xl mx-4">
+        <PageHeading>Saved items</PageHeading>
+        <div>
+          {bookmarkStatus === "loading" &&
+            Children.toArray(
+              Array.from({ length: 7 }, () => {
+                return <ArticleLoading />;
+              })
+            )}
+          {bookmarkStatus === "error" && (
+            <p className="font-medium py-4">
+              Something went wrong fetching your saved posts... Refresh the
+              page.
+            </p>
+          )}
+
+          {bookmarkStatus === "success" &&
+            bookmarks.map(
+              ({
+                id,
+                slug,
+                title,
+                excerpt,
+                user: { name, image, username },
+                updatedAt,
+                readTimeMins,
+              }) => {
+                return (
+                  <ArticlePreview
+                    key={id}
+                    id={id}
+                    username={username || ""}
+                    slug={slug}
+                    title={title}
+                    excerpt={excerpt}
+                    name={name}
+                    image={image}
+                    date={updatedAt.toISOString()}
+                    readTime={readTimeMins}
+                    showBookmark={false}
+                    menuOptions={[
+                      {
+                        label: "Remove item",
+                        postId: id,
+                        onClick: () => removeSavedItem(id),
+                      },
+                    ]}
+                  />
+                );
+              }
             )}
 
-            {bookmarkStatus === "success" &&
-              bookmarks.map(
-                ({
-                  id,
-                  slug,
-                  title,
-                  excerpt,
-                  user: { name, image, username },
-                  updatedAt,
-                  readTimeMins,
-                }) => {
-                  return (
-                    <ArticlePreview
-                      key={id}
-                      id={id}
-                      username={username || ""}
-                      slug={slug}
-                      title={title}
-                      excerpt={excerpt}
-                      name={name}
-                      image={image}
-                      date={updatedAt.toISOString()}
-                      readTime={readTimeMins}
-                      showBookmark={false}
-                      menuOptions={[
-                        {
-                          label: "Remove item",
-                          postId: id,
-                          onClick: () => removeSavedItem(id),
-                        },
-                      ]}
-                    />
-                  );
-                }
-              )}
-
-            {bookmarkStatus === "success" && bookmarks?.length === 0 && (
-              <p className="font-medium py-4">
-                Your saved posts will show up here.
-              </p>
-            )}
-          </div>
+          {bookmarkStatus === "success" && bookmarks?.length === 0 && (
+            <p className="font-medium py-4">
+              Your saved posts will show up here.
+            </p>
+          )}
         </div>
       </div>
     </Layout>
