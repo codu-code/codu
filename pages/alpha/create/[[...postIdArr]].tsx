@@ -13,8 +13,9 @@ import { ChevronUpIcon } from "@heroicons/react/solid";
 
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
-import Layout from "../../../components/Layout/Layout";
+import LayoutEditor from "../../../components/Layout/LayoutEditor";
 import { PromptDialog } from "../../../components/PromptService/PromptService";
+import EditorHints from "../../../components/EditorHints/EditorHints";
 
 import { trpc } from "../../../utils/trpc";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -261,15 +262,15 @@ const Create: NextPage = () => {
   };
 
   return (
-    <Layout>
-      <Fragment>
+    <LayoutEditor>
+      <div className="bg-smoke">
         <PromptDialog
           shouldConfirmLeave={unsavedChanges}
           updateParent={handleOpenDialog}
         />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Transition.Root show={open} as={Fragment}>
-            <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-smoke">
+            <div className="fixed left-0 bottom-0 top-0 w-full h-screen bg-smoke">
               <button
                 type="button"
                 className="absolute right-8 top-8 underline cursor-pointer z-50"
@@ -411,6 +412,7 @@ const Create: NextPage = () => {
                       </button>
                     </div>
                   </div>
+                  sadfasdf
                 </div>
               </div>
             </div>
@@ -441,53 +443,57 @@ const Create: NextPage = () => {
             </div>
           )}
           <div className="editor-actions bg-black sticky z-20 top-0 flex justify-end items-center py-4 lg:py-6 px-4 sm:px-6 g:px-4">
-                    <p className="mr-4">
-                      {saveStatus === "loading" && <span className="text-gray-400 text-xs lg:text-sm">Saving...</span>}
-                      {saveStatus === "error" && savedTime && (
-                        <span className="text-red-600 text-xs lg:text-sm">
-                          {`Error saving, last saved: ${savedTime.toString()}`}
-                        </span>
-                      )}
-                      {saveStatus === "success" && savedTime && (
-                        <span
-                          className="text-gray-400 text-xs lg:text-sm"
-                          title={savedTime.toString()}
-                        >
-                          {`Saved`}
-                        </span>
-                      )}
-                    </p>
+            <p className="mr-4">
+              {saveStatus === "loading" && (
+                <span className="text-gray-400 text-xs lg:text-sm">
+                  Saving...
+                </span>
+              )}
+              {saveStatus === "error" && savedTime && (
+                <span className="text-red-600 text-xs lg:text-sm">
+                  {`Error saving, last saved: ${savedTime.toString()}`}
+                </span>
+              )}
+              {saveStatus === "success" && savedTime && (
+                <span
+                  className="text-gray-400 text-xs lg:text-sm"
+                  title={savedTime.toString()}
+                >
+                  {`Saved`}
+                </span>
+              )}
+            </p>
 
-                    <button
-                      type="button"
-                      title="Preview"
-                      className="py-2 px-3 mr-4 inline-flex justify-center focus:outline-none"
-                      onClick={() => setViewPreview((current) => !current)}
-                    >
-                      {viewPreview ? (
-                        <IconEyeShut
-                          className="h-6 w-6 fill-slate-400"
-                          aria-hidden="true"
-                        />
-                      ) : (
-                        <IconEye
-                          className="h-6 w-6 fill-slate-700"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </button>
+            <button
+              type="button"
+              title="Preview"
+              className="py-2 px-3 mr-4 inline-flex justify-center focus:outline-none"
+              onClick={() => setViewPreview((current) => !current)}
+            >
+              {viewPreview ? (
+                <IconEyeShut
+                  className="h-6 w-6 fill-slate-400"
+                  aria-hidden="true"
+                />
+              ) : (
+                <IconEye
+                  className="h-6 w-6 fill-slate-700"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
 
-                    <button
-                      type="button"
-                      disabled={isDisabled}
-                      className="disabled:opacity-50 py-2 px-3 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm  inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none"
-                      onClick={() => setOpen(true)}
-                    >
-                      {!data?.published && "Publish"}
-                      {data?.published && "Save Changes"}
-                    </button>
-                  </div>
-          <div className="bg-smoke">
+            <button
+              type="button"
+              disabled={isDisabled}
+              className="disabled:opacity-50 py-2 px-3 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm  inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none"
+              onClick={() => setOpen(true)}
+            >
+              {!data?.published && "Publish"}
+              {data?.published && "Save Changes"}
+            </button>
+          </div>
+          <div className="bg-smoke relative">
             <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
               {/* Left sidebar & main wrapper */}
               <div className="flex-1 min-w-0 xl:flex">
@@ -546,8 +552,9 @@ const Create: NextPage = () => {
             </div>
           </div>
         </form>
-      </Fragment>
-    </Layout>
+        <EditorHints />
+      </div>
+    </LayoutEditor>
   );
 };
 
