@@ -21,25 +21,25 @@ const Metrics: NextPage = ({
         <div className="relative sm:mx-auto max-w-2xl mx-4">
           <div className="relative">
             <PageHeading>Metrics</PageHeading>
-            <div className="grid grid-cols-2 gap-8 mt-4">
-              <div className="bg-neutral-800 p-8 border-l-4 border-l-orange-400">
+            <div className="sm:grid grid-cols-2 gap-8 mt-4">
+              <div className="bg-neutral-800 p-8 border-l-4 border-l-orange-400 mb-4 sm:mb-0">
                 <h2 className="font-bold text-2xl">User Count</h2>
                 <p className="font-semibold text-8xl">{userCount}</p>
               </div>
 
-              <div className="bg-neutral-800 p-8 border-l-4 border-l-pink-600">
+              <div className="bg-neutral-800 p-8 border-l-4 border-l-pink-600 mb-4 sm:mb-0">
                 <h2 className="font-bold text-2xl">Published Posts</h2>
                 <p className="font-semibold text-8xl">{postsPublishedStats}</p>
               </div>
 
-              <div className="bg-neutral-800 p-8 border-l-4 border-l-pink-600">
+              <div className="bg-neutral-800 p-8 border-l-4 border-l-pink-600 mb-4 sm:mb-0">
                 <h2 className="font-bold text-2xl">Unpublished Posts</h2>
                 <p className="font-semibold text-8xl">
                   {postsNotPublishedStats}
                 </p>
               </div>
             </div>
-            <div className="bg-neutral-800 p-8 border-l-4 border-l-orange-400 mt-8">
+            <div className="bg-neutral-800 p-8 border-l-4 border-l-orange-400 sm:mt-8">
               <h2 className="font-bold text-2xl mb-6">Tags</h2>
               {tags.map(({ tag, count }: { tag: string; count: string }) => (
                 <p key={tag} className="font-semibold text-xl mb-1">
