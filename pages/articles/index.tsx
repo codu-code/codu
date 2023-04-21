@@ -70,7 +70,7 @@ const ArticlesPage = () => {
       </Head>
       <Layout>
         <div className="relative sm:mx-auto max-w-2xl mx-2">
-          <div className="my-8 border-b-2 pb-4 flex justify-between items-center">
+          <div className="mt-8 border-b pb-4 flex justify-between items-center">
             <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
               {typeof tag === "string" ? (
                 <div className="flex justify-center items-center">
