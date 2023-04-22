@@ -38,6 +38,7 @@
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.2",
     "fathom-client": "^3.5.0",
+    "material-icons": "^1.13.5",
     "nanoid": "^4.0.0",
     "next": "^13.2.3",
     "next-auth": "^4.22.0",
@@ -54,6 +55,9 @@
     "react-textarea-autosize": "^8.3.4",
     "satori": "^0.4.3",
     "sharp": "^0.31.3",
+    "slate": "^0.94.0",
+    "slate-history": "^0.93.0",
+    "slate-react": "^0.94.0",
     "superjson": "^1.12.2",
     "zod": "^3.21.4"
   },
