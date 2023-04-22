@@ -18,6 +18,7 @@ import { PromptDialog } from "../../components/PromptService/PromptService";
 import { trpc } from "../../utils/trpc";
 import { removeMarkdown } from "../../utils/removeMarkdown";
 import { useDebounce } from "../../hooks/useDebounce";
+import SlateEditor from "../../components/SlateEditor/SlateEditor";
 import Markdoc from "@markdoc/markdoc";
 import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
 import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
@@ -509,12 +510,17 @@ const Create: NextPage = () => {
                               {...register("title")}
                             />
 
-                            <CustomTextareaAutosize
+                            {/* <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
                               className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
                               minRows={25}
                               {...register("body")}
                               inputRef={textareaRef}
+                            /> */}
+                            <SlateEditor
+                            // {...register("body")}
+                            // inputRef={textareaRef}
+                            className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
                             />
 
                             <div className="flex justify-between items-center">
