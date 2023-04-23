@@ -510,18 +510,18 @@ const Create: NextPage = () => {
                               {...register("title")}
                             />
 
-                            {/* <CustomTextareaAutosize
+                            <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
                               className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
                               minRows={25}
                               {...register("body")}
                               inputRef={textareaRef}
-                            /> */}
-                            <SlateEditor
-                            // {...register("body")}
-                            // inputRef={textareaRef}
-                            className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
                             />
+                            {data ? (
+    <SlateEditor body={data.body} />
+  ) : (
+    <p>Loading editor...</p>
+  )}
 
                             <div className="flex justify-between items-center">
                               <>

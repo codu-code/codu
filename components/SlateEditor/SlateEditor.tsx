@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useEffect, useState } from 'react'
 import isHotkey from 'is-hotkey'
 import { Editable, withReact, useSlate, Slate } from 'slate-react'
 import {
@@ -9,6 +9,10 @@ import {
   Element as SlateElement,
 } from 'slate'
 import { withHistory } from 'slate-history'
+import {unified} from 'unified';
+import markdown from 'remark-parse';
+import slate from 'remark-slate';
+import { promisify } from 'util';
 
 import { Button, Icon, Toolbar } from './components'
 
@@ -22,13 +26,45 @@ const HOTKEYS = {
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
-const SlateEditor = () => {
-  const renderElement = useCallback(props => <Element {...props} />, [])
-  const renderLeaf = useCallback(props => <Leaf {...props} />, [])
-  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
+const SlateEditor = ({ body }) => {
+  console.log(body)
+  const processMarkdown = (markdownString) => {
+  const processor = unified().use(markdown).use(slate);
+
+  try {
+    const file = processor.processSync(markdownString);
+    const slateObject = file.result;
+    return slateObject;
+  } catch (err) {
+    console.error(err);
+    return [{ type: 'paragraph', children: [{ text: '' }] }];
+  }
+};
+
+  // const [value, setValue] = useState([{ type: 'paragraph', children: [{ text: '' }] }]);
+  
+  // useEffect(() => {
+  //   if (body) {
+  //     processMarkdown(body).then((slateObject) => setValue(slateObject));
+  //   }
+  // }, [body]);
+
+  const renderElement = useCallback(props => <Element {...props} />, []);
+  const renderLeaf = useCallback(props => <Leaf {...props} />, []);
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+
+  const memoizedValue = useMemo(() => {
+    if (body) {
+      return processMarkdown(body);
+    } else {
+      return [{ type: 'paragraph', children: [{ text: '' }] }];
+    }
+  }, [body]);
+  
 
   return (
-    <Slate editor={editor} value={initialValue}>
+    <Slate editor={editor} value={memoizedValue}>
+
       <Toolbar>
         <MarkButton format="bold" icon="format_bold" />
         <MarkButton format="italic" icon="format_italic" />
@@ -47,7 +83,8 @@ const SlateEditor = () => {
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        placeholder="Enter your content here 💖"
+        // placeholder={data.body}
+        // placeholder="Enter your content here 💖"
         spellCheck
         autoFocus
         onKeyDown={event => {
@@ -232,12 +269,12 @@ const MarkButton = ({ format, icon }) => {
   )
 }
 
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    align: 'left',
-    children: [{ text: '' }],
-  }
-]
+// const initialValue: Descendant[] = [
+//   {
+//     type: 'paragraph',
+//     align: 'left',
+//     children: [{ text: '' }],
+//   }
+// ]
 
 export default SlateEditor
