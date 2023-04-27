@@ -7,6 +7,20 @@ import Layout from "../../components/Layout/Layout";
 import { trpc } from "../../utils/trpc";
 import { useInView } from "react-intersection-observer";
 import { useRouter } from "next/router";
+import Link from "next/link";
+
+// Needs to be added to DB but testing with hardcoding
+const tagsToShow = [
+  "JavaScript",
+  "Web Development",
+  "Tutorial",
+  "Productivity",
+  "CSS",
+  "Terminal",
+  "Django",
+  "Python",
+  "Tips",
+];
 
 const ArticlesPage = () => {
   const router = useRouter();
@@ -69,8 +83,8 @@ const ArticlesPage = () => {
         <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
-        <div className="relative sm:mx-auto max-w-2xl mx-2">
-          <div className="mt-8 border-b pb-4 flex justify-between items-center">
+        <div className="mx-4">
+          <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
             <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
               {typeof tag === "string" ? (
                 <div className="flex justify-center items-center">
@@ -104,57 +118,79 @@ const ArticlesPage = () => {
               </select>
             </div>
           </div>
-          <section>
-            {status === "error" && (
-              <div>Something went wrong... Please refresh your page.</div>
-            )}
-            {status === "loading" &&
-              Children.toArray(
-                Array.from({ length: 7 }, () => {
-                  return <ArticleLoading />;
-                })
-              )}
-            {status === "success" &&
-              data.pages.map((page) => {
-                return (
-                  <Fragment key={page.nextCursor ?? "lastPage"}>
-                    {page.posts.map(
-                      ({
-                        slug,
-                        title,
-                        excerpt,
-                        user: { name, image, username },
-                        updatedAt,
-                        readTimeMins,
-                        id,
-                        currentUserLikesPost,
-                      }) => (
-                        <ArticlePreview
-                          key={title}
-                          id={id}
-                          slug={slug}
-                          title={title}
-                          excerpt={excerpt}
-                          name={name}
-                          username={username || ""}
-                          image={image}
-                          date={updatedAt.toISOString()}
-                          readTime={readTimeMins}
-                          bookmarkedInitialState={currentUserLikesPost}
-                        />
-                      )
-                    )}
-                  </Fragment>
-                );
-              })}
-            {status === "success" && !data.pages[0].posts.length && (
-              <h2 className="text-lg">No results founds</h2>
-            )}
-            {isFetchingNextPage ? <ArticleLoading /> : null}
-            <span className="invisible" ref={ref}>
-              intersection observer marker
-            </span>
-          </section>
+          <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">
+            <div className="relative md:col-span-8">
+              <section>
+                {status === "error" && (
+                  <div className="mt-8">
+                    Something went wrong... Please refresh your page.
+                  </div>
+                )}
+                {status === "loading" &&
+                  Children.toArray(
+                    Array.from({ length: 7 }, () => {
+                      return <ArticleLoading />;
+                    })
+                  )}
+                {status === "success" &&
+                  data.pages.map((page) => {
+                    return (
+                      <Fragment key={page.nextCursor ?? "lastPage"}>
+                        {page.posts.map(
+                          ({
+                            slug,
+                            title,
+                            excerpt,
+                            user: { name, image, username },
+                            updatedAt,
+                            readTimeMins,
+                            id,
+                            currentUserLikesPost,
+                          }) => (
+                            <ArticlePreview
+                              key={title}
+                              id={id}
+                              slug={slug}
+                              title={title}
+                              excerpt={excerpt}
+                              name={name}
+                              username={username || ""}
+                              image={image}
+                              date={updatedAt.toISOString()}
+                              readTime={readTimeMins}
+                              bookmarkedInitialState={currentUserLikesPost}
+                            />
+                          )
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                {status === "success" && !data.pages[0].posts.length && (
+                  <h2 className="text-lg mt-8">No results founds</h2>
+                )}
+                {isFetchingNextPage ? <ArticleLoading /> : null}
+                <span className="invisible" ref={ref}>
+                  intersection observer marker
+                </span>
+              </section>
+            </div>
+            <section className="col-span-4 lg:block hidden">
+              <h3 className="text-2xl leading-6 font-semibold tracking-wide mb-4 mt-4">
+                Recommended topics
+              </h3>
+              <div className="flex gap-2 flex-wrap">
+                {tagsToShow.map((tag) => (
+                  <Link
+                    key={tag}
+                    href={`/articles?tag=${tag.toLowerCase()}`}
+                    className="bg-neutral-900 text-neutral-50 px-6 py-2 border border-neutral-600"
+                  >
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </div>
         </div>
       </Layout>
     </>
