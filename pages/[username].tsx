@@ -43,63 +43,63 @@ const Profile: NextPage = ({
         <meta property="og:type" content="website" />
       </Head>
       <Layout>
-        <div className="border-t-2">
-          <div className="max-w-2xl px-4 mx-auto text-white">
-            <main className="flex pt-6">
-              <div className="mr-4 flex-shrink-0 self-center">
-                {image && (
-                  <img
-                    className="rounded-full object-cover h-32 w-32"
-                    alt={`Avatar for ${name}`}
-                    src={image}
+        <div className="max-w-2xl px-4 mx-auto text-white">
+          <main className="flex pt-6">
+            <div className="mr-4 flex-shrink-0 self-center">
+              {image && (
+                <img
+                  className="rounded-full object-cover h-32 w-32"
+                  alt={`Avatar for ${name}`}
+                  src={image}
+                />
+              )}
+            </div>
+            <div className="flex flex-col justify-center">
+              <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
+              <h2 className="text-neutral-400 font-bold text-sm">
+                @{username}
+              </h2>
+              <p className="mt-1">{bio}</p>
+            </div>
+          </main>
+
+          <PageHeading>Published articles</PageHeading>
+
+          {posts.length ? (
+            posts.map(
+              ({ slug, title, excerpt, readTimeMins, published, id }) => {
+                if (!published) return;
+                return (
+                  <ArticlePreview
+                    key={slug}
+                    slug={slug}
+                    title={title}
+                    excerpt={excerpt}
+                    name={name}
+                    username={username || ""}
+                    image={image}
+                    date={published}
+                    readTime={readTimeMins}
+                    menuOptions={
+                      isOwner
+                        ? [
+                            {
+                              label: "Edit",
+                              href: `/create/${id}`,
+                              postId: id,
+                            },
+                          ]
+                        : undefined
+                    }
+                    showBookmark={!isOwner}
+                    id={id}
                   />
-                )}
-              </div>
-              <div className="flex flex-col justify-center">
-                <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
-                <h2 className="text-gray-400 font-bold text-sm">@{username}</h2>
-                <p className="mt-1">{bio}</p>
-              </div>
-            </main>
-
-            <PageHeading>Published articles</PageHeading>
-
-            {posts.length ? (
-              posts.map(
-                ({ slug, title, excerpt, readTimeMins, published, id }) => {
-                  if (!published) return;
-                  return (
-                    <ArticlePreview
-                      key={slug}
-                      slug={slug}
-                      title={title}
-                      excerpt={excerpt}
-                      name={name}
-                      username={username || ""}
-                      image={image}
-                      date={published}
-                      readTime={readTimeMins}
-                      menuOptions={
-                        isOwner
-                          ? [
-                              {
-                                label: "Edit",
-                                href: `/create/${id}`,
-                                postId: id,
-                              },
-                            ]
-                          : undefined
-                      }
-                      showBookmark={!isOwner}
-                      id={id}
-                    />
-                  );
-                }
-              )
-            ) : (
-              <p className="font-medium py-4">Nothing published yet... 🥲</p>
-            )}
-          </div>
+                );
+              }
+            )
+          ) : (
+            <p className="font-medium py-4">Nothing published yet... 🥲</p>
+          )}
         </div>
       </Layout>
     </>

@@ -13,15 +13,16 @@ export class AppStage extends cdk.Stage {
     super(scope, id, props);
 
     const { production } = props;
-
     const storageStack = new StorageStack(this, "StorageStack", {
       production,
     });
-    new AppStack(this, "AppStack", {
+    const appStack = new AppStack(this, "AppStack", {
       vpc: storageStack.vpc,
       bucket: storageStack.bucket,
       production,
     });
-    new CdnStack(this, "CdnStack");
+    new CdnStack(this, "CdnStack", {
+      loadbalancer: appStack.loadbalancer,
+    });
   }
 }

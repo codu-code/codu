@@ -20,7 +20,10 @@ export class StorageStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
 
-    this.vpc = new ec2.Vpc(this, "StorageStackVpc");
+    this.vpc = new ec2.Vpc(this, "StorageStackVpc", {
+      natGateways: 1,
+    });
+
     const { vpc } = this;
     // s3 bucket
     const bucketName = ssm.StringParameter.valueForStringParameter(

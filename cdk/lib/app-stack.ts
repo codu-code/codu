@@ -33,37 +33,7 @@ export class AppStack extends cdk.Stack {
       1
     );
 
-    // const customHeaderValue = ssm.StringParameter.valueForStringParameter(
-    //   this,
-    //   `/env/cf/customHeaderValue`,
-    //   1
-    // );
-
-    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/env/hostedZoneId`,
-      1
-    );
-
     const wwwDomainName = `www.${domainName}`;
-
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
-      hostedZoneId,
-      zoneName: domainName,
-    });
-
-    const certificate = new acm.DnsValidatedCertificate(this, "LbCertificate", {
-      domainName,
-      subjectAlternativeNames: [`*.${domainName}`],
-      hostedZone: zone,
-      region: "eu-west-1",
-    });
-
-    // new route53.CnameRecord(this, "Cname", {
-    //   zone,
-    //   recordName: wwwDomainName,
-    //   target: domainName,
-    // });
 
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
@@ -143,31 +113,19 @@ export class AppStack extends cdk.Stack {
         {
           cluster,
           taskDefinition: taskDef,
-          memoryLimitMiB: production ? 1024 : 512,
-          cpu: production ? 512 : 256,
+          memoryLimitMiB: production ? 512 : 512, // Can alter if need more
+          cpu: production ? 256 : 256, // Can alter if need more
           publicLoadBalancer: true,
-          protocol: elbv2.ApplicationProtocol.HTTPS,
-          certificate,
-          domainZone: zone,
-          redirectHTTP: true,
-          domainName: wwwDomainName,
+          protocol: elbv2.ApplicationProtocol.HTTP,
         }
       );
 
-    // fargateService.listener.addAction("ListenerRule", {
-    //   priority: 1,
-    //   conditions: [
-    //     elbv2.ListenerCondition.httpHeader("X-FCTL-FRWD", [customHeaderValue]),
-    //   ],
-    //   action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
-    // });
-
-    // fargateService.listener.addAction("DefaultListenerRule", {
-    //   action: elbv2.ListenerAction.fixedResponse(500, {
-    //     contentType: "text/plain",
-    //     messageBody: "Not Allowed",
-    //   }),
-    // });
+    fargateService.listener.addAction("DefaultListenerRule", {
+      action: elbv2.ListenerAction.fixedResponse(500, {
+        contentType: "text/plain",
+        messageBody: "Not Allowed",
+      }),
+    });
 
     if (!production) {
       fargateService.listener.addAction("ListenerRule", {
@@ -181,17 +139,23 @@ export class AppStack extends cdk.Stack {
       });
     }
 
+    fargateService.listener.addAction("HostListenerRule", {
+      priority: 1,
+      conditions: [elbv2.ListenerCondition.hostHeaders(["*.codu.co"])],
+      action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
+    });
+
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
-      maxCapacity: 5,
+      maxCapacity: production ? 3 : 1,
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 60,
+      targetUtilizationPercent: 70,
     });
 
     scaling.scaleOnMemoryUtilization("MemoryScaling", {
-      targetUtilizationPercent: 60,
+      targetUtilizationPercent: 70,
     });
 
     fargateService.service.connections.allowFromAnyIpv4(

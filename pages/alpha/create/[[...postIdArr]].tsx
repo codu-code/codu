@@ -290,7 +290,7 @@ const Create: NextPage = () => {
                         rows={3}
                         {...register("excerpt")}
                       />
-                      <p className="mt-2 text-sm text-gray-400">
+                      <p className="mt-2 text-sm text-neutral-400">
                         What readers will see before they click on your article.
                         Good SEO descriptions utilize keywords, summarize the
                         story and are between 140-156 characters long.
@@ -315,17 +315,17 @@ const Create: NextPage = () => {
                       {tags.map((tag) => (
                         <div
                           key={tag}
-                          className="bg-gray-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
+                          className="bg-neutral-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
                         >
                           <span
-                            className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-smoke font-semibold"
+                            className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-black font-semibold"
                             x-text="tag"
                           >
                             {tag}
                           </span>
                           <button
                             onClick={() => onDelete(tag)}
-                            className="w-6 h-6 inline-block align-middle text-white bg-gray-600 focus:outline-none"
+                            className="w-6 h-6 inline-block align-middle text-white bg-neutral-600 focus:outline-none"
                           >
                             <svg
                               className="w-6 h-6 fill-current mx-auto"
@@ -345,7 +345,7 @@ const Create: NextPage = () => {
                         readers to find and know what your story is about.
                       </p>
                     </div>
-                    <div className="col-span-12  border-b border-gray-300 pb-4">
+                    <div className="col-span-12  border-b border-neutral-300 pb-4">
                       <Disclosure>
                         {({ open }) => (
                           <>
@@ -354,7 +354,7 @@ const Create: NextPage = () => {
                               <ChevronUpIcon
                                 className={`${
                                   open ? "rotate-180 transform" : ""
-                                } h-5 w-5 text-gray-400`}
+                                } h-5 w-5 text-neutral-400`}
                               />
                             </Disclosure.Button>
                             <Disclosure.Panel className="pt-4 pb-2">
@@ -368,7 +368,7 @@ const Create: NextPage = () => {
                                 defaultValue=""
                                 {...register("canonicalUrl")}
                               />
-                              <p className="mt-2 text-sm text-gray-400">
+                              <p className="mt-2 text-sm text-neutral-400">
                                 Add this if the post was originally published
                                 elsewhere and you want to link to it as the
                                 original source.
@@ -383,7 +383,7 @@ const Create: NextPage = () => {
                         <button
                           type="button"
                           disabled={isDisabled}
-                          className="bg-white border border-gray-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                          className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                           onClick={async () => {
                             if (isDisabled) return;
                             await savePost();
@@ -435,7 +435,7 @@ const Create: NextPage = () => {
                   <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
                   <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
                 </div>
-                <div className="text-gray-400 text-xs font-medium mt-2 text-center">
+                <div className="text-neutral-400 text-xs font-medium mt-2 text-center">
                   Fetching post data.
                 </div>
               </div>

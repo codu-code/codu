@@ -7,10 +7,15 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 
-export class CdnStack extends cdk.Stack {
+interface Props extends cdk.StackProps {
+  loadbalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer;
+}
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export class CdnStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: Props) {
     super(scope, id, props);
+
+    const { loadbalancer } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -73,6 +78,56 @@ export class CdnStack extends cdk.Stack {
       }
     );
 
+    const webDistribution = new cloudfront.CloudFrontWebDistribution(
+      this,
+      "WebDistribution",
+      {
+        defaultRootObject: "",
+        originConfigs: [
+          {
+            behaviors: [
+              {
+                isDefaultBehavior: true,
+                allowedMethods: cloudfront.CloudFrontAllowedMethods.ALL,
+                cachedMethods:
+                  cloudfront.CloudFrontAllowedCachedMethods.GET_HEAD_OPTIONS,
+                forwardedValues: {
+                  queryString: true,
+                  cookies: {
+                    forward: "all",
+                  },
+                  headers: [
+                    "Origin",
+                    "Authorization",
+                    "Content-Type",
+                    "Referer",
+                    "Host",
+                    "CloudFront-Viewer-Country",
+                  ],
+                },
+                defaultTtl: cdk.Duration.seconds(0),
+                maxTtl: cdk.Duration.seconds(0),
+                minTtl: cdk.Duration.seconds(0),
+              },
+            ],
+            customOriginSource: {
+              domainName: loadbalancer.loadBalancerDnsName,
+              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+            },
+          },
+        ],
+        viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(
+          certificate,
+          {
+            aliases: [wwwDomainName],
+          }
+        ),
+        comment: `Web distribution for ${wwwDomainName}`,
+        priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      }
+    );
+
     const redirectRecordProps = {
       zone,
       recordName: domainName,
@@ -87,5 +142,16 @@ export class CdnStack extends cdk.Stack {
       "AaaaRedirectAliasRecord",
       redirectRecordProps
     );
+
+    const recordProps = {
+      zone,
+      recordName: wwwDomainName,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(webDistribution)
+      ),
+    };
+
+    new route53.ARecord(this, "WebAliasRecord", recordProps);
+    new route53.AaaaRecord(this, "AaaaWebAliasRecord", recordProps);
   }
 }

@@ -58,14 +58,14 @@ const Notifications = () => {
   const noNotifications = !data?.pages[0].data.length;
 
   const Placeholder = () => (
-    <div className="border-white border-2 border-l-8 shadow p-4 w-full my-4 bg-smoke">
+    <div className="border-white border-2 border-l-8 shadow p-4 w-full my-4 bg-black">
       <div className="animate-pulse">
         <div className="flex space-x-4">
-          <div className="rounded-full bg-gray-800 h-10 w-10"></div>
+          <div className="rounded-full bg-neutral-800 h-10 w-10"></div>
           <div className="flex-1 space-y-2 py-1">
             <div className="grid grid-cols-8 gap-4">
-              <div className="h-4 bg-gray-800 rounded col-span-6"></div>
-              <div className="h-2 bg-gray-800 rounded col-span-3"></div>
+              <div className="h-4 bg-neutral-800 rounded col-span-6"></div>
+              <div className="h-2 bg-neutral-800 rounded col-span-3"></div>
             </div>
           </div>
         </div>
@@ -88,144 +88,141 @@ const Notifications = () => {
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       </Head>
       <Layout>
-        <div className="border-t border-white">
-          <div className="relative sm:mx-auto max-w-2xl mx-4">
-            <div className="relative">
-              <PageHeading>Notifications</PageHeading>
-              {!!count && count > 0 && (
-                <button
-                  onClick={() => deleteAll()}
-                  className="absolute top-0 right-0 secondary-button text-sm py-2 px-1"
-                >
-                  Mark all as read
-                </button>
+        <div className="relative sm:mx-auto max-w-2xl mx-4">
+          <div className="relative">
+            <PageHeading>Notifications</PageHeading>
+            {!!count && count > 0 && (
+              <button
+                onClick={() => deleteAll()}
+                className="absolute top-0 right-0 secondary-button text-sm py-2 px-1"
+              >
+                Mark all as read
+              </button>
+            )}
+          </div>
+
+          <section>
+            {status === "error" && (
+              <div>Something went wrong... Please refresh your page.</div>
+            )}
+            {status === "loading" &&
+              Children.toArray(
+                Array.from({ length: 7 }, () => {
+                  return <Placeholder />;
+                })
               )}
-            </div>
+            {status !== "loading" && noNotifications && (
+              <p className=" text-lg font-semibold">
+                No new notifications. ✅{" "}
+              </p>
+            )}
 
-            <section>
-              {status === "error" && (
-                <div>Something went wrong... Please refresh your page.</div>
-              )}
-              {status === "loading" &&
-                Children.toArray(
-                  Array.from({ length: 7 }, () => {
-                    return <Placeholder />;
-                  })
-                )}
-              {status !== "loading" && noNotifications && (
-                <p className=" text-lg font-semibold">
-                  No new notifications. ✅{" "}
-                </p>
-              )}
+            {status === "success" &&
+              data.pages.map((page) => {
+                return (
+                  <Fragment key={page.nextCursor ?? "lastPage"}>
+                    {page.data.map(
+                      ({ id, createdAt, type, post, notifier }) => {
+                        if (!post || !notifier) return null;
 
-              {status === "success" &&
-                data.pages.map((page) => {
-                  return (
-                    <Fragment key={page.nextCursor ?? "lastPage"}>
-                      {page.data.map(
-                        ({ id, createdAt, type, post, notifier }) => {
-                          if (!post || !notifier) return null;
+                        const dateTime = Temporal.Instant.from(
+                          createdAt.toISOString()
+                        );
+                        const isCurrentYear =
+                          new Date().getFullYear() === createdAt.getFullYear();
 
-                          const dateTime = Temporal.Instant.from(
-                            createdAt.toISOString()
-                          );
-                          const isCurrentYear =
-                            new Date().getFullYear() ===
-                            createdAt.getFullYear();
-
-                          const readableDate = dateTime.toLocaleString(
-                            ["en-IE"],
-                            isCurrentYear
-                              ? {
-                                  month: "long",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "numeric",
-                                }
-                              : {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
-                          );
-                          const { username, name, image } = notifier;
-                          // Check that we handle the notifications
-                          if (
-                            ![
-                              NEW_COMMENT_ON_YOUR_POST,
-                              NEW_REPLY_TO_YOUR_COMMENT,
-                            ].includes(type)
-                          )
-                            return null;
-                          return (
-                            <div key={id}>
-                              <div className="p-4 my-2 border-white border-2 bg-smoke border-l-8 shadow-xl flex justify-between">
-                                <div>
-                                  <div className="flex gap-3 sm:gap-5">
-                                    {image && (
+                        const readableDate = dateTime.toLocaleString(
+                          ["en-IE"],
+                          isCurrentYear
+                            ? {
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "numeric",
+                              }
+                            : {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                        );
+                        const { username, name, image } = notifier;
+                        // Check that we handle the notifications
+                        if (
+                          ![
+                            NEW_COMMENT_ON_YOUR_POST,
+                            NEW_REPLY_TO_YOUR_COMMENT,
+                          ].includes(type)
+                        )
+                          return null;
+                        return (
+                          <div key={id}>
+                            <div className="p-4 my-2 border-white border-2 bg-black border-l-8 shadow-xl flex justify-between">
+                              <div>
+                                <div className="flex gap-3 sm:gap-5">
+                                  {image && (
+                                    <Link
+                                      className="underline font-semibold flex flex-shrink-0"
+                                      href={`/${username}`}
+                                    >
+                                      <img
+                                        className="h-10 mb-2 rounded-full"
+                                        src={image}
+                                        alt={`${name}'s avatar`}
+                                      />
+                                    </Link>
+                                  )}
+                                  <div>
+                                    <p className="mb-1">
                                       <Link
-                                        className="underline font-semibold flex flex-shrink-0"
+                                        className="underline font-semibold"
                                         href={`/${username}`}
                                       >
-                                        <img
-                                          className="h-10 mb-2 rounded-full"
-                                          src={image}
-                                          alt={`${name}'s avatar`}
-                                        />
+                                        {name}
+                                      </Link>{" "}
+                                      {type === NEW_COMMENT_ON_YOUR_POST &&
+                                        "started a discussion on your post "}
+                                      {type === NEW_REPLY_TO_YOUR_COMMENT &&
+                                        "replied to your comment on "}
+                                      <Link
+                                        className="underline font-semibold"
+                                        href={`articles/${post.slug}`}
+                                      >
+                                        {post.title}
                                       </Link>
-                                    )}
-                                    <div>
-                                      <p className="mb-1">
-                                        <Link
-                                          className="underline font-semibold"
-                                          href={`/${username}`}
-                                        >
-                                          {name}
-                                        </Link>{" "}
-                                        {type === NEW_COMMENT_ON_YOUR_POST &&
-                                          "started a discussion on your post "}
-                                        {type === NEW_REPLY_TO_YOUR_COMMENT &&
-                                          "replied to your comment on "}
-                                        <Link
-                                          className="underline font-semibold"
-                                          href={`articles/${post.slug}`}
-                                        >
-                                          {post.title}
-                                        </Link>
-                                        .
-                                      </p>
-                                      <time className="text-gray-500 text-sm">
-                                        {readableDate}
-                                      </time>
-                                    </div>
+                                      .
+                                    </p>
+                                    <time className="text-neutral-500 text-sm">
+                                      {readableDate}
+                                    </time>
                                   </div>
                                 </div>
-                                <div className="w-10 border-l border-slate-700 ml-2 pl-3 flex flex-col justify-center">
-                                  <button
-                                    title="Mark as read"
-                                    className="text-white rounded-full h-8 w-8 flex justify-center items-center hover:bg-slate-700"
-                                    onClick={() => mutate({ id })}
-                                  >
-                                    <CheckIcon
-                                      className="h-6 w-6"
-                                      aria-hidden="true"
-                                    />
-                                  </button>
-                                </div>
+                              </div>
+                              <div className="w-10 border-l border-slate-700 ml-2 pl-3 flex flex-col justify-center">
+                                <button
+                                  title="Mark as read"
+                                  className="text-white rounded-full h-8 w-8 flex justify-center items-center hover:bg-slate-700"
+                                  onClick={() => mutate({ id })}
+                                >
+                                  <CheckIcon
+                                    className="h-6 w-6"
+                                    aria-hidden="true"
+                                  />
+                                </button>
                               </div>
                             </div>
-                          );
-                        }
-                      )}
-                    </Fragment>
-                  );
-                })}
-              {isFetchingNextPage ? <Placeholder /> : null}
-              <span className="invisible" ref={ref}>
-                intersection observer marker
-              </span>
-            </section>
-          </div>
+                          </div>
+                        );
+                      }
+                    )}
+                  </Fragment>
+                );
+              })}
+            {isFetchingNextPage ? <Placeholder /> : null}
+            <span className="invisible" ref={ref}>
+              intersection observer marker
+            </span>
+          </section>
         </div>
       </Layout>
     </>

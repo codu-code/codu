@@ -14,64 +14,110 @@ const CodeOfConduct: NextPage = () => {
                   Code Of Conduct
                 </h1>
 
-                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">Support us</h2>
-                <p className="mt-3 text-lg text-gray-500">
-                  We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for
-                  everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity
-                  and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste,
-                  color, religion, or sexual identity and orientation.
+                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+                  Support us
+                </h2>
+                <p className="mt-3 text-lg text-neutral-500">
+                  We as members, contributors, and leaders pledge to make
+                  participation in our community a harassment-free experience
+                  for everyone, regardless of age, body size, visible or
+                  invisible disability, ethnicity, sex characteristics, gender
+                  identity and expression, level of experience, education,
+                  socio-economic status, nationality, personal appearance, race,
+                  caste, color, religion, or sexual identity and orientation.
                 </p>
-                <p className="mt-3 text-lg text-gray-500">
-                  We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and healthy community.
+                <p className="mt-3 text-lg text-neutral-500">
+                  We pledge to act and interact in ways that contribute to an
+                  open, welcoming, diverse, inclusive, and healthy community.
                 </p>
 
-                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">Our Standards</h2>
-                <p className="mt-3 text-lg text-gray-500">
-                  Examples of behavior that contributes to a positive environment for our community include:
+                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+                  Our Standards
+                </h2>
+                <p className="mt-3 text-lg text-neutral-500">
+                  Examples of behavior that contributes to a positive
+                  environment for our community include:
                 </p>
-                <ul className="text-lg text-gray-500 list-disc mt-3 pl-8">
-                  <li className="my-4">Demonstrating empathy and kindness toward other people</li>
-                  <li className="my-4">Being respectful of differing opinions, viewpoints, and experiences</li>
-                  <li className="my-4">Giving and gracefully accepting constructive feedback</li>
+                <ul className="text-lg text-neutral-500 list-disc mt-3 pl-8">
                   <li className="my-4">
-                    Accepting responsibility and apologizing to those affected by our mistakes, and learning from the experience
+                    Demonstrating empathy and kindness toward other people
                   </li>
-                  <li className="my-4">Focusing on what is best not just for us as individuals, but for the overall community</li>
+                  <li className="my-4">
+                    Being respectful of differing opinions, viewpoints, and
+                    experiences
+                  </li>
+                  <li className="my-4">
+                    Giving and gracefully accepting constructive feedback
+                  </li>
+                  <li className="my-4">
+                    Accepting responsibility and apologizing to those affected
+                    by our mistakes, and learning from the experience
+                  </li>
+                  <li className="my-4">
+                    Focusing on what is best not just for us as individuals, but
+                    for the overall community
+                  </li>
                 </ul>
 
-                <p className="mt-3 text-lg text-gray-500">Examples of unacceptable behavior include:</p>
-                <ul className="text-lg text-gray-500 list-disc mt-3 pl-8">
-                  <li className="my-4">The use of sexualized language or imagery, and sexual attention or advances of any kind</li>
-                  <li className="my-4">Trolling, insulting or derogatory comments, and personal or political attacks</li>
+                <p className="mt-3 text-lg text-neutral-500">
+                  Examples of unacceptable behavior include:
+                </p>
+                <ul className="text-lg text-neutral-500 list-disc mt-3 pl-8">
+                  <li className="my-4">
+                    The use of sexualized language or imagery, and sexual
+                    attention or advances of any kind
+                  </li>
+                  <li className="my-4">
+                    Trolling, insulting or derogatory comments, and personal or
+                    political attacks
+                  </li>
                   <li className="my-4">Public or private harassment</li>
                   <li className="my-4">
-                    Publishing others’ private information, such as a physical or email address, without their explicit permission
+                    Publishing others’ private information, such as a physical
+                    or email address, without their explicit permission
                   </li>
-                  <li className="my-4">Other conduct which could reasonably be considered inappropriate in a professional setting</li>
+                  <li className="my-4">
+                    Other conduct which could reasonably be considered
+                    inappropriate in a professional setting
+                  </li>
                 </ul>
 
-                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">Enforcement Responsibilities</h2>
-                <p className="mt-3 text-lg text-gray-500">
-                  Project maintainers are responsible for clarifying and enforcing our standards of acceptable behavior and will take
-                  appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive,
+                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+                  Enforcement Responsibilities
+                </h2>
+                <p className="mt-3 text-lg text-neutral-500">
+                  Project maintainers are responsible for clarifying and
+                  enforcing our standards of acceptable behavior and will take
+                  appropriate and fair corrective action in response to any
+                  behavior that they deem inappropriate, threatening, offensive,
                   or harmful.
                 </p>
-                <p className="mt-3 text-lg text-gray-500">
-                  Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits,
-                  issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation
+                <p className="mt-3 text-lg text-neutral-500">
+                  Project maintainers have the right and responsibility to
+                  remove, edit, or reject comments, commits, code, wiki edits,
+                  issues, and other contributions that are not aligned to this
+                  Code of Conduct, and will communicate reasons for moderation
                   decisions when appropriate.
                 </p>
 
-                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">Scope</h2>
-                <p className="mt-3 text-lg text-gray-500">
-                  This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing
-                  the community in public spaces. Examples of representing our community include using an official e-mail address, posting
-                  via an official social media account, or acting as an appointed representative at an online or offline event.
+                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+                  Scope
+                </h2>
+                <p className="mt-3 text-lg text-neutral-500">
+                  This Code of Conduct applies within all community spaces, and
+                  also applies when an individual is officially representing the
+                  community in public spaces. Examples of representing our
+                  community include using an official e-mail address, posting
+                  via an official social media account, or acting as an
+                  appointed representative at an online or offline event.
                 </p>
 
-                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">Enforcement</h2>
-                <p className="mt-3 text-lg text-gray-500">
-                  Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team responsible for
+                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+                  Enforcement
+                </h2>
+                <p className="mt-3 text-lg text-neutral-500">
+                  Instances of abusive, harassing, or otherwise unacceptable
+                  behavior may be reported to the project team responsible for
                   enforcement at{" "}
                   <a
                     className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 text-1xl font-bold"
@@ -79,11 +125,14 @@ const CodeOfConduct: NextPage = () => {
                   >
                     hi@codu.co
                   </a>
-                  . All complaints will be reviewed and investigated promptly and fairly.
+                  . All complaints will be reviewed and investigated promptly
+                  and fairly.
                 </p>
 
-                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">Attribution</h2>
-                <p className="mt-3 text-lg text-gray-500">
+                <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+                  Attribution
+                </h2>
+                <p className="mt-3 text-lg text-neutral-500">
                   This Code of Conduct is adapted from the{" "}
                   <a
                     className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 text-1xl font-bold"
