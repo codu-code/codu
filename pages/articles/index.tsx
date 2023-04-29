@@ -83,7 +83,7 @@ const ArticlesPage = () => {
         <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
-        <div className="mx-4">
+        <div className="mx-2">
           <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
             <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
               {typeof tag === "string" ? (
