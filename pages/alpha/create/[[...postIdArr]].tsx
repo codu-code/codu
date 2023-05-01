@@ -13,8 +13,9 @@ import { ChevronUpIcon } from "@heroicons/react/solid";
 
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
-import Layout from "../../../components/Layout/Layout";
+import LayoutEditor from "../../../components/Layout/LayoutEditor";
 import { PromptDialog } from "../../../components/PromptService/PromptService";
+import EditorHints from "../../../components/EditorHints/EditorHints";
 
 import { trpc } from "../../../utils/trpc";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -23,6 +24,9 @@ import { useMarkdownHotkeys } from "../../../markdoc/editor/hotkeys/hotkeys.mark
 import { useMarkdownShortcuts } from "../../../markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "../../../markdoc/components";
 import { config } from "../../../markdoc/config";
+
+import IconEye from "../../../icons/icon-eye.svg";
+import IconEyeShut from "../../../icons/icon-eye-shut.svg";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -72,7 +76,6 @@ const Create: NextPage = () => {
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
-      toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -259,15 +262,15 @@ const Create: NextPage = () => {
   };
 
   return (
-    <Layout>
-      <Fragment>
+    <LayoutEditor>
+      <div className="bg-smoke">
         <PromptDialog
           shouldConfirmLeave={unsavedChanges}
           updateParent={handleOpenDialog}
         />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Transition.Root show={open} as={Fragment}>
-            <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-black">
+            <div className="fixed left-0 bottom-0 top-0 w-full h-screen bg-smoke">
               <button
                 type="button"
                 className="absolute right-8 top-8 underline cursor-pointer z-50"
@@ -337,7 +340,7 @@ const Create: NextPage = () => {
                           </button>
                         </div>
                       ))}
-                      <p className="mt-2 text-sm text-neutral-400">
+                      <p className="mt-2 text-sm text-gray-400">
                         Tag with up to 5 topics. This makes it easier for
                         readers to find and know what your story is about.
                       </p>
@@ -409,6 +412,7 @@ const Create: NextPage = () => {
                       </button>
                     </div>
                   </div>
+                  sadfasdf
                 </div>
               </div>
             </div>
@@ -438,44 +442,66 @@ const Create: NextPage = () => {
               <div className="absolute bg-black top-0 bottom-0 left-0 right-0 opacity-25 z-60" />
             </div>
           )}
-          <div className="bg-black">
+          <div className="editor-actions bg-black sticky z-20 top-0 flex justify-end items-center py-4 lg:py-6 px-4 sm:px-6 g:px-4">
+            <p className="mr-4">
+              {saveStatus === "loading" && (
+                <span className="text-gray-400 text-xs lg:text-sm">
+                  Saving...
+                </span>
+              )}
+              {saveStatus === "error" && savedTime && (
+                <span className="text-red-600 text-xs lg:text-sm">
+                  {`Error saving, last saved: ${savedTime.toString()}`}
+                </span>
+              )}
+              {saveStatus === "success" && savedTime && (
+                <span
+                  className="text-gray-400 text-xs lg:text-sm"
+                  title={savedTime.toString()}
+                >
+                  {`Saved`}
+                </span>
+              )}
+            </p>
+
+            <button
+              type="button"
+              title="Preview"
+              className="py-2 px-3 mr-4 inline-flex justify-center focus:outline-none"
+              onClick={() => setViewPreview((current) => !current)}
+            >
+              {viewPreview ? (
+                <IconEyeShut
+                  className="h-6 w-6 fill-slate-400"
+                  aria-hidden="true"
+                />
+              ) : (
+                <IconEye
+                  className="h-6 w-6 fill-slate-700"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+
+            <button
+              type="button"
+              disabled={isDisabled}
+              className="disabled:opacity-50 py-2 px-3 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm  inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none"
+              onClick={() => setOpen(true)}
+            >
+              {!data?.published && "Publish"}
+              {data?.published && "Save Changes"}
+            </button>
+          </div>
+          <div className="bg-smoke relative">
             <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
               {/* Left sidebar & main wrapper */}
               <div className="flex-1 min-w-0 xl:flex">
-                <div className="xl:flex-shrink-0 xl:w-64 ">
-                  <div className="h-full pl-4 pr-6 py-6 sm:pl-6 xl:pl-0  lg:px-4">
-                    {/* Start left column area */}
-                    <div className="h-full relative">
-                      <div className="bg-black text-neutral-800 border-2 border-white shadow-xl p-6">
-                        <h1 className="text-3xl tracking-tight font-extrabold text-white">
-                          {viewPreview ? "Previewing" : "Editing"} your post
-                        </h1>
-                        <p className="mt-1 text-neutral-400">
-                          The body of your content can be edited using markdown.
-                          Your post remains private until you
-                          &#8220;publish&#8221; the article.
-                        </p>
-                        <div className="flex">
-                          <button
-                            type="button"
-                            className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
-                            onClick={() =>
-                              setViewPreview((current) => !current)
-                            }
-                          >
-                            {viewPreview ? "Back to editing" : "View preview"}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    {/* End left column area */}
-                  </div>
-                </div>
                 <div className="lg:min-w-0 lg:flex-1">
                   <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
                     {/* Start main area*/}
                     <div className="relative h-full">
-                      <div className="bg-black text-white border-2 border-white shadow-xl">
+                      <div className="text-white border-white shadow-xl">
                         {viewPreview ? (
                           <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
                             <h2 className="pt-4 sm:my-5 text-3xl font-bold leading-tight">
@@ -498,10 +524,10 @@ const Create: NextPage = () => {
                             </article>
                           </section>
                         ) : (
-                          <div className="py-6 px-4 sm:p-6 lg:pb-8">
+                          <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
                             <input
                               autoFocus
-                              className="border-none text-2xl leading-5 outline-none bg-black focus:bg-black"
+                              className="bg-smoke border-none text-2xl leading-5 outline-none focus:ring-0"
                               placeholder="Article title"
                               type="text"
                               aria-label="Post Content"
@@ -510,43 +536,12 @@ const Create: NextPage = () => {
 
                             <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
-                              className="border-none text-lg outline-none shadow-none mb-8 bg-black focus:bg-black"
+                              className="bg-smoke border-none focus:ring-0 text-lg outline-none shadow-none mb-8"
                               minRows={25}
                               {...register("body")}
                               inputRef={textareaRef}
                             />
-
-                            <div className="flex justify-between items-center">
-                              <>
-                                {saveStatus === "loading" && (
-                                  <p>Auto-saving...</p>
-                                )}
-                                {saveStatus === "error" && savedTime && (
-                                  <p className="text-red-600 text-xs lg:text-sm">
-                                    {`Error saving, last saved: ${savedTime.toString()}`}
-                                  </p>
-                                )}
-                                {saveStatus === "success" && savedTime && (
-                                  <p className="text-neutral-400 text-xs lg:text-sm">
-                                    {`Saved: ${savedTime.toString()}`}
-                                  </p>
-                                )}
-                              </>
-                              <div />
-
-                              <div className="flex">
-                                <button
-                                  type="button"
-                                  disabled={isDisabled}
-                                  className="disabled:opacity-50 ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                                  onClick={() => setOpen(true)}
-                                >
-                                  {!data?.published && "Publish"}
-                                  {data?.published && "Save Changes"}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                          </section>
                         )}
                       </div>
                     </div>
@@ -554,45 +549,12 @@ const Create: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
-                <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
-                  {/* Start right column area */}
-                  <div className="bg-black text-neutral-800 border-2 border-white shadow-xl p-6">
-                    <h3 className="text-xl tracking-tight font-semibold text-white">
-                      How to use the editor
-                    </h3>
-                    <p className="mt-1 text-neutral-400">
-                      You can edit and format the main content of your article
-                      using Markdown. If you have never used Markdown, you can
-                      check out{" "}
-                      <a
-                        href="https://www.markdownguide.org/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="fancy-link"
-                      >
-                        this
-                      </a>{" "}
-                      free guide on{" "}
-                      <a
-                        href="https://www.markdownguide.org/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="fancy-link"
-                      >
-                        markdownguide
-                      </a>
-                      .
-                    </p>
-                  </div>
-                  {/* End right column area */}
-                </div>
-              </div>
             </div>
           </div>
         </form>
-      </Fragment>
-    </Layout>
+        <EditorHints />
+      </div>
+    </LayoutEditor>
   );
 };
 
