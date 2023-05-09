@@ -177,9 +177,9 @@ const ArticlesPage = () => {
               </section>
             </div>
             <section className="col-span-4 lg:block hidden">
-              <div className="announcement-wrapper">
+              <div className="cursor-pointer my-4">
                 <Image
-                  className="announcement-image"
+                  className="w-full"
                   src={writingChallenge}
                   alt={"Writing Challenge Banner"}
                   onClick={() =>
