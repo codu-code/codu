@@ -8,6 +8,8 @@ import { trpc } from "../../utils/trpc";
 import { useInView } from "react-intersection-observer";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
+import writingChallenge from "../../public/images/announcements/writingChallenge.png";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -175,6 +177,18 @@ const ArticlesPage = () => {
               </section>
             </div>
             <section className="col-span-4 lg:block hidden">
+              <div className="announcement-wrapper">
+                <Image
+                  className="announcement-image"
+                  src={writingChallenge}
+                  alt={"Writing Challenge Banner"}
+                  onClick={() =>
+                    router.push(
+                      "/articles/join-our-6-week-writing-challenge-quohtgqb"
+                    )
+                  }
+                />
+              </div>
               <h3 className="text-2xl leading-6 font-semibold tracking-wide mb-4 mt-4">
                 Recommended topics
               </h3>
