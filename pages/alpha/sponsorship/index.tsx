@@ -8,8 +8,8 @@ const Sponsorship: NextPage = () => {
   return (
     <Layout>
       <div>
-        <header className="bg-white text-black text-center pt-10 pb-24 px-4">
-          <h1 className="font-extrabold text-3xl">
+        <header className="bg-white text-black text-center pt-10 pb-24 px-4 sm:pb-36 sm:text-left sm:px-10 md:pb-44 md:px-20 lg:px-36 lg:pt-14">
+          <h1 className="font-extrabold text-3xl md:text-4xl md:mb-2 lg:text-5xl">
             Become a{" "}
             <b className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 font-extrabold">
               Sponsor
@@ -19,59 +19,59 @@ const Sponsorship: NextPage = () => {
             Reach thousands of developers every mounth!
           </h3>
         </header>
-        <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8">
+        <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
           <div className="w-32">
             <Image
               src="/images/sponsors/pic1.png"
               alt=""
-              width={150}
-              height={150}
-              className="max-w-none"
+              width={250}
+              height={250}
+              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
           <div className="w-32">
             <Image
               src="/images/sponsors/pic2.png"
               alt=""
-              width={150}
-              height={150}
-              className="max-w-none"
+              width={250}
+              height={250}
+              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
           <div className="w-32">
             <Image
               src="/images/sponsors/pic3.png"
               alt=""
-              width={150}
-              height={150}
-              className="max-w-none"
+              width={250}
+              height={250}
+              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
           <div className="w-32">
             <Image
               src="/images/sponsors/pic4.png"
               alt=""
-              width={150}
-              height={150}
-              className="max-w-none"
+              width={250}
+              height={250}
+              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
           <div className="w-32">
             <Image
               src="/images/sponsors/pic5.png"
               alt=""
-              width={150}
-              height={150}
-              className="max-w-none"
+              width={250}
+              height={250}
+              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
         </section>
-        <main className="bg-black px-4 pb-20 flex flex-col lg:flex-row lg:items-center">
-          <div className="flex flex-col gap-4">
-            <h2 className="text-xl font-bold">
+        <main className="bg-black px-4 sm:px-10 pb-20 flex flex-col lg:flex-row lg:items-center sm:pt-8 md:px-20 lg:pt-2 lg:pb-40 lg:px-36 lg:justify-between lg:gap-16">
+          <div className="flex flex-col gap-4 max-w-lg">
+            <h2 className="text-xl sm:text-2xl font-bold">
               Trusted by brands both large and small
             </h2>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 text-md sm:text-lg">
               <p>
                 Codú aims to create one of the largest coding communities
                 globally. Your funds go directly towards building the community
@@ -99,7 +99,7 @@ const Sponsorship: NextPage = () => {
                 className="w-full"
               />
             </div>
-            <div className="max-w-[200px] text-center flex">
+            <div className="max-w-[200px]">
               <Image
                 src="/images/sponsors/learnupon.png"
                 alt=""
@@ -134,17 +134,19 @@ const Sponsorship: NextPage = () => {
             </div>
           </div>
         </main>
-        <div className="bg-white py-4 text-center w-full flex flex-col items-center gap-4">
-          <h2 className="text-black font-extrabold text-lg">
-            Let us help you amplify your brand.
-          </h2>
-          <Link
-            className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-            href=""
-          >
-            Find out more
-          </Link>
-        </div>
+        <section className="sm:px-10 md:px-20 lg:px-36">
+          <div className="bg-white py-4 text-center w-full flex flex-col items-center gap-4 sm:rounded-lg lg:justify-between lg:py-8">
+            <h2 className="text-black font-extrabold text-lg lg:text-2xl">
+              Let us help you amplify your brand.
+            </h2>
+            <Link
+              className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+              href=""
+            >
+              Find out more
+            </Link>
+          </div>
+        </section>
       </div>
     </Layout>
   );
