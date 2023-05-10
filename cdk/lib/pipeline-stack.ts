@@ -24,24 +24,30 @@ export class PipelineStack extends cdk.Stack {
       synth: synthAction,
     });
 
-    const getConfig = (env: "dev" | "prod") => {
-      const accountId = ssm.StringParameter.valueFromLookup(
-        this,
-        `/env/${env}/accountId`
-      );
+    const devAccountId = ssm.StringParameter.valueFromLookup(
+      this,
+      `/env/dev/accountId`
+    );
 
-      return {
-        env: {
-          account: accountId,
-          region: "eu-west-1",
-        },
-      };
-    };
+    const prodAccountId = ssm.StringParameter.valueFromLookup(
+      this,
+      `/env/prod/accountId`
+    );
 
-    const dev = new AppStage(this, "Dev", getConfig("dev"));
+    const defaultRegion = "eu-west-1";
+
+    const dev = new AppStage(this, "Dev", {
+      env: {
+        account: devAccountId,
+        region: defaultRegion,
+      },
+    });
 
     const prod = new AppStage(this, "Prod", {
-      ...getConfig("prod"),
+      env: {
+        account: prodAccountId,
+        region: defaultRegion,
+      },
       production: true,
     });
 

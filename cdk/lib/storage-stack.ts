@@ -22,6 +22,7 @@ export class StorageStack extends cdk.Stack {
 
     this.vpc = new ec2.Vpc(this, "StorageStackVpc", {
       natGateways: 1,
+      maxAzs: 1,
     });
 
     const { vpc } = this;
