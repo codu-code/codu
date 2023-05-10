@@ -182,7 +182,7 @@ const ArticlesPage = () => {
                   <Image
                     className="w-full"
                     src={challenge}
-                    alt={"Writing Challenge Banner"}
+                    alt={`"Codú Writing Challenge" text on white background`}
                   />
                 </Link>
                 <div className="tracking-wide text-sm my-3 break-words px-4 py-2">
