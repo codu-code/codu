@@ -20,6 +20,10 @@ export class StorageStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
 
+    new ec2.Vpc(this, "StorageStackVpc", {
+      natGateways: 1,
+    });
+
     this.vpc = new ec2.Vpc(this, "StorageVpc", {
       natGateways: 1,
       maxAzs: 1,
