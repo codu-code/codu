@@ -9,7 +9,7 @@ import { useInView } from "react-intersection-observer";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
-import writingChallenge from "../../public/images/announcements/writingChallenge.png";
+import challenge from "../../public/images/announcements/challenge.png";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -177,17 +177,27 @@ const ArticlesPage = () => {
               </section>
             </div>
             <section className="col-span-4 lg:block hidden">
-              <div className="cursor-pointer my-4">
-                <Image
-                  className="w-full"
-                  src={writingChallenge}
-                  alt={"Writing Challenge Banner"}
-                  onClick={() =>
-                    router.push(
-                      "/articles/join-our-6-week-writing-challenge-quohtgqb"
-                    )
-                  }
-                />
+              <div className="mt-4 mb-8 border border-neutral-600 bg-neutral-900">
+                <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
+                  <Image
+                    className="w-full"
+                    src={challenge}
+                    alt={"Writing Challenge Banner"}
+                  />
+                </Link>
+                <div className="tracking-wide text-sm my-3 break-words px-4 py-2">
+                  <Link
+                    className="block underline text-lg leading-6 font-semibold"
+                    href="/articles/join-our-6-week-writing-challenge-quohtgqb"
+                  >
+                    Join the Codú writing challenge!
+                  </Link>
+                  <p className="my-3">
+                    Join our first Codú challenge! Write 6 articles in 6 weeks
+                    and earn a swag bag.
+                  </p>
+                  <p>Click the link to find out more.</p>
+                </div>
               </div>
               <h3 className="text-2xl leading-6 font-semibold tracking-wide mb-4 mt-4">
                 Recommended topics
