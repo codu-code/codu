@@ -119,7 +119,7 @@ const Create: NextPage = () => {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || removeMarkdown(data.body.substring(0, 155), {}),
+      excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
     };
     return formData;
   };
