@@ -93,10 +93,7 @@ const ArticlePage: NextPage = ({
   };
 
   const handleCopyToClipboard = (e: React.FormEvent) => {
-    if (
-      !optionsData[2].href.includes("Share To Twitter") ||
-      !optionsData[2].href.includes("Share To Linkedin")
-    ) {
+    if (optionsData[2].label.includes("Copy to clipboard")) {
       e.preventDefault();
       copy(location.href);
       setCopied(true);
