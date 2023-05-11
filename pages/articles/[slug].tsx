@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import Markdoc from "@markdoc/markdoc";
 import type {
   NextPage,
@@ -13,6 +13,7 @@ import {
   BookmarkIcon,
   DotsHorizontalIcon,
 } from "@heroicons/react/outline";
+import copy from "copy-to-clipboard";
 import prisma from "../../server/db/client";
 import Layout from "../../components/Layout/Layout";
 import BioBar from "../../components/BioBar/BioBar";
@@ -39,6 +40,20 @@ const ArticlePage: NextPage = ({
   post,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session } = useSession();
+  const [copied, setCopied] = React.useState(false);
+  const [copyToClipboard, setCopyToClipboard] = useState({
+    label: "",
+    href: "",
+  });
+
+  useEffect(() => {
+    setCopyToClipboard({
+      label: copied ? "Copied!" : "Copy to clipboard",
+      href: location.href,
+    });
+    const to = setTimeout(setCopied, 1000, false);
+    return () => clearTimeout(to);
+  }, [copied]);
 
   if (!slug) return null;
 
@@ -77,6 +92,14 @@ const ArticlePage: NextPage = ({
     }
   };
 
+  const handleCopyToClipboard = (e: React.FormEvent) => {
+    if (optionsData[2].label.includes("Copy to clipboard")) {
+      e.preventDefault();
+      copy(location.href);
+      setCopied(true);
+    }
+  };
+
   if (!post) return null;
 
   const optionsData = createMenuData(
@@ -84,6 +107,8 @@ const ArticlePage: NextPage = ({
     post.user.name || "",
     `https://${host}/articles/${post.slug}`
   );
+
+  optionsData.push(copyToClipboard);
 
   const ast = Markdoc.parse(post.body);
   const content = Markdoc.transform(ast, config);
@@ -186,6 +211,7 @@ const ArticlePage: NextPage = ({
                         target="blank"
                         rel="noopener noreferrer"
                         href={encodeURI(item.href)}
+                        onClick={handleCopyToClipboard}
                       >
                         {item.label}
                       </a>
