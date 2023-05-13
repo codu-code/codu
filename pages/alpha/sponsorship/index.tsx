@@ -3,8 +3,22 @@ import type { NextPage } from "next";
 import Layout from "../../../components/Layout/Layout";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const Sponsorship: NextPage = () => {
+  const [scroll, setScroll] = useState(0);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScroll(window.scrollY);
+    }
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <Layout>
       <div>
@@ -20,7 +34,16 @@ const Sponsorship: NextPage = () => {
           </h3>
         </header>
         <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
-          <div className="w-32">
+          <div
+            className={`w-32`}
+            style={{
+              transform: `${
+                scroll < 200
+                  ? `rotate(${(scroll / 200) * 6.56}deg)`
+                  : "rotate(6.56deg)"
+              }`,
+            }}
+          >
             <Image
               src="/images/sponsors/pic1.png"
               alt=""
@@ -29,7 +52,16 @@ const Sponsorship: NextPage = () => {
               className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
-          <div className="w-32">
+          <div
+            className="w-32"
+            style={{
+              transform: `${
+                scroll < 200
+                  ? `rotate(${-(scroll / 200) * 3.57}deg)`
+                  : "rotate(-3.57deg)"
+              }`,
+            }}
+          >
             <Image
               src="/images/sponsors/pic2.png"
               alt=""
@@ -38,7 +70,16 @@ const Sponsorship: NextPage = () => {
               className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
-          <div className="w-32">
+          <div
+            className="w-32"
+            style={{
+              transform: `${
+                scroll < 200
+                  ? `rotate(${(scroll / 200) * 4.68}deg)`
+                  : "rotate(4.68deg)"
+              }`,
+            }}
+          >
             <Image
               src="/images/sponsors/pic3.png"
               alt=""
@@ -47,7 +88,16 @@ const Sponsorship: NextPage = () => {
               className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
-          <div className="w-32">
+          <div
+            className="w-32"
+            style={{
+              transform: `${
+                scroll < 200
+                  ? `rotate(-${(scroll / 200) * 4.35}deg)`
+                  : "rotate(-4.35deg)"
+              }`,
+            }}
+          >
             <Image
               src="/images/sponsors/pic4.png"
               alt=""
@@ -56,7 +106,16 @@ const Sponsorship: NextPage = () => {
               className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
             />
           </div>
-          <div className="w-32">
+          <div
+            className="w-32"
+            style={{
+              transform: `${
+                scroll < 200
+                  ? `rotate(${(scroll / 200) * 6.56}deg)`
+                  : "rotate(6.56deg)"
+              }`,
+            }}
+          >
             <Image
               src="/images/sponsors/pic5.png"
               alt=""
@@ -67,7 +126,7 @@ const Sponsorship: NextPage = () => {
           </div>
         </section>
         <main className="bg-black px-4 sm:px-10 pb-20 flex flex-col lg:flex-row lg:items-center sm:pt-8 md:px-20 lg:pt-2 lg:pb-40 lg:px-36 lg:justify-between lg:gap-16">
-          <div className="flex flex-col gap-4 max-w-lg">
+          <div className="flex flex-col gap-4 max-w-2xl">
             <h2 className="text-xl sm:text-2xl font-bold">
               Trusted by brands both large and small
             </h2>
