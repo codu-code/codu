@@ -16,6 +16,7 @@ import Layout from "../../components/Layout/Layout";
 import { PromptDialog } from "../../components/PromptService/PromptService";
 
 import { trpc } from "../../utils/trpc";
+import { removeMarkdown } from "../../utils/removeMarkdown";
 import { useDebounce } from "../../hooks/useDebounce";
 import Markdoc from "@markdoc/markdoc";
 import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
@@ -118,7 +119,7 @@ const Create: NextPage = () => {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || undefined,
+      excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
     };
     return formData;
   };
