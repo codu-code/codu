@@ -5,6 +5,40 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+interface Image {
+  rotate: number;
+  src: string;
+  alt: string;
+}
+
+const images: Image[] = [
+  {
+    src: "/images/sponsors/pic1.png",
+    alt: "Audience watching a presentation",
+    rotate: 6.56,
+  },
+  {
+    src: "/images/sponsors/pic2.png",
+    alt: "Audience watching a presentation with the name 'Codú' on the screen",
+    rotate: -3.57,
+  },
+  {
+    src: "/images/sponsors/pic3.png",
+    alt: "Six people from Codú smiling at the camera",
+    rotate: 4.58,
+  },
+  {
+    src: "/images/sponsors/pic4.png",
+    alt: "Audience watching a presentation",
+    rotate: -4.35,
+  },
+  {
+    src: "/images/sponsors/pic5.png",
+    alt: "Audience smiling at the camera",
+    rotate: 6.56,
+  },
+];
+
 const Sponsorship: NextPage = () => {
   const [scroll, setScroll] = useState(0);
 
@@ -34,96 +68,27 @@ const Sponsorship: NextPage = () => {
           </h3>
         </header>
         <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
-          <div
-            className={`w-32`}
-            style={{
-              transform: `${
-                scroll < 200
-                  ? `rotate(${(scroll / 200) * 6.56}deg)`
-                  : "rotate(6.56deg)"
-              }`,
-            }}
-          >
-            <Image
-              src="/images/sponsors/pic1.png"
-              alt=""
-              width={250}
-              height={250}
-              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
-            />
-          </div>
-          <div
-            className="w-32"
-            style={{
-              transform: `${
-                scroll < 200
-                  ? `rotate(${-(scroll / 200) * 3.57}deg)`
-                  : "rotate(-3.57deg)"
-              }`,
-            }}
-          >
-            <Image
-              src="/images/sponsors/pic2.png"
-              alt=""
-              width={250}
-              height={250}
-              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
-            />
-          </div>
-          <div
-            className="w-32"
-            style={{
-              transform: `${
-                scroll < 200
-                  ? `rotate(${(scroll / 200) * 4.68}deg)`
-                  : "rotate(4.68deg)"
-              }`,
-            }}
-          >
-            <Image
-              src="/images/sponsors/pic3.png"
-              alt=""
-              width={250}
-              height={250}
-              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
-            />
-          </div>
-          <div
-            className="w-32"
-            style={{
-              transform: `${
-                scroll < 200
-                  ? `rotate(-${(scroll / 200) * 4.35}deg)`
-                  : "rotate(-4.35deg)"
-              }`,
-            }}
-          >
-            <Image
-              src="/images/sponsors/pic4.png"
-              alt=""
-              width={250}
-              height={250}
-              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
-            />
-          </div>
-          <div
-            className="w-32"
-            style={{
-              transform: `${
-                scroll < 200
-                  ? `rotate(${(scroll / 200) * 6.56}deg)`
-                  : "rotate(6.56deg)"
-              }`,
-            }}
-          >
-            <Image
-              src="/images/sponsors/pic5.png"
-              alt=""
-              width={250}
-              height={250}
-              className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
-            />
-          </div>
+          {images.map((image, id) => (
+            <div
+              key={id}
+              className={`w-32`}
+              style={{
+                transform: `${
+                  scroll < 200
+                    ? `rotate(${(scroll / 200) * image.rotate}deg)`
+                    : `rotate(${image.rotate}deg)`
+                }`,
+              }}
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={250}
+                height={250}
+                className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
+              />
+            </div>
+          ))}
         </section>
         <main className="bg-black px-4 sm:px-10 pb-20 flex flex-col lg:flex-row lg:items-center sm:pt-8 md:px-20 lg:pt-2 lg:pb-40 lg:px-36 lg:justify-between lg:gap-16">
           <div className="flex flex-col gap-4 max-w-2xl">
