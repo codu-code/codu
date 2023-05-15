@@ -264,6 +264,9 @@ const Create: NextPage = () => {
         <PromptDialog
           shouldConfirmLeave={unsavedChanges}
           updateParent={handleOpenDialog}
+          title="Unsaved Changes"
+          subTitle="You have unsaved changes."
+          content="Changes that you have made will be lost."
         />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Transition.Root show={open} as={Fragment}>
