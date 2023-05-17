@@ -117,6 +117,7 @@ const ArticlePage: NextPage = ({
     <>
       <Head>
         <title>{post.title}</title>
+        {post.canonicalUrl && <link rel="canonical" href={post.canonicalUrl} />}
         <meta name="author" content={post.user.name}></meta>
         <meta key="og:title" property="og:title" content={post.title} />
         <meta
