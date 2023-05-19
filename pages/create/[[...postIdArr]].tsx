@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import CustomTextareaAutosize from "../../components/CustomTextareAutosize/CustomTextareaAutosize";
 import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
@@ -24,6 +24,9 @@ import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc
 import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
+import {unified} from 'unified';
+import markdown from 'remark-parse';
+import slateTransformer from 'remark-slate';
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -45,12 +48,15 @@ const Create: NextPage = () => {
   useMarkdownHotkeys(textareaRef);
   useMarkdownShortcuts(textareaRef);
 
+ 
+
   const {
     handleSubmit,
     register,
     watch,
     reset,
     getValues,
+    control,
     formState: { isDirty },
   } = useForm<SavePostInput>({
     mode: "onSubmit",
@@ -135,6 +141,7 @@ const Create: NextPage = () => {
     }
     setUnsavedChanges(false);
   };
+
 
   const hasLoadingState =
     publishStatus === "loading" ||
@@ -258,6 +265,13 @@ const Create: NextPage = () => {
         setUnsavedChanges(true);
     }
   };
+
+  const slateInitialValue = unified()
+ .use(markdown)
+ .use(slateTransformer)
+ .processSync(body).result;
+
+ console.log(slateInitialValue)
 
   return (
     <Layout>
@@ -510,19 +524,24 @@ const Create: NextPage = () => {
                               {...register("title")}
                             />
 
-                            <CustomTextareaAutosize
+                            {/* <CustomTextareaAutosize
                               placeholder="Enter your content here 💖"
                               className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
                               minRows={25}
                               {...register("body")}
                               inputRef={textareaRef}
-                            />
-                            {data ? (
-    <SlateEditor body={data.body} />
-  ) : (
-    <p>Loading editor...</p>
-  )}
-
+                            /> */}
+                            <Controller
+                              name="body"
+                              control={control}
+                              render={({ field }) => {
+                                return slateInitialValue && slateInitialValue.length > 0 ? (
+                                  <SlateEditor {...field} initialValue={slateInitialValue} />
+                                ) : (
+                                  <p>Loading editor...</p>
+                                );
+                              }}
+                              />
                             <div className="flex justify-between items-center">
                               <>
                                 {saveStatus === "loading" && (

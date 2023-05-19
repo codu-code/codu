@@ -56,6 +56,7 @@
     "react-textarea-autosize": "^8.3.4",
     "remark-parse": "^10.0.1",
     "remark-slate": "^1.8.6",
+    "remark-stringify": "^10.0.3",
     "satori": "^0.4.3",
     "sharp": "^0.31.3",
     "slate": "^0.94.0",
