@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react'
+import TextareaAutosize, { TextareaAutosizeProps } from 'react-textarea-autosize';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react'
 import {
   Editor,
@@ -10,7 +11,7 @@ import {
 } from 'slate'
 import { withHistory } from 'slate-history'
 import { serialize } from 'remark-slate';
-
+import styles from './SlateEditor.module.css'
 import { Button, Icon, Menu, Portal } from './components'
 
 const SlateEditor = ({initialValue, onChange: _onChange}) => {
@@ -28,6 +29,7 @@ const SlateEditor = ({initialValue, onChange: _onChange}) => {
     <Slate editor={editor} value={initialValue} onChange={handleChange}>
       <HoveringToolbar />
       <Editable
+        className="text-xl leading-5 bg-neutral-900 focus:bg-black mt-4 focus:ring-2 focus:ring-gray-300 py-3 px-2 min-h-[40rem]"
         renderLeaf={props => <Leaf {...props} />}
         placeholder="Enter some text..."
         onDOMBeforeInput={(event: InputEvent) => {
