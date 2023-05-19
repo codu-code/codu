@@ -1,99 +1,46 @@
-import React, { useCallback, useMemo, useEffect, useState } from 'react'
-import isHotkey from 'is-hotkey'
-import { Editable, withReact, useSlate, Slate } from 'slate-react'
+import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react'
+import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react'
 import {
   Editor,
   Transforms,
+  Text,
   createEditor,
   Descendant,
-  Element as SlateElement,
+  Range,
 } from 'slate'
 import { withHistory } from 'slate-history'
-import {unified} from 'unified';
-import markdown from 'remark-parse';
-import slate from 'remark-slate';
-import { promisify } from 'util';
+import { serialize } from 'remark-slate';
 
-import { Button, Icon, Toolbar } from './components'
+import { Button, Icon, Menu, Portal } from './components'
 
-const HOTKEYS = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-  'mod+`': 'code',
-}
-
-const LIST_TYPES = ['numbered-list', 'bulleted-list']
-const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
-
-const SlateEditor = ({ body }) => {
-  console.log(body)
-  const processMarkdown = (markdownString) => {
-  const processor = unified().use(markdown).use(slate);
-
-  try {
-    const file = processor.processSync(markdownString);
-    const slateObject = file.result;
-    return slateObject;
-  } catch (err) {
-    console.error(err);
-    return [{ type: 'paragraph', children: [{ text: '' }] }];
-  }
-};
-
-  // const [value, setValue] = useState([{ type: 'paragraph', children: [{ text: '' }] }]);
+const SlateEditor = ({initialValue, onChange: _onChange}) => {
+  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
+  const [value, setValue] = useState(initialValue);
   
-  // useEffect(() => {
-  //   if (body) {
-  //     processMarkdown(body).then((slateObject) => setValue(slateObject));
-  //   }
-  // }, [body]);
+  const handleChange = useCallback((nextValue) => {
+    setValue(nextValue);
+    // serialize slate state to a markdown string
+    _onChange(nextValue.map((v) => serialize(v)).join(''));
+  }, [_onChange]);
 
-  const renderElement = useCallback(props => <Element {...props} />, []);
-  const renderLeaf = useCallback(props => <Leaf {...props} />, []);
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-
-  const memoizedValue = useMemo(() => {
-    if (body) {
-      return processMarkdown(body);
-    } else {
-      return [{ type: 'paragraph', children: [{ text: '' }] }];
-    }
-  }, [body]);
-  
 
   return (
-    <Slate editor={editor} value={memoizedValue}>
-
-      <Toolbar>
-        <MarkButton format="bold" icon="format_bold" />
-        <MarkButton format="italic" icon="format_italic" />
-        <MarkButton format="underline" icon="format_underlined" />
-        <MarkButton format="code" icon="code" />
-        <BlockButton format="heading-one" icon="looks_one" />
-        <BlockButton format="heading-two" icon="looks_two" />
-        <BlockButton format="block-quote" icon="format_quote" />
-        <BlockButton format="numbered-list" icon="format_list_numbered" />
-        <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-        <BlockButton format="left" icon="format_align_left" />
-        <BlockButton format="center" icon="format_align_center" />
-        <BlockButton format="right" icon="format_align_right" />
-        <BlockButton format="justify" icon="format_align_justify" />
-      </Toolbar>
+    <Slate editor={editor} value={initialValue} onChange={handleChange}>
+      <HoveringToolbar />
       <Editable
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        // placeholder={data.body}
-        // placeholder="Enter your content here 💖"
-        spellCheck
-        autoFocus
-        onKeyDown={event => {
-          for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, event as any)) {
+        renderLeaf={props => <Leaf {...props} />}
+        placeholder="Enter some text..."
+        onDOMBeforeInput={(event: InputEvent) => {
+          switch (event.inputType) {
+            case 'formatBold':
               event.preventDefault()
-              const mark = HOTKEYS[hotkey]
-              toggleMark(editor, mark)
-            }
+              return toggleFormat(editor, 'bold')
+            case 'formatItalic':
+              event.preventDefault()
+              return toggleFormat(editor, 'italic')
+            case 'formatUnderline':
+              event.preventDefault()
+              return toggleFormat(editor, 'underlined')
           }
         }}
       />
@@ -101,118 +48,21 @@ const SlateEditor = ({ body }) => {
   )
 }
 
-const toggleBlock = (editor, format) => {
-  const isActive = isBlockActive(
+const toggleFormat = (editor, format) => {
+  const isActive = isFormatActive(editor, format)
+  Transforms.setNodes(
     editor,
-    format,
-    TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
+    { [format]: isActive ? null : true },
+    { match: Text.isText, split: true }
   )
-  const isList = LIST_TYPES.includes(format)
+}
 
-  Transforms.unwrapNodes(editor, {
-    match: n =>
-      !Editor.isEditor(n) &&
-      SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type) &&
-      !TEXT_ALIGN_TYPES.includes(format),
-    split: true,
+const isFormatActive = (editor, format) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => n[format] === true,
+    mode: 'all',
   })
-  let newProperties: Partial<SlateElement>
-  if (TEXT_ALIGN_TYPES.includes(format)) {
-    newProperties = {
-      align: isActive ? undefined : format,
-    }
-  } else {
-    newProperties = {
-      type: isActive ? 'paragraph' : isList ? 'list-item' : format,
-    }
-  }
-  Transforms.setNodes<SlateElement>(editor, newProperties)
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] }
-    Transforms.wrapNodes(editor, block)
-  }
-}
-
-const toggleMark = (editor, format) => {
-  const isActive = isMarkActive(editor, format)
-
-  if (isActive) {
-    Editor.removeMark(editor, format)
-  } else {
-    Editor.addMark(editor, format, true)
-  }
-}
-
-const isBlockActive = (editor, format, blockType = 'type') => {
-  const { selection } = editor
-  if (!selection) return false
-
-  const [match] = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: n =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        n[blockType] === format,
-    })
-  )
-
   return !!match
-}
-
-const isMarkActive = (editor, format) => {
-  const marks = Editor.marks(editor)
-  return marks ? marks[format] === true : false
-}
-
-const Element = ({ attributes, children, element }) => {
-  const style = { textAlign: element.align }
-  switch (element.type) {
-    case 'block-quote':
-      return (
-        <blockquote style={style} {...attributes}>
-          {children}
-        </blockquote>
-      )
-    case 'bulleted-list':
-      return (
-        <ul style={style} {...attributes}>
-          {children}
-        </ul>
-      )
-    case 'heading-one':
-      return (
-        <h1 style={style} {...attributes}>
-          {children}
-        </h1>
-      )
-    case 'heading-two':
-      return (
-        <h2 style={style} {...attributes}>
-          {children}
-        </h2>
-      )
-    case 'list-item':
-      return (
-        <li style={style} {...attributes}>
-          {children}
-        </li>
-      )
-    case 'numbered-list':
-      return (
-        <ol style={style} {...attributes}>
-          {children}
-        </ol>
-      )
-    default:
-      return (
-        <p style={style} {...attributes}>
-          {children}
-        </p>
-      )
-  }
 }
 
 const Leaf = ({ attributes, children, leaf }) => {
@@ -220,61 +70,80 @@ const Leaf = ({ attributes, children, leaf }) => {
     children = <strong>{children}</strong>
   }
 
-  if (leaf.code) {
-    children = <code>{children}</code>
-  }
-
   if (leaf.italic) {
     children = <em>{children}</em>
   }
 
-  if (leaf.underline) {
+  if (leaf.underlined) {
     children = <u>{children}</u>
   }
 
   return <span {...attributes}>{children}</span>
 }
 
-const BlockButton = ({ format, icon }) => {
+const HoveringToolbar = () => {
+  const ref = useRef<HTMLDivElement | null>()
+  const editor = useSlate()
+  const inFocus = useFocused()
+
+  useEffect(() => {
+    const el = ref.current
+    const { selection } = editor
+
+    if (!el) {
+      return
+    }
+
+    if (
+      !selection ||
+      !inFocus ||
+      Range.isCollapsed(selection) ||
+      Editor.string(editor, selection) === ''
+    ) {
+      el.removeAttribute('style')
+      return
+    }
+
+    const domSelection = window.getSelection()
+    const domRange = domSelection.getRangeAt(0)
+    const rect = domRange.getBoundingClientRect()
+    el.style.opacity = '1'
+    el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`
+    el.style.left = `${rect.left +
+      window.pageXOffset -
+      el.offsetWidth / 2 +
+      rect.width / 2}px`
+  })
+
+  return (
+    <Portal>
+      <Menu
+  ref={ref}
+  className="p-2 absolute top-0 left-0 mt-[-6px] opacity-0 bg-black rounded transition-opacity duration-700 z-10"
+  onMouseDown={e => {
+    // prevent toolbar from taking focus away from editor
+    e.preventDefault()
+  }}
+>
+  <FormatButton format="bold" icon="format_bold" />
+  <FormatButton format="italic" icon="format_italic" />
+  <FormatButton format="underlined" icon="format_underlined" />
+</Menu>
+    </Portal>
+  )
+}
+
+const FormatButton = ({ format, icon }) => {
   const editor = useSlate()
   return (
     <Button
-      active={isBlockActive(
-        editor,
-        format,
-        TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
-      )}
-      onMouseDown={event => {
-        event.preventDefault()
-        toggleBlock(editor, format)
-      }}
+      reversed
+      active={isFormatActive(editor, format)}
+      onClick={() => toggleFormat(editor, format)}
     >
       <Icon>{icon}</Icon>
     </Button>
   )
 }
-
-const MarkButton = ({ format, icon }) => {
-  const editor = useSlate()
-  return (
-    <Button
-      active={isMarkActive(editor, format)}
-      onMouseDown={event => {
-        event.preventDefault()
-        toggleMark(editor, format)
-      }}
-    >
-      <Icon>{icon}</Icon>
-    </Button>
-  )
-}
-
-// const initialValue: Descendant[] = [
-//   {
-//     type: 'paragraph',
-//     align: 'left',
-//     children: [{ text: '' }],
-//   }
-// ]
 
 export default SlateEditor
