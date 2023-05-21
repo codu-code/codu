@@ -27,6 +27,9 @@ import { config } from "../../markdoc/config";
 import {unified} from 'unified';
 import markdown from 'remark-parse';
 import slateTransformer from 'remark-slate';
+import ReactMarkdown from 'react-markdown'
+import { htmlToSlate } from 'slate-serializers'
+import parse from 'html-react-parser';
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -266,12 +269,14 @@ const Create: NextPage = () => {
     }
   };
 
-  const slateInitialValue = unified()
- .use(markdown)
- .use(slateTransformer)
- .processSync(body).result;
+//   const slateInitialValue = unified()
+//  .use(markdown)
+//  .use(slateTransformer)
+//  .processSync(body).result;
 
- console.log(slateInitialValue)
+const slateInitialValue = htmlToSlate(body)
+
+
 
   return (
     <Layout>
@@ -504,13 +509,17 @@ const Create: NextPage = () => {
                               }}
                             >
                               <h1>{title}</h1>
-                              {Markdoc.renderers.react(
+                              {/* {Markdoc.renderers.react(
                                 Markdoc.transform(Markdoc.parse(body), config),
                                 React,
                                 {
                                   components: markdocComponents,
                                 }
-                              )}
+                              )} */}
+                              <div>
+                                {parse(body)}
+                              </div>
+
                             </article>
                           </section>
                         ) : (
