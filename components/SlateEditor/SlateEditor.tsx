@@ -1,5 +1,4 @@
 import React, { useMemo, useRef, useEffect, useState, useCallback } from 'react'
-import TextareaAutosize, { TextareaAutosizeProps } from 'react-textarea-autosize';
 import { Slate, Editable, withReact, useSlate, useFocused } from 'slate-react'
 import {
   Editor,
@@ -10,20 +9,27 @@ import {
   Range,
 } from 'slate'
 import { withHistory } from 'slate-history'
-import { serialize } from 'remark-slate';
-import styles from './SlateEditor.module.css'
+import { slateToHtml } from 'slate-serializers'
 import { Button, Icon, Menu, Portal } from './components'
+import {sanitize} from 'dompurify'
 
 const SlateEditor = ({initialValue, onChange: _onChange}) => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), [])
   const [value, setValue] = useState(initialValue);
   
-  const handleChange = useCallback((nextValue) => {
-    setValue(nextValue);
-    // serialize slate state to a markdown string
-    _onChange(nextValue.map((v) => serialize(v)).join(''));
-  }, [_onChange]);
+  // const handleChange = useCallback((nextValue) => {
+  //   setValue(nextValue);
+  //   // serialize slate state to a markdown string
+  //   _onChange(nextValue.map((v) => serialize(v)).join(''));
+  // }, [_onChange]);
 
+const handleChange = useCallback((nextValue) => {
+  setValue(nextValue);
+  const serializedData = slateToHtml(nextValue)
+  const sanitizedData = sanitize(serializedData)
+  console.log(sanitizedData)
+  _onChange(sanitizedData);
+}, [_onChange]);
 
   return (
     <Slate editor={editor} value={initialValue} onChange={handleChange}>
