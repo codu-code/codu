@@ -28,8 +28,9 @@ import {unified} from 'unified';
 import markdown from 'remark-parse';
 import slateTransformer from 'remark-slate';
 import ReactMarkdown from 'react-markdown'
-import { htmlToSlate } from 'slate-serializers'
+import { htmlToSlate, slateToHtml } from 'slate-serializers'
 import parse from 'html-react-parser';
+import { htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateOverrides";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -45,6 +46,8 @@ const Create: NextPage = () => {
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
+  const [slateInitialValue, setSlateInitialValue] = useState(htmlToSlate('<p>Enter Content Here......</p>'))
+  const [slateChecked, setSlateChecked] = useState<boolean>(false)
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -222,8 +225,10 @@ const Create: NextPage = () => {
   };
 
   useEffect(() => {
+    setSlateChecked(true)
     if (!data) return;
     const { body, excerpt, title, id, tags } = data;
+    setSlateInitialValue(htmlToSlate(body))
     setTags(tags.map(({ tag }) => tag.title));
     reset({ body, excerpt, title, id });
   }, [data]);
@@ -273,8 +278,7 @@ const Create: NextPage = () => {
 //  .use(markdown)
 //  .use(slateTransformer)
 //  .processSync(body).result;
-
-const slateInitialValue = htmlToSlate(body)
+// console.log(body)
 
 
 
@@ -516,7 +520,7 @@ const slateInitialValue = htmlToSlate(body)
                                   components: markdocComponents,
                                 }
                               )} */}
-                              <div>
+                              <div className="slateP">
                                 {parse(body)}
                               </div>
 
@@ -544,11 +548,7 @@ const slateInitialValue = htmlToSlate(body)
                               name="body"
                               control={control}
                               render={({ field }) => {
-                                return slateInitialValue && slateInitialValue.length > 0 ? (
-                                  <SlateEditor {...field} initialValue={slateInitialValue} />
-                                ) : (
-                                  <p>Loading editor...</p>
-                                );
+                                return slateChecked ? <SlateEditor {...field} initialValue={slateInitialValue} /> : ''
                               }}
                               />
                             <div className="flex justify-between items-center">

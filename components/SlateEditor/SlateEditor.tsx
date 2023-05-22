@@ -10,6 +10,7 @@ import {
 } from 'slate'
 import { withHistory } from 'slate-history'
 import { slateToHtml } from 'slate-serializers'
+import customSlateToDomConfig from './slateToDomOverride'
 import { Button, Icon, Menu, Portal } from './components'
 import {sanitize} from 'dompurify'
 
@@ -25,9 +26,10 @@ const SlateEditor = ({initialValue, onChange: _onChange}) => {
 
 const handleChange = useCallback((nextValue) => {
   setValue(nextValue);
+  console.log(nextValue)
   const serializedData = slateToHtml(nextValue)
   const sanitizedData = sanitize(serializedData)
-  console.log(sanitizedData)
+  // console.log(sanitizedData)
   _onChange(sanitizedData);
 }, [_onChange]);
 
@@ -48,7 +50,7 @@ const handleChange = useCallback((nextValue) => {
               return toggleFormat(editor, 'italic')
             case 'formatUnderline':
               event.preventDefault()
-              return toggleFormat(editor, 'underlined')
+              return toggleFormat(editor, 'underline')
           }
         }}
       />
@@ -82,7 +84,7 @@ const Leaf = ({ attributes, children, leaf }) => {
     children = <em>{children}</em>
   }
 
-  if (leaf.underlined) {
+  if (leaf.underline) {
     children = <u>{children}</u>
   }
 
@@ -135,7 +137,7 @@ const HoveringToolbar = () => {
 >
   <FormatButton format="bold" icon="format_bold" />
   <FormatButton format="italic" icon="format_italic" />
-  <FormatButton format="underlined" icon="format_underlined" />
+  <FormatButton format="underline" icon="format_underlined" />
 </Menu>
     </Portal>
   )

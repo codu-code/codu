@@ -231,6 +231,11 @@ table {
   margin: 0 !important;
 }
 
+
+.slateP > p {
+  margin: 0!important;
+}
+
 /* Loading animation */
 .loader-dots div {
     animation-timing-function: cubic-bezier(0, 1, 1, 0);
