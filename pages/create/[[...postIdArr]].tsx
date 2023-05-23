@@ -37,6 +37,7 @@ const Create: NextPage = () => {
   const { postIdArr } = router.query;
 
   const postId = postIdArr?.[0] || "";
+   const isNewPost = !postId;
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -46,7 +47,7 @@ const Create: NextPage = () => {
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
-  const [slateInitialValue, setSlateInitialValue] = useState(htmlToSlate('<p>Enter Content Here......</p>'))
+  const [slateInitialValue, setSlateInitialValue] = useState(null);
   const [slateChecked, setSlateChecked] = useState<boolean>(false)
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -63,6 +64,7 @@ const Create: NextPage = () => {
     reset,
     getValues,
     control,
+    trigger,
     formState: { isDirty },
   } = useForm<SavePostInput>({
     mode: "onSubmit",
@@ -228,7 +230,6 @@ const Create: NextPage = () => {
     setSlateChecked(true)
     if (!data) return;
     const { body, excerpt, title, id, tags } = data;
-    setSlateInitialValue(htmlToSlate(body))
     setTags(tags.map(({ tag }) => tag.title));
     reset({ body, excerpt, title, id });
   }, [data]);
@@ -274,11 +275,23 @@ const Create: NextPage = () => {
     }
   };
 
-//   const slateInitialValue = unified()
-//  .use(markdown)
-//  .use(slateTransformer)
-//  .processSync(body).result;
-// console.log(body)
+useEffect(() => {
+  if (isNewPost) {
+    setSlateInitialValue(htmlToSlate('<p></p>'));
+  } else if (data) {
+    const { body } = data;
+    console.log('setting as initial: ', htmlToSlate(body))
+    setSlateInitialValue(htmlToSlate(body));
+  }
+}, [data, isNewPost, ]);
+
+
+useEffect(() => {
+  if(viewPreview === true){
+    setSlateInitialValue(htmlToSlate(body));
+  }
+}, [viewPreview]);
+
 
 
 
@@ -499,7 +512,7 @@ const Create: NextPage = () => {
                   </div>
                 </div>
                 <div className="lg:min-w-0 lg:flex-1">
-                  <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
+                  <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 min-h-[40rem]">
                     {/* Start main area*/}
                     <div className="relative h-full">
                       <div className="bg-neutral-900 text-white  shadow-xl">
@@ -544,13 +557,16 @@ const Create: NextPage = () => {
                               {...register("body")}
                               inputRef={textareaRef}
                             /> */}
-                            <Controller
-                              name="body"
-                              control={control}
-                              render={({ field }) => {
-                                return slateChecked ? <SlateEditor {...field} initialValue={slateInitialValue} /> : ''
-                              }}
-                              />
+                            {slateInitialValue && (
+                                <Controller
+                                  name="body"
+                                  control={control}
+                                  render={({ field }) => (
+                                    <SlateEditor {...field} initialValue={slateInitialValue} />
+                                  )}
+                                />
+                              )}
+
                             <div className="flex justify-between items-center">
                               <>
                                 {saveStatus === "loading" && (
