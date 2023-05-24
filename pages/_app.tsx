@@ -6,7 +6,7 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { trpc } from "../utils/trpc";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
-import 'material-icons/iconfont/material-icons.css';
+// import 'material-icons/iconfont/material-icons.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();

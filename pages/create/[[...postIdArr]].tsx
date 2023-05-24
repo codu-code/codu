@@ -20,8 +20,8 @@ import { removeMarkdown } from "../../utils/removeMarkdown";
 import { useDebounce } from "../../hooks/useDebounce";
 import SlateEditor from "../../components/SlateEditor/SlateEditor";
 import Markdoc from "@markdoc/markdoc";
-import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
-import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
+// import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
+// import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import {unified} from 'unified';
@@ -52,8 +52,8 @@ const Create: NextPage = () => {
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useMarkdownHotkeys(textareaRef);
-  useMarkdownShortcuts(textareaRef);
+  // useMarkdownHotkeys(textareaRef);
+  // useMarkdownShortcuts(textareaRef);
 
  
 

@@ -28,6 +28,7 @@
     "@next/bundle-analyzer": "^12.3.4",
     "@prisma/client": "^4.13.0",
     "@resvg/resvg-js": "^2.4.1",
+    "@styled-icons/material": "^10.47.0",
     "@tailwindcss/forms": "^0.5.2",
     "@tanem/react-nprogress": "^5.0.33",
     "@tanstack/react-query": "^4.27.0",
@@ -41,7 +42,6 @@
     "dompurify": "^3.0.3",
     "fathom-client": "^3.5.0",
     "html-react-parser": "^3.0.16",
-    "material-icons": "^1.13.5",
     "nanoid": "^4.0.0",
     "next": "^13.2.3",
     "next-auth": "^4.22.0",
@@ -69,6 +69,7 @@
     "slate-serializers": "^0.0.32",
     "styled-components": "^5.3.10",
     "superjson": "^1.12.2",
+    "tippy.js": "^6.3.7",
     "unified": "^10.1.2",
     "zod": "^3.21.4"
   },
