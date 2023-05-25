@@ -19,18 +19,19 @@ import { trpc } from "../../utils/trpc";
 import { removeMarkdown } from "../../utils/removeMarkdown";
 import { useDebounce } from "../../hooks/useDebounce";
 import SlateEditor from "../../components/SlateEditor/SlateEditor";
-import Markdoc from "@markdoc/markdoc";
+// import Markdoc from "@markdoc/markdoc";
 // import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
 // import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
-import { markdocComponents } from "../../markdoc/components";
-import { config } from "../../markdoc/config";
+// import { markdocComponents } from "../../markdoc/components";
+// import { config } from "../../markdoc/config";
 import {unified} from 'unified';
 import markdown from 'remark-parse';
 import slateTransformer from 'remark-slate';
 import ReactMarkdown from 'react-markdown'
 import { htmlToSlate, slateToHtml } from 'slate-serializers'
+import { config as htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateConfig";
 import parse from 'html-react-parser';
-import { htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateOverrides";
+// import { htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateOverrides";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -160,18 +161,18 @@ const Create: NextPage = () => {
 
   const onSubmit = async (data: SavePostInput) => {
     // vaidate markdoc syntax
-    const ast = Markdoc.parse(data.body);
-    const errors = Markdoc.validate(ast, config).filter(
-      (e) => e.error.level === "critical"
-    );
+    // const ast = Markdoc.parse(data.body);
+    // const errors = Markdoc.validate(ast, config).filter(
+    //   (e) => e.error.level === "critical"
+    // );
 
-    if (errors.length > 0) {
-      console.error(errors);
-      errors.forEach((err) => {
-        toast.error(err.error.message);
-      });
-      return;
-    }
+    // if (errors.length > 0) {
+    //   console.error(errors);
+    //   errors.forEach((err) => {
+    //     toast.error(err.error.message);
+    //   });
+    //   return;
+    // }
     if (!published) {
       try {
         const formData = getFormData();
@@ -274,23 +275,30 @@ const Create: NextPage = () => {
         setUnsavedChanges(true);
     }
   };
-
+function replaceEmptyTags(html) {
+  return html.replace(/<p>\s*<\/p>/g, '<br />');
+}
 useEffect(() => {
   if (isNewPost) {
-    setSlateInitialValue(htmlToSlate('<p></p>'));
+    setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
   } else if (data) {
     const { body } = data;
-    console.log('setting as initial: ', htmlToSlate(body))
-    setSlateInitialValue(htmlToSlate(body));
+    console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
+    console.log(parse(body), 'parsing')
+    setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
   }
 }, [data, isNewPost, ]);
 
 
 useEffect(() => {
   if(viewPreview === true){
-    setSlateInitialValue(htmlToSlate(body));
+    console.log(body)
+    console.log('setting as new initial: ', htmlToSlate(body, htmlToSlateConfig))
+
+    setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
   }
 }, [viewPreview]);
+
 
 
 
@@ -534,7 +542,7 @@ useEffect(() => {
                                 }
                               )} */}
                               <div className="slateP">
-                                {parse(body)}
+                                {parse(replaceEmptyTags(body))}
                               </div>
 
                             </article>

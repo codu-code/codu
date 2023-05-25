@@ -2,6 +2,7 @@ import React from 'react';
 import { FormatBold } from '@styled-icons/material/FormatBold';
 import { FormatItalic } from '@styled-icons/material/FormatItalic';
 import { FormatUnderlined } from '@styled-icons/material/FormatUnderlined';
+import { Link as LinkIcon } from '@styled-icons/material/Link';
 import {
   BalloonToolbar,
   BalloonToolbarProps,
@@ -9,9 +10,11 @@ import {
   MARK_BOLD,
   MARK_ITALIC,
   MARK_UNDERLINE,
+  ELEMENT_LINK,
   MarkToolbarButton,
   WithPartial,
   usePlateEditorRef,
+  LinkToolbarButton
   // UseVirtualFloatingOptions
 } from '@udecode/plate';
 
@@ -19,7 +22,7 @@ const HooveringToolbar = (
   props: WithPartial<BalloonToolbarProps, 'children'>
 ) => {
   const { children, ...balloonToolbarProps } = props;
-  console.log('my props ', balloonToolbarProps)
+  // console.log('my props ', balloonToolbarProps)
 
   const editor = usePlateEditorRef();
 
@@ -53,6 +56,11 @@ const HooveringToolbar = (
       <MarkToolbarButton
         type={getPluginType(editor, MARK_UNDERLINE)}
         icon={<FormatUnderlined />}
+        actionHandler="onMouseDown"
+      />
+      <LinkToolbarButton
+        // type={getPluginType(editor, ELEMENT_LINK)}
+        icon={<LinkIcon />}
         actionHandler="onMouseDown"
       />
       {children}

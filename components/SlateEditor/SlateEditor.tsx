@@ -2,8 +2,9 @@ import React, { useState, useCallback } from "react";
 import { slateToHtml } from "slate-serializers";
 import { sanitize } from "dompurify";
 import HooveringToolbar from "./HooveringToolbar";
-
+import {config} from './slateToHTMLConfig'
 import {
+  createLinkPlugin,
   createBlockquotePlugin,
   createBoldPlugin,
   createCodeBlockPlugin,
@@ -14,9 +15,15 @@ import {
   createPlugins,
   createStrikethroughPlugin,
   createUnderlinePlugin,
+  PlateFloatingLink,
+  SoftBreakPlugin,
   Plate,
+  createSoftBreakPlugin,
 } from "@udecode/plate";
-import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
+// import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
+// import { createLineBreakPlugin } from "./customPlugins/lineBreakPlugin";
+import { softBreakPlugin } from "./customPlugins/softBreakPlugin";
+import { linkPlugin } from "./customPlugins/linkPlugin";
 import { editableProps } from "./editableProps";
 import { MyValue } from "./plateTypes";
 import { plateUI } from "./plateUI";
@@ -35,6 +42,8 @@ const plugins = createPlugins<MyValue>(
     createUnderlinePlugin(),
     createStrikethroughPlugin(),
     createCodePlugin(),
+    createLinkPlugin(linkPlugin),
+    createSoftBreakPlugin(softBreakPlugin),
   ],
   {
     components: plateUI,
@@ -42,15 +51,17 @@ const plugins = createPlugins<MyValue>(
 );
 
 const SlateEditor = ({ onChange: _onChange, initialValue }) => {
+  // console.log(linkPlugin)
   const [value, setValue] = useState(initialValue);
+
 
   const handleChange = useCallback(
     (nextValue) => {
       setValue(nextValue);
-      console.log(nextValue);
-      const serializedData = slateToHtml(nextValue);
-      console.log(serializedData);
-      const sanitizedData = sanitize(serializedData);
+      // console.log(nextValue);
+      const serializedData = slateToHtml(nextValue, config);
+      // console.log(serializedData);
+      const sanitizedData = sanitize(serializedData, { ADD_ATTR: ['target'] });
       console.log("saving this: ", sanitizedData);
       _onChange(sanitizedData);
     },

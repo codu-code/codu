@@ -8,7 +8,7 @@ const renderElement = (props: RenderElementProps) => {
     // Check if the paragraph is empty
     if (isEmpty) {
       // Render a line break
-      return <p><br /></p>;
+      return <br></br>;
     }
   }
 
