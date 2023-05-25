@@ -4,6 +4,7 @@ import {
     ELEMENT_CODE_BLOCK,
     ELEMENT_MEDIA_EMBED,
     ELEMENT_PARAGRAPH,
+    MARK_FONT_SIZE,
     MediaEmbedElement,
     StyledElement,
     withProps,
@@ -27,6 +28,14 @@ import {
         },
       },
       prefixClassNames: 'p',
+    }),
+    [MARK_FONT_SIZE]: withProps(StyledElement, {
+      // as: 'p',
+      styles: {
+        root: {
+          fontSize: '20px'
+        },
+      },
     }),
   });
   

@@ -2,7 +2,9 @@ import React from 'react';
 import { FormatBold } from '@styled-icons/material/FormatBold';
 import { FormatItalic } from '@styled-icons/material/FormatItalic';
 import { FormatUnderlined } from '@styled-icons/material/FormatUnderlined';
+import { FormatSize } from '@styled-icons/material';
 import { Link as LinkIcon } from '@styled-icons/material/Link';
+import { Editor } from 'slate';
 import {
   BalloonToolbar,
   BalloonToolbarProps,
@@ -10,13 +12,16 @@ import {
   MARK_BOLD,
   MARK_ITALIC,
   MARK_UNDERLINE,
+  MARK_FONT_SIZE,
   ELEMENT_LINK,
   MarkToolbarButton,
   WithPartial,
   usePlateEditorRef,
-  LinkToolbarButton
+  LinkToolbarButton,
+  ToolbarButton
   // UseVirtualFloatingOptions
 } from '@udecode/plate';
+import { applyFontSize } from './customPlugins/createFontSizePlugin';
 
 const HooveringToolbar = (
   props: WithPartial<BalloonToolbarProps, 'children'>
@@ -28,6 +33,8 @@ const HooveringToolbar = (
 
   const arrow = false;
   const theme = 'dark';
+
+  
 
   // TODO: Define positioning of the toolbar and pass into BallonToolbar as floatingOptions={floatingOptions}
   // const floatingOptions: UseVirtualFloatingOptions = {
@@ -63,6 +70,25 @@ const HooveringToolbar = (
         icon={<LinkIcon />}
         actionHandler="onMouseDown"
       />
+      <ToolbarButton
+  icon={<FormatSize />}
+  onMouseDown={(event) => {
+    event.preventDefault();
+
+    const nodes = Array.from(
+      Editor.nodes(editor, {
+        at: editor.selection || undefined,
+        match: Text.isText,
+      })
+    );
+
+    const isFontSizeIncreased = nodes.some(([node]) => node.fontSize === '1.2em');
+
+    // Call applyFontSize with the desired action
+    applyFontSize(editor, !isFontSizeIncreased);
+  }}
+/>
+
       {children}
     </BalloonToolbar>
   );

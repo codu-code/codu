@@ -3,12 +3,14 @@ import { slateToHtml } from "slate-serializers";
 import { sanitize } from "dompurify";
 import HooveringToolbar from "./HooveringToolbar";
 import {config} from './slateToHTMLConfig'
+import { CustomFontSizeComponent } from "./customPlugins/createFontSizePlugin";
 import {
   createLinkPlugin,
   createBlockquotePlugin,
   createBoldPlugin,
   createCodeBlockPlugin,
   createCodePlugin,
+  createFontSizePlugin,
   createHeadingPlugin,
   createItalicPlugin,
   createParagraphPlugin,
@@ -27,6 +29,7 @@ import { linkPlugin } from "./customPlugins/linkPlugin";
 import { editableProps } from "./editableProps";
 import { MyValue } from "./plateTypes";
 import { plateUI } from "./plateUI";
+// import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
 
 const plugins = createPlugins<MyValue>(
   [
@@ -35,6 +38,9 @@ const plugins = createPlugins<MyValue>(
     createBlockquotePlugin(),
     createCodeBlockPlugin({
       component: plateUI.CodeBlockElement,
+    }),
+    createFontSizePlugin({
+      component: CustomFontSizeComponent
     }),
     createHeadingPlugin(),
     createBoldPlugin(),
@@ -62,7 +68,7 @@ const SlateEditor = ({ onChange: _onChange, initialValue }) => {
       const serializedData = slateToHtml(nextValue, config);
       // console.log(serializedData);
       const sanitizedData = sanitize(serializedData, { ADD_ATTR: ['target'] });
-      console.log("saving this: ", sanitizedData);
+      // console.log("saving this: ", sanitizedData);
       _onChange(sanitizedData);
     },
     [_onChange]

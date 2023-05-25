@@ -35,6 +35,17 @@ exports.config = {
       return new domhandler_1.Element("blockquote", {}, p);
     },
   //   p: ({ node, children = [] }) => {
+  //   if (node.fontSize) {
+  //     return new domhandler_1.Element(
+  //       'p',
+  //       { className: 'large-text' },
+  //       children
+  //     );
+  //   }
+  //   // Handle the case where fontSize is not true
+  //   return new domhandler_1.Element('p', {}, children);
+  // },
+  //   p: ({ node, children = [] }) => {
   //   if (node.children[0].text === '') {
   //     return new domhandler_1.Element("br", {}, []);
   //   }
