@@ -82,7 +82,7 @@ const HooveringToolbar = (
       })
     );
 
-    const isFontSizeIncreased = nodes.some(([node]) => node.fontSize === '1.2em');
+    const isFontSizeIncreased = nodes.some(([node]) => node.fontSize === true);
 
     // Call applyFontSize with the desired action
     applyFontSize(editor, !isFontSizeIncreased);

@@ -3,7 +3,7 @@ import { Text, Transforms } from "slate";
 import { MARK_FONT_SIZE } from "@udecode/plate";
 // ...
 
-const CustomFontSizeComponent = ({ attributes, children, leaf }) => {
+export const CustomFontSizeComponent = ({ attributes, children, leaf }) => {
   const size = leaf.fontSize ? '1.5em' : 'inherit';
   return (
     <span {...attributes} style={{ fontSize: size }}>
@@ -15,8 +15,10 @@ const CustomFontSizeComponent = ({ attributes, children, leaf }) => {
 // Define the plugin using createPluginFactory
 export const createFontSizePlugin = createPluginFactory({
   key: MARK_FONT_SIZE,
-  // component: CustomFontSizeComponent,
+  isLeaf: true,
+  component: CustomFontSizeComponent,
 });
+
 
 // ...
 
@@ -27,7 +29,7 @@ export const applyFontSize = (editor, isIncreasing) => {
     if (isIncreasing) {
       Transforms.setNodes(
         editor,
-        { [MARK_FONT_SIZE]: '1.2em' },
+        { [MARK_FONT_SIZE]: true },
         { match: Text.isText, split: true }
       );
     } else {

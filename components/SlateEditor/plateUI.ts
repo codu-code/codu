@@ -9,33 +9,26 @@ import {
     StyledElement,
     withProps,
   } from '@udecode/plate';
-  
+  import { CustomFontSizeComponent } from './customPlugins/createFontSizePlugin';
+
   export const plateUI = createPlateUI({
-    [ELEMENT_MEDIA_EMBED]: withProps(MediaEmbedElement, {
-      nodeProps: {
-        twitterOptions: {
-          theme: 'dark',
-        },
+  [ELEMENT_MEDIA_EMBED]: withProps(MediaEmbedElement, {
+    nodeProps: {
+      twitterOptions: {
+        theme: 'dark',
       },
-    }),
-    [ELEMENT_CODE_BLOCK]: CodeBlockElement,
-    [ELEMENT_PARAGRAPH]: withProps(StyledElement, {
-      // as: 'p',
-      styles: {
-        root: {
-          margin: 0,
-          padding: '4px 0',
-        },
+    },
+  }),
+  [ELEMENT_CODE_BLOCK]: CodeBlockElement,
+  [ELEMENT_PARAGRAPH]: withProps(StyledElement, {
+    // as: 'p',
+    styles: {
+      root: {
+        margin: 0,
+        padding: '4px 0',
       },
-      prefixClassNames: 'p',
-    }),
-    [MARK_FONT_SIZE]: withProps(StyledElement, {
-      // as: 'p',
-      styles: {
-        root: {
-          fontSize: '20px'
-        },
-      },
-    }),
-  });
-  
+    },
+    prefixClassNames: 'p',
+  }),
+  [MARK_FONT_SIZE]: CustomFontSizeComponent,
+});

@@ -16,22 +16,13 @@ import Layout from "../../components/Layout/Layout";
 import { PromptDialog } from "../../components/PromptService/PromptService";
 
 import { trpc } from "../../utils/trpc";
-import { removeMarkdown } from "../../utils/removeMarkdown";
 import { useDebounce } from "../../hooks/useDebounce";
 import SlateEditor from "../../components/SlateEditor/SlateEditor";
-// import Markdoc from "@markdoc/markdoc";
-// import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
-// import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
-// import { markdocComponents } from "../../markdoc/components";
-// import { config } from "../../markdoc/config";
-import {unified} from 'unified';
-import markdown from 'remark-parse';
-import slateTransformer from 'remark-slate';
-import ReactMarkdown from 'react-markdown'
+
 import { htmlToSlate, slateToHtml } from 'slate-serializers'
 import { config as htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateConfig";
 import parse from 'html-react-parser';
-// import { htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateOverrides";
+import { config as slateToHTMLConfig } from "../../components/SlateEditor/slateToHTMLConfig";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -53,10 +44,6 @@ const Create: NextPage = () => {
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // useMarkdownHotkeys(textareaRef);
-  // useMarkdownShortcuts(textareaRef);
-
- 
 
   const {
     handleSubmit,
@@ -135,7 +122,7 @@ const Create: NextPage = () => {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
+      excerpt: data.excerpt || 'placeholder',
     };
     return formData;
   };
@@ -160,19 +147,6 @@ const Create: NextPage = () => {
   const published = !!data?.published || false;
 
   const onSubmit = async (data: SavePostInput) => {
-    // vaidate markdoc syntax
-    // const ast = Markdoc.parse(data.body);
-    // const errors = Markdoc.validate(ast, config).filter(
-    //   (e) => e.error.level === "critical"
-    // );
-
-    // if (errors.length > 0) {
-    //   console.error(errors);
-    //   errors.forEach((err) => {
-    //     toast.error(err.error.message);
-    //   });
-    //   return;
-    // }
     if (!published) {
       try {
         const formData = getFormData();
@@ -278,29 +252,41 @@ const Create: NextPage = () => {
 function replaceEmptyTags(html) {
   return html.replace(/<p>\s*<\/p>/g, '<br />');
 }
+// useEffect(() => {
+//   if (isNewPost) {
+//     setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
+//   } else if (data) {
+//     const { body } = data;
+//     console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
+//     console.log(parse(body), 'parsing')
+//     setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
+//   }
+// }, [data, isNewPost, ]);
+
+
+// useEffect(() => {
+//   if(viewPreview === true){
+//     console.log(body)
+//     console.log('setting as new initial: ', htmlToSlate(body, htmlToSlateConfig))
+
+//     setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
+//   }
+// }, [viewPreview]);
+
+
 useEffect(() => {
   if (isNewPost) {
-    setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
-  } else if (data) {
-    const { body } = data;
-    console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
-    console.log(parse(body), 'parsing')
-    setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
+    setSlateInitialValue([{ type: 'p', children: [{ text: '' }] }]);
+  } else if (data && data.body) {
+    setSlateInitialValue(JSON.parse(data.body));
   }
-}, [data, isNewPost, ]);
-
+}, [data?.body, isNewPost]);
 
 useEffect(() => {
-  if(viewPreview === true){
-    console.log(body)
-    console.log('setting as new initial: ', htmlToSlate(body, htmlToSlateConfig))
-
-    setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
+  if (viewPreview === true) {
+    setSlateInitialValue(JSON.parse(body));
   }
 }, [viewPreview]);
-
-
-
 
 
   return (
@@ -542,7 +528,7 @@ useEffect(() => {
                                 }
                               )} */}
                               <div className="slateP">
-                                {parse(replaceEmptyTags(body))}
+                                {parse(replaceEmptyTags(slateToHtml(JSON.parse(body), slateToHTMLConfig)))}
                               </div>
 
                             </article>

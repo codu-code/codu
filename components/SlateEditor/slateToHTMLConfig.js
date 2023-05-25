@@ -6,8 +6,8 @@ const domhandler_1 = require("domhandler");
 // Staightforward transform - no attributes are considered
 // Use transforms instead for more complex operations
 const ELEMENT_NAME_TAG_MAP = {
-  p: "p",
-  paragraph: "p",
+  // p: "p",
+  // paragraph: "p",
   h1: "h1",
   h2: "h2",
   h3: "h3",
@@ -34,27 +34,6 @@ exports.config = {
       const p = [new domhandler_1.Element("p", {}, children)];
       return new domhandler_1.Element("blockquote", {}, p);
     },
-  //   p: ({ node, children = [] }) => {
-  //   if (node.fontSize) {
-  //     return new domhandler_1.Element(
-  //       'p',
-  //       { className: 'large-text' },
-  //       children
-  //     );
-  //   }
-  //   // Handle the case where fontSize is not true
-  //   return new domhandler_1.Element('p', {}, children);
-  // },
-  //   p: ({ node, children = [] }) => {
-  //   if (node.children[0].text === '') {
-  //     return new domhandler_1.Element("br", {}, []);
-  //   }
-  //   return new domhandler_1.Element(
-  //     "p",
-  //     {},
-  //     children
-  //   );
-  // },
     a: ({ node, children = [] }) => {
       const element = new domhandler_1.Element(
         "a",
@@ -64,6 +43,12 @@ exports.config = {
         },
         children
       );
+      return element;
+    },
+   p: ({ node, children = [] }) => {
+      const hasFontSize = node.children[0].fontSize;
+      const className = hasFontSize ? 'post_text_xl' : '_test';
+      const element = new domhandler_1.Element('p', { class: className }, children);
       return element;
     },
   },

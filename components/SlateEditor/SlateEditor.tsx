@@ -10,7 +10,7 @@ import {
   createBoldPlugin,
   createCodeBlockPlugin,
   createCodePlugin,
-  createFontSizePlugin,
+  // createFontSizePlugin,
   createHeadingPlugin,
   createItalicPlugin,
   createParagraphPlugin,
@@ -29,7 +29,7 @@ import { linkPlugin } from "./customPlugins/linkPlugin";
 import { editableProps } from "./editableProps";
 import { MyValue } from "./plateTypes";
 import { plateUI } from "./plateUI";
-// import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
+import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
 
 const plugins = createPlugins<MyValue>(
   [
@@ -39,9 +39,7 @@ const plugins = createPlugins<MyValue>(
     createCodeBlockPlugin({
       component: plateUI.CodeBlockElement,
     }),
-    createFontSizePlugin({
-      component: CustomFontSizeComponent
-    }),
+    createFontSizePlugin({ component: plateUI.CustomFontSizeComponent,}),
     createHeadingPlugin(),
     createBoldPlugin(),
     createItalicPlugin(),
@@ -64,12 +62,12 @@ const SlateEditor = ({ onChange: _onChange, initialValue }) => {
   const handleChange = useCallback(
     (nextValue) => {
       setValue(nextValue);
-      // console.log(nextValue);
-      const serializedData = slateToHtml(nextValue, config);
+      console.log(nextValue);
+      // const serializedData = slateToHtml(nextValue, config);
       // console.log(serializedData);
-      const sanitizedData = sanitize(serializedData, { ADD_ATTR: ['target'] });
+      // const sanitizedData = sanitize(serializedData, { ADD_ATTR: ['target'] });
       // console.log("saving this: ", sanitizedData);
-      _onChange(sanitizedData);
+      _onChange(JSON.stringify(nextValue));
     },
     [_onChange]
   );
