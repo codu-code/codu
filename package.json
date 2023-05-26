@@ -37,6 +37,7 @@
     "@trpc/react-query": "^10.16.0",
     "@trpc/server": "^10.16.0",
     "@udecode/plate": "^20.6.5",
+    "atropos": "^1.0.2",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.2",
     "dompurify": "^3.0.3",
