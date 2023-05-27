@@ -4,6 +4,7 @@ import { sanitize } from "dompurify";
 import HooveringToolbar from "./HooveringToolbar";
 import {config} from './slateToHTMLConfig'
 import { CustomFontSizeComponent } from "./customPlugins/createFontSizePlugin";
+import ExpandingToolbar from "./customPlugins/ExpandingMenu";
 import {
   createLinkPlugin,
   createBlockquotePlugin,
@@ -22,7 +23,7 @@ import {
   Plate,
   createSoftBreakPlugin,
 } from "@udecode/plate";
-// import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
+import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
 // import { createLineBreakPlugin } from "./customPlugins/lineBreakPlugin";
 import { softBreakPlugin } from "./customPlugins/softBreakPlugin";
 import { linkPlugin } from "./customPlugins/linkPlugin";
@@ -33,8 +34,8 @@ import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
 
 const plugins = createPlugins<MyValue>(
   [
-    createParagraphPlugin(),
-    // createCustomParagraphPlugin(),
+    // createParagraphPlugin(),
+    createCustomParagraphPlugin(),
     createBlockquotePlugin(),
     createCodeBlockPlugin({
       component: plateUI.CodeBlockElement,
@@ -50,7 +51,7 @@ const plugins = createPlugins<MyValue>(
     createSoftBreakPlugin(softBreakPlugin),
   ],
   {
-    components: plateUI,
+    // components: plateUI,
   }
 );
 

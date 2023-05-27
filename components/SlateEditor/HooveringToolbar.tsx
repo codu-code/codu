@@ -4,9 +4,8 @@ import { FormatItalic } from "@styled-icons/material/FormatItalic";
 import { FormatUnderlined } from "@styled-icons/material/FormatUnderlined";
 import { FormatSize, FormatQuote } from "@styled-icons/material";
 import { Code } from "@styled-icons/material";
-import { Title } from "@styled-icons/material";
 import { Link as LinkIcon } from "@styled-icons/material/Link";
-import { TextFields } from "@styled-icons/material";
+import { TextFields, Title } from "@styled-icons/material";
 import { Editor } from "slate";
 import {
   BalloonToolbar,
