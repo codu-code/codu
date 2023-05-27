@@ -53,17 +53,16 @@ const Home: NextPage = () => {
         <div>
           <main className="relative">
             <Atropos
-              rotateXMax={1}
-              rotateYMax={1}
-              stretchX={0.2}
+              rotateXMax={0.2}
+              rotateYMax={0.2}
+              stretchX={1}
               stretchY={0.2}
-              stretchZ={1}
-              shadowScale={20}
+              stretchZ={0.2}
               highlight={false}
               className="h-[1000px] w-ful overflow-hidden relative"
             >
               <img
-                className="absolute h-full w-full"
+                className="absolute h-full w-full object-cover"
                 src={"images/home/space.jpg"}
                 data-atropos-offset="-2"
               />
