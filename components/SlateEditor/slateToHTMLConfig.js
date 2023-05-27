@@ -6,8 +6,8 @@ const domhandler_1 = require("domhandler");
 // Staightforward transform - no attributes are considered
 // Use transforms instead for more complex operations
 const ELEMENT_NAME_TAG_MAP = {
-  // p: "p",
-  // paragraph: "p",
+  p: "p",
+  paragraph: "p",
   h1: "h1",
   h2: "h2",
   h3: "h3",
@@ -45,11 +45,24 @@ exports.config = {
       );
       return element;
     },
-   p: ({ node, children = [] }) => {
-      const hasFontSize = node.children[0].fontSize;
-      const className = hasFontSize ? 'post_text_xl' : '_test';
-      const element = new domhandler_1.Element('p', { class: className }, children);
-      return element;
+    media_embed: ({ node }) => {
+      const iframe = new domhandler_1.Element("iframe", {
+        src: node.url,
+        frameborder: "0",
+        allow:
+          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+        allowfullscreen: "",
+        // style: "width:100%; aspect-ratio: '16 / 9'"
+      });
+
+      const div = new domhandler_1.Element("div", {}, [iframe]);
+
+      return div;
+    },
+    img: ({ node }) => {
+      return new domhandler_1.Element("img", {
+        src: node.url,
+      });
     },
   },
   encodeEntities: true,

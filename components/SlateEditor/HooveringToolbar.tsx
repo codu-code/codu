@@ -2,8 +2,6 @@ import React from "react";
 import { FormatBold } from "@styled-icons/material/FormatBold";
 import { FormatItalic } from "@styled-icons/material/FormatItalic";
 import { FormatUnderlined } from "@styled-icons/material/FormatUnderlined";
-import { FormatSize, FormatQuote } from "@styled-icons/material";
-import { Code } from "@styled-icons/material";
 import { Link as LinkIcon } from "@styled-icons/material/Link";
 import { TextFields, Title } from "@styled-icons/material";
 import { Editor } from "slate";
@@ -105,13 +103,6 @@ const HooveringToolbar = (
           applyFontSize(editor, !isFontSizeIncreased);
         }}
       /> */}
-      {/* <BlockToolbarButton
-        type={getPluginType(editor, ELEMENT_BLOCKQUOTE)}
-        icon={<FormatQuote />}
-        actionHandler="onMouseDown"
-      /> */}
-      {/* <CodeBlockToolbarButton icon={<Code />} actionHandler="onMouseDown"/> */}
-
       {children}
     </BalloonToolbar>
   );

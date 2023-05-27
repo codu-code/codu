@@ -10,6 +10,7 @@ import {
     withProps,
   } from '@udecode/plate';
   import { CustomFontSizeComponent } from './customPlugins/createFontSizePlugin';
+  import { createCustomParagraphPlugin, CustomParagraphComponent } from './customPlugins/CustomParagraphPlugin';
 
   export const plateUI = createPlateUI({
   [ELEMENT_MEDIA_EMBED]: withProps(MediaEmbedElement, {
@@ -20,15 +21,5 @@ import {
     },
   }),
   [ELEMENT_CODE_BLOCK]: CodeBlockElement,
-  [ELEMENT_PARAGRAPH]: withProps(StyledElement, {
-    // as: 'p',
-    styles: {
-      root: {
-        margin: 0,
-        padding: '4px 0',
-      },
-    },
-    prefixClassNames: 'p',
-  }),
-  [MARK_FONT_SIZE]: CustomFontSizeComponent,
+  [ELEMENT_PARAGRAPH]: CustomParagraphComponent
 });

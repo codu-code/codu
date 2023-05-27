@@ -1,5 +1,6 @@
 import { createPluginFactory, PlatePlugin } from "@udecode/plate";
 import { ELEMENT_PARAGRAPH } from "@udecode/plate-paragraph";
+import { AddCircleOutline } from "@styled-icons/material";
 import { RenderElementProps } from "slate-react";
 import { Node } from "slate";
 import React, { useState } from "react";
@@ -25,14 +26,17 @@ export const CustomMenu = ({ editor }) => {
   return (
     <div >
       {showPlus && 
-        <button
+        <span
           onClick={() => {
             setShow(!show);
             setShowPlus(false);
           }}
+          style={{
+            cursor: 'pointer',
+          }}
         >
           +
-        </button>
+        </span>
       }
       {show && 
         <ExpandingToolbar />
@@ -42,14 +46,13 @@ export const CustomMenu = ({ editor }) => {
 }
 
 // Define the custom paragraph component
-const CustomParagraphComponent = (props: RenderElementProps) => {
+export const CustomParagraphComponent = (props: RenderElementProps) => {
   const { attributes, children, element } = props;
   const editor = useEditorRef();
 
   if (element.type === ELEMENT_PARAGRAPH && Node.string(element) === '') {
     return (
       <>
-      
       <p {...attributes}>
         <CustomMenu editor={editor} />
         {children}
@@ -67,5 +70,5 @@ export const createCustomParagraphPlugin = (): PlatePlugin =>
   createPluginFactory({
     key: ELEMENT_PARAGRAPH,
     isElement: true,
-    component: CustomParagraphComponent,
+    // component: CustomParagraphComponent,
   })();

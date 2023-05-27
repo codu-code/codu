@@ -20,6 +20,8 @@ import {
   createUnderlinePlugin,
   PlateFloatingLink,
   SoftBreakPlugin,
+  createImagePlugin,
+  createMediaEmbedPlugin,
   Plate,
   createSoftBreakPlugin,
 } from "@udecode/plate";
@@ -35,7 +37,7 @@ import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
 const plugins = createPlugins<MyValue>(
   [
     // createParagraphPlugin(),
-    createCustomParagraphPlugin(),
+    createCustomParagraphPlugin({ component: plateUI.CustomParagraphComponent,}),
     createBlockquotePlugin(),
     createCodeBlockPlugin({
       component: plateUI.CodeBlockElement,
@@ -49,9 +51,11 @@ const plugins = createPlugins<MyValue>(
     createCodePlugin(),
     createLinkPlugin(linkPlugin),
     createSoftBreakPlugin(softBreakPlugin),
+    createImagePlugin(),
+    createMediaEmbedPlugin(),
   ],
   {
-    // components: plateUI,
+    components: plateUI,
   }
 );
 
