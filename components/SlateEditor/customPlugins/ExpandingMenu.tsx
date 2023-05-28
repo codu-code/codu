@@ -5,14 +5,19 @@ import { getPluginType, usePlateEditorRef, MARK_BOLD, MarkToolbarButton,
   ToolbarButton,
   ELEMENT_IMAGE,
   ELEMENT_MEDIA_EMBED,
+  ELEMENT_OL,
+  ELEMENT_UL,
   BlockToolbarButton,
   CodeBlockToolbarButton,
   ELEMENT_BLOCKQUOTE,
   ImageToolbarButton,
+  ListToolbarButton,
   MediaEmbedToolbarButton, } from '@udecode/plate';
 import { FormatQuote } from "@styled-icons/material";
 import { Code } from "@styled-icons/material";
 import { Image } from '@styled-icons/material/Image';
+import { FormatListBulleted } from '@styled-icons/material/FormatListBulleted';
+import { FormatListNumbered } from '@styled-icons/material/FormatListNumbered';
 import { OndemandVideo } from '@styled-icons/material/OndemandVideo';
 
 const ExpandingToolbar = (props: WithPartial<ToolbarProps, 'children'>) => {
@@ -34,6 +39,14 @@ const editor = usePlateEditorRef();
       <CodeBlockToolbarButton icon={<Code />} actionHandler="onMouseDown" tooltip={null}/>
       <ImageToolbarButton icon={<Image />} />
       <MediaEmbedToolbarButton icon={<OndemandVideo />} />
+      <ListToolbarButton
+        type={getPluginType(editor, ELEMENT_UL)}
+        icon={<FormatListBulleted />}
+      />
+      <ListToolbarButton
+        type={getPluginType(editor, ELEMENT_OL)}
+        icon={<FormatListNumbered />}
+      />
     </Toolbar>
   );
 };

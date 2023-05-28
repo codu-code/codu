@@ -3,7 +3,7 @@ import { FormatBold } from "@styled-icons/material/FormatBold";
 import { FormatItalic } from "@styled-icons/material/FormatItalic";
 import { FormatUnderlined } from "@styled-icons/material/FormatUnderlined";
 import { Link as LinkIcon } from "@styled-icons/material/Link";
-import { TextFields, Title } from "@styled-icons/material";
+import { TextFields, Title, Keyboard } from "@styled-icons/material";
 import { Editor } from "slate";
 import {
   BalloonToolbar,
@@ -16,6 +16,7 @@ import {
   // ELEMENT_LINK,
   ELEMENT_H4,
   ELEMENT_H3,
+  MARK_KBD,
   MarkToolbarButton,
   WithPartial,
   usePlateEditorRef,
@@ -83,6 +84,11 @@ const HooveringToolbar = (
         icon={<TextFields />}
         actionHandler="onMouseDown"
       />
+      <MarkToolbarButton
+      type={getPluginType(editor, MARK_KBD)}
+      icon={<Keyboard />}
+       actionHandler="onMouseDown"
+    />
       {/* <ToolbarButton
         icon={<FormatSize />}
         onMouseDown={(event) => {

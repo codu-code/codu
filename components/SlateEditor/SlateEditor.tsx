@@ -14,6 +14,8 @@ import {
   // createFontSizePlugin,
   createHeadingPlugin,
   createItalicPlugin,
+   createListPlugin,
+   createTodoListPlugin,
   createParagraphPlugin,
   createPlugins,
   createStrikethroughPlugin,
@@ -24,6 +26,7 @@ import {
   createMediaEmbedPlugin,
   Plate,
   createSoftBreakPlugin,
+  createKbdPlugin,
 } from "@udecode/plate";
 import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
 // import { createLineBreakPlugin } from "./customPlugins/lineBreakPlugin";
@@ -53,6 +56,9 @@ const plugins = createPlugins<MyValue>(
     createSoftBreakPlugin(softBreakPlugin),
     createImagePlugin(),
     createMediaEmbedPlugin(),
+    createListPlugin(),
+    createKbdPlugin(),
+   createTodoListPlugin(),
   ],
   {
     components: plateUI,
