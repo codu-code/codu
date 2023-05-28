@@ -70,7 +70,6 @@ const HooveringToolbar = (
         actionHandler="onMouseDown"
       />
       <LinkToolbarButton
-        // type={getPluginType(editor, ELEMENT_LINK)}
         icon={<LinkIcon />}
         actionHandler="onMouseDown"
       />

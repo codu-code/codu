@@ -236,6 +236,10 @@ table {
   margin: 0!important;
 }
 
+.post_text_xl {
+  font-size: 1.5em;
+}
+
 /* Loading animation */
 .loader-dots div {
     animation-timing-function: cubic-bezier(0, 1, 1, 0);
@@ -256,6 +260,22 @@ table {
     left: 56px;
     animation: loader-dots3 0.6s infinite;
 }
+
+
+/* hacky solution to override plate styles  */
+
+input[placeholder="Paste link"] {
+    color: black;
+}
+
+input[placeholder="Text to display"] {
+    color: black;
+}
+
+.slate-kbd {
+  color: black
+}
+
 @keyframes loader-dots1 {
     0% {
         transform: scale(0);
@@ -280,4 +300,7 @@ table {
         transform: translate(24px, 0);
     }
 }
+
+
+
 
