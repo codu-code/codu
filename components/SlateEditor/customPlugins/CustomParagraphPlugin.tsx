@@ -24,7 +24,7 @@ export const CustomMenu = ({ editor }) => {
   const top = editor.selection && editor.selection.anchor ? `${editor.selection.anchor.offset * 20}px` : '0px';
 
   return (
-    <div >
+   <div style={{ position: 'relative', display: 'flex', alignItems: 'center', backgroundColor: 'pink' }}>
       {showPlus && 
         <span
           onClick={() => {
@@ -33,13 +33,18 @@ export const CustomMenu = ({ editor }) => {
           }}
           style={{
             cursor: 'pointer',
+            position: 'absolute',
+            left: '10px',
+            top: '-2px'
           }}
         >
-          +
+          <AddCircleOutline size="24" color="white" />
         </span>
       }
       {show && 
-        <ExpandingToolbar />
+        <div style={{ position: 'absolute', top: '-6px', left: '40px',   }}> 
+          <ExpandingToolbar />
+        </div>
       }
     </div>
   )
