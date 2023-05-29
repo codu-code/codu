@@ -34,17 +34,26 @@ const createMenuData = (title: string, username: string, url: string) => [
   },
 ];
 
+interface CopyToClipboardOption {
+  label: string;
+  href: string;
+}
+
 const ArticlePage: NextPage = ({
   slug,
   host,
   post,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { data: session } = useSession();
-  const [copied, setCopied] = React.useState(false);
-  const [copyToClipboard, setCopyToClipboard] = useState({
-    label: "",
-    href: "",
-  });
+  const [copied, setCopied] = useState<boolean>(false);
+  const [copyToClipboard, setCopyToClipboard] = useState<CopyToClipboardOption>(
+    {
+      label: "",
+      href: "",
+    }
+  );
+
+  const { label, href } = copyToClipboard;
 
   useEffect(() => {
     setCopyToClipboard({
@@ -93,9 +102,9 @@ const ArticlePage: NextPage = ({
   };
 
   const handleCopyToClipboard = (e: React.FormEvent) => {
-    if (optionsData[2].label.includes("Copy to clipboard")) {
+    if (label.includes("Copy to clipboard") || label.includes("Copied!")) {
       e.preventDefault();
-      copy(location.href);
+      copy(href);
       setCopied(true);
     }
   };
@@ -108,7 +117,9 @@ const ArticlePage: NextPage = ({
     `https://${host}/articles/${post.slug}`
   );
 
-  optionsData.push(copyToClipboard);
+  if (label.length > 0) {
+    optionsData.push(copyToClipboard);
+  }
 
   const ast = Markdoc.parse(post.body);
   const content = Markdoc.transform(ast, config);
