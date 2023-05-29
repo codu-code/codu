@@ -7,6 +7,7 @@ import { CustomFontSizeComponent } from "./customPlugins/createFontSizePlugin";
 import ExpandingToolbar from "./customPlugins/ExpandingMenu";
 import {
   createLinkPlugin,
+  createBasicElementsPlugin,
   createBlockquotePlugin,
   createBoldPlugin,
   createCodeBlockPlugin,
@@ -36,6 +37,7 @@ import { editableProps } from "./editableProps";
 import { MyValue } from "./plateTypes";
 import { plateUI } from "./plateUI";
 import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
+import createCustomCodePlugin from "./customPlugins/createCustomCodeBlockPlugin";
 
 const plugins = createPlugins<MyValue>(
   [
@@ -45,6 +47,8 @@ const plugins = createPlugins<MyValue>(
     createCodeBlockPlugin({
       component: plateUI.CodeBlockElement,
     }),
+    // createCodeBlockPlugin(),
+    // createCustomCodePlugin(),
     createFontSizePlugin({ component: plateUI.CustomFontSizeComponent,}),
     createHeadingPlugin(),
     createBoldPlugin(),
@@ -58,7 +62,8 @@ const plugins = createPlugins<MyValue>(
     createMediaEmbedPlugin(),
     createListPlugin(),
     createKbdPlugin(),
-   createTodoListPlugin(),
+    // createBasicElementsPlugin(),
+  //  createTodoListPlugin(),
   ],
   {
     components: plateUI,

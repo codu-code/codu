@@ -37,3 +37,17 @@ export const config: HtmlToSlateConfig = {
   filterWhitespaceNodes: true,
   convertBrToLineBreak: false,
 }
+
+//    p: ({ node, children = [] }) => {
+//   const hasFontSize = node.children[0].fontSize;
+  
+//   if (!hasFontSize) {
+//     const element = new domhandler_1.Element('p', {}, []);
+//     element.children = children;
+//     return element;
+//   }
+  
+//   const className = 'post_text_xl';
+//   const element = new domhandler_1.Element('p', { class: className }, children);
+//   return element;
+// },

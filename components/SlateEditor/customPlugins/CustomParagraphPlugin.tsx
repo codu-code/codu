@@ -58,7 +58,7 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
   if (element.type === ELEMENT_PARAGRAPH && Node.string(element) === '') {
     return (
       <>
-      <p {...attributes}>
+      <p className="py-1" {...attributes}>
         <CustomMenu editor={editor} />
         {children}
       </p>
@@ -67,7 +67,7 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
     );
   }
 
-  return <p {...attributes}>{children}</p>;
+  return <p className="py-1" {...attributes}>{children}</p>;
 };
 
 // Define the custom paragraph plugin

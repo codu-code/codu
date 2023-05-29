@@ -133,6 +133,7 @@ import {
   export type MyInlineDescendant = MyInlineElement | RichText;
   export type MyInlineChildren = MyInlineDescendant[];
   
+  
   /**
    * Block props
    */

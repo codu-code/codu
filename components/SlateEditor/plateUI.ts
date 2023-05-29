@@ -4,13 +4,15 @@ import {
     ELEMENT_CODE_BLOCK,
     ELEMENT_MEDIA_EMBED,
     ELEMENT_PARAGRAPH,
+    ELEMENT_OL,
+    ELEMENT_UL,
+    ELEMENT_LI,
     MARK_FONT_SIZE,
     MediaEmbedElement,
     StyledElement,
     withProps,
   } from '@udecode/plate';
-  import { CustomFontSizeComponent } from './customPlugins/createFontSizePlugin';
-  import { createCustomParagraphPlugin, CustomParagraphComponent } from './customPlugins/CustomParagraphPlugin';
+  import { CustomParagraphComponent } from './customPlugins/CustomParagraphPlugin';
 
   export const plateUI = createPlateUI({
   [ELEMENT_MEDIA_EMBED]: withProps(MediaEmbedElement, {
