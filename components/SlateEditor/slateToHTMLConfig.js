@@ -52,7 +52,7 @@ exports.config = {
         allow:
           "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
         allowfullscreen: "",
-        // style: "width:100%; aspect-ratio: '16 / 9'"
+        style: "width:100%; aspect-ratio: '16 / 9'"
       });
 
       const div = new domhandler_1.Element("div", {}, [iframe]);

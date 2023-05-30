@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { slateToHtml } from "slate-serializers";
 import { sanitize } from "dompurify";
 import HooveringToolbar from "./HooveringToolbar";
@@ -10,11 +10,10 @@ import {
   createBoldPlugin,
   createCodeBlockPlugin,
   createCodePlugin,
-  // createFontSizePlugin,
   createHeadingPlugin,
   createItalicPlugin,
-   createListPlugin,
-   createTodoListPlugin,
+  createListPlugin,
+  createTodoListPlugin,
   createParagraphPlugin,
   createPlugins,
   createStrikethroughPlugin,
@@ -26,6 +25,10 @@ import {
   Plate,
   createSoftBreakPlugin,
   createKbdPlugin,
+  serializeHtml,
+  createPlateEditor,
+  usePlateEditorState,
+  useEditorRef, usePlateActions, createDeserializeHtmlPlugin
 } from "@udecode/plate";
 import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
 // import { createLineBreakPlugin } from "./customPlugins/lineBreakPlugin";
@@ -66,6 +69,7 @@ const plugins = createPlugins<MyValue>(
     createMediaEmbedPlugin(),
     createListPlugin(),
     createKbdPlugin(),
+    createDeserializeHtmlPlugin(),
     // createBasicElementsPlugin(),
   //  createTodoListPlugin(),
   ],
@@ -74,10 +78,21 @@ const plugins = createPlugins<MyValue>(
   }
 );
 
+
+
 const SlateEditor = ({ onChange: _onChange, initialValue }) => {
   // console.log(linkPlugin)
   const [value, setValue] = useState(initialValue);
+  // Instantiate the editor
+  // const editor = useMemo(() => createPlateEditor({ plugins }), [plugins]);
 
+  // Get reference to editor
+  // const editorRef = useEditorRef();
+
+  // useEffect(() => {
+  //   // Set editor reference
+  //   editorRef.current = editor;
+  // }, [editor]);
 
   const handleChange = useCallback(
     (nextValue) => {
@@ -91,6 +106,29 @@ const SlateEditor = ({ onChange: _onChange, initialValue }) => {
     },
     [_onChange]
   );
+
+  // const handleChange = useCallback(
+  //   (nextValue) => {
+  //     setValue(nextValue);
+  //   },
+  //   []
+  // );
+
+  // const handleChange = useCallback(
+  //   (nextValue) => {
+  //     setValue(nextValue);
+  //     _onChange(JSON.stringify(nextValue));
+  //   },
+  //   [_onChange]
+  // );
+
+//  useEffect(() => {
+//     if (editor) {
+//       const html = serializeHtml(editor, { nodes: value });
+//       console.log(html);
+//       _onChange(html);
+//     }
+//   }, [editor, value, _onChange]);
 
   return (
     <>
