@@ -13,6 +13,7 @@ import {
     withProps,
   } from '@udecode/plate';
   import { CustomParagraphComponent } from './customPlugins/CustomParagraphPlugin';
+  import { CustomCodeBlockComponent } from './customPlugins/createCustomCodeBlockPlugin';
 
   export const plateUI = createPlateUI({
   [ELEMENT_MEDIA_EMBED]: withProps(MediaEmbedElement, {

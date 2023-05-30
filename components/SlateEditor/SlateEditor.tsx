@@ -3,8 +3,6 @@ import { slateToHtml } from "slate-serializers";
 import { sanitize } from "dompurify";
 import HooveringToolbar from "./HooveringToolbar";
 import {config} from './slateToHTMLConfig'
-import { CustomFontSizeComponent } from "./customPlugins/createFontSizePlugin";
-import ExpandingToolbar from "./customPlugins/ExpandingMenu";
 import {
   createLinkPlugin,
   createBasicElementsPlugin,
@@ -37,19 +35,22 @@ import { editableProps } from "./editableProps";
 import { MyValue } from "./plateTypes";
 import { plateUI } from "./plateUI";
 import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
-import createCustomCodePlugin from "./customPlugins/createCustomCodeBlockPlugin";
-
+import { createCustomCodeBlockPlugin } from "./customPlugins/createCustomCodeBlockPlugin";
+import { createCustomBlockquotePlugin } from "./customPlugins/createBlockQuotePlugin";
 const plugins = createPlugins<MyValue>(
   [
     // createParagraphPlugin(),
     createCustomParagraphPlugin({ component: plateUI.CustomParagraphComponent,}),
-    createBlockquotePlugin(),
-    createCodeBlockPlugin({
-      component: plateUI.CodeBlockElement,
-    }),
+    // createBlockquotePlugin(),
+    createCustomBlockquotePlugin(),
+    // createCodeBlockPlugin({
+    //   component: plateUI.CodeBlockElement,
+    // }),
     // createCodeBlockPlugin(),
-    // createCustomCodePlugin(),
-    createFontSizePlugin({ component: plateUI.CustomFontSizeComponent,}),
+    createCustomCodeBlockPlugin({
+       component: plateUI.CodeBlockElement,
+    }),
+    // createFontSizePlugin({ component: plateUI.CustomFontSizeComponent,}),
     createHeadingPlugin(),
     createBoldPlugin(),
     createItalicPlugin(),

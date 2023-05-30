@@ -1,13 +1,56 @@
-import { createPluginFactory, HotkeyPlugin } from '@udecode/plate-common';
 import { Transforms, Editor, Path } from 'slate';
+import {
+  createPluginFactory,
+  HotkeyPlugin,
+  onKeyDownToggleElement,
+  getLastChildPath,
+  getLastChild
+} from '@udecode/plate-common';
 
 export const ELEMENT_BLOCKQUOTE = 'blockquote';
 
-/**
- * Enables support for block quotes, useful for
- * quotations and passages.
- */
-const createBlockquotePlugin = createPluginFactory<HotkeyPlugin>({
+const isLastNodeInEditor = (editor) => {
+  const lastChild = getLastChild([editor, []]);
+  
+  if (lastChild) {
+    console.log(lastChild)
+    const [lastNode, lastPath] = lastChild;
+    return Path.equals(lastPath, Editor.path(editor, []));
+  }
+  // If no last child found, consider as false
+  return false;
+};
+
+
+const withCustomBlockquote = (editor) => {
+  console.log('custom block quote')
+  const { apply } = editor;
+
+  editor.apply = (operation) => {
+    // console.log(operation.type)
+    // console.log(operation)
+    apply(operation);
+
+    if (operation.type === 'set_node' && operation.newProperties.type === ELEMENT_BLOCKQUOTE) {
+      console.log('insert blockquote')
+
+      const emptyNode = { type: 'p', children: [{ text: '' }] };
+      const lastChildPath = getLastChildPath([editor, []]);
+
+      if (lastChildPath) {
+        Transforms.insertNodes(editor, emptyNode, { at: Path.next(lastChildPath) });
+      } else {
+        // Fallback if no child node is found
+        Transforms.insertNodes(editor, emptyNode);
+      }
+    }
+  }
+
+  return editor;
+};
+
+
+export const createCustomBlockquotePlugin = createPluginFactory<HotkeyPlugin>({
   key: ELEMENT_BLOCKQUOTE,
   isElement: true,
   deserializeHtml: {
@@ -17,45 +60,11 @@ const createBlockquotePlugin = createPluginFactory<HotkeyPlugin>({
       },
     ],
   },
+  handlers: {
+    onKeyDown: onKeyDownToggleElement,
+  },
   options: {
     hotkey: 'mod+shift+.',
   },
-  handlers: {
-    onKeyDown: (editor, event) => {
-      if (event.key === '.' && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-
-        // The behavior of the original onKeyDownToggleElement is simplified
-        // here for the sake of clarity.
-        const isActive = !!Editor.nodes(editor, {
-          match: n => n.type === 'blockquote',
-        }).length;
-
-        Transforms.setNodes(
-          editor,
-          { type: isActive ? 'paragraph' : 'blockquote' },
-          { match: n => Editor.isBlock(editor, n) }
-        );
-
-        const [match] = Editor.nodes(editor, {
-          match: n => n.type === 'blockquote',
-        });
-
-        if (match) {
-          const [node, path] = match;
-          // Check if the blockquote is the last node
-          if (Editor.isEnd(editor, path)) {
-            // Add a new paragraph after the blockquote
-            Transforms.insertNodes(
-              editor,
-              { type: 'paragraph', children: [{ text: '' }] },
-              { at: Path.next(path), select: true }
-            );
-          }
-        }
-      }
-    },
-  },
+  withOverrides: withCustomBlockquote
 });
-
-export const createCustomBlockquotePlugin = createBlockquotePlugin;

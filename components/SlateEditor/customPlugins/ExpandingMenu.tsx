@@ -1,4 +1,5 @@
 import React from 'react';
+import {Transforms} from 'slate'
 import { Toolbar, ToolbarProps, WithPartial } from '@udecode/plate';
 import { getPluginType, usePlateEditorRef, MARK_BOLD, MarkToolbarButton,
   LinkToolbarButton,
@@ -13,7 +14,7 @@ import { getPluginType, usePlateEditorRef, MARK_BOLD, MarkToolbarButton,
   ImageToolbarButton,
   ListToolbarButton,
   MediaEmbedToolbarButton, } from '@udecode/plate';
-import { FormatQuote } from "@styled-icons/material";
+import { AddAlert, FormatQuote } from "@styled-icons/material";
 import { Code } from "@styled-icons/material";
 import { Image } from '@styled-icons/material/Image';
 import { FormatListBulleted } from '@styled-icons/material/FormatListBulleted';
@@ -30,13 +31,14 @@ const editor = usePlateEditorRef();
     color: "#ffffff",
     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
     borderRadius: "4px"
-  }}>
+  }} >
     <BlockToolbarButton
         type={getPluginType(editor, ELEMENT_BLOCKQUOTE)}
         icon={<FormatQuote />}
         actionHandler="onMouseDown"
+       
       />
-      <CodeBlockToolbarButton icon={<Code />} actionHandler="onMouseDown" tooltip={null}/>
+      <CodeBlockToolbarButton icon={<Code />} actionHandler="onMouseDown" tooltip={null} />
       <ImageToolbarButton icon={<Image />} />
       <MediaEmbedToolbarButton icon={<OndemandVideo />} />
       <ListToolbarButton
