@@ -22,7 +22,7 @@ import {
   PlateFloatingLink,
   SoftBreakPlugin,
   createImagePlugin,
-  createMediaEmbedPlugin,
+  // createMediaEmbedPlugin,
   Plate,
   createSoftBreakPlugin,
   createKbdPlugin,
@@ -37,6 +37,8 @@ import { plateUI } from "./plateUI";
 import { createFontSizePlugin } from "./customPlugins/createFontSizePlugin";
 import { createCustomCodeBlockPlugin } from "./customPlugins/createCustomCodeBlockPlugin";
 import { createCustomBlockquotePlugin } from "./customPlugins/createBlockQuotePlugin";
+import { createCustomImagePlugin } from "./customPlugins/createCustomImagePlugin";
+import { createMediaEmbedPlugin } from "./customPlugins/createCustomMediaPlugin";
 const plugins = createPlugins<MyValue>(
   [
     // createParagraphPlugin(),
@@ -59,7 +61,8 @@ const plugins = createPlugins<MyValue>(
     createCodePlugin(),
     createLinkPlugin(linkPlugin),
     createSoftBreakPlugin(softBreakPlugin),
-    createImagePlugin(),
+    // createImagePlugin(),
+    createCustomImagePlugin(),
     createMediaEmbedPlugin(),
     createListPlugin(),
     createKbdPlugin(),

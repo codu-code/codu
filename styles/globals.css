@@ -276,7 +276,7 @@ input[placeholder="Text to display"] {
   color: black
 }
 
-[class^="PlateFloatingLink"] {
+[class^="PlateFloatingLink"], [class^="PlateFloatingMedia"] {
     color: black;
 }
 
