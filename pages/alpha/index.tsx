@@ -3,7 +3,7 @@ import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import "atropos/css";
 import Atropos from "atropos/react";
-import space from "../../public/home/space.jpg";
+import Link from "next/link";
 
 const Home: NextPage = () => {
   return (
@@ -105,7 +105,23 @@ const Home: NextPage = () => {
               />
             </Atropos>
           </main>
-          <div className="pt-10 sm:pt-16 lg:pt-8 pb-14 px-4 sm:px-6 lg:px-8 lg:max-w-6xl lg:mx-auto"></div>
+          <section className="bg-neutral-300">
+            <div className="mx-auto max-w-7xl px-6 py-20 sm:py-32 lg:px-8">
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Sign up today to become a writer and
+                <br />
+                get a free invite to our Discord community.
+              </h2>
+              <div className="mt-10 flex items-center gap-x-6">
+                <Link href="/get-started" className="primary-button">
+                  Get started
+                </Link>
+                <a href="#" className="leading-6 text-gray-900 font-semibold">
+                  Learn more <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </section>
         </div>
       </Layout>
     </>
