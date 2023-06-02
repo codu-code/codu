@@ -59,19 +59,21 @@ const Home: NextPage = () => {
               stretchY={0.2}
               stretchZ={0.2}
               highlight={false}
-              className="h-[1000px] w-ful overflow-hidden relative"
+              className="h-[770px] sm:h-[1000px] w-ful overflow-hidden relative"
             >
               <img
-                className="absolute h-full w-full object-cover"
+                className="absolute h-full w-full object-cover -z-10"
                 src={"images/home/space.jpg"}
                 data-atropos-offset="-2"
+                alt="Realistic space sky which is black with stars scattered across."
               />
               <div data-atropos-offset="0" className="mt-60">
                 <img
                   src="/images/codu.svg"
-                  className="w-[400px] mx-auto object-contain"
+                  className="w-[240px] sm:w-[340px] mx-auto object-contain"
+                  alt="Codú logo"
                 />
-                <h1 className="text-7xl font-extrabold tracking-tight text-center text-white mt-8">
+                <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8">
                   A{" "}
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
                     space
@@ -79,18 +81,20 @@ const Home: NextPage = () => {
                   for coders
                 </h1>
               </div>
-              <img
-                className="h-[800px] w-[800px] mt-20 mx-auto brightness-75"
-                src={"images/home/moon.png"}
-                data-atropos-offset="1"
-              />
-
-              <img
-                className="h-[350px] w-[350px] absolute right-52 bottom-32"
-                src={"images/home/rocketman.png"}
-                data-atropos-offset="8"
-              />
-
+              <div className="relative md:h-[800px] md:w-[800px] mx-auto">
+                <img
+                  className="mt-8 md:mt-20 mx-auto brightness-75"
+                  src={"images/home/moon.png"}
+                  data-atropos-offset="1"
+                  alt="Photograph of the moon"
+                />
+                <img
+                  className="h-[280px] w-[280px] md:h-[350px] md:w-[350px] absolute right-0 md:-right-28 top-8"
+                  src={"images/home/rocketman.png"}
+                  data-atropos-offset="8"
+                  alt="3D claymation style model of a astronaut on a rocket"
+                />
+              </div>
               <div
                 className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-black"
                 data-atropos-offset="-2"
