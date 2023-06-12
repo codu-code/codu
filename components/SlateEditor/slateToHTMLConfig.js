@@ -24,7 +24,8 @@ const MARK_ELEMENT_TAG_MAP = {
   bold: ["strong"],
   underline: ["u"],
   italic: ["i"],
-  code: ["pre", "code"],
+  code_block: "pre",
+  code_line: "code",
 };
 exports.config = {
   markMap: MARK_ELEMENT_TAG_MAP,
@@ -45,6 +46,29 @@ exports.config = {
       );
       return element;
     },
+   code_block: ({ node, children = [] }) => {
+      // Check for language and add default if none is specified
+      const language = node.lang ? `language-${node.lang}` : 'language-none';
+      const preElement = new domhandler_1.Element(
+        "pre",
+        { class: language },
+        children
+      );
+      return preElement;
+    },
+    code_line: ({ node }) => {
+  // Extract the text from all child nodes that have a 'text' property
+  const text = node.children.filter(child => child.text).map(child => child.text).join('');
+  console.log(text)
+  const codeElement = new domhandler_1.Element(
+    "code",
+    {class: "block"},
+    [new domhandler_1.Text(text)]
+  );
+  
+  return codeElement;
+},
+
     media_embed: ({ node }) => {
       const iframe = new domhandler_1.Element("iframe", {
         src: node.url,
