@@ -5,6 +5,11 @@ import { HtmlToSlateConfig } from "slate-serializers";
 
 export const config: HtmlToSlateConfig = {
   elementTags: {
+    pre: (el) => ({
+      type: 'code_block',
+      lang: el.attribs.class?.split('-')[1] || null, 
+    }),
+    code: () => ({ type: 'code_line' }),
     a: (el) => ({
       type: 'a',
       newTab: el && getAttributeValue(el, 'target') === '_blank',
@@ -24,8 +29,8 @@ export const config: HtmlToSlateConfig = {
     ul: () => ({ type: 'ul' }),
   },
   textTags: {
-    code: () => ({ code: true }),
-    pre: () => ({ code: true }),
+    // code: () => ({ code: true }),
+    // pre: () => ({ code: true }),
     del: () => ({ strikethrough: true }),
     em: () => ({ italic: true }),
     i: () => ({ italic: true }),
@@ -33,7 +38,7 @@ export const config: HtmlToSlateConfig = {
     strong: () => ({ bold: true }),
     u: () => ({ underline: true }),
   },
-  htmlPreProcessString: (html) => html.replace(/<pre[^>]*>/g, '<code>').replace(/<\/pre>/g, '</code>'),
+  // htmlPreProcessString: (html) => html.replace(/<pre[^>]*>/g, '<code>').replace(/<\/pre>/g, '</code>'),
   filterWhitespaceNodes: true,
   convertBrToLineBreak: false,
 }
