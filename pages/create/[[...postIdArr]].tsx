@@ -252,41 +252,57 @@ const Create: NextPage = () => {
 function replaceEmptyTags(html) {
   return html.replace(/<p>\s*<\/p>/g, '<br />');
 }
-// useEffect(() => {
-//   if (isNewPost) {
-//     setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
-//   } else if (data) {
-//     const { body } = data;
-//     console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
-//     console.log(parse(body), 'parsing')
-//     setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
-//   }
-// }, [data, isNewPost, ]);
 
-
-// useEffect(() => {
-//   if(viewPreview === true){
-//     console.log(body)
-//     console.log('setting as new initial: ', htmlToSlate(body, htmlToSlateConfig))
-
-//     setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
-//   }
-// }, [viewPreview]);
-
+function updateImageNodes(nodes) {
+  for (let node of nodes) {
+    if (node.type === 'img') {
+      node.children = [{ text: '' }];
+    }
+  
+    if (Array.isArray(node.children)) {
+      updateImageNodes(node.children);
+    }
+  }
+}
 
 useEffect(() => {
   if (isNewPost) {
-    setSlateInitialValue([{ type: 'p', children: [{ text: '' }] }]);
-  } else if (data && data.body) {
-    setSlateInitialValue(JSON.parse(data.body));
+    setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
+  } else if (data) {
+    const { body } = data;
+    console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
+    console.log(parse(body), 'parsing')
+    setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
   }
-}, [data?.body, isNewPost]);
+}, [data, isNewPost, ]);
+
 
 useEffect(() => {
-  if (viewPreview === true) {
-    setSlateInitialValue(JSON.parse(body));
+  if(viewPreview === true){
+    console.log('parsing this', body);
+    const slateValue = htmlToSlate(body, htmlToSlateConfig)
+    console.log(slateValue, 'slate value')
+    updateImageNodes(slateValue);
+    console.log('setting as new initial: ', slateValue)
+    setSlateInitialValue(slateValue);
   }
 }, [viewPreview]);
+
+
+
+// useEffect(() => {
+//   if (isNewPost) {
+//     setSlateInitialValue([{ type: 'p', children: [{ text: '' }] }]);
+//   } else if (data && data.body) {
+//     setSlateInitialValue(JSON.parse(data.body));
+//   }
+// }, [data?.body, isNewPost]);
+
+// useEffect(() => {
+//   if (viewPreview === true) {
+//     setSlateInitialValue(JSON.parse(body));
+//   }
+// }, [viewPreview]);
 
 
   return (
@@ -528,7 +544,7 @@ useEffect(() => {
                                 }
                               )} */}
                               <div className="slateP">
-                                {parse(replaceEmptyTags(slateToHtml(JSON.parse(body), slateToHTMLConfig)))}
+                                {parse(replaceEmptyTags(body))}
                               </div>
 
                             </article>

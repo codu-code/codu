@@ -84,29 +84,31 @@ exports.config = {
       return div;
     },
     img: ({ node }) => {
+  const baseAttrs = {
+    src: node.url
+  };
+
+  if(node.width) {
+    baseAttrs.width = `${node.width}`;
+  }
+
   // If a caption is present, create a figure with an img and figcaption inside
   if (node.caption) {
-    const imgElement = new domhandler_1.Element("img", {
-      src: node.url,
-      width: node.width ? `${node.width}` : null
-    });
+    const imgElement = new domhandler_1.Element("img", baseAttrs);
 
     const figCaptionElement = new domhandler_1.Element("figcaption", {class: "text-center"}, [new domhandler_1.Text(node.caption[0].text)]);
 
     const figureElement = new domhandler_1.Element("figure", {class: "flex flex-col items-center"}, [imgElement, figCaptionElement]);
-
 
     return figureElement;
   } 
 
   // Otherwise, just create an img
   else {
-    return new domhandler_1.Element("img", {
-      src: node.url,
-      width: node.width ? `${node.width}` : null
-    });
+    return new domhandler_1.Element("img", baseAttrs);
   }
 }
+
 
   },
   encodeEntities: true,

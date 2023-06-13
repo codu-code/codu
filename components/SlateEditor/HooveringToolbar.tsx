@@ -4,7 +4,7 @@ import { FormatItalic } from "@styled-icons/material/FormatItalic";
 import { FormatUnderlined } from "@styled-icons/material/FormatUnderlined";
 import { Link as LinkIcon } from "@styled-icons/material/Link";
 import { TextFields, Title, Keyboard } from "@styled-icons/material";
-import { Editor } from "slate";
+
 import {
   BalloonToolbar,
   BalloonToolbarProps,
@@ -12,8 +12,6 @@ import {
   MARK_BOLD,
   MARK_ITALIC,
   MARK_UNDERLINE,
-  // MARK_FONT_SIZE,
-  // ELEMENT_LINK,
   ELEMENT_H4,
   ELEMENT_H3,
   MARK_KBD,
@@ -25,7 +23,6 @@ import {
   BlockToolbarButton,
   CodeBlockToolbarButton,
   ELEMENT_BLOCKQUOTE,
-  // UseVirtualFloatingOptions
 } from "@udecode/plate";
 import { applyFontSize } from "./customPlugins/createFontSizePlugin";
 
@@ -83,11 +80,11 @@ const HooveringToolbar = (
         icon={<TextFields />}
         actionHandler="onMouseDown"
       />
-      <MarkToolbarButton
+      {/* <MarkToolbarButton
       type={getPluginType(editor, MARK_KBD)}
       icon={<Keyboard />}
        actionHandler="onMouseDown"
-    />
+    /> */}
       {/* <ToolbarButton
         icon={<FormatSize />}
         onMouseDown={(event) => {
