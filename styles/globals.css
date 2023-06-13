@@ -296,6 +296,10 @@ input[placeholder="Text to display"] {
   width: 25%;
 }
 
+.slate-ImageElement-caption {
+  max-height: 22px;
+}
+
 /* .code {
     position: relative;
     padding: 10px;

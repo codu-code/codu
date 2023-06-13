@@ -270,9 +270,12 @@ useEffect(() => {
     setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
   } else if (data) {
     const { body } = data;
-    console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
-    console.log(parse(body), 'parsing')
-    setSlateInitialValue(htmlToSlate(body, htmlToSlateConfig));
+    const slateValue = htmlToSlate(body, htmlToSlateConfig)
+    // console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
+    // console.log(parse(body), 'parsing')
+    updateImageNodes(slateValue);
+    console.log('setting as new initial: ', slateValue)
+    setSlateInitialValue(slateValue);
   }
 }, [data, isNewPost, ]);
 
