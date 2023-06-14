@@ -39,13 +39,13 @@ const Nav = () => {
     <Disclosure as="nav" className="bg-black">
       {({ open }) => (
         <>
-          <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative z-10 px-4 mx-auto sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <span className="sr-only">Codú</span>
                   <Link
-                    className="hidden lg:flex items-baseline h-8 w-auto"
+                    className="items-baseline hidden w-auto h-8 lg:flex"
                     href="/"
                   >
                     <Image
@@ -59,7 +59,7 @@ const Nav = () => {
                     <span className="ml-2 text-xs font-semibold">Beta</span>
                   </Link>
                   <div className="flex">
-                    <Link className="flex lg:hidden w-auto items-end" href="/">
+                    <Link className="flex items-end w-auto lg:hidden" href="/">
                       <span className="sr-only">Codú</span>
                       <svg className="h-8" viewBox="0 0 694 829" fill="none">
                         <path
@@ -73,7 +73,7 @@ const Nav = () => {
                   </div>
                 </div>
 
-                <div className="hidden md:block md:ml-6 text-sm lg:text-base font-medium">
+                <div className="hidden text-sm font-medium md:block md:ml-6 lg:text-base">
                   <div className="flex space-x-4">
                     {navigation.map((item) =>
                       item.href.includes("http") ? (
@@ -82,13 +82,13 @@ const Nav = () => {
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
+                          className="px-3 py-2 rounded-md text-neutral-300 hover:bg-neutral-900 hover:text-white"
                         >
                           {item.name}
                         </a>
                       ) : (
                         <Link
-                          className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
+                          className="px-3 py-2 rounded-md text-neutral-300 hover:bg-neutral-900 hover:text-white"
                           key={item.name}
                           href={item.href}
                         >
@@ -100,33 +100,33 @@ const Nav = () => {
                 </div>
               </div>
               <div className="hidden md:ml-6 md:block">
-                <div className="flex items-center text-sm lg:text-base font-medium">
+                <div className="flex items-center text-sm font-medium lg:text-base">
                   {session ? (
                     <>
                       <Link
-                        className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
+                        className="px-3 py-2 rounded-md text-neutral-300 hover:bg-neutral-900 hover:text-white"
                         href="/my-posts"
                       >
                         Your Posts
                       </Link>
                       <Link
-                        className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="inline-flex items-center justify-center px-4 py-2 ml-4 font-medium text-white rounded-md shadow-sm flex-inline bg-gradient-to-r from-orange-400 to-pink-600 hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                         href="/create"
                       >
-                        <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                        <PlusSmIcon className="w-5 h-5 p-0 mr-1 -ml-2 text-white" />
                         New Post
                       </Link>
                     </>
                   ) : (
                     <>
                       <button
-                        className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
+                        className="px-3 py-2 rounded-md text-neutral-300 hover:bg-neutral-900 hover:text-white"
                         onClick={() => signIn()}
                       >
                         Sign in
                       </button>
                       <button
-                        className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="inline-flex justify-center px-4 py-2 ml-4 font-medium text-white rounded-md shadow-sm bg-gradient-to-r from-orange-400 to-pink-600 hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
                         onClick={() => signIn()}
                       >
                         Sign up for free
@@ -139,26 +139,26 @@ const Nav = () => {
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative ml-3 flex-shrink-0 rounded-full bg-black p-1 text-neutral-400 hover:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                        className="relative flex-shrink-0 p-1 ml-3 bg-black rounded-full text-neutral-400 hover:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
-                          <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                          <div className="absolute w-2 h-2 bg-pink-500 rounded-full animate-pulse right-1 top-1" />
                         )}
-                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                        <BellIcon className="w-6 h-6" aria-hidden="true" />
                       </Link>
-                      <Menu as="div" className="ml-4 relative">
+                      <Menu as="div" className="relative ml-4">
                         <div>
-                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-800 focus:ring-white">
+                          <Menu.Button className="flex text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-800 focus:ring-white">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
-                                className="h-10 w-10 rounded-full bg-neutral-300 object-cover"
+                                className="object-cover w-10 h-10 rounded-full bg-neutral-300"
                                 src={session?.user?.image}
                                 alt={`${session.user?.name}'s avatar`}
                               />
                             ) : (
-                              <div className="h-10 w-10 rounded-full bg-black flex justify-center items-center">
+                              <div className="flex items-center justify-center w-10 h-10 bg-black rounded-full">
                                 {session.user?.name?.[0] || "C"}
                               </div>
                             )}
@@ -173,7 +173,7 @@ const Nav = () => {
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                          <Menu.Items className="absolute right-0 w-48 px-1 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {item.onClick ? (
@@ -187,7 +187,7 @@ const Nav = () => {
                                   </button>
                                 ) : (
                                   <Link
-                                    className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 rounded"
+                                    className="block px-4 py-2 text-sm rounded text-neutral-700 hover:bg-neutral-200"
                                     href={item.href || ""}
                                   >
                                     {item.name}
@@ -198,36 +198,39 @@ const Nav = () => {
                           </Menu.Items>
                         </Transition>
                       </Menu>
+                      <span className="ml-3 text-neutral-400 hover:text-neutral-300">
+                        (69)
+                      </span>
                     </>
                   )}
                 </div>
               </div>
-              <div className="-mr-2 flex items-center md:hidden">
+              <div className="flex items-center -mr-2 md:hidden">
                 <Link
                   title="Notifications"
                   href="/notifications"
-                  className="relative block mr-3 flex-shrink-0 rounded-md bg-black p-2 text-neutral-400 hover:text-neutral-300 hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
+                  className="relative flex-shrink-0 block p-2 mr-3 bg-black rounded-md text-neutral-400 hover:text-neutral-300 hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
-                    <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                    <div className="absolute w-2 h-2 bg-pink-500 rounded-full animate-pulse right-1 top-1" />
                   )}
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
+                  <BellIcon className="w-6 h-6" aria-hidden="true" />
                 </Link>
                 {/* Mobile menu button */}
                 <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
-                    <XIcon className="block h-6 w-6" aria-hidden="true" />
+                    <XIcon className="block w-6 h-6" aria-hidden="true" />
                   ) : (
-                    <MenuIcon className="block h-6 w-6" aria-hidden="true" />
+                    <MenuIcon className="block w-6 h-6" aria-hidden="true" />
                   )}
                 </Disclosure.Button>
               </div>
             </div>
           </div>
 
-          <Disclosure.Panel className="md:hidden relative z-10 border-b-2 border-white">
+          <Disclosure.Panel className="relative z-10 border-b-2 border-white md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navigation.map((item) =>
                 item.href.includes("http") ? (
@@ -237,7 +240,7 @@ const Nav = () => {
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-neutral-300 hover:bg-neutral-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                    className="block px-3 py-2 text-base font-medium rounded-md text-neutral-300 hover:bg-neutral-900 hover:text-white"
                   >
                     {item.name}
                   </Disclosure.Button>
@@ -245,7 +248,7 @@ const Nav = () => {
                   <Link key={item.name} href={item.href}>
                     <Disclosure.Button
                       as="div"
-                      className="text-neutral-300 hover:bg-neutral-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                      className="block px-3 py-2 text-base font-medium rounded-md text-neutral-300 hover:bg-neutral-900 hover:text-white"
                     >
                       {item.name}
                     </Disclosure.Button>
@@ -253,7 +256,7 @@ const Nav = () => {
                 )
               )}
 
-              <div className="pt-3 pb-3 border-t border-neutral-700 flex  flex-col space-y-1">
+              <div className="flex flex-col pt-3 pb-3 space-y-1 border-t border-neutral-700">
                 {session ? (
                   <>
                     {userSubNav.map((item) => (
@@ -298,7 +301,7 @@ const Nav = () => {
                   <div className="flex items-center px-5">
                     <div className="flex-shrink-0">
                       <img
-                        className="h-10 w-10 rounded-full"
+                        className="w-10 h-10 rounded-full"
                         src={session.user?.image || "/images/person.png"}
                         alt={`${session.user?.name}'s avatar`}
                       />
@@ -319,7 +322,7 @@ const Nav = () => {
                           key={item.name}
                           as="button"
                           onClick={item.onClick}
-                          className="cursor-pointer block w-full text-left px-3 py-2 rounded-md text-base font-medium text-neutral-400 hover:text-white hover:bg-neutral-900"
+                          className="block w-full px-3 py-2 text-base font-medium text-left rounded-md cursor-pointer text-neutral-400 hover:text-white hover:bg-neutral-900"
                         >
                           {item.name}
                         </Disclosure.Button>
@@ -327,7 +330,7 @@ const Nav = () => {
                         <Link key={item.name} href={item.href}>
                           <Disclosure.Button
                             as="div"
-                            className="cursor-pointer block px-3 py-2 rounded-md text-base font-medium text-neutral-400 hover:text-white hover:bg-neutral-900"
+                            className="block px-3 py-2 text-base font-medium rounded-md cursor-pointer text-neutral-400 hover:text-white hover:bg-neutral-900"
                           >
                             {item.name}
                           </Disclosure.Button>
