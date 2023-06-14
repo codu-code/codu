@@ -300,6 +300,13 @@ input[placeholder="Text to display"] {
   max-height: 22px;
 }
 
+.slate-ul {
+  list-style-type: disc;
+}
+
+.slate-ol {
+  list-style-type: decimal;
+}
 /* .code {
     position: relative;
     padding: 10px;
