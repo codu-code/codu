@@ -1,4 +1,15 @@
-"use strict";
+import {
+  parseCustomIframeUrl,
+  youtubeRegex,
+  codepenRegex,
+  codesandboxRegex,
+} from "./customPlugins/utils/customParseIframeUrl";
+import { createYoutubeIframe } from "./customPlugins/mediaEmbed/components/Youtube";
+import { createCodepenIframe } from "./customPlugins/mediaEmbed/components/Codepen";
+import { createCodeSandboxIframe } from "./customPlugins/mediaEmbed/components/CodeSandbox";
+import { createGenericIframe } from "./customPlugins/mediaEmbed/components/GenericIframe";
+
+("use strict");
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = void 0;
 const domhandler_1 = require("domhandler");
@@ -46,9 +57,9 @@ exports.config = {
       );
       return element;
     },
-   code_block: ({ node, children = [] }) => {
+    code_block: ({ node, children = [] }) => {
       // Check for language and add default if none is specified
-      const language = node.lang ? `language-${node.lang}` : 'language-none';
+      const language = node.lang ? `language-${node.lang}` : "language-none";
       const preElement = new domhandler_1.Element(
         "pre",
         { class: language },
@@ -57,59 +68,64 @@ exports.config = {
       return preElement;
     },
     code_line: ({ node }) => {
-  // Extract the text from all child nodes that have a 'text' property
-  const text = node.children.filter(child => child.text).map(child => child.text).join('');
-  console.log(text)
-  const codeElement = new domhandler_1.Element(
-    "code",
-    {class: "block"},
-    [new domhandler_1.Text(text)]
-  );
-  
-  return codeElement;
-},
+      // Extract the text from all child nodes that have a 'text' property
+      const text = node.children
+        .filter((child) => child.text)
+        .map((child) => child.text)
+        .join("");
+      console.log(text);
+      const codeElement = new domhandler_1.Element("code", { class: "block" }, [
+        new domhandler_1.Text(text),
+      ]);
 
-    media_embed: ({ node }) => {
-      const iframe = new domhandler_1.Element("iframe", {
-        src: node.url,
-        frameborder: "0",
-        allow:
-          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-        allowfullscreen: "",
-        style: "width:100%; aspect-ratio: '16 / 9'"
-      });
-
-      const div = new domhandler_1.Element("div", {}, [iframe]);
-
-      return div;
+      return codeElement;
     },
+    media_embed: ({ node }) => {
+      const processedUrl = parseCustomIframeUrl(node.url);
+      if (processedUrl.match(youtubeRegex)) {
+        return createYoutubeIframe(processedUrl);
+      } else if (processedUrl.match(codepenRegex)) {
+        return createCodepenIframe(processedUrl);
+      } else if (processedUrl.match(codesandboxRegex)) {
+        return createCodeSandboxIframe(processedUrl);
+      } else {
+        return createGenericIframe(processedUrl)
+      }
+    },
+
     img: ({ node }) => {
-  const baseAttrs = {
-    src: node.url
-  };
+      const baseAttrs = {
+        src: node.url,
+      };
 
-  if(node.width) {
-    baseAttrs.width = `${node.width}`;
-  }
+      if (node.width) {
+        baseAttrs.width = `${node.width}`;
+      }
 
-  // If a caption is present, create a figure with an img and figcaption inside
-  if (node.caption) {
-    const imgElement = new domhandler_1.Element("img", baseAttrs);
+      // If a caption is present, create a figure with an img and figcaption inside
+      if (node.caption) {
+        const imgElement = new domhandler_1.Element("img", baseAttrs);
 
-    const figCaptionElement = new domhandler_1.Element("figcaption", {class: "text-center"}, [new domhandler_1.Text(node.caption[0].text)]);
+        const figCaptionElement = new domhandler_1.Element(
+          "figcaption",
+          { class: "text-center" },
+          [new domhandler_1.Text(node.caption[0].text)]
+        );
 
-    const figureElement = new domhandler_1.Element("figure", {class: "flex flex-col items-center"}, [imgElement, figCaptionElement]);
+        const figureElement = new domhandler_1.Element(
+          "figure",
+          { class: "flex flex-col items-center" },
+          [imgElement, figCaptionElement]
+        );
 
-    return figureElement;
-  } 
+        return figureElement;
+      }
 
-  // Otherwise, just create an img
-  else {
-    return new domhandler_1.Element("img", baseAttrs);
-  }
-}
-
-
+      // Otherwise, just create an img
+      else {
+        return new domhandler_1.Element("img", baseAttrs);
+      }
+    },
   },
   encodeEntities: true,
   alwaysEncodeBreakingEntities: false,
