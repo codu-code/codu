@@ -69,7 +69,7 @@ export const processCodePen = (url: string) => {
   return url.includes("/pen/") ? url.replace("/pen/", "/embed/") : url;
 };
 
-const processFallback = (url: string) => {
+export const processFallback = (url: string) => {
   // Process fallback URL
   return url;
 };
@@ -82,7 +82,6 @@ export const parseYoutubeUrl = (url: string) => {
   console.log('matching? youtube', match)
   
   if (match && match[1]) {
-    console.log('testing for match')
     return {
       provider: 'youtube',
       id: match[1],
@@ -119,4 +118,10 @@ export const parseCodeSandboxUrl = (url: string) => {
       url,
     };
   }
+};
+
+export const parseFallbackUrl = (url: string) => {
+  return {
+    url: parseCustomIframeUrl(url),
+  };
 };

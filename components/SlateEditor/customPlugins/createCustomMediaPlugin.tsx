@@ -12,7 +12,7 @@ import {
   parseIframeUrl,
   EmbedUrlData
 } from "@udecode/plate";
-import { parseCustomIframeUrl, parseYoutubeUrl, parseCodepenUrl, processCodePen, parseCodeSandboxUrl, processCodeSandbox } from "./utils/customParseIframeUrl";
+import { parseCustomIframeUrl, parseCodepenUrl, processCodePen, parseCodeSandboxUrl, processCodeSandbox, parseFallbackUrl, processFallback } from "./utils/customParseIframeUrl";
 import { YouTube } from "../../markdocNodes/Youtube/Youtube";
 
 
@@ -93,6 +93,23 @@ export function CodeSandbox(props: EmbedUrlData) {
   );
 }
 
+export function GenericIframe(props: EmbedUrlData) {
+  // Destructure the url from props, as we'll use it for the src of the iframe
+  const { url } = props;
+  console.log(url)
+  // const processedUrl = parseFallbackUrl(url)
+
+  return (
+      <iframe
+       className="remove-padding-from-iframe"
+        src={url} // use url for the iframe src
+        allowFullScreen
+        style={{width: '100%', height: '300px'}}
+      />
+  );
+}
+
+
 export const createMediaEmbedPlugin = createPluginFactory<MediaPlugin>({
   key: ELEMENT_MEDIA_EMBED,
   isElement: true,
@@ -120,6 +137,10 @@ export const createMediaEmbedPlugin = createPluginFactory<MediaPlugin>({
       {
         parser: parseTwitterUrl,
         component: MediaEmbedTweet,
+      },
+      {
+        parser: parseFallbackUrl,
+        component: GenericIframe,
       },
     ],
   },

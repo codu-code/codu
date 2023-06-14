@@ -63,8 +63,23 @@ const SlateEditor = ({ onChange: _onChange, initialValue }) => {
       setValue(nextValue);
       console.log(nextValue);
       const serializedData = slateToHtml(nextValue, config);
-      // console.log(serializedData);
-      const sanitizedData = sanitize(serializedData, { ADD_ATTR: ['target'] });
+
+      const sanitizedData = sanitize(serializedData, {
+  ADD_TAGS: ["iframe"], 
+  ADD_ATTR: [
+    'allowfullscreen', 
+    'allow', 
+    'frameborder', 
+    'scrolling', 
+    'target', 
+    'accelerometer', 
+    'autoplay', 
+    'clipboard-write', 
+    'encrypted-media', 
+    'gyroscope', 
+    'picture-in-picture'
+  ]
+});
       console.log("saving this: ", sanitizedData);
       _onChange(sanitizedData);
     },

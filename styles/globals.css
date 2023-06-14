@@ -312,6 +312,10 @@ input[placeholder="Text to display"] {
   display: none!important;
 }
 
+.jsCcLr {
+  padding-bottom: 10px!important;
+}
+
 /* .code {
     position: relative;
     padding: 10px;
