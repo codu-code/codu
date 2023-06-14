@@ -16,7 +16,6 @@ import {
   Plate,
   createSoftBreakPlugin,
   createKbdPlugin,
-  createDeserializeHtmlPlugin
 } from "@udecode/plate";
 import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
 import { softBreakPlugin } from "./customPlugins/softBreakPlugin";
@@ -46,8 +45,7 @@ const plugins = createPlugins<MyValue>(
     createCustomImagePlugin(),
     createMediaEmbedPlugin(),
     createListPlugin(),
-    createKbdPlugin(),
-    // createDeserializeHtmlPlugin(),
+    // createKbdPlugin(),
   ],
   {
     components: plateUI,
