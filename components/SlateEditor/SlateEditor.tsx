@@ -71,6 +71,16 @@ const SlateEditor = ({ onChange: _onChange, initialValue }) => {
     [_onChange]
   );
 
+  useEffect(() => {
+  const iframes = document.querySelectorAll('.remove-padding-from-iframe');
+  iframes.forEach((iframe) => {
+    const parent = iframe.parentElement;
+    if (parent) {
+      parent.style.paddingBottom = '10px';
+    }
+  });
+}, []);
+
 
 
   return (

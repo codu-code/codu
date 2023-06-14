@@ -71,6 +71,7 @@ export function CodePen({
       frameBorder="no"
       loading="lazy"
       allowFullScreen
+      className="remove-padding-from-iframe"
     />
   );
 }
@@ -78,17 +79,17 @@ export function CodePen({
 export function CodeSandbox(props: EmbedUrlData) {
   // Destructure the url from props, as we'll use it for the src of the iframe
   const { url } = props;
+  const processedUrl = processCodeSandbox(url)
 
   return (
-    <div style={{marginInline: '16px 0px'}}>
       <iframe
-        src={processCodeSandbox(url)} // use url for the iframe src
+       className="remove-padding-from-iframe"
+        src={processedUrl} // use url for the iframe src
         frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         style={{width: '100%', aspectRatio: '16 / 9'}}
       />
-    </div>
   );
 }
 
@@ -101,7 +102,7 @@ export const createMediaEmbedPlugin = createPluginFactory<MediaPlugin>({
   },
   withOverrides: withCustomMediaEmbed,
   options: {
-    disableCaption: true,
+    // disableCaption: true,
     transformUrl: parseCustomIframeUrl,
     rules: [
       {

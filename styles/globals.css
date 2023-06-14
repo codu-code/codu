@@ -312,10 +312,6 @@ input[placeholder="Text to display"] {
   display: none!important;
 }
 
-.slate-MediaEmbedElement-iframeWrapper {
-  padding-bottom: 10px!important;
-}
-
 /* .code {
     position: relative;
     padding: 10px;
