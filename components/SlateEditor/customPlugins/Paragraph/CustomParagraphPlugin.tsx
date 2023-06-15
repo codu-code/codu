@@ -9,7 +9,7 @@ import { useEditorRef } from "@udecode/plate";
 import ExpandingToolbar from "../../Components/ExpandingMenu";
 
 // Define the custom menu component
-export const CustomMenu = ({ editor }) => {
+export const CustomMenu = ({ editor }: any) => {
   const [show, setShow] = useState(false);
   const [showPlus, setShowPlus] = useState(true);
   const selected = useSelected();
@@ -55,6 +55,7 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
   const { attributes, children, element } = props;
   const editor = useEditorRef();
 
+  // @ts-ignore
   if (element.type === ELEMENT_PARAGRAPH && Node.string(element) === '') {
     return (
       <>
@@ -70,7 +71,6 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
   return <p className="py-1" {...attributes}>{children}</p>;
 };
 
-// Define the custom paragraph plugin
 export const createCustomParagraphPlugin = (): PlatePlugin =>
   createPluginFactory({
     key: ELEMENT_PARAGRAPH,

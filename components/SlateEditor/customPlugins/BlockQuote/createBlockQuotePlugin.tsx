@@ -1,54 +1,42 @@
-import { Transforms, Editor, Path } from 'slate';
+import { Transforms, Path } from "slate";
 import {
   createPluginFactory,
   HotkeyPlugin,
   onKeyDownToggleElement,
   getLastChildPath,
-  getLastChild
-} from '@udecode/plate-common';
+} from "@udecode/plate-common";
 
-export const ELEMENT_BLOCKQUOTE = 'blockquote';
+export const ELEMENT_BLOCKQUOTE = "blockquote";
 
-const isLastNodeInEditor = (editor) => {
-  const lastChild = getLastChild([editor, []]);
-  
-  if (lastChild) {
-    console.log(lastChild)
-    const [lastNode, lastPath] = lastChild;
-    return Path.equals(lastPath, Editor.path(editor, []));
-  }
-  // If no last child found, consider as false
-  return false;
-};
-
-
-const withCustomBlockquote = (editor) => {
-  console.log('custom block quote')
+const withCustomBlockquote = (editor: any) => {
+  console.log("custom block quote");
   const { apply } = editor;
 
-  editor.apply = (operation) => {
-    // console.log(operation.type)
-    // console.log(operation)
+  editor.apply = (operation: any) => {
     apply(operation);
 
-    if (operation.type === 'set_node' && operation.newProperties.type === ELEMENT_BLOCKQUOTE) {
-      console.log('insert blockquote')
+    if (
+      operation.type === "set_node" &&
+      operation.newProperties.type === ELEMENT_BLOCKQUOTE
+    ) {
+      console.log("insert blockquote");
 
-      const emptyNode = { type: 'p', children: [{ text: '' }] };
+      const emptyNode = { type: "p", children: [{ text: "" }] };
       const lastChildPath = getLastChildPath([editor, []]);
 
       if (lastChildPath) {
-        Transforms.insertNodes(editor, emptyNode, { at: Path.next(lastChildPath) });
+        Transforms.insertNodes(editor, emptyNode, {
+          at: Path.next(lastChildPath),
+        });
       } else {
         // Fallback if no child node is found
         Transforms.insertNodes(editor, emptyNode);
       }
     }
-  }
+  };
 
   return editor;
 };
-
 
 export const createCustomBlockquotePlugin = createPluginFactory<HotkeyPlugin>({
   key: ELEMENT_BLOCKQUOTE,
@@ -56,7 +44,7 @@ export const createCustomBlockquotePlugin = createPluginFactory<HotkeyPlugin>({
   deserializeHtml: {
     rules: [
       {
-        validNodeName: 'BLOCKQUOTE',
+        validNodeName: "BLOCKQUOTE",
       },
     ],
   },
@@ -64,7 +52,7 @@ export const createCustomBlockquotePlugin = createPluginFactory<HotkeyPlugin>({
     onKeyDown: onKeyDownToggleElement,
   },
   options: {
-    hotkey: 'mod+shift+.',
+    hotkey: "mod+shift+.",
   },
-  withOverrides: withCustomBlockquote
+  withOverrides: withCustomBlockquote,
 });

@@ -2,26 +2,28 @@ import { Transforms, Path } from "slate";
 import { createPluginFactory, getLastChildPath } from "@udecode/plate-common";
 import {
   getOnKeyDownCaption,
-  getWithSelectionCaption,
   MediaEmbedTweet,
   parseTwitterUrl,
   MediaPlugin,
-  MediaEmbed,
   MediaEmbedVideo,
   parseVideoUrl,
-  parseIframeUrl,
-  EmbedUrlData
+  EmbedUrlData,
 } from "@udecode/plate";
-import { parseCustomIframeUrl, parseCodepenUrl, processCodePen, parseCodeSandboxUrl, processCodeSandbox, parseFallbackUrl, processFallback } from "../utils/customParseIframeUrl";
-import { YouTube } from "../../../markdocNodes/Youtube/Youtube";
-
+import {
+  parseCustomIframeUrl,
+  parseCodepenUrl,
+  processCodePen,
+  parseCodeSandboxUrl,
+  processCodeSandbox,
+  parseFallbackUrl,
+} from "../utils/customParseIframeUrl";
 
 export const ELEMENT_MEDIA_EMBED = "media_embed";
 
-const withCustomMediaEmbed = (editor) => {
+const withCustomMediaEmbed = (editor: any) => {
   const { apply } = editor;
 
-  editor.apply = (operation) => {
+  editor.apply = (operation: any) => {
     apply(operation);
 
     if (
@@ -45,27 +47,25 @@ const withCustomMediaEmbed = (editor) => {
   return editor;
 };
 
-// Update the Props interface to extend EmbedUrlData, 
-// as that's what will be passed to the component by Plate
 interface Props extends EmbedUrlData {
   defaultTab?: string;
   height?: string;
 }
 
 export function CodePen({
-  url, // Note: changed from 'src' to 'url', as that's the property name in EmbedUrlData
-  defaultTab = 'html,result',
-  height = '300px',
+  url,
+  defaultTab = "html,result",
+  height = "300px",
 }: Props) {
-  const codePenSrc = new URL(processCodePen(url)); // changed from 'src' to 'url'
-  if (!codePenSrc.searchParams.get('default-tab')) {
-    codePenSrc.searchParams.set('default-tab', defaultTab);
+  const codePenSrc = new URL(processCodePen(url!));
+  if (!codePenSrc.searchParams.get("default-tab")) {
+    codePenSrc.searchParams.set("default-tab", defaultTab);
   }
 
   return (
     <iframe
       height={height}
-      style={{ width: '100%' }}
+      style={{ width: "100%" }}
       scrolling="no"
       src={codePenSrc.toString()}
       frameBorder="no"
@@ -77,38 +77,33 @@ export function CodePen({
 }
 
 export function CodeSandbox(props: EmbedUrlData) {
-  // Destructure the url from props, as we'll use it for the src of the iframe
   const { url } = props;
-  const processedUrl = processCodeSandbox(url)
+  const processedUrl = processCodeSandbox(url!);
 
   return (
-      <iframe
-       className="remove-padding-from-iframe"
-        src={processedUrl} // use url for the iframe src
-        frameBorder="0"
-        // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        style={{width: '100%', aspectRatio: '16 / 9'}}
-      />
+    <iframe
+      className="remove-padding-from-iframe"
+      src={processedUrl}
+      frameBorder="0"
+      allowFullScreen
+      style={{ width: "100%", aspectRatio: "16 / 9" }}
+    />
   );
 }
 
 export function GenericIframe(props: EmbedUrlData) {
-  // Destructure the url from props, as we'll use it for the src of the iframe
   const { url } = props;
-  console.log(url)
-  // const processedUrl = parseFallbackUrl(url)
+  console.log(url);
 
   return (
-      <iframe
-       className="remove-padding-from-iframe"
-        src={url} // use url for the iframe src
-        allowFullScreen
-        style={{width: '100%', height: '300px'}}
-      />
+    <iframe
+      className="remove-padding-from-iframe"
+      src={url}
+      allowFullScreen
+      style={{ width: "100%", height: "300px" }}
+    />
   );
 }
-
 
 export const createMediaEmbedPlugin = createPluginFactory<MediaPlugin>({
   key: ELEMENT_MEDIA_EMBED,

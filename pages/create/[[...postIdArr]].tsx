@@ -5,7 +5,6 @@ import React, { useState, useEffect, Fragment, useRef } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm, Controller } from "react-hook-form";
-import CustomTextareaAutosize from "../../components/CustomTextareAutosize/CustomTextareaAutosize";
 import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
@@ -19,10 +18,13 @@ import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
 import SlateEditor from "../../components/SlateEditor/Editor/SlateEditor";
 
-import { htmlToSlate } from 'slate-serializers'
+import { htmlToSlate } from "slate-serializers";
 import { config as htmlToSlateConfig } from "../../components/SlateEditor/Config/htmlToSlateConfig";
-import parse from 'html-react-parser';
-import { parseOptions, replaceEmptyTags } from "../../components/SlateEditor/Config/htmlReactParser";
+import parse from "html-react-parser";
+import {
+  parseOptions,
+  replaceEmptyTags,
+} from "../../components/SlateEditor/Config/htmlReactParser";
 import { updateImageNodes } from "../../components/SlateEditor/Config/updateImageNodes";
 
 const Create: NextPage = () => {
@@ -30,7 +32,7 @@ const Create: NextPage = () => {
   const { postIdArr } = router.query;
 
   const postId = postIdArr?.[0] || "";
-   const isNewPost = !postId;
+  const isNewPost = !postId;
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -41,14 +43,9 @@ const Create: NextPage = () => {
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
   const [slateInitialValue, setSlateInitialValue] = useState(null);
-  const [slateChecked, setSlateChecked] = useState<boolean>(false)
+  const [slateChecked, setSlateChecked] = useState<boolean>(false);
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-
-
-
-
 
   const {
     handleSubmit,
@@ -127,7 +124,7 @@ const Create: NextPage = () => {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || '',
+      excerpt: data.excerpt || "",
     };
     return formData;
   };
@@ -142,7 +139,6 @@ const Create: NextPage = () => {
     }
     setUnsavedChanges(false);
   };
-
 
   const hasLoadingState =
     publishStatus === "loading" ||
@@ -207,7 +203,7 @@ const Create: NextPage = () => {
   };
 
   useEffect(() => {
-    setSlateChecked(true)
+    setSlateChecked(true);
     if (!data) return;
     const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
@@ -255,45 +251,27 @@ const Create: NextPage = () => {
     }
   };
 
-useEffect(() => {
-  if (isNewPost) {
-    // @ts-ignore
-    setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
-  } else if (data) {
-    const { body } = data;
-    const slateValue = htmlToSlate(body, htmlToSlateConfig)
-    updateImageNodes(slateValue);
-    // @ts-ignore
-    setSlateInitialValue(slateValue);
-  }
-}, [data, isNewPost, ]);
+  useEffect(() => {
+    if (isNewPost) {
+      // @ts-ignore
+      setSlateInitialValue(htmlToSlate("<p></p>", htmlToSlateConfig));
+    } else if (data) {
+      const { body } = data;
+      const slateValue = htmlToSlate(body, htmlToSlateConfig);
+      updateImageNodes(slateValue);
+      // @ts-ignore
+      setSlateInitialValue(slateValue);
+    }
+  }, [data, isNewPost]);
 
-
-useEffect(() => {
-  if(viewPreview === true){
-    const slateValue = htmlToSlate(body, htmlToSlateConfig)
-    updateImageNodes(slateValue);
-    // @ts-ignore
-    setSlateInitialValue(slateValue);
-  }
-}, [viewPreview]);
-
-
-
-// useEffect(() => {
-//   if (isNewPost) {
-//     setSlateInitialValue([{ type: 'p', children: [{ text: '' }] }]);
-//   } else if (data && data.body) {
-//     setSlateInitialValue(JSON.parse(data.body));
-//   }
-// }, [data?.body, isNewPost]);
-
-// useEffect(() => {
-//   if (viewPreview === true) {
-//     setSlateInitialValue(JSON.parse(body));
-//   }
-// }, [viewPreview]);
-
+  useEffect(() => {
+    if (viewPreview === true) {
+      const slateValue = htmlToSlate(body, htmlToSlateConfig);
+      updateImageNodes(slateValue);
+      // @ts-ignore
+      setSlateInitialValue(slateValue);
+    }
+  }, [viewPreview]);
 
   return (
     <Layout>
@@ -527,9 +505,9 @@ useEffect(() => {
                             >
                               <h1>{title}</h1>
                               <div className="slateP">
+                                {/* @ts-ignore */}
                                 {parse(replaceEmptyTags(body), parseOptions)}
                               </div>
-
                             </article>
                           </section>
                         ) : (
@@ -544,14 +522,17 @@ useEffect(() => {
                             />
 
                             {slateInitialValue && (
-                                <Controller
-                                  name="body"
-                                  control={control}
-                                  render={({ field }) => (
-                                    <SlateEditor {...field} initialValue={slateInitialValue} />
-                                  )}
-                                />
-                              )}
+                              <Controller
+                                name="body"
+                                control={control}
+                                render={({ field }) => (
+                                  <SlateEditor
+                                    {...field}
+                                    initialValue={slateInitialValue}
+                                  />
+                                )}
+                              />
+                            )}
 
                             <div className="flex justify-between items-center">
                               <>

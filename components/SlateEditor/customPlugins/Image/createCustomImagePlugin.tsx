@@ -1,44 +1,37 @@
-import { Transforms, Editor, Path } from 'slate';
-import { createPluginFactory, getLastChildPath } from '@udecode/plate-common';
-import { ImagePlugin, ELEMENT_IMAGE, getOnKeyDownCaption } from '@udecode/plate';
+import { Transforms, Path } from "slate";
+import { createPluginFactory, getLastChildPath } from "@udecode/plate-common";
+import {
+  ImagePlugin,
+  ELEMENT_IMAGE,
+  getOnKeyDownCaption,
+} from "@udecode/plate";
 
-const isLastNodeInEditor = (editor) => {
-  const lastChildPath = getLastChildPath([editor, []]);
-  
-  if (lastChildPath) {
-    const editorPath = Editor.path(editor, []);
-    return Path.equals(lastChildPath, editorPath);
-  }
-
-  // If no last child path found, consider as false
-  return false;
-};
-
-
-
-const withCustomImage = (editor) => {
+const withCustomImage = (editor: any) => {
   const { apply } = editor;
 
-  editor.apply = (operation) => {
+  editor.apply = (operation: any) => {
     apply(operation);
 
-    if (operation.type === 'insert_node' && operation.node.type === ELEMENT_IMAGE) {
-      const emptyNode = { type: 'p', children: [{ text: '' }] };
+    if (
+      operation.type === "insert_node" &&
+      operation.node.type === ELEMENT_IMAGE
+    ) {
+      const emptyNode = { type: "p", children: [{ text: "" }] };
       const lastChildPath = getLastChildPath([editor, []]);
 
       if (lastChildPath) {
-        Transforms.insertNodes(editor, emptyNode, { at: Path.next(lastChildPath) });
+        Transforms.insertNodes(editor, emptyNode, {
+          at: Path.next(lastChildPath),
+        });
       } else {
         // Fallback if no child node is found
         Transforms.insertNodes(editor, emptyNode);
       }
     }
-  }
+  };
 
   return editor;
 };
-
-
 
 export const createCustomImagePlugin = createPluginFactory<ImagePlugin>({
   key: ELEMENT_IMAGE,
@@ -52,12 +45,12 @@ export const createCustomImagePlugin = createPluginFactory<ImagePlugin>({
     deserializeHtml: {
       rules: [
         {
-          validNodeName: 'IMG',
+          validNodeName: "IMG",
         },
       ],
       getNode: (el) => ({
         type,
-        url: el.getAttribute('src'),
+        url: el.getAttribute("src"),
       }),
     },
   }),
