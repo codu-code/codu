@@ -1,7 +1,22 @@
+import React, { ReactElement } from 'react';
 import Prism from 'prismjs';
 
+interface ReplacedObject {
+  attribs?: {
+    class?: string;
+    [key: string]: any;  // For any other attributes
+  };
+  name?: string;
+  children?: Array<{ 
+    name: string; 
+    children: Array<{
+      data?: string;
+    }>;
+  }>;
+}
+
 export const parseOptions = {
-  replace: ({ attribs, name, children }) => {
+  replace: ({ attribs, name, children }: ReplacedObject): ReactElement | void => {
     if (!attribs || name !== 'pre') return;
 
     const language = attribs.class && attribs.class.replace('language-', '');
@@ -13,7 +28,6 @@ export const parseOptions = {
 
         if (isCodeEmpty) {
           return <code className="block" style={{ minHeight: '1em' }} />;
-
         } else {
           const code = codeTag.children.map(child => child.data || '').join('');
 
@@ -32,6 +46,7 @@ export const parseOptions = {
 };
 
 
-export function replaceEmptyTags(html) {
+
+export function replaceEmptyTags(html: string) {
   return html.replace(/<p>\s*<\/p>/g, '<br />');
 }

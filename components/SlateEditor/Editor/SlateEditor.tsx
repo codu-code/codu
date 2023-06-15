@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { slateToHtml } from "slate-serializers";
+// @ts-ignore
 import { sanitize } from "dompurify";
 import HooveringToolbar from "../Components/HooveringToolbar";
-import {config} from '../Config/slateToHTMLConfig'
+const { config } = require('../Config/slateToHTMLConfig');
 import {
   createLinkPlugin,
   createBoldPlugin,
@@ -29,9 +30,11 @@ import { createCustomImagePlugin } from "../customPlugins/Image/createCustomImag
 import { createMediaEmbedPlugin } from "../customPlugins/Media/createCustomMediaPlugin";
 const plugins = createPlugins<MyValue>(
   [
+    // @ts-ignore
     createCustomParagraphPlugin({ component: plateUI.CustomParagraphComponent,}),
     createCustomBlockquotePlugin(),
     createCustomCodeBlockPlugin({
+    // @ts-ignore
        component: plateUI.CodeBlockElement,
     }),
     createHeadingPlugin(),
@@ -54,12 +57,13 @@ const plugins = createPlugins<MyValue>(
 
 
 
-const SlateEditor = ({ onChange: _onChange, initialValue }) => {
+const SlateEditor = ({ onChange: _onChange, initialValue }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, initialValue: any }) => {
+  // your component's implementation
 
   const [value, setValue] = useState(initialValue);
   
   const handleChange = useCallback(
-    (nextValue) => {
+    (nextValue: any) => {
       setValue(nextValue);
       console.log(nextValue);
       const serializedData = slateToHtml(nextValue, config);
@@ -103,6 +107,7 @@ const SlateEditor = ({ onChange: _onChange, initialValue }) => {
       <Plate<MyValue>
         editableProps={editableProps}
         initialValue={initialValue}
+        // @ts-ignore
         plugins={plugins}
         onChange={handleChange}
       >

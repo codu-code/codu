@@ -19,11 +19,11 @@ import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
 import SlateEditor from "../../components/SlateEditor/Editor/SlateEditor";
 
-import { htmlToSlate, slateToHtml } from 'slate-serializers'
+import { htmlToSlate } from 'slate-serializers'
 import { config as htmlToSlateConfig } from "../../components/SlateEditor/Config/htmlToSlateConfig";
-import parse, { domToReact, htmlToDOM } from 'html-react-parser';
+import parse from 'html-react-parser';
 import { parseOptions, replaceEmptyTags } from "../../components/SlateEditor/Config/htmlReactParser";
-import { config as slateToHTMLConfig } from "../../components/SlateEditor/Config/slateToHTMLConfig";
+import { updateImageNodes } from "../../components/SlateEditor/Config/updateImageNodes";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -255,29 +255,15 @@ const Create: NextPage = () => {
     }
   };
 
-
-function updateImageNodes(nodes) {
-  for (let node of nodes) {
-    if (node.type === 'img') {
-      node.children = [{ text: '' }];
-    }
-  
-    if (Array.isArray(node.children)) {
-      updateImageNodes(node.children);
-    }
-  }
-}
-
 useEffect(() => {
   if (isNewPost) {
+    // @ts-ignore
     setSlateInitialValue(htmlToSlate('<p></p>', htmlToSlateConfig));
   } else if (data) {
     const { body } = data;
     const slateValue = htmlToSlate(body, htmlToSlateConfig)
-    // console.log('setting as initial: ', htmlToSlate(body, htmlToSlateConfig))
-    // console.log(parse(body), 'parsing')
     updateImageNodes(slateValue);
-    console.log('setting as new initial: ', slateValue)
+    // @ts-ignore
     setSlateInitialValue(slateValue);
   }
 }, [data, isNewPost, ]);
@@ -285,11 +271,9 @@ useEffect(() => {
 
 useEffect(() => {
   if(viewPreview === true){
-    console.log('parsing this', body);
     const slateValue = htmlToSlate(body, htmlToSlateConfig)
-    console.log(slateValue, 'slate value')
     updateImageNodes(slateValue);
-    console.log('setting as new initial: ', slateValue)
+    // @ts-ignore
     setSlateInitialValue(slateValue);
   }
 }, [viewPreview]);

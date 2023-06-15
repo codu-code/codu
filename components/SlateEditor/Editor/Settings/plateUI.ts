@@ -6,16 +6,10 @@ import {
     ELEMENT_PARAGRAPH,
     ELEMENT_H3,
     ELEMENT_H4,
-    ELEMENT_OL,
-    ELEMENT_UL,
-    ELEMENT_LI,
-    MARK_FONT_SIZE,
     MediaEmbedElement,
-    StyledElement,
     withProps,
   } from '@udecode/plate';
   import { CustomParagraphComponent } from '../../customPlugins/Paragraph/CustomParagraphPlugin';
-  import { CustomCodeBlockComponent } from '../../customPlugins/CodeBlock/createCustomCodeBlockPlugin';
   import { CustomH3Component, CustomH4Component } from '../../customPlugins/Heading/customHeadingPlugin';
 
   export const plateUI = createPlateUI({
