@@ -1,4 +1,5 @@
-// import { config as defaultConfig } from "slate-serializers/lib/config/htmlToSlate/default";
+// @ts-nocheck
+// TODO: make type safe
 import { getAttributeValue } from "domutils";
 import { HtmlToSlateConfig } from "slate-serializers";
 

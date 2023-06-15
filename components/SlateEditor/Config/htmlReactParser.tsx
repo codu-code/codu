@@ -4,7 +4,7 @@ import Prism from 'prismjs';
 interface ReplacedObject {
   attribs?: {
     class?: string;
-    [key: string]: any;  // For any other attributes
+    [key: string]: any;
   };
   name?: string;
   children?: Array<{ 
@@ -15,6 +15,8 @@ interface ReplacedObject {
   }>;
 }
 
+
+// for adding prism js classes 
 export const parseOptions = {
   replace: ({ attribs, name, children }: ReplacedObject): ReactElement | void => {
     if (!attribs || name !== 'pre') return;
@@ -46,7 +48,8 @@ export const parseOptions = {
 };
 
 
-
+// serialization from slate to html is leaving empty p tags 
+// it would be better to replace them with <br/> tags
 export function replaceEmptyTags(html: string) {
   return html.replace(/<p>\s*<\/p>/g, '<br />');
 }

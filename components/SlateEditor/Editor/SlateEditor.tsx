@@ -3,7 +3,7 @@ import { slateToHtml } from "slate-serializers";
 // @ts-ignore
 import { sanitize } from "dompurify";
 import HooveringToolbar from "../Components/HooveringToolbar";
-const { config } = require('../Config/slateToHTMLConfig');
+const { config } = require("../Config/slateToHTMLConfig");
 import {
   createLinkPlugin,
   createBoldPlugin,
@@ -31,11 +31,14 @@ import { createMediaEmbedPlugin } from "../customPlugins/Media/createCustomMedia
 const plugins = createPlugins<MyValue>(
   [
     // @ts-ignore
-    createCustomParagraphPlugin({ component: plateUI.CustomParagraphComponent,}),
+    createCustomParagraphPlugin({
+    // @ts-ignore
+      component: plateUI.CustomParagraphComponent,
+    }),
     createCustomBlockquotePlugin(),
     createCustomCodeBlockPlugin({
-    // @ts-ignore
-       component: plateUI.CodeBlockElement,
+      // @ts-ignore
+      component: plateUI.CodeBlockElement,
     }),
     createHeadingPlugin(),
     createBoldPlugin(),
@@ -55,13 +58,17 @@ const plugins = createPlugins<MyValue>(
   }
 );
 
-
-
-const SlateEditor = ({ onChange: _onChange, initialValue }: { onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, initialValue: any }) => {
+const SlateEditor = ({
+  onChange: _onChange,
+  initialValue,
+}: {
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  initialValue: any;
+}) => {
   // your component's implementation
 
   const [value, setValue] = useState(initialValue);
-  
+
   const handleChange = useCallback(
     (nextValue: any) => {
       setValue(nextValue);
@@ -69,38 +76,38 @@ const SlateEditor = ({ onChange: _onChange, initialValue }: { onChange: (e: Reac
       const serializedData = slateToHtml(nextValue, config);
 
       const sanitizedData = sanitize(serializedData, {
-  ADD_TAGS: ["iframe"], 
-  ADD_ATTR: [
-    'allowfullscreen', 
-    'allow', 
-    'frameborder', 
-    'scrolling', 
-    'target', 
-    'accelerometer', 
-    'autoplay', 
-    'clipboard-write', 
-    'encrypted-media', 
-    'gyroscope', 
-    'picture-in-picture'
-  ]
-});
+        ADD_TAGS: ["iframe"],
+        ADD_ATTR: [
+          "allowfullscreen",
+          "allow",
+          "frameborder",
+          "scrolling",
+          "target",
+          "accelerometer",
+          "autoplay",
+          "clipboard-write",
+          "encrypted-media",
+          "gyroscope",
+          "picture-in-picture",
+        ],
+      });
       console.log("saving this: ", sanitizedData);
       _onChange(sanitizedData);
     },
     [_onChange]
   );
 
+  // TODO: figure out why some embeds are rendering
+  // with large padding-bottom and get rid of this hacky solution
   useEffect(() => {
-  const iframes = document.querySelectorAll('.remove-padding-from-iframe');
-  iframes.forEach((iframe) => {
-    const parent = iframe.parentElement;
-    if (parent) {
-      parent.style.paddingBottom = '10px';
-    }
-  });
-}, []);
-
-
+    const iframes = document.querySelectorAll(".remove-padding-from-iframe");
+    iframes.forEach((iframe) => {
+      const parent = iframe.parentElement;
+      if (parent) {
+        parent.style.paddingBottom = "10px";
+      }
+    });
+  }, []);
 
   return (
     <>
