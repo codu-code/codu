@@ -3,7 +3,7 @@ import { FormatBold } from "@styled-icons/material/FormatBold";
 import { FormatItalic } from "@styled-icons/material/FormatItalic";
 import { FormatUnderlined } from "@styled-icons/material/FormatUnderlined";
 import { Link as LinkIcon } from "@styled-icons/material/Link";
-import { TextFields, Title, Keyboard } from "@styled-icons/material";
+import { TextFields, Title } from "@styled-icons/material";
 
 import {
   BalloonToolbar,
@@ -14,40 +14,20 @@ import {
   MARK_UNDERLINE,
   ELEMENT_H4,
   ELEMENT_H3,
-  MARK_KBD,
   MarkToolbarButton,
   WithPartial,
   usePlateEditorRef,
   LinkToolbarButton,
-  ToolbarButton,
   BlockToolbarButton,
-  CodeBlockToolbarButton,
-  ELEMENT_BLOCKQUOTE,
 } from "@udecode/plate";
-import { applyFontSize } from "../customPlugins/Paragraph/createFontSizePlugin";
 
 const HooveringToolbar = (
   props: WithPartial<BalloonToolbarProps, "children">
 ) => {
   const { children, ...balloonToolbarProps } = props;
-  // console.log('my props ', balloonToolbarProps)
-
   const editor = usePlateEditorRef();
-
   const arrow = false;
   const theme = "dark";
-
-  // TODO: Define positioning of the toolbar and pass into BallonToolbar as floatingOptions={floatingOptions}
-  // const floatingOptions: UseVirtualFloatingOptions = {
-  //   getBoundingClientRect: () => ({
-  //     width: 0,
-  //     height: 0,
-  //     top: 0,
-  //     right: 0,
-  //     bottom: 0,
-  //     left: 0,
-  //   }),
-  // };
 
   return (
     <BalloonToolbar theme={theme} arrow={arrow} {...balloonToolbarProps}>
@@ -67,6 +47,8 @@ const HooveringToolbar = (
         actionHandler="onMouseDown"
       />
       <LinkToolbarButton
+        //@ts-ignore
+        tooltip={''}
         icon={<LinkIcon />}
         actionHandler="onMouseDown"
       />
@@ -80,31 +62,6 @@ const HooveringToolbar = (
         icon={<TextFields />}
         actionHandler="onMouseDown"
       />
-      {/* <MarkToolbarButton
-      type={getPluginType(editor, MARK_KBD)}
-      icon={<Keyboard />}
-       actionHandler="onMouseDown"
-    /> */}
-      {/* <ToolbarButton
-        icon={<FormatSize />}
-        onMouseDown={(event) => {
-          event.preventDefault();
-
-          const nodes = Array.from(
-            Editor.nodes(editor, {
-              at: editor.selection || undefined,
-              match: Text.isText,
-            })
-          );
-
-          const isFontSizeIncreased = nodes.some(
-            ([node]) => node.fontSize === true
-          );
-
-          // Call applyFontSize with the desired action
-          applyFontSize(editor, !isFontSizeIncreased);
-        }}
-      /> */}
       {children}
     </BalloonToolbar>
   );
