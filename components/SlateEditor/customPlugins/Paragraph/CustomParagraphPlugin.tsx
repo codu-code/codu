@@ -6,7 +6,7 @@ import { Node } from "slate";
 import React, { useState } from "react";
 import { useSelected, useFocused } from 'slate-react';
 import { useEditorRef } from "@udecode/plate";
-import ExpandingToolbar from "./ExpandingMenu";
+import ExpandingToolbar from "../../Components/ExpandingMenu";
 
 // Define the custom menu component
 export const CustomMenu = ({ editor }) => {

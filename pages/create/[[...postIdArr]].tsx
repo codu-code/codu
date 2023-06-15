@@ -17,13 +17,13 @@ import { PromptDialog } from "../../components/PromptService/PromptService";
 
 import { trpc } from "../../utils/trpc";
 import { useDebounce } from "../../hooks/useDebounce";
-import SlateEditor from "../../components/SlateEditor/SlateEditor";
+import SlateEditor from "../../components/SlateEditor/Editor/SlateEditor";
 
 import { htmlToSlate, slateToHtml } from 'slate-serializers'
-import { config as htmlToSlateConfig } from "../../components/SlateEditor/htmlToSlateConfig";
+import { config as htmlToSlateConfig } from "../../components/SlateEditor/Config/htmlToSlateConfig";
 import parse, { domToReact, htmlToDOM } from 'html-react-parser';
-import Prism from 'prismjs';
-import { config as slateToHTMLConfig } from "../../components/SlateEditor/slateToHTMLConfig";
+import { parseOptions } from "../../components/SlateEditor/Config/htmlReactParser";
+import { config as slateToHTMLConfig } from "../../components/SlateEditor/Config/slateToHTMLConfig";
 
 const Create: NextPage = () => {
   const router = useRouter();
@@ -45,36 +45,7 @@ const Create: NextPage = () => {
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-const parseOptions = {
-  replace: ({ attribs, name, children }) => {
-    if (!attribs || name !== 'pre') return;
 
-    const language = attribs.class && attribs.class.replace('language-', '');
-    const codeTags = children && children.filter(child => child.name === 'code');
-
-    if (codeTags && codeTags.length) {
-      const processedCode = codeTags.map(codeTag => {
-        const isCodeEmpty = codeTag.children.length === 0;
-
-        if (isCodeEmpty) {
-          return <code className="block" style={{ minHeight: '1em' }} />;
-
-        } else {
-          const code = codeTag.children.map(child => child.data || '').join('');
-
-          if (language && Prism.languages[language]) {
-            const highlightedCode = Prism.highlight(code, Prism.languages[language], language);
-            return <code className="block" dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
-          } else {
-            return <code className="block">{code}</code>;
-          }
-        }
-      });
-
-      return <pre className={language ? `language-${language}` : ''}>{processedCode}</pre>;
-    }
-  },
-};
 
 
 
@@ -156,7 +127,7 @@ const parseOptions = {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || 'placeholder',
+      excerpt: data.excerpt || '',
     };
     return formData;
   };
@@ -573,13 +544,6 @@ useEffect(() => {
                               }}
                             >
                               <h1>{title}</h1>
-                              {/* {Markdoc.renderers.react(
-                                Markdoc.transform(Markdoc.parse(body), config),
-                                React,
-                                {
-                                  components: markdocComponents,
-                                }
-                              )} */}
                               <div className="slateP">
                                 {parse(replaceEmptyTags(body), parseOptions)}
                               </div>
@@ -597,13 +561,6 @@ useEffect(() => {
                               {...register("title")}
                             />
 
-                            {/* <CustomTextareaAutosize
-                              placeholder="Enter your content here 💖"
-                              className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
-                              minRows={25}
-                              {...register("body")}
-                              inputRef={textareaRef}
-                            /> */}
                             {slateInitialValue && (
                                 <Controller
                                   name="body"

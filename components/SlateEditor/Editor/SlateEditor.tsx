@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { slateToHtml } from "slate-serializers";
 import { sanitize } from "dompurify";
-import HooveringToolbar from "./HooveringToolbar";
-import {config} from './slateToHTMLConfig'
+import HooveringToolbar from "../Components/HooveringToolbar";
+import {config} from '../Config/slateToHTMLConfig'
 import {
   createLinkPlugin,
   createBoldPlugin,
@@ -17,16 +17,16 @@ import {
   createSoftBreakPlugin,
   createKbdPlugin,
 } from "@udecode/plate";
-import { createCustomParagraphPlugin } from "./customPlugins/CustomParagraphPlugin";
-import { softBreakPlugin } from "./customPlugins/softBreakPlugin";
-import { linkPlugin } from "./customPlugins/linkPlugin";
-import { editableProps } from "./editableProps";
-import { MyValue } from "./plateTypes";
-import { plateUI } from "./plateUI";
-import { createCustomCodeBlockPlugin } from "./customPlugins/createCustomCodeBlockPlugin";
-import { createCustomBlockquotePlugin } from "./customPlugins/createBlockQuotePlugin";
-import { createCustomImagePlugin } from "./customPlugins/createCustomImagePlugin";
-import { createMediaEmbedPlugin } from "./customPlugins/createCustomMediaPlugin";
+import { createCustomParagraphPlugin } from "../customPlugins/Paragraph/CustomParagraphPlugin";
+import { softBreakPlugin } from "../customPlugins/Linebreaks/softBreakPlugin";
+import { linkPlugin } from "../customPlugins/Link/linkPlugin";
+import { editableProps } from "./Settings/editableProps";
+import { MyValue } from "./Settings/plateTypes";
+import { plateUI } from "./Settings/plateUI";
+import { createCustomCodeBlockPlugin } from "../customPlugins/CodeBlock/createCustomCodeBlockPlugin";
+import { createCustomBlockquotePlugin } from "../customPlugins/BlockQuote/createBlockQuotePlugin";
+import { createCustomImagePlugin } from "../customPlugins/Image/createCustomImagePlugin";
+import { createMediaEmbedPlugin } from "../customPlugins/Media/createCustomMediaPlugin";
 const plugins = createPlugins<MyValue>(
   [
     createCustomParagraphPlugin({ component: plateUI.CustomParagraphComponent,}),

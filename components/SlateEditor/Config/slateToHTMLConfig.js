@@ -3,11 +3,11 @@ import {
   youtubeRegex,
   codepenRegex,
   codesandboxRegex,
-} from "./customPlugins/utils/customParseIframeUrl";
-import { createYoutubeIframe } from "./customPlugins/mediaEmbed/components/Youtube";
-import { createCodepenIframe } from "./customPlugins/mediaEmbed/components/Codepen";
-import { createCodeSandboxIframe } from "./customPlugins/mediaEmbed/components/CodeSandbox";
-import { createGenericIframe } from "./customPlugins/mediaEmbed/components/GenericIframe";
+} from "../customPlugins/utils/customParseIframeUrl";
+import { createYoutubeIframe } from "../customPlugins/mediaEmbed/components/Youtube";
+import { createCodepenIframe } from "../customPlugins/mediaEmbed/components/Codepen";
+import { createCodeSandboxIframe } from "../customPlugins/mediaEmbed/components/CodeSandbox";
+import { createGenericIframe } from "../customPlugins/mediaEmbed/components/GenericIframe";
 
 ("use strict");
 Object.defineProperty(exports, "__esModule", { value: true });

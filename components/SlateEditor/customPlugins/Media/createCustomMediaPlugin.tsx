@@ -12,8 +12,8 @@ import {
   parseIframeUrl,
   EmbedUrlData
 } from "@udecode/plate";
-import { parseCustomIframeUrl, parseCodepenUrl, processCodePen, parseCodeSandboxUrl, processCodeSandbox, parseFallbackUrl, processFallback } from "./utils/customParseIframeUrl";
-import { YouTube } from "../../markdocNodes/Youtube/Youtube";
+import { parseCustomIframeUrl, parseCodepenUrl, processCodePen, parseCodeSandboxUrl, processCodeSandbox, parseFallbackUrl, processFallback } from "../utils/customParseIframeUrl";
+import { YouTube } from "../../../markdocNodes/Youtube/Youtube";
 
 
 export const ELEMENT_MEDIA_EMBED = "media_embed";

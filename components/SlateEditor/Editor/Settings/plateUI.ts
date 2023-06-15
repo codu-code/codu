@@ -14,9 +14,9 @@ import {
     StyledElement,
     withProps,
   } from '@udecode/plate';
-  import { CustomParagraphComponent } from './customPlugins/CustomParagraphPlugin';
-  import { CustomCodeBlockComponent } from './customPlugins/createCustomCodeBlockPlugin';
-  import { CustomH3Component, CustomH4Component } from './customPlugins/customHeadingPlugin';
+  import { CustomParagraphComponent } from '../../customPlugins/Paragraph/CustomParagraphPlugin';
+  import { CustomCodeBlockComponent } from '../../customPlugins/CodeBlock/createCustomCodeBlockPlugin';
+  import { CustomH3Component, CustomH4Component } from '../../customPlugins/Heading/customHeadingPlugin';
 
   export const plateUI = createPlateUI({
   [ELEMENT_MEDIA_EMBED]: withProps(MediaEmbedElement, {

@@ -24,7 +24,7 @@ import {
   CodeBlockToolbarButton,
   ELEMENT_BLOCKQUOTE,
 } from "@udecode/plate";
-import { applyFontSize } from "./customPlugins/createFontSizePlugin";
+import { applyFontSize } from "../customPlugins/Paragraph/createFontSizePlugin";
 
 const HooveringToolbar = (
   props: WithPartial<BalloonToolbarProps, "children">
