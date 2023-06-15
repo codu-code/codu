@@ -316,6 +316,18 @@ input[placeholder="Text to display"] {
   padding-bottom: 10px!important;
 }
 
+.slate-a, .slateP a {
+  color: #1E90FF!important;
+  text-decoration: none!important;
+  cursor: pointer;
+}
+
+.slate-a:hover, .slateP a:hover {
+  color: #87CEEB!important;
+  text-decoration: none!important;
+
+}
+
 /* .code {
     position: relative;
     padding: 10px;
