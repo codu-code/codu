@@ -336,6 +336,11 @@ input[placeholder="Text to display"] {
   border-color: #f3f4f6!important;
 }
 
+.slate-ImageElement-caption {
+  color: #9ca3af!important;
+  font-size: 0.8em!important;
+}
+
 /* .code {
     position: relative;
     padding: 10px;
