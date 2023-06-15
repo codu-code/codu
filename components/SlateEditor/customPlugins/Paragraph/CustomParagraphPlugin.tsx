@@ -59,7 +59,7 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
   if (element.type === ELEMENT_PARAGRAPH && Node.string(element) === '') {
     return (
       <>
-      <p className="py-1" {...attributes}>
+      <p className="py-1 text-lg" style={{color: "#d1d5db"}} {...attributes}>
         <CustomMenu editor={editor} />
         {children}
       </p>
@@ -68,7 +68,7 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
     );
   }
 
-  return <p className="py-1" {...attributes}>{children}</p>;
+  return <p className="py-1 text-lg" style={{color: "#d1d5db"}}  {...attributes}>{children}</p>;
 };
 
 export const createCustomParagraphPlugin = (): PlatePlugin =>
