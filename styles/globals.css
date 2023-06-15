@@ -258,7 +258,8 @@ table {
 }
 
 
-/* hacky solution to override plate styles  */
+/* plate editor style overrides  */
+/* TODO: we should set what styles we can in the components directly */
 
 input[placeholder="Paste link"] {
     color: black;
@@ -341,24 +342,22 @@ input[placeholder="Text to display"] {
   font-size: 0.8em!important;
 }
 
-/* .code {
-    position: relative;
-    padding: 10px;
-    background-color: white;
-    margin: 10px 0;
-  }
+.slateP li, .slateP ol, .slateP ul {
+  margin-top: 0!important;
+  margin-bottom: 0!important;
+}
 
- .code button {
-  position: absolute;
-  right: 10px;
-  border-radius: 4px;
-  border: none;
-  font-size: 15px;
-  
-  background: rgb(243, 244, 246);
-  padding: 2px 2px 0px 4px;
-} */
+.slate-li {
+  color: #d1d5db!important;
+  padding-left: 0.4em;
+  line-height: 1.2em;
+}
 
+.slate-li::marker {
+  color: #4b5563;
+}
+
+/* end of plate editor styles  */
 
 
 @keyframes loader-dots1 {
