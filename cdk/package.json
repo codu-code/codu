@@ -23,7 +23,7 @@
   "dependencies": {
     "aws-cdk-lib": "^2.78.0",
     "axios": "^1.4.0",
-    "constructs": "^10.2.27",
+    "constructs": "^10.2.31",
     "react": "^18.2.0",
     "satori": "^0.8.1",
     "sharp": "^0.32.1",
