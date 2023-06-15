@@ -72,7 +72,6 @@ const SlateEditor = ({
   const handleChange = useCallback(
     (nextValue: any) => {
       setValue(nextValue);
-      console.log(nextValue);
       const serializedData = slateToHtml(nextValue, config);
 
       const sanitizedData = sanitize(serializedData, {
@@ -91,7 +90,6 @@ const SlateEditor = ({
           "picture-in-picture",
         ],
       });
-      console.log("saving this: ", sanitizedData);
       _onChange(sanitizedData);
     },
     [_onChange]
