@@ -22,7 +22,7 @@ import SlateEditor from "../../components/SlateEditor/Editor/SlateEditor";
 import { htmlToSlate, slateToHtml } from 'slate-serializers'
 import { config as htmlToSlateConfig } from "../../components/SlateEditor/Config/htmlToSlateConfig";
 import parse, { domToReact, htmlToDOM } from 'html-react-parser';
-import { parseOptions } from "../../components/SlateEditor/Config/htmlReactParser";
+import { parseOptions, replaceEmptyTags } from "../../components/SlateEditor/Config/htmlReactParser";
 import { config as slateToHTMLConfig } from "../../components/SlateEditor/Config/slateToHTMLConfig";
 
 const Create: NextPage = () => {
@@ -254,9 +254,7 @@ const Create: NextPage = () => {
         setUnsavedChanges(true);
     }
   };
-function replaceEmptyTags(html) {
-  return html.replace(/<p>\s*<\/p>/g, '<br />');
-}
+
 
 function updateImageNodes(nodes) {
   for (let node of nodes) {

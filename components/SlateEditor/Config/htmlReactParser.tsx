@@ -30,3 +30,8 @@ export const parseOptions = {
     }
   },
 };
+
+
+export function replaceEmptyTags(html) {
+  return html.replace(/<p>\s*<\/p>/g, '<br />');
+}

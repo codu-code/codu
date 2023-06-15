@@ -23,6 +23,9 @@ import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import CommentsArea from "../../components/Comments/CommentsArea";
 
+import parse from "html-react-parser";
+import { parseOptions, replaceEmptyTags } from "../../components/SlateEditor/Config/htmlReactParser";
+
 const createMenuData = (title: string, username: string, url: string) => [
   {
     label: "Share to Twitter",
@@ -240,9 +243,12 @@ const ArticlePage: NextPage = ({
         <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
           <article className="prose prose-invert lg:prose-lg">
             <h1>{post.title}</h1>
-            {Markdoc.renderers.react(content, React, {
+            {/* {Markdoc.renderers.react(content, React, {
               components: markdocComponents,
-            })}
+            })} */}
+            <div className="slateP">
+              {parse(replaceEmptyTags(post.body), parseOptions)}
+            </div>
           </article>
           {post.tags.length > 0 && (
             <section className="flex flex-wrap gap-3">
