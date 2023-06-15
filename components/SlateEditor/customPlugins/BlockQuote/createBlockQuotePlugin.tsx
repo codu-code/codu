@@ -9,7 +9,6 @@ import {
 export const ELEMENT_BLOCKQUOTE = "blockquote";
 
 const withCustomBlockquote = (editor: any) => {
-  console.log("custom block quote");
   const { apply } = editor;
 
   editor.apply = (operation: any) => {
@@ -19,7 +18,6 @@ const withCustomBlockquote = (editor: any) => {
       operation.type === "set_node" &&
       operation.newProperties.type === ELEMENT_BLOCKQUOTE
     ) {
-      console.log("insert blockquote");
 
       const emptyNode = { type: "p", children: [{ text: "" }] };
       const lastChildPath = getLastChildPath([editor, []]);

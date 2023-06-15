@@ -328,6 +328,14 @@ input[placeholder="Text to display"] {
 
 }
 
+.slate-blockquote, blockquote {
+  font-style: italic;
+  color: #f3f4f6!important;
+  border-left-width: 0.25rem!important;
+  padding-left: 1em!important;
+  border-color: #f3f4f6!important;
+}
+
 /* .code {
     position: relative;
     padding: 10px;
