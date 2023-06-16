@@ -9,7 +9,6 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
-import PageHeading from "../components/PageHeading/PageHeading";
 import Head from "next/head";
 
 const Profile: NextPage = ({
@@ -45,17 +44,17 @@ const Profile: NextPage = ({
       <Layout>
         <div className="max-w-2xl px-4 mx-auto text-white">
           <main className="flex pt-6">
-            <div className="mr-4 flex-shrink-0 self-center">
+          <div className="mr-4 flex-shrink-0 self-center">
               {image && (
                 <img
-                  className="rounded-full object-cover h-32 w-32"
+                className="rounded-full object-cover h-32 w-32"
                   alt={`Avatar for ${name}`}
                   src={image}
                 />
               )}
             </div>
             <div className="flex flex-col justify-center">
-              <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
+            <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
               <h2 className="text-neutral-400 font-bold text-sm">
                 @{username}
               </h2>
@@ -63,7 +62,10 @@ const Profile: NextPage = ({
             </div>
           </main>
 
-          <PageHeading>Published articles</PageHeading>
+          <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
+            <h1>Published articles</h1>
+            <span>({posts.length})</span>
+          </div>
 
           {posts.length ? (
             posts.map(
