@@ -8,13 +8,10 @@ import { createYoutubeIframe } from "../customPlugins/mediaEmbed/components/Yout
 import { createCodepenIframe } from "../customPlugins/mediaEmbed/components/Codepen";
 import { createCodeSandboxIframe } from "../customPlugins/mediaEmbed/components/CodeSandbox";
 import { createGenericIframe } from "../customPlugins/mediaEmbed/components/GenericIframe";
+import { Element, Text } from "domhandler";
 
-("use strict");
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = void 0;
-const domhandler_1 = require("domhandler");
 // Map Slate element names to HTML tag names
-// Staightforward transform - no attributes are considered
+// Straightforward transform - no attributes are considered
 // Use transforms instead for more complex operations
 const ELEMENT_NAME_TAG_MAP = {
   p: "p",
@@ -30,6 +27,7 @@ const ELEMENT_NAME_TAG_MAP = {
   li: "li",
   blockquote: "blockquote",
 };
+
 const MARK_ELEMENT_TAG_MAP = {
   strikethrough: ["s"],
   bold: ["strong"],
@@ -38,7 +36,8 @@ const MARK_ELEMENT_TAG_MAP = {
   code_block: "pre",
   code_line: "code",
 };
-exports.config = {
+
+export const config = {
   markMap: MARK_ELEMENT_TAG_MAP,
   elementMap: ELEMENT_NAME_TAG_MAP,
   elementTransforms: {

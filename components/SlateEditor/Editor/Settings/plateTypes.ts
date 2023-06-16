@@ -79,7 +79,6 @@ import {
   //   TExcalidrawElement,
   // } from '@udecode/plate-ui-excalidraw';
   
-  //@ts-ignore
   import { CSSProperties } from 'styled-components';
   
   /**

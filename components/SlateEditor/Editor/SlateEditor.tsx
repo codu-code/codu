@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { slateToHtml } from "slate-serializers";
-// @ts-ignore
 import { sanitize } from "dompurify";
 import HooveringToolbar from "../Components/HooveringToolbar";
-const { config } = require("../Config/slateToHTMLConfig");
+import { config } from "../Config/slateToHTMLConfig";
+
 import {
   createLinkPlugin,
   createBoldPlugin,
@@ -30,14 +30,11 @@ import { createCustomImagePlugin } from "../customPlugins/Image/createCustomImag
 import { createMediaEmbedPlugin } from "../customPlugins/Media/createCustomMediaPlugin";
 const plugins = createPlugins<MyValue>(
   [
-    // @ts-ignore
     createCustomParagraphPlugin({
-    // @ts-ignore
       component: plateUI.CustomParagraphComponent,
     }),
     createCustomBlockquotePlugin(),
     createCustomCodeBlockPlugin({
-      // @ts-ignore
       component: plateUI.CodeBlockElement,
     }),
     createHeadingPlugin(),
@@ -112,7 +109,6 @@ const SlateEditor = ({
       <Plate<MyValue>
         editableProps={editableProps}
         initialValue={initialValue}
-        // @ts-ignore
         plugins={plugins}
         onChange={handleChange}
       >

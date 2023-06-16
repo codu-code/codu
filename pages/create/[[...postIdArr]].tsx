@@ -253,13 +253,11 @@ const Create: NextPage = () => {
 
   useEffect(() => {
     if (isNewPost) {
-      // @ts-ignore
       setSlateInitialValue(htmlToSlate("<p></p>", htmlToSlateConfig));
     } else if (data) {
       const { body } = data;
       const slateValue = htmlToSlate(body, htmlToSlateConfig);
       updateImageNodes(slateValue);
-      // @ts-ignore
       setSlateInitialValue(slateValue);
     }
   }, [data, isNewPost]);
@@ -268,7 +266,6 @@ const Create: NextPage = () => {
     if (viewPreview === true) {
       const slateValue = htmlToSlate(body, htmlToSlateConfig);
       updateImageNodes(slateValue);
-      // @ts-ignore
       setSlateInitialValue(slateValue);
     }
   }, [viewPreview]);
@@ -505,7 +502,6 @@ const Create: NextPage = () => {
                             >
                               <h1>{title}</h1>
                               <div className="slateP">
-                                {/* @ts-ignore */}
                                 {parse(replaceEmptyTags(body), parseOptions)}
                               </div>
                             </article>

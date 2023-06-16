@@ -1,8 +1,8 @@
-const domhandler_1 = require("domhandler");
+import { Element } from "domhandler";
 
 export function createCodeSandboxIframe(src: string) {
 
-  return new domhandler_1.Element("iframe", {
+  return new Element("iframe", {
     src,
     height: '300px',
     class: "codepen",

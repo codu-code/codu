@@ -39,7 +39,6 @@ const ExpandingToolbar = (props: WithPartial<ToolbarProps, "children">) => {
       <CodeBlockToolbarButton
         icon={<Code />}
         actionHandler="onMouseDown"
-        // @ts-ignore 
         tooltip={null}
       />
       <ImageToolbarButton icon={<Image />} />

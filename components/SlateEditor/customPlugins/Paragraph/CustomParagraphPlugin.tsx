@@ -55,7 +55,6 @@ export const CustomParagraphComponent = (props: RenderElementProps) => {
   const { attributes, children, element } = props;
   const editor = useEditorRef();
 
-  // @ts-ignore
   if (element.type === ELEMENT_PARAGRAPH && Node.string(element) === '') {
     return (
       <>

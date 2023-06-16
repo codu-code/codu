@@ -8,7 +8,7 @@ export const createLineBreakPlugin = createPluginFactory({
   deserializeHtml: {
     rules: [{ validNodeName: "BR" }],
   },
-  //@ts-ignore
+
   serializeHtml: ({ element }) => {
     if (element.type === ELEMENT_LINE_BREAK) {
       return "<br />";

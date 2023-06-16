@@ -47,7 +47,6 @@ const HooveringToolbar = (
         actionHandler="onMouseDown"
       />
       <LinkToolbarButton
-        //@ts-ignore
         tooltip={''}
         icon={<LinkIcon />}
         actionHandler="onMouseDown"

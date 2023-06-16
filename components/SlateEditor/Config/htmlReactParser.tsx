@@ -25,19 +25,19 @@ export const parseOptions = {
     const codeTags = children && children.filter(child => child.name === 'code');
 
     if (codeTags && codeTags.length) {
-      const processedCode = codeTags.map(codeTag => {
+      const processedCode = codeTags.map((codeTag, index) => {
         const isCodeEmpty = codeTag.children.length === 0;
 
         if (isCodeEmpty) {
-          return <code className="block" style={{ minHeight: '1em' }} />;
+          return <code className="block" key={index} style={{ minHeight: '1em' }} />;
         } else {
           const code = codeTag.children.map(child => child.data || '').join('');
 
           if (language && Prism.languages[language]) {
             const highlightedCode = Prism.highlight(code, Prism.languages[language], language);
-            return <code className="block" dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
+            return <code className="block" key={index} dangerouslySetInnerHTML={{ __html: highlightedCode }} />;
           } else {
-            return <code className="block">{code}</code>;
+            return <code key={index} className="block">{code}</code>;
           }
         }
       });

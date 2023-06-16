@@ -1,4 +1,3 @@
-// @ts-nocheck
 // TODO: make type safe
 import { getAttributeValue } from "domutils";
 import { HtmlToSlateConfig } from "slate-serializers";
