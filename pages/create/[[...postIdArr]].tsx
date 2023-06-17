@@ -4,8 +4,7 @@ import { useRouter } from "next/router";
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
-import { useForm } from "react-hook-form";
-import CustomTextareaAutosize from "../../components/CustomTextareAutosize/CustomTextareaAutosize";
+import { useForm, Controller } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
@@ -16,19 +15,24 @@ import Layout from "../../components/Layout/Layout";
 import { PromptDialog } from "../../components/PromptService/PromptService";
 
 import { trpc } from "../../utils/trpc";
-import { removeMarkdown } from "../../utils/removeMarkdown";
 import { useDebounce } from "../../hooks/useDebounce";
-import Markdoc from "@markdoc/markdoc";
-import { useMarkdownHotkeys } from "../../markdoc/editor/hotkeys/hotkeys.markdoc";
-import { useMarkdownShortcuts } from "../../markdoc/editor/shortcuts/shortcuts.markdoc";
-import { markdocComponents } from "../../markdoc/components";
-import { config } from "../../markdoc/config";
+import SlateEditor from "../../components/SlateEditor/Editor/SlateEditor";
+
+import { htmlToSlate } from "slate-serializers";
+import { config as htmlToSlateConfig } from "../../components/SlateEditor/Config/htmlToSlateConfig";
+import parse from "html-react-parser";
+import {
+  parseOptions,
+  replaceEmptyTags,
+} from "../../components/SlateEditor/Config/htmlReactParser";
+import { updateImageNodes } from "../../components/SlateEditor/Config/updateImageNodes";
 
 const Create: NextPage = () => {
   const router = useRouter();
   const { postIdArr } = router.query;
 
   const postId = postIdArr?.[0] || "";
+  const isNewPost = !postId;
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -38,11 +42,10 @@ const Create: NextPage = () => {
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
+  const [slateInitialValue, setSlateInitialValue] = useState(null);
+  const [slateChecked, setSlateChecked] = useState<boolean>(false);
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useMarkdownHotkeys(textareaRef);
-  useMarkdownShortcuts(textareaRef);
 
   const {
     handleSubmit,
@@ -50,6 +53,8 @@ const Create: NextPage = () => {
     watch,
     reset,
     getValues,
+    control,
+    trigger,
     formState: { isDirty },
   } = useForm<SavePostInput>({
     mode: "onSubmit",
@@ -119,7 +124,7 @@ const Create: NextPage = () => {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
+      excerpt: data.excerpt || "",
     };
     return formData;
   };
@@ -143,19 +148,6 @@ const Create: NextPage = () => {
   const published = !!data?.published || false;
 
   const onSubmit = async (data: SavePostInput) => {
-    // vaidate markdoc syntax
-    const ast = Markdoc.parse(data.body);
-    const errors = Markdoc.validate(ast, config).filter(
-      (e) => e.error.level === "critical"
-    );
-
-    if (errors.length > 0) {
-      console.error(errors);
-      errors.forEach((err) => {
-        toast.error(err.error.message);
-      });
-      return;
-    }
     if (!published) {
       try {
         const formData = getFormData();
@@ -211,6 +203,7 @@ const Create: NextPage = () => {
   };
 
   useEffect(() => {
+    setSlateChecked(true);
     if (!data) return;
     const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
@@ -257,6 +250,25 @@ const Create: NextPage = () => {
         setUnsavedChanges(true);
     }
   };
+
+  useEffect(() => {
+    if (isNewPost) {
+      setSlateInitialValue(htmlToSlate("<p></p>", htmlToSlateConfig));
+    } else if (data) {
+      const { body } = data;
+      const slateValue = htmlToSlate(body, htmlToSlateConfig);
+      updateImageNodes(slateValue);
+      setSlateInitialValue(slateValue);
+    }
+  }, [data, isNewPost]);
+
+  useEffect(() => {
+    if (viewPreview === true) {
+      const slateValue = htmlToSlate(body, htmlToSlateConfig);
+      updateImageNodes(slateValue);
+      setSlateInitialValue(slateValue);
+    }
+  }, [viewPreview]);
 
   return (
     <Layout>
@@ -475,7 +487,7 @@ const Create: NextPage = () => {
                   </div>
                 </div>
                 <div className="lg:min-w-0 lg:flex-1">
-                  <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
+                  <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 min-h-[40rem]">
                     {/* Start main area*/}
                     <div className="relative h-full">
                       <div className="bg-neutral-900 text-white  shadow-xl">
@@ -489,13 +501,9 @@ const Create: NextPage = () => {
                               }}
                             >
                               <h1>{title}</h1>
-                              {Markdoc.renderers.react(
-                                Markdoc.transform(Markdoc.parse(body), config),
-                                React,
-                                {
-                                  components: markdocComponents,
-                                }
-                              )}
+                              <div className="slateP">
+                                {parse(replaceEmptyTags(body), parseOptions)}
+                              </div>
                             </article>
                           </section>
                         ) : (
@@ -509,13 +517,18 @@ const Create: NextPage = () => {
                               {...register("title")}
                             />
 
-                            <CustomTextareaAutosize
-                              placeholder="Enter your content here 💖"
-                              className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
-                              minRows={25}
-                              {...register("body")}
-                              inputRef={textareaRef}
-                            />
+                            {slateInitialValue && (
+                              <Controller
+                                name="body"
+                                control={control}
+                                render={({ field }) => (
+                                  <SlateEditor
+                                    {...field}
+                                    initialValue={slateInitialValue}
+                                  />
+                                )}
+                              />
+                            )}
 
                             <div className="flex justify-between items-center">
                               <>

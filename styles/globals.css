@@ -231,6 +231,11 @@ table {
   margin: 0 !important;
 }
 
+
+.slateP > p {
+  margin: 0!important;
+}
+
 /* Loading animation */
 .loader-dots div {
     animation-timing-function: cubic-bezier(0, 1, 1, 0);
@@ -251,6 +256,110 @@ table {
     left: 56px;
     animation: loader-dots3 0.6s infinite;
 }
+
+
+/* plate editor style overrides  */
+/* TODO: we should set what styles we can in the components directly */
+
+input[placeholder="Paste link"] {
+    color: black;
+}
+
+input[placeholder="Text to display"] {
+    color: black;
+}
+
+.slate-kbd, .slate-code_line {
+  color: black
+}
+
+[class^="PlateFloatingLink"], [class^="PlateFloatingMedia"] {
+    color: black;
+}
+
+[data-testid="CodeBlockSelectElement"] {
+    position: absolute;
+  right: 10px;
+  width: 20px;
+}
+
+[data-slate-editor="true"] {
+  
+}
+
+.slate-code_block {
+  min-height: 60px;
+}
+
+.slate-code_block select {
+ position: absolute;
+  right: 10px;
+  width: 25%;
+}
+
+.slate-ImageElement-caption {
+  max-height: 22px;
+}
+
+.slate-ul {
+  list-style-type: disc;
+}
+
+.slate-ol {
+  list-style-type: decimal;
+}
+
+.slate-MediaEmbedElement-handleRight, .slate-MediaEmbedElement-handleLeft, .slate-MediaEmbedElement-caption {
+  display: none!important;
+}
+
+.jsCcLr {
+  padding-bottom: 10px!important;
+}
+
+.slate-a, .slateP a {
+  color: #1E90FF!important;
+  text-decoration: none!important;
+  cursor: pointer;
+}
+
+.slate-a:hover, .slateP a:hover {
+  color: #87CEEB!important;
+  text-decoration: none!important;
+
+}
+
+.slate-blockquote, blockquote {
+  font-style: italic;
+  color: #f3f4f6!important;
+  border-left-width: 0.25rem!important;
+  padding-left: 1em!important;
+  border-color: #f3f4f6!important;
+}
+
+.slate-ImageElement-caption {
+  color: #9ca3af!important;
+  font-size: 0.8em!important;
+}
+
+.slateP li, .slateP ol, .slateP ul {
+  margin-top: 0!important;
+  margin-bottom: 0!important;
+}
+
+.slate-li {
+  color: #d1d5db!important;
+  padding-left: 0.4em;
+  line-height: 1.2em;
+}
+
+.slate-li::marker {
+  color: #4b5563;
+}
+
+/* end of plate editor styles  */
+
+
 @keyframes loader-dots1 {
     0% {
         transform: scale(0);
@@ -275,4 +384,7 @@ table {
         transform: translate(24px, 0);
     }
 }
+
+
+
 
