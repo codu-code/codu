@@ -36,6 +36,7 @@ const Create: NextPage = () => {
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
+  const [allowComments, setAllowComments] = useState<boolean>(true);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
@@ -61,6 +62,7 @@ const Create: NextPage = () => {
     defaultValues: {
       title: "",
       body: "",
+      allowComments: true,
     },
   });
 
@@ -125,13 +127,13 @@ const Create: NextPage = () => {
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
       excerpt: data.excerpt || "",
+      allowComments: data.allowComments,
     };
     return formData;
   };
 
   const savePost = async () => {
     const formData = getFormData();
-
     if (!formData.id) {
       create({ ...formData });
     } else {
@@ -205,8 +207,9 @@ const Create: NextPage = () => {
   useEffect(() => {
     setSlateChecked(true);
     if (!data) return;
-    const { body, excerpt, title, id, tags } = data;
+    const { body, excerpt, title, id, tags, allowComments } = data;
     setTags(tags.map(({ tag }) => tag.title));
+    setAllowComments(allowComments);
     reset({ body, excerpt, title, id });
   }, [data]);
 
@@ -385,6 +388,21 @@ const Create: NextPage = () => {
                                 elsewhere and you want to link to it as the
                                 original source.
                               </p>
+                            </Disclosure.Panel>
+                            <Disclosure.Panel className="pt-4 pb-2">
+                              <label htmlFor="canonicalUrl">
+                                Allow comments on your post
+                              </label>
+                              <input
+                                id="allowComments"
+                                type="checkbox"
+                                checked={allowComments}
+                                {...register("allowComments", {
+                                  onChange: (e) =>
+                                    setAllowComments(e.target.checked),
+                                  value: allowComments,
+                                })}
+                              />
                             </Disclosure.Panel>
                           </>
                         )}

@@ -48,6 +48,7 @@ model Post {
   bookmarks     Bookmark[]
   comments      Comment[]
   notifications Notification[]
+  allowComments Boolean        @default(true)
 }
 
 model Tag {

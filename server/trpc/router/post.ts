@@ -36,7 +36,15 @@ export const postRouter = router({
   update: protectedProcedure
     .input(SavePostSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
+      const {
+        id,
+        body,
+        title,
+        excerpt,
+        canonicalUrl,
+        tags = [],
+        allowComments,
+      } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
@@ -97,6 +105,7 @@ export const postRouter = router({
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
           canonicalUrl,
+          allowComments,
         },
       });
       return post;
