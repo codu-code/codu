@@ -57,7 +57,7 @@ const Sponsorship: NextPage = () => {
   return (
     <>
       <Head>
-        <meta name="robots" content="noindex" />    
+        <meta name="robots" content="noindex" />
       </Head>
       <Layout>
         <div>
@@ -69,7 +69,7 @@ const Sponsorship: NextPage = () => {
               </b>
             </h1>
             <h3 className="text-lg font-bold">
-              Reach thousands of developers every mounth!
+              Reach thousands of developers every month!
             </h3>
           </header>
           <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
