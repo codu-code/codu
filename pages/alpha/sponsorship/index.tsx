@@ -4,7 +4,7 @@ import Layout from "../../../components/Layout/Layout";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface Image {
   rotate: number;
@@ -41,16 +41,15 @@ const images: Image[] = [
 ];
 
 const Sponsorship: NextPage = () => {
-  const [scroll, setScroll] = useState(0);
-
   useEffect(() => {
     function handleScroll() {
-      setScroll(window.scrollY);
+      document.body.style.setProperty('--scroll', String(window.scrollY));
     }
     window.addEventListener("scroll", handleScroll);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      document.body.style.removeProperty('--scroll');
     };
   }, []);
 
@@ -73,16 +72,12 @@ const Sponsorship: NextPage = () => {
             </h3>
           </header>
           <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
-            {images.map((image, id) => (
+            {images.map((image) => (
               <div
-                key={id}
+                key={image.src}
                 className={`w-32`}
                 style={{
-                  transform: `${
-                    scroll < 200
-                      ? `rotate(${(scroll / 200) * image.rotate}deg)`
-                      : `rotate(${image.rotate}deg)`
-                  }`,
+                  transform: `rotate(calc(min(var(--scroll), 200) / 200 * ${image.rotate}deg))`
                 }}
               >
                 <Image
