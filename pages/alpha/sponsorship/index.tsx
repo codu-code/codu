@@ -1,40 +1,47 @@
 import type { NextPage } from "next";
 
 import Layout from "../../../components/Layout/Layout";
+import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
 import { useEffect } from "react";
 
+import pic1 from '../../../public/images/sponsors/pic1.png'
+import pic2 from '../../../public/images/sponsors/pic2.png'
+import pic3 from '../../../public/images/sponsors/pic3.png'
+import pic4 from '../../../public/images/sponsors/pic4.png'
+import pic5 from '../../../public/images/sponsors/pic5.png'
+
 interface Image {
   rotate: number;
-  src: string;
+  src: StaticImageData;
   alt: string;
 }
 
 const images: Image[] = [
   {
-    src: "/images/sponsors/pic1.png",
+    src: pic1,
     alt: "Audience watching a presentation",
     rotate: 6.56,
   },
   {
-    src: "/images/sponsors/pic2.png",
+    src: pic2,
     alt: "Audience watching a presentation with the name 'Codú' on the screen",
     rotate: -3.57,
   },
   {
-    src: "/images/sponsors/pic3.png",
+    src: pic3,
     alt: "Six people from Codú smiling at the camera",
     rotate: 4.58,
   },
   {
-    src: "/images/sponsors/pic4.png",
+    src: pic4,
     alt: "Audience watching a presentation",
     rotate: -4.35,
   },
   {
-    src: "/images/sponsors/pic5.png",
+    src: pic5,
     alt: "Audience smiling at the camera",
     rotate: 6.56,
   },
@@ -74,7 +81,7 @@ const Sponsorship: NextPage = () => {
           <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
             {images.map((image) => (
               <div
-                key={image.src}
+                key={image.alt}
                 className={`w-32`}
                 style={{
                   transform: `rotate(calc(min(var(--scroll), 200) / 200 * ${image.rotate}deg))`
@@ -83,8 +90,6 @@ const Sponsorship: NextPage = () => {
                 <Image
                   src={image.src}
                   alt={image.alt}
-                  width={250}
-                  height={250}
                   className="max-w-[150px] sm:max-w-[200px] md:max-w-none"
                 />
               </div>
