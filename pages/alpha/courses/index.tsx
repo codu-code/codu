@@ -30,7 +30,7 @@ const Courses: NextPage<
             </h1>
           </div>
 
-          <div className="max-w-5xl sm:mx-auto lg:max-w-5xl mt-4">
+          <div className="max-w-5xl sm:mx-auto lg:max-w-5xl sm:max-w-2xl mt-4">
             {courses.map(({ name, description, thumbnail }) => (
               <CoursePreview
                 key={name}
