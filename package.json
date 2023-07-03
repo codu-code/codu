@@ -35,7 +35,7 @@
     "@trpc/client": "^10.16.0",
     "@trpc/next": "^10.16.0",
     "@trpc/react-query": "^10.16.0",
-    "@trpc/server": "^10.16.0",
+    "@trpc/server": "^10.30.0",
     "@udecode/plate": "^20.6.5",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.2",
