@@ -311,6 +311,48 @@ export const postRouter = router({
 
     return { posts: cleaned, nextCursor };
   }),
+  randomTrending: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session?.user?.id;
+    const response = await ctx.prisma.post.findMany({
+      where: {
+        NOT: {
+          published: null,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+        readTimeMins: true,
+        slug: true,
+        excerpt: true,
+        user: {
+          select: { name: true, image: true, username: true },
+        },
+        bookmarks: {
+          select: { userId: true },
+          where: { userId: userId },
+        },
+      },
+      take: 20,
+      orderBy: {
+        likes: {
+          _count: "desc",
+        },
+      },
+    });
+
+    const cleaned = response.map((post) => {
+      const currentUserLikesPost = !!post.bookmarks.length;
+      post.bookmarks = [];
+      return { ...post, currentUserLikesPost };
+    });
+
+    const shuffled = cleaned.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 5);
+
+    return selected;
+  }),
   myPosts: protectedProcedure.query(async ({ ctx }) => {
     return ctx.prisma.post.findMany({
       where: {
