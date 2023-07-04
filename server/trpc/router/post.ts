@@ -342,7 +342,13 @@ export const postRouter = router({
       },
     });
 
-    const shuffled = response.sort(() => 0.5 - Math.random());
+    const cleaned = response.map((post) => {
+      const currentUserLikesPost = !!post.bookmarks.length;
+      post.bookmarks = [];
+      return { ...post, currentUserLikesPost };
+    });
+
+    const shuffled = cleaned.sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 5);
 
     return selected;

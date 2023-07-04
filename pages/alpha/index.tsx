@@ -1,19 +1,17 @@
-import type { Nextpost } from "next";
+import type { NextPage } from "next";
 import Image from "next/image";
-import { Children, Fragment, useEffect } from "react";
+import { Children } from "react";
 import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import "atropos/css";
 import Atropos from "atropos/react";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useInView } from "react-intersection-observer";
 import { trpc } from "../../utils/trpc";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
 import challenge from "../../public/images/announcements/challenge.png";
 
-const Home: Nextpost = () => {
+const Home: NextPage = () => {
   const tagsToShow = [
     "JavaScript",
     "Web Development",
@@ -27,8 +25,6 @@ const Home: Nextpost = () => {
   ];
 
   const { status, data } = trpc.post.randomTrending.useQuery();
-
-  console.log({ data });
 
   return (
     <>
@@ -72,6 +68,8 @@ const Home: Nextpost = () => {
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://codu.co" />
+        {/* @TODO: Remove this when not in alpha */}
+        <meta name="robots" content="noindex" />
       </Head>
       <Layout>
         <>
