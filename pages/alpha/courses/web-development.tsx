@@ -41,7 +41,20 @@ const WebDevelopmentCourse = () => {
               </div>
             </div>
 
-            <section className="hidden col-span-5 lg:block">2</section>
+            <section className="hidden col-span-5 lg:block">
+              <h2 className="text-3xl font-semibold tracking-tight text-neutral-50 sm:text-4xl">
+                Your progress
+              </h2>
+              <div className="flex flex-col p-4 mt-10 bg-neutral-900">
+                <p className="text-xl font-medium leading-none text-center">
+                  Introduction to Web Development
+                </p>
+                <span className="self-center mt-4">
+                  {/* Progress bar */}
+                  <CircularProgressBar progress={48} />
+                </span>
+              </div>
+            </section>
           </div>
         </div>
       </Layout>
@@ -83,6 +96,44 @@ const CourseContens = ({ title, contents }: CourseContensProps) => {
           ))}
         </ul>
       </div>
+    </div>
+  );
+};
+
+const CircularProgressBar = ({ progress }: { progress: number }) => {
+  const strokeWidth = 10; // Adjust this value to change the thickness of the outline
+  const radius = 50 - strokeWidth / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  return (
+    <div className="flex items-center justify-center overflow-hidden ">
+      <svg
+        className="w-32 h-32 transform translate-x-1 translate-y-1"
+        aria-hidden="true"
+      >
+        <circle
+          className="text-gray-300"
+          stroke-width="10"
+          stroke="currentColor"
+          fill="transparent"
+          r="50"
+          cx="60"
+          cy="60"
+        />
+        <circle
+          className="text-pink-600"
+          stroke-width="10"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - (progress / 100) * circumference}
+          stroke-linecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r="50"
+          cx="60"
+          cy="60"
+        />
+      </svg>
+      <span className="absolute text-2xl">{progress}%</span>
     </div>
   );
 };
