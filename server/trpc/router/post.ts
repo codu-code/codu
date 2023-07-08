@@ -43,7 +43,7 @@ export const postRouter = router({
         excerpt,
         canonicalUrl,
         tags = [],
-        allowComments,
+        showComments,
       } = input;
 
       const currentPost = await ctx.prisma.post.findUnique({
@@ -105,7 +105,7 @@ export const postRouter = router({
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
           canonicalUrl,
-          allowComments,
+          showComments,
         },
       });
       return post;

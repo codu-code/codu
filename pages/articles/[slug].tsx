@@ -266,7 +266,7 @@ const ArticlePage: NextPage = ({
         </div>
         <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
           <BioBar author={post.user} />
-          {post.allowComments ? (
+          {post.showComments ? (
             <CommentsArea postId={post.id} postOwnerId={post.userId} />
           ) : (
             <h3 className="py-10 italic text-lg">

@@ -32,7 +32,7 @@ const Create: NextPage = () => {
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
-  const [allowComments, setAllowComments] = useState<boolean>(true);
+  const [showComments, setShowComments] = useState<boolean>(true);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
@@ -57,7 +57,7 @@ const Create: NextPage = () => {
     defaultValues: {
       title: "",
       body: "",
-      allowComments: true,
+      showComments: true,
     },
   });
 
@@ -213,9 +213,9 @@ const Create: NextPage = () => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags, allowComments } = data;
+    const { body, excerpt, title, id, tags, showComments } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    setAllowComments(allowComments);
+    setShowComments(showComments);
     reset({ body, excerpt, title, id });
   }, [data]);
 
@@ -378,16 +378,16 @@ const Create: NextPage = () => {
                             </Disclosure.Panel>
                             <Disclosure.Panel className="pt-4 pb-2">
                               <label htmlFor="canonicalUrl">
-                                Allow comments on your post
+                                Show comments on your post
                               </label>
                               <input
-                                id="allowComments"
+                                id="showComments"
                                 type="checkbox"
-                                checked={allowComments}
-                                {...register("allowComments", {
+                                checked={showComments}
+                                {...register("showComments", {
                                   onChange: (e) =>
-                                    setAllowComments(e.target.checked),
-                                  value: allowComments,
+                                    setShowComments(e.target.checked),
+                                  value: showComments,
                                 })}
                               />
                             </Disclosure.Panel>
