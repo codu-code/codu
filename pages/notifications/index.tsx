@@ -13,7 +13,7 @@ import PageHeading from "../../components/PageHeading/PageHeading";
 import { trpc } from "../../utils/trpc";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { unstable_getServerSession } from "next-auth";
-import { GetServerSideProps } from "next/types";
+import type { GetServerSideProps } from "next/types";
 
 const Notifications = () => {
   const {
@@ -89,7 +89,7 @@ const Notifications = () => {
       </Head>
       <Layout>
         <div className="relative sm:mx-auto max-w-2xl mx-4">
-          <div className="relative">
+          <div className="relative mb-4">
             <PageHeading>Notifications</PageHeading>
             {!!count && count > 0 && (
               <button
