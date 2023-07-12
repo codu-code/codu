@@ -32,6 +32,7 @@ const Create: NextPage = () => {
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
+  const [showComments, setShowComments] = useState<boolean>(true);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
@@ -56,6 +57,7 @@ const Create: NextPage = () => {
     defaultValues: {
       title: "",
       body: "",
+      showComments: true,
     },
   });
 
@@ -126,7 +128,6 @@ const Create: NextPage = () => {
 
   const savePost = async () => {
     const formData = getFormData();
-
     if (!formData.id) {
       create({ ...formData });
     } else {
@@ -212,8 +213,9 @@ const Create: NextPage = () => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags } = data;
+    const { body, excerpt, title, id, tags, showComments } = data;
     setTags(tags.map(({ tag }) => tag.title));
+    setShowComments(showComments);
     reset({ body, excerpt, title, id });
   }, [data]);
 
@@ -373,6 +375,21 @@ const Create: NextPage = () => {
                                 elsewhere and you want to link to it as the
                                 original source.
                               </p>
+                            </Disclosure.Panel>
+                            <Disclosure.Panel className="pt-4 pb-2">
+                              <label htmlFor="canonicalUrl">
+                                Show comments on your post
+                              </label>
+                              <input
+                                id="showComments"
+                                type="checkbox"
+                                checked={showComments}
+                                {...register("showComments", {
+                                  onChange: (e) =>
+                                    setShowComments(e.target.checked),
+                                  value: showComments,
+                                })}
+                              />
                             </Disclosure.Panel>
                           </>
                         )}
