@@ -20,8 +20,6 @@ const Profile: NextPage = ({
 
   const { name, username, image, bio, posts, websiteUrl } = profile;
 
-  console.log(profile);
-
   return (
     <>
       <Head>
@@ -47,17 +45,17 @@ const Profile: NextPage = ({
       <Layout>
         <div className="max-w-2xl px-4 mx-auto text-white">
           <main className="flex pt-6">
-          <div className="mr-4 flex-shrink-0 self-center">
+            <div className="mr-4 flex-shrink-0 self-center">
               {image && (
                 <img
-                className="rounded-full object-cover h-32 w-32"
+                  className="rounded-full object-cover h-32 w-32"
                   alt={`Avatar for ${name}`}
                   src={image}
                 />
               )}
             </div>
             <div className="flex flex-col justify-center">
-            <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
+              <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
               <h2 className="text-neutral-400 font-bold text-sm">
                 @{username}
               </h2>
