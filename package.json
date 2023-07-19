@@ -59,7 +59,7 @@
     "satori": "^0.4.14",
     "sharp": "^0.31.3",
     "slate-react": "^0.94.2",
-    "slate-serializers": "^0.0.32",
+    "slate-serializers": "^0.4.0",
     "styled-components": "^5.3.11",
     "superjson": "^1.12.4",
     "zod": "^3.21.4"
