@@ -178,6 +178,17 @@ export default function Code({ children, language }: Props) {
             font-size: 15px;
             background: rgb(243 244 246);
             padding: 2px 2px 0px 4px;
+            transform: scaleY(0);
+            transition: transform 500ms ease-in-out;
+            transform-origin: bottom;
+          }
+
+          .code button:focus,
+          .code:hover > button,
+          .code:focus-visible > button {
+            transform: scaleY(1);
+            transition: transform 500ms ease-in-out;
+            transform-origin: top;
           }
 
           pre {
