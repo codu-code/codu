@@ -166,14 +166,13 @@ export default function Code({ children, language }: Props) {
       <style jsx>
         {`
           .code {
-            position: relative;
+            display: grid;
+            grid-template-rows: 30px 1fr;
           }
           .code button {
-            appearance: none;
-            position: absolute;
+            justify-self: end;
+            margin-right: 11px;
             color: inherit;
-            top: ${lines.length === 1 ? "17px" : "13px"};
-            right: 11px;
             border-radius: 4px;
             border: none;
             font-size: 15px;
