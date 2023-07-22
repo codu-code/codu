@@ -155,11 +155,11 @@ export default function Code({ children, language }: Props) {
     typeof children === "string" ? children.split("\n").filter(Boolean) : [];
 
   return (
-    <div className="code" aria-live="polite">
+    <div className="code" aria-live="polite" tabIndex={0}>
       <button type="button" onClick={() => setCopied(true)}>
         <Icon icon={copied ? "copied" : "copy"} color="#fb923c" />
       </button>
-      <pre key={children} ref={ref} className={`language-${lang}`}>
+      <pre key={children} ref={ref} className={`language-${lang}`} tabIndex={0}>
         {children}
       </pre>
 
