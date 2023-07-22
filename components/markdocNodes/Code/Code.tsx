@@ -179,6 +179,10 @@ export default function Code({ children, language }: Props) {
             background: rgb(243 244 246);
             padding: 2px 2px 0px 4px;
           }
+
+          pre {
+            text-wrap: wrap;
+          }
         `}
       </style>
     </div>
