@@ -165,7 +165,7 @@ export default function Code({ children, language }: Props) {
           .code {
             border-radius: 4px;
             display: grid;
-            gap: 1em;
+            gap: 5px;
             grid-template-rows: 30px 1fr;
           }
           .code button {
@@ -193,7 +193,7 @@ export default function Code({ children, language }: Props) {
 
           pre {
             margin: 0;
-            padding: 1em;
+            padding: 0.5em 1em;
             text-wrap: wrap;
           }
 
