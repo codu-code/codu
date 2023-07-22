@@ -151,9 +151,6 @@ export default function Code({ children, language }: Props) {
 
   const lang = language === "md" ? "markdoc" : language || "markdoc";
 
-  const lines =
-    typeof children === "string" ? children.split("\n").filter(Boolean) : [];
-
   return (
     <div className="code" aria-live="polite" tabIndex={0}>
       <button type="button" onClick={() => setCopied(true)}>
