@@ -163,10 +163,13 @@ export default function Code({ children, language }: Props) {
       <style jsx>
         {`
           .code {
+            border-radius: 4px;
             display: grid;
+            gap: 1em;
             grid-template-rows: 30px 1fr;
           }
           .code button {
+            margin-top: 5px;
             justify-self: end;
             margin-right: 11px;
             color: inherit;
@@ -189,7 +192,15 @@ export default function Code({ children, language }: Props) {
           }
 
           pre {
+            margin: 0;
+            padding: 1em;
             text-wrap: wrap;
+          }
+
+          @media (max-width: 1024px) {
+            .code button {
+              transform: scaleY(1);
+            }
           }
         `}
       </style>
