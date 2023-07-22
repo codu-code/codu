@@ -185,7 +185,7 @@ export default function Code({ children, language }: Props) {
 
           .code button:focus,
           .code:hover > button,
-          .code:focus-visible > button {
+          .code:focus-within > button {
             transform: scaleY(1);
             transition: transform 500ms ease-in-out;
             transform-origin: top;
