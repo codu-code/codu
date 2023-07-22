@@ -156,12 +156,13 @@ export default function Code({ children, language }: Props) {
 
   return (
     <div className="code" aria-live="polite">
-      <pre key={children} ref={ref} className={`language-${lang}`}>
-        {children}
-      </pre>
       <button type="button" onClick={() => setCopied(true)}>
         <Icon icon={copied ? "copied" : "copy"} color="#fb923c" />
       </button>
+      <pre key={children} ref={ref} className={`language-${lang}`}>
+        {children}
+      </pre>
+
       <style jsx>
         {`
           .code {
