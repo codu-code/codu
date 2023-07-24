@@ -176,7 +176,7 @@ export default function Code({ children, language }: Props) {
             border-radius: 4px;
             border: none;
             font-size: 15px;
-            background: rgb(243 244 246);
+            background-color: rgb(243 244 246);
             padding: 2px 2px 0px 4px;
             transform: scaleY(0);
             transition: transform 500ms ease-in-out;
@@ -210,15 +210,13 @@ export default function Code({ children, language }: Props) {
 
             .code button:hover,
             .code button:focus {
-              background-color: #ffffff;
-              outline: 2px solid #000000;
-              outline-style: inset;
+              background-color: #d1d5db;
               transition: background-color 250ms ease-in-out;
             }
 
             .code,
             .code pre {
-              background-color: #ffffff;
+              background-color: #d1d5db;
             }
           }
         `}
