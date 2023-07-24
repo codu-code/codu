@@ -202,6 +202,25 @@ export default function Code({ children, language }: Props) {
               transform: scaleY(1);
             }
           }
+
+          @media (prefers-color-scheme: light) {
+            .code button {
+              background-color: #000000;
+            }
+
+            .code button:hover,
+            .code button:focus {
+              background-color: #ffffff;
+              outline: 2px solid #000000;
+              outline-style: inset;
+              transition: background-color 250ms ease-in-out;
+            }
+
+            .code,
+            .code pre {
+              background-color: #ffffff;
+            }
+          }
         `}
       </style>
     </div>
