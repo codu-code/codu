@@ -205,7 +205,7 @@ export default function Code({ children, language }: Props) {
 
           @media (prefers-color-scheme: light) {
             .code button {
-              background-color: #000000;
+              background-color: #040404;
             }
 
             .code button:hover,
