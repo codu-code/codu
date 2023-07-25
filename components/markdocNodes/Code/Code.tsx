@@ -167,6 +167,7 @@ export default function Code({ children, language }: Props) {
             display: grid;
             gap: 5px;
             grid-template-rows: 30px 1fr;
+            background-color: #1c1b1b;
           }
           .code button {
             margin-top: 5px;
@@ -195,6 +196,7 @@ export default function Code({ children, language }: Props) {
             margin: 0;
             padding: 0.5em 1em;
             text-wrap: wrap;
+            background-color: inherit;
           }
 
           @media (max-width: 1024px) {
@@ -205,7 +207,7 @@ export default function Code({ children, language }: Props) {
 
           @media (prefers-color-scheme: light) {
             .code button {
-              background-color: #040404;
+              background-color: #020202;
             }
 
             .code button:hover,
