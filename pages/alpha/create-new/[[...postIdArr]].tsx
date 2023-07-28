@@ -270,6 +270,9 @@ const Create: NextPage = () => {
     }
   }, [viewPreview]);
 
+  // temporary do nothing so we can figure out what's breaking everything
+  return <div></div>;
+
   return (
     <Layout>
       <Fragment>
