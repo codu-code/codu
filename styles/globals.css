@@ -12,18 +12,18 @@ body {
 @tailwind utilities;
 
 @layer base {
-  [type='text'],
-  [type='email'],
-  [type='url'],
-  [type='password'],
-  [type='number'],
-  [type='date'],
-  [type='datetime-local'],
-  [type='month'],
-  [type='search'],
-  [type='tel'],
-  [type='time'],
-  [type='week'],
+  [type="text"],
+  [type="email"],
+  [type="url"],
+  [type="password"],
+  [type="number"],
+  [type="date"],
+  [type="datetime-local"],
+  [type="month"],
+  [type="search"],
+  [type="tel"],
+  [type="time"],
+  [type="week"],
   [multiple],
   textarea,
   select {
@@ -45,7 +45,6 @@ body {
 
 .fancy-link {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 tracking-wide cursor-pointer;
-  
 }
 
 .fancy-link:hover {
@@ -82,7 +81,7 @@ body {
   @apply visible;
 }
 
-.prose pre {
+.prose .code {
   @apply border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-black;
 }
 
@@ -231,60 +230,59 @@ table {
   margin: 0 !important;
 }
 
-
 .slateP > p {
-  margin: 0!important;
+  margin: 0 !important;
 }
 
 /* Loading animation */
 .loader-dots div {
-    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
 .loader-dots div:nth-child(1) {
-    left: 8px;
-    animation: loader-dots1 0.6s infinite;
+  left: 8px;
+  animation: loader-dots1 0.6s infinite;
 }
 .loader-dots div:nth-child(2) {
-    left: 8px;
-    animation: loader-dots2 0.6s infinite;
+  left: 8px;
+  animation: loader-dots2 0.6s infinite;
 }
 .loader-dots div:nth-child(3) {
-    left: 32px;
-    animation: loader-dots2 0.6s infinite;
+  left: 32px;
+  animation: loader-dots2 0.6s infinite;
 }
 .loader-dots div:nth-child(4) {
-    left: 56px;
-    animation: loader-dots3 0.6s infinite;
+  left: 56px;
+  animation: loader-dots3 0.6s infinite;
 }
-
 
 /* plate editor style overrides  */
 /* TODO: we should set what styles we can in the components directly */
 
 input[placeholder="Paste link"] {
-    color: black;
+  color: black;
 }
 
 input[placeholder="Text to display"] {
-    color: black;
+  color: black;
 }
 
-.slate-kbd, .slate-code_line {
-  color: black
+.slate-kbd,
+.slate-code_line {
+  color: black;
 }
 
-[class^="PlateFloatingLink"], [class^="PlateFloatingMedia"] {
-    color: black;
+[class^="PlateFloatingLink"],
+[class^="PlateFloatingMedia"] {
+  color: black;
 }
 
 [data-testid="CodeBlockSelectElement"] {
-    position: absolute;
+  position: absolute;
   right: 10px;
   width: 20px;
 }
 
 [data-slate-editor="true"] {
-  
 }
 
 .slate-code_block {
@@ -292,7 +290,7 @@ input[placeholder="Text to display"] {
 }
 
 .slate-code_block select {
- position: absolute;
+  position: absolute;
   right: 10px;
   width: 25%;
 }
@@ -309,46 +307,52 @@ input[placeholder="Text to display"] {
   list-style-type: decimal;
 }
 
-.slate-MediaEmbedElement-handleRight, .slate-MediaEmbedElement-handleLeft, .slate-MediaEmbedElement-caption {
-  display: none!important;
+.slate-MediaEmbedElement-handleRight,
+.slate-MediaEmbedElement-handleLeft,
+.slate-MediaEmbedElement-caption {
+  display: none !important;
 }
 
 .jsCcLr {
-  padding-bottom: 10px!important;
+  padding-bottom: 10px !important;
 }
 
-.slate-a, .slateP a {
-  color: #1E90FF!important;
-  text-decoration: none!important;
+.slate-a,
+.slateP a {
+  color: #1e90ff !important;
+  text-decoration: none !important;
   cursor: pointer;
 }
 
-.slate-a:hover, .slateP a:hover {
-  color: #87CEEB!important;
-  text-decoration: none!important;
-
+.slate-a:hover,
+.slateP a:hover {
+  color: #87ceeb !important;
+  text-decoration: none !important;
 }
 
-.slate-blockquote, blockquote {
+.slate-blockquote,
+blockquote {
   font-style: italic;
-  color: #f3f4f6!important;
-  border-left-width: 0.25rem!important;
-  padding-left: 1em!important;
-  border-color: #f3f4f6!important;
+  color: #f3f4f6 !important;
+  border-left-width: 0.25rem !important;
+  padding-left: 1em !important;
+  border-color: #f3f4f6 !important;
 }
 
 .slate-ImageElement-caption {
-  color: #9ca3af!important;
-  font-size: 0.8em!important;
+  color: #9ca3af !important;
+  font-size: 0.8em !important;
 }
 
-.slateP li, .slateP ol, .slateP ul {
-  margin-top: 0!important;
-  margin-bottom: 0!important;
+.slateP li,
+.slateP ol,
+.slateP ul {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .slate-li {
-  color: #d1d5db!important;
+  color: #d1d5db !important;
   padding-left: 0.4em;
   line-height: 1.2em;
 }
@@ -359,32 +363,27 @@ input[placeholder="Text to display"] {
 
 /* end of plate editor styles  */
 
-
 @keyframes loader-dots1 {
-    0% {
-        transform: scale(0);
-    }
-    100% {
-        transform: scale(1);
-    }
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 @keyframes loader-dots3 {
-    0% {
-        transform: scale(1);
-    }
-    100% {
-        transform: scale(0);
-    }
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
 }
 @keyframes loader-dots2 {
-    0% {
-        transform: translate(0, 0);
-    }
-    100% {
-        transform: translate(24px, 0);
-    }
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
 }
-
-
-
-
