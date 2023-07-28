@@ -77,7 +77,7 @@ const Profile: NextPage = ({
 
           <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
             <h1>Published articles</h1>
-            <span>({posts.length})</span>
+            <span className="font-light">({posts.length})</span>
           </div>
 
           {posts.length ? (
