@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Image from "next/image";
-import { Children } from "react";
+import { Children, useState } from "react";
 import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import "atropos/css";
@@ -10,6 +10,10 @@ import { trpc } from "../../utils/trpc";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
 import challenge from "../../public/images/announcements/challenge.png";
+
+import space from "public/images/home/space.jpg";
+import rocketman from "public/images/home/rocketman.png";
+import moon from "public/images/home/moon.png";
 
 const Home: NextPage = () => {
   const tagsToShow = [
@@ -25,6 +29,13 @@ const Home: NextPage = () => {
   ];
 
   const { status, data } = trpc.post.randomTrending.useQuery();
+  const [rocketLoaded, setRocketLoaded] = useState(false);
+  const [moonLoaded, setMoonLoaded] = useState(false);
+  const [starsLoaded, setStarsLoaded] = useState(false);
+
+  const isReady = rocketLoaded && moonLoaded && starsLoaded;
+
+  console.log({ isReady });
 
   return (
     <>
@@ -84,23 +95,34 @@ const Home: NextPage = () => {
                 highlight={false}
                 className="h-[770px] sm:h-[1000px] w-ful overflow-hidden relative"
               >
-                <Image
-                  height={2400}
-                  width={1600}
-                  className="absolute h-full w-full object-cover -z-10"
-                  src={"/images/home/space.jpg"}
-                  data-atropos-offset="-2"
-                  alt="Realistic space sky which is black with stars scattered across."
-                />
+                <div>
+                  <Image
+                    placeholder="blur"
+                    className="absolute h-full w-full object-cover -z-10"
+                    src={space}
+                    data-atropos-offset="-2"
+                    alt="Realistic space sky which is black with stars scattered across."
+                    onLoad={() => {
+                      setStarsLoaded(true);
+                    }}
+                  />
+                </div>
+
                 <div data-atropos-offset="0" className="mt-60">
                   <Image
                     width={340}
                     height={200}
                     src="/images/codu.svg"
-                    className="w-[240px] sm:w-[340px] mx-auto object-contain"
                     alt="Codú logo"
+                    className={`w-[240px] sm:w-[340px] mx-auto object-contain transition duration-500 ${
+                      isReady ? "opacity-100" : "opacity-0"
+                    }`}
                   />
-                  <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8">
+                  <h1
+                    className={`text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8 duration-500 ${
+                      isReady ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
                     A{" "}
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
                       space
@@ -108,23 +130,40 @@ const Home: NextPage = () => {
                     for coders
                   </h1>
                 </div>
+
                 <div className="relative md:h-[800px] md:w-[800px] mx-auto">
-                  <Image
-                    height={800}
-                    width={800}
-                    className="mt-8 md:mt-20 mx-auto brightness-75"
-                    src={"/images/home/moon.png"}
-                    data-atropos-offset="1"
-                    alt="Photograph of the moon"
-                  />
-                  <Image
-                    height={350}
-                    width={350}
-                    className="h-[280px] w-[280px] md:h-[350px] md:w-[350px] absolute right-0 md:-right-28 top-8"
-                    src={"/images/home/rocketman.png"}
-                    data-atropos-offset="8"
-                    alt="3D claymation style model of a astronaut on a rocket"
-                  />
+                  <div className="mt-8 md:mt-20 mx-auto brightness-75">
+                    <Image
+                      src={moon}
+                      data-atropos-offset="1"
+                      alt="Photograph of the moon"
+                      sizes="100vw"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                      }}
+                      onLoad={() => {
+                        setMoonLoaded(true);
+                      }}
+                    />
+                  </div>
+                  <div className="h-[280px] w-[280px] md:h-[350px] md:w-[350px] absolute right-0 md:-right-28 top-8">
+                    <Image
+                      height={350}
+                      width={350}
+                      src={rocketman}
+                      data-atropos-offset="8"
+                      alt="3D claymation style model of a astronaut on a rocket"
+                      sizes="100vw"
+                      style={{
+                        width: "100%",
+                        height: "auto",
+                      }}
+                      onLoad={() => {
+                        setRocketLoaded(true);
+                      }}
+                    />
+                  </div>
                 </div>
                 <div
                   className="absolute bottom-0 w-full h-40 bg-gradient-to-t from-black"
@@ -147,9 +186,12 @@ const Home: NextPage = () => {
                   <Link href="/get-started" className="primary-button">
                     Get started
                   </Link>
-                  <a href="#" className="leading-6 text-gray-900 font-semibold">
+                  <Link
+                    href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
+                    className="leading-6 text-gray-900 font-semibold"
+                  >
                     Learn more <span aria-hidden="true">→</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </section>
