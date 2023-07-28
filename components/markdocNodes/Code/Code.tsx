@@ -151,33 +151,75 @@ export default function Code({ children, language }: Props) {
 
   const lang = language === "md" ? "markdoc" : language || "markdoc";
 
-  const lines =
-    typeof children === "string" ? children.split("\n").filter(Boolean) : [];
-
   return (
-    <div className="code" aria-live="polite">
-      <pre key={children} ref={ref} className={`language-${lang}`}>
-        {children}
-      </pre>
+    <div className="code" aria-live="polite" tabIndex={0}>
       <button type="button" onClick={() => setCopied(true)}>
         <Icon icon={copied ? "copied" : "copy"} color="#fb923c" />
       </button>
+      <pre key={children} ref={ref} className={`language-${lang}`} tabIndex={0}>
+        {children}
+      </pre>
+
       <style jsx>
         {`
           .code {
-            position: relative;
+            border-radius: 4px;
+            display: grid;
+            gap: 5px;
+            grid-template-rows: 30px 1fr;
+            background-color: #1c1b1b;
           }
           .code button {
-            appearance: none;
-            position: absolute;
+            margin-top: 5px;
+            justify-self: end;
+            margin-right: 11px;
             color: inherit;
-            top: ${lines.length === 1 ? "17px" : "13px"};
-            right: 11px;
             border-radius: 4px;
             border: none;
             font-size: 15px;
-            background: rgb(243 244 246);
+            background-color: rgb(243 244 246);
             padding: 2px 2px 0px 4px;
+            transform: scaleY(0);
+            transition: transform 500ms ease-in-out;
+            transform-origin: bottom;
+          }
+
+          .code button:focus,
+          .code:hover > button,
+          .code:focus-within > button {
+            transform: scaleY(1);
+            transition: transform 500ms ease-in-out;
+            transform-origin: top;
+          }
+
+          pre {
+            margin: 0;
+            padding: 0.5em 1em;
+            text-wrap: wrap;
+            background-color: inherit;
+          }
+
+          @media (max-width: 1024px) {
+            .code button {
+              transform: scaleY(1);
+            }
+          }
+
+          @media (prefers-color-scheme: light) {
+            .code button {
+              background-color: #020202;
+            }
+
+            .code button:hover,
+            .code button:focus {
+              background-color: #d1d5db;
+              transition: background-color 250ms ease-in-out;
+            }
+
+            .code,
+            .code pre {
+              background-color: #d1d5db;
+            }
           }
         `}
       </style>
