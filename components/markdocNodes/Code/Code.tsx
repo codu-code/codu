@@ -165,6 +165,7 @@ export default function Code({ children, language }: Props) {
           .code {
             border-radius: 4px;
             display: grid;
+            align-items: start;
             gap: 5px;
             grid-template-rows: 30px 1fr;
             background-color: #1c1b1b;
@@ -207,13 +208,7 @@ export default function Code({ children, language }: Props) {
 
           @media (prefers-color-scheme: light) {
             .code button {
-              background-color: #020202;
-            }
-
-            .code button:hover,
-            .code button:focus {
-              background-color: #d1d5db;
-              transition: background-color 250ms ease-in-out;
+              background: linear-gradient(45deg, #bf1a5c, #d9413d);
             }
 
             .code,
