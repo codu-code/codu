@@ -157,7 +157,9 @@ export const postRouter = router({
         where: { id },
       });
 
-      if (currentPost?.userId !== ctx.session.user.id) {
+      const isAdmin = ctx.session.user.role === "ADMIN";
+
+      if (!isAdmin && currentPost?.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });
@@ -320,7 +322,7 @@ export const postRouter = router({
 
     return { posts: cleaned, nextCursor };
   }),
-  randomTrending: protectedProcedure.query(async ({ ctx }) => {
+  randomTrending: publicProcedure.query(async ({ ctx }) => {
     const userId = ctx.session?.user?.id;
     const response = await ctx.prisma.post.findMany({
       where: {

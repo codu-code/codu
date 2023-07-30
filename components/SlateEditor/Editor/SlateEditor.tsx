@@ -16,13 +16,12 @@ import {
   createUnderlinePlugin,
   Plate,
   createSoftBreakPlugin,
-  createKbdPlugin,
 } from "@udecode/plate";
 import { createCustomParagraphPlugin } from "../customPlugins/Paragraph/CustomParagraphPlugin";
 import { softBreakPlugin } from "../customPlugins/Linebreaks/softBreakPlugin";
 import { linkPlugin } from "../customPlugins/Link/linkPlugin";
 import { editableProps } from "./Settings/editableProps";
-import { MyValue } from "./Settings/plateTypes";
+import type { MyValue } from "./Settings/plateTypes";
 import { plateUI } from "./Settings/plateUI";
 import { createCustomCodeBlockPlugin } from "../customPlugins/CodeBlock/createCustomCodeBlockPlugin";
 import { createCustomBlockquotePlugin } from "../customPlugins/BlockQuote/createBlockQuotePlugin";
