@@ -35,6 +35,13 @@ const Home: NextPage = () => {
 
   const isReady = rocketLoaded && moonLoaded && starsLoaded;
 
+  const handleScroll = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -91,7 +98,7 @@ const Home: NextPage = () => {
                 stretchY={0.2}
                 stretchZ={0.2}
                 highlight={false}
-                className="h-[770px] sm:h-[1000px] w-ful overflow-hidden relative"
+                className="h-[620px] sm:h-[900px] w-full overflow-hidden relative"
               >
                 <div>
                   <Image
@@ -106,7 +113,7 @@ const Home: NextPage = () => {
                   />
                 </div>
 
-                <div data-atropos-offset="0" className="mt-60">
+                <div data-atropos-offset="0" className="mt-24 md:mt-40">
                   <Image
                     width={340}
                     height={200}
@@ -127,10 +134,31 @@ const Home: NextPage = () => {
                     </span>{" "}
                     for coders
                   </h1>
+                  <div className="flex justify-center mt-12">
+                    <button
+                      className="border-2 rounded-full p-4 animate-bounce bg-neutral-900 bg-opacity-60"
+                      onClick={() => handleScroll("cta")}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-8 h-8"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="relative md:h-[800px] md:w-[800px] mx-auto">
-                  <div className="mt-8 md:mt-20 mx-auto brightness-75">
+                <div className="-z-10 relative md:h-[800px] md:w-[800px] mx-auto">
+                  <div className="-mt-24 md:-mt-20 mx-auto brightness-75">
                     <Image
                       src={moon}
                       data-atropos-offset="1"
@@ -173,14 +201,16 @@ const Home: NextPage = () => {
                 />
               </Atropos>
             </main>
-            <section className="bg-neutral-300">
-              <div className="mx-auto max-w-7xl px-6 py-20 sm:py-32 lg:px-8">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                  Sign up today to become a writer and
+            <section className="bg-neutral-300 px-2" id="cta">
+              <div className="mx-auto lg:max-w-5xl sm:max-w-2xl py-20 sm:py-32">
+                <h2 className="text-2xl md:text-left text-center font-semibold tracking-tight text-gray-900 sm:text-4xl">
+                  <span className="font-extrabold">Sign up today</span> to
+                  become a writer and
                   <br />
-                  get a free invite to our Discord community.
+                  get a <span className="font-extrabold">free</span> invite to
+                  our Discord community.
                 </h2>
-                <div className="mt-10 flex items-center gap-x-6">
+                <div className="mt-8 flex items-center gap-x-6 justify-center md:justify-start">
                   <Link href="/get-started" className="primary-button">
                     Get started
                   </Link>
