@@ -22,9 +22,7 @@ import { signIn, useSession } from "next-auth/react";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import CommentsArea from "../../components/Comments/CommentsArea";
-
-import parse from "html-react-parser";
-import { parseOptions, replaceEmptyTags } from "../../components/SlateEditor/Config/htmlReactParser";
+import { useRouter } from "next/router";
 
 const createMenuData = (title: string, username: string, url: string) => [
   {
@@ -58,6 +56,8 @@ const ArticlePage: NextPage = ({
 
   const { label, href } = copyToClipboard;
 
+  const { push } = useRouter();
+
   useEffect(() => {
     setCopyToClipboard({
       label: copied ? "Copied!" : "Copy to clipboard",
@@ -72,6 +72,8 @@ const ArticlePage: NextPage = ({
   const { data, refetch } = trpc.post.sidebarData.useQuery({
     id: post?.id || "",
   });
+
+  const { mutate: deletePost } = trpc.post.delete.useMutation();
 
   const { mutate: like, status: likeStatus } = trpc.post.like.useMutation({
     onSettled() {
@@ -109,6 +111,17 @@ const ArticlePage: NextPage = ({
       e.preventDefault();
       copy(href);
       setCopied(true);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        await deletePost({ id: post.id });
+        push("/articles");
+      } catch {
+        console.error("Something went wrong.");
+      }
     }
   };
 
@@ -240,41 +253,48 @@ const ArticlePage: NextPage = ({
       </Transition>
 
       <Layout>
-        <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
-          <article className="prose prose-invert lg:prose-lg">
-            <h1>{post.title}</h1>
-            {Markdoc.renderers.react(content, React, {
-              components: markdocComponents,
-            })}
-            {/* <div className="slateP">
-              {parse(replaceEmptyTags(post.body), parseOptions)}
-            </div> */}
-          </article>
-          {post.tags.length > 0 && (
-            <section className="flex flex-wrap gap-3">
-              {post.tags.map(({ tag }) => (
-                <Link
-                  href={`/articles?tag=${tag.title.toLowerCase()}`}
-                  key={tag.title}
-                  className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold"
-                >
-                  {tag.title}
-                </Link>
-              ))}
-            </section>
-          )}
-        </div>
-        <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
-          <BioBar author={post.user} />
-          {post.showComments ? (
-            <CommentsArea postId={post.id} postOwnerId={post.userId} />
-          ) : (
-            <h3 className="py-10 italic text-lg">
-              Comments are disabled for this post
-            </h3>
-          )}
-        </div>
+        <>
+          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
+            <article className="prose prose-invert lg:prose-lg">
+              <h1>{post.title}</h1>
+              {Markdoc.renderers.react(content, React, {
+                components: markdocComponents,
+              })}
+            </article>
+            {post.tags.length > 0 && (
+              <section className="flex flex-wrap gap-3">
+                {post.tags.map(({ tag }) => (
+                  <Link
+                    href={`/articles?tag=${tag.title.toLowerCase()}`}
+                    key={tag.title}
+                    className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold"
+                  >
+                    {tag.title}
+                  </Link>
+                ))}
+              </section>
+            )}
+          </div>
+          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
+            <BioBar author={post.user} />
+            {post.showComments ? (
+              <CommentsArea postId={post.id} postOwnerId={post.userId} />
+            ) : (
+              <h3 className="py-10 italic text-lg">
+                Comments are disabled for this post
+              </h3>
+            )}
+          </div>
+        </>
       </Layout>
+      {session && session.user.role === "ADMIN" && (
+        <div className="border-t-2 text-center pb-8">
+          <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
+          <button onClick={handleDeletePost} className="secondary-button">
+            Delete Post
+          </button>
+        </div>
+      )}
     </>
   );
 };

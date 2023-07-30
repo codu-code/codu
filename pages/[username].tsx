@@ -3,6 +3,7 @@ import type {
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
+import React from "react";
 import Link from "next/link";
 import { unstable_getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -11,14 +12,48 @@ import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
 import Head from "next/head";
 import { LinkIcon } from "@heroicons/react/outline";
+import { useSession } from "next-auth/react";
+import { trpc } from "../utils/trpc";
+import { useRouter } from "next/router";
 
 const Profile: NextPage = ({
   profile,
   isOwner,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { mutate: banUser } = trpc.admin.ban.useMutation({
+    onSettled() {
+      router.reload();
+    },
+  });
+
+  const { mutate: unbanUser } = trpc.admin.unban.useMutation({
+    onSettled() {
+      router.reload();
+    },
+  });
+
   if (!profile) return null; // Should never happen because of serverside fetch or redirect
 
-  const { name, username, image, bio, posts, websiteUrl } = profile;
+  const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
+    profile;
+
+  const handleBanSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (accountLocked) return;
+
+    const target = e.target as typeof e.target & {
+      note: { value: string };
+    };
+    const note = target.note.value;
+
+    try {
+      await banUser({ userId: id, note });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -60,7 +95,7 @@ const Profile: NextPage = ({
                 @{username}
               </h2>
               <p className="mt-1">{bio}</p>
-              {websiteUrl && (
+              {websiteUrl && !accountLocked && (
                 <Link
                   href={websiteUrl}
                   className="flex flex-row items-center"
@@ -74,11 +109,16 @@ const Profile: NextPage = ({
               )}
             </div>
           </main>
-
-          <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
-            <h1>Published articles</h1>
-            <span>({posts.length})</span>
-          </div>
+          {accountLocked ? (
+            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
+              <h1>Account locked 🔒</h1>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
+              <h1>Published articles</h1>
+              <span className="font-light">({posts.length})</span>
+            </div>
+          )}
 
           {posts.length ? (
             posts.map(
@@ -117,6 +157,40 @@ const Profile: NextPage = ({
           )}
         </div>
       </Layout>
+      {session && session.user.role === "ADMIN" && (
+        <div className="border-t-2 text-center pb-8">
+          <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
+          {accountLocked ? (
+            <button
+              onClick={() => unbanUser({ userId: id })}
+              className="secondary-button"
+            >
+              Unban this user
+            </button>
+          ) : (
+            <form className="flex flex-col" onSubmit={handleBanSubmit}>
+              <label
+                htmlFor="note"
+                className="block text-sm font-medium leading-6 text-gray-400"
+              >
+                Add your reason to ban the user
+              </label>
+              <div className="mt-2">
+                <textarea
+                  rows={4}
+                  name="note"
+                  id="note"
+                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6"
+                  defaultValue={""}
+                />
+              </div>
+              <button type="submit" className="mt-4 secondary-button">
+                Ban user
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </>
   );
 };
@@ -151,6 +225,7 @@ export const getServerSideProps = async (
       username: true,
       name: true,
       image: true,
+      id: true,
       websiteUrl: true,
       posts: {
         where: {
@@ -170,6 +245,11 @@ export const getServerSideProps = async (
           id: true,
         },
       },
+      BannedUsers: {
+        select: {
+          id: true,
+        },
+      },
     },
   });
 
@@ -183,14 +263,29 @@ export const getServerSideProps = async (
     };
   }
 
+  const accountLocked = !!profile.BannedUsers;
+
+  type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
+    Partial<Type>;
+
+  type Profile = typeof profile;
+  const cleanedProfile: MakeOptional<Profile, "BannedUsers"> = {
+    ...profile,
+  };
+
+  delete cleanedProfile.BannedUsers;
+
   return {
     props: {
       profile: {
-        ...profile,
-        posts: profile.posts.map((post) => ({
-          ...post,
-          published: post.published?.toISOString(),
-        })),
+        ...cleanedProfile,
+        posts: accountLocked
+          ? []
+          : profile.posts.map((post) => ({
+              ...post,
+              published: post.published?.toISOString(),
+            })),
+        accountLocked,
       },
       isOwner: session?.user?.username === username,
     },
