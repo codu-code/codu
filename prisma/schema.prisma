@@ -49,6 +49,7 @@ model Post {
   comments      Comment[]
   notifications Notification[]
   showComments  Boolean        @default(true)
+  Flagged       Flagged[]
 }
 
 model Tag {
@@ -99,6 +100,10 @@ model User {
   comments           Comment[]
   notification       Notification[]
   notfier            Notification[] @relation("notifier")
+  BannedUsers        BannedUsers?
+  bans               BannedUsers[]  @relation("bannedBy")
+  Flagged            Flagged[]
+  flaggedNotifier    Flagged[]      @relation("notifier")
 
   @@index(fields: [username, id])
 }
@@ -141,6 +146,7 @@ model Comment {
   parent       Comment?       @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
   likes        Like[]
   Notification Notification[]
+  Flagged      Flagged[]
 }
 
 model Like {
@@ -166,6 +172,32 @@ model Notification {
   postId     String?
   commentId  Int?
   notifierId String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  notifier   User?    @relation(name: "notifier", fields: [notifierId], references: [id], onDelete: Cascade)
+}
+
+model BannedUsers {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String   @unique
+  bannedById String
+  note       String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bannedBy   User     @relation(name: "bannedBy", fields: [bannedById], references: [id], onDelete: Cascade)
+}
+
+model Flagged {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String
+  notifierId String
+  note       String?
+  postId     String?
+  commentId  Int?
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)

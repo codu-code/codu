@@ -73,8 +73,7 @@ const ArticlePage: NextPage = ({
     id: post?.id || "",
   });
 
-  const { mutate: deletePost, status: deletePostStatus } =
-    trpc.post.delete.useMutation();
+  const { mutate: deletePost } = trpc.post.delete.useMutation();
 
   const { mutate: like, status: likeStatus } = trpc.post.like.useMutation({
     onSettled() {

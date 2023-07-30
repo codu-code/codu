@@ -29,6 +29,15 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async signIn({ user }) {
+      const userIsBanned = !!(await prisma.bannedUsers.findFirst({
+        where: {
+          userId: user.id,
+        },
+      }));
+      // Allows signin or not
+      return !userIsBanned;
+    },
   },
   events: {
     async createUser({ user }) {
