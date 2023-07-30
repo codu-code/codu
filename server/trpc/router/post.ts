@@ -322,7 +322,7 @@ export const postRouter = router({
 
     return { posts: cleaned, nextCursor };
   }),
-  randomTrending: protectedProcedure.query(async ({ ctx }) => {
+  randomTrending: publicProcedure.query(async ({ ctx }) => {
     const userId = ctx.session?.user?.id;
     const response = await ctx.prisma.post.findMany({
       where: {
