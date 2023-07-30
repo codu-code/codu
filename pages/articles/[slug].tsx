@@ -23,9 +23,6 @@ import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import CommentsArea from "../../components/Comments/CommentsArea";
 
-import parse from "html-react-parser";
-import { parseOptions, replaceEmptyTags } from "../../components/SlateEditor/Config/htmlReactParser";
-
 const createMenuData = (title: string, username: string, url: string) => [
   {
     label: "Share to Twitter",
@@ -240,40 +237,39 @@ const ArticlePage: NextPage = ({
       </Transition>
 
       <Layout>
-        <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
-          <article className="prose prose-invert lg:prose-lg">
-            <h1>{post.title}</h1>
-            {Markdoc.renderers.react(content, React, {
-              components: markdocComponents,
-            })}
-            {/* <div className="slateP">
-              {parse(replaceEmptyTags(post.body), parseOptions)}
-            </div> */}
-          </article>
-          {post.tags.length > 0 && (
-            <section className="flex flex-wrap gap-3">
-              {post.tags.map(({ tag }) => (
-                <Link
-                  href={`/articles?tag=${tag.title.toLowerCase()}`}
-                  key={tag.title}
-                  className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold"
-                >
-                  {tag.title}
-                </Link>
-              ))}
-            </section>
-          )}
-        </div>
-        <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
-          <BioBar author={post.user} />
-          {post.showComments ? (
-            <CommentsArea postId={post.id} postOwnerId={post.userId} />
-          ) : (
-            <h3 className="py-10 italic text-lg">
-              Comments are disabled for this post
-            </h3>
-          )}
-        </div>
+        <>
+          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
+            <article className="prose prose-invert lg:prose-lg">
+              <h1>{post.title}</h1>
+              {Markdoc.renderers.react(content, React, {
+                components: markdocComponents,
+              })}
+            </article>
+            {post.tags.length > 0 && (
+              <section className="flex flex-wrap gap-3">
+                {post.tags.map(({ tag }) => (
+                  <Link
+                    href={`/articles?tag=${tag.title.toLowerCase()}`}
+                    key={tag.title}
+                    className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold"
+                  >
+                    {tag.title}
+                  </Link>
+                ))}
+              </section>
+            )}
+          </div>
+          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
+            <BioBar author={post.user} />
+            {post.showComments ? (
+              <CommentsArea postId={post.id} postOwnerId={post.userId} />
+            ) : (
+              <h3 className="py-10 italic text-lg">
+                Comments are disabled for this post
+              </h3>
+            )}
+          </div>
+        </>
       </Layout>
     </>
   );
