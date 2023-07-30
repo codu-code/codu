@@ -157,7 +157,9 @@ export const postRouter = router({
         where: { id },
       });
 
-      if (currentPost?.userId !== ctx.session.user.id) {
+      const isAdmin = ctx.session.user.role === "ADMIN";
+
+      if (!isAdmin && currentPost?.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "FORBIDDEN",
         });

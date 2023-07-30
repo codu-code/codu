@@ -22,6 +22,7 @@ import { signIn, useSession } from "next-auth/react";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import CommentsArea from "../../components/Comments/CommentsArea";
+import { useRouter } from "next/router";
 
 const createMenuData = (title: string, username: string, url: string) => [
   {
@@ -55,6 +56,8 @@ const ArticlePage: NextPage = ({
 
   const { label, href } = copyToClipboard;
 
+  const { push } = useRouter();
+
   useEffect(() => {
     setCopyToClipboard({
       label: copied ? "Copied!" : "Copy to clipboard",
@@ -69,6 +72,9 @@ const ArticlePage: NextPage = ({
   const { data, refetch } = trpc.post.sidebarData.useQuery({
     id: post?.id || "",
   });
+
+  const { mutate: deletePost, status: deletePostStatus } =
+    trpc.post.delete.useMutation();
 
   const { mutate: like, status: likeStatus } = trpc.post.like.useMutation({
     onSettled() {
@@ -106,6 +112,17 @@ const ArticlePage: NextPage = ({
       e.preventDefault();
       copy(href);
       setCopied(true);
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        await deletePost({ id: post.id });
+        push("/articles");
+      } catch {
+        console.error("Something went wrong.");
+      }
     }
   };
 
@@ -271,6 +288,14 @@ const ArticlePage: NextPage = ({
           </div>
         </>
       </Layout>
+      {session && session.user.role === "ADMIN" && (
+        <div className="border-t-2 text-center pb-8">
+          <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
+          <button onClick={handleDeletePost} className="secondary-button">
+            Delete Post
+          </button>
+        </div>
+      )}
     </>
   );
 };
