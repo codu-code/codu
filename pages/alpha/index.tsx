@@ -147,7 +147,7 @@ const Home: NextPage = () => {
                   <Link href="/get-started" className="primary-button">
                     Get started
                   </Link>
-                  <a href="#" className="leading-6 text-gray-900 font-semibold">
+                  <a href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv" className="leading-6 text-gray-900 font-semibold">
                     Learn more <span aria-hidden="true">→</span>
                   </a>
                 </div>
