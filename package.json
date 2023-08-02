@@ -40,7 +40,7 @@
     "atropos": "^1.0.2",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.3",
-    "dompurify": "^3.0.4",
+    "dompurify": "^3.0.5",
     "fathom-client": "^3.5.0",
     "html-react-parser": "^3.0.16",
     "nanoid": "^4.0.2",
