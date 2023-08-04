@@ -58,7 +58,7 @@
     "react-textarea-autosize": "^8.5.2",
     "satori": "^0.10.1",
     "sharp": "^0.32.4",
-    "slate-react": "^0.97.1",
+    "slate-react": "^0.97.2",
     "slate-serializers": "^0.4.1",
     "styled-components": "^5.3.11",
     "superjson": "^1.12.4",
