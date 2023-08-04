@@ -45,8 +45,15 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Codú | Homepost</title>
-        <meta name="description" content="Codú | Web Developer Community" />
+        <title>Codú - The Web Developer Community</title>
+        <meta
+          name="description"
+          content="A free network and community for web developers. Learn and grow together."
+        />
+        <meta
+          name="keywords"
+          content="software development, coding, nodejs, javascript, web development"
+        ></meta>
         <link
           rel="apple-touch-icon"
           sizes="180x180"
@@ -73,8 +80,13 @@ const Home: NextPage = () => {
         <meta name="theme-color" content="#000" />
         <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
         <meta
+          name="og:title"
+          content="`Codú - The Web Developer Community"
+          key="og:description"
+        />
+        <meta
           name="og:description"
-          content={`Codú is the ultimate community for web developers.`}
+          content="A free network and community for web developers. Learn and grow together."
           key="og:description"
         />
         <meta
