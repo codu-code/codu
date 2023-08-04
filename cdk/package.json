@@ -26,7 +26,7 @@
     "constructs": "^10.2.69",
     "react": "^18.2.0",
     "satori": "^0.10.1",
-    "sharp": "^0.32.2",
+    "sharp": "^0.32.3",
     "source-map-support": "^0.5.21"
   }
 }
