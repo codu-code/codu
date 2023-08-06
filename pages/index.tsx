@@ -96,8 +96,6 @@ const Home: NextPage = () => {
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://codu.co" />
-        {/* @TODO: Remove this when not in alpha */}
-        <meta name="robots" content="noindex" />
       </Head>
       <Layout>
         <>
