@@ -31,7 +31,7 @@
     "@styled-icons/material": "^10.47.0",
     "@tailwindcss/forms": "^0.5.3",
     "@tanem/react-nprogress": "^5.0.44",
-    "@tanstack/react-query": "^4.29.19",
+    "@tanstack/react-query": "^4.29.23",
     "@trpc/client": "^10.34.0",
     "@trpc/next": "^10.34.0",
     "@trpc/react-query": "^10.34.0",
