@@ -107,7 +107,9 @@ const ArticlePage: NextPage = ({
   };
 
   const handleCopyToClipboard = (e: React.FormEvent) => {
-    if (label.includes("Copy to clipboard") || label.includes("Copied!")) {
+    if (label !== e.currentTarget.innerHTML) {
+      setCopied(false);
+    } else {
       e.preventDefault();
       copy(href);
       setCopied(true);
