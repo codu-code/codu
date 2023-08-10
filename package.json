@@ -45,7 +45,7 @@
     "html-react-parser": "^3.0.16",
     "nanoid": "^4.0.2",
     "next": "^13.4.9",
-    "next-auth": "^4.22.1",
+    "next-auth": "^4.22.3",
     "next-superjson-plugin": "^0.5.9",
     "nodemailer": "^6.9.3",
     "prismjs": "^1.29.0",
