@@ -61,7 +61,7 @@
     "slate-react": "^0.97.2",
     "slate-serializers": "^0.4.1",
     "styled-components": "^5.3.11",
-    "superjson": "^1.12.4",
+    "superjson": "^1.13.1",
     "zod": "^3.21.4"
   },
   "devDependencies": {
