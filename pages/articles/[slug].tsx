@@ -257,7 +257,7 @@ const ArticlePage: NextPage = ({
       <Layout>
         <>
           <div className="mx-auto pb-4 md:max-w-3xl px-2 sm:px-4 break-words">
-            <article className="prose prose-invert lg:prose-lg mx-auto">
+            <article className="prose prose-invert lg:prose-lg mx-auto max-w-3xl">
               <h1>{post.title}</h1>
               {Markdoc.renderers.react(content, React, {
                 components: markdocComponents,
