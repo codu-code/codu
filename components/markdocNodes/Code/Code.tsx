@@ -1,98 +1,7 @@
 import React, { useEffect } from "react";
 import copy from "copy-to-clipboard";
 import Prism from "prismjs";
-
-const svgs = {
-  copied: (
-    <svg viewBox="0 0 512 512">
-      <title>Copied</title>
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="32"
-        d="M96,288L192,384L416,128"
-      />
-      <style jsx>
-        {`
-          path {
-            stroke-dasharray: 477;
-            stroke-dashoffset: 477;
-            animation: draw 150ms ease-out forwards;
-          }
-          @keyframes draw {
-            to {
-              stroke-dashoffset: 0;
-            }
-          }
-        `}
-      </style>
-    </svg>
-  ),
-  copy: (
-    <svg viewBox="0 0 512 512">
-      <title>Copy</title>
-      <rect
-        x="128"
-        y="128"
-        width="336"
-        height="336"
-        rx="57"
-        ry="57"
-        fill="none"
-        stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="32"
-      />
-      <path
-        d="M383.5 128l.5-24a56.16 56.16 0 00-56-56H112a64.19 64.19 0 00-64 64v216a56.16 56.16 0 0056 56h24"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="32"
-      />
-    </svg>
-  ),
-};
-
-function Icon({
-  icon,
-  color = "inherit",
-}: {
-  icon: "copy" | "copied";
-  color: string;
-}) {
-  return (
-    <span className="icon">
-      {svgs[icon] || null}
-      <style jsx>
-        {`
-          .icon {
-            display: inline-block;
-            position: relative;
-            font-size: inherit;
-            width: 1em;
-            height: 1em;
-            min-width: 16px;
-            box-sizing: content-box;
-            color: ${color};
-          }
-          .icon :global(svg) {
-            z-index: 10; // make icons in callouts show correctly
-            position: relative;
-            display: block;
-            fill: currentcolor;
-            stroke: currentcolor;
-            width: 100%;
-            height: 100%;
-          }
-        `}
-      </style>
-    </span>
-  );
-}
+import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/outline";
 
 Prism.languages.ts = Prism.languages.js;
 Prism.languages.jsx = Prism.languages.html;
@@ -151,75 +60,35 @@ export default function Code({ children, language }: Props) {
 
   const lang = language === "md" ? "markdoc" : language || "markdoc";
 
+  const lines =
+    typeof children === "string" ? children.split("\n").filter(Boolean) : [];
+
   return (
-    <div className="code" aria-live="polite" tabIndex={0}>
-      <button type="button" onClick={() => setCopied(true)}>
-        <Icon icon={copied ? "copied" : "copy"} color="#fb923c" />
-      </button>
-      <pre key={children} ref={ref} className={`language-${lang}`} tabIndex={0}>
+    <div className="code group" aria-live="polite">
+      <pre key={children} ref={ref} className={`language-${lang}`}>
         {children}
       </pre>
-
+      <button
+        className=" dark:bg-gray-700 bg-gray-300 border shadow-md dark:border-gray-500 border-gray-400 h-8 w-8 rounded-lg absolute flex justify-center items-center md:opacity-0 md:scale-0 opacity-100 ease-in-out transition-all group-hover:opacity-100 group-hover:scale-100"
+        type="button"
+        onClick={() => setCopied(true)}
+      >
+        {copied ? (
+          <CheckIcon className="h-5 w-5 dark:text-gray-300 text-gray-700" />
+        ) : (
+          <DocumentDuplicateIcon className="h-5 w-5 dark:text-gray-300 text-gray-700 dark:bg-gray-700 bg-gray-300" />
+        )}
+      </button>
       <style jsx>
         {`
           .code {
-            border-radius: 4px;
-            display: grid;
-            gap: 5px;
-            grid-template-rows: 30px 1fr;
-            background-color: #1c1b1b;
+            position: relative;
           }
           .code button {
-            margin-top: 5px;
-            justify-self: end;
-            margin-right: 11px;
+            appearance: none;
             color: inherit;
-            border-radius: 4px;
-            border: none;
-            font-size: 15px;
-            background-color: rgb(243 244 246);
-            padding: 2px 2px 0px 4px;
-            transform: scaleY(0);
-            transition: transform 500ms ease-in-out;
-            transform-origin: bottom;
-          }
-
-          .code button:focus,
-          .code:hover > button,
-          .code:focus-within > button {
-            transform: scaleY(1);
-            transition: transform 500ms ease-in-out;
-            transform-origin: top;
-          }
-
-          pre {
-            margin: 0;
-            padding: 0.5em 1em;
-            text-wrap: wrap;
-            background-color: inherit;
-          }
-
-          @media (max-width: 1024px) {
-            .code button {
-              transform: scaleY(1);
-            }
-          }
-
-          @media (prefers-color-scheme: light) {
-            .code button {
-              background-color: #020202;
-            }
-
-            .code button:hover,
-            .code button:focus {
-              background-color: #d1d5db;
-              transition: background-color 250ms ease-in-out;
-            }
-
-            .code,
-            .code pre {
-              background-color: #d1d5db;
-            }
+            top: ${lines.length === 1 ? "17px" : "13px"};
+            right: 11px;
           }
         `}
       </style>
