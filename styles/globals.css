@@ -81,8 +81,8 @@ body {
   @apply visible;
 }
 
-.prose .code {
-  @apply border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-black;
+.prose pre {
+  @apply border-2 border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-black;
 }
 
 .prose code {
