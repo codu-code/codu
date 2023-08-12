@@ -256,8 +256,8 @@ const ArticlePage: NextPage = ({
 
       <Layout>
         <>
-          <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4 break-words">
-            <article className="prose prose-invert lg:prose-lg">
+          <div className="mx-auto pb-4 md:max-w-3xl px-2 sm:px-4 break-words">
+            <article className="prose prose-invert lg:prose-lg mx-auto">
               <h1>{post.title}</h1>
               {Markdoc.renderers.react(content, React, {
                 components: markdocComponents,
@@ -289,7 +289,7 @@ const ArticlePage: NextPage = ({
           </div>
         </>
       </Layout>
-      {session && session.user.role === "ADMIN" && (
+      {session && session?.user?.role === "ADMIN" && (
         <div className="border-t-2 text-center pb-8">
           <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
           <button onClick={handleDeletePost} className="secondary-button">
