@@ -29,7 +29,7 @@
     "@prisma/client": "^4.16.2",
     "@resvg/resvg-js": "^2.4.1",
     "@styled-icons/material": "^10.47.0",
-    "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/forms": "^0.5.4",
     "@tanem/react-nprogress": "^5.0.44",
     "@tanstack/react-query": "^4.32.6",
     "@trpc/client": "^10.34.0",
