@@ -1,5 +1,5 @@
 # Install dependencies only when needed
-FROM public.ecr.aws/docker/library/node:16 AS deps
+FROM public.ecr.aws/docker/library/node:18 AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 # RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY prisma ./prisma
 RUN npm ci
 
 # Rebuild the source code only when needed
-FROM public.ecr.aws/docker/library/node:16 AS builder
+FROM public.ecr.aws/docker/library/node:18 AS builder
 # RUN apt-get update -y \
 #     && apt-get install -y openssl
 
@@ -27,7 +27,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production image, copy all the files and run next
-FROM public.ecr.aws/docker/library/node:16 AS runner
+FROM public.ecr.aws/docker/library/node:18 AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
