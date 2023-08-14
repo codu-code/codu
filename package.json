@@ -33,7 +33,7 @@
     "@tanem/react-nprogress": "^5.0.44",
     "@tanstack/react-query": "^4.32.6",
     "@trpc/client": "^10.34.0",
-    "@trpc/next": "^10.34.0",
+    "@trpc/next": "^10.35.0",
     "@trpc/react-query": "^10.34.0",
     "@trpc/server": "^10.34.0",
     "@udecode/plate": "^20.7.2",
