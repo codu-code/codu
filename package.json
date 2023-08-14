@@ -35,7 +35,7 @@
     "@trpc/client": "^10.34.0",
     "@trpc/next": "^10.34.0",
     "@trpc/react-query": "^10.34.0",
-    "@trpc/server": "^10.34.0",
+    "@trpc/server": "^10.35.0",
     "@udecode/plate": "^20.7.2",
     "atropos": "^1.0.2",
     "clsx": "^1.2.1",
