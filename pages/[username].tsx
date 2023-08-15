@@ -5,7 +5,7 @@ import type {
 } from "next";
 import React from "react";
 import Link from "next/link";
-import { unstable_getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
 import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
@@ -210,11 +210,7 @@ export const getServerSideProps = async (
     };
   }
 
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  );
+  const session = await getServerSession(context.req, context.res, authOptions);
 
   const profile = await prisma.user.findUnique({
     where: {
