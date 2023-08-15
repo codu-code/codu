@@ -47,7 +47,12 @@ export class AppStack extends cdk.Stack {
     taskDef.addToTaskRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: ["s3:*Object", "SES:*"],
+        actions: [
+          "s3:*Object",
+          "SES:*",
+          "ssm:GetParameters",
+          "ssm:GetParameter",
+        ],
         resources: ["*"],
       })
     );
