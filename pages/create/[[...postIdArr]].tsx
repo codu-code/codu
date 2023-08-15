@@ -2,7 +2,7 @@ import type { NextPage, GetServerSideProps } from "next";
 import { ZodError } from "zod";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, Fragment, useRef } from "react";
-import { unstable_getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useForm } from "react-hook-form";
 import CustomTextareaAutosize from "../../components/CustomTextareAutosize/CustomTextareaAutosize";
@@ -615,11 +615,7 @@ const Create: NextPage = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  );
+  const session = await getServerSession(context.req, context.res, authOptions);
 
   if (!session) {
     return {
