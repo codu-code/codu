@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useState, useEffect, useCallback } from "react";
 import { Modal } from "../Modal/Modal";
-import { ExclamationIcon, PlusSmIcon, XIcon } from "@heroicons/react/outline";
+import { ExclamationIcon, XIcon } from "@heroicons/react/outline";
 import { Dialog } from "@headlessui/react";
 
 export interface serviceProps {

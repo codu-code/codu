@@ -5,7 +5,7 @@ import type {
 } from "next";
 import { useRouter } from "next/router";
 import { customAlphabet } from "nanoid";
-import { unstable_getServerSession } from "next-auth/next";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
@@ -444,11 +444,7 @@ const Settings: NextPage = ({
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  );
+  const session = await getServerSession(context.req, context.res, authOptions);
 
   if (!session?.user?.id) {
     return {
