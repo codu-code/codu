@@ -35,6 +35,8 @@ export class AppStack extends cdk.Stack {
 
     const cluster = new ecs.Cluster(this, "ServiceCluster", { vpc });
 
+    cluster.addDefaultCloudMapNamespace({ name: this.cloudMapNamespace });
+
     const appAsset = new ecrAssets.DockerImageAsset(this, "app", {
       directory: "../",
       file: "Dockerfile",
