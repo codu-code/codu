@@ -48,6 +48,6 @@ COPY --from=builder /app/.next/static ./.next/static
 EXPOSE 3000
 
 ENV PORT 3000
-ENV HOSTNAME host.docker.internal
+ENV HOSTNAME localhost
 
 CMD ["node", "server.js"]
