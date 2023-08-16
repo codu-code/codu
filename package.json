@@ -44,7 +44,7 @@
     "fathom-client": "^3.5.0",
     "html-react-parser": "^3.0.16",
     "nanoid": "^4.0.2",
-    "next": "^13.4.16",
+    "next": "^13.3.4",
     "next-auth": "^4.22.3",
     "next-superjson-plugin": "^0.5.9",
     "nodemailer": "^6.9.3",
