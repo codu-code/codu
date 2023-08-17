@@ -6,6 +6,7 @@
     "lib": [
       "es2020", "dom"
     ],
+    "esModuleInterop": true,
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -25,6 +26,7 @@
     ]
   },
   "exclude": [
+    "lambdas/",
     "node_modules",
     "cdk.out"
   ]
