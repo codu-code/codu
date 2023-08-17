@@ -5,7 +5,9 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { OriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
+import { S3EventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 
 interface Props extends cdk.StackProps {
   production?: boolean;
@@ -55,6 +57,23 @@ export class StorageStack extends cdk.Stack {
 
     this.bucket.grantRead(new iam.AccountRootPrincipal());
     this.bucket.grantRead(this.originAccessIdentity);
+
+    // Lambda for resizing uploads
+    const s3EventHandler = new lambda.Function(this, "S3EventHandler", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      code: lambda.Code.fromAsset("lambdas"),
+      handler: "imageResize.handler",
+      timeout: cdk.Duration.seconds(300),
+    });
+
+    this.bucket.grantReadWrite(s3EventHandler);
+
+    s3EventHandler.addEventSource(
+      new S3EventSource(this.bucket, {
+        events: [s3.EventType.OBJECT_CREATED],
+        filters: [{ prefix: "u/" }],
+      })
+    );
 
     const dbUsername = ssm.StringParameter.valueForStringParameter(
       this,
