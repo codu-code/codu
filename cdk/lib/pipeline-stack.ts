@@ -22,7 +22,6 @@ export class PipelineStack extends cdk.Stack {
       pipelineName: "codu-pipline",
       crossAccountKeys: true,
       synth: synthAction,
-      publishAssetsInParallel: true,
     });
 
     const devAccountId = ssm.StringParameter.valueFromLookup(
