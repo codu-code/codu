@@ -1,6 +1,5 @@
-import { S3 } from "@aws-sdk/client-s3";
-import sharp from "sharp";
-
+const sharp = require("sharp");
+const { S3 } = require("@aws-sdk/client-s3");
 const s3 = new S3({});
 
 exports.handler = async (event) => {
