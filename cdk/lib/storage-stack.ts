@@ -63,8 +63,19 @@ export class StorageStack extends cdk.Stack {
     // Lambda for resizing uploads
     const s3EventHandler = new NodejsFunction(this, "ResizeU", {
       runtime: lambda.Runtime.NODEJS_18_X,
-      entry: path.join(__dirname, "/../lambdas/imageResize.js"),
+      entry: path.join(__dirname, "/../src/imageResize.js"),
       timeout: cdk.Duration.seconds(300),
+      bundling: {
+        commandHooks: {
+          beforeBundling: () => [],
+          beforeInstall: () => [
+            "npm install",
+            "rm -rf node_modules/sharp",
+            "SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install --arch=x64 --platform=linux --libc=glibc sharp",
+          ],
+          afterBundling: () => [],
+        },
+      },
     });
 
     this.bucket.grantReadWrite(s3EventHandler);
