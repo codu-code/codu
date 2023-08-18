@@ -8,7 +8,8 @@ import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { OriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
 import { S3EventSource } from "aws-cdk-lib/aws-lambda-event-sources";
-import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import * as path from "path";
 
 interface Props extends cdk.StackProps {
   production?: boolean;
@@ -60,10 +61,9 @@ export class StorageStack extends cdk.Stack {
     this.bucket.grantRead(this.originAccessIdentity);
 
     // Lambda for resizing uploads
-    const s3EventHandler = new lambda.Function(this, "ResizeU", {
+    const s3EventHandler = new NodejsFunction(this, "ResizeU", {
       runtime: lambda.Runtime.NODEJS_18_X,
-      code: lambda.Code.fromAsset("lambdas"),
-      handler: "imageResize.handler",
+      entry: path.join(__dirname, "/../src/imageResize.js"),
       timeout: cdk.Duration.seconds(300),
     });
 
