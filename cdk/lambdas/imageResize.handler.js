@@ -20,7 +20,7 @@ exports.handler = async (event) => {
     if (!bodyStream) throw new Error("BodyStream is empty");
 
     const resizedImage = await sharp(bodyStream)
-      .resize(200)
+      .resize({ width: 200, height: 200, fit: "fill" })
       .webp({ quality: 80 })
       .toBuffer();
 
