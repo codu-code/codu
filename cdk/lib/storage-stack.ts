@@ -66,14 +66,8 @@ export class StorageStack extends cdk.Stack {
       entry: path.join(__dirname, "/../lambdas/imageResize.js"),
       timeout: cdk.Duration.seconds(300),
       bundling: {
-        commandHooks: {
-          beforeBundling: () => [
-            "rm -rf node_modules/sharp",
-            "SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install --arch=x64 --platform=linux --libc=glibc sharp",
-          ],
-          beforeInstall: () => [],
-          afterBundling: () => [],
-        },
+        nodeModules: ["sharp"],
+        forceDockerBundling: true,
       },
     });
 
