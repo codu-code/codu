@@ -14,12 +14,13 @@ exports.handler = async (event) => {
   };
 
   console.log("===========");
-  console.log(params);
+  console.log({ params });
 
   try {
     const image = await s3.getObject(params);
     console.log("IMAGE", image);
     const bodyStream = image.Body;
+    console.log({ bodyStream });
     if (!bodyStream) throw new Error("BodyStream is empty");
 
     const resizedImage = await sharp(bodyStream)
