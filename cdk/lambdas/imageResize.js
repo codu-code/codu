@@ -4,6 +4,8 @@ const s3 = new S3({});
 
 exports.handler = async (event) => {
   const bucket = event.Records[0].s3.bucket.name;
+  console.log("KEY");
+  console.log(event.Records[0].s3.object.key);
   const key = decodeURIComponent(
     event.Records[0].s3.object.key.replace(/\+/g, " ")
   );
