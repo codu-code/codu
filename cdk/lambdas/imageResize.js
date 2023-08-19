@@ -10,7 +10,7 @@ exports.handler = async (event) => {
 
   const pattern = "u/";
   const regex = new RegExp(`^.*?${pattern}`);
-  const key = event.Records[0].s3.object.key.replace(regex);
+  const key = event.Records[0].s3.object.key.replace(regex, pattern);
 
   const params = {
     Bucket: bucket,
