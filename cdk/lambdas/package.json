@@ -9,10 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.391.0",
     "sharp": "^0.32.5"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.391.0",
     "@types/node": "^20.5.0",
     "esbuild": "^0.19.2"
   }
