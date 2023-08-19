@@ -5,12 +5,7 @@ const s3 = new S3({});
 exports.handler = async (event) => {
   console.log(JSON.stringify(event, null, 2));
   const bucket = event.Records[0].s3.bucket.name;
-  console.log("KEY");
-  console.log(event.Records[0].s3.object.key);
-
-  const pattern = "u/";
-  const regex = new RegExp(`^.*?${pattern}`);
-  const key = event.Records[0].s3.object.key.replace(regex, pattern);
+  const key = "/" + event.Records[0].s3.object.key;
 
   const params = {
     Bucket: bucket,
