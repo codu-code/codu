@@ -65,6 +65,7 @@ export class StorageStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       entry: path.join(__dirname, "/../lambdas/imageResize.js"),
       timeout: cdk.Duration.seconds(300),
+      depsLockFilePath: path.join(__dirname, "/../lambdas/package-lock.json"),
       bundling: {
         nodeModules: ["sharp"],
         forceDockerBundling: true,
