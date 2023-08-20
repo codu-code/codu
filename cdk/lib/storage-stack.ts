@@ -66,7 +66,7 @@ export class StorageStack extends cdk.Stack {
       entry: path.join(__dirname, "/../lambdas/imageResize.js"),
       timeout: cdk.Duration.seconds(120),
       bundling: {
-        nodeModules: ["sharp"],
+        externalModules: ["sharp"],
       },
     });
 
