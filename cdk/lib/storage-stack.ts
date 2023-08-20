@@ -62,7 +62,7 @@ export class StorageStack extends cdk.Stack {
 
     const sharpLayer = new lambda.LayerVersion(this, "sharpLayer", {
       compatibleRuntimes: [lambda.Runtime.NODEJS_18_X],
-      code: lambda.Code.fromAsset("layers/sharp"),
+      code: lambda.Code.fromAsset(path.join(__dirname, "/../layers/sharp")),
       description: "Uses a 3rd party library called yup",
     });
 
