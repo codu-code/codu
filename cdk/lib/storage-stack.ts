@@ -64,11 +64,9 @@ export class StorageStack extends cdk.Stack {
     const s3EventHandler = new NodejsFunction(this, "ResizeU", {
       runtime: lambda.Runtime.NODEJS_18_X,
       entry: path.join(__dirname, "/../lambdas/imageResize.js"),
-      timeout: cdk.Duration.seconds(300),
-      depsLockFilePath: path.join(__dirname, "/../lambdas/package-lock.json"),
+      timeout: cdk.Duration.seconds(120),
       bundling: {
         nodeModules: ["sharp"],
-        forceDockerBundling: true,
       },
     });
 
