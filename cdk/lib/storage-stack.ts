@@ -60,6 +60,12 @@ export class StorageStack extends cdk.Stack {
     this.bucket.grantRead(new iam.AccountRootPrincipal());
     this.bucket.grantRead(this.originAccessIdentity);
 
+    const sharpLayer = new lambda.LayerVersion(this, "sharpLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_18_X],
+      code: lambda.Code.fromAsset("layers/sharp"),
+      description: "Uses a 3rd party library called yup",
+    });
+
     // Lambda for resizing uploads
     const s3EventHandler = new NodejsFunction(this, "ResizeU", {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -68,6 +74,7 @@ export class StorageStack extends cdk.Stack {
       bundling: {
         externalModules: ["sharp"],
       },
+      layers: [sharpLayer],
     });
 
     this.bucket.grantReadWrite(s3EventHandler);
