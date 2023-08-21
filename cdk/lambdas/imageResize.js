@@ -1,6 +1,6 @@
 const sharp = require("sharp");
-const { S3 } = require("@aws-sdk/client-s3");
-const s3 = new S3({});
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = new S3Client();
 
 exports.handler = async (event) => {
   console.log(JSON.stringify(event, null, 2));
@@ -16,13 +16,12 @@ exports.handler = async (event) => {
   console.log({ params });
 
   try {
-    const image = await s3.getObject(params);
-    console.log("IMAGE", image);
-    const bodyStream = image.Body;
-    console.log({ bodyStream });
-    if (!bodyStream) throw new Error("BodyStream is empty");
+    const response = await s3.send(new GetObjectCommand(params));
+    const stream = response.Body;
 
-    const resizedImage = await sharp(bodyStream)
+    if (!stream) throw new Error("BodyStream is empty");
+
+    const resizedImage = await sharp(Buffer.concat(await stream.toArray()))
       .resize({ width: 200, height: 200, fit: "fill" })
       .webp({ quality: 80 })
       .toBuffer()
