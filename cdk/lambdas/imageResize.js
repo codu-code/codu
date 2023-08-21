@@ -1,4 +1,4 @@
-const sharp = require("/opt/sharp");
+const sharp = require("sharp");
 const { S3 } = require("@aws-sdk/client-s3");
 const s3 = new S3({});
 
