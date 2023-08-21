@@ -28,12 +28,9 @@ exports.handler = async (event) => {
     if (!stream) throw new Error("BodyStream is empty");
 
     const resizedImage = await sharp(Buffer.concat(await stream.toArray()))
-      .resize({ width: 200, height: 200, fit: "fill" })
+      .resize({ width: 220, height: 220, fit: "cover" })
       .webp({ quality: 80 })
-      .toBuffer()
-      .catch((err) => {
-        console.log("SHARP ERROR", err);
-      });
+      .toBuffer();
 
     await s3.send(
       new PutObjectCommand({
