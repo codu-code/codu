@@ -1,5 +1,9 @@
 const sharp = require("sharp");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} = require("@aws-sdk/client-s3");
 const s3 = new S3Client();
 
 exports.handler = async (event) => {
@@ -29,11 +33,13 @@ exports.handler = async (event) => {
         console.log("SHARP ERROR", err);
       });
     console.log("2===========");
-    await s3.putObject({
-      Bucket: bucket,
-      Key: `resized/${key}`,
-      Body: resizedImage,
-    });
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: `resized/${key}`,
+        Body: resizedImage,
+      })
+    );
 
     return {
       statusCode: 200,
