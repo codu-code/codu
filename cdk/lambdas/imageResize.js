@@ -6,18 +6,20 @@ const {
 } = require("@aws-sdk/client-s3");
 const s3 = new S3Client();
 
+const createTargetKey = (str) => {
+  return str.replace(/u\//, "new/");
+};
+
 exports.handler = async (event) => {
   console.log(JSON.stringify(event, null, 2));
   const bucket = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
+  const targetKey = createTargetKey(key);
 
   const params = {
     Bucket: bucket,
     Key: key,
   };
-
-  console.log("===========");
-  console.log({ params });
 
   try {
     const response = await s3.send(new GetObjectCommand(params));
@@ -32,11 +34,11 @@ exports.handler = async (event) => {
       .catch((err) => {
         console.log("SHARP ERROR", err);
       });
-    console.log("2===========");
+
     await s3.send(
       new PutObjectCommand({
         Bucket: bucket,
-        Key: `resized/${key}`,
+        Key: targetKey,
         Body: resizedImage,
       })
     );
