@@ -56,7 +56,7 @@
     "react-hotkeys-hook": "^4.4.1",
     "react-intersection-observer": "^9.5.2",
     "react-textarea-autosize": "^8.5.2",
-    "satori": "^0.10.1",
+    "satori": "^0.10.2",
     "sharp": "^0.32.4",
     "slate-react": "^0.97.2",
     "slate-serializers": "^0.4.1",
