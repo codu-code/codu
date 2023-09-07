@@ -57,7 +57,7 @@
     "react-intersection-observer": "^9.5.2",
     "react-textarea-autosize": "^8.5.2",
     "satori": "^0.10.3",
-    "sharp": "^0.32.4",
+    "sharp": "^0.32.5",
     "slate-react": "^0.98.2",
     "slate-serializers": "^0.4.1",
     "styled-components": "^5.3.11",
