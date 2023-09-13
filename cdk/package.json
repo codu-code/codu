@@ -11,7 +11,7 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.391.0",
+    "@aws-sdk/client-s3": "^3.410.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^18.11.15",
     "@types/react": "^18.2.14",
@@ -22,8 +22,8 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.91.0",
-    "constructs": "^10.2.69",
+    "aws-cdk-lib": "^2.95.1",
+    "constructs": "^10.2.70",
     "source-map-support": "^0.5.21"
   }
 }
