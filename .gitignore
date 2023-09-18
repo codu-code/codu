@@ -56,3 +56,5 @@ cdk.context.json
 
 # local script file for setting up ssm
 ssmSetup.zsh
+# Sentry Auth Token
+.sentryclirc
