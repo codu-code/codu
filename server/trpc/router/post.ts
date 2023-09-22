@@ -309,7 +309,8 @@ export const postRouter = router({
     });
 
     const cleaned = response.map((post) => {
-      const currentUserLikesPost = !!post.bookmarks.length;
+      let currentUserLikesPost = !!post.bookmarks.length;
+      if (userId === undefined) currentUserLikesPost = false;
       post.bookmarks = [];
       return { ...post, currentUserLikesPost };
     });
@@ -354,7 +355,8 @@ export const postRouter = router({
     });
 
     const cleaned = response.map((post) => {
-      const currentUserLikesPost = !!post.bookmarks.length;
+      let currentUserLikesPost = !!post.bookmarks.length;
+      if (userId === undefined) currentUserLikesPost = false;
       post.bookmarks = [];
       return { ...post, currentUserLikesPost };
     });
