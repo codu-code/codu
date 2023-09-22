@@ -1,4 +1,3 @@
-import { BlobResult } from "@vercel/blob";
 import { toast } from "sonner";
 import { EditorState, Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet, EditorView } from "@tiptap/pm/view";
@@ -90,7 +89,7 @@ export function startImageUpload(file: File, view: EditorView, pos: number) {
   handleImageUpload(file).then((src) => {
     const { schema } = view.state;
 
-    let pos = findPlaceholder(view.state, id);
+    const pos = findPlaceholder(view.state, id);
     // If the content around the placeholder has been deleted, drop
     // the image
     if (pos == null) return;
@@ -124,9 +123,9 @@ export const handleImageUpload = (file: File) => {
       }).then(async (res) => {
         // Successfully uploaded image
         if (res.status === 200) {
-          const { url } = (await res.json()) as BlobResult;
+          const { url } = (await res.json());
           // preload the image
-          let image = new Image();
+          const image = new Image();
           image.src = url;
           image.onload = () => {
             resolve(url);
