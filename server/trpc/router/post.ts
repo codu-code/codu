@@ -251,7 +251,7 @@ export const postRouter = router({
   all: publicProcedure.input(GetPostsSchema).query(async ({ ctx, input }) => {
     const userId = ctx.session?.user?.id;
     const limit = input?.limit ?? 50;
-    const { cursor, sort, tag } = input;
+    const { cursor, sort, tag, searchTerm } = input;
 
     const orderMapping = {
       newest: {
@@ -287,6 +287,32 @@ export const postRouter = router({
               },
             }
           : {}),
+          ...(searchTerm
+            ? {
+                OR: [
+                  {
+                    user: {
+                      name: {
+                        contains: searchTerm || "",
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    title: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    excerpt: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              }
+            : {}),
       },
       select: {
         id: true,
