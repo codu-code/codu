@@ -42,12 +42,9 @@ export function DatePickerWithRange(props:Props ) {
             variant={"outline"}
             size={'icon'}
             onMouseOver={()=>setIsOpenCalendar(true)}
-            className={cn(
-              "  text-left font-normal bg-transparent border-2 hover:bg-transparent h-8 w-8",
-            )}>
+            className={cn("text-left font-normal bg-transparent border-2 hover:bg-transparent h-8 w-8",)}>
             <CalendarIcon className="text-white w-11 "   />
           </Button>
-
 
         </PopoverTrigger>
         

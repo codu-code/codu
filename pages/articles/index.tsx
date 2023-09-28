@@ -32,10 +32,12 @@ const ArticlesPage = () => {
 
   const { filter, tag: dirtyTag } = router.query;
   const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
+ 
   const [searchTerm, setSearchTerm] = useState("");
+  const [date, setDate] = useState<DateRange | undefined>(undefined)
+ 
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
-  const [date, setDate] = useState<DateRange | undefined>(undefined)
 
   const getSortBy = () => {
     if (typeof filter === "string") {
@@ -90,8 +92,8 @@ const ArticlesPage = () => {
       </Head>
       <Layout>
         <div className="mx-2">   
-          <div className="sm:mx-auto max-w-5xl mt-8 border-b pb-4 lg:max-w-5xl sm:max-w-2xl flex">
-            <h1 className="max-[370px]:text-4xl max-[400px]:text-5xl text-6xl sm:text-4xl tracking-tight font-extrabold text-neutral-50 pl-2 pr-2 grow-0">
+          <div className="flex flex-wrap sm:mx-auto max-w-5xl mt-8 border-b pb-4 lg:max-w-5xl sm:max-w-2xl">
+            <h1 className="min-w-fit max-[370px]:text-4xl max-[400px]:text-5xl text-6xl sm:text-4xl tracking-tight font-extrabold text-neutral-50 pl-2 pr-2 mb-2 grow-0">
               {typeof tag === "string" ? (
                 <div className="flex justify-center items-center">
                   <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
