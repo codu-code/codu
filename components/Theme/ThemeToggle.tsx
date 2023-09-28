@@ -11,12 +11,12 @@ interface ThemeToggleProps {
 // FUTURE CSS FIX - Menu - inline block, top alignment.
 
 const ThemeToggle: FunctionComponent<ThemeToggleProps> = () => {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   return (
     <Menu
       as="div"
-      className="relative text-neutral-400 hover:text-neutral-300 focus:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ml-3 rounded-full  items-center flex justify-start"
+      className="relative inline-block text-neutral-400 hover:text-neutral-300 focus:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ml-3 rounded-full  "
     >
       <Menu.Button className="">
         <SunIcon className="w-6 h-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -56,7 +56,7 @@ const ThemeToggle: FunctionComponent<ThemeToggleProps> = () => {
             as="button"
             className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm px-4 py-2  font-medium outline-none w-full hover:hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700 text-black
 "
-            onClick={() => setTheme("light")}
+            onClick={() => setTheme("dark")}
           >
             {({ active }) => (
               <>

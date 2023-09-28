@@ -6,6 +6,7 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { trpc } from "../utils/trpc";
 import ProgressBar from "../components/ProgressBar/ProgressBar";
+import Providers from "../components/Theme/ThemeProvider";
 // import 'material-icons/iconfont/material-icons.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -80,10 +81,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [router]);
 
   return (
-    <SessionProvider session={pageProps.session}>
-      <ProgressBar isAnimating={isAnimating} />
-      <Component {...pageProps} />
-    </SessionProvider>
+    <Providers>
+      <SessionProvider session={pageProps.session}>
+        <ProgressBar isAnimating={isAnimating} />
+        <Component {...pageProps} />
+      </SessionProvider>
+    </Providers>
   );
 }
 

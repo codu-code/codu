@@ -14,6 +14,7 @@ import challenge from "public/images/announcements/challenge.png";
 import space from "public/images/home/space.jpg";
 import rocketman from "public/images/home/rocketman.png";
 import moon from "public/images/home/moon.png";
+import { useTheme } from "next-themes";
 
 const Home: NextPage = () => {
   const tagsToShow = [
@@ -27,6 +28,10 @@ const Home: NextPage = () => {
     "Python",
     "Tips",
   ];
+
+  const { theme, setTheme } = useTheme();
+
+  console.log(theme);
 
   const { status, data } = trpc.post.randomTrending.useQuery();
   const [rocketLoaded, setRocketLoaded] = useState(false);
