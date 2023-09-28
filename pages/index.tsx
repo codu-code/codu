@@ -16,6 +16,7 @@ import rocketman from "public/images/home/rocketman.png";
 import moon from "public/images/home/moon.png";
 
 const Home: NextPage = () => {
+  // Comment push
   const tagsToShow = [
     "JavaScript",
     "Web Development",
