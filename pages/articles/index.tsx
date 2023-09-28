@@ -1,4 +1,4 @@
-import { Children, Fragment, useEffect } from "react";
+import { Children, Fragment, useEffect, useState } from "react";
 import Head from "next/head";
 import { TagIcon } from "@heroicons/react/outline";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
@@ -10,6 +10,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
+import SearchBar from "../../components/ArticleSearch/SearchBar";
+import { DatePickerWithRange } from "@/components/ArticleSearch/DatePickerRange";
+import type { DateRange } from "react-day-picker"
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -29,9 +32,10 @@ const ArticlesPage = () => {
 
   const { filter, tag: dirtyTag } = router.query;
   const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
-
+  const [searchTerm, setSearchTerm] = useState("");
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
+  const [date, setDate] = useState<DateRange | undefined>(undefined)
 
   const getSortBy = () => {
     if (typeof filter === "string") {
@@ -45,7 +49,7 @@ const ArticlesPage = () => {
 
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     trpc.post.all.useInfiniteQuery(
-      { limit: 15, sort: selectedSortFilter, tag },
+      { limit: 15, sort: selectedSortFilter, tag, searchTerm, date  },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       }
@@ -85,9 +89,9 @@ const ArticlesPage = () => {
         <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
-        <div className="mx-2">
-          <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
-            <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
+        <div className="mx-2">   
+          <div className="sm:mx-auto max-w-5xl mt-8 border-b pb-4 lg:max-w-5xl sm:max-w-2xl flex">
+            <h1 className="max-[370px]:text-4xl max-[400px]:text-5xl text-6xl sm:text-4xl tracking-tight font-extrabold text-neutral-50 pl-2 pr-2 grow-0">
               {typeof tag === "string" ? (
                 <div className="flex justify-center items-center">
                   <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
@@ -97,27 +101,34 @@ const ArticlesPage = () => {
                 "Articles"
               )}
             </h1>
-            <div>
-              <label htmlFor="filter" className="sr-only">
-                Location
-              </label>
-              <select
-                id="filter"
-                name="filter"
-                className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
-                onChange={(e) => {
-                  router.push(
-                    `/articles?filter=${e.target.value}${
-                      tag ? `&tag=${tag}` : ""
-                    }`
-                  );
-                }}
-                value={selectedSortFilter}
-              >
-                <option>newest</option>
-                <option>oldest</option>
-                <option>top</option>
-              </select>
+            <div className="flex grow justify-end">
+              <div className="sm:w-fit flex items-center flex-wrap mr-2 w-40">
+                <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>    
+                <div className="flex items-end w-full sm:w-auto">
+                  <DatePickerWithRange date={date} setDate={setDate}/>
+                  <div className="grow">
+                    <label htmlFor="filter" className="sr-only">
+                      Location
+                    </label>
+                    <select
+                      id="filter"
+                      name="filter"
+                      className="mt-2 h-8 capitalize block rounded-md border-0 py-1.5 pl-3 pr-8  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 sm:mt-0 text-sm"
+                      onChange={(e) => {
+                        router.push(
+                          `/articles?filter=${e.target.value}${
+                            tag ? `&tag=${tag}` : ""
+                          }`
+                        );
+                      }}
+                      value={selectedSortFilter}>
+                        <option>newest</option>
+                        <option>oldest</option>
+                        <option>top</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">

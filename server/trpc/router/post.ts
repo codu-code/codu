@@ -15,6 +15,7 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
+import { addDays } from "date-fns"
 
 export const postRouter = router({
   create: protectedProcedure
@@ -251,7 +252,7 @@ export const postRouter = router({
   all: publicProcedure.input(GetPostsSchema).query(async ({ ctx, input }) => {
     const userId = ctx.session?.user?.id;
     const limit = input?.limit ?? 50;
-    const { cursor, sort, tag } = input;
+    const { cursor, sort, tag, searchTerm, date  } = input;
 
     const orderMapping = {
       newest: {
@@ -287,6 +288,41 @@ export const postRouter = router({
               },
             }
           : {}),
+          ...(searchTerm
+            ? {
+                OR: [
+                  {
+                    user: {
+                      name: {
+                        contains: searchTerm || "",
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    title: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    excerpt: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              }
+            : {}),
+            ...(date && date.from && date.to 
+              ? {
+                
+                  AND: [
+                      { updatedAt: { gte: date.from }},
+                      { updatedAt: { lte: addDays(date.to,1) } },
+                  ], 
+              }
+              : {}),
       },
       select: {
         id: true,
