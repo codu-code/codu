@@ -62,7 +62,10 @@ export const GetPostsSchema = z.object({
   sort: z.enum(["newest", "oldest", "top"]),
   tag: z.string().nullish(),
   searchTerm: z.string().nullish(),
-  date: z.any() 
+  date: z.object({
+      from:z.date(),
+      to:z.date(),
+    }).nullish()
 });
 
 export type SavePostInput = z.TypeOf<typeof SavePostSchema>;
