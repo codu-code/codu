@@ -8,6 +8,7 @@ import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { PlusSmIcon, BellIcon } from "@heroicons/react/solid";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 import { trpc } from "../../utils/trpc";
+import ThemeToggle from "../Theme/ThemeToggle";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -136,6 +137,7 @@ const Nav = () => {
                   {/* Profile dropdown */}
                   {session && (
                     <>
+                      <ThemeToggle />
                       <Link
                         title="Notifications"
                         href="/notifications"
