@@ -265,6 +265,9 @@ export const postRouter = router({
           _count: "desc" as Prisma.SortOrder,
         },
       },
+      bookmarked: {
+        published: "desc" as Prisma.SortOrder,  // sorts by desc(same as newest). Filtering for 'bookmarked' happens below 
+      }  
     };
     const orderBy = orderMapping[sort] || orderMapping["newest"];
 
@@ -285,6 +288,15 @@ export const postRouter = router({
                   },
                 },
               },
+            }
+          : {}),
+           ...(sort === 'bookmarked' 
+          ? {
+              bookmarks:{
+                 some:{
+                  userId:userId,
+                 }
+              }
             }
           : {}),
       },

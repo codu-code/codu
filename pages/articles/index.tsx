@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
+import { useSession } from "next-auth/react";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -26,12 +27,13 @@ const tagsToShow = [
 
 const ArticlesPage = () => {
   const router = useRouter();
+  const {data:session} = useSession();
 
   const { filter, tag: dirtyTag } = router.query;
   const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
 
-  type Filter = "newest" | "oldest" | "top";
-  const filters: Filter[] = ["newest", "oldest", "top"];
+  type Filter = "newest" | "oldest" | "top" | "bookmarked";
+  const filters: Filter[] = ["newest", "oldest", "top", "bookmarked"];
 
   const getSortBy = () => {
     if (typeof filter === "string") {
@@ -117,6 +119,7 @@ const ArticlesPage = () => {
                 <option>newest</option>
                 <option>oldest</option>
                 <option>top</option>
+                {session && <option>bookmarked</option>}
               </select>
             </div>
           </div>
