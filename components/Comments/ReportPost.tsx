@@ -1,22 +1,25 @@
-import { useRef, useState,useEffect } from 'react';
+import React, { useRef, useState,useEffect } from 'react';
 import Flag from '../../icons/flag.svg'
-import { XCircleIcon,XIcon } from "@heroicons/react/outline";
+import { XIcon } from "@heroicons/react/outline";
 
 
 interface Props {
     name:string;
     body:string;
     id:number;
+    reportedBy:string  ;
 }
 
 export const ReportPost = (props:Props) => {
 
-  const { name, body, id } = props;
+  const { name, body, id, reportedBy } = props;
+
+
 
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [comment, setComment] = useState('')
 
-  console.log(comment )
+  console.log(comment)
 
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
@@ -27,7 +30,17 @@ export const ReportPost = (props:Props) => {
     }
   };
 
-const modalRef = useRef<HTMLDialogElement | null>(null);
+  const handleSubmit = (e:React.FormEvent) =>{
+    e.preventDefault();
+    console.log(reportedBy)
+    console.log(name)
+    console.log(body)
+    console.log(id)
+
+  }
+ 
+  const modalRef = useRef<HTMLDialogElement | null>(null);
+
   useEffect(() => {
     const modalElement = modalRef.current;
     if (modalElement) {
@@ -37,55 +50,60 @@ const modalRef = useRef<HTMLDialogElement | null>(null);
         modalElement.close();
       }
     }
-  }, [isModalOpen]);
+
+    // Close modal if clicked outside
+    const checkIfClickedOutside = (e:MouseEvent) => {
+      const targetNode = e.target as Node | null;
+      if (isModalOpen && modalRef.current && targetNode?.nodeName==='DIALOG' ) setModalOpen(false)      
+    }
+    document.addEventListener("mousedown", checkIfClickedOutside)
+    return () => {
+      document.removeEventListener("mousedown", checkIfClickedOutside)
+    }
+  }, [isModalOpen])
+
 
   return (
     <>
-        <button 
-            className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
-            onClick={handleOpenModal}>
+        <button aria-label="flag comment" onClick={handleOpenModal} className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800">
             <Flag className="h-5 "/>
         </button>   
 
-
     {isModalOpen &&    
-        <dialog ref={modalRef} onKeyDown={handleKeyDown} className='border bg-neutral-900 text-neutral-400 max-w-lg rounded-lg backdrop:bg-gray-700/90' >
-            <h1 className='text-2xl tracking-tight font-bold text-neutral-50 m-8 ml-4'>
-                Submit a report
-            </h1>
+        <dialog aria-modal="true" ref={modalRef} onKeyDown={handleKeyDown} 
+                className='p-0 border bg-neutral-900 text-neutral-400 max-w-lg rounded-lg backdrop:bg-gray-700/90' >
+            <div className= 'p-2 w-full h-full'>
+                <h1 className='text-2xl tracking-tight font-bold text-neutral-50 m-8 ml-4'>
+                    Submit a report
+                </h1>
+                <p className='border p-4 m-4 bg-neutral-700 text-zinc-200'>{body}</p>  
+                <div className='m-4'>
+                    <p className='mb-2'>Is this comment inappropriate?</p>
+                    <p>Thank you for bringing it to our attention. We take reports very seriously and will thoroughly investigate the matter.</p>
+                </div>
 
-            <p className='border p-4 m-4 mr-2 bg-neutral-700'>{body}</p>
-            
-            <div className='m-4'>
-                <p className='mb-2'>Is this comment inappropriate?</p>
-                <p>Thank you for bringing this to our attention. We take reports very seriously and will thoroughly investigate the matter.</p>
-            </div>
+                <form className='m-4'>
+                    <label htmlFor='report-comment'>Comment</label>
+                    <textarea
+                        maxLength={300}
+                        id="report-comment"
+                        rows={3}
+                        placeholder='leave a comment'
+                        onChange={(e)=>setComment(e.target.value)}
+                        value={comment}
+                    />
 
-            <div className='m-4'>
-                <label htmlFor='report-comment'>Comment</label>
-                <textarea
-                    maxLength={156}
-                    id="report-comment"
-                    rows={3}
-                    placeholder='leave a comment'
-                    onChange={(e)=>setComment(e.target.value)}
-                    value={comment}
-                />
-            </div>
-       
+                    <div className="flex justify-end mt-8 m-4 text-sm">
+                        <button className="primary-button" type='submit' onClick={handleSubmit}>
+                            SUBMIT REPORT
+                        </button>
+                    </div>
+                </form>
 
-            <div className="flex justify-end mt-8 m-4 text-sm">
-                <button className="primary-button"
-                    onClick={handleCloseModal}>
-                    SUBMIT REPORT
+                <button onClick={handleCloseModal} aria-label="Close" className="absolute top-6 right-6 p-1 hover:bg-neutral-800 rounded-full">
+                    <XIcon className='w-8'/>
                 </button>
             </div>
-
-            <button onClick={handleCloseModal} className="absolute top-6 right-6 p-1 hover:bg-neutral-800 rounded-full">
-                <XIcon className='w-8'/>
-            </button>
-
-
         </dialog>
     }
     </>

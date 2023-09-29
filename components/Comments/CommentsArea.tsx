@@ -199,7 +199,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                 day: "numeric",
               }
         );
-
+        const reportedBy = session?.user?.name;
         const commentUpdated =
           new Date(createdAt).toISOString() !==
           new Date(updatedAt).toISOString();
@@ -313,7 +313,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
-                    <ReportPost name={name} body={body} id={id}/>
+                 {reportedBy &&   <ReportPost name={name} body={body} id={id} reportedBy={reportedBy}/>}
                     {depth < 6 && (
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"
