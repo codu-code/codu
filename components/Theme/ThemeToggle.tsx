@@ -1,6 +1,5 @@
 import { Fragment, FunctionComponent } from "react";
 import { Menu, Transition } from "@headlessui/react";
-// import clsx from "clsx";
 import { SunIcon, MoonIcon, DesktopComputerIcon } from "@heroicons/react/solid";
 import { useTheme } from "next-themes";
 
@@ -41,13 +40,7 @@ const ThemeToggle: FunctionComponent<ThemeToggleProps> = () => {
           >
             {({ active }) => (
               <>
-                <SunIcon
-                  className="mr-2 h-4 w-4"
-                  // className={clsx(
-                  //   active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                  //   "block px-4 py-2 text-sm"
-                  // )}
-                />
+                <SunIcon className="mr-2 h-4 w-4" />
                 <span>Light</span>
               </>
             )}
@@ -67,20 +60,13 @@ const ThemeToggle: FunctionComponent<ThemeToggleProps> = () => {
           </Menu.Item>
           <Menu.Item
             as="button"
-            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm px-4 py-2 font-medium outline-none w-full hover:hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700
-            text-black
-"
+            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm px-4 py-2 font-medium outline-none w-full hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700
+            text-black"
             onClick={() => setTheme("dark")}
           >
             {({ active }) => (
               <>
-                <DesktopComputerIcon
-                  className="mr-2 h-4 w-4"
-                  // className={clsx(
-                  //   active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                  //   "block px-4 py-2 text-sm"
-                  // )}
-                />
+                <DesktopComputerIcon className="mr-2 h-4 w-4" />
                 <span>System</span>
               </>
             )}
