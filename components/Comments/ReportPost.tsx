@@ -1,6 +1,7 @@
 import React, { useRef, useState,useEffect } from 'react';
 import Flag from '../../icons/flag.svg'
 import { XIcon } from "@heroicons/react/outline";
+import toast, from "react-hot-toast";
 
 
 interface Props {
@@ -19,7 +20,6 @@ export const ReportPost = (props:Props) => {
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [comment, setComment] = useState('')
 
-  console.log(comment)
 
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
@@ -36,7 +36,9 @@ export const ReportPost = (props:Props) => {
     console.log(name)
     console.log(body)
     console.log(id)
-
+    handleCloseModal();
+    setComment('')
+    toast.success("Report sent");
   }
  
   const modalRef = useRef<HTMLDialogElement | null>(null);
@@ -109,5 +111,6 @@ export const ReportPost = (props:Props) => {
     </>
   );
 };
+
 
 
