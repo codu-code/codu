@@ -15,6 +15,7 @@ import { HeartIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 import { EditCommentSchema } from "../../schema/comment";
+import { ReportPost } from "./ReportPost";
 
 const SaveSchema = z.object({
   body: z
@@ -312,6 +313,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
+                    <ReportPost name={name} body={body} id={id}/>
                     {depth < 6 && (
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"
