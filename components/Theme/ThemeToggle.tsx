@@ -3,11 +3,10 @@ import { Menu, Transition } from "@headlessui/react";
 import { SunIcon, MoonIcon, DesktopComputerIcon } from "@heroicons/react/solid";
 import { useTheme } from "next-themes";
 
-//
 // FUTURE CSS FIX - Menu - inline block, top alignment - customisable css classname prop.
 
 const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
 
   return (
     <Menu
