@@ -6,7 +6,6 @@ import { signIn, useSession } from 'next-auth/react';
 import sendEmail from '../../utils/sendEmail';
 import { createReportEmailTemplate } from '../../utils/createReportEmailTemplate';
 
-
 interface Props {
     name:string;
     body:string;
@@ -17,21 +16,13 @@ interface Props {
 
 export const ReportPost = (props:Props) => {
 
-  const { name, body, id, email, slug } = props;
-
-
   const { data:session } = useSession(); 
-
-
+  const { name, body, id, email, slug } = props;
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [comment, setComment] = useState('')
 
-
-
-
   const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-   
+  const handleCloseModal = () => setModalOpen(false);   
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDialogElement>) => {
     if (event.key === "Escape") {
         handleCloseModal();
@@ -53,20 +44,17 @@ export const ReportPost = (props:Props) => {
         postLink:`https://codu.co/articles/${slug}`
     }
     
-
     const htmlMessage = createReportEmailTemplate(reportDetails);
 
-    console.log(htmlMessage)
-
     try {
-      // sendEmail({
-      //   recipient: process.env.ADMIN_EMAIL,
-      //   htmlMessage,
-      //   subject: "A user has reported a comment on Codú.co",
-      // }
-      // ).then(()=>
-      //   toast.success("Report sent")
-      // )
+      sendEmail({
+        recipient: process.env.ADMIN_EMAIL,
+        htmlMessage,
+        subject: "A user has reported a comment on Codú.co",
+      }
+      ).then(()=>
+        toast.success("Report sent")
+      )
     } catch (error) {
       console.log("Error attempting to email report", error);
       toast.error('Oops, something went wrong, please send us a message on discord https://github.com/codu-code/codu')
@@ -102,9 +90,9 @@ export const ReportPost = (props:Props) => {
 
   return (
     <>
-        <button aria-label="flag comment" onClick={()=> session ? handleOpenModal() : signIn() } className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800">
-            <Flag className="h-5 "/>
-        </button>   
+      <button aria-label="flag comment" onClick={()=> session ? handleOpenModal() : signIn() } className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800">
+          <Flag className="h-5 "/>
+      </button>   
 
     {isModalOpen &&    
         <dialog aria-modal="true" ref={modalRef} onKeyDown={handleKeyDown} 

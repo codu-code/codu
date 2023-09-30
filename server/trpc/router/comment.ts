@@ -31,10 +31,10 @@ interface ShapedResponse {
 [];
 
 // All I wanted from this file was to include user email in the ShapedResponse
-// Typescript was throwing an error for commentRouter >> Exported variable 'commentRouter' has or is using private name 'ShapedResponse'.ts(4025)  
+// Typescript was throwing an error for commentRouter line 39 >> Exported variable 'commentRouter' has or is using private name 'ShapedResponse'.ts(4025)  
 // Should be noted that the error was there when I opened the file and everthing was working fine. 
 // I moved the interface ShapedResponse to the top of the file and the error went away.
-// Feel free to delete this comment.
+// Please delete this comment. 
 
 export const commentRouter = router({
   create: protectedProcedure

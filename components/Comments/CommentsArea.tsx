@@ -164,23 +164,6 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   const generateComments = (
     commentsArr: Comments | Children | undefined,
     depth = 0
@@ -217,6 +200,7 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                 day: "numeric",
               }
         );
+
         const commentUpdated =
           new Date(createdAt).toISOString() !==
           new Date(updatedAt).toISOString();
@@ -330,24 +314,6 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                  <ReportPost name={name} body={body} id={id} email={email} slug={slug}/>
                     {depth < 6 && (
                       <button

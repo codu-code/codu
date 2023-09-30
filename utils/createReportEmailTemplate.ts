@@ -10,7 +10,6 @@ interface ReportDetails {
     postLink:string;
 }
 
-
 export const createReportEmailTemplate = (reportDetails:ReportDetails) =>
 `
 <!DOCTYPE html>
