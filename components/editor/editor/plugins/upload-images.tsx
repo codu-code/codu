@@ -1,6 +1,10 @@
 import { toast } from "sonner";
-import { EditorState, Plugin, PluginKey } from "@tiptap/pm/state";
-import { Decoration, DecorationSet, EditorView } from "@tiptap/pm/view";
+import type { EditorState } from "@tiptap/pm/state";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import type { EditorView } from "@tiptap/pm/view";
+
+// @TODO fix red squigly bois
 
 const uploadKey = new PluginKey("upload-image");
 
@@ -23,7 +27,7 @@ const UploadImagesPlugin = () =>
           const image = document.createElement("img");
           image.setAttribute(
             "class",
-            "opacity-40 rounded-lg border border-stone-200",
+            "opacity-40 rounded-lg border border-stone-200"
           );
           image.src = src;
           placeholder.appendChild(image);
@@ -33,7 +37,7 @@ const UploadImagesPlugin = () =>
           set = set.add(tr.doc, [deco]);
         } else if (action && action.remove) {
           set = set.remove(
-            set.find(null, null, (spec) => spec.id == action.remove.id),
+            set.find(null, null, (spec) => spec.id == action.remove.id)
           );
         }
         return set;
@@ -48,9 +52,10 @@ const UploadImagesPlugin = () =>
 
 export default UploadImagesPlugin;
 
-function findPlaceholder(state: EditorState, id: {}) {
+function findPlaceholder(state: EditorState, id = {}) {
   const decos = uploadKey.getState(state);
-  const found = decos.find(null, null, (spec) => spec.id == id);
+  // Type might be wrong here
+  const found = decos.find(null, null, (spec: { id: string }) => spec.id == id);
   return found.length ? found[0].from : null;
 }
 
@@ -123,7 +128,7 @@ export const handleImageUpload = (file: File) => {
       }).then(async (res) => {
         // Successfully uploaded image
         if (res.status === 200) {
-          const { url } = (await res.json());
+          const { url } = await res.json();
           // preload the image
           const image = new Image();
           image.src = url;
@@ -135,7 +140,7 @@ export const handleImageUpload = (file: File) => {
           resolve(file);
 
           throw new Error(
-            "`BLOB_READ_WRITE_TOKEN` environment variable not found, reading image locally instead.",
+            "`BLOB_READ_WRITE_TOKEN` environment variable not found, reading image locally instead."
           );
           // Unknown error
         } else {
@@ -146,7 +151,7 @@ export const handleImageUpload = (file: File) => {
         loading: "Uploading image...",
         success: "Image uploaded successfully.",
         error: (e) => e.message,
-      },
+      }
     );
   });
 };

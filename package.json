@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "ci-build": "prisma generate && prisma migrate deploy && next build",
+    "ci-build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",
@@ -52,7 +52,6 @@
     "@trpc/react-query": "^10.38.2",
     "@trpc/server": "^10.38.2",
     "@udecode/plate": "^20.7.2",
-    "ai": "^2.2.7",
     "atropos": "^1.0.2",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.3",

@@ -1,13 +1,9 @@
-"use client";
+// "use client";
 
-import {
-  useEffect,
-  useRef,
-  ReactNode,
-  Dispatch,
-  SetStateAction,
-  useMemo,
-} from "react";
+// @TODO Remove any with proper types...
+
+import { useEffect, useRef, useMemo } from "react";
+import type { ReactNode, SetStateAction, Dispatch } from "react";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
 
 export default function Leaflet({

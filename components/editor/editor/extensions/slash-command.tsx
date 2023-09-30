@@ -2,11 +2,12 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  ReactNode,
   useRef,
   useLayoutEffect,
 } from "react";
-import { Editor, Range, Extension } from "@tiptap/core";
+import type { ReactNode } from "react";
+import { Extension } from "@tiptap/core";
+import type { Editor, Range } from "@tiptap/core";
 import Suggestion from "@tiptap/suggestion";
 import { ReactRenderer } from "@tiptap/react";
 import tippy from "tippy.js";
@@ -22,7 +23,6 @@ import {
   Image as ImageIcon,
   Code,
 } from "lucide-react";
-import { toast } from "sonner";
 import { startImageUpload } from "@/components/editor/editor/plugins/upload-images";
 
 interface CommandItemProps {
@@ -130,13 +130,13 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ["blockquote"],
       icon: <TextQuote size={18} />,
       command: ({ editor, range }: CommandProps) =>
-      editor
-      .chain()
-      .focus()
-      .deleteRange(range)
-      .toggleNode("paragraph", "paragraph")
-      .toggleBlockquote()
-      .run(),
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .toggleNode("paragraph", "paragraph")
+          .toggleBlockquote()
+          .run(),
     },
     {
       title: "Code",
@@ -144,7 +144,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       searchTerms: ["codeblock"],
       icon: <Code size={18} />,
       command: ({ editor, range }: CommandProps) =>
-      editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
+        editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
     {
       title: "Image",
@@ -165,7 +165,7 @@ const getSuggestionItems = ({ query }: { query: string }) => {
           }
         };
         input.click();
-      },  
+      },
     },
     {
       title: "Bullet List",
@@ -240,7 +240,7 @@ const CommandList = ({
       const item = items[index];
       command(item);
     },
-    [command, items],
+    [command, items]
   );
 
   useEffect(() => {
