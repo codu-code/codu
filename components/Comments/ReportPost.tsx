@@ -1,20 +1,23 @@
 import React, { useRef, useState,useEffect } from 'react';
 import Flag from '../../icons/flag.svg'
 import { XIcon } from "@heroicons/react/outline";
-import toast, from "react-hot-toast";
+import toast from "react-hot-toast";
+import { useSession } from 'next-auth/react';
 
 
 interface Props {
     name:string;
     body:string;
     id:number;
-    reportedBy:string  ;
+    email:string | null;
 }
 
 export const ReportPost = (props:Props) => {
 
-  const { name, body, id, reportedBy } = props;
+  const { name, body, id, email } = props;
 
+
+  const { data:session } = useSession(); 
 
 
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
@@ -32,8 +35,15 @@ export const ReportPost = (props:Props) => {
 
   const handleSubmit = (e:React.FormEvent) =>{
     e.preventDefault();
-    console.log(reportedBy)
+
+    console.log(session?.user?.id)
+    console.log(session?.user?.email)
+    console.log(session?.user?.username)
+    console.log(session?.user?.name)
+    
+    
     console.log(name)
+    console.log(email)
     console.log(body)
     console.log(id)
     handleCloseModal();

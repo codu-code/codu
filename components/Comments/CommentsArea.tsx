@@ -176,7 +176,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         id,
         youLikedThis,
         likeCount,
-        user: { name, image, username, id: userId },
+        user: { name, image, username, id: userId, email },
         children,
       }) => {
         const ast = Markdoc.parse(body);
@@ -313,7 +313,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
-                 {reportedBy &&   <ReportPost name={name} body={body} id={id} reportedBy={reportedBy}/>}
+                 {reportedBy &&   <ReportPost name={name} body={body} id={id} email={email}/>}
                     {depth < 6 && (
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"

@@ -12,6 +12,30 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "../../../utils/notifications";
 
+interface ShapedResponse {
+  user: {
+    id: string;
+    username: string | null;
+    name: string;
+    image: string;
+    email:string | null;
+  };
+  youLikedThis: boolean;
+  likeCount: number;
+  id: number;
+  body: string;
+  createdAt: Date;
+  updatedAt: Date;
+  children?: ShapedResponse[];
+}
+[];
+
+// All I wanted from this file was to include user email in the ShapedResponse
+// Typescript was throwing an error for commentRouter >> Exported variable 'commentRouter' has or is using private name 'ShapedResponse'.ts(4025)  
+// Should be noted that the error was there when I opened the file and everthing was working fine. 
+// I moved the interface ShapedResponse to the top of the file and the error went away.
+// Feel free to delete this comment.
+
 export const commentRouter = router({
   create: protectedProcedure
     .input(SaveCommentSchema)
@@ -176,7 +200,7 @@ export const commentRouter = router({
           },
         },
         user: {
-          select: { name: true, image: true, username: true, id: true },
+          select: { name: true, image: true, username: true, id: true, email: true },
         },
         likes: {
           where: {
@@ -235,22 +259,7 @@ export const commentRouter = router({
           createdAt: "desc",
         },
       });
-      interface ShapedResponse {
-        user: {
-          id: string;
-          username: string | null;
-          name: string;
-          image: string;
-        };
-        youLikedThis: boolean;
-        likeCount: number;
-        id: number;
-        body: string;
-        createdAt: Date;
-        updatedAt: Date;
-        children?: ShapedResponse[];
-      }
-      [];
+     
 
       function shapeComments(commentsArr: typeof response): ShapedResponse[] {
         const value = commentsArr.map((comment) => {
