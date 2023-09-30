@@ -44,15 +44,6 @@ const ThemeToggle = () => {
             <MoonIcon className="mr-2 h-4 w-4" />
             <span>Dark</span>
           </Menu.Item>
-          <Menu.Item
-            as="button"
-            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm px-4 py-2 font-medium outline-none w-full hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700
-            text-black"
-            onClick={() => setTheme("dark")}
-          >
-            <DesktopComputerIcon className="mr-2 h-4 w-4" />
-            <span>System</span>
-          </Menu.Item>
         </Menu.Items>
       </Transition>
     </Menu>
