@@ -38,7 +38,8 @@ export const ReportPost = (props:Props) => {
         reportedByUser:session?.user?.name,
         reportedOnName:name,
         reportedOnEmail:email,
-        comment:body,
+        reportedComment:body,
+        commentMadeByReporter:comment,
         commentId:id,
         timeReportSent:new Date(),
         postLink:`https://codu.co/articles/${slug}`

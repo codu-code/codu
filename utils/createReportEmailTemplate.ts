@@ -4,10 +4,11 @@ interface ReportDetails {
     reportedByUser: string | null | undefined;
     reportedOnName: string;
     reportedOnEmail: string | null;
-    comment: string;
+    reportedComment: string;
     commentId: number;
     timeReportSent: Date;
     postLink:string;
+    commentMadeByReporter:string;
 }
 
 export const createReportEmailTemplate = (reportDetails:ReportDetails) =>
@@ -23,7 +24,7 @@ export const createReportEmailTemplate = (reportDetails:ReportDetails) =>
     <div style='padding:3rem; background-color:black; color:white;'>
         <p>Details of reported comment:</p>
         <p>link to post : <a style="color:yellow" href=${reportDetails.postLink ? reportDetails.postLink : ''}>${reportDetails.postLink ? reportDetails.postLink : ''}</a></p>
-        <p style='padding:3rem; border: 2px solid white;'>comment : ${reportDetails.comment ? reportDetails.comment : ''}</p>
+        <p style='padding:3rem; border: 2px solid white;'>comment : ${reportDetails.reportedComment ? reportDetails.reportedComment : ''}</p>
         <p>commment made by user : ${reportDetails.reportedOnName ? reportDetails.reportedOnName : ''} </p>
         <p>comment ID : ${reportDetails.commentId ? reportDetails.commentId : ''}</p>
         <p>users email : ${reportDetails.reportedOnEmail ? reportDetails.reportedOnEmail : ''} </p>   
@@ -34,11 +35,10 @@ export const createReportEmailTemplate = (reportDetails:ReportDetails) =>
    <br>
    <br>
    <br>
-
+   <p>Comment left the reporter : ${reportDetails.commentMadeByReporter ? reportDetails.commentMadeByReporter : ''} </p>
    <p>reported by user : ${reportDetails.reportedByUser ? reportDetails.reportedByUser : '' }</p>
    <p>users email : ${reportDetails.reportedByEmail ? reportDetails.reportedByEmail : ''}</p>
    <p>users id : ${reportDetails.reportedById ? reportDetails.reportedById : ''}</p>
-
   </div>
 
 </body>
