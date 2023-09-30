@@ -2,7 +2,9 @@ import React, { useRef, useState,useEffect } from 'react';
 import Flag from '../../icons/flag.svg'
 import { XIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
+import sendEmail from '../../utils/sendEmail';
+import { createReportEmailTemplate } from '../../utils/createReportEmailTemplate';
 
 
 interface Props {
@@ -10,11 +12,12 @@ interface Props {
     body:string;
     id:number;
     email:string | null;
+    slug:string
 }
 
 export const ReportPost = (props:Props) => {
 
-  const { name, body, id, email } = props;
+  const { name, body, id, email, slug } = props;
 
 
   const { data:session } = useSession(); 
@@ -22,6 +25,8 @@ export const ReportPost = (props:Props) => {
 
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [comment, setComment] = useState('')
+
+
 
 
   const handleOpenModal = () => setModalOpen(true);
@@ -36,19 +41,39 @@ export const ReportPost = (props:Props) => {
   const handleSubmit = (e:React.FormEvent) =>{
     e.preventDefault();
 
-    console.log(session?.user?.id)
-    console.log(session?.user?.email)
-    console.log(session?.user?.username)
-    console.log(session?.user?.name)
+    const reportDetails = {
+        reportedById:session?.user?.id,
+        reportedByEmail:session?.user?.email,
+        reportedByUser:session?.user?.name,
+        reportedOnName:name,
+        reportedOnEmail:email,
+        comment:body,
+        commentId:id,
+        timeReportSent:new Date(),
+        postLink:`https://codu.co/articles/${slug}`
+    }
     
-    
-    console.log(name)
-    console.log(email)
-    console.log(body)
-    console.log(id)
+
+    const htmlMessage = createReportEmailTemplate(reportDetails);
+
+    console.log(htmlMessage)
+
+    try {
+      // sendEmail({
+      //   recipient: process.env.ADMIN_EMAIL,
+      //   htmlMessage,
+      //   subject: "A user has reported a comment on Codú.co",
+      // }
+      // ).then(()=>
+      //   toast.success("Report sent")
+      // )
+    } catch (error) {
+      console.log("Error attempting to email report", error);
+      toast.error('Oops, something went wrong, please send us a message on discord https://github.com/codu-code/codu')
+    } 
+
     handleCloseModal();
     setComment('')
-    toast.success("Report sent");
   }
  
   const modalRef = useRef<HTMLDialogElement | null>(null);
@@ -77,7 +102,7 @@ export const ReportPost = (props:Props) => {
 
   return (
     <>
-        <button aria-label="flag comment" onClick={handleOpenModal} className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800">
+        <button aria-label="flag comment" onClick={()=> session ? handleOpenModal() : signIn() } className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800">
             <Flag className="h-5 "/>
         </button>   
 

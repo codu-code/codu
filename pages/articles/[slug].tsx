@@ -280,7 +280,7 @@ const ArticlePage: NextPage = ({
           <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
             <BioBar author={post.user} />
             {post.showComments ? (
-              <CommentsArea postId={post.id} postOwnerId={post.userId} />
+              <CommentsArea postId={post.id} postOwnerId={post.userId} slug={post.slug}/>
             ) : (
               <h3 className="py-10 italic text-lg">
                 Comments are disabled for this post
