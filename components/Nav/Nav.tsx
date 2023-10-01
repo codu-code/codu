@@ -8,6 +8,7 @@ import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import { PlusSmIcon, BellIcon } from "@heroicons/react/solid";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 import { trpc } from "../../utils/trpc";
+import ThemeToggle from "../Theme/ThemeToggle";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -36,7 +37,7 @@ const Nav = () => {
   const hasNotifications = !!count && count > 0;
 
   return (
-    <Disclosure as="nav" className="bg-black">
+    <Disclosure as="nav" className="bg-white dark:bg-black">
       {({ open }) => (
         <>
           <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,6 +137,7 @@ const Nav = () => {
                   {/* Profile dropdown */}
                   {session && (
                     <>
+                      <ThemeToggle />
                       <Link
                         title="Notifications"
                         href="/notifications"
