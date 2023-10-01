@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# Welcome message
 echo "#################################################"
 echo "#                                               #"
 echo "#         Welcome to Codu Hacktober Fest        #"
 echo "#                                               #"
 echo "#################################################"
 
-# Instructions for the user
 echo "Please create an OAuth app on GitHub by following these steps:"
 echo "- Go to https://github.com/settings/developers"
 echo "- Click on 'New OAuth App'"
@@ -16,10 +14,13 @@ echo "- For 'Authorization callback URL', copy your 'Homepage URL' and add '/api
 echo "- Click 'Register application'"
 echo "- You will be redirected to another screen with app env variables, keep this page open and proceed with the following prompts:"
 
-# Prompt user for input
 read -p "Enter your Client Id env variable: " GITHUB_ID
 read -p "Click generate a new client secret. Enter your GitHub Secret env variable: " GITHUB_SECRET
 read -p "Copy and past your auth callback url here: " URL
+
+echo "- Nice, now open two terminals and run the following commands: "
+echo "- Terminal 1) - docker-compose up "
+echo "- Terminal 2) - prisma db push, prisma db seed, npm run dev "
 
 # Create .env file
 echo "DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres" > .env
