@@ -12,27 +12,19 @@ import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
 import Layout from "../../../components/Layout/Layout";
-import { PromptDialog } from "../../../components/PromptService/PromptService";
+import { PromptDialog } from "@/components/PromptService/PromptService";
+import Editor from "@/components/editor/editor";
+import RenderPost from "@/components/editor/editor/RenderPost";
+
 
 import { trpc } from "../../../utils/trpc";
 import { useDebounce } from "../../../hooks/useDebounce";
-import SlateEditor from "../../../components/SlateEditor/Editor/SlateEditor";
-
-import { htmlToSlate } from "slate-serializers";
-import { config as htmlToSlateConfig } from "../../../components/SlateEditor/Config/htmlToSlateConfig";
-import parse from "html-react-parser";
-import {
-  parseOptions,
-  replaceEmptyTags,
-} from "../../../components/SlateEditor/Config/htmlReactParser";
-import { updateImageNodes } from "../../../components/SlateEditor/Config/updateImageNodes";
 
 const Create: NextPage = () => {
   const router = useRouter();
   const { postIdArr } = router.query;
 
   const postId = postIdArr?.[0] || "";
-  const isNewPost = !postId;
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
@@ -42,8 +34,6 @@ const Create: NextPage = () => {
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
-  const [slateInitialValue, setSlateInitialValue] = useState(null);
-  const [slateChecked, setSlateChecked] = useState<boolean>(false);
   const allowUpdate = unsavedChanges && !delayDebounce;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -77,7 +67,9 @@ const Create: NextPage = () => {
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
-      toast.success("Saved");
+      console.log('saved')
+
+      // toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -91,7 +83,8 @@ const Create: NextPage = () => {
       toast.error("Something went wrong creating draft");
     },
     onSuccess() {
-      toast.success("Saved draft");
+      console.log('saved')
+      // toast.success("Saved draft");
     },
   });
 
@@ -203,7 +196,6 @@ const Create: NextPage = () => {
   };
 
   useEffect(() => {
-    setSlateChecked(true);
     if (!data) return;
     const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
@@ -250,28 +242,6 @@ const Create: NextPage = () => {
         setUnsavedChanges(true);
     }
   };
-
-  useEffect(() => {
-    if (isNewPost) {
-      setSlateInitialValue(htmlToSlate("<p></p>", htmlToSlateConfig));
-    } else if (data) {
-      const { body } = data;
-      const slateValue = htmlToSlate(body, htmlToSlateConfig);
-      updateImageNodes(slateValue);
-      setSlateInitialValue(slateValue);
-    }
-  }, [data, isNewPost]);
-
-  useEffect(() => {
-    if (viewPreview === true) {
-      const slateValue = htmlToSlate(body, htmlToSlateConfig);
-      updateImageNodes(slateValue);
-      setSlateInitialValue(slateValue);
-    }
-  }, [viewPreview]);
-
-  // temporary do nothing so we can figure out what's breaking everything
-  return <div></div>;
 
   return (
     <Layout>
@@ -504,13 +474,11 @@ const Create: NextPage = () => {
                               }}
                             >
                               <h1>{title}</h1>
-                              <div className="slateP">
-                                {parse(replaceEmptyTags(body), parseOptions)}
-                              </div>
+                              <RenderPost json={body} />
                             </article>
                           </section>
                         ) : (
-                          <div className="py-6 px-4 sm:p-6 lg:pb-8">
+                          <div className="py-6 px-4 sm:p-6 lg:pb-8 bg-neutral-900">
                             <input
                               autoFocus
                               className="border-none text-2xl leading-5 outline-none bg-neutral-900 focus:bg-black"
@@ -520,14 +488,23 @@ const Create: NextPage = () => {
                               {...register("title")}
                             />
 
-                            {slateInitialValue && (
+                            {!body && (
                               <Controller
                                 name="body"
                                 control={control}
                                 render={({ field }) => (
-                                  <SlateEditor
+                                  <Editor {...field} initialValue={'{}'} />
+                                )}
+                              />
+                            )}
+                            {body && body.length > 0 && (
+                              <Controller
+                                name="body"
+                                control={control}
+                                render={({ field }) => (
+                                  <Editor
                                     {...field}
-                                    initialValue={slateInitialValue}
+                                    initialValue={body}
                                   />
                                 )}
                               />
