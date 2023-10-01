@@ -20,16 +20,10 @@ read -p "Copy and past your auth callback url here: " URL
 
 echo "- Nice, now open two terminals and run the following commands: "
 echo "- Terminal 1) - docker-compose up "
-echo "- Terminal 2) - prisma db push, prisma db seed, npm run dev "
+echo "- Terminal 2) - npx prisma db push, npx prisma db seed, npm run dev "
 
 # Create .env file
 echo "DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres" > .env
 echo "GITHUB_ID=$GITHUB_ID" >> .env
 echo "GITHUB_SECRET=$GITHUB_SECRET" >> .env
 echo "NEXTAUTH_URL=$URL" >> .env
-
-# Run docker-compose
-gnome-terminal -- docker-compose up
-
-# Open a new terminal for Prisma commands and npm run dev
-gnome-terminal -- bash -c "npx prisma db push; npx prisma db seed; npm run dev"
