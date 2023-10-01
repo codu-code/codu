@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Welcome message
+echo "#################################################"
+echo "#                                               #"
+echo "#         Welcome to Codu Hacktober Fest        #"
+echo "#                                               #"
+echo "#################################################"
+
 # Instructions for the user
 echo "Please create an OAuth app on GitHub by following these steps:"
 echo "- Go to https://github.com/settings/developers"
@@ -12,7 +19,7 @@ echo "- You will be redirected to another screen with app env variables, keep th
 # Prompt user for input
 read -p "Enter your Client Id env variable: " GITHUB_ID
 read -p "Click generate a new client secret. Enter your GitHub Secret env variable: " GITHUB_SECRET
-read -p "Copy and past your callback url here: " URL
+read -p "Copy and past your auth callback url here: " URL
 
 # Create .env file
 echo "DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres" > .env

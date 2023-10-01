@@ -1,5 +1,15 @@
 tasks:
   - init: |
-      npm install
       chmod +x setup.sh
       ./setup.sh
+      npm install
+  - name: Docker
+    command: |
+      docker-compose up
+  - name: Prisma
+    command: |
+      npx prisma db push
+      npx prisma db seed
+  - name: Development
+    command: |
+      npm run dev
