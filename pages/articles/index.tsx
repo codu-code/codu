@@ -86,9 +86,9 @@ const ArticlesPage = () => {
         <meta property="og:url" content="https://codu.co/articles" />
       </Head>
       <Layout>
-        <div className="mx-2">   
-          <div className="sm:mx-auto max-w-5xl mt-8 border-b pb-4 flex justify-between items-end flex-wrap lg:max-w-5xl sm:max-w-2xl">
-            <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ml-2">
+        <div className="mx-2">
+          <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
+            <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
               {typeof tag === "string" ? (
                 <div className="flex justify-center items-center">
                   <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
@@ -99,61 +99,27 @@ const ArticlesPage = () => {
               )}
             </h1>
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>    
-            <div className="flex items-end gap-2 mr-2">
-                
-
-
-
-            {/* <select
-                  id="filter"
-                  name="filter"
-                  className="capitalize mt-2 block w-full rounded-md border  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
-                  onChange={(e) => {
-                    router.push(
-                      `/articles?filter=${e.target.value}${
-                        tag ? `&tag=${tag}` : ""
-                      }`
-                    );
-                  }}
-                  value={'jan'}
-                >
-                  <option>Jan</option>
-                  <option>Feb</option>
-                  <option>Mar</option>
-                </select> */}
-
-
-
-
-
-
-
-              <div>
-                <label htmlFor="filter" className="sr-only">
-                  Location
-                </label>
-                <select
-                  id="filter"
-                  name="filter"
-                  className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
-                  onChange={(e) => {
-                    router.push(
-                      `/articles?filter=${e.target.value}${
-                        tag ? `&tag=${tag}` : ""
-                      }`
-                    );
-                  }}
-                  value={selectedSortFilter}
-                >
-                  <option>newest</option>
-                  <option>oldest</option>
-                  <option>top</option>
-                </select>
-
-
-
-
-              </div>
+            <div className='min-w-fit'>
+              <label htmlFor="filter" className="sr-only">
+                Location
+              </label>
+              <select
+                id="filter"
+                name="filter"
+                className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
+                onChange={(e) => {
+                  router.push(
+                    `/articles?filter=${e.target.value}${
+                      tag ? `&tag=${tag}` : ""
+                    }`
+                  );
+                }}
+                value={selectedSortFilter}
+              >
+                <option>newest</option>
+                <option>oldest</option>
+                <option>top</option>
+              </select>
             </div>
           </div>
           <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">
