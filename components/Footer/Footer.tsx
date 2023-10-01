@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 
-import Twitter from "../../icons/twitter.svg";
+import Twitter from "../../icons/x.svg";
 import Github from "../../icons/github.svg";
 import Discord from "../../icons/discord.svg";
 import Youtube from "../../icons/youtube.svg";
