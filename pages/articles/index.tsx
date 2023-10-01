@@ -1,4 +1,4 @@
-import { Children, Fragment, useEffect } from "react";
+import { Children, Fragment, useEffect, useState } from "react";
 import Head from "next/head";
 import { TagIcon } from "@heroicons/react/outline";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
+import SearchBar from "../../components/ArticleSearch/SearchBar";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -29,7 +30,7 @@ const ArticlesPage = () => {
 
   const { filter, tag: dirtyTag } = router.query;
   const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
-
+  const [searchTerm, setSearchTerm] = useState("");
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
 
@@ -45,7 +46,7 @@ const ArticlesPage = () => {
 
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     trpc.post.all.useInfiniteQuery(
-      { limit: 15, sort: selectedSortFilter, tag },
+      { limit: 15, sort: selectedSortFilter, tag, searchTerm },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       }
@@ -97,7 +98,8 @@ const ArticlesPage = () => {
                 "Articles"
               )}
             </h1>
-            <div>
+            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>    
+            <div className='min-w-fit'>
               <label htmlFor="filter" className="sr-only">
                 Location
               </label>
