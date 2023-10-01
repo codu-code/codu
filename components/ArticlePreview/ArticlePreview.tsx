@@ -73,7 +73,7 @@ const ArticlePreview: NextPage<Props> = ({
   };
 
   return (
-    <article className="border-l-4 border-l-pink-600 p-4 my-4 shadow-lg bg-neutral-900">
+    <article className="border-l-4 border-l-pink-600 p-4 my-4 shadow-lg bg-white dark:bg-neutral-900">
       <div className="flex justify-between">
         <div className="flex items-center mb-4">
           <span className="sr-only">{name}</span>
@@ -89,7 +89,7 @@ const ArticlePreview: NextPage<Props> = ({
               Written by{" "}
               <Link
                 href={`/${username}`}
-                className="text-neutral-400 font-semibold"
+                className="text-neutral-900 dark:text-neutral-400 font-semibold"
               >
                 {name}
               </Link>
@@ -129,7 +129,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
-                className="lg:mx-auto p-1 rounded-full hover:bg-neutral-800"
+                className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
                 onClick={() => {
                   if (bookmarked) return bookmarkPost(id, false);
                   bookmarkPost(id);
