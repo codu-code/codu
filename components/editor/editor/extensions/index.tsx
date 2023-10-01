@@ -1,6 +1,7 @@
 import StarterKit from "@tiptap/starter-kit";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TiptapLink from "@tiptap/extension-link";
+import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import TiptapUnderline from "@tiptap/extension-underline";
@@ -117,6 +118,12 @@ export const TiptapExtensions = [
   TiptapUnderline,
   TextStyle,
   Color,
+  Link.configure({
+    HTMLAttributes: {
+      class:
+        "text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer",
+    },
+  }),
   Highlight.configure({
     multicolor: true,
   }),
