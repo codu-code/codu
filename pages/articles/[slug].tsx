@@ -26,7 +26,7 @@ import { useRouter } from "next/router";
 
 const createMenuData = (title: string, username: string, url: string) => [
   {
-    label: "Share to Twitter",
+    label: "Share to X",
     href: `https://twitter.com/intent/tweet?text="${title}", by ${username}&hashtags=coducommunity,codu&url=${url}`,
   },
   {
