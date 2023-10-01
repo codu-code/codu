@@ -1,8 +1,8 @@
 tasks:
   - init: |
+      npm install
       chmod +x setup.sh
       ./setup.sh
-      npm install
   - name: Docker
     command: |
       docker-compose up
