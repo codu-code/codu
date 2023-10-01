@@ -1,7 +1,7 @@
 @tailwind base;
 
 body {
-  @apply bg-white text-black dark:bg-black dark:text-white;
+  @apply bg-neutral-100 text-neutral-900 dark:bg-black dark:text-white;
 }
 
 #__next {
