@@ -165,14 +165,12 @@ const Home: NextPage = () => {
                     height={200}
                     src="/images/codu.svg"
                     alt="Codú logo"
-                    className={`w-[240px] sm:w-[340px] mx-auto object-contain transition duration-500 ${
-                      isReady ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`w-[240px] sm:w-[340px] mx-auto object-contain transition duration-500 ${isReady ? "opacity-100" : "opacity-0"
+                      }`}
                   />
                   <h1
-                    className={`drop-shadow-2xl text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8 duration-500 ${
-                      isReady ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={`drop-shadow-2xl text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8 duration-500 ${isReady ? "opacity-100" : "opacity-0"
+                      }`}
                   >
                     A{" "}
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
@@ -238,7 +236,7 @@ const Home: NextPage = () => {
 
           <div className="mx-2">
             <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
-              <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
+              <h1 className="text-3xl tracking-tight font-extrabold text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
                 Trending
               </h1>
             </div>
@@ -291,7 +289,7 @@ const Home: NextPage = () => {
                 </div>
               </div>
               <section className="col-span-5 lg:block hidden">
-                <div className="mt-4 mb-8 border border-neutral-600 bg-neutral-900">
+                <div className="text-neutral-50 mt-4 mb-8 border border-neutral-600 bg-neutral-900">
                   <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                     <Image
                       className="w-full"
