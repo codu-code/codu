@@ -22,13 +22,14 @@ const GetStarted: NextPage = () => {
               <Image
                 src="/images/codu.png"
                 alt="Codú logo"
+                className="invert dark:invert-0"
                 height={60}
                 width={189}
               />
               <span className="ml-2 -mb-2 text-base font-semibold">Beta</span>
             </Link>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-neutral-900 dark:text-white">
             Sign in or create your account
           </h2>
           <p className="mt-2 text-center text-base text-neutral-500">
