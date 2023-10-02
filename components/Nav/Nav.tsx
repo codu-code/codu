@@ -130,9 +130,9 @@ const Nav = () => {
                     </>
                   )}
                   {/* Profile dropdown */}
+                  <ThemeToggle />
                   {session && (
                     <>
-                      <ThemeToggle />
                       <Link
                         title="Notifications"
                         href="/notifications"
