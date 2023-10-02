@@ -146,7 +146,7 @@ const ArticlePreview: NextPage<Props> = ({
             {menuOptions && (
               <Menu as="div" className="relative">
                 <div>
-                  <Menu.Button className="p-1 rounded-full hover:bg-neutral-800">
+                  <Menu.Button className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800">
                     <span className="sr-only">Open user menu</span>
                     <DotsHorizontalIcon className="w-6 h-6" />
                   </Menu.Button>
@@ -160,12 +160,12 @@ const ArticlePreview: NextPage<Props> = ({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="origin-top-right absolute bottom-10 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Items className="origin-top-right absolute bottom-10 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-black ring-white dark:bg-white ring-1 px-1 dark:ring-black ring-opacity-5 focus:outline-none">
                     {menuOptions.map((item) => (
                       <Menu.Item key={item.label}>
                         {"href" in item ? (
                           <Link
-                            className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded w-full text-left"
+                            className="block px-4 py-2 text-neutral-200 dark:text-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-200 rounded w-full text-left"
                             key={item.label}
                             href={item.href}
                           >
@@ -173,7 +173,7 @@ const ArticlePreview: NextPage<Props> = ({
                           </Link>
                         ) : (
                           <button
-                            className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded w-full text-left"
+                            className="block px-4 py-2 text-neutral-200 dark:text-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-200 rounded w-full text-left"
                             onClick={item.onClick}
                           >
                             {item.label}
