@@ -206,7 +206,7 @@ const Nav = () => {
                 <Link
                   title="Notifications"
                   href="/notifications"
-                  className="relative block mr-3 flex-shrink-0 rounded-md p-2 text-neutral-400 hover:text-neutral-300 hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
+                  className="relative block flex-shrink-0 rounded-md p-2 text-neutral-400 hover:text-neutral-300 hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
