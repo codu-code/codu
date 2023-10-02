@@ -52,6 +52,7 @@ const Nav = () => {
                     <Image
                       src="/images/codu.png"
                       alt="Codú logo"
+                      className="invert dark:invert-0"
                       height={30}
                       width={94.5}
                       priority
