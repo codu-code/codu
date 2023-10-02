@@ -35,6 +35,10 @@ body {
   }
 }
 
+.nav-button {
+  @apply text-neutral-900 hover:bg-neutral-200 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white px-3 py-2 rounded-md;
+}
+
 .primary-button {
   @apply items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 disabled:from-neutral-500 disabled:to-neutral-700 disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:text-neutral-300 transition-colors;
 }

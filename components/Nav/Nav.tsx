@@ -37,7 +37,7 @@ const Nav = () => {
   const hasNotifications = !!count && count > 0;
 
   return (
-    <Disclosure as="nav" className="bg-white dark:bg-black">
+    <Disclosure as="nav" className="bg-neutral-100 dark:bg-black">
       {({ open }) => (
         <>
           <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,13 +83,13 @@ const Nav = () => {
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
+                          className="nav-button"
                         >
                           {item.name}
                         </a>
                       ) : (
                         <Link
-                          className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
+                          className="text-neutral-900 hover:bg-neutral-200 hover:text-black   dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white px-3 py-2 rounded-md"
                           key={item.name}
                           href={item.href}
                         >
@@ -104,10 +104,7 @@ const Nav = () => {
                 <div className="flex items-center text-sm lg:text-base font-medium">
                   {session ? (
                     <>
-                      <Link
-                        className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
-                        href="/my-posts"
-                      >
+                      <Link className="nav-button" href="/my-posts">
                         Your Posts
                       </Link>
                       <Link
@@ -120,10 +117,7 @@ const Nav = () => {
                     </>
                   ) : (
                     <>
-                      <button
-                        className="text-neutral-300 hover:bg-neutral-900 hover:text-white px-3 py-2 rounded-md"
-                        onClick={() => signIn()}
-                      >
+                      <button className="nav-button" onClick={() => signIn()}>
                         Sign in
                       </button>
                       <button
