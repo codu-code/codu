@@ -48,7 +48,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
           )
         )}
 
-        <div className="pt-3 pb-3 border-t border-neutral-700 flex  flex-col space-y-1">
+        <div className="pt-3 pb-3 border-t border-neutral-700 flex flex-col space-y-1">
           {session ? (
             <>
               {userSubNav.map((item) => (
@@ -56,7 +56,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                   className={classNames(
                     item.fancy
                       ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                      : "text-neutral-300 hover:bg-neutral-900 hover:text-white block px-3",
+                      : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
                     "rounded-md text-base font-medium py-2 text-center"
                   )}
                   key={item.name}
@@ -99,7 +99,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                 />
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-white">
+                <div className="text-base font-medium text-black dark:text-white">
                   {session.user?.name}
                 </div>
                 <div className="text-sm font-medium text-neutral-400">
@@ -114,7 +114,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                     key={item.name}
                     as="button"
                     onClick={item.onClick}
-                    className="cursor-pointer block w-full text-left px-3 py-2 rounded-md text-base font-medium text-neutral-400 hover:text-white hover:bg-neutral-900"
+                    className="nav-button w-full text-left font-medium"
                   >
                     {item.name}
                   </Disclosure.Button>
@@ -122,7 +122,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                   <Link key={item.name} href={item.href}>
                     <Disclosure.Button
                       as="div"
-                      className="cursor-pointer block px-3 py-2 rounded-md text-base font-medium text-neutral-400 hover:text-white hover:bg-neutral-900"
+                      className="nav-button w-full text-left font-medium"
                     >
                       {item.name}
                     </Disclosure.Button>
