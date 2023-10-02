@@ -190,15 +190,15 @@ const Home: NextPage = () => {
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
-                        stroke="ffffff" // Change "currentColor" to "#ffffff"
+                        stroke="#ffffff" // Change "currentColor" to "#ffffff"
                         className="w-8 h-8"
                       >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5"
+                          d="M19.5 5.25l-7.5 7.5-7.5-7.5"
                         />
-                      </svg>
+                    </svg>
                     </button>
                   </div>
                 </div>
