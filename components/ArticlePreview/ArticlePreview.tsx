@@ -146,7 +146,7 @@ const ArticlePreview: NextPage<Props> = ({
             {menuOptions && (
               <Menu as="div" className="relative">
                 <div>
-                  <Menu.Button className="p-1 rounded-full hover:bg-neutral-800">
+                  <Menu.Button className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800">
                     <span className="sr-only">Open user menu</span>
                     <DotsHorizontalIcon className="w-6 h-6" />
                   </Menu.Button>
