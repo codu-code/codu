@@ -10,6 +10,7 @@ import { navigation, subNav, userSubNav } from "../../config/site_settings";
 import { trpc } from "../../utils/trpc";
 import ThemeToggle from "../Theme/ThemeToggle";
 import MobileNav from "./MobileNav";
+import ThemeToggleMobile from "../Theme/ThemeToggleMobile";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -201,6 +202,7 @@ const Nav = () => {
                 </div>
               </div>
               <div className="-mr-2 flex items-center md:hidden">
+                <ThemeToggleMobile />
                 <Link
                   title="Notifications"
                   href="/notifications"
