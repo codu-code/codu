@@ -9,6 +9,7 @@ import { PlusSmIcon, BellIcon } from "@heroicons/react/solid";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 import { trpc } from "../../utils/trpc";
 import ThemeToggle from "../Theme/ThemeToggle";
+import MobileNav from "./MobileNav";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -224,7 +225,7 @@ const Nav = () => {
             </div>
           </div>
 
-          <Disclosure.Panel className="md:hidden relative z-10 border-b-2 border-white">
+          {/* <Disclosure.Panel className="md:hidden relative z-10 border-b-2 border-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {navigation.map((item) =>
                 item.href.includes("http") ? (
@@ -335,7 +336,14 @@ const Nav = () => {
                 </div>
               </div>
             )}
-          </Disclosure.Panel>
+          </Disclosure.Panel> */}
+
+          {/* Testing MobileNav */}
+          <MobileNav
+            session={session}
+            count={count}
+            userNavigation={userNavigation}
+          />
         </>
       )}
     </Disclosure>
