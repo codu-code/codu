@@ -32,7 +32,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-neutral-300 hover:bg-neutral-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+              className="nav-button block text-base font-medium"
             >
               {item.name}
             </Disclosure.Button>
@@ -40,7 +40,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
             <Link key={item.name} href={item.href}>
               <Disclosure.Button
                 as="div"
-                className="text-neutral-300 hover:bg-neutral-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                className="nav-button block text-base font-medium"
               >
                 {item.name}
               </Disclosure.Button>

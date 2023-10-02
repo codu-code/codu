@@ -36,7 +36,7 @@ body {
 }
 
 .nav-button {
-  @apply text-neutral-900 hover:bg-neutral-200 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white px-3 py-2 rounded-md;
+  @apply text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-black focus:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:focus:bg-neutral-900 dark:hover:text-white dark:focus:text-white px-3 py-2 rounded-md;
 }
 
 .primary-button {
