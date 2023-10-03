@@ -219,11 +219,7 @@ const Nav = () => {
             </div>
           </div>
 
-          <MobileNav
-            session={session}
-            count={count}
-            userNavigation={userNavigation}
-          />
+          <MobileNav session={session} userNavigation={userNavigation} />
         </>
       )}
     </Disclosure>

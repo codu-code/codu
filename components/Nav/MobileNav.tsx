@@ -12,13 +12,11 @@ function classNames(...classes: string[]) {
 
 interface MobileNavProps {
   session: Session | null;
-  count: number | undefined;
   userNavigation: UserNavigationItem[];
 }
 
 const MobileNav: FunctionComponent<MobileNavProps> = ({
   session,
-  count,
   userNavigation,
 }) => {
   return (
