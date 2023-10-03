@@ -212,9 +212,9 @@ const Home: NextPage = () => {
                 />
               </Atropos>
             </main>
-            <section className="bg-neutral-300 px-2" id="cta">
+            <section className="bg-white dark:bg-neutral-300 px-2" id="cta">
               <div className="mx-auto lg:max-w-5xl sm:max-w-2xl py-20 sm:py-32">
-                <h2 className="text-2xl md:text-left text-center font-semibold tracking-tight text-gray-900 sm:text-4xl max-w-[660px]">
+                <h2 className="text-2xl md:text-left text-center font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl max-w-[660px]">
                   <span className="font-extrabold">Sign up today</span> to
                   become a writer and get a{" "}
                   <span className="font-extrabold">free</span> invite to our
@@ -226,7 +226,7 @@ const Home: NextPage = () => {
                   </Link>
                   <Link
                     href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
-                    className="leading-6 text-gray-900 font-semibold"
+                    className="leading-6 text-neutral-900 dark:text-gray-900 font-semibold"
                   >
                     Learn more <span aria-hidden="true">→</span>
                   </Link>
@@ -238,7 +238,7 @@ const Home: NextPage = () => {
 
           <div className="mx-2">
             <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
-              <h1 className="text-3xl tracking-tight font-extrabold text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
+              <h1 className="text-3xl tracking-tight font-extrabold text-neutral-900 dark:text-neutral-50 sm:text-4xl ">
                 Trending
               </h1>
             </div>
@@ -291,7 +291,7 @@ const Home: NextPage = () => {
                 </div>
               </div>
               <section className="col-span-5 lg:block hidden">
-                <div className="text-neutral-50 mt-4 mb-8 border border-neutral-600 bg-neutral-900">
+                <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-100 dark:border-neutral-600 bg-white dark:bg-neutral-900">
                   <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                     <Image
                       className="w-full"
@@ -321,7 +321,7 @@ const Home: NextPage = () => {
                     <Link
                       key={tag}
                       href={`/articles?tag=${tag.toLowerCase()}`}
-                      className="bg-neutral-900 text-neutral-50 px-6 py-2 border border-neutral-600"
+                      className="bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-200 dark:border-neutral-600"
                     >
                       {tag}
                     </Link>
