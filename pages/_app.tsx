@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import * as Fathom from "fathom-client";
-// import { SessionProvider } from "next-auth/react";
 import AuthProvider from "./context/AuthProvider";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
