@@ -12,7 +12,8 @@
     "studio": "prisma studio",
     "migrate": "npx prisma migrate"
   },
-  "prisma": {    "seed": "npx tsx ./prisma/seed.ts"
+  "prisma": {
+    "seed": "npx tsx ./prisma/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.410.0",
