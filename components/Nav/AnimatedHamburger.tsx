@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 
 interface AnimatedHamburgerProps {
-  open: Boolean;
+  open: boolean;
 }
 
 const AnimatedHamburger: FunctionComponent<AnimatedHamburgerProps> = ({
