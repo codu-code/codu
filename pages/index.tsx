@@ -190,7 +190,7 @@ const Home: NextPage = () => {
                         fill="none"
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
-                        stroke="ffffff"
+                        stroke="#ffffff"
                         className="w-8 h-8"
                       >
                         <path
