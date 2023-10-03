@@ -233,7 +233,7 @@ const ArticlePage: NextPage = ({
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-neutral-300 dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                <Menu.Items className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
                   {optionsData.map((item) => (
                     <Menu.Item key={item.label}>
                       <a
