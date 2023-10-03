@@ -198,7 +198,7 @@ const Home: NextPage = () => {
                           strokeLinejoin="round"
                           d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5"
                         />
-                      </svg>                      
+                      </svg>
                     </button>
                   </div>
                 </div>
