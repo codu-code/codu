@@ -11,6 +11,7 @@ import { trpc } from "../../utils/trpc";
 import ThemeToggle from "../Theme/ThemeToggle";
 import MobileNav from "./MobileNav";
 import ThemeToggleMobile from "../Theme/ThemeToggleMobile";
+import AnimatedHamburger from "./AnimatedHamburger";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -42,7 +43,7 @@ const Nav = () => {
     <Disclosure as="nav" className="bg-neutral-100 dark:bg-black">
       {({ open }) => (
         <>
-          <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -216,12 +217,13 @@ const Nav = () => {
                 </Link>
                 {/* Mobile menu button */}
                 <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                  <span className="sr-only">Open main menu</span>
+                  {/* <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
                   ) : (
                     <MenuIcon className="block h-6 w-6" aria-hidden="true" />
-                  )}
+                  )} */}
+                  <AnimatedHamburger open={open} />
                 </Disclosure.Button>
               </div>
             </div>
