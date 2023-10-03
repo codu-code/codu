@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import * as Fathom from "fathom-client";
-import { SessionProvider } from "next-auth/react";
+// import { SessionProvider } from "next-auth/react";
+import AuthProvider from "./context/AuthProvider";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { trpc } from "../utils/trpc";
@@ -82,11 +83,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <Providers>
-      <SessionProvider session={pageProps.session}>
-        <ProgressBar isAnimating={isAnimating} />
-        <Component {...pageProps} />
-      </SessionProvider>
-    </Providers>
+    <AuthProvider>
+      <ProgressBar isAnimating={isAnimating} />
+      <Component {...pageProps} />
+    </AuthProvider>
+  </Providers>
   );
 }
 

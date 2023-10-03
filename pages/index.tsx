@@ -45,7 +45,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Codú - The Web Developer Community</title>
+        <title>Codú -  Web Developer Community</title>
         <meta
           name="description"
           content="A free network and community for web developers. Learn and grow together."

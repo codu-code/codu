@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import { getServerSession } from "next-auth";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import Layout from "../../components/Layout/Layout";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { trpc } from "../../utils/trpc";
 import PageHeading from "../../components/PageHeading/PageHeading";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";

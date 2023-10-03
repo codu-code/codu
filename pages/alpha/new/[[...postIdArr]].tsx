@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../api/auth/[...nextauth]";
+import { authOptions } from "@/app/api/auth/authOptions";
 import { useForm, Controller } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";

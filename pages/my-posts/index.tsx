@@ -15,7 +15,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/solid";
 import Layout from "../../components/Layout/Layout";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { trpc } from "../../utils/trpc";
 import { Modal } from "../../components/Modal/Modal";
 
