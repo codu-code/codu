@@ -28,66 +28,11 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
     >
       <Disclosure.Panel className="md:hidden relative z-10 border-b-2 border-black dark:border-white">
         <div className="px-2 pt-2 pb-3 space-y-1">
-          {navigation.map((item) =>
-            item.href.includes("http") ? (
-              <Disclosure.Button
-                as="a"
-                key={item.name}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-button block text-base font-medium"
-              >
-                {item.name}
-              </Disclosure.Button>
-            ) : (
-              <Link key={item.name} href={item.href}>
-                <Disclosure.Button
-                  as="div"
-                  className="nav-button block text-base font-medium"
-                >
-                  {item.name}
-                </Disclosure.Button>
-              </Link>
-            )
-          )}
-
+          {navigation.map((item) => (
+            <NavItem item={item} />
+          ))}
           <div className="pt-3 pb-3 border-t border-neutral-700 flex flex-col space-y-1">
-            {session ? (
-              <>
-                {userSubNav.map((item) => (
-                  <Link
-                    className={classNames(
-                      item.fancy
-                        ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                        : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
-                      "rounded-md text-base font-medium py-2 text-center"
-                    )}
-                    key={item.name}
-                    href={item.href}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </>
-            ) : (
-              <>
-                {subNav.map((item) => (
-                  <button
-                    className={classNames(
-                      item.fancy
-                        ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                        : "text-neutral-300 hover:bg-neutral-900 hover:text-white block px-3",
-                      "rounded-md text-base font-medium py-2"
-                    )}
-                    key={item.name}
-                    onClick={() => signIn()}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </>
-            )}
+            <SubNav session={session} />
           </div>
         </div>
 
@@ -143,3 +88,60 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
 };
 
 export default MobileNav;
+
+interface NavItemProps {
+  item: {
+    name: string;
+    href: string;
+  };
+}
+
+const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
+  return item.href.includes("http") ? (
+    <Disclosure.Button
+      as="a"
+      key={item.name}
+      href={item.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="nav-button block text-base font-medium"
+    >
+      {item.name}
+    </Disclosure.Button>
+  ) : (
+    <Link key={item.name} href={item.href}>
+      <Disclosure.Button
+        as="div"
+        className="nav-button block text-base font-medium"
+      >
+        {item.name}
+      </Disclosure.Button>
+    </Link>
+  );
+};
+
+interface SubNavProps {
+  session: Session | null;
+}
+
+const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
+  const data = session ? userSubNav : subNav;
+  return (
+    <>
+      {data.map((item) => (
+        <Link
+          className={classNames(
+            item.fancy
+              ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+              : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
+            "rounded-md text-base font-medium py-2 text-center"
+          )}
+          key={item.name}
+          href={item.href}
+        >
+          {item.name}
+        </Link>
+      ))}
+    </>
+  );
+};
