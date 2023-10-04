@@ -107,7 +107,7 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
   return (
     <div className="relative h-full">
       <button
-      type="button"
+        type="button"
         className="flex h-full items-center gap-1 p-2 text-sm font-medium text-stone-600 hover:bg-stone-100 active:bg-stone-200"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -129,7 +129,7 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
           <div className="my-1 px-2 text-sm text-stone-500">Color</div>
           {TEXT_COLORS.map(({ name, color }, index) => (
             <button
-            type="button"
+              type="button"
               key={index}
               onClick={() => {
                 editor.commands.unsetColor();
@@ -160,7 +160,7 @@ export const ColorSelector: FC<ColorSelectorProps> = ({
 
           {HIGHLIGHT_COLORS.map(({ name, color }, index) => (
             <button
-            type="button"
+              type="button"
               key={index}
               onClick={() => {
                 editor.commands.unsetHighlight();

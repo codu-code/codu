@@ -51,7 +51,7 @@ const ArticlePage: NextPage = ({
     {
       label: "",
       href: "",
-    }
+    },
   );
 
   const { label, href } = copyToClipboard;
@@ -132,7 +132,7 @@ const ArticlePage: NextPage = ({
   const optionsData = createMenuData(
     post.title || "",
     post.user.name || "",
-    `https://${host}/articles/${post.slug}`
+    `https://${host}/articles/${post.slug}`,
   );
 
   if (label.length > 0) {
@@ -166,7 +166,7 @@ const ArticlePage: NextPage = ({
           name="image"
           property="og:image"
           content={`https://${host}/api/og?title=${encodeURIComponent(
-            post.title
+            post.title,
           )}`}
         />
         <meta name="twitter:card" content="summary_large_image" />
@@ -302,7 +302,7 @@ const ArticlePage: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext<{ slug: string }>
+  ctx: GetServerSidePropsContext<{ slug: string }>,
 ) => {
   try {
     const { params } = ctx;

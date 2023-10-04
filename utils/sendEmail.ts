@@ -49,7 +49,7 @@ const sendEmail = async (config: MailConfig) => {
         console.log(info.envelope);
         console.log(info.messageId);
       }
-    }
+    },
   );
 };
 

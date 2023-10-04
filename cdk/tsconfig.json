@@ -3,9 +3,7 @@
     "jsx": "react",
     "target": "ES2020",
     "module": "commonjs",
-    "lib": [
-      "es2020", "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "esModuleInterop": true,
     "declaration": true,
     "strict": true,
@@ -21,13 +19,7 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "typeRoots": [
-      "./node_modules/@types"
-    ]
+    "typeRoots": ["./node_modules/@types"]
   },
-  "exclude": [
-    "lambdas",
-    "node_modules",
-    "cdk.out"
-  ]
+  "exclude": ["lambdas", "node_modules", "cdk.out"]
 }

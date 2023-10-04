@@ -20,13 +20,13 @@ export class CdnStack extends cdk.Stack {
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/domainName`,
-      1
+      1,
     );
 
     const hostedZoneId = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/hostedZoneId`,
-      1
+      1,
     );
 
     const wwwDomainName = `www.${domainName}`;
@@ -70,12 +70,12 @@ export class CdnStack extends cdk.Stack {
           certificate,
           {
             aliases: [domainName],
-          }
+          },
         ),
         comment: `Redirect to ${wwwDomainName} from ${domainName}`,
         priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      }
+      },
     );
 
     const webDistribution = new cloudfront.CloudFrontWebDistribution(
@@ -120,19 +120,19 @@ export class CdnStack extends cdk.Stack {
           certificate,
           {
             aliases: [wwwDomainName],
-          }
+          },
         ),
         comment: `Web distribution for ${wwwDomainName}`,
         priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      }
+      },
     );
 
     const redirectRecordProps = {
       zone,
       recordName: domainName,
       target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(redirectDist)
+        new targets.CloudFrontTarget(redirectDist),
       ),
     };
 
@@ -140,14 +140,14 @@ export class CdnStack extends cdk.Stack {
     new route53.AaaaRecord(
       this,
       "AaaaRedirectAliasRecord",
-      redirectRecordProps
+      redirectRecordProps,
     );
 
     const recordProps = {
       zone,
       recordName: wwwDomainName,
       target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(webDistribution)
+        new targets.CloudFrontTarget(webDistribution),
       ),
     };
 

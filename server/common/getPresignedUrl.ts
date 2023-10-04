@@ -5,7 +5,7 @@ import { s3Client } from "../../utils/s3helpers";
 export const getPresignedUrl = async (
   userId: string,
   fileType: string,
-  fileSize: number
+  fileSize: number,
 ) => {
   const extension = fileType.split("/")[1];
   if (!extension) throw new Error("Invalid file type provided");

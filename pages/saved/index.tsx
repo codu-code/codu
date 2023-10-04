@@ -49,7 +49,7 @@ const MyPosts: NextPage = ({
             Children.toArray(
               Array.from({ length: 7 }, () => {
                 return <ArticleLoading />;
-              })
+              }),
             )}
           {bookmarkStatus === "error" && (
             <p className="font-medium py-4">
@@ -91,7 +91,7 @@ const MyPosts: NextPage = ({
                     ]}
                   />
                 );
-              }
+              },
             )}
 
           {bookmarkStatus === "success" && bookmarks?.length === 0 && (

@@ -27,7 +27,7 @@ const UploadImagesPlugin = () =>
           const image = document.createElement("img");
           image.setAttribute(
             "class",
-            "opacity-40 rounded-lg border border-stone-200"
+            "opacity-40 rounded-lg border border-stone-200",
           );
           image.src = src;
           placeholder.appendChild(image);
@@ -37,7 +37,7 @@ const UploadImagesPlugin = () =>
           set = set.add(tr.doc, [deco]);
         } else if (action && action.remove) {
           set = set.remove(
-            set.find(null, null, (spec) => spec.id == action.remove.id)
+            set.find(null, null, (spec) => spec.id == action.remove.id),
           );
         }
         return set;
@@ -140,7 +140,7 @@ export const handleImageUpload = (file: File) => {
           resolve(file);
 
           throw new Error(
-            "`BLOB_READ_WRITE_TOKEN` environment variable not found, reading image locally instead."
+            "`BLOB_READ_WRITE_TOKEN` environment variable not found, reading image locally instead.",
           );
           // Unknown error
         } else {
@@ -151,7 +151,7 @@ export const handleImageUpload = (file: File) => {
         loading: "Uploading image...",
         success: "Image uploaded successfully.",
         error: (e) => e.message,
-      }
+      },
     );
   });
 };

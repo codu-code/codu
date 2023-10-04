@@ -28,12 +28,12 @@ export class PipelineStack extends cdk.Stack {
 
     const devAccountId = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/dev/accountId`
+      `/env/dev/accountId`,
     );
 
     const prodAccountId = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/prod/accountId`
+      `/env/prod/accountId`,
     );
 
     const defaultRegion = "eu-west-1";

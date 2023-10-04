@@ -1,7 +1,14 @@
 import { cn, getUrlFromString } from "@/utils/utils";
 import { Editor } from "@tiptap/core";
 import { Check, Trash } from "lucide-react";
-import { Dispatch, FC, SetStateAction, useEffect, useRef, useCallback } from "react";
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 
 interface LinkSelectorProps {
   editor: Editor;
@@ -21,39 +28,38 @@ export const LinkSelector: FC<LinkSelectorProps> = ({
     inputRef.current && inputRef.current?.focus();
   });
 
- const setLink = useCallback(() => {
-  const previousUrl = editor.getAttributes("link").href;
+  const setLink = useCallback(() => {
+    const previousUrl = editor.getAttributes("link").href;
 
-  // unset
-  if (previousUrl) {
-    editor.chain().focus().unsetLink().run();
-    return;
-  }
-  
-  let url = window.prompt("URL", previousUrl);
+    // unset
+    if (previousUrl) {
+      editor.chain().focus().unsetLink().run();
+      return;
+    }
 
-  // cancelled
-  if (url === null) {
-    return;
-  }
+    let url = window.prompt("URL", previousUrl);
 
-  // empty
-  if (url === "") {
-    editor.chain().focus().extendMarkRange("link").unsetLink().run();
-    return;
-  }
+    // cancelled
+    if (url === null) {
+      return;
+    }
 
-  // Add protocol if missing
-  if (!url.match(/^https?:\/\//i)) {
-    url = 'https://' + url;
-  }
+    // empty
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
 
-  console.log(url)
+    // Add protocol if missing
+    if (!url.match(/^https?:\/\//i)) {
+      url = "https://" + url;
+    }
 
-  // update link
-  editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-}, [editor]);
+    console.log(url);
 
+    // update link
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  }, [editor]);
 
   return (
     <div className="relative">

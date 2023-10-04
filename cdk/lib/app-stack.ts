@@ -28,7 +28,7 @@ export class AppStack extends cdk.Stack {
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/domainName`,
-      1
+      1,
     );
 
     const wwwDomainName = `www.${domainName}`;
@@ -49,7 +49,7 @@ export class AppStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["s3:*Object", "SES:*"],
         resources: ["*"],
-      })
+      }),
     );
 
     taskDef
@@ -65,36 +65,36 @@ export class AppStack extends cdk.Stack {
             ssm.StringParameter.fromSecureStringParameterAttributes(
               this,
               "dbUrl",
-              { parameterName: "/env/db/dbUrl", version: 1 }
-            )
+              { parameterName: "/env/db/dbUrl", version: 1 },
+            ),
           ),
           GITHUB_SECRET: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "githubSecret",
-              "/env/githubSecret"
-            )
+              "/env/githubSecret",
+            ),
           ),
           GITHUB_ID: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "githubId",
-              "/env/githubId"
-            )
+              "/env/githubId",
+            ),
           ),
           NEXTAUTH_SECRET: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "nextauthSecret",
-              "/env/nextauthSecret"
-            )
+              "/env/nextauthSecret",
+            ),
           ),
           DISCORD_INVITE_URL: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "discordInviteUrl",
-              "/env/discordInviteUrl"
-            )
+              "/env/discordInviteUrl",
+            ),
           ),
         },
         logging: ecs.LogDrivers.awsLogs({
@@ -115,7 +115,7 @@ export class AppStack extends cdk.Stack {
           cpu: production ? 256 : 256, // Can alter if need more
           publicLoadBalancer: true,
           protocol: elbv2.ApplicationProtocol.HTTP,
-        }
+        },
       );
 
     fargateService.listener.addAction("DefaultListenerRule", {
@@ -158,7 +158,7 @@ export class AppStack extends cdk.Stack {
 
     fargateService.service.connections.allowFromAnyIpv4(
       ec2.Port.tcp(this.appPort),
-      "app-inbound"
+      "app-inbound",
     );
 
     this.loadbalancer = fargateService.loadBalancer;

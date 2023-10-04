@@ -27,7 +27,7 @@ const Notifications = () => {
     { limit: 20 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-    }
+    },
   );
 
   const { data: count, refetch: refetchCount } =
@@ -109,7 +109,7 @@ const Notifications = () => {
               Children.toArray(
                 Array.from({ length: 7 }, () => {
                   return <Placeholder />;
-                })
+                }),
               )}
             {status !== "loading" && noNotifications && (
               <p className="text-neutral-900 dark:text-neutral-50 text-lg font-semibold">
@@ -126,7 +126,7 @@ const Notifications = () => {
                         if (!post || !notifier) return null;
 
                         const dateTime = Temporal.Instant.from(
-                          createdAt.toISOString()
+                          createdAt.toISOString(),
                         );
                         const isCurrentYear =
                           new Date().getFullYear() === createdAt.getFullYear();
@@ -144,7 +144,7 @@ const Notifications = () => {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
-                              }
+                              },
                         );
                         const { username, name, image } = notifier;
                         // Check that we handle the notifications
@@ -213,7 +213,7 @@ const Notifications = () => {
                             </div>
                           </div>
                         );
-                      }
+                      },
                     )}
                   </Fragment>
                 );
