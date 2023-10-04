@@ -9,7 +9,7 @@ const AnimatedHamburger: FunctionComponent<AnimatedHamburgerProps> = ({
 }) => {
   return (
     <div
-      className="text-neutral-600 w-6 h-6 relative focus:outline-none 
+      className="text-neutral-400 w-6 h-6 relative focus:outline-none 
     group-hover:text-neutral-900 group-focus:text-neutral-900 dark:group-hover:text-white dark:group-focus:text-white"
     >
       <div className="block w-5 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
