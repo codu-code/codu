@@ -10,10 +10,15 @@
     "lint": "next lint",
     "test:e2e": "playwright test",
     "studio": "prisma studio",
-    "migrate": "npx prisma migrate"
+    "migrate": "npx prisma migrate",
+    "prettier": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
+    "prepare": "husky install"
   },
   "prisma": {
     "seed": "npx tsx ./prisma/seed.ts"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.410.0",
@@ -103,8 +108,12 @@
     "chance": "^1.1.11",
     "eslint": "^8.15.0",
     "eslint-config-next": "^13.4.19",
+    "eslint-config-prettier": "^9.0.0",
     "gray-matter": "^4.0.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
     "postcss": "^8.4.25",
+    "prettier": "^3.0.3",
     "prisma": "^4.16.2",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.2.2"
