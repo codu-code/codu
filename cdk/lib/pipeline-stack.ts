@@ -22,6 +22,8 @@ export class PipelineStack extends cdk.Stack {
       pipelineName: "codu-pipline",
       crossAccountKeys: true,
       synth: synthAction,
+      dockerEnabledForSelfMutation: true,
+      dockerEnabledForSynth: true,
     });
 
     const devAccountId = ssm.StringParameter.valueFromLookup(

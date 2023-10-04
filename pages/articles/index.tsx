@@ -1,4 +1,4 @@
-import { Children, Fragment, useEffect } from "react";
+import { Children, Fragment, useEffect, useState } from "react";
 import Head from "next/head";
 import { TagIcon } from "@heroicons/react/outline";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
+import SearchBar from "../../components/ArticleSearch/SearchBar";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -29,7 +30,7 @@ const ArticlesPage = () => {
 
   const { filter, tag: dirtyTag } = router.query;
   const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
-
+  const [searchTerm, setSearchTerm] = useState("");
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
 
@@ -45,7 +46,7 @@ const ArticlesPage = () => {
 
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     trpc.post.all.useInfiniteQuery(
-      { limit: 15, sort: selectedSortFilter, tag },
+      { limit: 15, sort: selectedSortFilter, tag, searchTerm },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       }
@@ -87,28 +88,28 @@ const ArticlesPage = () => {
       <Layout>
         <div className="mx-2">
           <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
-            <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
+            <h1 className="text-3xl tracking-tight font-extrabold text-neutral-900 dark:text-neutral-50 sm:text-4xl ">
               {typeof tag === "string" ? (
                 <div className="flex justify-center items-center">
-                  <TagIcon className="text-neutral-200 h-6 w-6 mr-3" />
+                  <TagIcon className="text-neutral-800 dark:text-neutral-200 h-6 w-6 mr-3" />
                   {capitalize(tag)}
                 </div>
               ) : (
                 "Articles"
               )}
             </h1>
-            <div>
+            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>    
+            <div className='min-w-fit'>
               <label htmlFor="filter" className="sr-only">
                 Location
               </label>
               <select
                 id="filter"
                 name="filter"
-                className="capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10  ring-1 ring-inset ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
+                className="ring-neutral-900 ring-2 capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 dark:ring-1 ring-inset dark:ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
                 onChange={(e) => {
                   router.push(
-                    `/articles?filter=${e.target.value}${
-                      tag ? `&tag=${tag}` : ""
+                    `/articles?filter=${e.target.value}${tag ? `&tag=${tag}` : ""
                     }`
                   );
                 }}
@@ -177,7 +178,7 @@ const ArticlesPage = () => {
               </section>
             </div>
             <section className="col-span-4 lg:block hidden">
-              <div className="mt-4 mb-8 border border-neutral-600 bg-neutral-900">
+              <div className="text-neutral-50 mt-4 mb-8 border border-neutral-600 bg-neutral-900">
                 <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                   <Image
                     className="w-full"
