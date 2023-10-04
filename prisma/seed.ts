@@ -75,7 +75,7 @@ const generateUserData = (count = 100) => {
             chance.integer({
               min: 1,
               max: 5,
-            })
+            }),
           ),
         },
       };

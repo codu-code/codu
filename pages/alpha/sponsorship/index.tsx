@@ -7,11 +7,11 @@ import Link from "next/link";
 import Head from "next/head";
 import { useEffect } from "react";
 
-import pic1 from '../../../public/images/sponsors/pic1.png'
-import pic2 from '../../../public/images/sponsors/pic2.png'
-import pic3 from '../../../public/images/sponsors/pic3.png'
-import pic4 from '../../../public/images/sponsors/pic4.png'
-import pic5 from '../../../public/images/sponsors/pic5.png'
+import pic1 from "../../../public/images/sponsors/pic1.png";
+import pic2 from "../../../public/images/sponsors/pic2.png";
+import pic3 from "../../../public/images/sponsors/pic3.png";
+import pic4 from "../../../public/images/sponsors/pic4.png";
+import pic5 from "../../../public/images/sponsors/pic5.png";
 
 interface Image {
   rotate: number;
@@ -50,13 +50,13 @@ const images: Image[] = [
 const Sponsorship: NextPage = () => {
   useEffect(() => {
     function handleScroll() {
-      document.body.style.setProperty('--scroll', String(window.scrollY));
+      document.body.style.setProperty("--scroll", String(window.scrollY));
     }
     window.addEventListener("scroll", handleScroll);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      document.body.style.removeProperty('--scroll');
+      document.body.style.removeProperty("--scroll");
     };
   }, []);
 
@@ -84,7 +84,7 @@ const Sponsorship: NextPage = () => {
                 key={image.alt}
                 className={`w-32`}
                 style={{
-                  transform: `rotate(calc(min(var(--scroll), 200) / 200 * ${image.rotate}deg))`
+                  transform: `rotate(calc(min(var(--scroll), 200) / 200 * ${image.rotate}deg))`,
                 }}
               >
                 <Image
@@ -103,8 +103,8 @@ const Sponsorship: NextPage = () => {
               <div className="flex flex-col gap-4 text-md sm:text-lg">
                 <p>
                   Codú aims to create one of the largest coding communities
-                  globally. Your funds go directly towards building the community
-                  and a flourishing ecosystem.
+                  globally. Your funds go directly towards building the
+                  community and a flourishing ecosystem.
                 </p>
                 <p>
                   We offer opportunities to sponsor <b>hackathons</b>, monthly{" "}

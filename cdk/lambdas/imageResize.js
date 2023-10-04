@@ -37,7 +37,7 @@ exports.handler = async (event) => {
         Bucket: bucket,
         Key: targetKey,
         Body: resizedImage,
-      })
+      }),
     );
 
     return {

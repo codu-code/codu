@@ -4,7 +4,6 @@ import { CodePen } from "../CodePen/CodePen";
 import { CodeSandbox } from "../CodeSandbox/CodeSandbox";
 import { FallbackMedia } from "../FallbackMedia/FallbackMedia";
 
-
 interface MediaProps {
   src: string;
   type?: string;
@@ -14,17 +13,16 @@ interface MediaProps {
 }
 
 const getYoutubeRegex = () =>
-/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?=.*v=\w+)|embed\/)|youtu\.be\/)/i;
+  /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?=.*v=\w+)|embed\/)|youtu\.be\/)/i;
 
 const getEmbedUrlRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([\w-]{11})(?:\S+)?$/i;
 
 const getCodesandboxRegex = () =>
-/^https?:\/\/codesandbox\.io\/(?:embed|s)\/([\w-]+)(?:\?.*)?$/i;
+  /^https?:\/\/codesandbox\.io\/(?:embed|s)\/([\w-]+)(?:\?.*)?$/i;
 
 const getCodepenRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?codepen\.io\/[\w-]+\/(?:embed|pen)\/([\w-]+)(?:\S+)?$/i;
-
 
 const protocolRegex = /^(f|ht)tps?:\/\//i;
 const youtubeRegex = getYoutubeRegex();
@@ -32,15 +30,13 @@ const embedUrlRegex = getEmbedUrlRegex();
 const codesandboxRegex = getCodesandboxRegex();
 const codepenRegex = getCodepenRegex();
 
-
 export function Media(props: React.ReactPropTypes) {
-
   const MEDIA_TYPES = {
-  YOUTUBE: "youtube",
-  CODEPEN: "codepen",
-  CODESANDBOX: "codesandbox",
-  FALLBACK: "fallback",
-};
+    YOUTUBE: "youtube",
+    CODEPEN: "codepen",
+    CODESANDBOX: "codesandbox",
+    FALLBACK: "fallback",
+  };
 
   // type is used to return a specif component in markdocNodes
   const type = React.useRef(MEDIA_TYPES.FALLBACK);
@@ -71,7 +67,7 @@ export function Media(props: React.ReactPropTypes) {
     type.current = MEDIA_TYPES.YOUTUBE;
     return {
       ...mediaProps,
-      src
+      src,
     };
   };
 
@@ -93,7 +89,7 @@ export function Media(props: React.ReactPropTypes) {
     type.current = MEDIA_TYPES.CODEPEN;
     return {
       ...mediaProps,
-      src
+      src,
     };
   };
 
@@ -128,7 +124,7 @@ export function Media(props: React.ReactPropTypes) {
   // format youtube url if it is not embed format
   // can happen when user copy and past direct from youtube url bar
   const formatEmbed = (src: string) => {
-    const videoId = src.match(/(?:\?v=|&v=|youtu\.be\/)([\w-]{11})/)[1] || '';
+    const videoId = src.match(/(?:\?v=|&v=|youtu\.be\/)([\w-]{11})/)[1] || "";
     src = `https://www.youtube.com/embed/${videoId}`;
     return src;
   };

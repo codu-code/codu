@@ -94,7 +94,7 @@ const Nav = () => {
                         >
                           {item.name}
                         </Link>
-                      )
+                      ),
                     )}
                   </div>
                 </div>

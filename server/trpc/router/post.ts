@@ -64,8 +64,8 @@ export const postRouter = router({
             },
             update: {},
             create: { title: tag },
-          })
-        )
+          }),
+        ),
       );
 
       await ctx.prisma.postTag.deleteMany({
@@ -81,8 +81,8 @@ export const postRouter = router({
               tagId: tag.id,
               postId: id,
             },
-          })
-        )
+          }),
+        ),
       );
 
       const getExcerptValue = (): string | undefined => {
@@ -287,32 +287,32 @@ export const postRouter = router({
               },
             }
           : {}),
-          ...(searchTerm
-            ? {
-                OR: [
-                  {
-                    user: {
-                      name: {
-                        contains: searchTerm || "",
-                        mode: "insensitive",
-                      },
-                    },
-                  },
-                  {
-                    title: {
+        ...(searchTerm
+          ? {
+              OR: [
+                {
+                  user: {
+                    name: {
                       contains: searchTerm || "",
                       mode: "insensitive",
                     },
                   },
-                  {
-                    excerpt: {
-                      contains: searchTerm || "",
-                      mode: "insensitive",
-                    },
+                },
+                {
+                  title: {
+                    contains: searchTerm || "",
+                    mode: "insensitive",
                   },
-                ],
-              }
-            : {}),
+                },
+                {
+                  excerpt: {
+                    contains: searchTerm || "",
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            }
+          : {}),
       },
       select: {
         id: true,

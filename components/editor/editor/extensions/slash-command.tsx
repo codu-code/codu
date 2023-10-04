@@ -240,7 +240,7 @@ const CommandList = ({
       const item = items[index];
       command(item);
     },
-    [command, items]
+    [command, items],
   );
 
   useEffect(() => {

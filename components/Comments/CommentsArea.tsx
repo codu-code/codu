@@ -116,12 +116,12 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   const onSubmit = async (
     body: string,
     parentId: number | undefined,
-    fieldName: FieldName
+    fieldName: FieldName,
   ) => {
     // vaidate markdoc syntax
     const ast = Markdoc.parse(body);
     const errors = Markdoc.validate(ast, config).filter(
-      (e) => e.error.level === "critical"
+      (e) => e.error.level === "critical",
     );
 
     if (errors.length > 0) {
@@ -164,7 +164,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
 
   const generateComments = (
     commentsArr: Comments | Children | undefined,
-    depth = 0
+    depth = 0,
   ) => {
     if (!commentsArr) return null;
     return commentsArr.map(
@@ -196,7 +196,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-              }
+              },
         );
 
         const commentUpdated =
@@ -321,7 +321,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                             // TODO: Add alert to confirm reset if there is already content being written
                             resetField("reply");
                             setShowCommentBoxId((currentId) =>
-                              currentId === id ? null : id
+                              currentId === id ? null : id,
                             );
                           }
                         }}
@@ -362,7 +362,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
             )}
           </section>
         );
-      }
+      },
     );
   };
 
@@ -415,7 +415,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
               React,
               {
                 components: markdocComponents,
-              }
+              },
             )}
           </article>
         ) : (

@@ -1,4 +1,3 @@
-
 interface Props {
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
@@ -10,7 +9,7 @@ const SearchBar = (props: Props) => {
   console.log(searchTerm);
 
   return (
-    <div className='flex grow justify-end'>
+    <div className="flex grow justify-end">
       <label htmlFor="searchInput" aria-label="Enter search term"></label>
       <input
         onChange={(e) => setSearchTerm(e.target.value)}

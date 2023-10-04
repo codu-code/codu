@@ -75,7 +75,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                         {item.name}
                       </Disclosure.Button>
                     </Link>
-                  )
+                  ),
                 )}
               </div>
             </div>
@@ -132,7 +132,7 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
             item.fancy
               ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
               : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 dark:focus:bg-neutral-900 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
-            "rounded-md text-base font-medium py-2 text-center"
+            "rounded-md text-base font-medium py-2 text-center",
           )}
           key={item.name}
           href={item.href}
