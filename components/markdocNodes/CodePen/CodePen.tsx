@@ -6,18 +6,18 @@ interface Props {
 
 export function CodePen({
   src,
-  defaultTab = 'html,result',
-  height = '300px',
+  defaultTab = "html,result",
+  height = "300px",
 }: Props) {
   const codePenSrc = new URL(src);
-  if (!codePenSrc.searchParams.get('default-tab')) {
-    codePenSrc.searchParams.set('default-tab', defaultTab);
+  if (!codePenSrc.searchParams.get("default-tab")) {
+    codePenSrc.searchParams.set("default-tab", defaultTab);
   }
 
   return (
     <iframe
       height={height}
-      style={{ width: '100%' }}
+      style={{ width: "100%" }}
       scrolling="no"
       src={codePenSrc.toString()}
       frameBorder="no"

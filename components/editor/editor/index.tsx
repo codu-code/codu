@@ -11,17 +11,16 @@ interface EditorProps {
   onChange: (value: string) => void;
 }
 
-export default function Editor({onChange, initialValue}: EditorProps) {
-
+export default function Editor({ onChange, initialValue }: EditorProps) {
   const editor = useEditor({
     extensions: TiptapExtensions,
     editorProps: TiptapEditorProps,
     content: JSON.parse(initialValue),
     onUpdate: (e) => {
-      const {editor} = e
+      const { editor } = e;
       const json = editor.getJSON();
-      console.log(json)
-      onChange(JSON.stringify(json))
+      console.log(json);
+      onChange(JSON.stringify(json));
     },
     autofocus: "end",
   });
@@ -34,7 +33,7 @@ export default function Editor({onChange, initialValue}: EditorProps) {
     >
       {editor && <EditorBubbleMenu editor={editor} />}
       {editor?.isActive("image") && <ImageResizer editor={editor} />}
-      <EditorContent editor={editor}/>
+      <EditorContent editor={editor} />
     </div>
   );
 }

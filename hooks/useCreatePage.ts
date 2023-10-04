@@ -47,14 +47,15 @@ export type useCreatePageReturnType = {
   title: string;
   body: string;
   saveStatus: string;
-}
+};
 
 type useCreatepagePropTypes = {
-    postId: string;
-}
+  postId: string;
+};
 
-function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnType {
-
+function useCreatePage({
+  postId,
+}: useCreatepagePropTypes): useCreatePageReturnType {
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagValue, setTagValue] = useState<string>("");
@@ -98,14 +99,14 @@ function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnTyp
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
-      console.log('saved')
+      console.log("saved");
 
       // toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
           timeStyle: "short",
-        })
+        }),
       );
     },
   });
@@ -114,7 +115,7 @@ function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnTyp
       toast.error("Something went wrong creating draft");
     },
     onSuccess() {
-      console.log('saved')
+      console.log("saved");
       // toast.success("Saved draft");
     },
   });
@@ -129,11 +130,11 @@ function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnTyp
           "Something went wrong fetching your draft, refresh your page or you may lose data",
           {
             duration: 5000,
-          }
+          },
         );
       },
       enabled: !!postId && shouldRefetch,
-    }
+    },
   );
 
   useEffect(() => {
@@ -186,7 +187,7 @@ function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnTyp
             onError() {
               toast.error("Something went wrong publishing, please try again.");
             },
-          }
+          },
         );
       } catch (err) {
         if (err instanceof ZodError) {
@@ -274,7 +275,7 @@ function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnTyp
     }
   };
 
-    return {
+  return {
     viewPreview,
     setViewPreview,
     tags,
@@ -310,8 +311,8 @@ function useCreatePage({postId}: useCreatepagePropTypes): useCreatePageReturnTyp
     dataStatus,
     title,
     body,
-    saveStatus
+    saveStatus,
   };
-};
+}
 
-export default useCreatePage
+export default useCreatePage;

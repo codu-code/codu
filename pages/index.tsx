@@ -254,7 +254,7 @@ const Home: NextPage = () => {
                     Children.toArray(
                       Array.from({ length: 7 }, () => {
                         return <ArticleLoading />;
-                      })
+                      }),
                     )}
                   {status === "success" &&
                     data.map(
@@ -281,7 +281,7 @@ const Home: NextPage = () => {
                           readTime={readTimeMins}
                           bookmarkedInitialState={currentUserLikesPost}
                         />
-                      )
+                      ),
                     )}
                 </section>
                 <div className="flex justify-center">

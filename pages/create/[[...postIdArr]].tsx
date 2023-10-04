@@ -79,7 +79,7 @@ const Create: NextPage = () => {
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
           timeStyle: "short",
-        })
+        }),
       );
     },
   });
@@ -102,11 +102,11 @@ const Create: NextPage = () => {
           "Something went wrong fetching your draft, refresh your page or you may lose data",
           {
             duration: 5000,
-          }
+          },
         );
       },
       enabled: !!postId && shouldRefetch,
-    }
+    },
   );
 
   useEffect(() => {
@@ -147,7 +147,7 @@ const Create: NextPage = () => {
     // vaidate markdoc syntax
     const ast = Markdoc.parse(data.body);
     const errors = Markdoc.validate(ast, config).filter(
-      (e) => e.error.level === "critical"
+      (e) => e.error.level === "critical",
     );
 
     if (errors.length > 0) {
@@ -171,7 +171,7 @@ const Create: NextPage = () => {
             onError() {
               toast.error("Something went wrong publishing, please try again.");
             },
-          }
+          },
         );
       } catch (err) {
         if (err instanceof ZodError) {
@@ -511,7 +511,7 @@ const Create: NextPage = () => {
                                 React,
                                 {
                                   components: markdocComponents,
-                                }
+                                },
                               )}
                             </article>
                           </section>

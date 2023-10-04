@@ -1,4 +1,8 @@
-import type { GetServerSideProps, InferGetServerSidePropsType, NextPage } from "next";
+import type {
+  GetServerSideProps,
+  InferGetServerSidePropsType,
+  NextPage,
+} from "next";
 import Head from "next/head";
 import Layout from "../../../components/Layout/Layout";
 import CoursePreview from "../../../components/Course/CoursePreview";
@@ -44,18 +48,22 @@ const Courses: NextPage<
       </Layout>
     </>
   );
-}
-
-export const getServerSideProps: GetServerSideProps<{ courses: Course[] }> = async () => {
-  const courses: Course[] = [
-    {
-      name: 'Introduction to Web Development',
-      description: 'Discover the magic of web development in our beginner-friendly course! Master HTML for structure, CSS for style, and JavaScript for interactivity. Learn from experts, tackle hands-on projects, and build a strong foundation to create stunning, responsive websites. Unleash your creativity and join us today! <br /><br />Perfect for your first steps into a programming career or looking to refresh their fundamentals.',
-      thumbnail: 'https://images.unsplash.com/photo-1612758272676-dec3a658080e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80',
-    }
-  ]
-
-  return { props: { courses } }
 };
 
-export default Courses
+export const getServerSideProps: GetServerSideProps<{
+  courses: Course[];
+}> = async () => {
+  const courses: Course[] = [
+    {
+      name: "Introduction to Web Development",
+      description:
+        "Discover the magic of web development in our beginner-friendly course! Master HTML for structure, CSS for style, and JavaScript for interactivity. Learn from experts, tackle hands-on projects, and build a strong foundation to create stunning, responsive websites. Unleash your creativity and join us today! <br /><br />Perfect for your first steps into a programming career or looking to refresh their fundamentals.",
+      thumbnail:
+        "https://images.unsplash.com/photo-1612758272676-dec3a658080e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
+    },
+  ];
+
+  return { props: { courses } };
+};
+
+export default Courses;
