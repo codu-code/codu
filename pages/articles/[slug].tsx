@@ -178,11 +178,11 @@ const ArticlePage: NextPage = ({
         enterFrom="transform opacity-0 scale-75"
         enterTo="transform opacity-100 scale-100"
       >
-        <div className="bg-neutral-900 border-t border-neutral-700 fixed lg:w-20 lg:border-r lg:border-b bottom-0 w-full py-2 z-20 lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
+        <div className="bg-neutral-100 dark:bg-neutral-900 border-t border-neutral-700 fixed lg:w-20 lg:border-r lg:border-b bottom-0 w-full py-2 z-20 lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
           <div className="flex justify-evenly lg:flex-col h-full">
             <div className="flex items-center lg:flex-col">
               <button
-                className="p-1 rounded-full hover:bg-neutral-800"
+                className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
                 onClick={() => {
                   if (data?.currentUserLiked) return likePost(post.id, false);
                   likePost(post.id);
@@ -201,7 +201,7 @@ const ArticlePage: NextPage = ({
             </div>
 
             <button
-              className="lg:mx-auto p-1 rounded-full hover:bg-neutral-800"
+              className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
               onClick={() => {
                 if (!session) {
                   signIn();
@@ -219,7 +219,7 @@ const ArticlePage: NextPage = ({
             </button>
             <Menu as="div" className="ml-4 relative">
               <div>
-                <Menu.Button className="p-1 rounded-full hover:bg-neutral-800">
+                <Menu.Button className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800">
                   <span className="sr-only">Open user menu</span>
                   <DotsHorizontalIcon className="w-6 h-6" />
                 </Menu.Button>
@@ -233,11 +233,11 @@ const ArticlePage: NextPage = ({
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                <Menu.Items className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
                   {optionsData.map((item) => (
                     <Menu.Item key={item.label}>
                       <a
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded"
+                        className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded"
                         target="blank"
                         rel="noopener noreferrer"
                         href={encodeURI(item.href)}
