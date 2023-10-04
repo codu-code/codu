@@ -28,7 +28,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
       <Disclosure.Panel className="md:hidden relative z-10 border-b-2 border-black dark:border-white">
         <div className="px-2 pt-2 pb-3 space-y-1">
           {navigation.map((item) => (
-            <NavItem item={item} />
+            <NavItem item={item} key={item.name} />
           ))}
           <div className="pt-3 pb-3 border-t border-neutral-700 flex flex-col space-y-1">
             <SubNav session={session} />
@@ -99,7 +99,6 @@ const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
   return item.href.includes("http") ? (
     <Disclosure.Button
       as="a"
-      key={item.name}
       href={item.href}
       target="_blank"
       rel="noopener noreferrer"
@@ -108,7 +107,7 @@ const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
       {item.name}
     </Disclosure.Button>
   ) : (
-    <Link key={item.name} href={item.href}>
+    <Link href={item.href}>
       <Disclosure.Button
         as="div"
         className="nav-button block text-base font-medium"
