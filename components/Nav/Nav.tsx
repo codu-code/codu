@@ -202,7 +202,7 @@ const Nav = () => {
                 <Link
                   title="Notifications"
                   href="/notifications"
-                  className="relative block flex-shrink-0 rounded-md p-2 text-neutral-400 hover:text-neutral-300 hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-inset"
+                  className="relative group block mobile-nav-button"
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
@@ -211,7 +211,7 @@ const Nav = () => {
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </Link>
                 {/* Mobile menu button */}
-                <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                <Disclosure.Button className="group mobile-nav-button">
                   <span className="sr-only">Open main menu</span>
                   <AnimatedHamburger open={open} />
                 </Disclosure.Button>

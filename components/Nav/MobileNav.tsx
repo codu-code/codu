@@ -1,5 +1,4 @@
 import { Disclosure, Transition } from "@headlessui/react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";

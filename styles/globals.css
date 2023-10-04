@@ -39,6 +39,10 @@ body {
   @apply text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-black focus:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:focus:bg-neutral-900 dark:hover:text-white dark:focus:text-white px-3 py-2 rounded-md;
 }
 
+.mobile-nav-button {
+  @apply rounded-md p-2 text-neutral-600 dark:text-neutral-400  hover:text-neutral-900 dark:hover:text-white focus:text-neutral-900 dark:focus:text-white hover:bg-neutral-300 dark:hover:bg-neutral-900  focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-400 dark:focus:ring-white;
+}
+
 .primary-button {
   @apply items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 disabled:from-neutral-500 disabled:to-neutral-700 disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:text-neutral-300 transition-colors;
 }
