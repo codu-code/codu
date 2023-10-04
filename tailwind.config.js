@@ -7,6 +7,10 @@ module.exports = {
     extend: {
       colors: {
         black: "#040404",
+        twitter: "var(--twitter-clr)",
+        github: "var(--github-clr)",
+        discord: "var(--discord-clr)",
+        youtube: "var(--youtube-clr)",
       },
     },
   },
