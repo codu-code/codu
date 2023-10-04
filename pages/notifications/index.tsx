@@ -58,14 +58,14 @@ const Notifications = () => {
   const noNotifications = !data?.pages[0].data.length;
 
   const Placeholder = () => (
-    <div className="border-white border-2 border-l-8 shadow p-4 w-full my-4 bg-black">
+    <div className="border-neutral-100 dark:border-white border shadow p-4 w-full my-4 bg-neutral-100 dark:bg-black">
       <div className="animate-pulse">
         <div className="flex space-x-4">
-          <div className="rounded-full bg-neutral-800 h-10 w-10"></div>
+          <div className="rounded-full bg-gray-300 dark:bg-neutral-800 h-10 w-10"></div>
           <div className="flex-1 space-y-2 py-1">
             <div className="grid grid-cols-8 gap-4">
-              <div className="h-4 bg-neutral-800 rounded col-span-6"></div>
-              <div className="h-2 bg-neutral-800 rounded col-span-3"></div>
+              <div className="h-4 bg-gray-300 dark:bg-neutral-800 rounded col-span-6"></div>
+              <div className="h-2 bg-gray-300 dark:bg-neutral-800 rounded col-span-3"></div>
             </div>
           </div>
         </div>
@@ -112,7 +112,7 @@ const Notifications = () => {
                 })
               )}
             {status !== "loading" && noNotifications && (
-              <p className=" text-lg font-semibold">
+              <p className="text-neutral-900 dark:text-neutral-50 text-lg font-semibold">
                 No new notifications. ✅{" "}
               </p>
             )}
@@ -157,7 +157,7 @@ const Notifications = () => {
                           return null;
                         return (
                           <div key={id}>
-                            <div className="p-4 my-2 border-white border-2 bg-black border-l-8 shadow-xl flex justify-between">
+                            <div className="p-4 my-2 border-neutral-100 dark:border-white border bg-neutral-100 dark:bg-black shadow-xl flex justify-between">
                               <div>
                                 <div className="flex gap-3 sm:gap-5">
                                   {image && (
@@ -201,7 +201,7 @@ const Notifications = () => {
                               <div className="w-10 border-l border-slate-700 ml-2 pl-3 flex flex-col justify-center">
                                 <button
                                   title="Mark as read"
-                                  className="text-white rounded-full h-8 w-8 flex justify-center items-center hover:bg-slate-700"
+                                  className="dark:text-white rounded-full h-8 w-8 flex justify-center items-center hover:bg-gray-300 dark:hover:bg-slate-700"
                                   onClick={() => mutate({ id })}
                                 >
                                   <CheckIcon

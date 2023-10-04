@@ -1,5 +1,12 @@
 @tailwind base;
 
+:root {
+  --discord-clr: linear-gradient(to bottom, #4b83fb, #734df8);
+  --youtube-clr: linear-gradient(to top, #6d0202 22%, #c90000 61%);
+  --github-clr: #f17f06;
+  --twitter-clr: #282828;
+}
+
 body {
   @apply bg-neutral-100 text-neutral-900 dark:bg-black dark:text-white;
 }
@@ -36,7 +43,11 @@ body {
 }
 
 .nav-button {
-  @apply text-neutral-900 hover:bg-neutral-200 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white px-3 py-2 rounded-md;
+  @apply text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-black focus:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:focus:bg-neutral-900 dark:hover:text-white dark:focus:text-white px-3 py-2 rounded-md;
+}
+
+.mobile-nav-button {
+  @apply rounded-md p-2 text-neutral-600 dark:text-neutral-400  hover:text-neutral-900 dark:hover:text-white focus:text-neutral-900 dark:focus:text-white hover:bg-neutral-300 dark:hover:bg-neutral-900  focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-400 dark:focus:ring-white;
 }
 
 .primary-button {
@@ -363,6 +374,21 @@ blockquote {
 
 .slate-li::marker {
   color: #4b5563;
+}
+
+/* Footer social hover effects */
+
+.twitter {
+  @apply hover:bg-twitter focus:bg-twitter;
+}
+.github {
+  @apply hover:bg-github focus:bg-github;
+}
+.discord {
+  @apply hover:bg-discord focus:bg-discord;
+}
+.youtube {
+  @apply hover:bg-youtube focus:bg-youtube;
 }
 
 /* end of plate editor styles  */
