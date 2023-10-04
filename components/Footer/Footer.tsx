@@ -1,4 +1,3 @@
-import type { NextPage } from "next";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 
