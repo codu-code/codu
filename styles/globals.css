@@ -365,6 +365,72 @@ blockquote {
   color: #4b5563;
 }
 
+/* Footer social hover effects */
+
+#twitter:hover,
+#twitter:focus {
+  transition: all 300ms;
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  cursor: pointer;
+  color: white !important;
+  background: rgba(40, 40, 40, 1);
+}
+
+#github:hover,
+#github:focus {
+  transition: all 300ms;
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  cursor: pointer;
+  color: white !important;
+  background: #f17f06;
+}
+
+#discord:hover,
+#discord:focus {
+  transition: all 300ms;
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  cursor: pointer;
+  color: white !important;
+  background: #4b83fb;
+  background: -moz-linear-gradient(top, #4b83fb, #734df8);
+  background: -ms-linear-gradient(top, #4b83fb, #734df8);
+  background: -webkit-linear-gradient(top, #4b83fb, #734df8);
+}
+
+#youtube:hover,
+#youtube:focus {
+  transition: all 300ms;
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  cursor: pointer;
+  color: white !important;
+  background: rgb(201, 0, 0);
+  background-image: -webkit-linear-gradient(
+    bottom,
+    rgb(109, 2, 2) 22%,
+    rgb(201, 0, 0) 61%
+  );
+  background-image: -moz-linear-gradient(
+    bottom,
+    rgb(109, 2, 2) 22%,
+    rgb(201, 0, 0) 61%
+  );
+  background-image: -o-linear-gradient(
+    bottom,
+    rgb(109, 2, 2) 22%,
+    rgb(201, 0, 0) 61%
+  );
+  background-image: -ms-linear-gradient(
+    bottom,
+    rgb(109, 2, 2) 22%,
+    rgb(201, 0, 0) 61%
+  );
+  background-image: linear-gradient(bottom, #6d0202 22%, rgb(201, 0, 0) 61%);
+}
+
 /* end of plate editor styles  */
 
 @keyframes loader-dots1 {
