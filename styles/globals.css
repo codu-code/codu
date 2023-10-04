@@ -1,8 +1,8 @@
 @tailwind base;
 
 :root {
-  --discord-clr: linear-gradient(top, #4b83fb, #734df8);
-  --youtube-clr: linear-gradient(bottom, #6d0202 22%, #c90000 61%);
+  --discord-clr: linear-gradient(to bottom, #4b83fb, #734df8);
+  --youtube-clr: linear-gradient(to top, #6d0202 22%, #c90000 61%);
   --github-clr: #f17f06;
   --twitter-clr: #282828;
 }
@@ -381,10 +381,10 @@ blockquote {
   @apply hover:bg-github focus:bg-github;
 }
 .discord {
-  @apply hover:bg-gradient-to-b focus:bg-gradient-to-b from-[#4b83fb] to-[#734df8];
+  @apply hover:bg-discord focus:bg-discord;
 }
 .youtube {
-  @apply hover:bg-gradient-to-t focus:bg-gradient-to-b from-[#6d0202] to-[#c90000];
+  @apply hover:bg-youtube focus:bg-youtube;
 }
 
 /* end of plate editor styles  */

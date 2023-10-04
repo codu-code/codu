@@ -9,6 +9,8 @@ module.exports = {
         black: "#040404",
         twitter: "var(--twitter-clr)",
         github: "var(--github-clr)",
+      },
+      backgroundImage: {
         discord: "var(--discord-clr)",
         youtube: "var(--youtube-clr)",
       },
