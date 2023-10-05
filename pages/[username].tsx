@@ -6,7 +6,7 @@ import type {
 import React, { useState } from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "./api/auth/[...nextauth]";
+import { authOptions } from "../app/api/auth/authOptions";
 import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
