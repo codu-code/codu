@@ -82,11 +82,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <Providers>
-    <AuthProvider>
-      <ProgressBar isAnimating={isAnimating} />
-      <Component {...pageProps} />
-    </AuthProvider>
-  </Providers>
+      <AuthProvider>
+        <ProgressBar isAnimating={isAnimating} />
+        <Component {...pageProps} />
+      </AuthProvider>
+    </Providers>
   );
 }
 
