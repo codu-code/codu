@@ -7,7 +7,9 @@
   "extends": [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended",
-    "prettier"
+    "prettier",
+    "plugin:testing-linbrary/react",
+    "plugin:jest-dom/recommended"
   ],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "warn",
