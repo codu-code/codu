@@ -11,7 +11,7 @@ import Head from "next/head";
 import Layout from "../../components/Layout/Layout";
 import PageHeading from "../../components/PageHeading/PageHeading";
 import { trpc } from "../../utils/trpc";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { getServerSession } from "next-auth";
 import type { GetServerSideProps } from "next/types";
 

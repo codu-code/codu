@@ -1,6 +1,6 @@
 import Layout from "../../components/Layout/Layout";
 import PageHeading from "../../components/PageHeading/PageHeading";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { getServerSession } from "next-auth";
 import type {
   GetServerSideProps,
