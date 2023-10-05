@@ -15,7 +15,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/solid";
 import Layout from "../../components/Layout/Layout";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { trpc } from "../../utils/trpc";
 import { Modal } from "../../components/Modal/Modal";
 
@@ -160,7 +160,7 @@ const MyPosts: NextPage = ({
                       tab.current
                         ? "bg-neutral-100 text-neutral-700"
                         : "text-neutral-200 hover:text-neutral-400",
-                      "px-4 py-2 font-medium text-base rounded-t-md"
+                      "px-4 py-2 font-medium text-base rounded-t-md",
                     )}
                     aria-current={tab.current ? "page" : undefined}
                     key={tab.name}
@@ -235,7 +235,7 @@ const MyPosts: NextPage = ({
                                       active
                                         ? "bg-neutral-100 text-black"
                                         : "text-neutral-700",
-                                      "group flex items-center px-4 py-2 text-sm"
+                                      "group flex items-center px-4 py-2 text-sm",
                                     )}
                                     href={`/create/${id}`}
                                   >
@@ -258,7 +258,7 @@ const MyPosts: NextPage = ({
                                       active
                                         ? "bg-neutral-100 text-black"
                                         : "text-neutral-700",
-                                      "group flex items-center px-4 py-2 text-sm w-full"
+                                      "group flex items-center px-4 py-2 text-sm w-full",
                                     )}
                                   >
                                     <TrashIcon
@@ -275,7 +275,7 @@ const MyPosts: NextPage = ({
                       </Menu>
                     </div>
                   </article>
-                )
+                ),
               )}
             {selectedTabData.status === "success" &&
               selectedTabData.data?.length === 0 && (

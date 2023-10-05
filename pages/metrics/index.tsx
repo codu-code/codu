@@ -1,6 +1,6 @@
 import Layout from "../../components/Layout/Layout";
 import PageHeading from "../../components/PageHeading/PageHeading";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { getServerSession } from "next-auth";
 import type {
   GetServerSideProps,
@@ -109,7 +109,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           tag: string;
         };
       },
-      item
+      item,
     ) => {
       const groupValue = item["tagId"];
       if (!result[groupValue]) {
@@ -121,7 +121,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       result[groupValue].count++;
       return result;
     },
-    {}
+    {},
   );
 
   const tagsWithCount = Object.keys(grouped)

@@ -6,7 +6,7 @@ import type {
 import { useRouter } from "next/router";
 import { customAlphabet } from "nanoid";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -105,22 +105,22 @@ const Settings: NextPage = ({
           onError(error) {
             if (error) return toast.error(error.message);
             return toast.error(
-              "Something went wrong uploading the photo, please retry."
+              "Something went wrong uploading the photo, please retry.",
             );
           },
           async onSuccess(signedUrl) {
             const url = await uploadToUrl(signedUrl, file);
             if (!url) {
               return toast.error(
-                "Something went wrong uploading the photo, please retry."
+                "Something went wrong uploading the photo, please retry.",
               );
             }
             setProfilePhoto({ status: "success", url });
             toast.success(
-              "Profile photo successfully updated. This may take a few minutes to update around the site."
+              "Profile photo successfully updated. This may take a few minutes to update around the site.",
             );
           },
-        }
+        },
       );
     }
   };
@@ -369,7 +369,7 @@ const Settings: NextPage = ({
                               emailNotifications
                                 ? "bg-green-600"
                                 : "bg-neutral-400",
-                              "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                              "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300",
                             )}
                           >
                             <span
@@ -378,7 +378,7 @@ const Settings: NextPage = ({
                                 emailNotifications
                                   ? "translate-x-5"
                                   : "translate-x-0",
-                                "inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+                                "inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200",
                               )}
                             />
                           </Switch>
@@ -402,7 +402,7 @@ const Settings: NextPage = ({
                               weeklyNewsletter
                                 ? "bg-green-600"
                                 : "bg-neutral-400",
-                              "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                              "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300",
                             )}
                           >
                             <span
@@ -411,7 +411,7 @@ const Settings: NextPage = ({
                                 weeklyNewsletter
                                   ? "translate-x-5"
                                   : "translate-x-0",
-                                "inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+                                "inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200",
                               )}
                             />
                           </Switch>
@@ -465,7 +465,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const nanoid = customAlphabet("1234567890abcdef", 3);
     const initialUsername = `${(session.user.name || "").replace(
       /\s/g,
-      "-"
+      "-",
     )}-${nanoid()}`.toLowerCase();
 
     const rawData = await prisma.user.update({

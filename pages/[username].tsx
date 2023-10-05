@@ -6,7 +6,7 @@ import type {
 import React from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "./api/auth/[...nextauth]";
+import { authOptions } from "../app/api/auth/authOptions";
 import prisma from "../server/db/client";
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
@@ -72,13 +72,13 @@ const Profile: NextPage = ({
           name="image"
           property="og:image"
           content={`/api/og?title=${encodeURIComponent(
-            `${name} - Codú Profile`
+            `${name} - Codú Profile`,
           )}`}
         />
         <meta property="og:type" content="website" />
       </Head>
       <Layout>
-        <div className="max-w-2xl px-4 mx-auto text-white">
+        <div className="max-w-2xl px-4 mx-auto text-900 dark:text-white">
           <main className="flex pt-6">
             <div className="mr-4 flex-shrink-0 self-center">
               {image && (
@@ -91,7 +91,7 @@ const Profile: NextPage = ({
             </div>
             <div className="flex flex-col justify-center">
               <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
-              <h2 className="text-neutral-400 font-bold text-sm">
+              <h2 className="text-neutral-500 dark:text-neutral-400 font-bold text-sm">
                 @{username}
               </h2>
               <p className="mt-1">{bio}</p>
@@ -101,7 +101,7 @@ const Profile: NextPage = ({
                   className="flex flex-row items-center"
                   target="blank"
                 >
-                  <LinkIcon className="h-5 mr-2 text-neutral-400" />
+                  <LinkIcon className="h-5 mr-2 text-neutral-500 dark:text-neutral-400" />
                   <p className="mt-1 text-blue-500">
                     {getDomainFromUrl(websiteUrl)}
                   </p>
@@ -110,11 +110,11 @@ const Profile: NextPage = ({
             </div>
           </main>
           {accountLocked ? (
-            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
+            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-900 dark:text-neutral-50">
               <h1>Account locked 🔒</h1>
             </div>
           ) : (
-            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
+            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-900 dark:text-neutral-50">
               <h1>Published articles</h1>
               <span className="font-light">({posts.length})</span>
             </div>
@@ -150,7 +150,7 @@ const Profile: NextPage = ({
                     id={id}
                   />
                 );
-              }
+              },
             )
           ) : (
             <p className="font-medium py-4">Nothing published yet... 🥲</p>
@@ -171,7 +171,7 @@ const Profile: NextPage = ({
             <form className="flex flex-col" onSubmit={handleBanSubmit}>
               <label
                 htmlFor="note"
-                className="block text-sm font-medium leading-6 text-gray-400"
+                className="block text-sm font-medium leading-6 text-gray-700 dark:text-gray-400"
               >
                 Add your reason to ban the user
               </label>
@@ -180,7 +180,7 @@ const Profile: NextPage = ({
                   rows={4}
                   name="note"
                   id="note"
-                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-900 dark:ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6"
                   defaultValue={""}
                 />
               </div>
@@ -196,7 +196,7 @@ const Profile: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext<{ username: string }>
+  context: GetServerSidePropsContext<{ username: string }>,
 ) => {
   const username = context.params?.username;
 

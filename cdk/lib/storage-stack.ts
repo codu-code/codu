@@ -33,7 +33,7 @@ export class StorageStack extends cdk.Stack {
     const bucketName = ssm.StringParameter.valueForStringParameter(
       this,
       "/env/bucketname",
-      1
+      1,
     );
 
     this.originAccessIdentity = new OriginAccessIdentity(this, "OAI", {
@@ -68,7 +68,6 @@ export class StorageStack extends cdk.Stack {
       depsLockFilePath: path.join(__dirname, "/../lambdas/package-lock.json"),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
-        forceDockerBundling: true,
       },
     });
 
@@ -78,19 +77,19 @@ export class StorageStack extends cdk.Stack {
       new S3EventSource(this.bucket, {
         events: [s3.EventType.OBJECT_CREATED],
         filters: [{ prefix: "u/" }],
-      })
+      }),
     );
 
     const dbUsername = ssm.StringParameter.valueForStringParameter(
       this,
       "/env/db/username",
-      1
+      1,
     );
 
     const dbName = ssm.StringParameter.valueForStringParameter(
       this,
       "/env/db/name",
-      1
+      1,
     );
 
     // RDS
@@ -102,7 +101,7 @@ export class StorageStack extends cdk.Stack {
       }),
       credentials: rds.Credentials.fromPassword(
         dbUsername,
-        cdk.SecretValue.ssmSecure("/env/db/password", "1")
+        cdk.SecretValue.ssmSecure("/env/db/password", "1"),
       ),
       vpc: vpc,
       vpcSubnets: vpc.selectSubnets({
@@ -110,7 +109,7 @@ export class StorageStack extends cdk.Stack {
       }),
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T4G,
-        ec2.InstanceSize.MICRO
+        ec2.InstanceSize.MICRO,
       ),
       allocatedStorage: 20,
       maxAllocatedStorage: 100,

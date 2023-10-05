@@ -17,11 +17,16 @@ const CoursePreview = ({ name, description, thumbnail }: Props) => {
         <Image alt={name} src={thumbnail} fill className="object-cover" />
       </div>
       <div className="order-2 md:order-1">
-        <h2 className="font-bold text-lg px-3 py-2 lg:px-6 lg:py-1 border-neutral-500 border-b">{name}</h2>
-        <div className="px-3 py-3 lg:px-6" dangerouslySetInnerHTML={{ __html: description }} />
+        <h2 className="font-bold text-lg px-3 py-2 lg:px-6 lg:py-1 border-neutral-500 border-b">
+          {name}
+        </h2>
+        <div
+          className="px-3 py-3 lg:px-6"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CoursePreview
+export default CoursePreview;

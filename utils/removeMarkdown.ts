@@ -38,7 +38,7 @@ export function removeMarkdown(md: string, options: RemoveMarkdownOptions) {
       if (options.listUnicodeChar)
         output = output.replace(
           /^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm,
-          options.listUnicodeChar + " $1"
+          options.listUnicodeChar + " $1",
         );
       else output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, "$1");
     }
@@ -70,7 +70,7 @@ export function removeMarkdown(md: string, options: RemoveMarkdownOptions) {
       // Adding the lookahead literal with the default regex for html. Eg./<(?!sup|sub)[^>]*>/ig
       htmlReplaceRegex = new RegExp(
         "<" + joinedHtmlTagsToSkip + "[^>]*>",
-        "ig"
+        "ig",
       );
     }
 
@@ -87,7 +87,7 @@ export function removeMarkdown(md: string, options: RemoveMarkdownOptions) {
       // Remove inline links
       .replace(
         /\[([^\]]*?)\][\[\(].*?[\]\)]/g,
-        options.replaceLinksWithURL ? "$2" : "$1"
+        options.replaceLinksWithURL ? "$2" : "$1",
       )
       // Remove blockquotes
       .replace(/^\s{0,3}>\s?/gm, "")
@@ -97,7 +97,7 @@ export function removeMarkdown(md: string, options: RemoveMarkdownOptions) {
       // Remove atx-style headers
       .replace(
         /^(\n)?\s{0,}#{1,6}\s+| {0,}(\n)?\s{0,}#{0,} #{0,}(\n)?\s{0,}$/gm,
-        "$1$2$3"
+        "$1$2$3",
       )
       // Remove * emphasis
       .replace(/([\*]+)(\S)(.*?\S)??\1/g, "$2$3")

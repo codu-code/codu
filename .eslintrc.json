@@ -4,11 +4,17 @@
     "project": "./tsconfig.json"
   },
   "plugins": ["@typescript-eslint"],
-  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "warn",
-    // We may turn this back on later
     "@typescript-eslint/ban-ts-comment": "warn",
-    "@next/next/no-img-element": "off"
+    "@next/next/no-img-element": "off",
+    "no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-console": "warn"
   }
 }

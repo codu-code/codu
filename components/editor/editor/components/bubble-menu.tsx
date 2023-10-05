@@ -93,7 +93,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       <div className="flex">
         {items.map((item, index) => (
           <button
-          type="button"
+            type="button"
             key={index}
             onClick={item.command}
             className="p-2 text-stone-600 hover:bg-stone-100 active:bg-stone-200"
@@ -106,7 +106,6 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           </button>
         ))}
       </div>
-      
     </BubbleMenu>
   );
 };

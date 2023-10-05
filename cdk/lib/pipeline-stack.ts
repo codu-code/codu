@@ -22,16 +22,18 @@ export class PipelineStack extends cdk.Stack {
       pipelineName: "codu-pipline",
       crossAccountKeys: true,
       synth: synthAction,
+      dockerEnabledForSelfMutation: true,
+      dockerEnabledForSynth: true,
     });
 
     const devAccountId = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/dev/accountId`
+      `/env/dev/accountId`,
     );
 
     const prodAccountId = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/prod/accountId`
+      `/env/prod/accountId`,
     );
 
     const defaultRegion = "eu-west-1";

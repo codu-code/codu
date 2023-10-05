@@ -11,7 +11,7 @@ const ThemeToggle = () => {
   return (
     <Menu
       as="div"
-      className="relative flex justify-center items-center text-neutral-400 hover:text-neutral-300 focus:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ml-3 rounded-full"
+      className="relative flex justify-center items-center text-neutral-900 dark:text-neutral-300 hover:dark:text-white hover:text-yellow-500 focus:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ml-3 rounded-full"
     >
       <Menu.Button className="relative h-full">
         <SunIcon className="w-6 h-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
