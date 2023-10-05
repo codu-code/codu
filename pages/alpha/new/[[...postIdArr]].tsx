@@ -2,17 +2,15 @@ import type { NextPage, GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { Fragment } from "react";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../api/auth/[...nextauth]";
+import { authOptions } from "@/app/api/auth/authOptions";
 import { Controller } from "react-hook-form";
 import { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
-
 import Layout from "../../../components/Layout/Layout";
 import { PromptDialog } from "@/components/PromptService/PromptService";
 import Editor from "@/components/editor/editor";
 import RenderPost from "@/components/editor/editor/RenderPost";
-
 import useCreatePage from "@/hooks/useCreatePage";
 
 const Create: NextPage = () => {

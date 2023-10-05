@@ -6,7 +6,7 @@ import type {
 import { useRouter } from "next/router";
 import { customAlphabet } from "nanoid";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/authOptions";
 import { useState } from "react";
 import { Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
