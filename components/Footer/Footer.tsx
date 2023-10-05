@@ -77,7 +77,7 @@ const Footer = () => {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`p-1 rounded-md transition-all hover:scale-105 focus:scale-105 hover:brightness-110 focus:brightness-110 hover:text-white focus:text-white ${item.name.toLowerCase()}`}
+              className={`p-1 rounded-md transition-all duration-300 hover:scale-105 focus:scale-105 hover:brightness-110 focus:brightness-110 hover:text-white focus:text-white ${item.name.toLowerCase()}`}
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
