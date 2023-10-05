@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",
-    "test:jest": "jest",
+    "test:jest": "jest --collectCoverage",
     "studio": "prisma studio",
     "migrate": "npx prisma migrate",
     "prettier": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
