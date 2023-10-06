@@ -1,0 +1,5 @@
+tasks:
+  - init: |
+      npm install
+      chmod +x setup.sh
+      ./setup.sh

@@ -8,6 +8,7 @@
   "rules": {
     "@typescript-eslint/consistent-type-imports": "warn",
     // We may turn this back on later
+    "@typescript-eslint/ban-ts-comment": "warn",
     "@next/next/no-img-element": "off"
   }
 }

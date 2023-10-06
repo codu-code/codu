@@ -68,7 +68,6 @@ export class StorageStack extends cdk.Stack {
       depsLockFilePath: path.join(__dirname, "/../lambdas/package-lock.json"),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
-        forceDockerBundling: true,
       },
     });
 
