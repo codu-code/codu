@@ -9,11 +9,16 @@ export const sendEmailRouter = router({
         .input(SendEmailSchema)
         .mutation(async ({input}) => {
             const { htmlMessage, subject } = input;
-            sendEmail({
-                recipient:process.env.ADMIN_EMAIL || '',
-                htmlMessage,
-                subject,
-            })
+            try {
+                await sendEmail({
+                    recipient: process.env.ADMIN_EMAIL || '',
+                    htmlMessage,
+                    subject,
+                });
+              } catch (error) {
+                console.log(`Failed to send email: ${error}`)
+                throw new Error();
+              }
     })
 })
 

@@ -35,22 +35,29 @@ const sendEmail = async (config: MailConfig) => {
   const emailSchema = z.string().email();
   const to = emailSchema.parse(recipient);
   // send some mail
-  transporter.sendMail(
-    {
-      from: "hi@codu.co",
-      to,
-      subject,
-      html: htmlMessage,
-    },
-    (err, info) => {
-      if (err) {
-        console.log("Error sending mail:", err);
-      } else {
-        console.log(info.envelope);
-        console.log(info.messageId);
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(
+      {
+        from: "hi@codu.co",
+        to,
+        subject,
+        html: htmlMessage,
+      },
+      (err, info) => {
+        if (err) {
+          console.log("Error sending mail:", err);
+          reject(`Error sending mail: ${err}`);
+        } else {
+          console.log(info.envelope);
+          console.log(info.messageId);
+          resolve({
+            envelope: info.envelope,
+            messageId: info.messageId,
+          });
+        }
       }
-    }
-  );
-};
+    );
+  });
+}
 
 export default sendEmail;
