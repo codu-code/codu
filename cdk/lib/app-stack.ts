@@ -61,6 +61,20 @@ export class AppStack extends cdk.Stack {
           S3_BUCKET_NAME: bucket.bucketName,
         }, // Plain text not for secrets
         secrets: {
+          SENTRY_ENVIRONMENT: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "sentryEnvironment",
+              { parameterName: "/env/sentry/environment", version: 1 },
+            ),
+          ),
+          SENTRY_DSN: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "sentryDsn",
+              { parameterName: "/env/sentry/dsn", version: 1 },
+            ),
+          ),
           DATABASE_URL: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromSecureStringParameterAttributes(
               this,
