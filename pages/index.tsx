@@ -167,12 +167,12 @@ const Home: NextPage = () => {
                     alt="Codú logo"
                     className={`w-[240px] sm:w-[340px] mx-auto object-contain transition duration-500 ${
                       isReady ? "opacity-100" : "opacity-0"
-                      }`}
+                    }`}
                   />
                   <h1
                     className={`drop-shadow-2xl text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8 duration-500 ${
                       isReady ? "opacity-100" : "opacity-0"
-                      }`}
+                    }`}
                   >
                     A{" "}
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
