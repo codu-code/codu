@@ -8,9 +8,9 @@ export const sendEmailRouter = router({
     send:protectedProcedure
         .input(SendEmailSchema)
         .mutation(async ({input}) => {
-            const { recipient, htmlMessage, subject } = input;
+            const { htmlMessage, subject } = input;
             sendEmail({
-                recipient,
+                recipient:process.env.ADMIN_EMAIL || '',
                 htmlMessage,
                 subject,
             })

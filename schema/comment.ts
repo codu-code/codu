@@ -25,7 +25,6 @@ export const LikeCommentSchema = z.object({
 });
 
 export const SendEmailSchema = z.object({
-  recipient: z.string().email(),
   htmlMessage: z.string(),
   subject: z.string()
 })

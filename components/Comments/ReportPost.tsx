@@ -52,9 +52,7 @@ export const ReportPost = (props:Props) => {
     }
     
     const htmlMessage = createReportEmailTemplate(reportDetails);
-
     const mailInputs = {
-      recipient: process.env.ADMIN_EMAIL || '',
       htmlMessage: htmlMessage,
       subject: 'A user has reported a comment on Codú.co',
     }
