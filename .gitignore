@@ -58,3 +58,6 @@ cdk.context.json
 ssmSetup.zsh
 # Sentry Auth Token
 .sentryclirc
+
+# Generated files
+.swc
