@@ -4,6 +4,7 @@ import { profileRouter } from "./profile";
 import { commentRouter } from "./comment";
 import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
+import { sendEmailRouter } from "./sendEmail";
 
 export const appRouter = router({
   post: postRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   comment: commentRouter,
   notification: notificationRouter,
   admin: adminRouter,
+  sendEmail: sendEmailRouter
 });
 
 // export type definition of API

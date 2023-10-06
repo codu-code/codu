@@ -4,6 +4,7 @@ import { XIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
 import { signIn, useSession } from 'next-auth/react';
 import { createReportEmailTemplate } from '../../utils/createReportEmailTemplate';
+import { trpc } from '../../utils/trpc';
 
 interface Props {
     name:string;
@@ -14,6 +15,11 @@ interface Props {
 }
 
 export const ReportPost = (props:Props) => {
+
+  const { mutate:sendEmail }  = trpc.sendEmail.send.useMutation({ 
+      onSuccess: () => { toast.success('Report sent')},
+      onError: () => {  toast.error('Oops, something went wrong, please send us a message on discord https://github.com/codu-code/codu');  }
+  })
 
   const { data:session } = useSession(); 
   const { name, body, id, email, slug } = props;
@@ -30,6 +36,7 @@ export const ReportPost = (props:Props) => {
 
   const handleSubmit = async (e:React.FormEvent) =>{
     e.preventDefault();
+    if(!session) return signIn();
 
     const reportDetails = {
         reportedById:session?.user?.id,
@@ -46,29 +53,17 @@ export const ReportPost = (props:Props) => {
     
     const htmlMessage = createReportEmailTemplate(reportDetails);
 
-    try {
-      await fetch('/api/sendEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recipient: process.env.ADMIN_EMAIL || '',
-          htmlMessage,
-          subject: 'A user has reported a comment on Codú.co',
-        }),
-      });
-      toast.success('Report sent');
-    } catch (error) {
-      console.log('Error attempting to email report', error);
-      toast.error(
-        'Oops, something went wrong, please send us a message on discord https://github.com/codu-code/codu'
-      );
+    const mailInputs = {
+      recipient: process.env.ADMIN_EMAIL || '',
+      htmlMessage: htmlMessage,
+      subject: 'A user has reported a comment on Codú.co',
     }
+
+    sendEmail(mailInputs)
 
     handleCloseModal();
     setComment('')
-  }
+  };
  
   const modalRef = useRef<HTMLDialogElement | null>(null);
 
