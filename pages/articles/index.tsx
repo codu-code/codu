@@ -11,6 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
 import SearchBar from "../../components/ArticleSearch/SearchBar";
+import { useDebounce } from "../../hooks/useDebounce";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -41,12 +42,12 @@ const ArticlesPage = () => {
     }
     return "newest";
   };
-
   const selectedSortFilter = getSortBy();
 
+  const debouncedSearchTerm = useDebounce(searchTerm);
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     trpc.post.all.useInfiniteQuery(
-      { limit: 15, sort: selectedSortFilter, tag, searchTerm },
+      { limit: 15, sort: selectedSortFilter, tag, debouncedSearchTerm },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
