@@ -13,6 +13,7 @@ import SlashCommand from "./slash-command";
 import { InputRule } from "@tiptap/core";
 import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
+import Document from "@tiptap/extension-document";
 
 const CustomImage = TiptapImage.extend({
   addProseMirrorPlugins() {
@@ -20,8 +21,14 @@ const CustomImage = TiptapImage.extend({
   },
 });
 
+const CustomDocument = Document.extend({
+  content: "heading block*",
+});
+
 export const TiptapExtensions = [
+  CustomDocument,
   StarterKit.configure({
+    document: false,
     bulletList: {
       HTMLAttributes: {
         class: "list-disc list-outside leading-3 -mt-2",
@@ -107,12 +114,12 @@ export const TiptapExtensions = [
   }),
   Placeholder.configure({
     placeholder: ({ node }) => {
-      if (node.type.name === "heading") {
-        return `Heading ${node.attrs.level}`;
+      if (node.type.name === "heading" && node.attrs.level == 1) {
+        return "Add a title to your post here!";
       }
-      return "Press '/' for commands, or '++' for AI autocomplete...";
+
+      return "type / to see a list of formatting features";
     },
-    includeChildren: true,
   }),
   SlashCommand,
   TiptapUnderline,
@@ -132,3 +139,6 @@ export const TiptapExtensions = [
     transformCopiedText: true,
   }),
 ];
+
+// const pos = editor.view.state.selection.$from.before();
+//           return pos !== 0;

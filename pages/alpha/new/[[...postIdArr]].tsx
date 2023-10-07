@@ -1,6 +1,6 @@
 import type { NextPage, GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/authOptions";
 import { Controller } from "react-hook-form";
@@ -46,9 +46,22 @@ const Create: NextPage = () => {
     saveStatus,
   } = useCreatePage({ postId });
 
+  const [editorTitle, setEditorTitle] = useState(title);
+
+  console.log(editorTitle);
+
+  // console.log(body, title)
+
   return (
     <Layout>
       <Fragment>
+        <button
+          type="button"
+          className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4 absolute top-10 right-10"
+          onClick={() => setViewPreview((current) => !current)}
+        >
+          Preview
+        </button>
         <PromptDialog
           shouldConfirmLeave={unsavedChanges}
           updateParent={handleOpenDialog}
@@ -233,35 +246,6 @@ const Create: NextPage = () => {
             <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
               {/* Left sidebar & main wrapper */}
               <div className="flex-1 min-w-0 xl:flex">
-                <div className="xl:flex-shrink-0 xl:w-64 ">
-                  <div className="h-full pl-4 pr-6 py-6 sm:pl-6 xl:pl-0  lg:px-4">
-                    {/* Start left column area */}
-                    <div className="h-full relative">
-                      <div className="bg-neutral-900 text-neutral-600 shadow-xl p-6">
-                        <h1 className="text-3xl tracking-tight font-extrabold text-white">
-                          {viewPreview ? "Previewing" : "Editing"} your post
-                        </h1>
-                        <p className="mt-1 text-neutral-400">
-                          The body of your content can be edited using markdown.
-                          Your post remains private until you
-                          &#8220;publish&#8221; the article.
-                        </p>
-                        <div className="flex">
-                          <button
-                            type="button"
-                            className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
-                            onClick={() =>
-                              setViewPreview((current) => !current)
-                            }
-                          >
-                            {viewPreview ? "Back to editing" : "View preview"}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    {/* End left column area */}
-                  </div>
-                </div>
                 <div className="lg:min-w-0 lg:flex-1">
                   <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 min-h-[40rem]">
                     {/* Start main area*/}
@@ -282,15 +266,6 @@ const Create: NextPage = () => {
                           </section>
                         ) : (
                           <div className="py-6 px-4 sm:p-6 lg:pb-8 bg-neutral-900">
-                            <input
-                              autoFocus
-                              className="border-none text-2xl leading-5 outline-none bg-neutral-900 focus:bg-black"
-                              placeholder="Article title"
-                              type="text"
-                              aria-label="Post Content"
-                              {...register("title")}
-                            />
-
                             {!body && (
                               <Controller
                                 name="body"
@@ -346,40 +321,6 @@ const Create: NextPage = () => {
                     </div>
                     {/* End main area */}
                   </div>
-                </div>
-              </div>
-              <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
-                <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
-                  {/* Start right column area */}
-                  <div className="bg-neutral-900 text-neutral-600 shadow-xl p-6">
-                    <h3 className="text-xl tracking-tight font-semibold text-white">
-                      How to use the editor
-                    </h3>
-                    <p className="mt-1 text-neutral-400">
-                      You can edit and format the main content of your article
-                      using Markdown. If you have never used Markdown, you can
-                      check out{" "}
-                      <a
-                        href="https://www.markdownguide.org/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="fancy-link"
-                      >
-                        this
-                      </a>{" "}
-                      free guide on{" "}
-                      <a
-                        href="https://www.markdownguide.org/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="fancy-link"
-                      >
-                        markdownguide
-                      </a>
-                      .
-                    </p>
-                  </div>
-                  {/* End right column area */}
                 </div>
               </div>
             </div>
