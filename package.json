@@ -15,13 +15,8 @@
     "prettier": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
     "prepare": "husky install"
   },
-  "prisma": {    "seed": "npx tsx ./prisma/seed.ts"
-  },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
-  },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+  "prisma": {
+    "seed": "npx tsx ./prisma/seed.ts"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"

@@ -58,3 +58,31 @@ cdk.context.json
 ssmSetup.zsh
 # Sentry Auth Token
 .sentryclirc
+
+# Generated files
+.swc
+
+# Env Variables
+
+
+# Prisma generated client
+/prisma/generated
+
+!jest.config.js
+*.d.ts
+node_modules
+
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+cdk.context.json
+!cdk/*/index.js
+
+# local script file for setting up ssm
+ssmSetup.zsh
+# Sentry Auth Token
+.sentryclirc
+
+# Generated files
+.swc
