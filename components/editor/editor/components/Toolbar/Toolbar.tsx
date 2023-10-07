@@ -14,7 +14,7 @@ function Toolbar() {
         <div
           className={styles.menu}
           style={{
-            transition: "max-height 0.7s ease-in-out",
+            transition: "max-height 0.2s ease-in-out",
             maxHeight: isOpen ? "100vh" : "0",
             overflow: "hidden",
           }}
