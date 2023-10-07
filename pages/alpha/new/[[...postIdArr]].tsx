@@ -46,12 +46,6 @@ const Create: NextPage = () => {
     saveStatus,
   } = useCreatePage({ postId });
 
-  const [editorTitle, setEditorTitle] = useState(title);
-
-  console.log(editorTitle);
-
-  // console.log(body, title)
-
   return (
     <Layout>
       <Fragment>
@@ -260,7 +254,6 @@ const Create: NextPage = () => {
                                 overflowWrap: "anywhere",
                               }}
                             >
-                              <h1>{title}</h1>
                               <RenderPost json={body} />
                             </article>
                           </section>
