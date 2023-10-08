@@ -21,6 +21,8 @@ import {
   AlignRightIcon,
   SubscriptIcon,
   SuperscriptIcon,
+  ImageIcon,
+  YoutubeIcon,
 } from "lucide-react";
 
 // import { NodeSelector } from "./node-selector";
@@ -372,11 +374,16 @@ function Toolbar({ editor }) {
                 }
               />
             </button>
-            <button type="button" onClick={addImage}>
-              setImage
+            <button type="button" onClick={addImage} disabled={isRootNode()}>
+              <ImageIcon color={isRootNode() ? "gray" : "white"} />
             </button>
-            <button type="button" id="add" onClick={addYoutubeVideo}>
-              Add YouTube video
+            <button
+              type="button"
+              id="add"
+              onClick={addYoutubeVideo}
+              disabled={isRootNode()}
+            >
+              <YoutubeIcon color={isRootNode() ? "gray" : "white"} />
             </button>
           </div>
         </div>
