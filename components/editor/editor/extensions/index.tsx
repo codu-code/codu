@@ -145,7 +145,7 @@ export const TiptapExtensions = [
     transformCopiedText: true,
   }),
   TextAlign.configure({
-    types: ["heading", "paragraph", "image"],
+    types: ["heading", "paragraph"],
   }),
   Subscript,
   Superscript,

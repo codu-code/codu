@@ -38,12 +38,12 @@ export interface ToolbarItem {
   icon: typeof BoldIcon;
 }
 
-function Toolbar({ editor }) {
+function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   const isRootNode = () => {
     try {
-      return editor.view.state.selection.$from.before() === 0;
+      return editor?.view.state.selection.$from.before() === 0;
     } catch (e) {
       // Handle or log the exception if necessary
       return false;
@@ -58,7 +58,7 @@ function Toolbar({ editor }) {
     const url = window.prompt("URL");
 
     if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+      editor?.chain().focus().setImage({ src: url }).run();
     }
   }, [editor]);
 

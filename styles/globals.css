@@ -145,6 +145,30 @@ body {
   margin-inline: auto;
 }
 
+/* Hide the default list markers */
+.ProseMirror ul,
+.ProseMirror ol {
+  list-style-type: none;
+}
+
+/* Create custom markers using pseudo-elements */
+.ProseMirror li p::before {
+  content: "•"; /* You can use other characters or even images */
+  margin-right: 10px;
+}
+
+/* For ordered lists */
+.ProseMirror ol li p::before {
+  counter-increment: my-awesome-counter;
+  content: counter(my-awesome-counter) ".";
+  margin-right: 10px;
+}
+
+/* Initialize the counter for ordered lists */
+.ProseMirror ol {
+  counter-reset: my-awesome-counter;
+}
+
 .token.comment,
 .token.prolog,
 .token.doctype,
