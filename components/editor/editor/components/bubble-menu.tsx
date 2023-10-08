@@ -55,6 +55,16 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       if (editor.isActive("image")) {
         return false;
       }
+
+      try {
+        if (editor.view.state.selection.$from.before() === 0) {
+          return false;
+        }
+      } catch (error) {
+        if (error instanceof RangeError) {
+          return false;
+        }
+      }
       return editor.view.state.selection.content().size > 0;
     },
     tippyOptions: {
