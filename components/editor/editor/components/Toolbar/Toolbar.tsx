@@ -4,6 +4,7 @@ import { FC, useState, ChangeEvent } from "react";
 import {
   BoldIcon,
   ItalicIcon,
+  UnderlineIcon,
   StrikethroughIcon,
   CodeIcon,
   Heading2Icon,
@@ -15,6 +16,11 @@ import {
   RectangleHorizontalIcon,
   UndoIcon,
   RedoIcon,
+  AlignLeftIcon,
+  AlignCenterIcon,
+  AlignRightIcon,
+  SubscriptIcon,
+  SuperscriptIcon,
 } from "lucide-react";
 
 // import { NodeSelector } from "./node-selector";
@@ -63,6 +69,15 @@ function Toolbar({ editor }) {
             >
               <ItalicIcon
                 color={editor.isActive("italic") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={editor.isActive("italic") ? "is-active" : ""}
+            >
+              <UnderlineIcon
+                color={editor.isActive("underline") ? "coral" : "white"}
               />
             </button>
             <button
@@ -162,6 +177,69 @@ function Toolbar({ editor }) {
               onClick={() => editor.chain().focus().redo().run()}
             >
               <RedoIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
+              // className={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
+            >
+              <AlignLeftIcon
+                color={
+                  editor.isActive({ textAlign: "left" }) ? "coral" : "white"
+                }
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                editor.chain().focus().setTextAlign("center").run()
+              }
+              // className={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}
+            >
+              <AlignCenterIcon
+                color={
+                  editor.isActive({ textAlign: "center" }) ? "coral" : "white"
+                }
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
+              // className={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}
+            >
+              <AlignRightIcon
+                color={
+                  editor.isActive({ textAlign: "right" }) ? "coral" : "white"
+                }
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (editor.isActive("superscript")) {
+                  editor.chain().focus().toggleSuperscript().run();
+                }
+                editor.chain().focus().toggleSubscript().run();
+              }}
+            >
+              <SubscriptIcon
+                color={editor.isActive("subscript") ? "coral" : "white"}
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (editor.isActive("subscript")) {
+                  editor.chain().focus().toggleSubscript().run();
+                }
+
+                editor.chain().focus().toggleSuperscript().run();
+              }}
+            >
+              <SuperscriptIcon
+                color={editor.isActive("superscript") ? "coral" : "white"}
+              />
             </button>
           </div>
         </div>

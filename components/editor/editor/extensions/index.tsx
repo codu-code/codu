@@ -14,6 +14,9 @@ import { InputRule } from "@tiptap/core";
 import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
 import Document from "@tiptap/extension-document";
+import TextAlign from "@tiptap/extension-text-align";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
 
 const CustomImage = TiptapImage.extend({
   addProseMirrorPlugins() {
@@ -138,6 +141,11 @@ export const TiptapExtensions = [
     html: false,
     transformCopiedText: true,
   }),
+  TextAlign.configure({
+    types: ["heading", "paragraph"],
+  }),
+  Subscript,
+  Superscript,
 ];
 
 // const pos = editor.view.state.selection.$from.before();
