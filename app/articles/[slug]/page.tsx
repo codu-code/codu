@@ -75,6 +75,7 @@ const ArticlePage = async ({ params }: Props) => {
   return (
     <>
       <Head>
+        {/* @TODO confirm metadata is correct and remove <Head> */}
         <title>{post.title}</title>
         {post.canonicalUrl && <link rel="canonical" href={post.canonicalUrl} />}
         <meta name="author" content={post.user.name}></meta>
