@@ -1,69 +1,61 @@
 import Moveable from "react-moveable";
+import { useEffect, useState } from "react";
 
-export const ImageResizer = ({ editor }) => {
+export const MediaResizer = ({ editor }) => {
+  const [moveableTarget, setMoveableTarget] = useState(null);
+
+  useEffect(() => {
+    const handleSelection = () => {
+      const selectedNode = document.querySelector(".ProseMirror-selectednode");
+      if (selectedNode && selectedNode.tagName === "IMG") {
+        setMoveableTarget(selectedNode);
+      } else {
+        setMoveableTarget(null);
+      }
+    };
+
+    document.addEventListener("selectionchange", handleSelection);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelection);
+    };
+  }, []);
+
   const updateMediaSize = () => {
-    const imageInfo = document.querySelector(
-      ".ProseMirror-selectednode",
-    ) as HTMLImageElement;
-    if (imageInfo) {
-      const selection = editor.state.selection;
+    const selectedNode = moveableTarget;
+    const selection = editor.state.selection;
+    if (selectedNode) {
       editor.commands.setImage({
-        src: imageInfo.src,
-        width: Number(imageInfo.style.width.replace("px", "")),
-        height: Number(imageInfo.style.height.replace("px", "")),
+        src: selectedNode.src,
+        width: Number(selectedNode.style.width.replace("px", "")),
+        height: Number(selectedNode.style.height.replace("px", "")),
       });
-      editor.commands.setNodeSelection(selection.from);
     }
+
+    editor.commands.setNodeSelection(selection.from);
   };
 
   return (
     <>
       <Moveable
-        target={document.querySelector(".ProseMirror-selectednode") as any}
+        target={moveableTarget}
         container={null}
         origin={false}
-        /* Resize event edges */
         edge={false}
         throttleDrag={0}
-        /* When resize or scale, keeps a ratio of the width, height. */
         keepRatio={true}
-        /* resizable*/
-        /* Only one of resizable, scalable, warpable can be used. */
         resizable={true}
         throttleResize={0}
-        onResize={({
-          target,
-          width,
-          height,
-          // dist,
-          delta,
-        }: // direction,
-        // clientX,
-        // clientY,
-        any) => {
-          delta[0] && (target!.style.width = `${width}px`);
-          delta[1] && (target!.style.height = `${height}px`);
+        onResize={({ target, width, height, delta }) => {
+          delta[0] && (target.style.width = `${width}px`);
+          delta[1] && (target.style.height = `${height}px`);
         }}
-        // { target, isDrag, clientX, clientY }: any
-        onResizeEnd={() => {
-          updateMediaSize();
-        }}
-        /* scalable */
-        /* Only one of resizable, scalable, warpable can be used. */
+        onResizeEnd={updateMediaSize}
         scalable={true}
         throttleScale={0}
-        /* Set the direction of resizable */
         renderDirections={["w", "e"]}
-        onScale={({
-          target,
-          // scale,
-          // dist,
-          // delta,
-          transform,
-        }: // clientX,
-        // clientY,
-        any) => {
-          target!.style.transform = transform;
+        onScale={({ target, transform }) => {
+          target.style.transform = transform;
         }}
       />
     </>
