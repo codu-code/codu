@@ -39,6 +39,10 @@ export interface ToolbarItem {
 function Toolbar({ editor }) {
   const [isOpen, setIsOpen] = useState(true);
 
+  const isRootNode = () => {
+    return editor.view.state.selection.$from.before() === 0;
+  };
+
   const handleExpand = (e: ChangeEvent<HTMLInputElement>) => {
     setIsOpen(e.target.checked);
   };
@@ -58,45 +62,85 @@ function Toolbar({ editor }) {
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
               type="button"
-              className={editor.isActive("bold") ? "is-active" : ""}
+              // className={editor.isActive("bold") ? "is-active" : ""}
+              disabled={isRootNode()}
             >
-              <BoldIcon color={editor.isActive("bold") ? "coral" : "white"} />
+              <BoldIcon
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("bold")
+                    ? "coral"
+                    : "white"
+                }
+              />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={editor.isActive("italic") ? "is-active" : ""}
             >
               <ItalicIcon
-                color={editor.isActive("italic") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("italic")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               className={editor.isActive("italic") ? "is-active" : ""}
             >
               <UnderlineIcon
-                color={editor.isActive("underline") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("underline")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleStrike().run()}
               // className={editor.isActive('strike') ? 'is-active' : ''}
             >
               <StrikethroughIcon
-                color={editor.isActive("strike") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("strike")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleCode().run()}
               // className={editor.isActive('code') ? 'is-active' : ''}
             >
-              <CodeIcon color={editor.isActive("code") ? "coral" : "white"} />
+              <CodeIcon
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("code")
+                    ? "coral"
+                    : "white"
+                }
+              />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 2 }).run()
@@ -105,11 +149,16 @@ function Toolbar({ editor }) {
             >
               <Heading2Icon
                 color={
-                  editor.isActive("heading", { level: 2 }) ? "coral" : "white"
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("heading", { level: 2 })
+                    ? "coral"
+                    : "white"
                 }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 3 }).run()
@@ -118,65 +167,106 @@ function Toolbar({ editor }) {
             >
               <Heading3Icon
                 color={
-                  editor.isActive("heading", { level: 3 }) ? "coral" : "white"
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("heading", { level: 3 })
+                    ? "coral"
+                    : "white"
                 }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               // className={editor.isActive('bulletList') ? 'is-active' : ''}
             >
               <ListIcon
-                color={editor.isActive("bulletList") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("bulletList")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
               // className={editor.isActive('orderedList') ? 'is-active' : ''}
             >
               <ListOrderedIcon
-                color={editor.isActive("orderedList") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("orderedList")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               // className={editor.isActive('codeBlock') ? 'is-active' : ''}
             >
               <SquareCodeIcon
-                color={editor.isActive("codeBlock") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("codeBlock")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
               // className={editor.isActive('blockquote') ? 'is-active' : ''}
             >
               <QuoteIcon
-                color={editor.isActive("blockquote") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("blockQuote")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
+              disabled={isRootNode()}
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
               type="button"
             >
               <RectangleHorizontalIcon
-                color={editor.isActive("setHorizontalRule") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("setHorizontalRule")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
             <button
               type="button"
               onClick={() => editor.chain().focus().undo().run()}
+              disabled={isRootNode()}
             >
-              <UndoIcon />
+              <UndoIcon color={isRootNode() ? "gray" : "white"} />
             </button>
             <button
               type="button"
               onClick={() => editor.chain().focus().redo().run()}
+              disabled={isRootNode()}
             >
-              <RedoIcon />
+              <RedoIcon color={isRootNode() ? "gray" : "white"} />
             </button>
             <button
               type="button"
@@ -214,6 +304,7 @@ function Toolbar({ editor }) {
               />
             </button>
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => {
                 if (editor.isActive("superscript")) {
@@ -223,11 +314,18 @@ function Toolbar({ editor }) {
               }}
             >
               <SubscriptIcon
-                color={editor.isActive("subscript") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("subscript")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
 
             <button
+              disabled={isRootNode()}
               type="button"
               onClick={() => {
                 if (editor.isActive("subscript")) {
@@ -238,7 +336,13 @@ function Toolbar({ editor }) {
               }}
             >
               <SuperscriptIcon
-                color={editor.isActive("superscript") ? "coral" : "white"}
+                color={
+                  isRootNode()
+                    ? "gray"
+                    : editor.isActive("superscript")
+                    ? "coral"
+                    : "white"
+                }
               />
             </button>
           </div>
