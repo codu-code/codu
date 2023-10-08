@@ -32,7 +32,7 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
         editor?.chain().focus().run();
       }}
     >
-      <Toolbar />
+      {editor && <Toolbar editor={editor} />}
       {editor && <EditorBubbleMenu editor={editor} />}
       <EditorContent editor={editor} />
     </div>

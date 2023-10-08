@@ -1,7 +1,36 @@
-import React, { useState, ChangeEvent } from "react";
 import styles from "./Toolbar.module.css";
+import { BubbleMenu, BubbleMenuProps, Editor } from "@tiptap/react";
+import { FC, useState, ChangeEvent } from "react";
+import {
+  BoldIcon,
+  ItalicIcon,
+  StrikethroughIcon,
+  CodeIcon,
+  Heading2Icon,
+  Heading3Icon,
+  ListOrderedIcon,
+  ListIcon,
+  SquareCodeIcon,
+  QuoteIcon,
+  RectangleHorizontalIcon,
+  UndoIcon,
+  RedoIcon,
+} from "lucide-react";
 
-function Toolbar() {
+// import { NodeSelector } from "./node-selector";
+// import { LinkSelector } from "./link-selector";
+import { cn } from "@/utils/utils";
+
+type ToolbarProps = Omit<BubbleMenuProps, "children">;
+
+export interface ToolbarItem {
+  name: string;
+  isActive: () => boolean;
+  command: () => void;
+  icon: typeof BoldIcon;
+}
+
+function Toolbar({ editor }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleExpand = (e: ChangeEvent<HTMLInputElement>) => {
@@ -20,9 +49,120 @@ function Toolbar() {
           }}
         >
           <div className={styles.buttons}>
-            <button>H2</button>
-            <button>H3</button>
-            <button>Bullet List</button>
+            <button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              type="button"
+              className={editor.isActive("bold") ? "is-active" : ""}
+            >
+              <BoldIcon color={editor.isActive("bold") ? "coral" : "white"} />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={editor.isActive("italic") ? "is-active" : ""}
+            >
+              <ItalicIcon
+                color={editor.isActive("italic") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              // className={editor.isActive('strike') ? 'is-active' : ''}
+            >
+              <StrikethroughIcon
+                color={editor.isActive("strike") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              // className={editor.isActive('code') ? 'is-active' : ''}
+            >
+              <CodeIcon color={editor.isActive("code") ? "coral" : "white"} />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 2 }).run()
+              }
+              // className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
+            >
+              <Heading2Icon
+                color={
+                  editor.isActive("heading", { level: 2 }) ? "coral" : "white"
+                }
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                editor.chain().focus().toggleHeading({ level: 3 }).run()
+              }
+              // className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
+            >
+              <Heading3Icon
+                color={
+                  editor.isActive("heading", { level: 3 }) ? "coral" : "white"
+                }
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              // className={editor.isActive('bulletList') ? 'is-active' : ''}
+            >
+              <ListIcon
+                color={editor.isActive("bulletList") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+              // className={editor.isActive('orderedList') ? 'is-active' : ''}
+            >
+              <ListOrderedIcon
+                color={editor.isActive("orderedList") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+              // className={editor.isActive('codeBlock') ? 'is-active' : ''}
+            >
+              <SquareCodeIcon
+                color={editor.isActive("codeBlock") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+              // className={editor.isActive('blockquote') ? 'is-active' : ''}
+            >
+              <QuoteIcon
+                color={editor.isActive("blockquote") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().setHorizontalRule().run()}
+              type="button"
+            >
+              <RectangleHorizontalIcon
+                color={editor.isActive("setHorizontalRule") ? "coral" : "white"}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().undo().run()}
+            >
+              <UndoIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().redo().run()}
+            >
+              <RedoIcon />
+            </button>
           </div>
         </div>
         <label className={styles.switch}>
