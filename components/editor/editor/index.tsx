@@ -20,7 +20,6 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
     onUpdate: (e) => {
       const { editor } = e;
       const json = editor.getJSON();
-      console.log(json);
       onChange(JSON.stringify(json));
     },
     autofocus: "end",
