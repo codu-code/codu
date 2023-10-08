@@ -1,16 +1,16 @@
 import { TRPCError } from "@trpc/server";
 import { BanUserSchema, UnbanUserSchema } from "../../../schema/admin";
 
-import { router, adminOnlyProcedure } from "../trpc";
+import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
 
-export const adminRouter = router({
+export const adminRouter = createTRPCRouter({
   ban: adminOnlyProcedure
     .input(BanUserSchema)
     .mutation(async ({ input, ctx }) => {
       const { userId, note } = input;
       const currentUserId = ctx.session.user.id;
 
-      const user = await ctx.prisma.user.findFirstOrThrow({
+      const user = await ctx.db.user.findFirstOrThrow({
         where: {
           id: userId,
         },
@@ -22,14 +22,14 @@ export const adminRouter = router({
         });
       }
 
-      await ctx.prisma.bannedUsers.create({
+      await ctx.db.bannedUsers.create({
         data: {
           userId,
           note,
           bannedById: currentUserId,
         },
       });
-      await ctx.prisma.session.deleteMany({
+      await ctx.db.session.deleteMany({
         where: {
           userId,
         },
@@ -42,7 +42,7 @@ export const adminRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { userId } = input;
 
-      await ctx.prisma.bannedUsers.deleteMany({
+      await ctx.db.bannedUsers.deleteMany({
         where: {
           userId,
         },

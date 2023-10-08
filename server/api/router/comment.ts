@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { router, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import {
   SaveCommentSchema,
   EditCommentSchema,
@@ -12,14 +12,14 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "../../../utils/notifications";
 
-export const commentRouter = router({
+export const commentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(SaveCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, postId, parentId } = input;
       const userId = ctx.session.user.id;
 
-      const postData = await ctx.prisma.post.findUnique({
+      const postData = await ctx.db.post.findUnique({
         where: {
           id: postId,
         },
@@ -30,7 +30,7 @@ export const commentRouter = router({
 
       const postOwnerId = postData?.userId;
 
-      const { id } = await ctx.prisma.comment.create({
+      const { id } = await ctx.db.comment.create({
         data: {
           userId,
           body,
@@ -40,7 +40,7 @@ export const commentRouter = router({
       });
 
       if (parentId) {
-        const commentData = await ctx.prisma.comment.findUnique({
+        const commentData = await ctx.db.comment.findUnique({
           where: {
             id: parentId,
           },
@@ -49,7 +49,7 @@ export const commentRouter = router({
           },
         });
         if (commentData?.userId && commentData?.userId !== userId) {
-          await ctx.prisma.notification.create({
+          await ctx.db.notification.create({
             data: {
               notifierId: userId,
               type: NEW_REPLY_TO_YOUR_COMMENT,
@@ -62,7 +62,7 @@ export const commentRouter = router({
       }
 
       if (!parentId && postOwnerId && postOwnerId !== userId) {
-        await ctx.prisma.notification.create({
+        await ctx.db.notification.create({
           data: {
             notifierId: userId,
             type: NEW_COMMENT_ON_YOUR_POST,
@@ -79,7 +79,7 @@ export const commentRouter = router({
     .input(EditCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, id } = input;
-      const currentComment = await ctx.prisma.comment.findFirstOrThrow({
+      const currentComment = await ctx.db.comment.findFirstOrThrow({
         where: {
           id,
         },
@@ -95,7 +95,7 @@ export const commentRouter = router({
         return currentComment;
       }
 
-      const comment = await ctx.prisma.comment.update({
+      const comment = await ctx.db.comment.update({
         where: {
           id,
         },
@@ -110,7 +110,7 @@ export const commentRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentComment = await ctx.prisma.comment.findUnique({
+      const currentComment = await ctx.db.comment.findUnique({
         where: { id },
       });
 
@@ -120,7 +120,7 @@ export const commentRouter = router({
         });
       }
 
-      const comment = await ctx.prisma.comment.delete({
+      const comment = await ctx.db.comment.delete({
         where: {
           id,
         },
@@ -134,14 +134,14 @@ export const commentRouter = router({
       const { commentId } = input;
       const userId = ctx.session.user.id;
 
-      const liked = await ctx.prisma.like.findUnique({
+      const liked = await ctx.db.like.findUnique({
         where: {
           userId_commentId: { userId, commentId },
         },
       });
 
       if (liked) {
-        const res = await ctx.prisma.like.delete({
+        const res = await ctx.db.like.delete({
           where: {
             userId_commentId: { userId, commentId },
           },
@@ -150,7 +150,7 @@ export const commentRouter = router({
         return res;
       }
 
-      const res = await ctx.prisma.like.create({
+      const res = await ctx.db.like.create({
         data: {
           commentId,
           userId,
@@ -188,13 +188,13 @@ export const commentRouter = router({
         },
       };
 
-      const count = await ctx.prisma.comment.count({
+      const count = await ctx.db.comment.count({
         where: {
           postId,
         },
       });
 
-      const response = await ctx.prisma.comment.findMany({
+      const response = await ctx.db.comment.findMany({
         where: {
           postId,
           parentId: null,

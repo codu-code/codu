@@ -1,7 +1,17 @@
+/**
+ * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
+ * 1. You want to modify request context (see Part 1).
+ * 2. You want to create a new middleware or type of procedure (see Part 3).
+ *
+ * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
+ * need to use are documented accordingly near the end.
+ */
+
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type NextRequest } from "next/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+
 import { getServerAuthSession } from "@/server/auth";
 import db from "@/server/db/client";
 
@@ -73,18 +83,31 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
   },
 });
 
-export const router = t.router;
+/**
+ * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
+ *
+ * These are the pieces you use to build your tRPC API. You should import these a lot in the
+ * "/src/server/api/routers" directory.
+ */
 
 /**
- * Unprotected procedure
- **/
+ * This is how you create new routers and sub-routers in your tRPC API.
+ *
+ * @see https://trpc.io/docs/router
+ */
+export const createTRPCRouter = t.router;
+
+/**
+ * Public (unauthenticated) procedure
+ *
+ * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
+ * guarantee that a user querying is authorized, but you can still access user session data if they
+ * are logged in.
+ */
 export const publicProcedure = t.procedure;
 
-/**
- * Reusable middleware to ensure
- * users are logged in
- */
-const isAuthed = t.middleware(({ ctx, next }) => {
+/** Reusable middleware that enforces users are logged in before running the procedure. */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
@@ -108,8 +131,5 @@ const isAdmin = t.middleware(({ ctx, next }) => {
   });
 });
 
-/**
- * Protected procedure
- **/
-export const protectedProcedure = t.procedure.use(isAuthed);
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 export const adminOnlyProcedure = t.procedure.use(isAdmin);

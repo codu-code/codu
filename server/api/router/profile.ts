@@ -7,15 +7,15 @@ import {
 
 import { getPresignedUrl } from "../../common/getPresignedUrl";
 
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 
-export const profileRouter = router({
+export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
-      const profile = await ctx.prisma.user.update({
+      const profile = await ctx.db.user.update({
         where: {
           id: ctx.session.user.id,
         },
@@ -28,7 +28,7 @@ export const profileRouter = router({
   updateProfilePhotoUrl: protectedProcedure
     .input(updateProfilePhotoUrlSchema)
     .mutation(async ({ input, ctx }) => {
-      const profile = await ctx.prisma.user.update({
+      const profile = await ctx.db.user.update({
         where: {
           id: ctx.session.user.id,
         },
@@ -68,7 +68,7 @@ export const profileRouter = router({
     }),
   get: publicProcedure.input(getProfileSchema).query(({ ctx, input }) => {
     const { username } = input;
-    return ctx.prisma.user.findUnique({
+    return ctx.db.user.findUnique({
       where: {
         username,
       },

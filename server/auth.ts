@@ -1,10 +1,10 @@
-import NextAuth, { type NextAuthOptions } from "next-auth";
+import { type NextAuthOptions, getServerSession } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { createWelcomeEmailTemplate } from "../../../utils/createEmailTemplate";
+import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
 
-import prisma from "../../../server/db/client";
-import sendEmail from "../../../utils/sendEmail";
+import prisma from "@/server/db/client";
+import sendEmail from "@/utils/sendEmail";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -58,5 +58,12 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+/**
+ * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
+ *
+ * @see https://next-auth.js.org/configuration/nextjs
+ */
+export const getServerAuthSession = () => getServerSession(authOptions);
 
 export default authOptions;

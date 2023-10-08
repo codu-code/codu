@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
 import { readingTime } from "../../../utils/readingTime";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   PublishPostSchema,
   GetSinglePostSchema,
@@ -16,13 +16,13 @@ import {
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
 
-export const postRouter = router({
+export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(CreatePostSchema)
     .mutation(async ({ input, ctx }) => {
       const { body } = input;
       const id = nanoid(8);
-      const post = await ctx.prisma.post.create({
+      const post = await ctx.db.post.create({
         data: {
           ...input,
           id,
@@ -46,7 +46,7 @@ export const postRouter = router({
         showComments,
       } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
+      const currentPost = await ctx.db.post.findUnique({
         where: { id },
       });
 
@@ -58,7 +58,7 @@ export const postRouter = router({
 
       const tagResponse = await Promise.all(
         tags.map((tag) =>
-          ctx.prisma.tag.upsert({
+          ctx.db.tag.upsert({
             where: {
               title: tag,
             },
@@ -68,7 +68,7 @@ export const postRouter = router({
         ),
       );
 
-      await ctx.prisma.postTag.deleteMany({
+      await ctx.db.postTag.deleteMany({
         where: {
           postId: id,
         },
@@ -76,7 +76,7 @@ export const postRouter = router({
 
       await Promise.all(
         tagResponse.map((tag) =>
-          ctx.prisma.postTag.create({
+          ctx.db.postTag.create({
             data: {
               tagId: tag.id,
               postId: id,
@@ -94,7 +94,7 @@ export const postRouter = router({
         return excerpt;
       };
 
-      const post = await ctx.prisma.post.update({
+      const post = await ctx.db.post.update({
         where: {
           id,
         },
@@ -115,7 +115,7 @@ export const postRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { published, id } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
+      const currentPost = await ctx.db.post.findUnique({
         where: { id },
       });
 
@@ -134,7 +134,7 @@ export const postRouter = router({
           ? excerpt
           : removeMarkdown(currentPost.body, {}).substring(0, 156);
 
-      const post = await ctx.prisma.post.update({
+      const post = await ctx.db.post.update({
         where: {
           id,
         },
@@ -153,7 +153,7 @@ export const postRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
+      const currentPost = await ctx.db.post.findUnique({
         where: { id },
       });
 
@@ -165,7 +165,7 @@ export const postRouter = router({
         });
       }
 
-      const post = await ctx.prisma.post.delete({
+      const post = await ctx.db.post.delete({
         where: {
           id,
         },
@@ -179,7 +179,7 @@ export const postRouter = router({
       const userId = ctx.session.user.id;
 
       if (setLiked) {
-        const res = await ctx.prisma.like.create({
+        const res = await ctx.db.like.create({
           data: {
             postId,
             userId,
@@ -187,7 +187,7 @@ export const postRouter = router({
         });
         return res;
       }
-      const res = await ctx.prisma.like.deleteMany({
+      const res = await ctx.db.like.deleteMany({
         where: {
           AND: [{ postId }, { userId: ctx.session?.user?.id }],
         },
@@ -200,7 +200,7 @@ export const postRouter = router({
       const { postId, setBookmarked } = input;
 
       if (setBookmarked) {
-        const res = await ctx.prisma.bookmark.create({
+        const res = await ctx.db.bookmark.create({
           data: {
             postId,
             userId: ctx.session?.user?.id,
@@ -208,7 +208,7 @@ export const postRouter = router({
         });
         return res;
       }
-      const res = await ctx.prisma.bookmark.deleteMany({
+      const res = await ctx.db.bookmark.deleteMany({
         where: {
           AND: [{ postId }, { userId: ctx.session?.user?.id }],
         },
@@ -222,18 +222,18 @@ export const postRouter = router({
 
       const [likes, currentUserLikedCount, currentUserBookmarkedCount] =
         await Promise.all([
-          ctx.prisma.like.count({
+          ctx.db.like.count({
             where: {
               postId: id,
             },
           }),
-          ctx.prisma.like.count({
+          ctx.db.like.count({
             where: {
               postId: id,
               userId: ctx.session?.user?.id,
             },
           }),
-          ctx.prisma.bookmark.count({
+          ctx.db.bookmark.count({
             where: {
               postId: id,
               userId: ctx.session?.user?.id,
@@ -268,7 +268,7 @@ export const postRouter = router({
     };
     const orderBy = orderMapping[sort] || orderMapping["newest"];
 
-    const response = await ctx.prisma.post.findMany({
+    const response = await ctx.db.post.findMany({
       take: limit + 1,
       where: {
         NOT: {
@@ -351,7 +351,7 @@ export const postRouter = router({
   }),
   randomTrending: publicProcedure.query(async ({ ctx }) => {
     const userId = ctx.session?.user?.id;
-    const response = await ctx.prisma.post.findMany({
+    const response = await ctx.db.post.findMany({
       where: {
         NOT: {
           published: null,
@@ -393,7 +393,7 @@ export const postRouter = router({
     return selected;
   }),
   myPosts: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.post.findMany({
+    return ctx.db.post.findMany({
       where: {
         NOT: [{ published: null }],
         userId: ctx?.session?.user?.id,
@@ -411,7 +411,7 @@ export const postRouter = router({
     });
   }),
   drafts: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.post.findMany({
+    return ctx.db.post.findMany({
       where: {
         published: null,
         userId: ctx.session.user.id,
@@ -426,7 +426,7 @@ export const postRouter = router({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
+      const currentPost = await ctx.db.post.findUnique({
         where: { id },
         include: {
           tags: {
@@ -452,7 +452,7 @@ export const postRouter = router({
   bySlug: publicProcedure
     .input(GetSinglePostSchema)
     .query(async ({ input, ctx }) => {
-      const post = await ctx.prisma.post.findUnique({
+      const post = await ctx.db.post.findUnique({
         where: {
           slug: input.slug,
         },
@@ -478,14 +478,12 @@ export const postRouter = router({
         },
       });
       if (!post) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
+        return null;
       }
       return post;
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
-    const response = await ctx.prisma.bookmark.findMany({
+    const response = await ctx.db.bookmark.findMany({
       where: {
         userId: ctx.session.user.id,
       },
