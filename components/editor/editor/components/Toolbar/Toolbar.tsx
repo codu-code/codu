@@ -1,6 +1,6 @@
 import styles from "./Toolbar.module.css";
 import { BubbleMenu, BubbleMenuProps, Editor } from "@tiptap/react";
-import { FC, useState, ChangeEvent } from "react";
+import { FC, useState, ChangeEvent, useCallback } from "react";
 import {
   BoldIcon,
   ItalicIcon,
@@ -40,12 +40,24 @@ function Toolbar({ editor }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const isRootNode = () => {
-    return editor.view.state.selection.$from.before() === 0;
+    return editor.view.state.selection.$from === 0;
   };
 
   const handleExpand = (e: ChangeEvent<HTMLInputElement>) => {
     setIsOpen(e.target.checked);
   };
+
+  const addImage = useCallback(() => {
+    const url = window.prompt("URL");
+
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  }, [editor]);
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div className={`${styles.sticky} bg-neutral-900`}>
@@ -344,6 +356,9 @@ function Toolbar({ editor }) {
                     : "white"
                 }
               />
+            </button>
+            <button type="button" onClick={addImage}>
+              setImage
             </button>
           </div>
         </div>

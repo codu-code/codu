@@ -33,6 +33,7 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
       }}
     >
       {editor && <Toolbar editor={editor} />}
+      {editor && <ImageResizer editor={editor} />}
       {editor && <EditorBubbleMenu editor={editor} />}
       <EditorContent editor={editor} />
     </div>

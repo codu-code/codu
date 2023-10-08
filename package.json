@@ -42,7 +42,7 @@
     "@tanstack/react-query": "^4.35.0",
     "@tiptap/extension-color": "^2.1.6",
     "@tiptap/extension-highlight": "^2.1.6",
-    "@tiptap/extension-image": "^2.1.6",
+    "@tiptap/extension-image": "^2.1.11",
     "@tiptap/extension-link": "^2.1.6",
     "@tiptap/extension-placeholder": "^2.1.6",
     "@tiptap/extension-subscript": "^2.1.11",
