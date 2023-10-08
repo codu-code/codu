@@ -8,7 +8,6 @@ import Head from "next/head";
 import { TagIcon } from "@heroicons/react/outline";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
-import Layout from "../../components/Layout/Layout";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
