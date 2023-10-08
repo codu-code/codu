@@ -12,12 +12,14 @@ import { Markdown } from "tiptap-markdown";
 import Highlight from "@tiptap/extension-highlight";
 import SlashCommand from "./slash-command";
 import { InputRule } from "@tiptap/core";
-import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
+// import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
 import Document from "@tiptap/extension-document";
 import TextAlign from "@tiptap/extension-text-align";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
+import Youtube from "@tiptap/extension-youtube";
+import UpdatedYoutube from "./update-youtube";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -147,7 +149,10 @@ export const TiptapExtensions = [
   }),
   Subscript,
   Superscript,
+  // margin controlled in global.css
+  Youtube.configure({
+    width: 480,
+    height: 320,
+    allowFullscreen: true,
+  }),
 ];
-
-// const pos = editor.view.state.selection.$from.before();
-//           return pos !== 0;

@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { TiptapEditorProps } from "./props";
 import { TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
-import { ImageResizer } from "@/components/editor/editor/components/image-resizer";
+import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
 
 interface EditorProps {
@@ -33,7 +33,7 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
       }}
     >
       {editor && <Toolbar editor={editor} />}
-      {editor && <ImageResizer editor={editor} />}
+      {editor && <MediaResizer editor={editor} />}
       {editor && <EditorBubbleMenu editor={editor} />}
       <EditorContent editor={editor} />
     </div>

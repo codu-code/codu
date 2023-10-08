@@ -141,6 +141,10 @@ body {
   min-height: 500px;
 }
 
+.ProseMirror iframe {
+  margin-inline: auto;
+}
+
 .token.comment,
 .token.prolog,
 .token.doctype,

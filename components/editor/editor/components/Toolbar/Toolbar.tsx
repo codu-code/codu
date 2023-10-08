@@ -40,7 +40,12 @@ function Toolbar({ editor }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const isRootNode = () => {
-    return editor.view.state.selection.$from === 0;
+    try {
+      return editor.view.state.selection.$from.before() === 0;
+    } catch (e) {
+      // Handle or log the exception if necessary
+      return false;
+    }
   };
 
   const handleExpand = (e: ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +63,16 @@ function Toolbar({ editor }) {
   if (!editor) {
     return null;
   }
+
+  const addYoutubeVideo = () => {
+    const url = prompt("Enter YouTube URL");
+
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+      });
+    }
+  };
 
   return (
     <div className={`${styles.sticky} bg-neutral-900`}>
@@ -359,6 +374,9 @@ function Toolbar({ editor }) {
             </button>
             <button type="button" onClick={addImage}>
               setImage
+            </button>
+            <button type="button" id="add" onClick={addYoutubeVideo}>
+              Add YouTube video
             </button>
           </div>
         </div>
