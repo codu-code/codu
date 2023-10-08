@@ -12,7 +12,6 @@ import Suggestion from "@tiptap/suggestion";
 import { ReactRenderer } from "@tiptap/react";
 import tippy from "tippy.js";
 import {
-  Heading1,
   Heading2,
   Heading3,
   List,
@@ -42,6 +41,7 @@ const Command = Extension.create({
     return {
       suggestion: {
         char: "/",
+
         command: ({
           editor,
           range,
@@ -66,7 +66,18 @@ const Command = Extension.create({
   },
 });
 
-const getSuggestionItems = ({ query }: { query: string }) => {
+const getSuggestionItems = ({
+  query,
+  editor,
+}: {
+  query: string;
+  editor: Editor;
+}) => {
+  // Check if the cursor is at the start of the document
+  const pos = editor.view.state.selection.$from.before();
+  if (pos === 0) {
+    return [];
+  }
   return [
     {
       title: "Text",
@@ -79,20 +90,6 @@ const getSuggestionItems = ({ query }: { query: string }) => {
           .focus()
           .deleteRange(range)
           .toggleNode("paragraph", "paragraph")
-          .run();
-      },
-    },
-    {
-      title: "Heading 1",
-      description: "Big section heading.",
-      searchTerms: ["title", "big", "large", "heading"],
-      icon: <Heading1 size={18} />,
-      command: ({ editor, range }: CommandProps) => {
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .setNode("heading", { level: 1 })
           .run();
       },
     },
@@ -146,27 +143,27 @@ const getSuggestionItems = ({ query }: { query: string }) => {
       command: ({ editor, range }: CommandProps) =>
         editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
     },
-    {
-      title: "Image",
-      description: "Upload an image from your computer.",
-      searchTerms: ["photo", "picture", "media"],
-      icon: <ImageIcon size={18} />,
-      command: ({ editor, range }: CommandProps) => {
-        editor.chain().focus().deleteRange(range).run();
-        // upload image
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async () => {
-          if (input.files?.length) {
-            const file = input.files[0];
-            const pos = editor.view.state.selection.from;
-            startImageUpload(file, editor.view, pos);
-          }
-        };
-        input.click();
-      },
-    },
+    // {
+    //   title: "Image",
+    //   description: "Upload an image from your computer.",
+    //   searchTerms: ["photo", "picture", "media"],
+    //   icon: <ImageIcon size={18} />,
+    //   command: ({ editor, range }: CommandProps) => {
+    //     editor.chain().focus().deleteRange(range).run();
+    //     // upload image
+    //     const input = document.createElement("input");
+    //     input.type = "file";
+    //     input.accept = "image/*";
+    //     input.onchange = async () => {
+    //       if (input.files?.length) {
+    //         const file = input.files[0];
+    //         const pos = editor.view.state.selection.from;
+    //         startImageUpload(file, editor.view, pos);
+    //       }
+    //     };
+    //     input.click();
+    //   },
+    // },
     {
       title: "Bullet List",
       description: "Create a simple bullet list.",

@@ -75,6 +75,7 @@ function useCreatePage({
     watch,
     reset,
     getValues,
+    setValue,
     control,
     trigger,
     formState: { isDirty },
@@ -87,7 +88,6 @@ function useCreatePage({
   });
 
   const { title, body } = watch();
-
   const debouncedValue = useDebounce(title + body, 1500);
 
   const { mutate: publish, status: publishStatus } =
@@ -156,11 +156,14 @@ function useCreatePage({
 
   const savePost = async () => {
     const formData = getFormData();
+    const json = JSON.parse(formData.body);
+    const titleText = json?.content?.[0]?.content?.[0]?.text || "My post";
+    const updatedFormData = { ...formData, title: titleText };
 
     if (!formData.id) {
-      create({ ...formData });
+      create({ ...updatedFormData });
     } else {
-      save({ ...formData, id: postId });
+      save({ ...updatedFormData, id: postId });
     }
     setUnsavedChanges(false);
   };

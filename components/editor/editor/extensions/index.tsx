@@ -3,6 +3,7 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TiptapLink from "@tiptap/extension-link";
 import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
+import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import TiptapUnderline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
@@ -11,17 +12,29 @@ import { Markdown } from "tiptap-markdown";
 import Highlight from "@tiptap/extension-highlight";
 import SlashCommand from "./slash-command";
 import { InputRule } from "@tiptap/core";
-import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
+// import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
+import Document from "@tiptap/extension-document";
+import TextAlign from "@tiptap/extension-text-align";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
+import Youtube from "@tiptap/extension-youtube";
+import UpdatedYoutube from "./update-youtube";
 
-const CustomImage = TiptapImage.extend({
-  addProseMirrorPlugins() {
-    return [UploadImagesPlugin()];
-  },
+// const CustomImage = TiptapImage.extend({
+//   addProseMirrorPlugins() {
+//     return [UploadImagesPlugin()];
+//   },
+// });
+
+const CustomDocument = Document.extend({
+  content: "heading block*",
 });
 
 export const TiptapExtensions = [
+  CustomDocument,
   StarterKit.configure({
+    document: false,
     bulletList: {
       HTMLAttributes: {
         class: "list-disc list-outside leading-3 -mt-2",
@@ -94,12 +107,12 @@ export const TiptapExtensions = [
         "text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer",
     },
   }),
-  CustomImage.configure({
-    allowBase64: true,
-    HTMLAttributes: {
-      class: "rounded-lg border border-stone-200",
-    },
-  }),
+  // CustomImage.configure({
+  //   allowBase64: true,
+  //   HTMLAttributes: {
+  //     class: "rounded-lg border border-stone-200",
+  //   },
+  // }),
   UpdatedImage.configure({
     HTMLAttributes: {
       class: "rounded-lg border border-stone-200",
@@ -107,12 +120,12 @@ export const TiptapExtensions = [
   }),
   Placeholder.configure({
     placeholder: ({ node }) => {
-      if (node.type.name === "heading") {
-        return `Heading ${node.attrs.level}`;
+      if (node.type.name === "heading" && node.attrs.level == 1) {
+        return "Add a title to your post here!";
       }
-      return "Press '/' for commands, or '++' for AI autocomplete...";
+
+      return "type / to see a list of formatting features";
     },
-    includeChildren: true,
   }),
   SlashCommand,
   TiptapUnderline,
@@ -130,5 +143,16 @@ export const TiptapExtensions = [
   Markdown.configure({
     html: false,
     transformCopiedText: true,
+  }),
+  TextAlign.configure({
+    types: ["heading", "paragraph"],
+  }),
+  Subscript,
+  Superscript,
+  // margin controlled in global.css
+  Youtube.configure({
+    width: 480,
+    height: 320,
+    allowFullscreen: true,
   }),
 ];
