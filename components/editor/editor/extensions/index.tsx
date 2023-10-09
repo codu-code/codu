@@ -36,7 +36,6 @@ import { programmingLanguages } from "../languages";
 // });
 
 // Unsure why the ? is required but registerLanguage undefined initially
-
 programmingLanguages.forEach(
   (lang) => lowlight?.registerLanguage(lang.name, lang),
 );
@@ -48,6 +47,13 @@ const CustomDocument = Document.extend({
 const CustomCodeBlock = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlock);
+  },
+  renderHTML({ node, HTMLAttributes }) {
+    return [
+      "pre",
+      HTMLAttributes,
+      ["code", { class: "language-javascript" }, node.textContent],
+    ];
   },
 }).configure({ lowlight });
 

@@ -1,8 +1,6 @@
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import { ChangeEvent, FunctionComponent } from "react";
 
-import { lowlight } from "lowlight";
-
 // Change this for code styling
 import "highlight.js/styles/monokai-sublime.css";
 
@@ -22,9 +20,6 @@ const CodeBlock: FunctionComponent<CodeBlockProps> = ({
   updateAttributes,
   extension,
 }) => {
-  const lowlightLanguages = lowlight?.listLanguages();
-
-  console.log(lowlightLanguages);
   return (
     <NodeViewWrapper className="code-block">
       <select

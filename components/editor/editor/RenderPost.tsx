@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import DOMPurify, { Config } from "dompurify";
 import { generateHTML } from "@tiptap/core";
 import { TiptapExtensions } from "./extensions";
+import "highlight.js/styles/monokai-sublime.css";
 
 interface RenderPostProps {
   json: string;
@@ -10,6 +11,7 @@ interface RenderPostProps {
 const config: Config = {
   ADD_TAGS: ["iframe"],
   ADD_ATTR: ["allowfullscreen", "target"],
+  ALLOWED_TAGS: ["span", "code", "pre"],
 };
 
 const RenderPost = ({ json }: RenderPostProps) => {

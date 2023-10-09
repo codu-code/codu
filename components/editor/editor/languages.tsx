@@ -5,7 +5,6 @@ import js from "highlight.js/lib/languages/javascript";
 import ts from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
 import bash from "highlight.js/lib/languages/bash";
-import node from "highlight.js/lib/languages/node-repl";
 import python from "highlight.js/lib/languages/python";
 import java from "highlight.js/lib/languages/java";
 import csharp from "highlight.js/lib/languages/csharp";
@@ -27,7 +26,6 @@ export const programmingLanguages = [
   ts,
   html,
   bash,
-  node,
   python,
   java,
   csharp,
