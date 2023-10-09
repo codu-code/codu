@@ -15,11 +15,14 @@ import { InputRule } from "@tiptap/core";
 // import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
 import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
 import TextAlign from "@tiptap/extension-text-align";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 import UpdatedYoutube from "./update-youtube";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -33,6 +36,7 @@ const CustomDocument = Document.extend({
 
 export const TiptapExtensions = [
   CustomDocument,
+
   StarterKit.configure({
     document: false,
     bulletList: {
