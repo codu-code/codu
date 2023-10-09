@@ -16,11 +16,8 @@ const config: Config = {
 const RenderPost = ({ json }: RenderPostProps) => {
   const sanitizedHTML = useMemo(() => {
     const rawHTML = generateHTML(JSON.parse(json), [...TiptapExtensions]);
-    console.log(rawHTML);
     return DOMPurify.sanitize(rawHTML, config) as string;
   }, [json]);
-
-  const rawHTML = generateHTML(JSON.parse(json), [...TiptapExtensions]);
 
   return <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
 };
