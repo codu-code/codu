@@ -27,12 +27,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 
 import { lowlight } from "lowlight";
 import CodeBlock from "../CodeBlock";
-
-import languages from "highlight.js";
-import css from "highlight.js/lib/languages/css";
-import js from "highlight.js/lib/languages/javascript";
-import ts from "highlight.js/lib/languages/typescript";
-import html from "highlight.js/lib/languages/xml";
+import { programmingLanguages } from "../languages";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -42,12 +37,9 @@ import html from "highlight.js/lib/languages/xml";
 
 // Unsure why the ? is required but registerLanguage undefined initially
 
-console.log(languages);
-
-lowlight?.registerLanguage("html", html);
-lowlight?.registerLanguage("css", css);
-lowlight?.registerLanguage("js", js);
-lowlight?.registerLanguage("ts", ts);
+programmingLanguages.forEach(
+  (lang) => lowlight?.registerLanguage(lang.name, lang),
+);
 
 const CustomDocument = Document.extend({
   content: "heading block*",
