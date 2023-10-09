@@ -23,11 +23,11 @@ import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 import UpdatedYoutube from "./update-youtube";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import { ReactNodeViewRenderer } from "@tiptap/react";
+import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
 
 import { lowlight } from "lowlight";
-import CodeBlock from "../CodeBlock";
 import { programmingLanguages } from "../languages";
+import CodeBlock from "../components/CodeBlock/CodeBlock";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -44,9 +44,17 @@ const CustomDocument = Document.extend({
   content: "heading block*",
 });
 
-const CustomCodeBlock = CodeBlockLowlight.extend({
+export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlock);
+  },
+}).configure({ lowlight });
+
+export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer((props: NodeViewProps) => (
+      <CodeBlock {...props} readOnly />
+    ));
   },
 }).configure({ lowlight });
 
@@ -54,7 +62,6 @@ export const TiptapExtensions = [
   CustomDocument,
   Paragraph,
   Text,
-  CustomCodeBlock,
   StarterKit.configure({
     document: false,
     bulletList: {
@@ -178,3 +185,8 @@ export const TiptapExtensions = [
     allowFullscreen: true,
   }),
 ];
+
+function highlightCode(code, language) {
+  const result = lowlight.highlight(language, code);
+  return `<pre><code class="hljs ${language}">${result}</code></pre>`;
+}
