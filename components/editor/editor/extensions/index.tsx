@@ -26,12 +26,24 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
 import { lowlight } from "lowlight";
+import CodeBlock from "../CodeBlock";
+
+import css from "highlight.js/lib/languages/css";
+import js from "highlight.js/lib/languages/javascript";
+import ts from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
 //     return [UploadImagesPlugin()];
 //   },
 // });
+
+// Unsure why the ? is required but registerLanguage undefined initially
+lowlight?.registerLanguage("html", html);
+lowlight?.registerLanguage("css", css);
+lowlight?.registerLanguage("js", js);
+lowlight?.registerLanguage("ts", ts);
 
 const CustomDocument = Document.extend({
   content: "heading block*",
@@ -47,7 +59,7 @@ export const TiptapExtensions = [
   CustomDocument,
   Paragraph,
   Text,
-
+  CustomCodeBlock,
   StarterKit.configure({
     document: false,
     bulletList: {
