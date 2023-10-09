@@ -69,7 +69,7 @@
     "fathom-client": "^3.5.0",
     "framer-motion": "^10.16.1",
     "highlight.js": "^11.9.0",
-    "lowlight": "^3.0.0",
+    "lowlight": "^2.4.0",
     "lucide-react": "^0.268.0",
     "nanoid": "^4.0.2",
     "next": "^13.5.4",
