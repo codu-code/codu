@@ -48,13 +48,6 @@ const CustomCodeBlock = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlock);
   },
-  renderHTML({ node, HTMLAttributes }) {
-    return [
-      "pre",
-      HTMLAttributes,
-      ["code", { class: "language-javascript" }, node.textContent],
-    ];
-  },
 }).configure({ lowlight });
 
 export const TiptapExtensions = [
