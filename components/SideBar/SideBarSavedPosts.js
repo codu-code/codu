@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function SideBarSavedPosts() {
   let { data: bookmarks, status: bookmarkStatus } = trpc.post.myBookmarks.useQuery();
 
-  const howManySavedToShow = 3;
+  const howManySavedToShow = 4;
   const totalNumberSaved = bookmarks?.length;
 
   if (bookmarks) bookmarks = bookmarks.sort(() => Math.random() - 0.5).slice(0, howManySavedToShow);
