@@ -7,7 +7,10 @@ interface RenderPostProps {
   json: string;
 }
 
-const config = { ADD_TAGS: ["iframe"], ADD_ATTR: ["allowfullscreen"] };
+const config = {
+  ADD_TAGS: ["iframe"],
+  ADD_ATTR: ["allowfullscreen", "target"],
+};
 
 const RenderPost = ({ json }: RenderPostProps) => {
   const sanitizedHTML = useMemo(() => {
