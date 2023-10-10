@@ -6,49 +6,83 @@ import {
   RowsIcon,
   Trash2Icon,
 } from "lucide-react";
-import React from "react";
+import { FunctionComponent, ReactNode } from "react";
+
+import styles from "../Toolbar/Toolbar.module.css";
+
+interface TableButtonProps {
+  disabled: boolean;
+  onClick: () => boolean | void;
+  icon: ReactNode;
+  className: string;
+  title: string;
+}
+
+const TableButton: FunctionComponent<TableButtonProps> = ({
+  onClick,
+  disabled,
+  icon,
+  className,
+  title,
+}) => {
+  return (
+    <div className={styles.buttonContainer} data-tooltip={title}>
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`relative flex w-fit h-fit text-neutral-100 cursor-pointer justify-center items-center p-1 rounded-md ${className}`}
+      >
+        {icon}
+        <div className={`${styles.tooltip} top-8`}>
+          <span className="text-sm">{title}</span>
+        </div>
+      </button>
+    </div>
+  );
+};
 
 const CustomTableNodeView = (props: NodeViewProps) => {
   const { editor } = props;
 
   return (
     <NodeViewWrapper>
-      <div className="flex">
-        <button
+      <div className="flex gap-1">
+        <TableButton
           onClick={() => editor.chain().focus().addColumnAfter().run()}
           disabled={!editor.can().addColumnAfter()}
-          className="flex w-fit h-fit bg-neutral-900 text-neutral-100 cursor-pointer hover:bg-neutral-600 justify-center items-center p-1 rounded-md"
-        >
-          <ColumnsIcon />
-        </button>
-        <button
+          className="bg-neutral-900 hover:bg-neutral-600"
+          icon={<ColumnsIcon />}
+          title="Add Column"
+        />
+        <TableButton
           onClick={() => editor.chain().focus().addRowAfter().run()}
           disabled={!editor.can().addColumnAfter()}
-          className="flex w-fit h-fit bg-neutral-900 text-neutral-100 cursor-pointer hover:bg-neutral-600 justify-center items-center p-1 rounded-md"
-        >
-          <RowsIcon />
-        </button>
-        <button
+          className="bg-neutral-900 hover:bg-neutral-600"
+          title="Add Row"
+          icon={<RowsIcon />}
+        />
+        <TableButton
           onClick={() => editor.chain().focus().deleteColumn().run()}
           disabled={!editor.can().deleteColumn()}
-          className="flex w-fit h-fit bg-red-700 text-neutral-100 cursor-pointer hover:bg-red-400 justify-center items-center p-1 rounded-md"
-        >
-          <BookmarkMinus />
-        </button>
-        <button
+          className="bg-red-700 hover:bg-red-400"
+          title="Delete Column"
+          icon={<BookmarkMinus />}
+        />
+
+        <TableButton
           onClick={() => editor.chain().focus().deleteRow().run()}
           disabled={!editor.can().deleteRow()}
-          className="flex w-fit h-fit bg-red-700 text-neutral-100 cursor-pointer hover:bg-red-400 justify-center items-center p-1 rounded-md"
-        >
-          <DeleteIcon />
-        </button>
-        <button
+          className="bg-red-700 hover:bg-red-400"
+          title="Delete Row"
+          icon={<DeleteIcon />}
+        />
+        <TableButton
           onClick={() => editor.chain().focus().deleteTable().run()}
           disabled={!editor.can().deleteTable()}
-          className="flex w-fit h-fit bg-red-700 text-neutral-100 cursor-pointer hover:bg-red-400 justify-center items-center p-1 rounded-md"
-        >
-          <Trash2Icon />
-        </button>
+          className="bg-red-700 hover:bg-red-400"
+          title="Delete Table"
+          icon={<Trash2Icon />}
+        />
       </div>
       <NodeViewContent
         className="bg-neutral-100 w-full table-fixed overflow-scroll"

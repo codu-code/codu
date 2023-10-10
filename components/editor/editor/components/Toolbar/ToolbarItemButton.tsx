@@ -26,7 +26,9 @@ const ToolBarItemButton: FunctionComponent<ToolBarItemButtonProps> = ({
         className={className}
       >
         {icon}
-        <div className={styles.tooltip}>{title}</div>
+        <div className={styles.tooltip}>
+          <span className="text-sm">{title}</span>
+        </div>
       </button>
     </div>
   );

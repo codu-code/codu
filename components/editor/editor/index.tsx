@@ -38,7 +38,7 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
       {editor && (
         <EditorBubbleMenu editor={editor} className="p-1 font-extrabold" />
       )}
-      <EditorContent editor={editor} className="bg-sky-900" />
+      <EditorContent editor={editor} />
     </div>
   );
 }
