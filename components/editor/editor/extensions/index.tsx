@@ -38,10 +38,26 @@ const CustomDocument = Document.extend({
 
 export const TiptapExtensions = [
   CustomDocument,
-  Table,
-  TableCell,
-  TableHeader,
-  TableRow,
+  Table.configure({
+    HTMLAttributes: {
+      class: "bg-neutral-100 w-full table-fixed overflow-scroll",
+    },
+  }),
+  TableRow.configure({
+    HTMLAttributes: {
+      class: "bg-neutral-900 p-1 border border-black",
+    },
+  }),
+  TableHeader.configure({
+    HTMLAttributes: {
+      class: "text-neutral-900 bg-neutral-300 p-1 border border-black",
+    },
+  }),
+  TableCell.configure({
+    HTMLAttributes: {
+      class: "text-neutral-900 bg-neutral-100 p-1 border border-black",
+    },
+  }),
   StarterKit.configure({
     document: false,
     bulletList: {

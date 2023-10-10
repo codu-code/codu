@@ -275,13 +275,6 @@ input[type="email"] {
   font-weight: inherit;
 }
 
-table {
-  display: block;
-  max-width: fit-content;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
 .prose .callout > p {
   margin: 0 !important;
 }

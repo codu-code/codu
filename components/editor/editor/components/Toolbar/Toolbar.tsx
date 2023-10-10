@@ -31,6 +31,7 @@ import {
 // import { LinkSelector } from "./link-selector";
 import { cn } from "@/utils/utils";
 import ToolBarItemButton from "./ToolbarItemButton";
+import TableMenuBar from "../Table/TableMenuBar";
 
 type ToolbarProps = Omit<BubbleMenuProps, "children">;
 
@@ -43,6 +44,7 @@ export interface ToolbarItem {
 
 function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const [isTableEditing, setIsTableEditing] = useState(false);
 
   const isRootNode = () => {
     try {
@@ -390,16 +392,32 @@ function Toolbar({ editor }: ToolbarProps) {
                 />
               }
             />
-            <ToolBarItemButton
-              title="Table"
-              isRootNode={isRootNode}
-              onClick={() => editor.chain().focus().insertTable().run()}
-              icon={
-                <TableIcon
-                  color={editor.isActive("insertTable") ? "coral" : "white"}
+            <>
+              <ToolBarItemButton
+                title="Table"
+                isRootNode={isRootNode}
+                onClick={() => {
+                  editor
+                    .chain()
+                    .focus()
+                    .insertTable({ rows: 3, cols: 3 })
+                    .run();
+                  setIsTableEditing(true);
+                }}
+                icon={
+                  <TableIcon
+                    color={editor.isActive("insertTable") ? "coral" : "white"}
+                  />
+                }
+              />
+              {isTableEditing && (
+                <TableMenuBar
+                  editor={editor}
+                  setIsTableEditing={setIsTableEditing}
                 />
-              }
-            />
+              )}
+            </>
+
             <ToolBarItemButton
               title="Image"
               isRootNode={isRootNode}
