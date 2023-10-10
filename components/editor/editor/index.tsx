@@ -10,9 +10,14 @@ import Toolbar from "./components/Toolbar/Toolbar";
 interface EditorProps {
   initialValue: string;
   onChange: (value: string) => void;
+  showToolbar: boolean;
 }
 
-export default function Editor({ onChange, initialValue }: EditorProps) {
+export default function Editor({
+  onChange,
+  initialValue,
+  showToolbar,
+}: EditorProps) {
   const editor = useEditor({
     extensions: TiptapExtensions,
     editorProps: TiptapEditorProps,
@@ -33,7 +38,7 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
         editor?.chain().focus().run();
       }}
     >
-      {editor && <Toolbar editor={editor} />}
+      {editor && showToolbar && <Toolbar editor={editor} />}
       {editor && <MediaResizer editor={editor} />}
       {editor && <EditorBubbleMenu editor={editor} />}
       <EditorContent editor={editor} />

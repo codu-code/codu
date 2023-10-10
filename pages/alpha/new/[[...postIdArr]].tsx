@@ -264,7 +264,11 @@ const Create: NextPage = () => {
                                 name="body"
                                 control={control}
                                 render={({ field }) => (
-                                  <Editor {...field} initialValue={"{}"} />
+                                  <Editor
+                                    {...field}
+                                    initialValue={"{}"}
+                                    showToolbar={!open}
+                                  />
                                 )}
                               />
                             )}
@@ -273,7 +277,11 @@ const Create: NextPage = () => {
                                 name="body"
                                 control={control}
                                 render={({ field }) => (
-                                  <Editor {...field} initialValue={body} />
+                                  <Editor
+                                    {...field}
+                                    initialValue={body}
+                                    showToolbar={!open}
+                                  />
                                 )}
                               />
                             )}
