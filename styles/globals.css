@@ -279,6 +279,15 @@ input[type="email"] {
   margin: 0 !important;
 }
 
+/* Fix custom table layout */
+
+table div {
+  display: flex;
+  flex-direction: column;
+  background: blue;
+  width: 100%;
+}
+
 /* Loading animation */
 .loader-dots div {
   animation-timing-function: cubic-bezier(0, 1, 1, 0);

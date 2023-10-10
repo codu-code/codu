@@ -27,6 +27,7 @@ import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
 import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
 import CustomTableRowNodeView from "../components/Table/CustomTableRow";
+import CustomTableHeaderNodeView from "../components/Table/CustomTableNodeView";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -38,38 +39,48 @@ const CustomDocument = Document.extend({
   content: "heading block*",
 });
 
-export const CustomTableRow = TableRow.extend({
+// export const CustomTableRow = TableRow.extend({
+//   addNodeView() {
+//     return ReactNodeViewRenderer((props: NodeViewProps) => (
+//       <CustomTableRowNodeView {...props} />
+//     ));
+//   },
+// }).configure({
+//   HTMLAttributes: {
+//     class: "bg-neutral-900 p-1 border border-black",
+//   },
+// });
+
+export const CustomTable = Table.extend({
   addNodeView() {
     return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CustomTableRowNodeView {...props} />
+      <CustomTableHeaderNodeView {...props} />
     ));
   },
-}).configure({
-  HTMLAttributes: {
-    class: "bg-neutral-900 p-1 border border-black",
-  },
 });
-
 export const TiptapExtensions = [
   CustomDocument,
-  Table.configure({
-    HTMLAttributes: {
-      class: "bg-neutral-100 w-full table-fixed overflow-scroll",
-    },
-  }),
+  CustomTable,
+  // Table.configure({
+  //   HTMLAttributes: {
+  //     class: "bg-neutral-100 w-full  overflow-scroll",
+  //   },
+  // }),
   TableRow.configure({
     HTMLAttributes: {
-      class: "bg-neutral-900 p-1 border border-black",
+      class: "bg-neutral-900 border border-neutral-500 bg-red-500 flex-1 flex",
     },
   }),
   TableHeader.configure({
     HTMLAttributes: {
-      class: "text-neutral-900 bg-neutral-300 p-1 border border-black",
+      class:
+        "text-neutral-900 bg-neutral-300 border border-neutral-500 flex-1 flex text-center p-1",
     },
   }),
   TableCell.configure({
     HTMLAttributes: {
-      class: "text-neutral-900 bg-neutral-100 p-1 border border-black",
+      class:
+        "text-neutral-900 bg-neutral-100 border border-neutral-500 flex-1 flex p-1",
     },
   }),
   StarterKit.configure({

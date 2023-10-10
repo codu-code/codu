@@ -410,14 +410,7 @@ function Toolbar({ editor }: ToolbarProps) {
                   />
                 }
               />
-              {isTableEditing && (
-                <TableMenuBar
-                  editor={editor}
-                  setIsTableEditing={setIsTableEditing}
-                />
-              )}
             </>
-
             <ToolBarItemButton
               title="Image"
               isRootNode={isRootNode}

@@ -1,30 +1,21 @@
-import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
-import { Node } from "prosemirror-model";
+import { NodeViewContent, NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import React from "react";
 
 const CustomTableRowNodeView = (props: NodeViewProps) => {
-  const { node } = props;
+  const { editor } = props;
 
-  const handleDeleteRow = () => {
-    // Implement logic to delete the row here
-    // You can access the node and view to perform the deletion
-  };
-
-  const handleAddRow = () => {
-    // Implement logic to add another row here
-    // You can access the node and view to perform the addition
-  };
+  const handleAddRow = () => {};
 
   return (
-    <NodeViewWrapper>
-      {/* Render your custom buttons here */}
-      <button onClick={handleDeleteRow}>Delete Row</button>
+    <NodeViewWrapper className="bg-neutral-900 p-1 border border-black">
+      <button
+        onClick={() => editor.chain().focus().deleteRow().run()}
+        disabled={!editor.can().deleteTable()}
+      >
+        Delete Row
+      </button>
       <button onClick={handleAddRow}>Add Row</button>
-      {node.content.map((cell, index) => (
-        <div key={index} className="your-cell-class">
-          {view.component(cell)}
-        </div>
-      ))}
+      <NodeViewContent className="content" as="table"></NodeViewContent>
     </NodeViewWrapper>
   );
 };
