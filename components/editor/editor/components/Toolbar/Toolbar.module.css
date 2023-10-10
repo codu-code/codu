@@ -81,7 +81,7 @@ input:checked + .slider::before {
   transition:
     opacity 0.2s ease-in-out,
     transform 0.3s ease-in-out;
-  transition-delay: 0.5s;
+  transition-delay: 0.75s;
   pointer-events: none;
   z-index: 1000;
 }

@@ -24,6 +24,7 @@ import {
   SuperscriptIcon,
   ImageIcon,
   YoutubeIcon,
+  TableIcon,
 } from "lucide-react";
 
 // import { NodeSelector } from "./node-selector";
@@ -299,7 +300,6 @@ function Toolbar({ editor }: ToolbarProps) {
               onClick={() => editor.chain().focus().undo().run()}
               icon={<UndoIcon color={isRootNode() ? "gray" : "white"} />}
             />
-
             <ToolBarItemButton
               title="Redo"
               isRootNode={isRootNode}
@@ -387,6 +387,16 @@ function Toolbar({ editor }: ToolbarProps) {
                       ? "coral"
                       : "white"
                   }
+                />
+              }
+            />
+            <ToolBarItemButton
+              title="Table"
+              isRootNode={isRootNode}
+              onClick={() => editor.chain().focus().insertTable().run()}
+              icon={
+                <TableIcon
+                  color={editor.isActive("insertTable") ? "coral" : "white"}
                 />
               }
             />

@@ -21,6 +21,11 @@ import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 import UpdatedYoutube from "./update-youtube";
 
+import Table from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
+
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
 //     return [UploadImagesPlugin()];
@@ -33,6 +38,10 @@ const CustomDocument = Document.extend({
 
 export const TiptapExtensions = [
   CustomDocument,
+  Table,
+  TableCell,
+  TableHeader,
+  TableRow,
   StarterKit.configure({
     document: false,
     bulletList: {
