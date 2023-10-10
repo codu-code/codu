@@ -25,6 +25,8 @@ import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
+import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
+import CustomTableRowNodeView from "../components/Table/CustomTableRow";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -34,6 +36,18 @@ import TableRow from "@tiptap/extension-table-row";
 
 const CustomDocument = Document.extend({
   content: "heading block*",
+});
+
+export const CustomTableRow = TableRow.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer((props: NodeViewProps) => (
+      <CustomTableRowNodeView {...props} />
+    ));
+  },
+}).configure({
+  HTMLAttributes: {
+    class: "bg-neutral-900 p-1 border border-black",
+  },
 });
 
 export const TiptapExtensions = [
