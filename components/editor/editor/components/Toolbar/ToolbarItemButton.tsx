@@ -4,7 +4,7 @@ import styles from "./Toolbar.module.css";
 
 interface ToolBarItemButtonProps {
   isRootNode: () => boolean;
-  children: ReactNode;
+  icon: ReactNode;
   title: string;
   onClick: () => boolean | void;
   className?: string;
@@ -13,20 +13,19 @@ interface ToolBarItemButtonProps {
 const ToolBarItemButton: FunctionComponent<ToolBarItemButtonProps> = ({
   title,
   isRootNode,
-  children,
+  icon,
   onClick,
   className,
 }) => {
   return (
     <div className={styles.buttonContainer} data-tooltip={title}>
       <button
-        disabled
         onClick={onClick}
         type="button"
         disabled={isRootNode()}
         className={className}
       >
-        {children}
+        {icon}
         <div className={styles.tooltip}>{title}</div>
       </button>
     </div>

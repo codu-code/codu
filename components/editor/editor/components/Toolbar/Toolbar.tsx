@@ -94,240 +94,257 @@ function Toolbar({ editor }: ToolbarProps) {
               title="Bold"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleBold().run()}
-            >
-              <BoldIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("bold")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <BoldIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("bold")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Italic"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleItalic().run()}
-            >
-              <ItalicIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("italic")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <ItalicIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("italic")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Underline"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-            >
-              <UnderlineIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("underline")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <UnderlineIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("underline")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Strikeline"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleStrike().run()}
-            >
-              <StrikethroughIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("strike")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <StrikethroughIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("strike")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Code"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleCode().run()}
-            >
-              <CodeIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("code")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <CodeIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("code")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
+
             <ToolBarItemButton
               title="H2"
               isRootNode={isRootNode}
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 2 }).run()
               }
-            >
-              <Heading2Icon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("heading", { level: 2 })
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <Heading2Icon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("heading", { level: 2 })
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
+
             <ToolBarItemButton
               title="H3"
               isRootNode={isRootNode}
               onClick={() =>
                 editor.chain().focus().toggleHeading({ level: 3 }).run()
               }
-            >
-              <Heading3Icon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("heading", { level: 3 })
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <Heading3Icon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("heading", { level: 3 })
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
+
             <ToolBarItemButton
               title="List"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-            >
-              <ListIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("bulletList")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <ListIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("bulletList")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
 
             <ToolBarItemButton
               title="Ordered List"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            >
-              <ListOrderedIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("orderedList")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <ListOrderedIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("orderedList")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
 
             <ToolBarItemButton
               title="Code Block"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            >
-              <SquareCodeIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("codeBlock")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <SquareCodeIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("codeBlock")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
+
             <ToolBarItemButton
               title="Block Quote"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            >
-              <QuoteIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("blockQuote")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <QuoteIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("blockQuote")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
 
             <ToolBarItemButton
               title="Horizontal"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            >
-              <RectangleHorizontalIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("setHorizontalRule")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <RectangleHorizontalIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("setHorizontalRule")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Undo"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().undo().run()}
-            >
-              <UndoIcon color={isRootNode() ? "gray" : "white"} />
-            </ToolBarItemButton>
+              icon={<UndoIcon color={isRootNode() ? "gray" : "white"} />}
+            />
 
             <ToolBarItemButton
               title="Redo"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().redo().run()}
-            >
-              <RedoIcon color={isRootNode() ? "gray" : "white"} />
-            </ToolBarItemButton>
+              icon={<RedoIcon color={isRootNode() ? "gray" : "white"} />}
+            />
 
             <ToolBarItemButton
               title="Left"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
-            >
-              <AlignLeftIcon
-                color={
-                  editor.isActive({ textAlign: "left" }) ? "coral" : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <AlignLeftIcon
+                  color={
+                    editor.isActive({ textAlign: "left" }) ? "coral" : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Center"
               isRootNode={isRootNode}
               onClick={() =>
                 editor.chain().focus().setTextAlign("center").run()
               }
-            >
-              <AlignCenterIcon
-                color={
-                  editor.isActive({ textAlign: "center" }) ? "coral" : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <AlignCenterIcon
+                  color={
+                    editor.isActive({ textAlign: "center" }) ? "coral" : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Right"
               isRootNode={isRootNode}
               onClick={() => editor.chain().focus().setTextAlign("right").run()}
-            >
-              <AlignRightIcon
-                color={
-                  editor.isActive({ textAlign: "right" }) ? "coral" : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <AlignRightIcon
+                  color={
+                    editor.isActive({ textAlign: "right" }) ? "coral" : "white"
+                  }
+                />
+              }
+            />
 
             <ToolBarItemButton
               title="Subscript"
@@ -338,20 +355,21 @@ function Toolbar({ editor }: ToolbarProps) {
                 }
                 editor.chain().focus().toggleSubscript().run();
               }}
-            >
-              <SubscriptIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("subscript")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <SubscriptIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("subscript")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
 
             <ToolBarItemButton
-              title="Subscript"
+              title="Superscript"
               isRootNode={isRootNode}
               onClick={() => {
                 if (editor.isActive("subscript")) {
@@ -360,31 +378,30 @@ function Toolbar({ editor }: ToolbarProps) {
 
                 editor.chain().focus().toggleSuperscript().run();
               }}
-            >
-              <SuperscriptIcon
-                color={
-                  isRootNode()
-                    ? "gray"
-                    : editor.isActive("superscript")
-                    ? "coral"
-                    : "white"
-                }
-              />
-            </ToolBarItemButton>
+              icon={
+                <SuperscriptIcon
+                  color={
+                    isRootNode()
+                      ? "gray"
+                      : editor.isActive("superscript")
+                      ? "coral"
+                      : "white"
+                  }
+                />
+              }
+            />
             <ToolBarItemButton
               title="Image"
               isRootNode={isRootNode}
               onClick={addImage}
-            >
-              <ImageIcon color={isRootNode() ? "gray" : "white"} />
-            </ToolBarItemButton>
+              icon={<ImageIcon color={isRootNode() ? "gray" : "white"} />}
+            />
             <ToolBarItemButton
               title="Youtube"
               isRootNode={isRootNode}
               onClick={addYoutubeVideo}
-            >
-              <YoutubeIcon color={isRootNode() ? "gray" : "white"} />
-            </ToolBarItemButton>
+              icon={<YoutubeIcon color={isRootNode() ? "gray" : "white"} />}
+            />
           </div>
         </div>
         <label className={styles.switch}>
