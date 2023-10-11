@@ -10,7 +10,6 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "../../utils/notifications";
 import Head from "next/head";
-import Layout from "../../components/Layout/Layout";
 import PageHeading from "../../components/PageHeading/PageHeading";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";

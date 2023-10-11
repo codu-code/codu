@@ -8,6 +8,7 @@ import Footer from "@/components/Footer/Footer";
 import Nav from "@/components/Nav/Nav";
 import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
+// @TODO layout app in way that doesn't need to use client session check
 
 export const metadata = {
   title: "Codú - The Web Developer Community",
@@ -32,7 +33,7 @@ export default async function RootLayout({
     <html lang="en" className="h-full">
       {/* <ProgressBar />  Needs to be fixed */}
       <Fathom />
-      <body className="h-full">
+      <body className="h-full" suppressHydrationWarning={true}>
         <AuthProvider>
           <ThemeProvider>
             <TRPCReactProvider headers={headers()}>

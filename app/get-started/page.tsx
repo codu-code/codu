@@ -1,13 +1,18 @@
+"use client";
+
+// TODO cleanup and add metadata
+
 import type { NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn, getProviders } from "next-auth/react";
-import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 import { LockClosedIcon } from "@heroicons/react/solid";
 
 const GetStarted: NextPage = () => {
-  const { callbackUrl } = useRouter().query;
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl");
 
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
@@ -78,10 +83,3 @@ const GetStarted: NextPage = () => {
 };
 
 export default GetStarted;
-
-export async function getServerSideProps() {
-  const providers = await getProviders();
-  return {
-    props: { providers },
-  };
-}

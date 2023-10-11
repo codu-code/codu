@@ -1,34 +1,46 @@
-import type {
-  NextPage,
-  InferGetServerSidePropsType,
-  GetServerSidePropsContext,
-} from "next";
 import React from "react";
 import Link from "next/link";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../app/api/auth/authOptions";
-import prisma from "../server/db/client";
+
 import Layout from "../components/Layout/Layout";
 import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
 import Head from "next/head";
 import { LinkIcon } from "@heroicons/react/outline";
-import { useSession } from "next-auth/react";
-import { trpc } from "../utils/trpc";
+import { api } from "@/server/trpc/react";
 import { useRouter } from "next/router";
+import { Session } from "next-auth";
 
-const Profile: NextPage = ({
-  profile,
-  isOwner,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+type Props = {
+  session: Session | null;
+  isOwner: boolean;
+  profile: {
+    posts: {
+      published: string | undefined;
+      title: string;
+      excerpt: string;
+      slug: string;
+      readTimeMins: number;
+      id: string;
+    }[];
+    accountLocked: boolean;
+    id: string;
+    username: string | null;
+    name: string;
+    image: string;
+    bio: string;
+    websiteUrl: string;
+  };
+};
+
+const Profile = ({ profile, isOwner, session }: Props) => {
   const router = useRouter();
-  const { data: session } = useSession();
-  const { mutate: banUser } = trpc.admin.ban.useMutation({
+
+  const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
       router.reload();
     },
   });
 
-  const { mutate: unbanUser } = trpc.admin.unban.useMutation({
+  const { mutate: unbanUser } = api.admin.unban.useMutation({
     onSettled() {
       router.reload();
     },
@@ -157,7 +169,7 @@ const Profile: NextPage = ({
           )}
         </div>
       </Layout>
-      {session && session.user.role === "ADMIN" && (
+      {session?.user?.role === "ADMIN" && (
         <div className="border-t-2 text-center pb-8">
           <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
           {accountLocked ? (
@@ -193,99 +205,6 @@ const Profile: NextPage = ({
       )}
     </>
   );
-};
-
-export const getServerSideProps = async (
-  context: GetServerSidePropsContext<{ username: string }>,
-) => {
-  const username = context.params?.username;
-
-  if (!username) {
-    return {
-      redirect: {
-        destination: "/404",
-        permanent: false,
-      },
-      props: {},
-    };
-  }
-
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  const profile = await prisma.user.findUnique({
-    where: {
-      username,
-    },
-    select: {
-      bio: true,
-      username: true,
-      name: true,
-      image: true,
-      id: true,
-      websiteUrl: true,
-      posts: {
-        where: {
-          NOT: {
-            published: null,
-          },
-        },
-        orderBy: {
-          published: "desc",
-        },
-        select: {
-          title: true,
-          excerpt: true,
-          slug: true,
-          readTimeMins: true,
-          published: true,
-          id: true,
-        },
-      },
-      BannedUsers: {
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
-
-  if (!profile) {
-    return {
-      redirect: {
-        destination: "/404",
-        permanent: false,
-      },
-      props: {},
-    };
-  }
-
-  const accountLocked = !!profile.BannedUsers;
-
-  type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
-    Partial<Type>;
-
-  type Profile = typeof profile;
-  const cleanedProfile: MakeOptional<Profile, "BannedUsers"> = {
-    ...profile,
-  };
-
-  delete cleanedProfile.BannedUsers;
-
-  return {
-    props: {
-      profile: {
-        ...cleanedProfile,
-        posts: accountLocked
-          ? []
-          : profile.posts.map((post) => ({
-              ...post,
-              published: post.published?.toISOString(),
-            })),
-        accountLocked,
-      },
-      isOwner: session?.user?.username === username,
-    },
-  };
 };
 
 export default Profile;
