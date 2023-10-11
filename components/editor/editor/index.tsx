@@ -2,10 +2,11 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import { TiptapEditorProps } from "./props";
-import { TiptapExtensions } from "./extensions";
+import { CustomTableRow, TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
+import TableMenuBar from "./components/Table/TableMenuBar";
 
 interface EditorProps {
   initialValue: string;
@@ -20,7 +21,6 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
     onUpdate: (e) => {
       const { editor } = e;
       const json = editor.getJSON();
-      console.log(json);
       onChange(JSON.stringify(json));
     },
     autofocus: "end",
@@ -35,7 +35,9 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
     >
       {editor && <Toolbar editor={editor} />}
       {editor && <MediaResizer editor={editor} />}
-      {editor && <EditorBubbleMenu editor={editor} />}
+      {editor && (
+        <EditorBubbleMenu editor={editor} className="p-1 font-extrabold" />
+      )}
       <EditorContent editor={editor} />
     </div>
   );
