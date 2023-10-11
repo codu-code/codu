@@ -128,7 +128,7 @@ const MyPosts: NextPage = ({
             </button>
           </div>
         </Modal>
-        <div className="relative sm:mx-auto max-w-2xl mx-4">
+        <div className="relative sm:mx-auto max-w-2xl mx-4 bg-neutral-100 dark:bg-black">
           <div className="border-b border-neutral-200 mt-8 mb-4">
             <div className="sm:hidden">
               <label htmlFor="tabs" className="sr-only">
@@ -158,8 +158,8 @@ const MyPosts: NextPage = ({
                   <Link
                     className={classNames(
                       tab.current
-                        ? "bg-neutral-100 text-neutral-700"
-                        : "text-neutral-200 hover:text-neutral-400",
+                        ? "bg-black dark:bg-neutral-100 text-neutral-200 dark:text-neutral-700"
+                        : "text-neutral-700 dark:text-neutral-200 hover:text-neutral-400",
                       "px-4 py-2 font-medium text-base rounded-t-md",
                     )}
                     aria-current={tab.current ? "page" : undefined}
@@ -186,7 +186,10 @@ const MyPosts: NextPage = ({
             {selectedTabData.status === "success" &&
               selectedTabData.data?.map(
                 ({ id, title, excerpt, readTimeMins, slug }) => (
-                  <article className="border-2 p-4 mb-4 bg-black" key={id}>
+                  <article
+                    className="border-2 p-4 mb-4 bg-white dark:bg-black border-neutral-100"
+                    key={id}
+                  >
                     {tab === "published" ? (
                       <Link href={`articles/${slug}`}>
                         <h2 className="text-2xl font-semibold mb-2 hover:underline">
