@@ -21,6 +21,17 @@ import {
   TextQuote,
   Image as ImageIcon,
   Code,
+  YoutubeIcon,
+  BoldIcon,
+  RectangleHorizontalIcon,
+  ItalicIcon,
+  UnderlineIcon,
+  StrikethroughIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  AlignCenterIcon,
+  SubscriptIcon,
+  SuperscriptIcon,
 } from "lucide-react";
 import { startImageUpload } from "@/components/editor/editor/plugins/upload-images";
 
@@ -189,6 +200,137 @@ const getSuggestionItems = ({
       command: ({ editor, range }: CommandProps) => {
         editor.chain().focus().deleteRange(range).run();
         window.open("https://github.com/codu-code/codu/issues", "_blank");
+      },
+    },
+    {
+      title: "Image",
+      description: "Add an image.",
+      searchTerms: ["image", "img", "picture"],
+      icon: <ImageIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        const url = window.prompt("URL");
+        if (url) {
+          editor
+            .chain()
+            .focus()
+            .deleteRange(range)
+            .setImage({ src: url })
+            .run();
+        }
+      },
+    },
+    {
+      title: "Video",
+      description: "Add a video.",
+      searchTerms: ["video", "youtube"],
+      icon: <YoutubeIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        const url = window.prompt("Enter YouTube URL");
+        if (url) {
+          editor
+            .chain()
+            .focus()
+            .deleteRange(range)
+            .setYoutubeVideo({ src: url })
+            .run();
+        }
+      },
+    },
+    {
+      title: "Horizontal line",
+      description: "Create a horizontal line.",
+      searchTerms: ["horizontal", "line", "divider", "separator"],
+      icon: <RectangleHorizontalIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).setHorizontalRule().run();
+      },
+    },
+    {
+      title: "Bold",
+      description: "Bolden the text.",
+      searchTerms: ["bold", "emphasise", "highlight"],
+      icon: <BoldIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).toggleBold().run();
+      },
+    },
+    {
+      title: "Italic",
+      description: "Italicise the text.",
+      searchTerms: ["italic", "emphasise", "cursive"],
+      icon: <ItalicIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).toggleItalic().run();
+      },
+    },
+    {
+      title: "Underline",
+      description: "Underline the text.",
+      searchTerms: ["underline", "emphasise"],
+      icon: <UnderlineIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).toggleUnderline().run();
+      },
+    },
+    {
+      title: "Strikeline",
+      description: "Strikeline through text.",
+      searchTerms: ["strikeline"],
+      icon: <StrikethroughIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).toggleStrike().run();
+      },
+    },
+    {
+      title: "Left align",
+      description: "Left align the text.",
+      searchTerms: ["left", "align"],
+      icon: <AlignLeftIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).setTextAlign("left").run();
+      },
+    },
+    {
+      title: "Center align",
+      description: "Center align the text.",
+      searchTerms: ["center", "align"],
+      icon: <AlignCenterIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).setTextAlign("center").run();
+      },
+    },
+    {
+      title: "Right align",
+      description: "Right align the text.",
+      searchTerms: ["right", "align"],
+      icon: <AlignRightIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        editor.chain().focus().deleteRange(range).setTextAlign("right").run();
+      },
+    },
+    {
+      title: "Subscript",
+      description: "Add subscript to text.",
+      searchTerms: ["subscript"],
+      icon: <SubscriptIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        if (editor.isActive("superscript")) {
+          editor.chain().focus().toggleSuperscript().run();
+        }
+
+        editor.chain().focus().deleteRange(range).toggleSubscript().run();
+      },
+    },
+    {
+      title: "Superscript",
+      description: "Add superscript to text.",
+      searchTerms: ["superscript"],
+      icon: <SuperscriptIcon size={18} />,
+      command: ({ editor, range }: CommandProps) => {
+        if (editor.isActive("subscript")) {
+          editor.chain().focus().toggleSubscript().run();
+        }
+        editor.chain().focus().deleteRange(range).toggleSuperscript().run();
       },
     },
   ].filter((item) => {
