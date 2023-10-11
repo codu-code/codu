@@ -1,47 +1,68 @@
 import { trpc } from "@/utils/trpc";
-import { Children } from "react";
+import React, { Children } from "react";
 
 import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
 
-export default function SideBarSavedPosts() {
-  let { data: bookmarks, status: bookmarkStatus } = trpc.post.myBookmarks.useQuery();
+export default React.memo(function SideBarSavedPosts() {
+  let { data: bookmarks, status: bookmarkStatus } =
+    trpc.post.myBookmarks.useQuery();
 
   const howManySavedToShow = 4;
   const totalNumberSaved = bookmarks?.length;
 
-  if (bookmarks) bookmarks = bookmarks.sort(() => Math.random() - 0.5).slice(0, howManySavedToShow);
+  if (bookmarks)
+    bookmarks = bookmarks
+      .sort(() => Math.random() - 0.5)
+      .slice(0, howManySavedToShow);
 
   return (
     <div className="overflow-hidden w-full">
-      <h3 className="text-2xl leading-6 font-semibold tracking-wide mb-4 mt-8">Saved posts</h3>
+      <h3 className="text-2xl leading-6 font-semibold tracking-wide mb-4 mt-8">
+        Saved posts
+      </h3>
       <div className="w-full">
         {bookmarkStatus === "loading" &&
           Children.toArray(
             Array.from({ length: howManySavedToShow }, () => {
               return <LoadingSkeleton />;
-            })
+            }),
           )}
-        {bookmarkStatus === "error" && <p className="font-medium py-4">Something went wrong fetching your saved posts... Refresh the page.</p>}
+        {bookmarkStatus === "error" && (
+          <p className="font-medium py-4">
+            Something went wrong fetching your saved posts... Refresh the page.
+          </p>
+        )}
 
         {bookmarks &&
           bookmarkStatus === "success" &&
-          bookmarks.map(({ id, slug, title, user: { name, image, username }, updatedAt, readTimeMins }) => {
-            return (
-              <SideBarSavedArticlePreview
-                key={id}
-                username={username || ""}
-                slug={slug}
-                title={title}
-                name={name}
-                image={image}
-                date={updatedAt.toISOString()}
-                readTime={readTimeMins}
-              />
-            );
-          })}
+          bookmarks.map(
+            ({
+              id,
+              slug,
+              title,
+              user: { name, image, username },
+              updatedAt,
+              readTimeMins,
+            }) => {
+              return (
+                <SideBarSavedArticlePreview
+                  key={id}
+                  username={username || ""}
+                  slug={slug}
+                  title={title}
+                  name={name}
+                  image={image}
+                  date={updatedAt.toISOString()}
+                  readTime={readTimeMins}
+                />
+              );
+            },
+          )}
         {bookmarkStatus === "success" && bookmarks?.length === 0 && (
-          <p className="font-medium py-4">Saved posts will be displayed in this section for easy access.</p>
+          <p className="font-medium py-4">
+            Saved posts will be displayed in this section for easy access.
+          </p>
         )}
       </div>
       {totalNumberSaved && totalNumberSaved > howManySavedToShow && (
@@ -51,7 +72,7 @@ export default function SideBarSavedPosts() {
       )}
     </div>
   );
-}
+});
 
 function LoadingSkeleton() {
   return (
