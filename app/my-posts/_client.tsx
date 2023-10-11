@@ -151,6 +151,7 @@ const MyPosts = () => {
                     tab.current
                       ? "bg-black dark:bg-neutral-100 text-neutral-200 dark:text-neutral-700"
                       : "text-neutral-700 dark:text-neutral-200 hover:text-neutral-400",
+                    "px-4 py-2 font-medium text-base rounded-t-md",
                   )}
                   aria-current={tab.current ? "page" : undefined}
                   key={tab.name}
