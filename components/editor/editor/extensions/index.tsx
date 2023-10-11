@@ -21,6 +21,13 @@ import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 import UpdatedYoutube from "./update-youtube";
 
+import Table from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
+import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
+import CustomTableNodeView from "../components/Table/CustomTableNodeView";
+
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
 //     return [UploadImagesPlugin()];
@@ -31,8 +38,38 @@ const CustomDocument = Document.extend({
   content: "heading block*",
 });
 
+export const CustomTable = Table.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer((props: NodeViewProps) => (
+      <CustomTableNodeView {...props} />
+    ));
+  },
+});
 export const TiptapExtensions = [
   CustomDocument,
+  CustomTable,
+  // Table.configure({
+  //   HTMLAttributes: {
+  //     class: "bg-neutral-100 w-full  overflow-scroll",
+  //   },
+  // }),
+  TableRow.configure({
+    HTMLAttributes: {
+      class: "bg-neutral-900 border border-neutral-500 bg-red-500 flex-1 flex",
+    },
+  }),
+  TableHeader.configure({
+    HTMLAttributes: {
+      class:
+        "text-neutral-900 bg-neutral-300 border border-neutral-500 flex-1 flex text-center p-1",
+    },
+  }),
+  TableCell.configure({
+    HTMLAttributes: {
+      class:
+        "text-neutral-900 bg-neutral-100 border border-neutral-500 flex-1 flex p-1",
+    },
+  }),
   StarterKit.configure({
     document: false,
     bulletList: {
