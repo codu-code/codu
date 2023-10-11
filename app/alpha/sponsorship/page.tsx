@@ -1,17 +1,17 @@
-import type { NextPage } from "next";
+"use client";
 
-import Layout from "../../../components/Layout/Layout";
+import Layout from "@/components/Layout/Layout";
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 import Head from "next/head";
 import { useEffect } from "react";
 
-import pic1 from "../../../public/images/sponsors/pic1.png";
-import pic2 from "../../../public/images/sponsors/pic2.png";
-import pic3 from "../../../public/images/sponsors/pic3.png";
-import pic4 from "../../../public/images/sponsors/pic4.png";
-import pic5 from "../../../public/images/sponsors/pic5.png";
+import pic1 from "@/public/images/sponsors/pic1.png";
+import pic2 from "@/public/images/sponsors/pic2.png";
+import pic3 from "@/public/images/sponsors/pic3.png";
+import pic4 from "@/public/images/sponsors/pic4.png";
+import pic5 from "@/public/images/sponsors/pic5.png";
 
 interface Image {
   rotate: number;
@@ -47,7 +47,7 @@ const images: Image[] = [
   },
 ];
 
-const Sponsorship: NextPage = () => {
+const Sponsorship = () => {
   useEffect(() => {
     function handleScroll() {
       document.body.style.setProperty("--scroll", String(window.scrollY));

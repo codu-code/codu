@@ -1,5 +1,6 @@
+"use client";
+
 import Image from "next/image";
-import { Children } from "react";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 import Link from "next/link";

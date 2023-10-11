@@ -1,5 +1,8 @@
+"use client";
+// @TODO make sure post is saved before publishing (should be fine but let's disable the button if it's not up to date)
+
 import { ZodError } from "zod";
-import { useRouter } from "next/router";
+
 import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -7,8 +10,9 @@ import toast from "react-hot-toast";
 import type { SavePostInput } from "../schema/post";
 import { ConfirmPostSchema } from "../schema/post";
 
-import { trpc } from "../utils/trpc";
+import { api } from "@/server/trpc/react";
 import { useDebounce } from "./useDebounce";
+import { redirect } from "next/navigation";
 
 export type useCreatePageReturnType = {
   viewPreview: boolean;
@@ -65,9 +69,6 @@ function useCreatePage({
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
   const allowUpdate = unsavedChanges && !delayDebounce;
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const router = useRouter();
 
   const {
     handleSubmit,
@@ -75,7 +76,6 @@ function useCreatePage({
     watch,
     reset,
     getValues,
-    setValue,
     control,
     trigger,
     formState: { isDirty },
@@ -90,10 +90,13 @@ function useCreatePage({
   const { title, body } = watch();
   const debouncedValue = useDebounce(title + body, 1500);
 
-  const { mutate: publish, status: publishStatus } =
-    trpc.post.publish.useMutation();
+  const {
+    mutate: publish,
+    status: publishStatus,
+    data: publishData,
+  } = api.post.publish.useMutation();
 
-  const { mutate: save, status: saveStatus } = trpc.post.update.useMutation({
+  const { mutate: save, status: saveStatus } = api.post.update.useMutation({
     onError() {
       // TODO: Add error messages from field validations
       return toast.error("Something went wrong auto-saving");
@@ -110,7 +113,7 @@ function useCreatePage({
       );
     },
   });
-  const { mutate: create, data: createData } = trpc.post.create.useMutation({
+  const { mutate: create, data: createData } = api.post.create.useMutation({
     onError() {
       toast.error("Something went wrong creating draft");
     },
@@ -122,7 +125,7 @@ function useCreatePage({
 
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
-  const { data, status: dataStatus } = trpc.post.editDraft.useQuery(
+  const { data, status: dataStatus } = api.post.editDraft.useQuery(
     { id: postId },
     {
       onError() {
@@ -180,18 +183,7 @@ function useCreatePage({
       try {
         const formData = getFormData();
         ConfirmPostSchema.parse(formData);
-        await savePost();
-        return await publish(
-          { id: postId, published: !published },
-          {
-            onSuccess(response) {
-              response?.slug && router.push(`/articles/${response.slug}`);
-            },
-            onError() {
-              toast.error("Something went wrong publishing, please try again.");
-            },
-          },
-        );
+        return publish({ id: postId, published: !published });
       } catch (err) {
         if (err instanceof ZodError) {
           return toast.error(err.issues[0].message);
@@ -202,6 +194,10 @@ function useCreatePage({
     }
     await savePost();
   };
+
+  if (publishStatus === "success" && publishData?.slug) {
+    redirect(`/articles/${publishData.slug}`);
+  }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -246,7 +242,7 @@ function useCreatePage({
 
   useEffect(() => {
     if (!createData?.id) return;
-    router.push(createData.id);
+    redirect(`/alpha/new/${createData.id}`);
   }, [createData]);
 
   const hasContent = title.length >= 5 && body.length >= 10;

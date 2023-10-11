@@ -6,6 +6,8 @@ import prisma from "../../server/db/client";
 
 // @TODO - Maybe add Metadata for this page
 
+// @TODO - Loading state for this page
+
 export default async function Page() {
   const session = await getServerAuthSession();
 
