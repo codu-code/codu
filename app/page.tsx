@@ -1,13 +1,16 @@
 import Image from "next/image";
 import { Children } from "react";
 import Head from "next/head";
-
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import challenge from "public/images/announcements/challenge.png";
 import Hero from "@/components/Hero/Hero";
 import TrendingPostsHome from "@/components/TrendingPostsHome/TrendingPostsHome";
+import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 
 const Home = () => {
+  const { data: session } = useSession();
+
   const tagsToShow = [
     "JavaScript",
     "Web Development",
@@ -146,6 +149,11 @@ const Home = () => {
                   </Link>
                 ))}
               </div>
+              {session && (
+                <div className="flex gap-2 flex-wrap">
+                  <SideBarSavedPosts />
+                </div>
+              )}
             </section>
           </div>
         </div>
