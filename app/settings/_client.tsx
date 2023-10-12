@@ -7,8 +7,6 @@ import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
 import toast, { Toaster } from "react-hot-toast";
-
-import Layout from "../../components/Layout/Layout";
 import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";
 
