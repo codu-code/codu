@@ -55,8 +55,6 @@ export const LinkSelector: FC<LinkSelectorProps> = ({
       url = "https://" + url;
     }
 
-    console.log(url);
-
     // update link
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }, [editor]);

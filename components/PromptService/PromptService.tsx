@@ -29,6 +29,7 @@ export const PromptDialog = ({
       if (!shouldConfirmLeave) {
         return;
       }
+      console.log({ nextPath });
       updateParent("initial");
       setshowPromptDialog(true);
       setNextRouterPath(nextPath);

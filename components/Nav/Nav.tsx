@@ -1,21 +1,22 @@
+"use client";
+
 import { signOut, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
-import { useSession } from "next-auth/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { PlusSmIcon, BellIcon } from "@heroicons/react/solid";
 import { navigation } from "../../config/site_settings";
-import { trpc } from "../../utils/trpc";
+import { api } from "@/server/trpc/react";
+import { getServerAuthSession } from "@/server/auth";
 import ThemeToggle from "../Theme/ThemeToggle";
 import MobileNav from "./MobileNav";
 import ThemeToggleMobile from "../Theme/ThemeToggleMobile";
 import AnimatedHamburger from "./AnimatedHamburger";
+import { Session } from "next-auth";
 
-const Nav = () => {
-  const { data: session } = useSession();
-
-  const { data: count } = trpc.notification.getCount.useQuery(undefined, {
+const Nav = ({ session }: { session: Session | null }) => {
+  const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: session ? true : false,
   });
 

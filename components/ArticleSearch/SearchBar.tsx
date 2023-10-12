@@ -6,8 +6,6 @@ interface Props {
 const SearchBar = (props: Props) => {
   const { searchTerm, setSearchTerm } = props;
 
-  console.log(searchTerm);
-
   return (
     <div className="flex grow justify-end">
       <label htmlFor="searchInput" aria-label="Enter search term"></label>
