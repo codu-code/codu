@@ -45,16 +45,16 @@ module.exports = withBundleAnalyzer({
 
 // Injected content via Sentry wizard below
 
-// const { withSentryConfig } = require("@sentry/nextjs");
+const { withSentryConfig } = require("@sentry/nextjs");
 
-// module.exports = withSentryConfig(
-//   module.exports,
-//   {
-//     silent: true,
-//     org: "codu",
-//     project: "codu",
-//   },
-//   {
-//     hideSourceMaps: true,
-//   },
-// );
+module.exports = withSentryConfig(
+  module.exports,
+  {
+    silent: true,
+    org: "codu",
+    project: "codu",
+  },
+  {
+    hideSourceMaps: true,
+  },
+);
