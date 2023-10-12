@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { DotsHorizontalIcon } from "@heroicons/react/solid";
@@ -5,7 +7,6 @@ import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
 import { Fragment, useState } from "react";
-import { trpc } from "../../utils/trpc";
 import { markdocComponents } from "../../markdoc/components";
 import { config } from "../../markdoc/config";
 import Markdoc from "@markdoc/markdoc";
@@ -15,6 +16,7 @@ import { HeartIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 import { EditCommentSchema } from "../../schema/comment";
+import { api } from "@/server/trpc/react";
 
 const SaveSchema = z.object({
   body: z
@@ -58,18 +60,18 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
     data: commentsResponse,
     refetch,
     status: commentStatus,
-  } = trpc.comment.get.useQuery({
+  } = api.comment.get.useQuery({
     postId,
   });
   const { mutate, status: createCommentStatus } =
-    trpc.comment.create.useMutation({
+    api.comment.create.useMutation({
       onSuccess: () => {
         refetch();
         setShowCommentBoxId(null);
       },
     });
 
-  const { mutate: like, status: likeStatus } = trpc.comment.like.useMutation({
+  const { mutate: like, status: likeStatus } = api.comment.like.useMutation({
     onSettled() {
       refetch();
     },
@@ -88,13 +90,13 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   const comments = commentsResponse?.data;
 
   const { mutate: editComment, status: editStatus } =
-    trpc.comment.edit.useMutation({
+    api.comment.edit.useMutation({
       onSuccess: () => {
         refetch();
       },
     });
 
-  const { mutate: deleteComment } = trpc.comment.delete.useMutation({
+  const { mutate: deleteComment } = api.comment.delete.useMutation({
     onSuccess: () => {
       refetch();
     },

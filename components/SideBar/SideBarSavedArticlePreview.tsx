@@ -13,15 +13,14 @@ type Props = {
 };
 
 const SideBarSavedArticlePreview: NextPage<Props> = ({
-    title,
-    slug,
-    date,
-    readTime,
-    name,
-    image,
-    username,
-  }) => {
-
+  title,
+  slug,
+  date,
+  readTime,
+  name,
+  image,
+  username,
+}) => {
   const dateTime = Temporal.Instant.from(date);
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
@@ -31,13 +30,14 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
 
   return (
     <article className="h-32 p-4 my-4 shadow-lg bg-white dark:bg-neutral-900 flex flex-col">
-       <header className="grow flex items-center">
+      <header className="grow flex items-center">
         <Link
           className="text-base leading-6 font-semibold tracking-wide cursor-pointer hover:underline"
-          href={`/articles/${slug}`}>
+          href={`/articles/${slug}`}
+        >
           {title}
         </Link>
-      </header>   
+      </header>
       <div className="flex items-center grow">
         <span className="sr-only">{name}</span>
         <Link href={`/${username}`}>

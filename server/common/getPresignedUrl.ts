@@ -49,6 +49,7 @@ export const getPresignedUrl = async (
     ContentLength: fileSize,
   });
 
+  // @FIX TS ERROR
   const putUrl = await getSignedUrl(s3Client, putCommand, {
     expiresIn: 3600,
   });
