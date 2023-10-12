@@ -1,10 +1,9 @@
 import React from "react";
 import prisma from "@/server/db/client";
 
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Content from "./_usernameClient";
 import { getServerAuthSession } from "@/server/auth";
-import { customAlphabet } from "nanoid";
 
 // @TODO - Maybe add Metadata for this page
 
