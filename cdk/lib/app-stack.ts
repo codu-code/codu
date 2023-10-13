@@ -57,6 +57,7 @@ export class AppStack extends cdk.Stack {
         image: ecs.ContainerImage.fromDockerImageAsset(appAsset),
         environment: {
           BASE_URL: `https://${wwwDomainName}`,
+          DOMAIN_NAME: wwwDomainName,
           NEXTAUTH_URL: `https://${wwwDomainName}`,
           S3_BUCKET_NAME: bucket.bucketName,
         }, // Plain text not for secrets
