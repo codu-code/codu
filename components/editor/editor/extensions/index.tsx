@@ -30,7 +30,6 @@ import TableRow from "@tiptap/extension-table-row";
 import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
 import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
 
 import { lowlight } from "lowlight";
 import { programmingLanguages } from "../languages";
@@ -50,20 +49,6 @@ programmingLanguages.forEach(
 const CustomDocument = Document.extend({
   content: "heading block*",
 });
-
-export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer(CodeBlock);
-  },
-}).configure({ lowlight });
-
-export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CodeBlock {...props} readOnly />
-    ));
-  },
-}).configure({ lowlight });
 
 export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
   addNodeView() {

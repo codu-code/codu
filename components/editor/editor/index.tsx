@@ -2,15 +2,10 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import { TiptapEditorProps } from "./props";
-import {
-  CustomCodeBlockEdit,
-  CustomTableRow,
-  TiptapExtensions,
-} from "./extensions";
+import { CustomCodeBlockEdit, TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
-import TableMenuBar from "./components/Table/TableMenuBar";
 
 interface EditorProps {
   initialValue: string;
