@@ -55,7 +55,7 @@ export const CustomCodeBlock = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlock);
   },
-  renderHTML({ HTMLAttributes, node, ...other }) {
+  renderHTML({ HTMLAttributes, node }) {
     const codeContent = node.textContent;
     const language = node.attrs.language || "plaintext";
 
