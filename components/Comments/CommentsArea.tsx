@@ -17,6 +17,7 @@ import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 import { EditCommentSchema } from "../../schema/comment";
 import { api } from "@/server/trpc/react";
+import { ReportComments } from "./ReportComments";
 
 const SaveSchema = z.object({
   body: z
@@ -36,9 +37,10 @@ export type SaveInput = {
 interface Props {
   postId: string;
   postOwnerId: string;
+  slug: string;
 }
 
-const CommentsArea = ({ postId, postOwnerId }: Props) => {
+const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<number | null>(null);
   const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
   const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
@@ -177,7 +179,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         id,
         youLikedThis,
         likeCount,
-        user: { name, image, username, id: userId },
+        user: { name, image, username, id: userId, email },
         children,
       }) => {
         const ast = Markdoc.parse(body);
@@ -314,6 +316,13 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
+                    <ReportComments
+                      name={name}
+                      body={body}
+                      id={id}
+                      email={email}
+                      slug={slug}
+                    />
                     {depth < 6 && (
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"
