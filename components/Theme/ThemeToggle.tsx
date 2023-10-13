@@ -30,7 +30,7 @@ const ThemeToggle = () => {
         <Menu.Items className="origin-top-right top-7 absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
           <Menu.Item
             as="button"
-            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm font-medium outline-none hover:hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700 text-black w-full px-4 py-2"
+            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm font-medium outline-none hover:hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-black w-full px-4 py-2"
             onClick={() => setTheme("light")}
           >
             <SunIcon className="mr-2 h-4 w-4" />
@@ -38,7 +38,7 @@ const ThemeToggle = () => {
           </Menu.Item>
           <Menu.Item
             as="button"
-            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm px-4 py-2 font-medium outline-none w-full hover:hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-slate-700 text-black"
+            className="relative flex cursor-default text-base md:text-sm select-none items-center rounded-sm px-4 py-2 font-medium outline-none w-full hover:hover:bg-neutral-200   focus:hover:bg-neutral-200  data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-black"
             onClick={() => setTheme("dark")}
           >
             <MoonIcon className="mr-2 h-4 w-4" />
