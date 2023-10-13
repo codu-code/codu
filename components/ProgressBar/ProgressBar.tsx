@@ -1,13 +1,38 @@
+"use client";
+
+//@TODO fix this!
+
 import { useNProgress } from "@tanem/react-nprogress";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-interface Props {
-  isAnimating: boolean;
-}
+const ProgressBar = () => {
+  const router = useRouter();
 
-const ProgressBar = ({ isAnimating }: Props) => {
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+
   const { animationDuration, isFinished, progress } = useNProgress({
     isAnimating,
   });
+
+  useEffect(() => {
+    function onRouteChangeStart() {
+      setIsAnimating(true);
+    }
+
+    function onRouteChangeComplete() {
+      setIsAnimating(false);
+    }
+
+    router.events.on("routeChangeStart", onRouteChangeStart);
+    router.events.on("routeChangeComplete", onRouteChangeComplete);
+
+    // Unassign event listener
+    return () => {
+      router.events.off("routeChangeComplete", onRouteChangeComplete);
+      router.events.off("routeChangeStart", onRouteChangeStart);
+    };
+  }, [router]);
 
   return (
     <div

@@ -1,11 +1,14 @@
+"use client";
+
 import type { NextPage } from "next";
 import { Fragment, useState } from "react";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 import { BookmarkIcon, DotsHorizontalIcon } from "@heroicons/react/outline";
 import { Menu, Transition } from "@headlessui/react";
-import { trpc } from "../../utils/trpc";
+import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
+import { type Session } from "next-auth";
 
 type ButtonOptions = {
   label: string;
@@ -54,7 +57,7 @@ const ArticlePreview: NextPage<Props> = ({
   });
 
   const { mutate: bookmark, status: bookmarkStatus } =
-    trpc.post.bookmark.useMutation({
+    api.post.bookmark.useMutation({
       onSettled() {
         setIsBookmarked((isBookmarked) => !isBookmarked);
       },

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import copy from "copy-to-clipboard";
 import Prism from "prismjs";

@@ -1,6 +1,6 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "../../utils/s3helpers";
+import { s3Client } from "@/utils/s3helpers";
 
 export const getPresignedUrl = async (
   userId: string,
@@ -19,6 +19,7 @@ export const getPresignedUrl = async (
     ContentLength: fileSize,
   });
 
+  // @FIX TS ERROR
   const putUrl = await getSignedUrl(s3Client, putCommand, {
     expiresIn: 3600,
   });
