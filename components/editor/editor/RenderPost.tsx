@@ -1,22 +1,25 @@
-import React from "react";
-import { TiptapExtensions } from "./extensions";
+import React, { useMemo } from "react";
+import DOMPurify from "dompurify";
+import { generateHTML } from "@tiptap/core";
+import { CustomCodeBlock, TiptapExtensions } from "./extensions";
 import "highlight.js/styles/monokai-sublime.css";
-import { EditorContent, useEditor } from "@tiptap/react";
 
 interface RenderPostProps {
   json: string;
 }
 
+const config = { ADD_TAGS: ["iframe"], ADD_ATTR: ["allowfullscreen"] };
+
 const RenderPost = ({ json }: RenderPostProps) => {
-  const content = JSON.parse(json);
+  const sanitizedHTML = useMemo(() => {
+    const rawHTML = generateHTML(JSON.parse(json), [
+      ...TiptapExtensions,
+      CustomCodeBlock,
+    ]);
+    return DOMPurify.sanitize(rawHTML, config);
+  }, [json]);
 
-  const editor = useEditor({
-    editable: false,
-    extensions: [...TiptapExtensions, CustomCodeBlockReadOnly],
-    content,
-  });
-
-  return <EditorContent editor={editor} />;
+  return <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
 };
 
 export default RenderPost;

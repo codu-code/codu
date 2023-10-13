@@ -34,6 +34,7 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { lowlight } from "lowlight";
 import { programmingLanguages } from "../languages";
 import CodeBlock from "../components/CodeBlock/CodeBlock";
+import hljs from "highlight.js";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
