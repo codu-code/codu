@@ -1,10 +1,10 @@
 import { api } from "@/server/trpc/react";
-import { Children } from "react";
+import React, { Children } from "react";
 
 import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
 
-export default function SideBarSavedPosts() {
+export default React.memo(function SideBarSavedPosts() {
   // @TODO query the backend to get the last 4
   let { data: bookmarks } = api.post.myBookmarks.useQuery();
   const { status: bookmarkStatus } = api.post.myBookmarks.useQuery();
@@ -73,7 +73,7 @@ export default function SideBarSavedPosts() {
       )}
     </div>
   );
-}
+});
 
 function LoadingSkeleton() {
   return (

@@ -15,6 +15,8 @@ import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
 import SearchBar from "../../components/ArticleSearch/SearchBar";
 import { api } from "@/server/trpc/react";
+import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
+import { useSession } from "next-auth/react";
 
 // Needs to be added to DB but testing with hardcoding
 const tagsToShow = [
@@ -32,7 +34,7 @@ const tagsToShow = [
 const ArticlesPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-
+  const session = useSession();
   const filter = searchParams?.get("filter");
   const dirtyTag = searchParams?.get("tag");
 
@@ -222,6 +224,11 @@ const ArticlesPage = () => {
                 </Link>
               ))}
             </div>
+            {session && (
+              <div className="flex gap-2 flex-wrap">
+                <SideBarSavedPosts />
+              </div>
+            )}
           </section>
         </div>
       </div>
