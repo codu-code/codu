@@ -27,10 +27,7 @@ const Home = () => {
     <>
       <div>
         <Hero />
-        <section
-          className="bg-white border border-neutral-300 dark:bg-neutral-300 px-2"
-          id="cta"
-        >
+        <section className="bg-white dark:bg-neutral-300 px-2" id="cta">
           <div className="mx-auto lg:max-w-5xl sm:max-w-2xl py-20 sm:py-32">
             <h2 className="text-2xl md:text-left text-center font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl max-w-[660px]">
               <span className="font-extrabold">Sign up today</span> to become a
@@ -61,7 +58,7 @@ const Home = () => {
         <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">
           <TrendingPostsHome />
           <section className="col-span-5 lg:block hidden">
-            <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-100 dark:border-neutral-600 bg-white dark:bg-neutral-900">
+            <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
                   className="w-full"
