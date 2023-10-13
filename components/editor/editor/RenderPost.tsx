@@ -1,5 +1,5 @@
 import React from "react";
-import { CustomCodeBlockReadOnly, TiptapExtensions } from "./extensions";
+import { TiptapExtensions } from "./extensions";
 import "highlight.js/styles/monokai-sublime.css";
 import { EditorContent, useEditor } from "@tiptap/react";
 

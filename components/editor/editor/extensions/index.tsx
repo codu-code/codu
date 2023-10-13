@@ -50,19 +50,28 @@ const CustomDocument = Document.extend({
   content: "heading block*",
 });
 
-export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
+export const CustomCodeBlock = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer(CodeBlock);
   },
-}).configure({ lowlight });
+  renderHTML({ HTMLAttributes, node, ...other }) {
+    const codeContent = node.textContent;
+    const language = node.attrs.language || "plaintext";
 
-export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CodeBlock {...props} readOnly />
-    ));
+    const highlightedCode = hljs.highlight(language, codeContent, true);
+
+    // Could not find solution other that manually manipulating the DOM with JS
+    const codeElement = document.createElement("code");
+    codeElement.innerHTML = highlightedCode.value;
+
+    const preElement = document.createElement("pre");
+    preElement.appendChild(codeElement);
+
+    return preElement;
   },
-}).configure({ lowlight });
+}).configure({
+  lowlight,
+});
 
 export const CustomTable = Table.extend({
   addNodeView() {
@@ -74,6 +83,7 @@ export const CustomTable = Table.extend({
 export const TiptapExtensions = [
   CustomDocument,
   CustomTable,
+  CustomCodeBlock,
   // Table.configure({
   //   HTMLAttributes: {
   //     class: "bg-neutral-100 w-full  overflow-scroll",
