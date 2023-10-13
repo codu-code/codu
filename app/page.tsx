@@ -88,7 +88,7 @@ const Home = () => {
                 <Link
                   key={tag}
                   href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-200 dark:border-neutral-600"
+                  className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-300 dark:border-neutral-600"
                 >
                   {tag}
                 </Link>
