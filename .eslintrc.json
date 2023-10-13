@@ -8,7 +8,7 @@
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended",
     "prettier",
-    "plugin:testing-linbrary/react",
+    "plugin:testing-library/react",
     "plugin:jest-dom/recommended"
   ],
   "rules": {

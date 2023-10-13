@@ -6,8 +6,8 @@ import Link from "next/link";
 
 export default function SideBarSavedPosts() {
   // @TODO query the backend to get the last 4
-  let { data: bookmarks, status: bookmarkStatus } =
-    api.post.myBookmarks.useQuery();
+  let { data: bookmarks } = api.post.myBookmarks.useQuery();
+  const { status: bookmarkStatus } = api.post.myBookmarks.useQuery();
 
   const howManySavedToShow = 4;
   const totalNumberSaved = bookmarks?.length;
