@@ -4,8 +4,8 @@ import PageHeading from "./PageHeading";
 
 describe("Page Header", () => {
   it("renders the ui with the correct heading value", () => {
-    const { getByText } = render(<PageHeading>Hello Codu</PageHeading>);
+    render(<PageHeading>Hello Codu</PageHeading>);
 
-    expect(getByText("Hello Codu")).toBeInTheDocument();
+    expect(screen.getByText("Hello Codu")).toBeInTheDocument();
   });
 });
