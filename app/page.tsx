@@ -27,7 +27,10 @@ const Home = () => {
     <>
       <div>
         <Hero />
-        <section className="bg-white dark:bg-neutral-300 px-2" id="cta">
+        <section
+          className="bg-white border border-neutral-300 dark:bg-neutral-300 px-2"
+          id="cta"
+        >
           <div className="mx-auto lg:max-w-5xl sm:max-w-2xl py-20 sm:py-32">
             <h2 className="text-2xl md:text-left text-center font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl max-w-[660px]">
               <span className="font-extrabold">Sign up today</span> to become a
