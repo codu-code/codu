@@ -12,6 +12,7 @@ const config = { ADD_TAGS: ["iframe"], ADD_ATTR: ["allowfullscreen"] };
 
 const RenderPost = ({ json }: RenderPostProps) => {
   const sanitizedHTML = useMemo(() => {
+    if (!json) return;
     const rawHTML = generateHTML(JSON.parse(json), [
       ...TiptapExtensions,
       CustomCodeBlock,
