@@ -10,7 +10,12 @@ module.exports = withBundleAnalyzer({
       test: /\.svg$/,
       use: ["@svgr/webpack"],
     });
-    return config;
+    return {
+      ...config,
+      optimization: {
+        minimize: false,
+      },
+    };
   },
   images: {
     domains: [
