@@ -1,5 +1,3 @@
-import type { NextPage } from "next";
-
 // @TODO metadata
 
 const Sponsorship = () => {

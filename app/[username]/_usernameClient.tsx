@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import Link from "next/link";
-import Layout from "../components/Layout/Layout";
-import ArticlePreview from "../components/ArticlePreview/ArticlePreview";
-import Head from "next/head";
+import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import { LinkIcon } from "@heroicons/react/outline";
 import { api } from "@/server/trpc/react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { Tabs } from "@/components/Tabs";
 import EventPreview from "@/components/EventPreview/EventPreview";
 import CommunityPreview from "@/components/CommunityPreview/CommunityPreview";
-import { Session } from "next-auth";
+import type { Session } from "next-auth";
 
 type Props = {
   session: Session | null;
@@ -67,7 +65,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
-      router.reload();
+      router.refresh();
     },
   });
 
@@ -75,7 +73,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   const { mutate: unbanUser } = api.admin.unban.useMutation({
     onSettled() {
-      router.reload();
+      router.refresh();
     },
   });
 
@@ -130,27 +128,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   return (
     <>
-      <Head>
-        <title>{`${name} - Codú`}</title>
-        <meta name="description" content={`${name}'s profile on Codú`} />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="manifest" href="site.webmanifest" />
-        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#000000" />
-        <link rel="shortcut icon" href="favicon.ico" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-config" content="browserconfig.xml" />
-        <meta name="theme-color" content="#000" />
-        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
-        <meta
-          name="image"
-          property="og:image"
-          content={`/api/og?title=${encodeURIComponent(
-            `${name} - Codú Profile`,
-          )}`}
-        />
-        <meta property="og:type" content="website" />
-      </Head>
-      <Layout>
         <div className="max-w-2xl px-4 mx-auto text-900 dark:text-white">
           <main className="flex pt-6">
             <div className="mr-4 flex-shrink-0 self-center">
@@ -301,7 +278,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
             }
           })()}
         </div>
-      </Layout>
       {session?.user?.role === "ADMIN" && (
         <div className="border-t-2 text-center pb-8">
           <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>

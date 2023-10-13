@@ -9,7 +9,6 @@ import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
-import Layout from "../../../components/Layout/Layout";
 // @TODO fix PromptDialog
 // import { PromptDialog } from "../../../components/PromptService/PromptService";
 import { api } from "@/server/trpc/react";
