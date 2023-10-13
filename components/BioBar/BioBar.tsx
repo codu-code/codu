@@ -29,7 +29,7 @@ const BioFooter = ({ author }: Props) => {
             <h4 className="text-lg md:text-xl font-bold text-neutral-200">
               Written by{" "}
               <Link
-                className="underline font-bold text-white"
+                className="underline font-bold neutral-900"
                 href={`/${username}`}
               >
                 {name}
