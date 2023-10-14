@@ -424,7 +424,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
           <TextareaAutosize
             {...register(name)}
             minLength={1}
-            className="p-2 w-full mb-2 bg-black rounded"
+            className="p-2 w-full mb-2 dark:bg-black bg-neutral-300 rounded"
             placeholder="What do you think?"
             minRows={3}
           />
