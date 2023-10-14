@@ -89,7 +89,7 @@
     "react-textarea-autosize": "^8.5.3",
     "satori": "^0.10.4",
     "sharp": "^0.32.6",
-    "sonner": "^0.6.2",
+    "sonner": "^0.7.4",
     "styled-components": "^5.3.11",
     "superjson": "^1.13.1",
     "tailwind-merge": "^1.14.0",
