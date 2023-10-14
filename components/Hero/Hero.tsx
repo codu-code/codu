@@ -31,7 +31,7 @@ export default function Hero() {
         stretchY={0.2}
         stretchZ={0.3}
         highlight={false}
-        className="h-[calc(100vh_-_100px)] max-h-[calc(100svh_-_100px)] sm:h-[900px] w-full overflow-hidden relative"
+        className="h-[calc(100vh_-_100px)] max-h-[calc(100svh_-_100px)] sm:h-[900px] w-full overflow-hidden relative [&>span.atropos-scale]:pointer-events-none [&_span.atropos-rotate]:pointer-events-auto"
       >
         <Image
           placeholder="blur"
