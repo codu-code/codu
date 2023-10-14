@@ -58,7 +58,7 @@ const Home = () => {
         <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">
           <TrendingPostsHome />
           <section className="col-span-5 lg:block hidden">
-            <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-100 dark:border-neutral-600 bg-white dark:bg-neutral-900">
+            <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
                   className="w-full"
@@ -88,7 +88,7 @@ const Home = () => {
                 <Link
                   key={tag}
                   href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-200 dark:border-neutral-600"
+                  className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-300 dark:border-neutral-600"
                 >
                   {tag}
                 </Link>
