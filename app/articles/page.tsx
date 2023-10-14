@@ -188,7 +188,7 @@ const ArticlesPage = () => {
             </section>
           </div>
           <section className="col-span-4 lg:block hidden">
-            <div className="text-neutral-50 mt-4 mb-8 border border-neutral-600 bg-neutral-900">
+            <div className="dark:text-neutral-50 mt-4 mb-8 border dark:border-neutral-600 border-neutral-300  dark:bg-neutral-900 bg-white">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
                   className="w-full"
@@ -218,7 +218,7 @@ const ArticlesPage = () => {
                 <Link
                   key={tag}
                   href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="bg-neutral-900 text-neutral-50 px-6 py-2 border border-neutral-600"
+                  className="dark:bg-neutral-900 bg-white dark:text-neutral-50 px-6 py-2 border dark:border-neutral-600 border-neutral-300"
                 >
                   {tag}
                 </Link>
