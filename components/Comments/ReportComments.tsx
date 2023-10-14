@@ -4,8 +4,6 @@ import { XIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
 import { signIn, useSession } from "next-auth/react";
 import { createReportEmailTemplate } from "../../utils/createReportEmailTemplate";
-import { trpc } from "@/utils/trpc";
-// import { trpc } from "../../utils/trpc";
 import { api } from "@/server/trpc/react";
 
 interface Props {
