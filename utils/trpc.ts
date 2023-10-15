@@ -6,7 +6,6 @@ import superjson from "superjson";
 import { type AppRouter } from "@/server/api/router";
 
 const getBaseUrl = () => {
-  console.log("getBaseUrl", process.env.DOMAIN_NAME, process.env.VERCEL_URL);
   if (typeof window !== "undefined") return ""; // browser should use relative url
   if (process.env.DOMAIN_NAME) return `https://${process.env.DOMAIN_NAME}`; // SSR should use Domain name or vercel url on Vercel
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
