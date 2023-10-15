@@ -26,10 +26,10 @@ const BioFooter = ({ author }: Props) => {
 
         <div className="flex flex-col justify-center">
           {username && (
-            <h4 className="text-lg md:text-xl font-bold text-neutral-200">
+            <h4 className="text-lg md:text-xl font-bold dark:text-neutral-200 neutral-900">
               Written by{" "}
               <Link
-                className="underline font-bold text-white"
+                className="underline font-bold dark:text-white neutral-900"
                 href={`/${username}`}
               >
                 {name}
