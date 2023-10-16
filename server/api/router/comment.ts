@@ -176,7 +176,13 @@ export const commentRouter = createTRPCRouter({
           },
         },
         user: {
-          select: { name: true, image: true, username: true, id: true },
+          select: {
+            name: true,
+            image: true,
+            username: true,
+            id: true,
+            email: true,
+          },
         },
         likes: {
           where: {
@@ -241,6 +247,7 @@ export const commentRouter = createTRPCRouter({
           username: string | null;
           name: string;
           image: string;
+          email: string | null;
         };
         youLikedThis: boolean;
         likeCount: number;

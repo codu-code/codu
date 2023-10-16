@@ -6,6 +6,7 @@ import { communityRouter } from "./community";
 import { eventRouter } from "./event";
 import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
+import { emailReportRouter } from "./emailReport";
 
 export const appRouter = createTRPCRouter({
   post: postRouter,
@@ -15,6 +16,7 @@ export const appRouter = createTRPCRouter({
   admin: adminRouter,
   community: communityRouter,
   event: eventRouter,
+  emailReport: emailReportRouter,
 });
 
 // export type definition of API
