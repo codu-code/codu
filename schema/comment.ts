@@ -24,5 +24,10 @@ export const LikeCommentSchema = z.object({
   commentId: z.number(),
 });
 
+export const SendEmailSchema = z.object({
+  htmlMessage: z.string(),
+  subject: z.string(),
+});
+
 export type SaveCommentInput = z.TypeOf<typeof SaveCommentSchema>;
 export type EditCommentInput = z.TypeOf<typeof EditCommentSchema>;
