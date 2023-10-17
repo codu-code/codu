@@ -11,7 +11,9 @@ interface ReportDetails {
   commentMadeByReporter: string;
 }
 
-export const createReportEmailTemplate = (reportDetails: ReportDetails) =>
+export const createCommentReportEmailTemplate = (
+  reportDetails: ReportDetails,
+) =>
   `
   <!DOCTYPE html>
   <html>
