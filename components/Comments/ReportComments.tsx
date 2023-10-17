@@ -8,16 +8,15 @@ import { api } from "@/server/trpc/react";
 import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEmailTemplate";
 
 interface Props {
-  id?: number;
-  body?: string;
-  email?: string | null;
-  slug?: string;
-
-  name: string;
   postTitle?: string;
   postId?: string;
   postUrl?: string;
   postUsername?: string;
+  name: string;
+  body?: string;
+  id?: number;
+  email?: string | null;
+  slug?: string;
 }
 
 export const ReportComments = (props: Props) => {
@@ -151,7 +150,7 @@ export const ReportComments = (props: Props) => {
       {postTitle && (
         <button
           onClick={() => (session ? handleOpenModal() : signIn())}
-          className="text-black pl-4 p-1 hover:bg-neutral-300 rounded w-full flex"
+          className="p-1 rounded w-full flex px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
         >
           Report Article
         </button>

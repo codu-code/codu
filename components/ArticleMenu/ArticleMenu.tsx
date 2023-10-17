@@ -189,7 +189,6 @@ const ArticleMenu = ({
                     </a>
                   </Menu.Item>
                 ))}
-
                 <ReportComments
                   postTitle={postTitle}
                   name={postUsername}
