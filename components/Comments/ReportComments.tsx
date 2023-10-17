@@ -3,8 +3,9 @@ import Flag from "../../icons/flag.svg";
 import { XIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
 import { signIn, useSession } from "next-auth/react";
-import { createReportEmailTemplate } from "../../utils/createReportEmailTemplate";
+import { createCommentReportEmailTemplate } from "../../utils/createCommentReportEmailTemplate";
 import { api } from "@/server/trpc/react";
+import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEmailTemplate";
 
 interface Props {
   id?: number;
@@ -74,7 +75,7 @@ export const ReportComments = (props: Props) => {
         postLink: `https://codu.co/articles/${slug}`,
       };
 
-      const htmlMessage = createReportEmailTemplate(reportDetails);
+      const htmlMessage = createCommentReportEmailTemplate(reportDetails);
 
       const mailInputs = {
         htmlMessage: htmlMessage,
@@ -89,20 +90,19 @@ export const ReportComments = (props: Props) => {
         reportedByEmail: session?.user?.email,
         reportedByUser: session?.user?.name,
         reportedOnName: name,
-
+        postTitle,
         postId,
         postUrl,
         postUsername,
-
         commentMadeByReporter: comment,
         timeReportSent: new Date(),
       };
 
-      const htmlMessage = createReportEmailTemplate(reportDetails);
+      const htmlMessage = createArticleReportEmailTemplate(reportDetails);
 
       const mailInputs = {
         htmlMessage: htmlMessage,
-        subject: "A user has reported a comment on Codú.co",
+        subject: "A user has reported an article on Codú.co",
       };
 
       sendEmail(mailInputs);
@@ -175,7 +175,8 @@ export const ReportComments = (props: Props) => {
             </p>
             <div className="m-4">
               <p className="mb-2">
-                Is this {postTitle ? "article" : "comment"} inappropriate?
+                Is {postTitle ? "something in this article" : "this comment"}{" "}
+                inappropriate?
               </p>
               <p>
                 Thank you for bringing it to our attention. We take reports very
