@@ -7,11 +7,16 @@ import { createReportEmailTemplate } from "../../utils/createReportEmailTemplate
 import { api } from "@/server/trpc/react";
 
 interface Props {
+  id?: number;
+  body?: string;
+  email?: string | null;
+  slug?: string;
+
   name: string;
-  body: string;
-  id: number;
-  email: string | null;
-  slug: string;
+  postTitle?: string;
+  postId?: string;
+  postUrl?: string;
+  postUsername?: string;
 }
 
 export const ReportComments = (props: Props) => {
@@ -27,7 +32,17 @@ export const ReportComments = (props: Props) => {
   });
 
   const { data: session } = useSession();
-  const { name, body, id, email, slug } = props;
+  const {
+    name,
+    body,
+    id,
+    email,
+    slug,
+    postTitle,
+    postId,
+    postUrl,
+    postUsername,
+  } = props;
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [comment, setComment] = useState("");
 
@@ -44,27 +59,54 @@ export const ReportComments = (props: Props) => {
 
     if (!session) return signIn();
 
-    const reportDetails = {
-      reportedById: session?.user?.id,
-      reportedByEmail: session?.user?.email,
-      reportedByUser: session?.user?.name,
-      reportedOnName: name,
-      reportedOnEmail: email,
-      reportedComment: body,
-      commentMadeByReporter: comment,
-      commentId: id,
-      timeReportSent: new Date(),
-      postLink: `https://codu.co/articles/${slug}`,
-    };
+    if (!postTitle) {
+      // report on a comment
+      const reportDetails = {
+        reportedById: session?.user?.id,
+        reportedByEmail: session?.user?.email,
+        reportedByUser: session?.user?.name,
+        reportedOnName: name,
+        reportedOnEmail: email,
+        reportedComment: body,
+        commentMadeByReporter: comment,
+        commentId: id,
+        timeReportSent: new Date(),
+        postLink: `https://codu.co/articles/${slug}`,
+      };
 
-    const htmlMessage = createReportEmailTemplate(reportDetails);
+      const htmlMessage = createReportEmailTemplate(reportDetails);
 
-    const mailInputs = {
-      htmlMessage: htmlMessage,
-      subject: "A user has reported a comment on Codú.co",
-    };
+      const mailInputs = {
+        htmlMessage: htmlMessage,
+        subject: "A user has reported a comment on Codú.co",
+      };
 
-    sendEmail(mailInputs);
+      sendEmail(mailInputs);
+    } else {
+      // report on an article
+      const reportDetails = {
+        reportedById: session?.user?.id,
+        reportedByEmail: session?.user?.email,
+        reportedByUser: session?.user?.name,
+        reportedOnName: name,
+
+        postId,
+        postUrl,
+        postUsername,
+
+        commentMadeByReporter: comment,
+        timeReportSent: new Date(),
+      };
+
+      const htmlMessage = createReportEmailTemplate(reportDetails);
+
+      const mailInputs = {
+        htmlMessage: htmlMessage,
+        subject: "A user has reported a comment on Codú.co",
+      };
+
+      sendEmail(mailInputs);
+    }
 
     handleCloseModal();
     setComment("");
@@ -96,13 +138,24 @@ export const ReportComments = (props: Props) => {
 
   return (
     <>
-      <button
-        aria-label="flag comment"
-        onClick={() => (session ? handleOpenModal() : signIn())}
-        className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
-      >
-        <Flag className="h-5 " />
-      </button>
+      {!postTitle && (
+        <button
+          aria-label="flag comment"
+          onClick={() => (session ? handleOpenModal() : signIn())}
+          className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
+        >
+          <Flag className="h-5 " />
+        </button>
+      )}
+
+      {postTitle && (
+        <button
+          onClick={() => (session ? handleOpenModal() : signIn())}
+          className="text-black pl-4 p-1 hover:bg-neutral-300 rounded w-full flex"
+        >
+          Report Article
+        </button>
+      )}
 
       {isModalOpen && (
         <dialog
@@ -116,10 +169,14 @@ export const ReportComments = (props: Props) => {
               Submit a report
             </h1>
             <p className="border p-4 m-4 bg-neutral-700 text-zinc-200">
+              <span>{postTitle ? "Article : " : "Comment : "}</span>
               {body}
+              {postTitle}
             </p>
             <div className="m-4">
-              <p className="mb-2">Is this comment inappropriate?</p>
+              <p className="mb-2">
+                Is this {postTitle ? "article" : "comment"} inappropriate?
+              </p>
               <p>
                 Thank you for bringing it to our attention. We take reports very
                 seriously and will thoroughly investigate the matter.

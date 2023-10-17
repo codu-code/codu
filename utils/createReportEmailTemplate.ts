@@ -3,9 +3,9 @@ interface ReportDetails {
   reportedByEmail?: string | null;
   reportedByUser?: string | null;
   reportedOnName: string;
-  reportedOnEmail: string | null;
-  reportedComment: string;
-  commentId: number;
+  reportedOnEmail: string | null | undefined;
+  reportedComment: string | undefined;
+  commentId: number | undefined;
   timeReportSent: Date;
   postLink: string;
   commentMadeByReporter: string;

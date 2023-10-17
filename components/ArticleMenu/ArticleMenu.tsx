@@ -13,6 +13,7 @@ import {
 import copy from "copy-to-clipboard";
 import { type Session } from "next-auth";
 import { signIn } from "next-auth/react";
+import { ReportComments } from "../Comments/ReportComments";
 
 interface CopyToClipboardOption {
   label: string;
@@ -188,6 +189,14 @@ const ArticleMenu = ({
                     </a>
                   </Menu.Item>
                 ))}
+
+                <ReportComments
+                  postTitle={postTitle}
+                  name={postUsername}
+                  postId={postId}
+                  postUsername={postUsername}
+                  postUrl={postUrl}
+                />
               </Menu.Items>
             </Transition>
           </Menu>
