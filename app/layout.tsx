@@ -9,7 +9,7 @@ import Nav from "@/components/Nav/Nav";
 import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
 // @TODO layout app in way that doesn't need to use client session check
-
+import NextTopLoader from "nextjs-toploader";
 export const metadata = {
   title: "Codú - The Web Developer Community",
   description:
@@ -34,6 +34,10 @@ export default async function RootLayout({
       {/* <ProgressBar />  Needs to be fixed */}
       <Fathom />
       <body className="h-full" suppressHydrationWarning={true}>
+        <NextTopLoader
+          showSpinner={false}
+          template='<div class="bar" role="bar"><div class="gradient"></div></div>'
+        />
         <AuthProvider>
           <ThemeProvider>
             <TRPCReactProvider headers={headers()}>
