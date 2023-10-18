@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import Flag from "../../icons/flag.svg";
 import { XIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
@@ -127,7 +127,8 @@ export const ReportComments = (props: Props) => {
       )}
 
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="fixed inset-0 flex w-screen items-center justify-center bg-gray-700/90">
+        <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
+        <div className="fixed inset-0 flex w-screen items-center justify-center">
           <Dialog.Panel className="p-0 border bg-neutral-900 text-neutral-400 max-w-lg rounded-lg relative ">
             <div className="m-8">
               <Dialog.Title className="text-2xl tracking-tight font-bold text-neutral-50 text-center">
