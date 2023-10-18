@@ -41,7 +41,7 @@ export const createArticleReportEmailTemplate = (
      <br>
      <br>
      <br>
-     <p>Comment left the reporter : ${
+     <p>Comment left by the reporter : ${
        reportDetails.commentMadeByReporter || ""
      } </p>
      <p>reported by user : ${reportDetails.reportedByUser || ""}</p>
