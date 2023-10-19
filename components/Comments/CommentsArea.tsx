@@ -46,7 +46,6 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
   const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
   const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
   const [initiallyLoaded, setInitiallyLoaded] = useState<boolean>(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: session } = useSession();
 
@@ -319,27 +318,13 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                       {likeCount}
                     </span>
 
-                    <button
-                      aria-label="flag comment"
-                      onClick={() =>
-                        session ? setIsModalOpen(true) : signIn()
-                      }
-                      className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
-                    >
-                      <Flag className="h-5 " />
-                    </button>
-
-                    {/* {isModalOpen && ( */}
                     <ReportComments
                       name={name}
                       body={body}
                       id={id}
                       email={email}
                       slug={slug}
-                      isModalOpen={isModalOpen}
-                      setIsModalOpen={setIsModalOpen}
                     />
-                    {/* )} */}
 
                     {depth < 6 && (
                       <button

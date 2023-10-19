@@ -99,8 +99,6 @@ const ArticleMenu = ({
     }
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
     <Transition
       show={!!data}
@@ -187,26 +185,13 @@ const ArticleMenu = ({
                     </li>
 
                     <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
-                      <button
-                        onClick={() =>
-                          session ? setIsModalOpen(true) : signIn()
-                        }
-                        className="p-1 rounded w-full flex px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
-                      >
-                        Report Article
-                      </button>
-
-                      {/* {isOpen && ( */}
                       <ReportComments
                         postTitle={postTitle}
                         name={postUsername}
                         postId={postId}
                         postUsername={postUsername}
                         postUrl={postUrl}
-                        isModalOpen={isModalOpen}
-                        setIsModalOpen={setIsModalOpen}
                       />
-                      {/* )} */}
                     </li>
                   </ul>
                 </div>
