@@ -162,11 +162,8 @@ const ArticleMenu = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              {/* <Popover.Panel className="absolute z-10"> */}
               <Popover.Panel className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
-                <div
-                // className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded"
-                >
+                <div>
                   <ul>
                     <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
                       <a
