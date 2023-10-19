@@ -20,6 +20,7 @@ const CodeBlock: FunctionComponent<NodeViewProps & CodeBlockProps> = ({
 }) => {
   return (
     <NodeViewWrapper className={styles["code-block"]}>
+      {/* Read only mode removes selector ability dropdown - more elegant solution potentially possible */}
       {!readOnly && (
         <select
           onClick={(e) => e.stopPropagation()}

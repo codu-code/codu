@@ -56,6 +56,7 @@ export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
   },
 }).configure({ lowlight });
 
+// Two CodeBlockNodes need to be created to disable selector menu
 export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
   addNodeView() {
     return ReactNodeViewRenderer((props: NodeViewProps) => (
