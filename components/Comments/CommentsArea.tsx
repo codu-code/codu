@@ -18,7 +18,6 @@ import { Temporal } from "@js-temporal/polyfill";
 import { EditCommentSchema } from "../../schema/comment";
 import { api } from "@/server/trpc/react";
 import { ReportComments } from "./ReportComments";
-import Flag from "../../icons/flag.svg";
 
 const SaveSchema = z.object({
   body: z
@@ -317,7 +316,6 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
-
                     <ReportComments
                       name={name}
                       body={body}
@@ -325,7 +323,6 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                       email={email}
                       slug={slug}
                     />
-
                     {depth < 6 && (
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"

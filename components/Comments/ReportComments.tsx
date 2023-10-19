@@ -47,7 +47,6 @@ export const ReportComments = (props: Props) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // const [isModalOpen, setIsModalOpen] = useState<boolean>(isModalOpenProp||false);
   const [comment, setComment] = useState("");
   let textAreaRef = useRef(null);
 
@@ -122,12 +121,14 @@ export const ReportComments = (props: Props) => {
       )}
 
       {!body && (
-        <button
-          onClick={() => (session ? setIsModalOpen(true) : signIn())}
-          className="p-1 rounded w-full flex px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
-        >
-          Report Article
-        </button>
+        <div className="w-full">
+          <button
+            onClick={() => (session ? setIsModalOpen(true) : signIn())}
+            className="rounded text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
+          >
+            Report Article
+          </button>
+        </div>
       )}
 
       <Dialog
@@ -135,7 +136,7 @@ export const ReportComments = (props: Props) => {
         onClose={() => setIsModalOpen(false)}
         initialFocus={textAreaRef}
       >
-        {/* <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" /> */}
+        <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
         <div className="fixed inset-0 flex w-screen items-center justify-center">
           <Dialog.Panel className="p-0 border bg-neutral-900 text-neutral-400 max-w-lg rounded-lg relative ">
             <div className="m-8">
@@ -198,22 +199,3 @@ export const ReportComments = (props: Props) => {
     </>
   );
 };
-
-//  {!postTitle && (
-//       <button
-//         aria-label="flag comment"
-//         onClick={() => (session ? setIsModalOpen(true) : signIn())}
-//         className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
-//       >
-//         <Flag className="h-5 " />
-//       </button>
-//     )}
-
-//     {postTitle && (
-//       <button
-//         onClick={() => (session ? setIsModalOpen(true) : signIn())}
-//         className="p-1 rounded w-full flex px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
-//       >
-//         Report Article
-//       </button>
-//     )}

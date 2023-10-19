@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Fragment, useEffect, useState } from "react";
-import { Menu, Popover, Transition } from "@headlessui/react";
+import { Popover, Transition } from "@headlessui/react";
 
 import { api } from "@/server/trpc/react";
 
