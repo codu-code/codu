@@ -10,7 +10,6 @@ import {
   TextIcon,
   Code,
   CheckSquare,
-  Heading,
 } from "lucide-react";
 import { Dispatch, FC, SetStateAction } from "react";
 
@@ -40,16 +39,22 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
         !editor.isActive("orderedList"),
     },
     {
-      name: "Heading",
-      icon: Heading,
+      name: "Heading 1",
+      icon: Heading1,
       command: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
       isActive: () => editor.isActive("heading", { level: 1 }),
     },
     {
-      name: "Subheading",
-      icon: Heading,
+      name: "Heading 2",
+      icon: Heading2,
       command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       isActive: () => editor.isActive("heading", { level: 2 }),
+    },
+    {
+      name: "Heading 3",
+      icon: Heading3,
+      command: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      isActive: () => editor.isActive("heading", { level: 3 }),
     },
     {
       name: "Quote",
