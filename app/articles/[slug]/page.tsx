@@ -111,7 +111,7 @@ const ArticlePage = async ({ params }: Props) => {
           postUrl={`https://${host}/articles/${post.slug}`}
         />
         <div className="mx-auto pb-4 md:max-w-3xl px-2 sm:px-4 break-words">
-          <article className="prose prose-invert lg:prose-lg mx-auto max-w-3xl">
+          <article className="prose dark:prose-invert lg:prose-lg mx-auto max-w-3xl">
             <h1>{post.title}</h1>
             {Markdoc.renderers.react(content, React, {
               components: markdocComponents,
@@ -134,7 +134,11 @@ const ArticlePage = async ({ params }: Props) => {
         <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
           <BioBar author={post.user} />
           {post.showComments ? (
-            <CommentsArea postId={post.id} postOwnerId={post.userId} />
+            <CommentsArea
+              postId={post.id}
+              postOwnerId={post.userId}
+              slug={slug}
+            />
           ) : (
             <h3 className="py-10 italic text-lg">
               Comments are disabled for this post
