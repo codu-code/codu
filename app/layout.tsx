@@ -35,6 +35,7 @@ export default async function RootLayout({
       <Fathom />
       <body className="h-full" suppressHydrationWarning={true}>
         <NextTopLoader
+          easing="linear"
           showSpinner={false}
           template='<div class="bar" role="bar"><div class="gradient"></div></div>'
         />
