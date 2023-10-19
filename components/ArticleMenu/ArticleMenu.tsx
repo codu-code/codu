@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Fragment, useEffect, useState } from "react";
-import { Menu, Transition } from "@headlessui/react";
+import { Menu, Popover, Transition } from "@headlessui/react";
 
 import { api } from "@/server/trpc/react";
 
@@ -99,18 +99,7 @@ const ArticleMenu = ({
     }
   };
 
-  const createMenuData = (title: string, username: string, url: string) => [
-    {
-      label: "Share to X",
-      href: `https://twitter.com/intent/tweet?text="${title}", by ${username}&hashtags=coducommunity,codu&url=${url}`,
-    },
-    {
-      label: "Share to LinkedIn",
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
-    },
-  ];
-
-  const optionsData = createMenuData(postTitle, postUsername, postUrl);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <Transition
@@ -159,13 +148,13 @@ const ArticleMenu = ({
               }`}
             />
           </button>
-          <Menu as="div" className="ml-4 relative">
-            <div>
-              <Menu.Button className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800">
-                <span className="sr-only">Open user menu</span>
-                <DotsHorizontalIcon className="w-6 h-6" />
-              </Menu.Button>
-            </div>
+
+          <Popover className="ml-4 relative">
+            <Popover.Button className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800">
+              <span className="sr-only">Open user menu</span>
+              <DotsHorizontalIcon className="w-6 h-6" />
+            </Popover.Button>
+
             <Transition
               as={Fragment}
               enter="transition ease-out duration-100"
@@ -175,30 +164,55 @@ const ArticleMenu = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
-                {optionsData.map((item) => (
-                  <Menu.Item key={item.label}>
-                    <a
-                      className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded"
-                      target="blank"
-                      rel="noopener noreferrer"
-                      href={encodeURI(item.href)}
-                      onClick={handleCopyToClipboard}
-                    >
-                      {item.label}
-                    </a>
-                  </Menu.Item>
-                ))}
-                <ReportComments
-                  postTitle={postTitle}
-                  name={postUsername}
-                  postId={postId}
-                  postUsername={postUsername}
-                  postUrl={postUrl}
-                />
-              </Menu.Items>
+              {/* <Popover.Panel className="absolute z-10"> */}
+              <Popover.Panel className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                <div
+                // className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded"
+                >
+                  <ul>
+                    <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
+                      <a
+                        href={`https://twitter.com/intent/tweet?text="${postTitle}", by ${postUsername}&hashtags=coducommunity,codu&url=${postUrl}`}
+                      >
+                        Share to X
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded"
+                        href={`https://www.linkedin.com/sharing/share-offsite/?url=${postUrl}`}
+                      >
+                        Share to LinkedIn
+                      </a>
+                    </li>
+
+                    <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
+                      <button
+                        onClick={() =>
+                          session ? setIsModalOpen(true) : signIn()
+                        }
+                        className="p-1 rounded w-full flex px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
+                      >
+                        Report Article
+                      </button>
+
+                      {/* {isOpen && ( */}
+                      <ReportComments
+                        postTitle={postTitle}
+                        name={postUsername}
+                        postId={postId}
+                        postUsername={postUsername}
+                        postUrl={postUrl}
+                        isModalOpen={isModalOpen}
+                        setIsModalOpen={setIsModalOpen}
+                      />
+                      {/* )} */}
+                    </li>
+                  </ul>
+                </div>
+              </Popover.Panel>
             </Transition>
-          </Menu>
+          </Popover>
         </div>
       </div>
     </Transition>
