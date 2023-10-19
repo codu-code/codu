@@ -47,7 +47,7 @@ body {
 }
 
 .mobile-nav-button {
-  @apply rounded-md p-2 text-neutral-600 dark:text-neutral-400  hover:text-neutral-900 dark:hover:text-white focus:text-neutral-900 dark:focus:text-white hover:bg-neutral-300 dark:hover:bg-neutral-900  focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-400 dark:focus:ring-white;
+  @apply rounded-md p-2 text-neutral-600 dark:text-neutral-400  hover:text-neutral-900 dark:hover:text-white focus:text-neutral-900 dark:focus:text-white hover:bg-neutral-300 dark:hover:bg-neutral-900  focus:outline-none focus:ring-2 focus:ring-inset focus:ring-offset-2 focus:ring-offset-rose-500 focus:ring-white;
 }
 
 .primary-button {
