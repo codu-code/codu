@@ -1,15 +1,14 @@
 import "../styles/globals.css";
 import { headers } from "next/headers";
 import Fathom from "@/components/Fathom/Fathom";
-// import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import ThemeProvider from "@/components/Theme/ThemeProvider";
 import { TRPCReactProvider } from "@/server/trpc/react";
 import Footer from "@/components/Footer/Footer";
 import Nav from "@/components/Nav/Nav";
 import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
+import NextTopLoader from "nextjs-toploader";
 // @TODO layout app in way that doesn't need to use client session check
-
 export const metadata = {
   title: "Codú - The Web Developer Community",
   description:
@@ -31,9 +30,13 @@ export default async function RootLayout({
   const session = await getServerAuthSession();
   return (
     <html lang="en" className="h-full">
-      {/* <ProgressBar />  Needs to be fixed */}
       <Fathom />
       <body className="h-full" suppressHydrationWarning={true}>
+        <NextTopLoader
+          easing="linear"
+          showSpinner={false}
+          template='<div class="bar" role="bar"><div class="gradient"></div></div>'
+        />
         <AuthProvider>
           <ThemeProvider>
             <TRPCReactProvider headers={headers()}>
