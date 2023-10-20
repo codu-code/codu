@@ -46,7 +46,7 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
       isActive: () => editor.isActive("heading", { level: 1 }),
     },
     {
-      name: "SubHeading",
+      name: "Subheading",
       icon: Heading,
       command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       isActive: () => editor.isActive("heading", { level: 2 }),
