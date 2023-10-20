@@ -129,7 +129,6 @@ const Nav = ({ session }: { session: Session | null }) => {
                     </>
                   )}
                   {/* Profile dropdown */}
-                  {/* <ThemeToggle /> */}
                   <div className="ml-3">
                     <ThemeToggle />
                   </div>
@@ -139,7 +138,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative p-1 ml-3 flex-shrink-0 rounded-sm  text-neutral-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2   "
+                        className="relative p-1 ml-3 flex-shrink-0 rounded-sm  text-neutral-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
@@ -149,7 +148,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                       </Link>
                       <Menu as="div" className="ml-4 relative">
                         <div>
-                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-800 focus:ring-rose-500 ring-offset-2">
+                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-rose-500 ring-offset-2 focus:ring-offset-white  ">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
