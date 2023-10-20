@@ -42,14 +42,14 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
     {
       name: "Heading",
       icon: Heading,
-      command: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
-      isActive: () => editor.isActive("heading", { level: 1 }),
+      command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      isActive: () => editor.isActive("heading", { level: 2 }),
     },
     {
       name: "Subheading",
       icon: Heading,
-      command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-      isActive: () => editor.isActive("heading", { level: 2 }),
+      command: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      isActive: () => editor.isActive("heading", { level: 3 }),
     },
     {
       name: "Quote",
