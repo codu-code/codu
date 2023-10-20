@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import DOMPurify from "dompurify";
+import DOMPurify, { Config } from "dompurify";
 import { generateHTML } from "@tiptap/core";
 import { TiptapExtensions } from "./extensions";
 
@@ -7,12 +7,15 @@ interface RenderPostProps {
   json: string;
 }
 
-const config = { ADD_TAGS: ["iframe"], ADD_ATTR: ["allowfullscreen"] };
+const config: Config = {
+  ADD_TAGS: ["iframe"],
+  ADD_ATTR: ["allowfullscreen", "target"],
+};
 
 const RenderPost = ({ json }: RenderPostProps) => {
   const sanitizedHTML = useMemo(() => {
     const rawHTML = generateHTML(JSON.parse(json), [...TiptapExtensions]);
-    return DOMPurify.sanitize(rawHTML, config);
+    return DOMPurify.sanitize(rawHTML, config) as string;
   }, [json]);
 
   return <div dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />;
