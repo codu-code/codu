@@ -8,17 +8,25 @@ import { api } from "@/server/trpc/react";
 import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEmailTemplate";
 import { Dialog } from "@headlessui/react";
 
-interface Props {
-  postTitle?: string;
-  postId?: string;
-  postUrl?: string;
-  postUsername?: string;
+interface CommonProps {
   name: string;
-  body?: string;
-  id?: number;
-  email?: string | null;
-  slug?: string;
 }
+
+interface Article extends CommonProps {
+  postTitle: string;
+  postId: string;
+  postUrl: string;
+  postUsername: string;
+}
+
+interface Comment extends CommonProps {
+  body: string;
+  id: number;
+  email: string | null;
+  slug: string;
+}
+
+type Props = Article | Comment;
 
 export const ReportComments = (props: Props) => {
   const { mutate: sendEmail } = api.emailReport.send.useMutation({
@@ -33,17 +41,6 @@ export const ReportComments = (props: Props) => {
   });
 
   const { data: session } = useSession();
-  const {
-    name,
-    body,
-    id,
-    email,
-    slug,
-    postTitle,
-    postId,
-    postUrl,
-    postUsername,
-  } = props;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -55,60 +52,55 @@ export const ReportComments = (props: Props) => {
 
     if (!session) return signIn();
 
-    if (!postTitle) {
-      // report on a comment
+    if ("postTitle" in props) {
       const reportDetails = {
         reportedById: session?.user?.id,
         reportedByEmail: session?.user?.email,
         reportedByUser: session?.user?.name,
-        reportedOnName: name,
-        reportedOnEmail: email,
-        reportedComment: body,
-        commentMadeByReporter: comment,
-        commentId: id,
-        timeReportSent: new Date(),
-        postLink: `https://codu.co/articles/${slug}`,
-      };
-
-      const htmlMessage = createCommentReportEmailTemplate(reportDetails);
-
-      const mailInputs = {
-        htmlMessage: htmlMessage,
-        subject: "A user has reported a comment on Codú.co",
-      };
-
-      sendEmail(mailInputs);
-    } else {
-      // report on an article
-      const reportDetails = {
-        reportedById: session?.user?.id,
-        reportedByEmail: session?.user?.email,
-        reportedByUser: session?.user?.name,
-        reportedOnName: name,
-        postTitle,
-        postId,
-        postUrl,
-        postUsername,
+        reportedOnName: props.name,
+        postTitle: props.postTitle,
+        postId: props.postId,
+        postUrl: props.postUrl,
+        postUsername: props.postUsername,
         commentMadeByReporter: comment,
         timeReportSent: new Date(),
       };
 
       const htmlMessage = createArticleReportEmailTemplate(reportDetails);
-
       const mailInputs = {
         htmlMessage: htmlMessage,
         subject: "A user has reported an article on Codú.co",
       };
-
       sendEmail(mailInputs);
+    } else {
+      const reportDetails = {
+        reportedById: session?.user?.id,
+        reportedByEmail: session?.user?.email,
+        reportedByUser: session?.user?.name,
+        reportedOnName: props.name,
+        reportedOnEmail: props.email,
+        reportedComment: props.body,
+        commentMadeByReporter: comment,
+        commentId: props.id,
+        timeReportSent: new Date(),
+        postLink: `https://codu.co/articles/${props.slug}`,
+      };
+
+      const htmlMessage = createCommentReportEmailTemplate(reportDetails);
+      const mailInputs = {
+        htmlMessage: htmlMessage,
+        subject: "A user has reported a comment on Codú.co",
+      };
+      sendEmail(mailInputs);
+      setIsModalOpen(false);
+      setComment("");
     }
-    setIsModalOpen(false);
-    setComment("");
   };
+  const isComment = "body" in props;
 
   return (
     <>
-      {body && (
+      {isComment && (
         <button
           aria-label="flag comment"
           onClick={(e) => {
@@ -120,7 +112,7 @@ export const ReportComments = (props: Props) => {
         </button>
       )}
 
-      {!body && (
+      {!isComment && (
         <div className="w-full">
           <button
             onClick={() => (session ? setIsModalOpen(true) : signIn())}
@@ -146,13 +138,13 @@ export const ReportComments = (props: Props) => {
 
               <Dialog.Description as="div">
                 <p className="m-4 ml-0">
-                  Is {postTitle ? "something in this article" : "this comment"}{" "}
+                  Is {!isComment ? "something in this article" : "this comment"}{" "}
                   inappropriate?
                 </p>
                 <p className="border p-4  bg-neutral-700 text-zinc-200 rounded">
-                  <span>{postTitle ? "Article : " : "Comment : "}</span>
-                  {body}
-                  {postTitle}
+                  <span>{!isComment ? "Article : " : "Comment : "}</span>
+                  {isComment && props.body}
+                  {!isComment && props.postTitle}
                 </p>
               </Dialog.Description>
 
