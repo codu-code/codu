@@ -1,19 +1,19 @@
 "use client";
 
-import { signOut, signIn } from "next-auth/react";
+import { api } from "@/server/trpc/react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { BellIcon, PlusSmIcon } from "@heroicons/react/solid";
+import { signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
-import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { PlusSmIcon, BellIcon } from "@heroicons/react/solid";
 import { navigation } from "../../config/site_settings";
-import { api } from "@/server/trpc/react";
-import { getServerAuthSession } from "@/server/auth";
-import ThemeToggle from "../Theme/ThemeToggle";
-import MobileNav from "./MobileNav";
-import ThemeToggleMobile from "../Theme/ThemeToggleMobile";
-import AnimatedHamburger from "./AnimatedHamburger";
+
 import { Session } from "next-auth";
+import ThemeToggle from "../Theme/ThemeToggle";
+import AnimatedHamburger from "./AnimatedHamburger";
+
+import MobileNav from "./MobileNav";
 
 const Nav = ({ session }: { session: Session | null }) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
@@ -129,23 +129,26 @@ const Nav = ({ session }: { session: Session | null }) => {
                     </>
                   )}
                   {/* Profile dropdown */}
-                  <ThemeToggle />
+                  <div className="ml-3">
+                    <ThemeToggle />
+                  </div>
+
                   {session && (
                     <>
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative ml-3 flex-shrink-0 rounded-full  text-neutral-400 hover:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                        className="relative p-1 ml-3 flex-shrink-0 rounded-sm  text-neutral-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
-                          <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                          <div className="absolute animate-pulse rounded-sm h-2 w-2 bg-pink-500 right-1 top-1" />
                         )}
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                       </Link>
                       <Menu as="div" className="ml-4 relative">
                         <div>
-                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-800 focus:ring-white">
+                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-rose-500 ring-offset-2 focus:ring-offset-white  ">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
@@ -199,7 +202,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                 </div>
               </div>
               <div className="-mr-2 flex items-center md:hidden">
-                <ThemeToggleMobile />
+                <ThemeToggle />
                 <Link
                   title="Notifications"
                   href="/notifications"
