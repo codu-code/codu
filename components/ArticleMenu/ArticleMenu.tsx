@@ -182,7 +182,14 @@ const ArticleMenu = ({
                         Share to LinkedIn
                       </a>
                     </li>
-
+                    <li>
+                      <button
+                        className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded w-full text-left"
+                        onClick={handleCopyToClipboard}
+                      >
+                        {label}
+                      </button>
+                    </li>
                     <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
                       <ReportModal type="post" title={postTitle} id={postId} />
                     </li>
