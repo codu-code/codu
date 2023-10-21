@@ -132,7 +132,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
-                className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
+                className="lg:mx-auto p-2 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800 focus-style-rounded"
                 onClick={() => {
                   if (bookmarked) return bookmarkPost(id, false);
                   bookmarkPost(id);

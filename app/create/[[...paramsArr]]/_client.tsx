@@ -469,7 +469,7 @@ const Create = () => {
                       <div className="flex">
                         <button
                           type="button"
-                          className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
+                          className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 mt-4"
                           onClick={() => setViewPreview((current) => !current)}
                         >
                           {viewPreview ? "Back to editing" : "View preview"}

@@ -142,7 +142,7 @@ const ArticleMenu = ({
           </div>
 
           <button
-            className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
+            className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800 focus-style-rounded"
             onClick={() => {
               if (!session) {
                 signIn();
