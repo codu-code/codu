@@ -45,7 +45,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                 <div className="flex-shrink-0">
                   <span className="sr-only">Codú</span>
                   <Link
-                    className="hidden lg:flex items-baseline h-8 w-auto"
+                    className="hidden lg:flex items-baseline h-8 w-auto logo-focus"
                     href="/"
                   >
                     <Image
@@ -56,11 +56,14 @@ const Nav = ({ session }: { session: Session | null }) => {
                       width={94.5}
                       priority
                       sizes="(max-width: 94px) 100vw"
-                    />{" "}
+                    />
                     <span className="ml-2 text-xs font-semibold">Beta</span>
                   </Link>
                   <div className="flex">
-                    <Link className="flex lg:hidden w-auto items-end" href="/">
+                    <Link
+                      className="flex lg:hidden w-auto items-end p-2"
+                      href="/"
+                    >
                       <span className="sr-only">Codú</span>
                       <svg className="h-8" viewBox="0 0 694 829" fill="none">
                         <path
@@ -83,13 +86,13 @@ const Nav = ({ session }: { session: Session | null }) => {
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="nav-button"
+                          className="nav-button focus-style p-4"
                         >
                           {item.name}
                         </a>
                       ) : (
                         <Link
-                          className="text-neutral-900 hover:bg-neutral-200 hover:text-black   dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white px-3 py-2 rounded-md"
+                          className="nav-button"
                           key={item.name}
                           href={item.href}
                         >
@@ -107,10 +110,8 @@ const Nav = ({ session }: { session: Session | null }) => {
                       <Link className="nav-button" href="/my-posts">
                         Your Posts
                       </Link>
-                      <Link
-                        className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-                        href="/create"
-                      >
+
+                      <Link className="primary-button px-4 ml-4" href="/create">
                         <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
                         New Post
                       </Link>
@@ -121,7 +122,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                         Sign in
                       </button>
                       <button
-                        className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600"
                         onClick={() => signIn()}
                       >
                         Sign up for free
@@ -138,17 +139,17 @@ const Nav = ({ session }: { session: Session | null }) => {
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative p-1 ml-3 flex-shrink-0 rounded-sm  text-neutral-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                        className="relative p-2 flex-shrink-0 rounded-md text-neutral-400 focus-style "
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
-                          <div className="absolute animate-pulse rounded-sm h-2 w-2 bg-pink-500 right-1 top-1" />
+                          <div className="absolute animate-pulse rounded-sm h-2 w-2 bg-pink-600 right-1 top-1" />
                         )}
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                       </Link>
                       <Menu as="div" className="ml-4 relative">
                         <div>
-                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-rose-500 ring-offset-2 focus:ring-offset-white  ">
+                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 ring-offset-2 focus:ring-offset-white">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
@@ -206,16 +207,16 @@ const Nav = ({ session }: { session: Session | null }) => {
                 <Link
                   title="Notifications"
                   href="/notifications"
-                  className="relative group block mobile-nav-button"
+                  className="relative group block nav-button focus-style"
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
-                    <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                    <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-600 right-1 top-1" />
                   )}
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
                 </Link>
                 {/* Mobile menu button */}
-                <Disclosure.Button className="group mobile-nav-button">
+                <Disclosure.Button className="group nav-button focus-style">
                   <span className="sr-only">Open main menu</span>
                   <AnimatedHamburger open={open} />
                 </Disclosure.Button>

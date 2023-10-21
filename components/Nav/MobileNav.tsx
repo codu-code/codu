@@ -1,9 +1,9 @@
+import { UserNavigationItem } from "@/types/types";
 import { Disclosure, Transition } from "@headlessui/react";
+import { Session } from "next-auth";
 import Link from "next/link";
 import { FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
-import { UserNavigationItem } from "@/types/types";
-import { Session } from "next-auth";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -55,22 +55,21 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                   </div>
                 </div>
               </div>
-              <div className="mt-3 space-y-1">
+              <div className="flex flex-col self-start text-sm lg:text-base font-medium py-2">
                 {userNavigation.map((item) =>
                   item.onClick ? (
-                    <Disclosure.Button
+                    <button
+                      className="nav-button w-full "
                       key={item.name}
-                      as="button"
                       onClick={item.onClick}
-                      className="nav-button w-full text-left font-medium"
                     >
                       {item.name}
-                    </Disclosure.Button>
+                    </button>
                   ) : (
                     <Link key={item.name} href={item.href}>
                       <Disclosure.Button
                         as="div"
-                        className="nav-button w-full text-left font-medium"
+                        className="w-full font-medium nav-button"
                       >
                         {item.name}
                       </Disclosure.Button>
@@ -97,24 +96,28 @@ interface NavItemProps {
 
 const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
   return item.href.includes("http") ? (
-    <Disclosure.Button
-      as="a"
-      href={item.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="nav-button block text-base font-medium"
-    >
-      {item.name}
-    </Disclosure.Button>
-  ) : (
-    <Link href={item.href}>
+    <Disclosure>
       <Disclosure.Button
-        as="div"
-        className="nav-button block text-base font-medium"
+        as="a"
+        href={item.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center text-sm lg:text-base font-medium nav-button w-full"
       >
         {item.name}
       </Disclosure.Button>
-    </Link>
+    </Disclosure>
+  ) : (
+    <Disclosure>
+      <Disclosure.Button
+        as="a"
+        href={item.href}
+        rel="noopener noreferrer"
+        className="flex items-center text-sm lg:text-base font-medium nav-button w-full"
+      >
+        {item.name}
+      </Disclosure.Button>
+    </Disclosure>
   );
 };
 
@@ -130,7 +133,7 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
         <Link
           className={classNames(
             item.fancy
-              ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+              ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
               : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 dark:focus:bg-neutral-900 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
             "rounded-md text-base font-medium py-2 text-center",
           )}
