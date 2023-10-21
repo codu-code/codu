@@ -12,14 +12,11 @@ import { notFound } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
 import { api } from "@/server/trpc/server";
 import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
-import { type ResolvingMetadata, type Metadata } from "next";
+import { type Metadata } from "next";
 
 type Props = { params: { slug: string } };
 
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata,
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = params.slug;
 
   const post = await api.post.bySlug.query({
@@ -134,11 +131,7 @@ const ArticlePage = async ({ params }: Props) => {
         <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
           <BioBar author={post.user} />
           {post.showComments ? (
-            <CommentsArea
-              postId={post.id}
-              postOwnerId={post.userId}
-              slug={slug}
-            />
+            <CommentsArea postId={post.id} postOwnerId={post.userId} />
           ) : (
             <h3 className="py-10 italic text-lg">
               Comments are disabled for this post

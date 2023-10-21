@@ -3,107 +3,88 @@ import Flag from "../../icons/flag.svg";
 import { XIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
 import { signIn, useSession } from "next-auth/react";
-import { createCommentReportEmailTemplate } from "../../utils/createCommentReportEmailTemplate";
 import { api } from "@/server/trpc/react";
-import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEmailTemplate";
 import { Dialog } from "@headlessui/react";
 
-interface CommonProps {
-  name: string;
-}
+type Props = Post | Comment;
 
-interface Article extends CommonProps {
-  postTitle: string;
-  postId: string;
-  postUrl: string;
-  postUsername: string;
-}
+type Post = {
+  type: "post";
+  title: string;
+  id: string;
+};
 
-interface Comment extends CommonProps {
-  body: string;
+type Comment = {
+  type: "comment";
+  comment: string;
   id: number;
-  email: string | null;
-  slug: string;
-}
+};
 
-type Props = Article | Comment;
-
-export const ReportComments = (props: Props) => {
-  const { mutate: sendEmail } = api.emailReport.send.useMutation({
+export const ReportModal = (props: Props) => {
+  const { mutate: sendEmail } = api.report.send.useMutation({
     onSuccess: () => {
       toast.success("Report sent");
     },
     onError: () => {
-      toast.error(
-        "Oops, something went wrong, please send us a message on github https://github.com/codu-code/codu",
-      );
+      toast.error("Oops, something went wrong.");
     },
   });
 
   const { data: session } = useSession();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [comment, setComment] = useState("");
-  let textAreaRef = useRef(null);
+  const [reportBody, setReportBody] = useState("");
+  const textAreaRef = useRef(null);
+
+  const { type, id } = props;
+
+  const isComment = type === "comment" && typeof id === "number";
+  const isPost = type === "post" && typeof id === "string";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
 
-    if (!session) return signIn();
+    try {
+      if (!session) return signIn();
 
-    if ("postTitle" in props) {
-      const reportDetails = {
-        reportedById: session?.user?.id,
-        reportedByEmail: session?.user?.email,
-        reportedByUser: session?.user?.name,
-        reportedOnName: props.name,
-        postTitle: props.postTitle,
-        postId: props.postId,
-        postUrl: props.postUrl,
-        postUsername: props.postUsername,
-        commentMadeByReporter: comment,
-        timeReportSent: new Date(),
-      };
+      if (isComment) {
+        await sendEmail({
+          type,
+          body: reportBody,
+          id,
+        });
+      }
 
-      const htmlMessage = createArticleReportEmailTemplate(reportDetails);
-      const mailInputs = {
-        htmlMessage: htmlMessage,
-        subject: "A user has reported an article on Codú.co",
-      };
-      sendEmail(mailInputs);
-    } else {
-      const reportDetails = {
-        reportedById: session?.user?.id,
-        reportedByEmail: session?.user?.email,
-        reportedByUser: session?.user?.name,
-        reportedOnName: props.name,
-        reportedOnEmail: props.email,
-        reportedComment: props.body,
-        commentMadeByReporter: comment,
-        commentId: props.id,
-        timeReportSent: new Date(),
-        postLink: `https://codu.co/articles/${props.slug}`,
-      };
+      if (isPost) {
+        await sendEmail({
+          type,
+          body: reportBody,
+          id,
+        });
+      }
 
-      const htmlMessage = createCommentReportEmailTemplate(reportDetails);
-      const mailInputs = {
-        htmlMessage: htmlMessage,
-        subject: "A user has reported a comment on Codú.co",
-      };
-      sendEmail(mailInputs);
       setIsModalOpen(false);
-      setComment("");
+      setReportBody("");
+      setLoading(false);
+
+      if (!isComment && !isPost) {
+        throw new Error("Invalid report");
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try submit report again.");
     }
   };
-  const isComment = "body" in props;
 
   return (
     <>
       {isComment && (
         <button
           aria-label="flag comment"
-          onClick={(e) => {
+          onClick={() => {
             session ? setIsModalOpen(true) : signIn();
           }}
           className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
@@ -138,13 +119,13 @@ export const ReportComments = (props: Props) => {
 
               <Dialog.Description as="div">
                 <p className="m-4 ml-0">
-                  Is {!isComment ? "something in this article" : "this comment"}{" "}
+                  Is {isPost ? "something in this article" : "this comment"}{" "}
                   inappropriate?
                 </p>
                 <p className="border p-4  bg-neutral-700 text-zinc-200 rounded">
-                  <span>{!isComment ? "Article : " : "Comment : "}</span>
-                  {isComment && props.body}
-                  {!isComment && props.postTitle}
+                  <span>{isPost ? "Article : " : "Comment : "}</span>
+                  {isComment && props.comment}
+                  {isPost && props.title}
                 </p>
               </Dialog.Description>
 
@@ -160,19 +141,20 @@ export const ReportComments = (props: Props) => {
                   id="report-comment"
                   rows={3}
                   placeholder="type...."
-                  onChange={(e) => setComment(e.target.value)}
-                  value={comment}
+                  onChange={(e) => setReportBody(e.target.value)}
+                  value={reportBody}
                   className="rounded"
                   ref={textAreaRef}
                 />
 
                 <div className="flex justify-end text-sm mt-8">
                   <button
-                    className="primary-button"
+                    disabled={loading}
+                    className="primary-button uppercase"
                     type="submit"
                     onClick={handleSubmit}
                   >
-                    SUBMIT REPORT
+                    Submit report
                   </button>
                 </div>
               </form>

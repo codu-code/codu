@@ -13,7 +13,7 @@ import {
 import copy from "copy-to-clipboard";
 import { type Session } from "next-auth";
 import { signIn } from "next-auth/react";
-import { ReportComments } from "../Comments/ReportComments";
+import { ReportModal } from "../ReportModal/ReportModal";
 
 interface CopyToClipboardOption {
   label: string;
@@ -76,6 +76,7 @@ const ArticleMenu = ({
     try {
       await like({ postId, setLiked });
     } catch (err) {
+      // @TODO handle error
       console.error(err);
     }
   };
@@ -85,6 +86,7 @@ const ArticleMenu = ({
     try {
       await bookmark({ postId, setBookmarked });
     } catch (err) {
+      // @TODO handle error
       console.error(err);
     }
   };
@@ -182,13 +184,7 @@ const ArticleMenu = ({
                     </li>
 
                     <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
-                      <ReportComments
-                        postTitle={postTitle}
-                        name={postUsername}
-                        postId={postId}
-                        postUsername={postUsername}
-                        postUrl={postUrl}
-                      />
+                      <ReportModal type="post" title={postTitle} id={postId} />
                     </li>
                   </ul>
                 </div>

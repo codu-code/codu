@@ -1,15 +1,17 @@
-interface ReportDetails {
-  reportedById?: string;
-  reportedByEmail?: string | null;
-  reportedByUser?: string | null;
-  reportedOnName: string;
-  reportedOnEmail: string | null | undefined;
-  reportedComment: string | undefined;
-  commentId: number | undefined;
-  timeReportSent: Date;
-  postLink: string;
-  commentMadeByReporter: string;
-}
+type ReportDetails = {
+  reason: string;
+  url: string;
+  id: number;
+  email: string;
+  comment: string;
+  username: string;
+  userId: string;
+  reportedBy: {
+    username: string;
+    id: string;
+    email: string;
+  };
+};
 
 export const createCommentReportEmailTemplate = (
   reportDetails: ReportDetails,
@@ -17,34 +19,21 @@ export const createCommentReportEmailTemplate = (
   `
   <!DOCTYPE html>
   <html>
-  <head>
-    <title>Report details</title>
-  </head>
   <body>
     <div style="font-family: Arial, sans-serif;">
       <div style='padding:3rem; background-color:black; color:white;'>
-          <p>Details of reported comment:</p>
-          <a style="color:yellow" href="${reportDetails.postLink}">Post Link</a>
-          <p style='padding:3rem; border: 2px solid white;'>comment : ${
-            reportDetails.reportedComment || ""
-          }</p>
-          <p>commment made by user : ${reportDetails.reportedOnName || ""} </p>
-          <p>comment ID : ${reportDetails.commentId || ""}</p>
-          <p>users email : ${reportDetails.reportedOnEmail || ""} </p>   
-          <p>comment report timestamp : ${
-            reportDetails.timeReportSent || ""
-          } </p>
+          <p>Details of reported post: ${reportDetails.reason}</p>
+          <a style="color:yellow" href="${reportDetails.url}">Post Link</a>
+          <p style='padding:3rem; border: 2px solid white;'>Comment : ${reportDetails.comment}</p>
+          <p>commment made by user : ${reportDetails.comment} </p>
+          <p>comment ID : ${reportDetails.id}</p>
+          <p>Comment user information: Username - ${reportDetails.username}, Email - ${reportDetails.email}, User ID - ${reportDetails.userId} </p>   
       </div>
      <br>
      <br>
-     <br>
-     <br>
-     <p>Comment left by the reporter : ${
-       reportDetails.commentMadeByReporter || ""
-     } </p>
-     <p>reported by user : ${reportDetails.reportedByUser || ""}</p>
-     <p>users email : ${reportDetails.reportedByEmail || ""}</p>
-     <p>users id : ${reportDetails.reportedById || ""}</p>
+     <p>Comment left by the reporter : @${reportDetails.reportedBy.username} </p>
+     <p>users email : ${reportDetails.reportedBy.email}</p>
+     <p>users id : ${reportDetails.reportedBy.id}</p>
     </div>
   </body>
   </html>
