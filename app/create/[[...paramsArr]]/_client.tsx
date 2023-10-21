@@ -10,7 +10,6 @@ import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
 // @TODO fix PromptDialog
-// import { PromptDialog } from "../../../components/PromptService/PromptService";
 import { api } from "@/server/trpc/react";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -234,35 +233,8 @@ const Create = () => {
     if (isDirty) setUnsavedChanges(true);
   }, [title, body]);
 
-  // const handleOpenDialog = (res: string) => {
-  //   switch (res) {
-  //     case "initial":
-  //       setDelayDebounce(true);
-  //       break;
-  //     case "confirm":
-  //       setUnsavedChanges(false);
-  //       setDelayDebounce(false);
-  //       break;
-  //     case "cancel":
-  //       setDelayDebounce(false);
-  //       !published && savePost();
-  //       break;
-  //     default:
-  //       // setting allowUpdate in this case
-  //       setDelayDebounce(false);
-  //       setUnsavedChanges(true);
-  //   }
-  // };
-
   return (
     <>
-      {/* <PromptDialog
-          shouldConfirmLeave={unsavedChanges}
-          updateParent={handleOpenDialog}
-          title="Unsaved Changes"
-          subTitle="You have unsaved changes."
-          content="Changes that you have made will be lost."
-        /> */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
           <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-black">
