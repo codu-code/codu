@@ -89,6 +89,7 @@ export const footerNav = [
   { name: "Articles", href: "/articles" },
   { name: "Communities", href: "/communities" },
   { name: "Sponsorship", href: "/sponsorship" },
+  { name: "Code Of Conduct", href: "/code-of-conduct" },
 ];
 
 export const navigation = [
