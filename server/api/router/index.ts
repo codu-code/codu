@@ -4,7 +4,7 @@ import { profileRouter } from "./profile";
 import { commentRouter } from "./comment";
 import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
-import { emailReportRouter } from "./emailReport";
+import { reportRouter } from "./report";
 
 export const appRouter = createTRPCRouter({
   post: postRouter,
@@ -12,7 +12,7 @@ export const appRouter = createTRPCRouter({
   comment: commentRouter,
   notification: notificationRouter,
   admin: adminRouter,
-  emailReport: emailReportRouter,
+  report: reportRouter,
 });
 
 // export type definition of API
