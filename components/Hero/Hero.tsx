@@ -105,7 +105,7 @@ export default function Hero() {
           </h1>
           <div className="flex justify-center mt-12">
             <button
-              className="border-2 rounded-full p-4 animate-bounce bg-neutral-900 bg-opacity-60"
+              className="border-2 rounded-full p-4 animate-bounce bg-neutral-900 bg-opacity-60 focus-style-rounded"
               onClick={() => handleScroll("cta")}
             >
               <svg

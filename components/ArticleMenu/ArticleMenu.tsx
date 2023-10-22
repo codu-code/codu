@@ -1,14 +1,14 @@
 "use client";
 
-import React, { Fragment, useEffect, useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
+import React, { Fragment, useEffect, useState } from "react";
 
 import { api } from "@/server/trpc/react";
 
 import {
-  HeartIcon,
   BookmarkIcon,
   DotsHorizontalIcon,
+  HeartIcon,
 } from "@heroicons/react/outline";
 import copy from "copy-to-clipboard";
 import { type Session } from "next-auth";
@@ -132,7 +132,7 @@ const ArticleMenu = ({
           </div>
 
           <button
-            className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
+            className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800 focus-style-rounded"
             onClick={() => {
               if (!session) {
                 signIn();
