@@ -34,7 +34,7 @@ const tagsToShow = [
 const ArticlesPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const session = useSession();
+  const { data: session } = useSession();
   const filter = searchParams?.get("filter");
   const dirtyTag = searchParams?.get("tag");
 
@@ -188,7 +188,7 @@ const ArticlesPage = () => {
             </section>
           </div>
           <section className="col-span-4 lg:block hidden">
-            <div className="text-neutral-50 mt-4 mb-8 border border-neutral-600 bg-neutral-900">
+            <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
                   className="w-full"
@@ -218,7 +218,7 @@ const ArticlesPage = () => {
                 <Link
                   key={tag}
                   href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="bg-neutral-900 text-neutral-50 px-6 py-2 border border-neutral-600"
+                  className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-300 dark:border-neutral-600"
                 >
                   {tag}
                 </Link>
