@@ -204,17 +204,19 @@ const Nav = ({ session }: { session: Session | null }) => {
               </div>
               <div className="-mr-2 flex items-center md:hidden">
                 <ThemeToggle />
-                <Link
-                  title="Notifications"
-                  href="/notifications"
-                  className="relative group block nav-button focus-style"
-                >
-                  <span className="sr-only">View notifications</span>
-                  {hasNotifications && (
-                    <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-600 right-1 top-1" />
-                  )}
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </Link>
+                {session && (
+                  <Link
+                    title="Notifications"
+                    href="/notifications"
+                    className="relative group block nav-button focus-style"
+                  >
+                    <span className="sr-only">View notifications</span>
+                    {hasNotifications && (
+                      <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                    )}
+                    <BellIcon className="h-6 w-6" aria-hidden="true" />
+                  </Link>
+                )}
                 {/* Mobile menu button */}
                 <Disclosure.Button className="group nav-button focus-style">
                   <span className="sr-only">Open main menu</span>
