@@ -38,7 +38,7 @@ body {
   }
 
   a {
-    @apply focus-style p-1;
+    @apply focus-style;
   }
 
   label {
@@ -51,15 +51,15 @@ body {
 }
 
 .focus-style {
-  @apply rounded-md shadow-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-pink-600 focus:ring-inset focus:ring-offset-2 focus:ring-offset-pink-600 focus:ring-white focus:outline-none focus:ring-2;
+  @apply rounded-md shadow-sm focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
 }
 
 .focus-style-rounded {
-  @apply rounded-full shadow-sm focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-pink-600 focus:ring-inset focus:ring-offset-2 focus:ring-offset-pink-600 focus:ring-white focus:outline-none focus:ring-2;
+  @apply rounded-full shadow-sm focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
 }
 
 .primary-button {
-  @apply items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 disabled:from-neutral-500 disabled:to-neutral-700 disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:text-neutral-300 transition-colors focus-style;
+  @apply disabled:from-neutral-500 disabled:to-neutral-700 disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:text-neutral-300 ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-white  focus:outline-none;
 }
 
 .logo-focus {
