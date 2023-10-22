@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 export const metadata = {
   title: "🚨 WIP - Things will break",
   robots: {
@@ -7,5 +9,8 @@ export const metadata = {
 };
 
 export default function Alpha({ children }: { children: ChildNode }) {
-  return <>{children}</>;
+  if (process.env.ALPHA || process.env.NODE_ENV === "development") {
+    return <>{children}</>;
+  }
+  notFound();
 }
