@@ -29,14 +29,13 @@ const Create = () => {
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
-  const [showComments, setShowComments] = useState<boolean>(true);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-  const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
-  const allowUpdate = unsavedChanges && !delayDebounce;
+
+  const allowUpdate = unsavedChanges;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useMarkdownHotkeys(textareaRef);
@@ -54,7 +53,6 @@ const Create = () => {
     defaultValues: {
       title: "",
       body: "",
-      showComments: true,
     },
   });
 
@@ -206,9 +204,8 @@ const Create = () => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags, showComments } = data;
+    const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    setShowComments(showComments);
     reset({ body, excerpt, title, id });
   }, [data]);
 
@@ -338,21 +335,6 @@ const Create = () => {
                               elsewhere and you want to link to it as the
                               original source.
                             </p>
-                          </Disclosure.Panel>
-                          <Disclosure.Panel className="pt-4 pb-2">
-                            <label htmlFor="canonicalUrl">
-                              Show comments on your post
-                            </label>
-                            <input
-                              id="showComments"
-                              type="checkbox"
-                              checked={showComments}
-                              {...register("showComments", {
-                                onChange: (e) =>
-                                  setShowComments(e.target.checked),
-                                value: showComments,
-                              })}
-                            />
                           </Disclosure.Panel>
                         </>
                       )}
