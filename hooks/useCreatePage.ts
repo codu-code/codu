@@ -202,6 +202,10 @@ function useCreatePage({
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const { value } = e.target;
+    const isTitleElement = e.target.dataset.type === "title";
+    if (isTitleElement) {
+      return;
+    }
     setTagValue(value);
   };
 
