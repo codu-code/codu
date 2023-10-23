@@ -36,15 +36,7 @@ export const postRouter = createTRPCRouter({
   update: protectedProcedure
     .input(SavePostSchema)
     .mutation(async ({ input, ctx }) => {
-      const {
-        id,
-        body,
-        title,
-        excerpt,
-        canonicalUrl,
-        tags = [],
-        showComments,
-      } = input;
+      const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
 
       const currentPost = await ctx.db.post.findUnique({
         where: { id },
@@ -105,7 +97,6 @@ export const postRouter = createTRPCRouter({
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
           canonicalUrl,
-          showComments,
         },
       });
       return post;
