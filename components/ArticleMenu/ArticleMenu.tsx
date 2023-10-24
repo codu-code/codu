@@ -109,7 +109,7 @@ const ArticleMenu = ({
       enterFrom="transform opacity-0 scale-75"
       enterTo="transform opacity-100 scale-100"
     >
-      <div className="bg-neutral-100 dark:bg-neutral-900 border-t border-neutral-700 fixed lg:w-20 lg:border-r lg:border-b bottom-0 w-full py-2 z-20 lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
+      <div className="bg-white dark:bg-neutral-900 border-t border-neutral-700 fixed lg:w-20 lg:border-r lg:border-b bottom-0 w-full py-2 z-20 lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
         <div className="flex justify-evenly lg:flex-col h-full">
           <div className="flex items-center lg:flex-col">
             <button
