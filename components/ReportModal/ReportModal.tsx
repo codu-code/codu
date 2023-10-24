@@ -94,14 +94,12 @@ export const ReportModal = (props: Props) => {
       )}
 
       {!isComment && (
-        <div className="w-full">
-          <button
-            onClick={() => (session ? setIsModalOpen(true) : signIn())}
-            className="rounded text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
-          >
-            Report Article
-          </button>
-        </div>
+        <button
+          onClick={() => (session ? setIsModalOpen(true) : signIn())}
+          className="w-full rounded text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
+        >
+          <div className="w-ful text-left">Report Article</div>
+        </button>
       )}
 
       <Dialog
