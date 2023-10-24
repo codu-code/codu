@@ -108,6 +108,7 @@ export const ReportModal = (props: Props) => {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialFocus={textAreaRef}
+        className="relative z-50"
       >
         <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
         <div className="fixed inset-0 flex w-screen items-center justify-center">
