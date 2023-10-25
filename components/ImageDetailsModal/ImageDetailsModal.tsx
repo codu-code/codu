@@ -1,5 +1,6 @@
 import { Editor } from "@tiptap/core";
 import {
+  BaseSyntheticEvent,
   ChangeEvent,
   Dispatch,
   FormEvent,
@@ -8,7 +9,7 @@ import {
 } from "react";
 import { Modal } from "@/components/Modal/Modal";
 import { XIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { FieldValues, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -23,6 +24,8 @@ const imageDetailsSchema = z.object({
   alt: z.string({ required_error: "An alt description is required" }),
   title: z.string({ required_error: "A title is required" }),
 });
+
+type ImageDetailsSchema = z.infer<typeof imageDetailsSchema>;
 
 interface Props {
   setIsImageDetailsModalOpen: Dispatch<SetStateAction<boolean>>;
@@ -79,9 +82,31 @@ export default function ImageDetailsModal(props: Props) {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm({
+  } = useForm<ImageDetailsSchema>({
     resolver: zodResolver(imageDetailsSchema),
   });
+
+  type Submit = {
+    data: ImageDetailsSchema;
+    event: BaseSyntheticEvent<object, any, any> | undefined;
+  };
+
+  const onSubmit = ({ data, event }: Submit) => {
+    event?.stopPropagation();
+
+    console.log(data.src);
+    console.log(data.alt);
+    console.log(data.title);
+
+    editor
+      ?.chain()
+      .focus()
+      .setImage({ src: data.src, alt: data.alt, title: data.title })
+      .run();
+
+    reset();
+    setIsImageDetailsModalOpen(false);
+  };
 
   return (
     <Modal
@@ -100,7 +125,9 @@ export default function ImageDetailsModal(props: Props) {
           </button>
         </div>
 
-        <form>
+        <form
+          onSubmit={handleSubmit((data, event) => onSubmit({ data, event }))}
+        >
           <div>
             <label htmlFor="src">Image URL:</label>
             <input
@@ -110,6 +137,7 @@ export default function ImageDetailsModal(props: Props) {
               name="src"
               placeholder="Enter image URL..."
             />
+            {errors && <p>{errors.src?.message}</p>}
           </div>
 
           <div>
@@ -121,6 +149,7 @@ export default function ImageDetailsModal(props: Props) {
               name="alt"
               placeholder="Enter an alt description..."
             />
+            {errors && <p>{errors.alt?.message}</p>}
           </div>
 
           <div>
@@ -132,6 +161,7 @@ export default function ImageDetailsModal(props: Props) {
               name="title"
               placeholder="Enter a title..."
             />
+            {errors && <p>{errors.title?.message}</p>}
           </div>
 
           <button type="submit">Submit</button>

@@ -26,13 +26,14 @@ import {
   YoutubeIcon,
   TableIcon,
 } from "lucide-react";
-import ImageDetailsModal from "@/components/ImageDetailsModal/ImageDetailsModal";
 
 // import { NodeSelector } from "./node-selector";
 // import { LinkSelector } from "./link-selector";
 import { cn } from "@/utils/utils";
 import ToolBarItemButton from "./ToolbarItemButton";
 // import TableMenuBar from "../Table/TableMenuBar";
+
+import ImageDetailsModal from "@/components/ImageDetailsModal/ImageDetailsModal";
 
 type ToolbarProps = Omit<BubbleMenuProps, "children">;
 
@@ -46,7 +47,6 @@ export interface ToolbarItem {
 function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [isTableEditing, setIsTableEditing] = useState(false);
-
   const [isImageDetailsModalOpen, setIsImageDetailsModalOpen] = useState(false);
 
   const isRootNode = () => {
