@@ -8,6 +8,21 @@ import {
 } from "react";
 import { Modal } from "@/components/Modal/Modal";
 import { XIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const imageDetailsSchema = z.object({
+  src: z
+    .string({
+      required_error: "A URL is required",
+      invalid_type_error: "Must be a valid URL",
+    })
+    .trim()
+    .url(),
+  alt: z.string({ required_error: "An alt description is required" }),
+  title: z.string({ required_error: "A title is required" }),
+});
 
 interface Props {
   setIsImageDetailsModalOpen: Dispatch<SetStateAction<boolean>>;
@@ -15,48 +30,58 @@ interface Props {
   editor?: Editor;
 }
 
-interface ImageDetails {
-  src: string;
-  alt: string;
-  title: string;
-}
+// interface ImageDetails {
+//   src: string;
+//   alt: string;
+//   title: string;
+// }
 
 export default function ImageDetailsModal(props: Props) {
   const { isImageDetailsModalOpen, setIsImageDetailsModalOpen, editor } = props;
 
-  const [imgDetails, setImgDetails] = useState<ImageDetails>({
-    src: "",
-    alt: "",
-    title: "",
+  // const [imgDetails, setImgDetails] = useState<ImageDetails>({
+  //   src: "",
+  //   alt: "",
+  //   title: "",
+  // });
+
+  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setImgDetails({ ...imgDetails, [name]: value });
+  // };
+
+  // const handleSubmitold = (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+
+  //   // const addImage = useCallback(() => {
+  //   const url = imgDetails.src;
+  //   const alt = imgDetails.alt;
+  //   const title = imgDetails.title;
+
+  //   console.log("all3", url, alt, title);
+
+  //   if (url) {
+  //     console.log(imgDetails);
+  //     console.log(editor);
+  //     editor
+  //       ?.chain()
+  //       .focus()
+  //       .setImage({ src: url, alt: alt, title: title })
+  //       .run();
+  //   }
+
+  //   setIsImageDetailsModalOpen(false);
+  // };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    resolver: zodResolver(imageDetailsSchema),
   });
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setImgDetails({ ...imgDetails, [name]: value });
-  };
-
-  // console.log(imgDetails);
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // const addImage = useCallback(() => {
-    const url = imgDetails.src;
-    const alt = imgDetails.alt;
-    const title = imgDetails.title;
-
-    if (url) {
-      console.log(imgDetails);
-      console.log(editor);
-      editor
-        ?.chain()
-        .focus()
-        .setImage({ src: url, alt: alt, title: title })
-        .run();
-    }
-
-    setIsImageDetailsModalOpen(false);
-  };
 
   return (
     <Modal
@@ -75,46 +100,42 @@ export default function ImageDetailsModal(props: Props) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form>
           <div>
             <label htmlFor="src">Image URL:</label>
             <input
-              type="text"
+              {...register("src")}
+              type="url "
               id="src"
               name="src"
-              value={imgDetails.src}
-              onChange={handleChange}
-              required
+              placeholder="Enter image URL..."
             />
           </div>
 
           <div>
             <label htmlFor="alt">Alt Text:</label>
             <input
+              {...register("alt")}
               type="text"
               id="alt"
               name="alt"
-              value={imgDetails.alt}
-              onChange={handleChange}
-              required
+              placeholder="Enter an alt description..."
             />
           </div>
 
           <div>
             <label htmlFor="title">Title:</label>
             <input
+              {...register("title")}
               type="text"
               id="title"
               name="title"
-              value={imgDetails.title}
-              onChange={handleChange}
+              placeholder="Enter a title..."
             />
           </div>
 
           <button type="submit">Submit</button>
         </form>
-
-        <div>this is the image modal</div>
       </>
     </Modal>
   );
