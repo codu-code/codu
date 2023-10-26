@@ -13,6 +13,7 @@ import { XIcon } from "lucide-react";
 import { FieldValues, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Dialog } from "@headlessui/react";
 
 const imageDetailsSchema = z.object({
   src: z
@@ -34,49 +35,8 @@ interface Props {
   editor?: Editor;
 }
 
-// interface ImageDetails {
-//   src: string;
-//   alt: string;
-//   title: string;
-// }
-
 export default function ImageDetailsModal(props: Props) {
   const { isImageDetailsModalOpen, setIsImageDetailsModalOpen, editor } = props;
-
-  // const [imgDetails, setImgDetails] = useState<ImageDetails>({
-  //   src: "",
-  //   alt: "",
-  //   title: "",
-  // });
-
-  // const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-  //   setImgDetails({ ...imgDetails, [name]: value });
-  // };
-
-  // const handleSubmitold = (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-
-  //   // const addImage = useCallback(() => {
-  //   const url = imgDetails.src;
-  //   const alt = imgDetails.alt;
-  //   const title = imgDetails.title;
-
-  //   console.log("all3", url, alt, title);
-
-  //   if (url) {
-  //     console.log(imgDetails);
-  //     console.log(editor);
-  //     editor
-  //       ?.chain()
-  //       .focus()
-  //       .setImage({ src: url, alt: alt, title: title })
-  //       .run();
-  //   }
-
-  //   setIsImageDetailsModalOpen(false);
-  // };
 
   const {
     register,
@@ -92,39 +52,40 @@ export default function ImageDetailsModal(props: Props) {
     event: BaseSyntheticEvent<object, any, any> | undefined;
   };
 
-  const onSubmit = useCallback(
-    ({ data, event }: Submit) => {
-      event?.stopPropagation();
-      console.log(event?.isPropagationStopped());
-      // console.log(event?.bubbles,'bubbles')
+  const onSubmit = ({ data, event }: Submit) => {
+    // event?.stopPropagation();
 
-      console.log(data.src);
-      console.log(data.alt);
-      console.log(data.title);
-      // console.log(event?.preventDefault())
+    console.log(data.src);
+    console.log(data.alt);
+    console.log(data.title);
 
-      editor
-        ?.chain()
-        .focus()
-        .setImage({ src: data.src, alt: data.alt, title: data.title })
-        .run();
+    editor
+      ?.chain()
+      .focus()
+      .setImage({ src: data.src, alt: data.alt, title: data.title })
+      .run();
 
-      // reset();
-      // setIsImageDetailsModalOpen(false);
-    },
-    [editor],
-  );
-
-  if (!editor) {
-    return null;
-  }
+    reset();
+    setIsImageDetailsModalOpen(false);
+  };
 
   return (
     <Modal
       open={isImageDetailsModalOpen}
-      onClose={() => setIsImageDetailsModalOpen(false)}
+      onClose={() => {
+        reset();
+        setIsImageDetailsModalOpen(false);
+      }}
     >
       <>
+        <Dialog.Title className="text-lg text-center mb-4">
+          Image details
+        </Dialog.Title>
+
+        <Dialog.Description className="mb-4">
+          Please enter a URL for the image, along with an alt description and a
+          title.
+        </Dialog.Description>
         <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
           <button
             type="button"
@@ -137,13 +98,13 @@ export default function ImageDetailsModal(props: Props) {
         </div>
 
         <form
-          onSubmit={handleSubmit((data, event) => onSubmit({ data, event }))}
+        // onSubmit={handleSubmit((data, event) => onSubmit({ data, event }))}
         >
           <div>
             <label htmlFor="src">Image URL:</label>
             <input
               {...register("src")}
-              type="url "
+              type="text"
               id="src"
               name="src"
               placeholder="Enter image URL..."
@@ -175,7 +136,15 @@ export default function ImageDetailsModal(props: Props) {
             {errors && <p>{errors.title?.message}</p>}
           </div>
 
-          <button type="submit">Submit</button>
+          <div className="w-full flex justify-end mt-4">
+            <button
+              type="submit"
+              className="disabled:opacity-50 rounded ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+              onClick={handleSubmit((data, event) => onSubmit({ data, event }))}
+            >
+              Submit
+            </button>
+          </div>
         </form>
       </>
     </Modal>
