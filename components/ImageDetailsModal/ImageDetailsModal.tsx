@@ -5,6 +5,7 @@ import {
   Dispatch,
   FormEvent,
   SetStateAction,
+  useCallback,
   useState,
 } from "react";
 import { Modal } from "@/components/Modal/Modal";
@@ -91,22 +92,32 @@ export default function ImageDetailsModal(props: Props) {
     event: BaseSyntheticEvent<object, any, any> | undefined;
   };
 
-  const onSubmit = ({ data, event }: Submit) => {
-    event?.stopPropagation();
+  const onSubmit = useCallback(
+    ({ data, event }: Submit) => {
+      event?.stopPropagation();
+      console.log(event?.isPropagationStopped());
+      // console.log(event?.bubbles,'bubbles')
 
-    console.log(data.src);
-    console.log(data.alt);
-    console.log(data.title);
+      console.log(data.src);
+      console.log(data.alt);
+      console.log(data.title);
+      // console.log(event?.preventDefault())
 
-    editor
-      ?.chain()
-      .focus()
-      .setImage({ src: data.src, alt: data.alt, title: data.title })
-      .run();
+      editor
+        ?.chain()
+        .focus()
+        .setImage({ src: data.src, alt: data.alt, title: data.title })
+        .run();
 
-    reset();
-    setIsImageDetailsModalOpen(false);
-  };
+      // reset();
+      // setIsImageDetailsModalOpen(false);
+    },
+    [editor],
+  );
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <Modal
