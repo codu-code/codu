@@ -17,14 +17,19 @@ import { Dialog } from "@headlessui/react";
 
 const imageDetailsSchema = z.object({
   src: z
-    .string({
-      required_error: "A URL is required",
-      invalid_type_error: "Must be a valid URL",
-    })
+    .string()
     .trim()
-    .url(),
-  alt: z.string({ required_error: "An alt description is required" }),
-  title: z.string({ required_error: "A title is required" }),
+    .url()
+    .refine((value) => {
+      const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+      return urlPattern.test(value);
+    }),
+  alt: z
+    .string()
+    .refine((value) => value !== "", { message: "An alt value is required" }),
+  title: z
+    .string()
+    .refine((value) => value !== "", { message: "A title is required" }),
 });
 
 type ImageDetailsSchema = z.infer<typeof imageDetailsSchema>;
