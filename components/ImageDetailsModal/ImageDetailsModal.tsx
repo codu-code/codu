@@ -52,8 +52,6 @@ export default function ImageDetailsModal(props: Props) {
     setIsImageDetailsModalOpen(false);
   };
 
-  const urlInputRef = useRef(null);
-
   return (
     <Modal
       open={isImageDetailsModalOpen}
@@ -61,7 +59,6 @@ export default function ImageDetailsModal(props: Props) {
         reset();
         setIsImageDetailsModalOpen(false);
       }}
-      initialFocusRef={urlInputRef}
     >
       <>
         <Dialog.Title className="text-lg text-center mb-4">
@@ -75,7 +72,7 @@ export default function ImageDetailsModal(props: Props) {
         <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
           <button
             type="button"
-            className="bg-neutral-900 text-neutral-400 hover:text-neutral-500 focus:outline-none"
+            className="bg-neutral-900 text-neutral-400 hover:text-neutral-200 focus:text-neutral-200"
             onClick={() => {
               setIsImageDetailsModalOpen(false);
               reset();
@@ -104,7 +101,6 @@ export default function ImageDetailsModal(props: Props) {
               id="src"
               name="src"
               placeholder="Enter image URL..."
-              ref={urlInputRef}
             />
             {errors && (
               <p className="text-right text-red-600 mt-2">
