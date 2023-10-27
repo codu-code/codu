@@ -1,29 +1,18 @@
+import { Dispatch, SetStateAction, useRef } from "react";
 import { Editor } from "@tiptap/core";
-import {
-  BaseSyntheticEvent,
-  ChangeEvent,
-  Dispatch,
-  FormEvent,
-  SetStateAction,
-  useCallback,
-  useState,
-} from "react";
 import { Modal } from "@/components/Modal/Modal";
 import { XIcon } from "lucide-react";
-import { FieldValues, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { Dialog } from "@headlessui/react";
 
 const imageDetailsSchema = z.object({
   src: z
     .string()
     .trim()
-    .url()
-    .refine((value) => {
-      const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-      return urlPattern.test(value);
-    }),
+    .min(1, { message: "A URL is required." })
+    .url({ message: "Must be a valid URL" }),
   alt: z
     .string()
     .refine((value) => value !== "", { message: "An alt value is required" }),
@@ -52,18 +41,7 @@ export default function ImageDetailsModal(props: Props) {
     resolver: zodResolver(imageDetailsSchema),
   });
 
-  type Submit = {
-    data: ImageDetailsSchema;
-    event: BaseSyntheticEvent<object, any, any> | undefined;
-  };
-
-  const onSubmit = ({ data, event }: Submit) => {
-    // event?.stopPropagation();
-
-    console.log(data.src);
-    console.log(data.alt);
-    console.log(data.title);
-
+  const onSubmit = (data: ImageDetailsSchema) => {
     editor
       ?.chain()
       .focus()
@@ -74,6 +52,8 @@ export default function ImageDetailsModal(props: Props) {
     setIsImageDetailsModalOpen(false);
   };
 
+  const urlInputRef = useRef(null);
+
   return (
     <Modal
       open={isImageDetailsModalOpen}
@@ -81,6 +61,7 @@ export default function ImageDetailsModal(props: Props) {
         reset();
         setIsImageDetailsModalOpen(false);
       }}
+      initialFocusRef={urlInputRef}
     >
       <>
         <Dialog.Title className="text-lg text-center mb-4">
@@ -95,7 +76,10 @@ export default function ImageDetailsModal(props: Props) {
           <button
             type="button"
             className="bg-neutral-900 text-neutral-400 hover:text-neutral-500 focus:outline-none"
-            onClick={() => setIsImageDetailsModalOpen(false)}
+            onClick={() => {
+              setIsImageDetailsModalOpen(false);
+              reset();
+            }}
           >
             <span className="sr-only">Close</span>
             <XIcon className="h-6 w-6" aria-hidden="true" />
@@ -103,7 +87,14 @@ export default function ImageDetailsModal(props: Props) {
         </div>
 
         <form
+        // onSubmit={handleSubmit(onSubmit)}
+
         // onSubmit={handleSubmit((data, event) => onSubmit({ data, event }))}
+
+        // onSubmit={e=>{
+        //   e.stopPropagation();
+        //   handleSubmit((data) => onSubmit( data ))}
+        // }
         >
           <div>
             <label htmlFor="src">Image URL:</label>
@@ -113,8 +104,13 @@ export default function ImageDetailsModal(props: Props) {
               id="src"
               name="src"
               placeholder="Enter image URL..."
+              ref={urlInputRef}
             />
-            {errors && <p>{errors.src?.message}</p>}
+            {errors && (
+              <p className="text-right text-red-600 mt-2">
+                {errors.src?.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -126,7 +122,11 @@ export default function ImageDetailsModal(props: Props) {
               name="alt"
               placeholder="Enter an alt description..."
             />
-            {errors && <p>{errors.alt?.message}</p>}
+            {errors && (
+              <p className="text-right text-red-600 mt-2">
+                {errors.alt?.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -138,14 +138,19 @@ export default function ImageDetailsModal(props: Props) {
               name="title"
               placeholder="Enter a title..."
             />
-            {errors && <p>{errors.title?.message}</p>}
+            {errors && (
+              <p className="text-right text-red-600 mt-2">
+                {errors.title?.message}
+              </p>
+            )}
           </div>
 
           <div className="w-full flex justify-end mt-4">
             <button
               type="submit"
+              disabled={isSubmitting}
               className="disabled:opacity-50 rounded ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
-              onClick={handleSubmit((data, event) => onSubmit({ data, event }))}
+              onClick={handleSubmit(onSubmit)}
             >
               Submit
             </button>
