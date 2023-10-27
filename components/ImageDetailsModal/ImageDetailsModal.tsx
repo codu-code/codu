@@ -69,30 +69,7 @@ export default function ImageDetailsModal(props: Props) {
           Please enter a URL for the image, along with an alt description and a
           title.
         </Dialog.Description>
-        <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
-          <button
-            type="button"
-            className="bg-neutral-900 text-neutral-400 hover:text-neutral-200 focus:text-neutral-200"
-            onClick={() => {
-              setIsImageDetailsModalOpen(false);
-              reset();
-            }}
-          >
-            <span className="sr-only">Close</span>
-            <XIcon className="h-6 w-6" aria-hidden="true" />
-          </button>
-        </div>
-
-        <form
-        // onSubmit={handleSubmit(onSubmit)}
-
-        // onSubmit={handleSubmit((data, event) => onSubmit({ data, event }))}
-
-        // onSubmit={e=>{
-        //   e.stopPropagation();
-        //   handleSubmit((data) => onSubmit( data ))}
-        // }
-        >
+        <form>
           <div>
             <label htmlFor="src">Image URL:</label>
             <input
@@ -150,6 +127,19 @@ export default function ImageDetailsModal(props: Props) {
             >
               Submit
             </button>
+            <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
+              <button
+                type="button"
+                className="bg-neutral-900 text-neutral-400 hover:text-neutral-200 focus:text-neutral-200"
+                onClick={() => {
+                  setIsImageDetailsModalOpen(false);
+                  reset();
+                }}
+              >
+                <span className="sr-only">Close</span>
+                <XIcon className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </form>
       </>

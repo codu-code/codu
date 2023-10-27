@@ -86,6 +86,11 @@ function Toolbar({ editor }: ToolbarProps) {
 
   return (
     <div className={`${styles.sticky} bg-neutral-900`}>
+      <ImageDetailsModal
+        isImageDetailsModalOpen={isImageDetailsModalOpen}
+        setIsImageDetailsModalOpen={setIsImageDetailsModalOpen}
+        editor={editor}
+      />
       <div className={styles.flex}>
         <div
           className={styles.menu}
@@ -414,11 +419,6 @@ function Toolbar({ editor }: ToolbarProps) {
                 }
               />
             </>
-            <ImageDetailsModal
-              isImageDetailsModalOpen={isImageDetailsModalOpen}
-              setIsImageDetailsModalOpen={setIsImageDetailsModalOpen}
-              editor={editor}
-            />
             <ToolBarItemButton
               title="Image"
               isRootNode={isRootNode}
