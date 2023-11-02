@@ -53,10 +53,10 @@ model Post {
 }
 
 model Tag {
-  createdAt DateTime  @default(now())
-  id        Int       @id @default(autoincrement())
-  title     String    @unique @db.VarChar(20)
-  PostTag   PostTag[]
+  createdAt    DateTime       @default(now())
+  id           Int            @id @default(autoincrement())
+  title        String         @unique @db.VarChar(20)
+  PostTag      PostTag[]
 }
 
 model PostTag {
@@ -104,6 +104,8 @@ model User {
   bans               BannedUsers[]  @relation("bannedBy")
   Flagged            Flagged[]
   flaggedNotifier    Flagged[]      @relation("notifier")
+  RSVP               RSVP[]
+  memberships        Membership[]
 
   @@index(fields: [username, id])
 }
@@ -202,4 +204,50 @@ model Flagged {
   post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
   notifier   User?    @relation(name: "notifier", fields: [notifierId], references: [id], onDelete: Cascade)
+}
+
+model Community {
+  id          String         @id @unique
+  name        String
+  city        String
+  country     String
+  coverImage  String
+  description String         @db.Text()
+  excerpt     String         @default("") @db.VarChar(156)
+  slug        String         @unique
+  events      Event[]
+  members     Membership[]
+}
+
+model Event {
+  id          String    @id @unique
+  eventDate   DateTime
+  name        String
+  coverImage  String
+  address     String
+  capacity    Int
+  description String    @db.Text()
+  slug        String    @unique
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  communityId String
+  RSVP        RSVP[]
+}
+
+model Membership {
+  id               String @id @unique
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  community        Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  communityId      String
+  isEventOrganiser Boolean
+  createdAt  DateTime @default(now())
+}
+
+model RSVP {
+  id      String @id @unique
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+  createdAt  DateTime @default(now())
 }

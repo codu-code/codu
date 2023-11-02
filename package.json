@@ -59,6 +59,7 @@
     "fathom-client": "^3.5.0",
     "framer-motion": "^10.16.1",
     "html-react-parser": "^3.0.16",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.268.0",
     "nanoid": "^4.0.2",
     "next": "^13.4.19",

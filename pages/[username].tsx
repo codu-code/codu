@@ -3,7 +3,7 @@ import type {
   InferGetServerSidePropsType,
   GetServerSidePropsContext,
 } from "next";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -15,6 +15,9 @@ import { LinkIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/react";
 import { trpc } from "../utils/trpc";
 import { useRouter } from "next/router";
+import { Tabs } from "@/components/Tabs";
+import EventPreview from "@/components/EventPreview/EventPreview";
+import CommunityPreview from "@/components/CommunityPreview/CommunityPreview";
 
 const Profile: NextPage = ({
   profile,
@@ -28,6 +31,8 @@ const Profile: NextPage = ({
     },
   });
 
+  const [selectedTab, setSelectedTab] = useState("articles");
+
   const { mutate: unbanUser } = trpc.admin.unban.useMutation({
     onSettled() {
       router.reload();
@@ -36,8 +41,18 @@ const Profile: NextPage = ({
 
   if (!profile) return null; // Should never happen because of serverside fetch or redirect
 
-  const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
-    profile;
+  const {
+    name,
+    username,
+    image,
+    bio,
+    posts,
+    websiteUrl,
+    id,
+    accountLocked,
+    RSVP,
+    memberships,
+  } = profile;
 
   const handleBanSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -54,6 +69,24 @@ const Profile: NextPage = ({
       console.error(error);
     }
   };
+
+  const tabs = [
+    {
+      id: "articles",
+      title: "Published articles",
+      subtitle: `(${posts.length})`,
+    },
+    {
+      id: "events",
+      title: "Events",
+      subtitle: `(${RSVP.length})`,
+    },
+    {
+      id: "communities",
+      title: "Communities",
+      subtitle: `(${memberships.length})`,
+    },
+  ];
 
   return (
     <>
@@ -114,50 +147,122 @@ const Profile: NextPage = ({
               <h1>Account locked 🔒</h1>
             </div>
           ) : (
-            <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-50">
-              <h1>Published articles</h1>
-              <span className="font-light">({posts.length})</span>
+            <div className="mx-auto lg:max-w-5xl sm:max-w-2xl">
+              <div className="flex justify-between items-center pt-4">
+                <Tabs
+                  tabs={tabs}
+                  selectedTab={selectedTab}
+                  onTabSelected={(tabId) => setSelectedTab(tabId)}
+                />
+              </div>
             </div>
           )}
-
-          {posts.length ? (
-            posts.map(
-              ({ slug, title, excerpt, readTimeMins, published, id }) => {
-                if (!published) return;
+          {(() => {
+            switch (selectedTab) {
+              case "articles":
                 return (
-                  <ArticlePreview
-                    key={slug}
-                    slug={slug}
-                    title={title}
-                    excerpt={excerpt}
-                    name={name}
-                    username={username || ""}
-                    image={image}
-                    date={published}
-                    readTime={readTimeMins}
-                    menuOptions={
-                      isOwner
-                        ? [
-                            {
-                              label: "Edit",
-                              href: `/create/${id}`,
-                              postId: id,
-                            },
-                          ]
-                        : undefined
-                    }
-                    showBookmark={!isOwner}
-                    id={id}
-                  />
+                  <div>
+                    {posts.length ? (
+                      posts.map(
+                        ({
+                          slug,
+                          title,
+                          excerpt,
+                          readTimeMins,
+                          published,
+                          id,
+                        }) => {
+                          if (!published) return;
+                          return (
+                            <ArticlePreview
+                              key={slug}
+                              slug={slug}
+                              title={title}
+                              excerpt={excerpt}
+                              name={name}
+                              username={username || ""}
+                              image={image}
+                              date={published}
+                              readTime={readTimeMins}
+                              menuOptions={
+                                isOwner
+                                  ? [
+                                      {
+                                        label: "Edit",
+                                        href: `/create/${id}`,
+                                        postId: id,
+                                      },
+                                    ]
+                                  : undefined
+                              }
+                              showBookmark={!isOwner}
+                              id={id}
+                            />
+                          );
+                        }
+                      )
+                    ) : (
+                      <p className="font-medium py-4">
+                        Nothing published yet... 🥲
+                      </p>
+                    )}
+                  </div>
                 );
-              }
-            )
-          ) : (
-            <p className="font-medium py-4">Nothing published yet... 🥲</p>
-          )}
+              case "events":
+                return (
+                  <>
+                    {RSVP.map(({ event }) => (
+                      <EventPreview
+                        key={event.name}
+                        id={event.id}
+                        address={event.address}
+                        eventSlug={event.slug}
+                        communitySlug={event.community.slug}
+                        name={event.name}
+                        description={event.description}
+                        eventDate={event.eventDate.toISOString()}
+                        attendees={RSVP.length}
+                        coverImage={event.coverImage}
+                        commnunityName={event.community.name}
+                      />
+                    ))}
+                    {memberships.length === 0 ? (
+                      <p className="font-medium py-4">
+                        You have not joined an event yet... 🥲
+                      </p>
+                    ) : null}
+                  </>
+                );
+              case "communities":
+                return (
+                  <>
+                    {memberships.map(({ community }) => (
+                      <CommunityPreview
+                        key={community.id}
+                        id={community.id}
+                        slug={community.slug}
+                        name={community.name}
+                        excerpt={community.excerpt}
+                        image={community.coverImage}
+                        city={community.city}
+                        country={community.country}
+                        membersCount={community.members.length}
+                      />
+                    ))}
+                    {memberships.length === 0 ? (
+                      <p className="font-medium py-4">
+                        You have not joined a community yet... 🥲
+                      </p>
+                    ) : null}
+                  </>
+                );
+              default:
+                return null;
+            }
+          })()}
         </div>
       </Layout>
-      {session && session.user.role === "ADMIN" && (
+      {session && session.user && session.user.role === "ADMIN" && (
         <div className="border-t-2 text-center pb-8">
           <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
           {accountLocked ? (
@@ -223,6 +328,24 @@ export const getServerSideProps = async (
       image: true,
       id: true,
       websiteUrl: true,
+      RSVP: {
+        select: {
+          event: {
+            include: {
+              community: true,
+            },
+          },
+        },
+      },
+      memberships: {
+        select: {
+          community: {
+            include: {
+              members: true,
+            },
+          },
+        },
+      },
       posts: {
         where: {
           NOT: {

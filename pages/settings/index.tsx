@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import { trpc } from "../../utils/trpc";
 import prisma from "../../server/db/client";
 import toast, { Toaster } from "react-hot-toast";
-
 import Layout from "../../components/Layout/Layout";
 import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";

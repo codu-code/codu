@@ -87,19 +87,19 @@ export const rules = [
 export const footerNav = [
   { name: "Home", href: "/" },
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "https://www.meetup.com/codu-community/" },
+  { name: "Communities", href: "/communities" },
   { name: "Sponsorship", href: "/sponsorship" },
 ];
 
 export const navigation = [
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "https://www.meetup.com/codu-community/" },
+  { name: "Events", href: "/communities" },
   { name: "Support us", href: "/sponsorship" },
 ];
 
 export const userSubNav = [
   { name: "My Posts", href: "/my-posts" },
-  { name: "New Post", href: "/create", fancy: true },
+  { name: "New Post", href: "/create", fancy: true }
 ];
 
 export const subNav = [
@@ -107,8 +107,16 @@ export const subNav = [
   { name: "Sign up for free", href: "/get-started", fancy: true },
 ];
 
+interface Author {
+    name: string;
+    role: string;
+    emoji: string;
+    bio: string;
+    imageUrl: string;
+}
+
 type Authors = {
-  [index: string]: any;
+  [index: string]: Author;
 };
 
 export const authors: Authors = {
