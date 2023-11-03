@@ -1,15 +1,16 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { upsertCommunitySchema } from "../../schema/community";
 import type { upsertCommunityInput } from "../../schema/community";
 import CustomTextareaAutosize from "../CustomTextareAutosize/CustomTextareaAutosize";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useMarkdownHotkeys } from "@/markdoc/editor/hotkeys/hotkeys.markdoc";
 import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markdoc";
 import toast, { Toaster } from "react-hot-toast";
 import { trpc } from "@/utils/trpc";
 import { uploadFile } from "../../utils/s3helpers";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface Community {
   id?: string | null;

@@ -29,6 +29,24 @@ export default async function Page({
       image: true,
       id: true,
       websiteUrl: true,
+      RSVP: {
+        select: {
+          event: {
+            include: {
+              community: true,
+            },
+          },
+        },
+      },
+      memberships: {
+        select: {
+          community: {
+            include: {
+              members: true,
+            },
+          },
+        },
+      },
       posts: {
         where: {
           NOT: {

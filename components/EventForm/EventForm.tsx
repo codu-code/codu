@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { upsertEventSchema } from "../../schema/event";
@@ -9,7 +11,7 @@ import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markd
 import toast, { Toaster } from "react-hot-toast";
 import { trpc } from "@/utils/trpc";
 import { uploadFile } from "../../utils/s3helpers";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface Event {
   id?: string | null;

@@ -1,7 +1,6 @@
 import React from "react";
 import Markdoc from "@markdoc/markdoc";
 import Link from "next/link";
-import Head from "next/head";
 import BioBar from "@/components/BioBar/BioBar";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";

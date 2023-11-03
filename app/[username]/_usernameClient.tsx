@@ -1,42 +1,20 @@
+"use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import { LinkIcon } from "@heroicons/react/outline";
 import { api } from "@/server/trpc/react";
 import { useRouter } from "next/navigation";
-import { Tabs } from "@/components/Tabs";
 import EventPreview from "@/components/EventPreview/EventPreview";
 import CommunityPreview from "@/components/CommunityPreview/CommunityPreview";
 import type { Session } from "next-auth";
+import { Tabs } from "@/components/Tabs";
 
 type Props = {
   session: Session | null;
   isOwner: boolean;
   profile: {
-    posts: {
-      published: string | undefined;
-      title: string;
-      excerpt: string;
-      slug: string;
-      readTimeMins: number;
-      id: string;
-    }[];
-    accountLocked: boolean;
-    RSVP: {
-      event: {
-        id: string;
-        slug: string;
-        name: string;
-        description: string;
-        eventDate: Date;
-        address: string;
-        coverImage: string;
-        community: {
-          slug: string;
-          name: string;
-        };
-      };
-    }[];
     memberships: {
       community: {
         id: string;
@@ -51,6 +29,30 @@ type Props = {
         }[];
       };
     }[];
+    RSVP: {
+      event: {
+        id: string;
+        slug: string;
+        name: string;
+        description: string;
+        address: string;
+        eventDate: Date;
+        coverImage: string;
+        community: {
+          slug: string;
+          name: string;
+        };
+      };
+    }[];
+    posts: {
+      published: string | undefined;
+      title: string;
+      excerpt: string;
+      slug: string;
+      readTimeMins: number;
+      id: string;
+    }[];
+    accountLocked: boolean;
     id: string;
     username: string | null;
     name: string;
@@ -62,14 +64,13 @@ type Props = {
 
 const Profile = ({ profile, isOwner, session }: Props) => {
   const router = useRouter();
+  const [selectedTab, setSelectedTab] = useState("articles");
 
   const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
       router.refresh();
     },
   });
-
-  const [selectedTab, setSelectedTab] = useState("articles");
 
   const { mutate: unbanUser } = api.admin.unban.useMutation({
     onSettled() {
