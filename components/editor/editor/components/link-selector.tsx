@@ -1,7 +1,7 @@
 import { cn, getUrlFromString } from "@/utils/utils";
 import { Editor } from "@tiptap/core";
 import { Check, Trash } from "lucide-react";
-import { Dispatch, FC, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useRef, useCallback } from "react";
 
 interface LinkSelectorProps {
   editor: Editor;
@@ -21,13 +21,46 @@ export const LinkSelector: FC<LinkSelectorProps> = ({
     inputRef.current && inputRef.current?.focus();
   });
 
+ const setLink = useCallback(() => {
+  const previousUrl = editor.getAttributes("link").href;
+
+  // unset
+  if (previousUrl) {
+    editor.chain().focus().unsetLink().run();
+    return;
+  }
+  
+  let url = window.prompt("URL", previousUrl);
+
+  // cancelled
+  if (url === null) {
+    return;
+  }
+
+  // empty
+  if (url === "") {
+    editor.chain().focus().extendMarkRange("link").unsetLink().run();
+    return;
+  }
+
+  // Add protocol if missing
+  if (!url.match(/^https?:\/\//i)) {
+    url = 'https://' + url;
+  }
+
+  console.log(url)
+
+  // update link
+  editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+}, [editor]);
+
+
   return (
     <div className="relative">
       <button
+        type="button"
         className="flex h-full items-center space-x-2 px-3 py-1.5 text-sm font-medium text-stone-600 hover:bg-stone-100 active:bg-stone-200"
-        onClick={() => {
-          setIsOpen(!isOpen);
-        }}
+        onClick={setLink}
       >
         <p className="text-base">↗</p>
         <p
@@ -38,7 +71,7 @@ export const LinkSelector: FC<LinkSelectorProps> = ({
           Link
         </p>
       </button>
-      {isOpen && (
+      {/* {isOpen && (
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -72,7 +105,7 @@ export const LinkSelector: FC<LinkSelectorProps> = ({
             </button>
           )}
         </form>
-      )}
+      )} */}
     </div>
   );
 };

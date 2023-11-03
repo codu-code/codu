@@ -3,7 +3,6 @@ import { trpc } from "../utils/trpc";
 import { useInView } from "react-intersection-observer";
 import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
 import CommunityPreview from "@/components/CommunityPreview/CommunityPreview";
-import debounce from "lodash/debounce";
 
 export default function CommunitiesList() {
   const [searchQuery, setSearchQuery] = useState("");

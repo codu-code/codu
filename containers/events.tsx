@@ -3,7 +3,6 @@ import { trpc } from "../utils/trpc";
 import { useInView } from "react-intersection-observer";
 import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
 import EventPreview from "@/components/EventPreview/EventPreview";
-import debounce from "lodash/debounce";
 
 export default function EventsList() {
   const [searchQuery, setSearchQuery] = useState("");
