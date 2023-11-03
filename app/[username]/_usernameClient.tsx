@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
+import Head from "next/head";
 import { LinkIcon } from "@heroicons/react/outline";
 import { api } from "@/server/trpc/react";
 import { useRouter } from "next/navigation";
@@ -129,6 +130,26 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   return (
     <>
+      <Head>
+        <title>{`${name} - Codú`}</title>
+        <meta name="description" content={`${name}'s profile on Codú`} />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="manifest" href="site.webmanifest" />
+        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#000000" />
+        <link rel="shortcut icon" href="favicon.ico" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-config" content="browserconfig.xml" />
+        <meta name="theme-color" content="#000" />
+        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
+        <meta
+          name="image"
+          property="og:image"
+          content={`/api/og?title=${encodeURIComponent(
+            `${name} - Codú Profile`,
+          )}`}
+        />
+        <meta property="og:type" content="website" />
+      </Head>
       <div className="max-w-2xl px-4 mx-auto text-900 dark:text-white">
         <main className="flex pt-6">
           <div className="mr-4 flex-shrink-0 self-center">
