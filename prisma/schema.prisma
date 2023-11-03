@@ -53,10 +53,10 @@ model Post {
 }
 
 model Tag {
-  createdAt    DateTime       @default(now())
-  id           Int            @id @default(autoincrement())
-  title        String         @unique @db.VarChar(20)
-  PostTag      PostTag[]
+  createdAt DateTime  @default(now())
+  id        Int       @id @default(autoincrement())
+  title     String    @unique @db.VarChar(20)
+  PostTag   PostTag[]
 }
 
 model PostTag {

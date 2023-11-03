@@ -17,8 +17,6 @@ export const appRouter = createTRPCRouter({
   community: communityRouter,
   event: eventRouter,
   report: reportRouter,
-  community: communityRouter,
-  event: eventRouter,
 });
 
 // export type definition of API
