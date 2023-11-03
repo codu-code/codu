@@ -24,8 +24,10 @@ export function Tabs(props: TabProps) {
             key={tab.title}
             onClick={() => onTabSelected(tab.id)}
             className={classNames(
-              tab.id === selectedTab ? "border-b-2 border-b-white-600 dark:border-b-zinc-900" : "",
-              "text-2xl tracking-tight font-extrabold text-neutral-50 pb-2 mr-8 dark:text-neutral-50"
+              tab.id === selectedTab
+                ? "border-b-2 border-b-white-600 dark:border-b-zinc-900"
+                : "",
+              "text-2xl tracking-tight font-extrabold text-neutral-50 pb-2 mr-8 dark:text-neutral-50",
             )}
           >
             {tab.title} <span className="font-light">{tab.subtitle}</span>

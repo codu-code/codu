@@ -61,7 +61,7 @@ const generateCommunityData = (count: number) => {
             chance.integer({
               min: 1,
               max: 5,
-            })
+            }),
           ),
         },
       };
@@ -137,7 +137,7 @@ const generateUserData = (count = 100) => {
             chance.integer({
               min: 1,
               max: 5,
-            })
+            }),
           ),
         },
       };

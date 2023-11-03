@@ -57,14 +57,10 @@ const CreateEventPage: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext<{ community: string }>
+  ctx: GetServerSidePropsContext<{ community: string }>,
 ) => {
   try {
-    const session = await getServerSession(
-      ctx.req,
-      ctx.res,
-      authOptions
-    );
+    const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (!session) {
       return {

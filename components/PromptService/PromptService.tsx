@@ -37,7 +37,7 @@ export const PromptDialog = ({
       router.events.emit("routeChangeError");
       throw "Aborting route change. Please ignore this error.";
     },
-    [shouldConfirmLeave]
+    [shouldConfirmLeave],
   );
 
   const cancelRouteChange = () => {

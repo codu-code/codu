@@ -1,5 +1,5 @@
 const codepen = {
-  render: 'CodePen',
+  render: "CodePen",
   attributes: {
     src: {
       type: String,

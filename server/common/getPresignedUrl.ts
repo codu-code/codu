@@ -18,7 +18,7 @@ interface CommunityFileConfig {
 
 function getKey(
   config: UserFileConfig | CommunityFileConfig | EventFileConfig,
-  extension: string
+  extension: string,
 ) {
   switch (config.kind) {
     case "user":
@@ -35,7 +35,7 @@ function getKey(
 export const getPresignedUrl = async (
   fileType: string,
   fileSize: number,
-  config: UserFileConfig | CommunityFileConfig | EventFileConfig
+  config: UserFileConfig | CommunityFileConfig | EventFileConfig,
 ) => {
   const extension = fileType.split("/")[1];
   if (!extension) throw new Error("Invalid file type provided");

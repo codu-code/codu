@@ -99,7 +99,7 @@ export const navigation = [
 
 export const userSubNav = [
   { name: "My Posts", href: "/my-posts" },
-  { name: "New Post", href: "/create", fancy: true }
+  { name: "New Post", href: "/create", fancy: true },
 ];
 
 export const subNav = [
@@ -108,11 +108,11 @@ export const subNav = [
 ];
 
 interface Author {
-    name: string;
-    role: string;
-    emoji: string;
-    bio: string;
-    imageUrl: string;
+  name: string;
+  role: string;
+  emoji: string;
+  bio: string;
+  imageUrl: string;
 }
 
 type Authors = {

@@ -200,7 +200,7 @@ const EventPage: NextPage = ({
           name="image"
           property="og:image"
           content={`https://${host}/api/og?title=${encodeURIComponent(
-            event.name
+            event.name,
           )}`}
         />
         <meta name="twitter:card" content="summary_large_image" />
@@ -321,12 +321,12 @@ const EventPage: NextPage = ({
                   {(() => {
                     if (session) {
                       const rsvp = event.RSVP.find(
-                        (rsvp) => rsvp.user.id === session.user?.id
+                        (rsvp) => rsvp.user.id === session.user?.id,
                       );
                       if (rsvp !== undefined) {
                         const isEventOrganiser = event.community.members.some(
                           (m) =>
-                            m.userId === session.user?.id && m.isEventOrganiser
+                            m.userId === session.user?.id && m.isEventOrganiser,
                         );
                         // Organisers cannoy leave their own events
                         // TODO support this after there is support for multiple organisers
@@ -374,7 +374,7 @@ const EventPage: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext<{ event: string }>
+  ctx: GetServerSidePropsContext<{ event: string }>,
 ) => {
   try {
     const { params } = ctx;

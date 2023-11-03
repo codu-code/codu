@@ -51,7 +51,7 @@ export function CommunityForm(props: CommunityFormProps) {
     },
     onSuccess() {
       toast.success("Saved!");
-      router.push('/communities');
+      router.push("/communities");
     },
   });
 
@@ -90,23 +90,23 @@ export function CommunityForm(props: CommunityFormProps) {
           onError(error) {
             if (error) return toast.error(error.message);
             return toast.error(
-              "Something went wrong uploading the photo, please retry."
+              "Something went wrong uploading the photo, please retry.",
             );
           },
           async onSuccess(signedUrl) {
             const url = await uploadToUrl(signedUrl, file);
             if (!url) {
               return toast.error(
-                "Something went wrong uploading the photo, please retry."
+                "Something went wrong uploading the photo, please retry.",
               );
             }
             setCoverImage({ status: "success", url });
             setValue("coverImage", url);
             toast.success(
-              "Profile photo successfully updated. This may take a few minutes to update around the site."
+              "Profile photo successfully updated. This may take a few minutes to update around the site.",
             );
           },
-        }
+        },
       );
     }
   };

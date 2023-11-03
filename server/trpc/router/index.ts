@@ -14,7 +14,7 @@ export const appRouter = router({
   notification: notificationRouter,
   admin: adminRouter,
   community: communityRouter,
-  event: eventRouter
+  event: eventRouter,
 });
 
 // export type definition of API

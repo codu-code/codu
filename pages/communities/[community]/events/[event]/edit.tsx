@@ -70,7 +70,7 @@ const EditEventPage: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext<{ event: string }>
+  ctx: GetServerSidePropsContext<{ event: string }>,
 ) => {
   try {
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
@@ -125,7 +125,7 @@ export const getServerSideProps = async (
     if (
       !event.community.members.some(
         (member) =>
-          member.userId === session.user?.id && member.isEventOrganiser
+          member.userId === session.user?.id && member.isEventOrganiser,
       )
     ) {
       return {

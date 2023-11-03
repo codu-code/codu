@@ -105,7 +105,7 @@ const Profile: NextPage = ({
           name="image"
           property="og:image"
           content={`/api/og?title=${encodeURIComponent(
-            `${name} - Codú Profile`
+            `${name} - Codú Profile`,
           )}`}
         />
         <meta property="og:type" content="website" />
@@ -187,19 +187,19 @@ const Profile: NextPage = ({
                               menuOptions={
                                 isOwner
                                   ? [
-                                    {
-                                      label: "Edit",
-                                      href: `/create/${id}`,
-                                      postId: id,
-                                    },
-                                  ]
+                                      {
+                                        label: "Edit",
+                                        href: `/create/${id}`,
+                                        postId: id,
+                                      },
+                                    ]
                                   : undefined
                               }
                               showBookmark={!isOwner}
                               id={id}
                             />
                           );
-                        }
+                        },
                       )
                     ) : (
                       <p className="font-medium py-4">
@@ -301,7 +301,7 @@ const Profile: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext<{ username: string }>
+  context: GetServerSidePropsContext<{ username: string }>,
 ) => {
   const username = context.params?.username;
 
@@ -401,9 +401,9 @@ export const getServerSideProps = async (
         posts: accountLocked
           ? []
           : profile.posts.map((post) => ({
-            ...post,
-            published: post.published?.toISOString(),
-          })),
+              ...post,
+              published: post.published?.toISOString(),
+            })),
         accountLocked,
       },
       isOwner: session?.user?.username === username,

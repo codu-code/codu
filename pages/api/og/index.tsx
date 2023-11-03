@@ -20,7 +20,7 @@ const Og = async (req: Req, res: ServerResponse) => {
     if (!title) throw new Error("No title present");
 
     const fontFile = await fetch(
-      "https://og-playground.vercel.app/inter-latin-ext-700-normal.woff"
+      "https://og-playground.vercel.app/inter-latin-ext-700-normal.woff",
     );
 
     const fontData: ArrayBuffer = await fontFile.arrayBuffer();
@@ -72,7 +72,7 @@ const Og = async (req: Req, res: ServerResponse) => {
         ],
         height,
         width,
-      }
+      },
     );
 
     const png = await sharp(Buffer.from(svg)).webp().toBuffer();
@@ -81,7 +81,7 @@ const Og = async (req: Req, res: ServerResponse) => {
     res.setHeader("Content-Type", `image/png`);
     res.setHeader(
       "Cache-Control",
-      `public, immutable, no-transform, s-maxage=31536000, max-age=31536000`
+      `public, immutable, no-transform, s-maxage=31536000, max-age=31536000`,
     );
     res.end(png);
   } catch (error) {

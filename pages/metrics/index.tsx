@@ -109,7 +109,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           tag: string;
         };
       },
-      item
+      item,
     ) => {
       const groupValue = item["tagId"];
       if (!result[groupValue]) {
@@ -121,7 +121,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       result[groupValue].count++;
       return result;
     },
-    {}
+    {},
   );
 
   const tagsWithCount = Object.keys(grouped)

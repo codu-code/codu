@@ -9,5 +9,5 @@ export const markdocComponents = {
   CodePen,
   Youtube: YouTube,
   CodeSandbox: CodeSandbox,
-  Media: Media
+  Media: Media,
 };

@@ -50,7 +50,7 @@ export const profileRouter = router({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: `Invalid file. Accepted file formats: ${acceptedFormats.join(
-            ", "
+            ", ",
           )}.`,
         });
       }

@@ -12,7 +12,7 @@ export default function CommunitiesList() {
       { limit: 15, filter: searchQuery },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
-      }
+      },
     );
 
   const { ref, inView } = useInView();
@@ -56,7 +56,7 @@ export default function CommunitiesList() {
             Children.toArray(
               Array.from({ length: 7 }, () => {
                 return <ArticleLoading />;
-              })
+              }),
             )}
           {status === "success" &&
             data.pages.map((page) => {

@@ -125,7 +125,7 @@ const CommunityPage: NextPage = ({
           name="image"
           property="og:image"
           content={`https://${host}/api/og?title=${encodeURIComponent(
-            community.name
+            community.name,
           )}`}
         />
         <meta name="twitter:card" content="summary_large_image" />
@@ -153,7 +153,7 @@ const CommunityPage: NextPage = ({
                         {(() => {
                           if (session) {
                             const membership = community.members.find(
-                              (m) => m.userId === session.user?.id
+                              (m) => m.userId === session.user?.id,
                             );
                             if (membership) {
                               // Organisers cannoy leave their own community
@@ -248,7 +248,7 @@ const CommunityPage: NextPage = ({
                               .filter((e) => e.eventDate.getTime() - now > 0)
                               .sort(
                                 (a, b) =>
-                                  a.eventDate.getTime() - b.eventDate.getTime()
+                                  a.eventDate.getTime() - b.eventDate.getTime(),
                               )
                               .map((event) => (
                                 <EventPreview
@@ -266,7 +266,7 @@ const CommunityPage: NextPage = ({
                                 />
                               ))}
                             {community.events.filter(
-                              (e) => e.eventDate.getTime() - now > 0
+                              (e) => e.eventDate.getTime() - now > 0,
                             ).length === 0 ? (
                               <p className="font-medium py-4">
                                 There are no events yet... 🥲
@@ -281,7 +281,7 @@ const CommunityPage: NextPage = ({
                               .filter((e) => e.eventDate.getTime() - now < 0)
                               .sort(
                                 (a, b) =>
-                                  b.eventDate.getTime() - a.eventDate.getTime()
+                                  b.eventDate.getTime() - a.eventDate.getTime(),
                               )
                               .map((event) => (
                                 <EventPreview
@@ -299,7 +299,7 @@ const CommunityPage: NextPage = ({
                                 />
                               ))}
                             {community.events.filter(
-                              (e) => e.eventDate.getTime() - now < 0
+                              (e) => e.eventDate.getTime() - now < 0,
                             ).length === 0 ? (
                               <p className="font-medium py-4">
                                 There are no events yet... 🥲
@@ -313,7 +313,7 @@ const CommunityPage: NextPage = ({
                             {community.members
                               .sort(
                                 (a, b) =>
-                                  b.createdAt.getTime() - a.createdAt.getTime()
+                                  b.createdAt.getTime() - a.createdAt.getTime(),
                               )
                               .sort((a) => (a.isEventOrganiser ? -1 : 1))
                               .map((member) => (
@@ -358,7 +358,7 @@ const CommunityPage: NextPage = ({
                                           <LinkIcon className="h-5 mr-2 text-neutral-400" />
                                           <p className="mt-1 text-blue-500">
                                             {getDomainFromUrl(
-                                              member.user.websiteUrl
+                                              member.user.websiteUrl,
                                             )}
                                           </p>
                                         </Link>
@@ -384,7 +384,7 @@ const CommunityPage: NextPage = ({
 };
 
 export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext<{ community: string }>
+  ctx: GetServerSidePropsContext<{ community: string }>,
 ) => {
   try {
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
