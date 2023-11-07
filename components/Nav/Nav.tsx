@@ -1,5 +1,4 @@
 "use client";
-
 import { api } from "@/server/trpc/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, PlusSmIcon } from "@heroicons/react/solid";
@@ -8,8 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 import { navigation } from "../../config/site_settings";
-
-import { Session } from "next-auth";
+import { type Session } from "next-auth";
 import ThemeToggle from "../Theme/ThemeToggle";
 import AnimatedHamburger from "./AnimatedHamburger";
 
