@@ -51,11 +51,11 @@ body {
 }
 
 .focus-style {
-  @apply rounded-md shadow-sm focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
+  @apply rounded-md focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
 }
 
 .focus-style-rounded {
-  @apply rounded-full shadow-sm focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
+  @apply rounded-full focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
 }
 
 .primary-button {

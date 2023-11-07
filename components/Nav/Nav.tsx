@@ -1,5 +1,4 @@
 "use client";
-
 import { api } from "@/server/trpc/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, PlusSmIcon } from "@heroicons/react/solid";
@@ -8,8 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 import { navigation } from "../../config/site_settings";
-
-import { Session } from "next-auth";
+import { type Session } from "next-auth";
 import ThemeToggle from "../Theme/ThemeToggle";
 import AnimatedHamburger from "./AnimatedHamburger";
 
@@ -139,11 +137,11 @@ const Nav = ({ session }: { session: Session | null }) => {
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative p-2 flex-shrink-0 rounded-md text-neutral-400 focus-style "
+                        className="relative p-2 flex-shrink-0 rounded-md  focus-style dark:text-neutral-400 dark:hover:text-white text-neutral-600 hover:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-900"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
-                          <div className="absolute animate-pulse rounded-sm h-2 w-2 bg-pink-600 right-1 top-1" />
+                          <div className="absolute animate-pulse rounded-sm h-1 w-1 bg-pink-600 right-1 top-1 " />
                         )}
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                       </Link>

@@ -1,8 +1,8 @@
-import { UserNavigationItem } from "@/types/types";
+import { type UserNavigationItem } from "@/types/types";
 import { Disclosure, Transition } from "@headlessui/react";
-import { Session } from "next-auth";
+import { type Session } from "next-auth";
 import Link from "next/link";
-import { FunctionComponent } from "react";
+import { type FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 
 function classNames(...classes: string[]) {
@@ -130,18 +130,20 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
   return (
     <>
       {data.map((item) => (
-        <Link
-          className={classNames(
-            item.fancy
-              ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
-              : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 dark:focus:bg-neutral-900 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
-            "rounded-md text-base font-medium py-2 text-center",
-          )}
-          key={item.name}
-          href={item.href}
-        >
-          {item.name}
-        </Link>
+        <Disclosure key={item.name}>
+          <Disclosure.Button
+            as={Link}
+            href={item.href}
+            className={classNames(
+              item.fancy
+                ? "bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm px-4 block justify-center text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                : "text-neutral-900 hover:text-black hover:bg-neutral-300 focus:bg-neutral-300 dark:focus:bg-neutral-900 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white block px-3",
+              "rounded-md text-base font-medium py-2 text-center",
+            )}
+          >
+            {item.name}
+          </Disclosure.Button>
+        </Disclosure>
       ))}
     </>
   );
