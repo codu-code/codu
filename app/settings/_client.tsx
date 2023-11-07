@@ -11,7 +11,7 @@ import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";
 
 import { uploadFile } from "../../utils/s3helpers";
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 function classNames(...classes: string[]) {

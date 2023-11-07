@@ -2,6 +2,8 @@ import { createTRPCRouter } from "../trpc";
 import { postRouter } from "./post";
 import { profileRouter } from "./profile";
 import { commentRouter } from "./comment";
+import { communityRouter } from "./community";
+import { eventRouter } from "./event";
 import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
 import { reportRouter } from "./report";
@@ -12,6 +14,8 @@ export const appRouter = createTRPCRouter({
   comment: commentRouter,
   notification: notificationRouter,
   admin: adminRouter,
+  community: communityRouter,
+  event: eventRouter,
   report: reportRouter,
 });
 

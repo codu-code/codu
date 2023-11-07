@@ -94,26 +94,25 @@ export const ReportModal = (props: Props) => {
       )}
 
       {!isComment && (
-        <div className="w-full">
-          <button
-            onClick={() => (session ? setIsModalOpen(true) : signIn())}
-            className="rounded text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
-          >
-            Report Article
-          </button>
-        </div>
+        <button
+          onClick={() => (session ? setIsModalOpen(true) : signIn())}
+          className="w-full rounded text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
+        >
+          <div className="w-ful text-left">Report Article</div>
+        </button>
       )}
 
       <Dialog
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialFocus={textAreaRef}
+        className="relative z-50"
       >
         <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
         <div className="fixed inset-0 flex w-screen items-center justify-center">
-          <Dialog.Panel className="p-0 border bg-neutral-900 text-neutral-400 max-w-lg rounded-lg relative ">
+          <Dialog.Panel className="p-0 border border-neutral-900 dark:border-neutral-50 bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 max-w-lg rounded-lg relative ">
             <div className="m-8">
-              <Dialog.Title className="text-2xl tracking-tight font-bold text-neutral-50 text-center">
+              <Dialog.Title className="text-2xl tracking-tight font-bold text-neutral-900 dark:text-neutral-50 text-center">
                 Submit a report
               </Dialog.Title>
 
@@ -122,7 +121,7 @@ export const ReportModal = (props: Props) => {
                   Is {isPost ? "something in this article" : "this comment"}{" "}
                   inappropriate?
                 </p>
-                <p className="border p-4  bg-neutral-700 text-zinc-200 rounded">
+                <p className="rounded p-4 border border-neutral-800 dark:border-neutral-50 bg-neutral-300 dark:bg-neutral-400 text-neutral-900 dark:text-neutral-800">
                   <span>{isPost ? "Article : " : "Comment : "}</span>
                   {isComment && props.comment}
                   {isPost && props.title}
@@ -135,7 +134,12 @@ export const ReportModal = (props: Props) => {
               </p>
 
               <form>
-                <label htmlFor="report-comment">Leave a comment</label>
+                <label
+                  htmlFor="report-comment"
+                  className="text-neutral-800 dark:text-neutral-50"
+                >
+                  Leave a comment
+                </label>
                 <textarea
                   maxLength={300}
                   id="report-comment"
@@ -143,7 +147,7 @@ export const ReportModal = (props: Props) => {
                   placeholder="type...."
                   onChange={(e) => setReportBody(e.target.value)}
                   value={reportBody}
-                  className="rounded"
+                  className="rounded border border-neutral-800 dark:border-neutral-50"
                   ref={textAreaRef}
                 />
 
