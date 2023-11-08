@@ -31,7 +31,9 @@ import {
 // import { LinkSelector } from "./link-selector";
 import { cn } from "@/utils/utils";
 import ToolBarItemButton from "./ToolbarItemButton";
-import TableMenuBar from "../Table/TableMenuBar";
+// import TableMenuBar from "../Table/TableMenuBar";
+
+import ImageDetailsModal from "@/components/ImageDetailsModal/ImageDetailsModal";
 
 type ToolbarProps = Omit<BubbleMenuProps, "children">;
 
@@ -45,6 +47,7 @@ export interface ToolbarItem {
 function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [isTableEditing, setIsTableEditing] = useState(false);
+  const [isImageDetailsModalOpen, setIsImageDetailsModalOpen] = useState(false);
 
   const isRootNode = () => {
     try {
@@ -59,13 +62,13 @@ function Toolbar({ editor }: ToolbarProps) {
     setIsOpen(e.target.checked);
   };
 
-  const addImage = useCallback(() => {
-    const url = window.prompt("URL");
+  // const addImage = useCallback(() => {
+  //   const url = window.prompt("URL");
 
-    if (url) {
-      editor?.chain().focus().setImage({ src: url }).run();
-    }
-  }, [editor]);
+  //   if (url) {
+  //     editor?.chain().focus().setImage({ src: url }).run();
+  //   }
+  // }, [editor]);
 
   if (!editor) {
     return null;
@@ -83,6 +86,11 @@ function Toolbar({ editor }: ToolbarProps) {
 
   return (
     <div className={`${styles.sticky} bg-neutral-900`}>
+      <ImageDetailsModal
+        isImageDetailsModalOpen={isImageDetailsModalOpen}
+        setIsImageDetailsModalOpen={setIsImageDetailsModalOpen}
+        editor={editor}
+      />
       <div className={styles.flex}>
         <div
           className={styles.menu}
@@ -414,7 +422,7 @@ function Toolbar({ editor }: ToolbarProps) {
             <ToolBarItemButton
               title="Image"
               isRootNode={isRootNode}
-              onClick={addImage}
+              onClick={() => setIsImageDetailsModalOpen(true)}
               icon={<ImageIcon color={isRootNode() ? "gray" : "white"} />}
             />
             <ToolBarItemButton

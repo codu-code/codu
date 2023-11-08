@@ -12,8 +12,6 @@ import Suggestion from "@tiptap/suggestion";
 import { ReactRenderer } from "@tiptap/react";
 import tippy from "tippy.js";
 import {
-  Heading2,
-  Heading3,
   List,
   ListOrdered,
   MessageSquarePlus,
@@ -21,6 +19,7 @@ import {
   TextQuote,
   Image as ImageIcon,
   Code,
+  Heading,
 } from "lucide-react";
 import { startImageUpload } from "@/components/editor/editor/plugins/upload-images";
 
@@ -94,10 +93,10 @@ const getSuggestionItems = ({
       },
     },
     {
-      title: "Heading 2",
+      title: "Heading",
       description: "Medium section heading.",
       searchTerms: ["subtitle", "medium", "heading"],
-      icon: <Heading2 size={18} />,
+      icon: <Heading size={18} />,
       command: ({ editor, range }: CommandProps) => {
         editor
           .chain()
@@ -108,10 +107,10 @@ const getSuggestionItems = ({
       },
     },
     {
-      title: "Heading 3",
+      title: "Subheading",
       description: "Small section heading.",
       searchTerms: ["subtitle", "small"],
-      icon: <Heading3 size={18} />,
+      icon: <Heading size={18} />,
       command: ({ editor, range }: CommandProps) => {
         editor
           .chain()

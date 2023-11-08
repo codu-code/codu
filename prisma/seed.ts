@@ -6,6 +6,68 @@ const prisma = new PrismaClient();
 // By passing a number we get a repeatable source of random generation.
 const chance = new Chance(1);
 
+const generateEventData = (count: number) => {
+  return Array(count)
+    .fill(null)
+    .map(() => {
+      const name = chance.sentence({
+        words: chance.integer({ min: 4, max: 8 }),
+      });
+      const slug = `${name
+        .toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "")}-${nanoid(8)}`;
+      return {
+        id: nanoid(8),
+        eventDate: chance.date(),
+        address: chance.address(),
+        coverImage: chance.avatar({ protocol: "https" }),
+        capacity: chance.integer({ min: 1, max: 100 }),
+        name: name,
+        description: chance.sentence({
+          words: chance.integer({ min: 200, max: 1000 }),
+        }),
+        slug,
+      };
+    });
+};
+
+const generateCommunityData = (count: number) => {
+  return Array(count)
+    .fill(null)
+    .map(() => {
+      const name = chance.sentence({
+        words: chance.integer({ min: 4, max: 8 }),
+      });
+      const slug = `${name
+        .toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "")}-${nanoid(8)}`;
+      return {
+        id: nanoid(8),
+        name: name,
+        city: chance.city(),
+        country: chance.country({ full: true }),
+        coverImage: chance.avatar({ protocol: "https" }),
+        description: chance.sentence({
+          words: chance.integer({ min: 200, max: 1000 }),
+        }),
+        excerpt: chance.sentence({
+          words: chance.integer({ min: 10, max: 20 }),
+        }),
+        slug,
+        events: {
+          create: generateEventData(
+            chance.integer({
+              min: 1,
+              max: 5,
+            }),
+          ),
+        },
+      };
+    });
+};
+
 const randomPosts = (count = 10) => {
   return Array(count)
     .fill(null)
@@ -85,6 +147,7 @@ const generateUserData = (count = 100) => {
 };
 
 const userData = generateUserData();
+const communityData = generateCommunityData(10);
 
 async function main() {
   console.log(`Start seeding, please wait...`);
@@ -95,6 +158,43 @@ async function main() {
       create: user,
     });
     console.log(`Added user: ${user.username}`);
+  });
+  communityData.forEach(async (community) => {
+    await prisma.community.upsert({
+      where: { id: community.id },
+      update: {},
+      create: community,
+    });
+    console.log(`Added community: ${community.name}`);
+  });
+  const users = await prisma.user.findMany();
+  communityData.forEach(async (community) => {
+    users.forEach(async (user, index) => {
+      const id = nanoid(8);
+      await prisma.membership.create({
+        data: {
+          id: id,
+          userId: user.id,
+          communityId: community.id,
+          isEventOrganiser: index === 0,
+        },
+      });
+      console.log(`Added membership: ${id}`);
+    });
+  });
+  const events = await prisma.event.findMany();
+  events.forEach(async (event) => {
+    users.forEach(async (user) => {
+      const id = nanoid(8);
+      await prisma.rSVP.create({
+        data: {
+          id: nanoid(8),
+          userId: user.id,
+          eventId: event.id,
+        },
+      });
+      console.log(`Added RSVP: ${id}`);
+    });
   });
   console.log(`Seeding finished.`);
 }

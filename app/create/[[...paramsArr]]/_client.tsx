@@ -10,7 +10,6 @@ import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
 // @TODO fix PromptDialog
-// import { PromptDialog } from "../../../components/PromptService/PromptService";
 import { api } from "@/server/trpc/react";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -30,14 +29,13 @@ const Create = () => {
 
   const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
-  const [showComments, setShowComments] = useState<boolean>(true);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-  const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
-  const allowUpdate = unsavedChanges && !delayDebounce;
+
+  const allowUpdate = unsavedChanges;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useMarkdownHotkeys(textareaRef);
@@ -55,7 +53,6 @@ const Create = () => {
     defaultValues: {
       title: "",
       body: "",
-      showComments: true,
     },
   });
 
@@ -207,9 +204,8 @@ const Create = () => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags, showComments } = data;
+    const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    setShowComments(showComments);
     reset({ body, excerpt, title, id });
   }, [data]);
 
@@ -234,35 +230,8 @@ const Create = () => {
     if (isDirty) setUnsavedChanges(true);
   }, [title, body]);
 
-  // const handleOpenDialog = (res: string) => {
-  //   switch (res) {
-  //     case "initial":
-  //       setDelayDebounce(true);
-  //       break;
-  //     case "confirm":
-  //       setUnsavedChanges(false);
-  //       setDelayDebounce(false);
-  //       break;
-  //     case "cancel":
-  //       setDelayDebounce(false);
-  //       !published && savePost();
-  //       break;
-  //     default:
-  //       // setting allowUpdate in this case
-  //       setDelayDebounce(false);
-  //       setUnsavedChanges(true);
-  //   }
-  // };
-
   return (
     <>
-      {/* <PromptDialog
-          shouldConfirmLeave={unsavedChanges}
-          updateParent={handleOpenDialog}
-          title="Unsaved Changes"
-          subTitle="You have unsaved changes."
-          content="Changes that you have made will be lost."
-        /> */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
           <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-black">
@@ -366,21 +335,6 @@ const Create = () => {
                               elsewhere and you want to link to it as the
                               original source.
                             </p>
-                          </Disclosure.Panel>
-                          <Disclosure.Panel className="pt-4 pb-2">
-                            <label htmlFor="canonicalUrl">
-                              Show comments on your post
-                            </label>
-                            <input
-                              id="showComments"
-                              type="checkbox"
-                              checked={showComments}
-                              {...register("showComments", {
-                                onChange: (e) =>
-                                  setShowComments(e.target.checked),
-                                value: showComments,
-                              })}
-                            />
                           </Disclosure.Panel>
                         </>
                       )}

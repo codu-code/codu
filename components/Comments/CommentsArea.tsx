@@ -7,17 +7,17 @@ import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
 import { Fragment, useState } from "react";
-import { markdocComponents } from "../../markdoc/components";
-import { config } from "../../markdoc/config";
+import { markdocComponents } from "@/markdoc/components";
+import { config } from "@/markdoc/config";
 import Markdoc from "@markdoc/markdoc";
 import toast, { Toaster } from "react-hot-toast";
 import z, { ZodError } from "zod";
 import { HeartIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
-import { EditCommentSchema } from "../../schema/comment";
+import { EditCommentSchema } from "@/schema/comment";
 import { api } from "@/server/trpc/react";
-import { ReportComments } from "./ReportComments";
+import { ReportModal } from "@/components/ReportModal/ReportModal";
 
 const SaveSchema = z.object({
   body: z
@@ -37,10 +37,9 @@ export type SaveInput = {
 interface Props {
   postId: string;
   postOwnerId: string;
-  slug: string;
 }
 
-const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
+const CommentsArea = ({ postId, postOwnerId }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<number | null>(null);
   const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
   const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
@@ -296,7 +295,7 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                 </div>
 
                 <div className="border-l-2 border-neutral-700 ml-4 pl-2 -mt-2">
-                  <div className="prose prose-invert text-sm overflow-x-scroll">
+                  <div className="prose prose-invert text-sm overflow-x-hidden">
                     {Markdoc.renderers.react(content, React, {
                       components: markdocComponents,
                     })}
@@ -316,13 +315,7 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
                     <span className="text-xs font-semibold mr-4 flex">
                       {likeCount}
                     </span>
-                    <ReportComments
-                      name={name}
-                      body={body}
-                      id={id}
-                      email={email}
-                      slug={slug}
-                    />
+                    <ReportModal type="comment" comment={body} id={id} />
                     {depth < 6 && (
                       <button
                         className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"
@@ -418,7 +411,7 @@ const CommentsArea = ({ postId, postOwnerId, slug }: Props) => {
         )}
         {viewPreviewId === id ? (
           <article
-            className="prose prose-invert text-sm overflow-x-scroll"
+            className="prose prose-invert text-sm overflow-x-hidden"
             style={{ whiteSpace: "pre-wrap" }}
           >
             {Markdoc.renderers.react(
