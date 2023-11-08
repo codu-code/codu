@@ -3,9 +3,6 @@ import { ChangeEvent, FunctionComponent } from "react";
 
 import styles from "./CodeBlock.module.css";
 
-// Change this for code styling
-import "highlight.js/styles/monokai-sublime.css";
-
 interface CodeBlockProps {
   readOnly: boolean;
 }
