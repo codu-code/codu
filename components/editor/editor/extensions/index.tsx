@@ -32,7 +32,10 @@ import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 
 import { lowlight } from "lowlight";
-import { programmingLanguages } from "../languages";
+
+// Highlight syntax select your style from here (https://highlightjs.org/examples)
+import "highlight.js/styles/monokai-sublime.css";
+
 import CodeBlock from "../components/CodeBlock/CodeBlock";
 
 // const CustomImage = TiptapImage.extend({
@@ -40,11 +43,6 @@ import CodeBlock from "../components/CodeBlock/CodeBlock";
 //     return [UploadImagesPlugin()];
 //   },
 // });
-
-// Unsure why the ? is required but registerLanguage undefined initially
-programmingLanguages.forEach(
-  (lang) => lowlight?.registerLanguage(lang.name, lang),
-);
 
 const CustomDocument = Document.extend({
   content: "heading block*",
