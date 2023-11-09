@@ -47,7 +47,7 @@ const Create = () => {
     <>
       <button
         type="button"
-        className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4 absolute top-10 right-10"
+        className="absolute right-10 top-10 mt-4 inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
         onClick={() => setViewPreview((current) => !current)}
       >
         Preview
@@ -61,18 +61,18 @@ const Create = () => {
       /> */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
-          <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-black">
+          <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full bg-black">
             <button
               type="button"
-              className="absolute right-8 top-8 underline cursor-pointer z-50"
+              className="absolute right-8 top-8 z-50 cursor-pointer underline"
               onClick={() => setOpen(false)}
             >
               Close
             </button>
-            <div className="relative mx-4 flex flex-col justify-center items-center h-full overflow-y-auto">
-              <div className="pt-16 pb-8">
-                <div className="block sm:grid gap-6 sm:grid-cols-12 w-full max-w-2xl">
-                  <div className="sm:col-span-6 mt-8 sm:mt-0">
+            <div className="relative mx-4 flex h-full flex-col items-center justify-center overflow-y-auto">
+              <div className="pb-8 pt-16">
+                <div className="block w-full max-w-2xl gap-6 sm:grid sm:grid-cols-12">
+                  <div className="mt-8 sm:col-span-6 sm:mt-0">
                     {" "}
                     <label htmlFor="excerpt">Excerpt</label>
                     <textarea
@@ -87,7 +87,7 @@ const Create = () => {
                       story and are between 140-156 characters long.
                     </p>
                   </div>
-                  <div className="sm:col-span-6 my-4 sm:my-0">
+                  <div className="my-4 sm:col-span-6 sm:my-0">
                     <label htmlFor="tags">Topics</label>
                     <input
                       id="tag"
@@ -106,20 +106,20 @@ const Create = () => {
                     {tags.map((tag) => (
                       <div
                         key={tag}
-                        className="bg-neutral-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
+                        className="mr-1 mt-2 inline-flex items-center overflow-hidden bg-neutral-300 text-sm"
                       >
                         <span
-                          className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-black font-semibold"
+                          className="ml-2 mr-1 max-w-xs truncate px-1 text-xs font-semibold leading-relaxed text-black"
                           x-text="tag"
                         >
                           {tag}
                         </span>
                         <button
                           onClick={() => onDelete(tag)}
-                          className="w-6 h-6 inline-block align-middle text-white bg-neutral-600 focus:outline-none"
+                          className="inline-block h-6 w-6 bg-neutral-600 align-middle text-white focus:outline-none"
                         >
                           <svg
-                            className="w-6 h-6 fill-current mx-auto"
+                            className="mx-auto h-6 w-6 fill-current"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                           >
@@ -148,7 +148,7 @@ const Create = () => {
                               } h-5 w-5 text-neutral-400`}
                             />
                           </Disclosure.Button>
-                          <Disclosure.Panel className="pt-4 pb-2">
+                          <Disclosure.Panel className="pb-2 pt-4">
                             <label htmlFor="canonicalUrl">Canonical URL</label>
                             <input
                               id="canonicalUrl"
@@ -167,12 +167,12 @@ const Create = () => {
                       )}
                     </Disclosure>
                   </div>
-                  <div className="mt-4 sm:mt-0 sm:col-span-12 flex justify-end w-full">
+                  <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
                     {!data?.published && (
                       <button
                         type="button"
                         disabled={isDisabled}
-                        className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
@@ -185,11 +185,11 @@ const Create = () => {
                     <button
                       type="submit"
                       disabled={isDisabled}
-                      className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                     >
                       {hasLoadingState ? (
                         <>
-                          <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-600 border-t-white rounded-full" />
+                          <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-orange-600 border-t-white" />
                           {"Saving"}
                         </>
                       ) : (
@@ -215,32 +215,32 @@ const Create = () => {
           }}
         />
         {dataStatus === "loading" && postId && (
-          <div className="fixed top-0 left-0 z-40 w-screen h-screen flex items-center justify-center bg-gray ">
-            <div className="bg-white z-50 py-2 px-5 flex items-center flex-col border-2 border-black opacity-100">
-              <div className="loader-dots block relative w-20 h-5 mt-2">
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
+            <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
+              <div className="loader-dots relative mt-2 block h-5 w-20">
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
               </div>
-              <div className="text-neutral-400 text-xs font-medium mt-2 text-center">
+              <div className="mt-2 text-center text-xs font-medium text-neutral-400">
                 Fetching post data.
               </div>
             </div>
-            <div className="absolute bg-black top-0 bottom-0 left-0 right-0 opacity-25 z-60" />
+            <div className="z-60 absolute bottom-0 left-0 right-0 top-0 bg-black opacity-25" />
           </div>
         )}
         <div className="bg-black">
-          <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
+          <div className="mx-auto w-full max-w-7xl flex-grow text-black lg:flex xl:px-8">
             {/* Left sidebar & main wrapper */}
-            <div className="flex-1 min-w-0 xl:flex">
+            <div className="min-w-0 flex-1 xl:flex">
               <div className="lg:min-w-0 lg:flex-1">
-                <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 min-h-[40rem]">
+                <div className="h-full min-h-[40rem] px-4 py-0 sm:px-6 lg:px-4 lg:py-6">
                   {/* Start main area*/}
                   <div className="relative h-full">
                     <div className="bg-neutral-900 text-white  shadow-xl">
                       {viewPreview ? (
-                        <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
+                        <section className="mx-auto max-w-xl px-4 py-6 pb-4 sm:p-6 lg:pb-8">
                           <article
                             className="prose prose-invert lg:prose-lg"
                             style={{
@@ -252,7 +252,7 @@ const Create = () => {
                           </article>
                         </section>
                       ) : (
-                        <div className="py-6 px-4 sm:p-6 lg:pb-8 bg-neutral-900">
+                        <div className="bg-neutral-900 px-4 py-6 sm:p-6 lg:pb-8">
                           {!body && (
                             <Controller
                               name="body"
@@ -272,18 +272,18 @@ const Create = () => {
                             />
                           )}
 
-                          <div className="flex justify-between items-center">
+                          <div className="flex items-center justify-between">
                             <>
                               {saveStatus === "loading" && (
                                 <p>Auto-saving...</p>
                               )}
                               {saveStatus === "error" && savedTime && (
-                                <p className="text-red-600 text-xs lg:text-sm">
+                                <p className="text-xs text-red-600 lg:text-sm">
                                   {`Error saving, last saved: ${savedTime.toString()}`}
                                 </p>
                               )}
                               {saveStatus === "success" && savedTime && (
-                                <p className="text-neutral-400 text-xs lg:text-sm">
+                                <p className="text-xs text-neutral-400 lg:text-sm">
                                   {`Saved: ${savedTime.toString()}`}
                                 </p>
                               )}
@@ -294,7 +294,7 @@ const Create = () => {
                               <button
                                 type="button"
                                 disabled={isDisabled}
-                                className="disabled:opacity-50 ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
                                 onClick={() => setOpen(true)}
                               >
                                 {!data?.published && "Publish"}
