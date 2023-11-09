@@ -220,8 +220,3 @@ export const TiptapExtensions = [
     allowFullscreen: true,
   }),
 ];
-
-function highlightCode(code, language) {
-  const result = lowlight.highlight(language, code);
-  return `<pre><code class="hljs ${language}">${result}</code></pre>`;
-}
