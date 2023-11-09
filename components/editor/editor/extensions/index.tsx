@@ -15,6 +15,8 @@ import { InputRule } from "@tiptap/core";
 // import UploadImagesPlugin from "@/components/editor/editor/plugins/upload-images";
 import UpdatedImage from "./updated-image";
 import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
 import TextAlign from "@tiptap/extension-text-align";
 import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
@@ -27,6 +29,14 @@ import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
 import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
 import CustomTableNodeView from "../components/Table/CustomTableNodeView";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+
+import { lowlight } from "lowlight";
+
+// Highlight syntax select your style from here (https://highlightjs.org/examples)
+import "highlight.js/styles/monokai-sublime.css";
+
+import CodeBlock from "../components/CodeBlock/CodeBlock";
 
 // const CustomImage = TiptapImage.extend({
 //   addProseMirrorPlugins() {
@@ -37,6 +47,21 @@ import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 const CustomDocument = Document.extend({
   content: "heading block*",
 });
+
+export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(CodeBlock);
+  },
+}).configure({ lowlight });
+
+// Two CodeBlockNodes need to be created to disable selector menu
+export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer((props: NodeViewProps) => (
+      <CodeBlock {...props} readOnly />
+    ));
+  },
+}).configure({ lowlight });
 
 export const CustomTable = Table.extend({
   addNodeView() {
@@ -70,6 +95,8 @@ export const TiptapExtensions = [
         "text-neutral-900 bg-neutral-100 border border-neutral-500 flex-1 flex p-1",
     },
   }),
+  Paragraph,
+  Text,
   StarterKit.configure({
     document: false,
     bulletList: {
