@@ -234,7 +234,7 @@ const Create = () => {
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
-          <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full dark:bg-black">
+          <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full bg-white dark:bg-black">
             <button
               type="button"
               className="absolute right-8 top-8 z-50 cursor-pointer underline"
@@ -254,7 +254,7 @@ const Create = () => {
                       rows={3}
                       {...register("excerpt")}
                     />
-                    <p className="mt-2 text-sm text-neutral-400">
+                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       What readers will see before they click on your article.
                       Good SEO descriptions utilize keywords, summarize the
                       story and are between 140-156 characters long.
@@ -304,7 +304,7 @@ const Create = () => {
                         </button>
                       </div>
                     ))}
-                    <p className="mt-2 text-sm text-neutral-400">
+                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       Tag with up to 5 topics. This makes it easier for readers
                       to find and know what your story is about.
                     </p>
@@ -313,7 +313,7 @@ const Create = () => {
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
+                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-neutral-800 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75 dark:text-white">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
@@ -330,7 +330,7 @@ const Create = () => {
                               defaultValue=""
                               {...register("canonicalUrl")}
                             />
-                            <p className="mt-2 text-sm text-neutral-400">
+                            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                               Add this if the post was originally published
                               elsewhere and you want to link to it as the
                               original source.
