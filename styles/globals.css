@@ -34,7 +34,7 @@ body {
   [multiple],
   textarea,
   select {
-    @apply mt-1 bg-white dark:bg-black focus:outline-none focus:ring-2 focus:ring-neutral-300 ring-offset-1 block w-full shadow-sm sm:text-sm border-white border-2 px-2 py-2 disabled:opacity-50 text-black dark:text-white;
+    @apply mt-1 block w-full border-2 border-white bg-white px-2 py-2 text-black shadow-sm ring-offset-1 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:bg-black dark:text-white sm:text-sm;
   }
 
   a {
@@ -47,19 +47,19 @@ body {
 }
 
 .nav-button {
-  @apply focus:text-neutral-900 dark:focus:text-white  text-neutral-900 hover:bg-neutral-200 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white py-2 rounded-md px-2 focus-style;
+  @apply focus-style rounded-md  px-2 py-2 text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white dark:focus:text-white;
 }
 
 .focus-style {
-  @apply rounded-md focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
+  @apply rounded-md focus:outline-none focus:ring-white focus-visible:ring-2  focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600;
 }
 
 .focus-style-rounded {
-  @apply rounded-full focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600  focus:ring-white focus:outline-none;
+  @apply rounded-full focus:outline-none focus:ring-white focus-visible:ring-2  focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600;
 }
 
 .primary-button {
-  @apply disabled:from-neutral-500 disabled:to-neutral-700 disabled:border-neutral-300 disabled:text-neutral-300 disabled:hover:text-neutral-300 ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-white  focus:outline-none;
+  @apply ml-4 inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-white disabled:border-neutral-300 disabled:from-neutral-500 disabled:to-neutral-700 disabled:text-neutral-300  disabled:hover:text-neutral-300;
 }
 
 .logo-focus {
@@ -67,19 +67,25 @@ body {
 }
 
 .secondary-button {
-  @apply items-center border-2 border-black dark:border-white hover:bg-neutral-300 dark:hover:bg-neutral-700 bg-gradient-to-r rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600;
+  @apply inline-flex items-center justify-center rounded-md border-2 border-black bg-gradient-to-r px-4 py-2 font-medium text-black shadow-sm hover:bg-neutral-300 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:border-white dark:text-white dark:hover:bg-neutral-700;
 }
 
 .fancy-link {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 tracking-wide cursor-pointer;
+  @apply cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent;
 }
 
 .fancy-link:hover {
   @apply from-orange-300 to-pink-500;
 }
 
+.prose {
+  @apply prose-neutral dark:prose-invert lg:prose-lg;
+
+  margin-top: 1.5rem;
+}
+
 .prose .anchor {
-  @apply absolute invisible no-underline;
+  @apply invisible absolute no-underline;
 
   margin-left: -1em;
   padding-right: 0.5em;
@@ -113,7 +119,7 @@ body {
 }
 
 .prose code {
-  @apply text-neutral-800 dark:text-neutral-200 px-1 py-0.5 border border-neutral-100 dark:border-neutral-800 rounded-lg bg-neutral-100 dark:bg-black font-mono;
+  @apply rounded-lg border border-neutral-100 bg-neutral-100 px-1 py-0.5 font-mono text-neutral-800 dark:border-neutral-800 dark:bg-black dark:text-neutral-200;
 }
 
 .prose code:after {
@@ -125,19 +131,13 @@ body {
 }
 
 .prose pre code {
-  @apply text-neutral-800 dark:text-neutral-200 p-0;
+  @apply p-0 text-neutral-800 dark:text-neutral-200;
   border: initial;
 }
 
 .prose img {
   /* Don't apply styles to next/image */
   @apply m-0;
-}
-
-.prose > :first-child {
-  /* Override removing top margin, causing layout shift */
-  margin-top: 1.25em !important;
-  margin-bottom: 1.25em !important;
 }
 
 /* Placeholder (at the top) */
@@ -251,7 +251,7 @@ pre {
 }
 
 .rehype-code-title {
-  @apply px-5 py-3 font-mono text-sm font-bold text-neutral-800 bg-neutral-200 border border-b-0 border-neutral-200 rounded-t-lg dark:text-neutral-200 dark:border-neutral-700 dark:bg-neutral-800;
+  @apply rounded-t-lg border border-b-0 border-neutral-200 bg-neutral-200 px-5 py-3 font-mono text-sm font-bold text-neutral-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200;
 }
 
 .rehype-code-title + pre {
@@ -259,7 +259,7 @@ pre {
 }
 
 .highlight-line {
-  @apply block px-4 -mx-4 bg-neutral-100 border-l-4 border-blue-500 dark:bg-neutral-800;
+  @apply -mx-4 block border-l-4 border-blue-500 bg-neutral-100 px-4 dark:bg-neutral-800;
 }
 
 /* Remove Safari input shadow on mobile */
