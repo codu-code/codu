@@ -120,7 +120,7 @@ const MyPosts = () => {
         </div>
       </Modal>
       <div className="relative mx-4 max-w-2xl bg-neutral-100 dark:bg-black sm:mx-auto">
-        <div className="mb-4 mt-8 border-b border-neutral-200">
+        <div className="mb-4 mt-8">
           <div className="sm:hidden">
             <label htmlFor="tabs" className="sr-only">
               Select a tab
@@ -144,14 +144,14 @@ const MyPosts = () => {
             </select>
           </div>
           <div className="hidden sm:block">
-            <nav className="flex" aria-label="Tabs">
+            <nav className="flex gap-1" aria-label="Tabs">
               {tabs.map((tab) => (
                 <Link
                   className={classNames(
                     tab.current
-                      ? "bg-black text-neutral-200 dark:bg-neutral-100 dark:text-neutral-700"
-                      : "text-neutral-700 hover:text-neutral-400 dark:text-neutral-200",
-                    "rounded-t-md px-4 py-2 text-base font-medium",
+                      ? "bg-neutral-800 text-neutral-200 dark:bg-neutral-100 dark:text-neutral-700"
+                      : "text-neutral-700 hover:bg-neutral-300 dark:text-neutral-200 dark:hover:bg-neutral-800",
+                    "rounded-md px-4 py-2 text-base font-medium",
                   )}
                   aria-current={tab.current ? "page" : undefined}
                   key={tab.name}
