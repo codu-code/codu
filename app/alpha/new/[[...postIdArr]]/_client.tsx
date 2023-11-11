@@ -140,7 +140,7 @@ const Create = () => {
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
+                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-pink-300 focus-visible:ring-opacity-75">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
