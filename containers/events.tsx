@@ -28,15 +28,16 @@ export default function EventsList() {
   };
 
   return (
-    <div className="mx-auto lg:max-w-5xl sm:max-w-2xl">
+    <div className="mx-auto sm:max-w-2xl lg:max-w-5xl">
       <div>
         <section>
           <div className="bg-neutral-900 text-neutral-700 shadow-xl">
-            <div className="border border-neutral-900 py-6 px-4 sm:p-6 lg:pb-8 ">
+            <div className="border border-neutral-900 px-4 py-6 sm:p-6 lg:pb-8 ">
               <div>
-                <label htmlFor="username">Search</label>
-                <div className="mt-1 shadow-sm flex">
+                <label htmlFor="search">Search</label>
+                <div className="mt-1 flex shadow-sm">
                   <input
+                    name="search"
                     type="text"
                     onChange={(e) => {
                       handleInputChange(e.target.value);
@@ -81,7 +82,7 @@ export default function EventsList() {
               );
             })}
           {status === "success" && !data.pages[0].events.length && (
-            <h2 className="text-lg mt-8">No results founds</h2>
+            <h2 className="mt-8 text-lg">No results founds</h2>
           )}
           {isFetchingNextPage ? <ArticleLoading /> : null}
           <span className="invisible" ref={ref}>

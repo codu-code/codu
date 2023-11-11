@@ -63,7 +63,7 @@ const MyPosts = () => {
         open={!!selectedArticleToDelete}
         onClose={() => setSelectedArticleToDelete(undefined)}
       >
-        <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
+        <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
           <button
             type="button"
             className="bg-neutral-900 text-neutral-400 hover:text-neutral-500 focus:outline-none"
@@ -74,16 +74,16 @@ const MyPosts = () => {
           </button>
         </div>
         <div className="sm:flex sm:items-start">
-          <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 sm:mx-0 sm:h-10 sm:w-10">
+          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-pink-600 sm:mx-0 sm:h-10 sm:w-10">
             <ExclamationIcon
-              className="h-6 w-6 text-white-600"
+              className="text-white-600 h-6 w-6"
               aria-hidden="true"
             />
           </div>
-          <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+          <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
             <Dialog.Title
               as="h3"
-              className="text-lg leading-6 font-medium text-white"
+              className="text-lg font-medium leading-6 text-white"
             >
               Delete article
             </Dialog.Title>
@@ -91,7 +91,7 @@ const MyPosts = () => {
               <p className="text-sm text-neutral-500">
                 Are you sure you want to delete this article?
               </p>
-              <p className="text-sm text-neutral-500 mt-2">
+              <p className="mt-2 text-sm text-neutral-500">
                 All of the data will be permanently removed from our servers
                 forever. This action cannot be undone.
               </p>
@@ -102,7 +102,7 @@ const MyPosts = () => {
           <button
             type="button"
             disabled={deleteStatus === "loading"}
-            className="ml-4 primary-button"
+            className="primary-button ml-4"
             onClick={() => {
               if (selectedArticleToDelete)
                 mutate({ id: selectedArticleToDelete });
@@ -112,15 +112,15 @@ const MyPosts = () => {
           </button>
           <button
             type="button"
-            className="mt-3 rounded-md w-full inline-flex justify-center border border-neutral-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-neutral-700 hover:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+            className="mt-3 inline-flex w-full justify-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-base font-medium text-neutral-700 shadow-sm hover:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
             onClick={() => setSelectedArticleToDelete(undefined)}
           >
             Cancel
           </button>
         </div>
       </Modal>
-      <div className="relative sm:mx-auto max-w-2xl mx-4 bg-neutral-100 dark:bg-black">
-        <div className="border-b border-neutral-200 mt-8 mb-4">
+      <div className="relative mx-4 max-w-2xl bg-neutral-100 dark:bg-black sm:mx-auto">
+        <div className="mb-4 mt-8">
           <div className="sm:hidden">
             <label htmlFor="tabs" className="sr-only">
               Select a tab
@@ -144,14 +144,14 @@ const MyPosts = () => {
             </select>
           </div>
           <div className="hidden sm:block">
-            <nav className="flex" aria-label="Tabs">
+            <nav className="flex gap-1" aria-label="Tabs">
               {tabs.map((tab) => (
                 <Link
                   className={classNames(
                     tab.current
-                      ? "bg-black dark:bg-neutral-100 text-neutral-200 dark:text-neutral-700"
-                      : "text-neutral-700 dark:text-neutral-200 hover:text-neutral-400",
-                    "px-4 py-2 font-medium text-base rounded-t-md",
+                      ? "bg-neutral-800 text-neutral-200 dark:bg-neutral-100 dark:text-neutral-700"
+                      : "text-neutral-700 hover:bg-neutral-300 dark:text-neutral-200 dark:hover:bg-neutral-800",
+                    "rounded-md px-4 py-2 text-base font-medium",
                   )}
                   aria-current={tab.current ? "page" : undefined}
                   key={tab.name}
@@ -166,10 +166,10 @@ const MyPosts = () => {
 
         <div>
           {selectedTabData.status === "loading" && (
-            <p className="font-medium py-4">Fetching your posts...</p>
+            <p className="py-4 font-medium">Fetching your posts...</p>
           )}
           {selectedTabData.status === "error" && (
-            <p className="font-medium py-4">
+            <p className="py-4 font-medium">
               Something went wrong fetching your posts... Refresh the page.
             </p>
           )}
@@ -178,26 +178,28 @@ const MyPosts = () => {
             selectedTabData.data?.map(
               ({ id, title, excerpt, readTimeMins, slug }) => (
                 <article
-                  className="border-2 p-4 mb-4 bg-white dark:bg-black border-neutral-100"
+                  className="mb-4 border-2 border-neutral-100 bg-white p-4 dark:bg-black"
                   key={id}
                 >
                   {tab === "published" ? (
                     <Link href={`articles/${slug}`}>
-                      <h2 className="text-2xl font-semibold mb-2 hover:underline">
+                      <h2 className="mb-2 text-2xl font-semibold hover:underline">
                         {title}
                       </h2>
                     </Link>
                   ) : (
-                    <h2 className=" text-2xl font-semibold mb-2">{title}</h2>
+                    <h2 className=" mb-2 text-2xl font-semibold">{title}</h2>
                   )}
-                  <p>{excerpt || "No excerpt yet... Write more to see one."}</p>
-                  <p className="mt-2 font-light text-sm text-neutral-400">
+                  <p className="break-words">
+                    {excerpt || "No excerpt yet... Write more to see one."}
+                  </p>
+                  <p className="mt-2 text-sm font-light text-neutral-400">
                     Read time so far: {readTimeMins} mins
                   </p>
                   <div className="flex justify-end">
                     <Menu as="div" className="relative inline-block text-left">
                       <div>
-                        <Menu.Button className="inline-flex justify-center w-full border border-neutral-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-100 focus:ring-indigo-500">
+                        <Menu.Button className="inline-flex w-full justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neutral-100">
                           Options
                           <ChevronDownIcon
                             className="-mr-1 ml-2 h-5 w-5"
@@ -215,7 +217,7 @@ const MyPosts = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="origin-top-right absolute right-0 mt-2 w-40 shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-neutral-100 focus:outline-none">
+                        <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <div className="py-1">
                             <Menu.Item>
                               {({ active }) => (
@@ -245,7 +247,7 @@ const MyPosts = () => {
                                     active
                                       ? "bg-neutral-100 text-black"
                                       : "text-neutral-700",
-                                    "group flex items-center px-4 py-2 text-sm w-full",
+                                    "group flex w-full items-center px-4 py-2 text-sm",
                                   )}
                                 >
                                   <TrashIcon
@@ -266,7 +268,7 @@ const MyPosts = () => {
             )}
           {selectedTabData.status === "success" &&
             selectedTabData.data?.length === 0 && (
-              <p className="font-medium py-4">Nothing to show here... 🥲</p>
+              <p className="py-4 font-medium">Nothing to show here... 🥲</p>
             )}
         </div>
       </div>

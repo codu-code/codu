@@ -209,28 +209,28 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
           <section key={id}>
             {editCommentBoxId !== id ? (
               <>
-                <div className="flex items-center mb-2 justify-between">
-                  <div className="flex items-center space-x-2 text-sm text-neutral-500">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-sm text-neutral-700 dark:text-neutral-500">
                     <Link href={`/${username}`}>
                       <img
-                        className="rounded-full object-cover bg-neutral-700 h-8 w-8"
+                        className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
                         alt={`Avatar for ${name}`}
                         src={image}
                       />
                     </Link>
                     <Link
-                      className="hover:underline text-white"
+                      className="font-semibold text-neutral-900 hover:underline dark:text-white"
                       href={`/${username}`}
                     >
                       {name}
                     </Link>
                     {isCurrentUser && !isAuthor && (
-                      <div className="border rounded text-xs px-1 py-[2px] border-orange-400 text-orange-400">
+                      <div className="rounded border border-orange-400 px-1 py-[2px] text-xs text-orange-400">
                         YOU
                       </div>
                     )}
                     {isAuthor && (
-                      <div className="border rounded text-xs px-1 py-[2px] border-pink-500 text-pink-500">
+                      <div className="rounded border border-pink-500 px-1 py-[2px] text-xs text-pink-500">
                         AUTHOR
                       </div>
                     )}
@@ -247,9 +247,9 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                   {isCurrentUser ? (
                     <Menu as="div" className="relative">
                       <div>
-                        <Menu.Button className="p-1 rounded-full hover:bg-neutral-800 bg-neutral-900">
+                        <Menu.Button className="rounded-full bg-neutral-200 p-1 hover:bg-neutral-300 dark:bg-neutral-900 dark:hover:bg-neutral-200">
                           <span className="sr-only">Open user menu</span>
-                          <DotsHorizontalIcon className="w-6 h-6" />
+                          <DotsHorizontalIcon className="h-6 w-6" />
                         </Menu.Button>
                       </div>
                       <Transition
@@ -261,11 +261,11 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="origin-top-right absolute bottom-10 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <>
                             <Menu.Item>
                               <button
-                                className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded w-full text-left text-sm"
+                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200"
                                 onClick={() => {
                                   if (id !== editCommentBoxId) {
                                     setValue("edit", body);
@@ -279,7 +279,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                             </Menu.Item>
                             <Menu.Item>
                               <button
-                                className="block px-4 py-2 text-neutral-700 hover:bg-neutral-200 rounded w-full text-left text-sm"
+                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200"
                                 onClick={() => {
                                   deleteComment({ id });
                                 }}
@@ -294,16 +294,16 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                   ) : null}
                 </div>
 
-                <div className="border-l-2 border-neutral-700 ml-4 pl-2 -mt-2">
-                  <div className="prose prose-invert text-sm overflow-x-hidden">
+                <div className="-mt-2 ml-4 border-l-2 border-neutral-400 pl-2 dark:border-neutral-700">
+                  <div className="prose overflow-x-hidden text-sm dark:prose-invert">
                     {Markdoc.renderers.react(content, React, {
                       components: markdocComponents,
                     })}
                   </div>
 
-                  <div className="flex items-center mt-2 mb-4">
+                  <div className="mb-4 mt-2 flex items-center">
                     <button
-                      className="p-1 mr-1 rounded-full hover:bg-neutral-800"
+                      className="mr-1 rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
                       onClick={() => likeComment(id)}
                     >
                       <HeartIcon
@@ -312,13 +312,13 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                         }`}
                       />
                     </button>
-                    <span className="text-xs font-semibold mr-4 flex">
+                    <span className="mr-4 flex text-xs font-semibold">
                       {likeCount}
                     </span>
                     <ReportModal type="comment" comment={body} id={id} />
                     {depth < 6 && (
                       <button
-                        className="border border-white px-2 py-1 text-xs rounded hover:bg-neutral-800"
+                        className="rounded border border-neutral-800 px-2 py-1 text-xs hover:bg-neutral-300 dark:border-white dark:hover:bg-neutral-800"
                         onClick={() => {
                           if (!session) return signIn();
                           if (showCommentBoxId !== id) {
@@ -389,20 +389,20 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   }: CommentAreaProps) => {
     return (
       <form
-        className="mb-8 relative"
+        className="relative mb-8"
         onSubmit={handleSubmit((e) => onSubmit(e[name], parentId, name))}
       >
         {loading && (
-          <div className="top-0 bottom-0 left-0 right-0 absolute">
-            <div className="flex justify-center items-center h-full">
-              <div className="border-4 border-neutral-700 border-l-neutral-500 animate-spin rounded-full h-8 w-8 opacity-100" />
+          <div className="absolute bottom-0 left-0 right-0 top-0">
+            <div className="flex h-full items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-700 border-l-neutral-500 opacity-100" />
             </div>
           </div>
         )}
         {session?.user?.image && (
-          <div className="flex items-center mb-2">
+          <div className="mb-2 flex items-center">
             <img
-              className="mr-2 rounded-full object-cover bg-neutral-700 h-8 w-8"
+              className="mr-2 h-8 w-8 rounded-full bg-neutral-700 object-cover"
               alt={`Avatar for ${session.user.name}`}
               src={session.user.image}
             />
@@ -411,7 +411,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         )}
         {viewPreviewId === id ? (
           <article
-            className="prose prose-invert text-sm overflow-x-hidden"
+            className="prose prose-invert overflow-x-hidden text-sm"
             style={{ whiteSpace: "pre-wrap" }}
           >
             {Markdoc.renderers.react(
@@ -426,7 +426,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
           <TextareaAutosize
             {...register(name)}
             minLength={1}
-            className="p-2 w-full mb-2 dark:bg-black bg-neutral-300 rounded"
+            className="mb-2 w-full rounded bg-neutral-300 p-2 dark:bg-black"
             placeholder="What do you think?"
             minRows={3}
           />
@@ -435,14 +435,14 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
           <button
             disabled={createCommentStatus === "loading"}
             type="submit"
-            className=" text-neutral-300 border-2 hover:text-white primary-button text-sm"
+            className=" primary-button border-2 text-sm text-neutral-300 hover:text-white"
           >
             {editMode ? "Update" : "Submit"}
           </button>
           <button
             disabled={createCommentStatus === "loading"}
             type="submit"
-            className="secondary-button text-sm ml-2"
+            className="secondary-button ml-2 text-sm"
             onClick={() =>
               setViewPreviewId((current) => {
                 if (current === id) return null;
@@ -456,7 +456,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
             <button
               type="button"
               onClick={onCancel}
-              className="text-sm opacity-60 hover:opacity-100 px-4 py-2 ml-2"
+              className="ml-2 px-4 py-2 text-sm opacity-60 hover:opacity-100"
             >
               Cancel
             </button>
@@ -467,16 +467,16 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   };
 
   return (
-    <section className="w-full relative">
+    <section className="relative w-full">
       {!initiallyLoaded && (
-        <div className="top-0 bottom-0 left-0 right-0 absolute z-20">
-          <div className="flex justify-center items-center h-full">
-            <div className="border-4 border-neutral-700 border-l-neutral-500 animate-spin rounded-full h-8 w-8 opacity-100" />
+        <div className="absolute bottom-0 left-0 right-0 top-0 z-20">
+          <div className="flex h-full items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-700 border-l-neutral-500 opacity-100" />
             <span className="sr-only">Loading</span>
           </div>
         </div>
       )}
-      <h2 className="mt-4 pb-2 text-xl border-b border-neutral-800">
+      <h2 className="mt-4 border-b border-neutral-800 pb-2 text-xl">
         {initiallyLoaded
           ? `Discussion (${commentsResponse?.count || 0})`
           : "Fetching comments"}
@@ -485,7 +485,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         {session ? (
           <CommentArea id={0} name="comment" />
         ) : (
-          <div className="mb-4 text-lg pb-4 border-b border-neutral-800">
+          <div className="mb-4 border-b border-neutral-800 pb-4 text-lg">
             <p className="mb-2">Hey! 👋</p>
             <p className="mb-2">Got something to say?</p>
             <p>
