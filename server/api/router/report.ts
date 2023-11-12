@@ -1,4 +1,5 @@
 import { ReportSchema } from "@/schema/report";
+import * as Sentry from "@sentry/nextjs";
 import sendEmail from "@/utils/sendEmail";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
@@ -23,7 +24,9 @@ export const reportRouter = createTRPCRouter({
         function getBaseUrl() {
           if (typeof window !== "undefined") return "";
           const env = process.env.DOMAIN_NAME || process.env.VERCEL_URL;
+          Sentry.captureMessage(`Domain - env https://${env}`);
           if (env) return "https://" + env;
+          Sentry.captureMessage("It's localhost");
           return "http://localhost:3000";
         }
 
@@ -101,7 +104,7 @@ export const reportRouter = createTRPCRouter({
           message: "Invalid report",
         });
       } catch (error) {
-        console.error(error);
+        Sentry.captureException(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Report failed to send",
