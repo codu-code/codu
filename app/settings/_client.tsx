@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "sonner";
 import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";
 
 import { uploadFile } from "../../utils/s3helpers";
 import type { Prisma } from "@prisma/client";
-import { redirect } from "next/navigation";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -60,14 +59,17 @@ const Settings = ({ profile }: { profile: User }) => {
     url: profile.image,
   });
 
-  const { mutate } = api.profile.edit.useMutation({
-    onError() {
+  const { mutate, isError, isSuccess, isLoading } =
+    api.profile.edit.useMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Saved");
+    }
+    if (isError) {
       toast.error("Something went wrong saving settings.");
-    },
-    onSuccess() {
-      redirect(`/${username}`);
-    },
-  });
+    }
+  }, [isError, isSuccess]);
 
   const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
   const { mutate: updateUserPhotoUrl } =
@@ -128,15 +130,7 @@ const Settings = ({ profile }: { profile: User }) => {
 
   return (
     <div className="py-8">
-      <Toaster
-        toastOptions={{
-          style: {
-            borderRadius: 0,
-            border: "2px solid black",
-            background: "white",
-          },
-        }}
-      />
+      <Toaster />
       <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
         <div className="text-neutral-700">
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -423,8 +417,9 @@ const Settings = ({ profile }: { profile: User }) => {
                       Cancel
                     </button>
                     <button
+                      disabled={isLoading}
                       type="submit"
-                      className="ml-5 inline-flex w-20 justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                      className="ml-5 inline-flex w-20 justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-20"
                     >
                       Save
                     </button>

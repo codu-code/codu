@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { XIcon, FlagIcon } from "@heroicons/react/outline";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
 import { api } from "@/server/trpc/react";
 import { Dialog } from "@headlessui/react";

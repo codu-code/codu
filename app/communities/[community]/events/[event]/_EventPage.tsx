@@ -10,7 +10,7 @@ import Markdoc from "@markdoc/markdoc";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import { trpc } from "@/utils/trpc";
-import toast, { Toaster } from "react-hot-toast";
+import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
 import { PencilIcon } from "@heroicons/react/solid";
 import type { Prisma } from "@prisma/client";
@@ -203,15 +203,7 @@ function EventPage(props: EventPageProps) {
 
   return (
     <>
-      <Toaster
-        toastOptions={{
-          style: {
-            borderRadius: 0,
-            border: "2px solid black",
-            background: "white",
-          },
-        }}
-      />
+      <Toaster />
       <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
         <div className="relative md:col-span-8">
           <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">

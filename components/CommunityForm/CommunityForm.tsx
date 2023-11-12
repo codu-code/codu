@@ -1,15 +1,15 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { upsertCommunitySchema } from "../../schema/community";
-import type { upsertCommunityInput } from "../../schema/community";
+import { upsertCommunitySchema } from "@/schema/community";
+import type { upsertCommunityInput } from "@/schema/community";
 import CustomTextareaAutosize from "../CustomTextareAutosize/CustomTextareaAutosize";
 import { useRef, useState } from "react";
 import { useMarkdownHotkeys } from "@/markdoc/editor/hotkeys/hotkeys.markdoc";
 import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markdoc";
-import toast, { Toaster } from "react-hot-toast";
+import { toast, Toaster } from "sonner";
 import { trpc } from "@/utils/trpc";
-import { uploadFile } from "../../utils/s3helpers";
+import { uploadFile } from "@/utils/s3helpers";
 import { useRouter } from "next/navigation";
 
 interface Community {
@@ -117,15 +117,7 @@ export function CommunityForm(props: CommunityFormProps) {
       onSubmit={handleSubmit(onSubmit)}
       className="border border-neutral-900"
     >
-      <Toaster
-        toastOptions={{
-          style: {
-            borderRadius: 0,
-            border: "2px solid black",
-            background: "white",
-          },
-        }}
-      />
+      <Toaster />
       <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white">
