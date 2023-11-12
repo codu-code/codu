@@ -24,9 +24,7 @@ export const reportRouter = createTRPCRouter({
         function getBaseUrl() {
           if (typeof window !== "undefined") return "";
           const env = process.env.DOMAIN_NAME || process.env.VERCEL_URL;
-          Sentry.captureMessage(`Domain - env https://${env}`);
           if (env) return "https://" + env;
-          Sentry.captureMessage("It's localhost");
           return "http://localhost:3000";
         }
 
