@@ -101,6 +101,7 @@ export const reportRouter = createTRPCRouter({
           message: "Invalid report",
         });
       } catch (error) {
+        console.error(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Report failed to send",
