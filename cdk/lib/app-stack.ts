@@ -111,6 +111,13 @@ export class AppStack extends cdk.Stack {
               "/env/discordInviteUrl",
             ),
           ),
+          ADMIN_EMAIL: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "adminEmail",
+              "/env/adminEmail",
+            ),
+          ),
         },
         logging: ecs.LogDrivers.awsLogs({
           streamPrefix: "AppContainer",
