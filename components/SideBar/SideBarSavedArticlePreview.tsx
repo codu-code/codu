@@ -29,7 +29,7 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
   });
 
   return (
-    <article className="my-4 flex h-32 flex-col bg-white p-4 shadow-lg dark:bg-neutral-900">
+    <article className="my-2 flex h-32 flex-col border border-neutral-300 bg-white p-4 px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
       <header className="flex grow items-center">
         <Link
           className="cursor-pointer text-base font-semibold leading-6 tracking-wide hover:underline"

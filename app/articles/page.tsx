@@ -115,7 +115,7 @@ const ArticlesPage = () => {
             <select
               id="filter"
               name="filter"
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 capitalize ring-2 ring-inset ring-neutral-900 focus:ring-2 focus:ring-pink-600 dark:ring-1 dark:ring-neutral-300 sm:text-sm sm:leading-6 "
+              className="mt-2 block w-full rounded border-neutral-300 py-1 pl-3 pr-10 text-sm leading-6 focus:ring-2 focus:ring-pink-600 dark:border-neutral-600"
               onChange={(e) => {
                 router.push(
                   `/articles?filter=${e.target.value}${
