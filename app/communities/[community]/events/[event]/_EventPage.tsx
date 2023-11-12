@@ -147,13 +147,13 @@ function EventPage(props: EventPageProps) {
             .map((rsvp) => (
               <div
                 key={rsvp.id}
-                className="bg-neutral-900 p-4 border-l-4 border-l-pink-600"
+                className="border-l-4 border-l-pink-600 bg-neutral-900 p-4"
               >
                 <main className="flex">
                   <div className="mr-4 flex-shrink-0 self-center">
                     {rsvp.user.image && (
                       <img
-                        className="rounded-full object-cover h-32 w-32"
+                        className="h-32 w-32 rounded-full object-cover"
                         alt={`Avatar for ${rsvp.user.name}`}
                         src={rsvp.user.image}
                       />
@@ -162,18 +162,18 @@ function EventPage(props: EventPageProps) {
                   <div className="flex flex-col justify-center">
                     <div>
                       {organisers.includes(rsvp.user.id) && (
-                        <div className="w-fit mb-2 bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold">
+                        <div className="mb-2 w-fit rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700">
                           Organizer
                         </div>
                       )}
                     </div>
                     <Link
-                      className="text-lg md:text-xl font-bold mb-0 hover:underline"
+                      className="mb-0 text-lg font-bold hover:underline md:text-xl"
                       href={`/${rsvp.user.username}`}
                     >
                       {rsvp.user.name}
                     </Link>
-                    <h2 className="text-neutral-400 font-bold text-sm">
+                    <h2 className="text-sm font-bold text-neutral-400">
                       @{rsvp.user.username}
                     </h2>
                     <p className="mt-1">{rsvp.user.bio}</p>
@@ -183,7 +183,7 @@ function EventPage(props: EventPageProps) {
                         className="flex flex-row items-center"
                         target="blank"
                       >
-                        <LinkIcon className="h-5 mr-2 text-neutral-400" />
+                        <LinkIcon className="mr-2 h-5 text-neutral-400" />
                         <p className="mt-1 text-blue-500">
                           {getDomainFromUrl(rsvp.user.websiteUrl)}
                         </p>
@@ -195,7 +195,7 @@ function EventPage(props: EventPageProps) {
             ))}
         </div>
         {list.length === 0 ? (
-          <p className="font-medium py-4">There are no attendees yet... 🥲</p>
+          <p className="py-4 font-medium">There are no attendees yet... 🥲</p>
         ) : null}
       </>
     );
@@ -212,21 +212,21 @@ function EventPage(props: EventPageProps) {
           },
         }}
       />
-      <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">
+      <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
         <div className="relative md:col-span-8">
-          <div className="mx-auto pb-4 md:max-w-3xl px-2 sm:px-4 break-words">
+          <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">
             <article className="mx-auto max-w-3xl pt-10">
-              <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold mb-4">{event.name}</h1>
+              <div className="flex items-center justify-between">
+                <h1 className="mb-4 text-3xl font-bold">{event.name}</h1>
                 <div>
                   {session &&
                     session.user &&
                     organisers.includes(session.user.id) && (
                       <Link
-                        className="whitespace-nowrap flex-inline items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="flex-inline inline-flex items-center justify-center whitespace-nowrap rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                         href={`/communities/${event.community.slug}/events/${event.slug}/edit`}
                       >
-                        <PencilIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                        <PencilIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                         Edit Event
                       </Link>
                     )}
@@ -234,7 +234,7 @@ function EventPage(props: EventPageProps) {
               </div>
               <div>
                 <img
-                  className="w-full aspect-[16/9] mb-4"
+                  className="mb-4 aspect-[16/9] w-full"
                   src={event.coverImage}
                   alt={event.name}
                 />
@@ -268,22 +268,22 @@ function EventPage(props: EventPageProps) {
           </div>
         </div>
         <div className="col-span-4">
-          <div className="mt-12 mb-8 border border-neutral-600 bg-neutral-900">
+          <div className="mb-8 mt-12 border border-neutral-600 bg-neutral-900">
             <img
-              className="w-full aspect-[16/9]"
+              className="aspect-[16/9] w-full"
               src={event.community.coverImage}
               alt={event.community.name}
             />
-            <div className="tracking-wide text-sm my-3 break-words px-4 py-2">
+            <div className="my-3 break-words px-4 py-2 text-sm tracking-wide">
               <Link
-                className="block text-lg leading-6 font-semibold hover:underline"
+                className="block text-lg font-semibold leading-6 hover:underline"
                 href={`/communities/${event.community.slug}`}
               >
                 {event.community.name}
               </Link>
               <p className="my-2">{event.community.excerpt}</p>
-              <div className="text-xs text-neutral-500 mt-4">
-                <div className="flex flex-row mb-4 text-neutral-500">
+              <div className="mt-4 text-xs text-neutral-500">
+                <div className="mb-4 flex flex-row text-neutral-500">
                   <div>
                     <CalendarIcon className="mr-2" />
                   </div>
@@ -291,7 +291,7 @@ function EventPage(props: EventPageProps) {
                     <p>{eventDate}</p>
                   </div>
                 </div>
-                <div className="flex flex-row mb-4 text-neutral-500">
+                <div className="mb-4 flex flex-row text-neutral-500">
                   <div>
                     <MapPinIcon className="mr-2" />
                   </div>
@@ -302,9 +302,9 @@ function EventPage(props: EventPageProps) {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-row mb-4">
+                <div className="mb-4 flex flex-row">
                   <UsersIcon className="mr-2" />
-                  <p className="font-medium pt-0.5">
+                  <p className="pt-0.5 font-medium">
                     {event.capacity - event.RSVP.length > 0
                       ? event.capacity - event.RSVP.length
                       : 0}{" "}
@@ -327,7 +327,7 @@ function EventPage(props: EventPageProps) {
                     if (!isEventOrganiser) {
                       return (
                         <button
-                          className="w-full bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                          className="inline-flex w-full justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                           onClick={() => deleteRsvp(event.id)}
                         >
                           Cancel your attendance to this event
@@ -337,7 +337,7 @@ function EventPage(props: EventPageProps) {
                   } else {
                     return (
                       <button
-                        className="w-full bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="inline-flex w-full justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                         onClick={() => createRsvp(event.id)}
                       >
                         {event.capacity - event.RSVP.length <= 0
@@ -349,7 +349,7 @@ function EventPage(props: EventPageProps) {
                 } else {
                   return (
                     <button
-                      className="w-full bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                      className="inline-flex w-full justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                       onClick={() => signIn()}
                     >
                       Sign in to attend this event

@@ -23,37 +23,37 @@ const CommunityPreview: NextPage<Props> = ({
   membersCount,
 }) => {
   return (
-    <article className="border-l-4 border-l-pink-600 p-4 my-4 shadow-lg bg-neutral-900">
+    <article className="my-4 border-l-4 border-l-pink-600 bg-neutral-900 p-4 shadow-lg">
       <div className="flex flex-row">
-        <div className="basis-1/4 mb-4">
+        <div className="mb-4 basis-1/4">
           <span className="sr-only">{name}</span>
           <img
-            className="rounded-lg object-cover w-full aspect-[16/9]"
+            className="aspect-[16/9] w-full rounded-lg object-cover"
             src={image}
             alt={`${name}'s avatar`}
           />
         </div>
         <div className="basis-3/4 pl-4">
-          <header className="text-2xl leading-6 font-semibold tracking-wide">
+          <header className="text-2xl font-semibold leading-6 tracking-wide">
             {name}
           </header>
-          <p className="tracking-wide text-sm md:text-lg my-3 break-words">
+          <p className="my-3 break-words text-sm tracking-wide md:text-lg">
             {excerpt}
           </p>
-          <div className="text-xs text-neutral-500 mb-1">
-            <div className="flex flex-row mr-2 mb-2">
+          <div className="mb-1 text-xs text-neutral-500">
+            <div className="mb-2 mr-2 flex flex-row">
               <MapPinIcon className="mr-2" />
-              <p className="font-medium pt-0.5">
+              <p className="pt-0.5 font-medium">
                 {city}, {country}
               </p>
             </div>
-            <div className="flex flex-row mr-2 mb-2">
+            <div className="mb-2 mr-2 flex flex-row">
               <UsersIcon className="mr-2" />
-              <p className="font-medium pt-0.5">{membersCount} members</p>
+              <p className="pt-0.5 font-medium">{membersCount} members</p>
             </div>
           </div>
-          <div className="flex justify-between content-center w-full">
-            <div className="flex items-center justify-between w-full">
+          <div className="flex w-full content-center justify-between">
+            <div className="flex w-full items-center justify-between">
               <Link
                 className="fancy-link semibold text-lg"
                 href={`/communities/${slug}`}

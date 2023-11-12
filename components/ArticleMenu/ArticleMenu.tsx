@@ -109,11 +109,11 @@ const ArticleMenu = ({
       enterFrom="transform opacity-0 scale-75"
       enterTo="transform opacity-100 scale-100"
     >
-      <div className="bg-white dark:bg-neutral-900 border-t border-neutral-700 fixed lg:w-20 lg:border-r lg:border-b bottom-0 w-full py-2 z-20 lg:top-1/2 lg:-translate-y-1/2 lg:h-56 lg:px-2">
-        <div className="flex justify-evenly lg:flex-col h-full">
+      <div className="fixed bottom-0 z-20 w-full border-t border-neutral-700 bg-white py-2 dark:bg-neutral-900 lg:top-1/2 lg:h-56 lg:w-20 lg:-translate-y-1/2 lg:border-b lg:border-r lg:px-2">
+        <div className="flex h-full justify-evenly lg:flex-col">
           <div className="flex items-center lg:flex-col">
             <button
-              className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
               onClick={() => {
                 if (data?.currentUserLiked) return likePost(postId, false);
                 likePost(postId);
@@ -128,11 +128,11 @@ const ArticleMenu = ({
                 }`}
               />
             </button>
-            <span className="w-4 ml-2">{data?.likes || 0}</span>
+            <span className="ml-2 w-4">{data?.likes || 0}</span>
           </div>
 
           <button
-            className="lg:mx-auto p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800 focus-style-rounded"
+            className="focus-style-rounded rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
             onClick={() => {
               if (!session) {
                 signIn();
@@ -149,10 +149,10 @@ const ArticleMenu = ({
             />
           </button>
 
-          <Popover className="ml-4 relative">
-            <Popover.Button className="p-1 rounded-full hover:bg-neutral-300 dark:hover:bg-neutral-800">
+          <Popover className="relative ml-4">
+            <Popover.Button className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
               <span className="sr-only">Open user menu</span>
-              <DotsHorizontalIcon className="w-6 h-6" />
+              <DotsHorizontalIcon className="h-6 w-6" />
             </Popover.Button>
 
             <Transition
@@ -164,10 +164,10 @@ const ArticleMenu = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Popover.Panel className="origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+              <Popover.Panel className="absolute bottom-14 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-white lg:bottom-0 lg:left-16">
                 <div>
                   <ul>
-                    <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
+                    <li className="block rounded px-4 py-2 text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700">
                       <a
                         href={`https://twitter.com/intent/tweet?text="${postTitle}", by ${postUsername}&hashtags=coducommunity,codu&url=${postUrl}`}
                       >
@@ -176,7 +176,7 @@ const ArticleMenu = ({
                     </li>
                     <li>
                       <a
-                        className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded"
+                        className="block rounded px-4 py-2 text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700"
                         href={`https://www.linkedin.com/sharing/share-offsite/?url=${postUrl}`}
                       >
                         Share to LinkedIn
@@ -184,13 +184,13 @@ const ArticleMenu = ({
                     </li>
                     <li>
                       <button
-                        className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded w-full text-left"
+                        className="block w-full rounded px-4 py-2 text-left text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700"
                         onClick={handleCopyToClipboard}
                       >
                         {label}
                       </button>
                     </li>
-                    <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
+                    <li className="block rounded px-4 py-2 text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700">
                       <ReportModal type="post" title={postTitle} id={postId} />
                     </li>
                   </ul>

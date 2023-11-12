@@ -39,36 +39,36 @@ const EventPreview: NextPage<Props> = (props) => {
   });
 
   return (
-    <article className="border-l-4 border-l-pink-600 p-4 my-4 shadow-lg bg-neutral-900">
+    <article className="my-4 border-l-4 border-l-pink-600 bg-neutral-900 p-4 shadow-lg">
       <div className="flex flex-row">
-        <div className="basis-1/4 mb-4">
+        <div className="mb-4 basis-1/4">
           <span className="sr-only">{name}</span>
           <img
-            className="rounded-lg object-cover w-full aspect-[16/9]"
+            className="aspect-[16/9] w-full rounded-lg object-cover"
             src={coverImage}
             alt={`${name}'s avatar`}
           />
         </div>
         <div className="basis-3/4 pl-4">
-          <header className="mb-3 text-2xl leading-6 font-semibold tracking-wide">
+          <header className="mb-3 text-2xl font-semibold leading-6 tracking-wide">
             {name}
           </header>
-          <div className="text-xs text-neutral-500 mb-1">
-            <div className="flex flex-row mr-2 mb-2">
+          <div className="mb-1 text-xs text-neutral-500">
+            <div className="mb-2 mr-2 flex flex-row">
               <CalendarIcon className="mr-2" />
-              <p className="font-medium pt-0.5">{readableDate}</p>
+              <p className="pt-0.5 font-medium">{readableDate}</p>
             </div>
-            <div className="flex flex-row mr-2 mb-2">
+            <div className="mb-2 mr-2 flex flex-row">
               <MapPinIcon className="mr-2" />
-              <p className="font-medium pt-0.5">{address}</p>
+              <p className="pt-0.5 font-medium">{address}</p>
             </div>
-            <div className="flex flex-row mr-2 mb-2">
+            <div className="mb-2 mr-2 flex flex-row">
               <UsersIcon className="mr-2" />
-              <p className="font-medium pt-0.5">{attendees} attendees</p>
+              <p className="pt-0.5 font-medium">{attendees} attendees</p>
             </div>
           </div>
-          <div className="flex justify-between content-center w-full">
-            <div className="flex items-center justify-between w-full">
+          <div className="flex w-full content-center justify-between">
+            <div className="flex w-full items-center justify-between">
               <Link
                 className="fancy-link semibold text-lg"
                 href={`/communities/${communitySlug}/events/${eventSlug}`}

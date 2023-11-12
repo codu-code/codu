@@ -61,7 +61,7 @@ export default function ImageDetailsModal(props: Props) {
       }}
     >
       <>
-        <Dialog.Title className="text-lg text-center mb-4">
+        <Dialog.Title className="mb-4 text-center text-lg">
           Image details
         </Dialog.Title>
 
@@ -80,7 +80,7 @@ export default function ImageDetailsModal(props: Props) {
               placeholder="Enter image URL..."
             />
             {errors && (
-              <p className="text-right text-red-600 mt-2">
+              <p className="mt-2 text-right text-red-600">
                 {errors.src?.message}
               </p>
             )}
@@ -96,7 +96,7 @@ export default function ImageDetailsModal(props: Props) {
               placeholder="Enter an alt description..."
             />
             {errors && (
-              <p className="text-right text-red-600 mt-2">
+              <p className="mt-2 text-right text-red-600">
                 {errors.alt?.message}
               </p>
             )}
@@ -112,22 +112,22 @@ export default function ImageDetailsModal(props: Props) {
               placeholder="Enter a title..."
             />
             {errors && (
-              <p className="text-right text-red-600 mt-2">
+              <p className="mt-2 text-right text-red-600">
                 {errors.title?.message}
               </p>
             )}
           </div>
 
-          <div className="w-full flex justify-end mt-4">
+          <div className="mt-4 flex w-full justify-end">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="disabled:opacity-50 rounded ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+              className="ml-5 inline-flex justify-center rounded bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
               onClick={handleSubmit(onSubmit)}
             >
               Submit
             </button>
-            <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
+            <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
               <button
                 type="button"
                 className="bg-neutral-900 text-neutral-400 hover:text-neutral-200 focus:text-neutral-200"

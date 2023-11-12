@@ -31,13 +31,13 @@ const Courses = () => {
       </Head>
 
       <div className="mx-2">
-        <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
-          <h1 className="text-3xl tracking-tight font-extrabold text-neutral-50 sm:text-4xl ">
+        <div className="mt-8 flex max-w-5xl items-center justify-between border-b pb-4 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
+          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-50 sm:text-4xl ">
             Courses
           </h1>
         </div>
 
-        <div className="max-w-5xl sm:mx-auto lg:max-w-5xl sm:max-w-2xl mt-4">
+        <div className="mt-4 max-w-5xl sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
           {courses.map(({ name, description, thumbnail }) => (
             <CoursePreview
               key={name}

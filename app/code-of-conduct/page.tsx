@@ -3,15 +3,15 @@ import React from "react";
 const CodeOfConduct = () => {
   return (
     <div>
-      <main className="bg-white  relative">
-        <div className="relative pt-12 pb-16 px-4 sm:pt-16 sm:px-6 lg:px-8 lg:max-w-8xl lg:mx-auto ">
+      <main className="relative  bg-white">
+        <div className="lg:max-w-8xl relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:px-8 ">
           <div className="lg:pl-8">
-            <div className="text-base max-w-prose mx-auto  ">
-              <h1 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-black sm:text-6xl pb-8 border-b-2">
+            <div className="mx-auto max-w-prose text-base  ">
+              <h1 className="mt-2 border-b-2 pb-8 text-3xl font-extrabold leading-8 tracking-tight text-black sm:text-6xl">
                 Code Of Conduct
               </h1>
 
-              <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+              <h2 className="mb-4 mt-12 text-xl font-semibold leading-6 tracking-wide text-black">
                 Support us
               </h2>
               <p className="mt-3 text-lg text-neutral-500">
@@ -28,14 +28,14 @@ const CodeOfConduct = () => {
                 open, welcoming, diverse, inclusive, and healthy community.
               </p>
 
-              <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+              <h2 className="mb-4 mt-12 text-xl font-semibold leading-6 tracking-wide text-black">
                 Our Standards
               </h2>
               <p className="mt-3 text-lg text-neutral-500">
                 Examples of behavior that contributes to a positive environment
                 for our community include:
               </p>
-              <ul className="text-lg text-neutral-500 list-disc mt-3 pl-8">
+              <ul className="mt-3 list-disc pl-8 text-lg text-neutral-500">
                 <li className="my-4">
                   Demonstrating empathy and kindness toward other people
                 </li>
@@ -59,7 +59,7 @@ const CodeOfConduct = () => {
               <p className="mt-3 text-lg text-neutral-500">
                 Examples of unacceptable behavior include:
               </p>
-              <ul className="text-lg text-neutral-500 list-disc mt-3 pl-8">
+              <ul className="mt-3 list-disc pl-8 text-lg text-neutral-500">
                 <li className="my-4">
                   The use of sexualized language or imagery, and sexual
                   attention or advances of any kind
@@ -79,7 +79,7 @@ const CodeOfConduct = () => {
                 </li>
               </ul>
 
-              <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+              <h2 className="mb-4 mt-12 text-xl font-semibold leading-6 tracking-wide text-black">
                 Enforcement Responsibilities
               </h2>
               <p className="mt-3 text-lg text-neutral-500">
@@ -96,7 +96,7 @@ const CodeOfConduct = () => {
                 when appropriate.
               </p>
 
-              <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+              <h2 className="mb-4 mt-12 text-xl font-semibold leading-6 tracking-wide text-black">
                 Scope
               </h2>
               <p className="mt-3 text-lg text-neutral-500">
@@ -108,7 +108,7 @@ const CodeOfConduct = () => {
                 representative at an online or offline event.
               </p>
 
-              <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+              <h2 className="mb-4 mt-12 text-xl font-semibold leading-6 tracking-wide text-black">
                 Enforcement
               </h2>
               <p className="mt-3 text-lg text-neutral-500">
@@ -116,7 +116,7 @@ const CodeOfConduct = () => {
                 behavior may be reported to the project team responsible for
                 enforcement at{" "}
                 <a
-                  className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 text-1xl font-bold"
+                  className="text-1xl z-20 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text font-bold text-transparent"
                   href="mailto:hi@codu.co"
                 >
                   hi@codu.co
@@ -125,13 +125,13 @@ const CodeOfConduct = () => {
                 fairly.
               </p>
 
-              <h2 className="text-xl leading-6 font-semibold tracking-wide text-black mt-12 mb-4">
+              <h2 className="mb-4 mt-12 text-xl font-semibold leading-6 tracking-wide text-black">
                 Attribution
               </h2>
               <p className="mt-3 text-lg text-neutral-500">
                 This Code of Conduct is adapted from the{" "}
                 <a
-                  className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 text-1xl font-bold"
+                  className="text-1xl z-20 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text font-bold text-transparent"
                   href="https://www.contributor-covenant.org/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -141,7 +141,7 @@ const CodeOfConduct = () => {
                 , version 2.1, available at{" "}
                 <a
                   href="https://www.contributor-covenant.org/version/2/1/code_of_conduct/"
-                  className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 text-lg font-bold lg:whitespace-nowrap break-words"
+                  className="z-20 break-words bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-lg font-bold text-transparent lg:whitespace-nowrap"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

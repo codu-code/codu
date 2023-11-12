@@ -440,7 +440,7 @@ function Toolbar({ editor }: ToolbarProps) {
               isOpen
                 ? "bg-gradient-to-r from-orange-400 to-pink-600"
                 : "bg-gray-300"
-            } ml-5 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-30`}
+            } focus:ring-pink-30 ml-5 inline-flex justify-center px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2`}
           ></span>
         </label>
       </div>
