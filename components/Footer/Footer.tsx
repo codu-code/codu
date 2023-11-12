@@ -43,7 +43,7 @@ const navigation = {
 const Footer = () => {
   return (
     <footer className="bg-neutral-100 dark:bg-black">
-      <div className="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
         <nav
           className="-mx-5 -my-2 flex flex-wrap justify-center"
           aria-label="Footer"
@@ -55,13 +55,13 @@ const Footer = () => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400 focus-style p-1"
+                  className="focus-style p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
                 >
                   {item.name}
                 </a>
               ) : (
                 <Link
-                  className="text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400 focus-style p-1"
+                  className="focus-style p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
                   href={item.href}
                 >
                   {item.name}
@@ -77,16 +77,15 @@ const Footer = () => {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`p-1 rounded-md transition-all duration-300 hover:scale-105 focus:scale-105 hover:brightness-110 focus:brightness-110 hover:text-white focus:text-white focus-style ${item.name.toLowerCase()}`}
+              className={`focus-style rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.name.toLowerCase()}`}
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
             </a>
           ))}
         </div>
-        <p className="mt-8 text-center text-base text-neutral-600 dark:text-neutral-500">
-          &copy; {Temporal.Now.plainDateISO().year} Codú Software Solutions,
-          Ltd.
+        <p className="mt-8 text-center text-xs text-neutral-600 dark:text-neutral-500">
+          &copy; {Temporal.Now.plainDateISO().year} Codú Limited
         </p>
       </div>
     </footer>
