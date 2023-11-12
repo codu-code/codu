@@ -51,7 +51,7 @@ export default function TrendingPostsHome() {
           )}
       </section>
       <div className="flex justify-center">
-        <Link className="secondary-button mt-2" href="/articles">
+        <Link className="secondary-button w-full" href="/articles">
           View more articles →
         </Link>
       </div>
