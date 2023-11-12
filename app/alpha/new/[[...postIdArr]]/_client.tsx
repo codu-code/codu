@@ -3,7 +3,6 @@
 import { redirect, useParams } from "next/navigation";
 import React, { Fragment } from "react";
 import { Controller } from "react-hook-form";
-import { Toaster } from "react-hot-toast";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 // @TODO fix PromptDiaglog
@@ -205,15 +204,6 @@ const Create = () => {
             </div>
           </div>
         </Transition.Root>
-        <Toaster
-          toastOptions={{
-            style: {
-              borderRadius: 0,
-              border: "2px solid black",
-              background: "white",
-            },
-          }}
-        />
         {dataStatus === "loading" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
