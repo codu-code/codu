@@ -67,7 +67,7 @@ body {
 }
 
 .secondary-button {
-  @apply inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white bg-gradient-to-r px-4 py-2 font-medium text-neutral-800 shadow-sm hover:bg-neutral-400 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white bg-gradient-to-r px-4 py-2 font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
 }
 
 .fancy-link {

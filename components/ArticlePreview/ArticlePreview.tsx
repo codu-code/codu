@@ -1,5 +1,5 @@
 "use client";
-
+import * as Sentry from "@sentry/nextjs";
 import type { NextPage } from "next";
 import { Fragment, useState } from "react";
 import Link from "next/link";
@@ -8,7 +8,6 @@ import { BookmarkIcon, DotsHorizontalIcon } from "@heroicons/react/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
-import { type Session } from "next-auth";
 
 type ButtonOptions = {
   label: string;
@@ -71,7 +70,7 @@ const ArticlePreview: NextPage<Props> = ({
       }
       return await bookmark({ postId, setBookmarked });
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
     }
   };
 
