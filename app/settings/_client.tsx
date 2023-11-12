@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";
 
@@ -130,7 +130,6 @@ const Settings = ({ profile }: { profile: User }) => {
 
   return (
     <div className="py-8">
-      <Toaster />
       <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
         <div className="text-neutral-700">
           <form onSubmit={handleSubmit(onSubmit)}>

@@ -7,7 +7,7 @@ import CustomTextareaAutosize from "../CustomTextareAutosize/CustomTextareaAutos
 import { useRef, useState } from "react";
 import { useMarkdownHotkeys } from "@/markdoc/editor/hotkeys/hotkeys.markdoc";
 import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markdoc";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
 import { uploadFile } from "@/utils/s3helpers";
 import { useRouter } from "next/navigation";
@@ -117,7 +117,6 @@ export function CommunityForm(props: CommunityFormProps) {
       onSubmit={handleSubmit(onSubmit)}
       className="border border-neutral-900"
     >
-      <Toaster />
       <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white">

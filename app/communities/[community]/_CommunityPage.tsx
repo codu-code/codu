@@ -11,7 +11,7 @@ import Markdoc from "@markdoc/markdoc";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import { trpc } from "@/utils/trpc";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { PlusSmIcon, PencilIcon } from "@heroicons/react/solid";
 import type { Prisma } from "@prisma/client";
@@ -120,7 +120,6 @@ function CommunityPage(props: CommunityPageProps) {
 
   return (
     <>
-      <Toaster />
       <div className="mx-auto sm:max-w-2xl lg:max-w-5xl">
         <div>
           <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">

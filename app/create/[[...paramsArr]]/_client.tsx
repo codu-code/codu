@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import { useForm } from "react-hook-form";
 import CustomTextareaAutosize from "../../../components/CustomTextareAutosize/CustomTextareaAutosize";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
@@ -394,7 +394,6 @@ const Create = () => {
             </div>
           </div>
         </Transition.Root>
-        <Toaster />
         {dataStatus === "loading" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
