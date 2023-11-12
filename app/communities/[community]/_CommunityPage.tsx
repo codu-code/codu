@@ -129,9 +129,9 @@ function CommunityPage(props: CommunityPageProps) {
           },
         }}
       />
-      <div className="mx-auto lg:max-w-5xl sm:max-w-2xl">
+      <div className="mx-auto sm:max-w-2xl lg:max-w-5xl">
         <div>
-          <div className="mx-auto pb-4 md:max-w-3xl px-2 sm:px-4 break-words">
+          <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">
             <article className="mx-auto max-w-3xl pt-12">
               <div>
                 <h1 className="text-4xl font-bold">{community.name}</h1>
@@ -149,7 +149,7 @@ function CommunityPage(props: CommunityPageProps) {
                           if (!membership.isEventOrganiser) {
                             return (
                               <button
-                                className="w-full bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                className="inline-flex w-full justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                                 onClick={() => deleteMembership(community.id)}
                               >
                                 Leave this community
@@ -159,17 +159,17 @@ function CommunityPage(props: CommunityPageProps) {
                             return (
                               <>
                                 <Link
-                                  className="mr-2 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                  className="mr-2 inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                                   href={`/communities/${community.slug}/events/create`}
                                 >
-                                  <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                                  <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                                   New Event
                                 </Link>
                                 <Link
-                                  className="bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                  className="inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                                   href={`/communities/${community.slug}/edit`}
                                 >
-                                  <PencilIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                                  <PencilIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                                   Edit Community
                                 </Link>
                               </>
@@ -178,7 +178,7 @@ function CommunityPage(props: CommunityPageProps) {
                         } else {
                           return (
                             <button
-                              className="w-full bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                              className="inline-flex w-full justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                               onClick={() => createMembership(community.id)}
                             >
                               Join this community
@@ -188,7 +188,7 @@ function CommunityPage(props: CommunityPageProps) {
                       } else {
                         return (
                           <button
-                            className="w-full bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                            className="inline-flex w-full justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                             onClick={() => signIn()}
                           >
                             Sign in to join this community
@@ -197,17 +197,17 @@ function CommunityPage(props: CommunityPageProps) {
                       }
                     })()}
                   </div>
-                  <div className="text-xs text-neutral-500 mt-2 ml-4">
-                    <div className="flex flex-row mb-2">
+                  <div className="ml-4 mt-2 text-xs text-neutral-500">
+                    <div className="mb-2 flex flex-row">
                       <MapPinIcon className="mr-2" />
-                      <p className="font-medium pt-0.5">
+                      <p className="pt-0.5 font-medium">
                         {community.city}, {community.country}
                       </p>
                     </div>
                   </div>
                 </div>
                 <img
-                  className="w-full aspect-[16/9] my-4"
+                  className="my-4 aspect-[16/9] w-full"
                   src={community.coverImage}
                   alt={community.name}
                 />
@@ -254,7 +254,7 @@ function CommunityPage(props: CommunityPageProps) {
                         {community.events.filter(
                           (e) => e.eventDate.getTime() - now > 0,
                         ).length === 0 ? (
-                          <p className="font-medium py-4">
+                          <p className="py-4 font-medium">
                             There are no events yet... 🥲
                           </p>
                         ) : null}
@@ -287,7 +287,7 @@ function CommunityPage(props: CommunityPageProps) {
                         {community.events.filter(
                           (e) => e.eventDate.getTime() - now < 0,
                         ).length === 0 ? (
-                          <p className="font-medium py-4">
+                          <p className="py-4 font-medium">
                             There are no events yet... 🥲
                           </p>
                         ) : null}
@@ -305,13 +305,13 @@ function CommunityPage(props: CommunityPageProps) {
                           .map((member) => (
                             <div
                               key={member.id}
-                              className="p-4 border-l-4 border-l-pink-600 bg-neutral-900"
+                              className="border-l-4 border-l-pink-600 bg-neutral-900 p-4"
                             >
                               <main className="flex">
                                 <div className="mr-4 flex-shrink-0 self-center">
                                   {member.user.image && (
                                     <img
-                                      className="rounded-full object-cover h-32 w-32"
+                                      className="h-32 w-32 rounded-full object-cover"
                                       alt={`Avatar for ${member.user.name}`}
                                       src={member.user.image}
                                     />
@@ -320,18 +320,18 @@ function CommunityPage(props: CommunityPageProps) {
                                 <div className="flex flex-col justify-center">
                                   <div>
                                     {member.isEventOrganiser && (
-                                      <div className="w-fit mb-2 bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold">
+                                      <div className="mb-2 w-fit rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700">
                                         Organizer
                                       </div>
                                     )}
                                   </div>
                                   <Link
-                                    className="text-lg md:text-xl font-bold mb-0 hover:underline"
+                                    className="mb-0 text-lg font-bold hover:underline md:text-xl"
                                     href={`/${member.user.username}`}
                                   >
                                     {member.user.name}
                                   </Link>
-                                  <h2 className="text-neutral-400 font-bold text-sm">
+                                  <h2 className="text-sm font-bold text-neutral-400">
                                     @{member.user.username}
                                   </h2>
                                   <p className="mt-1">{member.user.bio}</p>
@@ -341,7 +341,7 @@ function CommunityPage(props: CommunityPageProps) {
                                       className="flex flex-row items-center"
                                       target="blank"
                                     >
-                                      <LinkIcon className="h-5 mr-2 text-neutral-400" />
+                                      <LinkIcon className="mr-2 h-5 text-neutral-400" />
                                       <p className="mt-1 text-blue-500">
                                         {getDomainFromUrl(
                                           member.user.websiteUrl,

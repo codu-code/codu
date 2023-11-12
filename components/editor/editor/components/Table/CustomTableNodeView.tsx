@@ -30,7 +30,7 @@ const TableButton: FunctionComponent<TableButtonProps> = ({
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`relative flex w-fit h-fit text-neutral-100 cursor-pointer justify-center items-center p-1 rounded-md ${className}`}
+        className={`relative flex h-fit w-fit cursor-pointer items-center justify-center rounded-md p-1 text-neutral-100 ${className}`}
       >
         {icon}
         <div className={`${styles.tooltip} top-8`}>
@@ -85,7 +85,7 @@ const CustomTableNodeView = (props: NodeViewProps) => {
         />
       </div>
       <NodeViewContent
-        className="bg-neutral-100 w-full table-fixed overflow-scroll"
+        className="w-full table-fixed overflow-scroll bg-neutral-100"
         as="table"
       ></NodeViewContent>
     </NodeViewWrapper>

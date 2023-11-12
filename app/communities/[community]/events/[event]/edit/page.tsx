@@ -69,7 +69,7 @@ async function EditEventPage({ params }: { params: { event: string } }) {
   } = event;
 
   return (
-    <div className="mx-auto lg:col-span-9 max-w-2xl flex-grow flex flex-col justify-center w-full px-4 sm:px-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
       <div className="bg-neutral-900 text-neutral-700 shadow-xl">
         <EventForm
           defaultValues={{

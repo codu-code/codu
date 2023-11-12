@@ -126,9 +126,9 @@ export function CommunityForm(props: CommunityFormProps) {
           },
         }}
       />
-      <div className="py-6 px-4 sm:p-6 lg:pb-8 ">
+      <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
         <div>
-          <h2 className="text-3xl tracking-tight font-extrabold text-white">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white">
             Community editor
           </h2>
         </div>
@@ -196,22 +196,22 @@ export function CommunityForm(props: CommunityFormProps) {
               <div className="mt-1 lg:hidden">
                 <div className="flex items-center">
                   <div
-                    className="relative flex-shrink-0 overflow-hidden rounded-lg object-cover w-full aspect-[16/9]h-16 w-16 "
+                    className="aspect-[16/9]h-16 relative w-16 w-full flex-shrink-0 overflow-hidden rounded-lg object-cover "
                     aria-hidden="true"
                   >
                     {coverImage.status === "error" ||
                     coverImage.status === "loading" ? (
-                      <div className="rounded-lg object-cover w-full aspect-[16/9] border-2 h-full w-full bg-black" />
+                      <div className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 bg-black object-cover" />
                     ) : (
                       <img
-                        className="rounded-lg object-cover w-full aspect-[16/9] border-2 border-white object-cover h-full w-full"
+                        className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 border-white object-cover object-cover"
                         src={`${coverImage.url}`}
                         alt="Profile photo upload section"
                       />
                     )}
                   </div>
                   <div className="ml-5 rounded-md shadow-sm">
-                    <div className="group relative flex items-center justify-center border-white border-2 py-2 px-3 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:bg-black">
+                    <div className="group relative flex items-center justify-center border-2 border-white px-3 py-2 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:bg-black">
                       <label
                         htmlFor="mobile-community-photo"
                         className="relative text-sm font-medium leading-4 text-white"
@@ -232,13 +232,13 @@ export function CommunityForm(props: CommunityFormProps) {
                 </div>
               </div>
 
-              <div className="relative hidden overflow-hidden lg:block rounded-lg object-cover w-full aspect-[16/9]">
+              <div className="relative hidden aspect-[16/9] w-full overflow-hidden rounded-lg object-cover lg:block">
                 {coverImage.status === "error" ||
                 coverImage.status === "loading" ? (
-                  <div className="rounded-lg object-cover w-full aspect-[16/9] border-2 h-full w-full bg-black" />
+                  <div className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 bg-black object-cover" />
                 ) : (
                   <img
-                    className="relative rounded-lg object-cover w-full aspect-[16/9] border-2 border-white object-cover"
+                    className="relative aspect-[16/9] w-full rounded-lg border-2 border-white object-cover object-cover"
                     src={coverImage.url}
                     alt="Profile photo upload section"
                     sizes="(max-width: 768px) 10vw"
@@ -272,7 +272,7 @@ export function CommunityForm(props: CommunityFormProps) {
               <div className="mt-1">
                 <CustomTextareaAutosize
                   placeholder="Explain what is your community about here 💖"
-                  className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
+                  className="mb-8 border-none bg-neutral-900 text-lg shadow-none outline-none focus:bg-black"
                   minRows={25}
                   {...register("description")}
                   inputRef={textareaRef}
@@ -285,18 +285,18 @@ export function CommunityForm(props: CommunityFormProps) {
               </div>
             </div>
           </div>
-          <div className="pt-6 divide-y divide-neutral-200">
-            <div className="mt-2 py-4 flex justify-end">
+          <div className="divide-y divide-neutral-200 pt-6">
+            <div className="mt-2 flex justify-end py-4">
               <button
                 type="button"
-                className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                 onClick={() => router.push(`/`)}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="ml-5 w-20 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                className="ml-5 inline-flex w-20 justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
               >
                 Save
               </button>

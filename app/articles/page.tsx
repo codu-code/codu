@@ -96,11 +96,11 @@ const ArticlesPage = () => {
       </Head>
 
       <div className="mx-2">
-        <div className="max-w-5xl sm:mx-auto mt-8 border-b pb-4 flex justify-between items-center lg:max-w-5xl sm:max-w-2xl">
-          <h1 className="text-3xl tracking-tight font-extrabold text-neutral-900 dark:text-neutral-50 sm:text-4xl ">
+        <div className="mt-8 flex max-w-5xl items-center justify-between border-b pb-4 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
+          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-4xl ">
             {typeof tag === "string" ? (
-              <div className="flex justify-center items-center">
-                <TagIcon className="text-neutral-800 dark:text-neutral-200 h-6 w-6 mr-3" />
+              <div className="flex items-center justify-center">
+                <TagIcon className="mr-3 h-6 w-6 text-neutral-800 dark:text-neutral-200" />
                 {capitalize(tag)}
               </div>
             ) : (
@@ -115,7 +115,7 @@ const ArticlesPage = () => {
             <select
               id="filter"
               name="filter"
-              className="ring-neutral-900 ring-2 capitalize mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 dark:ring-1 ring-inset dark:ring-neutral-300 focus:ring-2 focus:ring-pink-600 sm:text-sm sm:leading-6 "
+              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 capitalize ring-2 ring-inset ring-neutral-900 focus:ring-2 focus:ring-pink-600 dark:ring-1 dark:ring-neutral-300 sm:text-sm sm:leading-6 "
               onChange={(e) => {
                 router.push(
                   `/articles?filter=${e.target.value}${
@@ -131,7 +131,7 @@ const ArticlesPage = () => {
             </select>
           </div>
         </div>
-        <div className="lg:grid grid-cols-12 gap-8 mx-auto lg:max-w-5xl sm:max-w-2xl">
+        <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
           <div className="relative md:col-span-8">
             <section>
               {status === "error" && (
@@ -179,7 +179,7 @@ const ArticlesPage = () => {
                   );
                 })}
               {status === "success" && !data.pages[0].posts.length && (
-                <h2 className="text-lg mt-8">No results founds</h2>
+                <h2 className="mt-8 text-lg">No results founds</h2>
               )}
               {isFetchingNextPage ? <ArticleLoading /> : null}
               <span className="invisible" ref={ref}>
@@ -187,8 +187,8 @@ const ArticlesPage = () => {
               </span>
             </section>
           </div>
-          <section className="col-span-4 lg:block hidden">
-            <div className="text-neutral-900 dark:text-neutral-50 mt-4 mb-8 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900">
+          <section className="col-span-4 hidden lg:block">
+            <div className="mb-8 mt-4 border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
                   className="w-full"
@@ -196,9 +196,9 @@ const ArticlesPage = () => {
                   alt={`"Codú Writing Challenge" text on white background`}
                 />
               </Link>
-              <div className="tracking-wide text-sm my-3 break-words px-4 py-2">
+              <div className="my-3 break-words px-4 py-2 text-sm tracking-wide">
                 <Link
-                  className="block underline text-lg leading-6 font-semibold"
+                  className="block text-lg font-semibold leading-6 underline"
                   href="/articles/join-our-6-week-writing-challenge-quohtgqb"
                 >
                   Join the Codú writing challenge!
@@ -210,22 +210,22 @@ const ArticlesPage = () => {
                 <p>Click the link to find out more.</p>
               </div>
             </div>
-            <h3 className="text-2xl leading-6 font-semibold tracking-wide mb-4 mt-4">
+            <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Recommended topics
             </h3>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex flex-wrap gap-2">
               {tagsToShow.map((tag) => (
                 <Link
                   key={tag}
                   href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 px-6 py-2 border border-neutral-300 dark:border-neutral-600"
+                  className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
                 >
                   {tag}
                 </Link>
               ))}
             </div>
             {session && (
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 <SideBarSavedPosts />
               </div>
             )}

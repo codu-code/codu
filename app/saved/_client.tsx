@@ -28,7 +28,7 @@ const SavedPosts = () => {
   };
 
   return (
-    <div className="relative sm:mx-auto max-w-2xl mx-4">
+    <div className="relative mx-4 max-w-2xl sm:mx-auto">
       <PageHeading>Saved items</PageHeading>
       <div>
         {bookmarkStatus === "loading" &&
@@ -38,7 +38,7 @@ const SavedPosts = () => {
             }),
           )}
         {bookmarkStatus === "error" && (
-          <p className="font-medium py-4">
+          <p className="py-4 font-medium">
             Something went wrong fetching your saved posts... Refresh the page.
           </p>
         )}
@@ -80,7 +80,7 @@ const SavedPosts = () => {
           )}
 
         {bookmarkStatus === "success" && bookmarks?.length === 0 && (
-          <p className="font-medium py-4">
+          <p className="py-4 font-medium">
             Your saved posts will show up here.
           </p>
         )}

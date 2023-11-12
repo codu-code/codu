@@ -26,8 +26,8 @@ const ArticleAdminPanel = ({ session, postId }: Props) => {
   };
 
   return (
-    <div className="border-t-2 text-center pb-8">
-      <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
+    <div className="border-t-2 pb-8 text-center">
+      <h4 className="mb-6 mt-4 text-2xl">Admin Control</h4>
       <button onClick={handleDeletePost} className="secondary-button">
         Delete Post
       </button>

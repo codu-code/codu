@@ -15,10 +15,10 @@ const BioFooter = ({ author }: Props) => {
   const { name, image, bio, username } = author;
   return (
     <div className="mx-auto pb-4">
-      <div className="flex flex-col sm:flex-row md:mx-auto border-t-2 pt-6 border-neutral-300 dark:border-neutral-800">
+      <div className="flex flex-col border-t-2 border-neutral-300 pt-6 dark:border-neutral-800 sm:flex-row md:mx-auto">
         <Link href={`/${username}`} className="shrink-0">
           <img
-            className="mr-4 rounded-full object-cover bg-neutral-700 h-20 w-20 sm:h-24 sm:w-24 sm:mb-0 mb-2"
+            className="mb-2 mr-4 h-20 w-20 rounded-full bg-neutral-700 object-cover sm:mb-0 sm:h-24 sm:w-24"
             alt={`Avatar for ${name}`}
             src={image}
           />
@@ -26,10 +26,10 @@ const BioFooter = ({ author }: Props) => {
 
         <div className="flex flex-col justify-center">
           {username && (
-            <h4 className="text-lg md:text-xl font-bold dark:text-neutral-200 neutral-900">
+            <h4 className="neutral-900 text-lg font-bold dark:text-neutral-200 md:text-xl">
               Written by{" "}
               <Link
-                className="underline font-bold dark:text-white neutral-900"
+                className="neutral-900 font-bold underline dark:text-white"
                 href={`/${username}`}
               >
                 {name}

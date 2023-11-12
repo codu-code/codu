@@ -18,10 +18,10 @@ const GetStarted: NextPage = () => {
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
 
   return (
-    <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-full items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
         <div>
-          <div className="flex justify-center mb-12">
+          <div className="mb-12 flex justify-center">
             <Link className="flex items-end" href="/">
               <span className="sr-only">Codú</span>
               <Image
@@ -31,7 +31,7 @@ const GetStarted: NextPage = () => {
                 height={60}
                 width={189}
               />
-              <span className="ml-2 -mb-2 text-base font-semibold">Beta</span>
+              <span className="-mb-2 ml-2 text-base font-semibold">Beta</span>
             </Link>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-neutral-900 dark:text-white">
@@ -39,7 +39,7 @@ const GetStarted: NextPage = () => {
           </h2>
           <p className="mt-2 text-center text-base text-neutral-500">
             Or{" "}
-            <Link className="font-medium fancy-link" href="/">
+            <Link className="fancy-link font-medium" href="/">
               return home
             </Link>
           </p>
@@ -51,18 +51,18 @@ const GetStarted: NextPage = () => {
             onClick={async () => {
               await signIn("github", { callbackUrl: redirectTo });
             }}
-            className="group relative w-full border border-transparent text-base bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+            className="group relative inline-flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
           >
-            <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
               <LockClosedIcon
                 className="h-5 w-5 text-orange-600 group-hover:text-white"
                 aria-hidden="true"
               />
             </span>
-            <span className="absolute right-0 inset-y-0 flex items-center pr-3">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3">
               <span className="sr-only">Sign in with GitHub</span>
               <svg
-                className="w-5 h-5 text-pink-800 group-hover:text-white"
+                className="h-5 w-5 text-pink-800 group-hover:text-white"
                 aria-hidden="true"
                 fill="currentColor"
                 viewBox="0 0 20 20"

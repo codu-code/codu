@@ -31,11 +31,11 @@ export default function Hero() {
         stretchY={0.2}
         stretchZ={0.3}
         highlight={false}
-        className="h-[calc(100vh_-_100px)] max-h-[calc(100svh_-_100px)] sm:h-[900px] w-full overflow-hidden relative [&>span.atropos-scale]:pointer-events-none [&_span.atropos-rotate]:pointer-events-auto"
+        className="relative h-[calc(100vh_-_100px)] max-h-[calc(100svh_-_100px)] w-full overflow-hidden sm:h-[900px] [&>span.atropos-scale]:pointer-events-none [&_span.atropos-rotate]:pointer-events-auto"
       >
         <Image
           placeholder="blur"
-          className="absolute h-full w-full object-cover -z-10"
+          className="absolute -z-10 h-full w-full object-cover"
           src={space}
           data-atropos-offset="-2"
           alt="Realistic space sky which is black with stars scattered across."
@@ -44,7 +44,7 @@ export default function Hero() {
           }}
         />
 
-        <div className="absolute -z-10  md:max-h-[800px] md:max-w-[800px] sm:max-h-[800px] sm:max-w-[600px] max-h-[480px] max-w-[480px] left-0 right-0 mx-auto sm:-bottom-60 md:-bottom-96 -bottom-28">
+        <div className="absolute -bottom-28  left-0 right-0 -z-10 mx-auto max-h-[480px] max-w-[480px] sm:-bottom-60 sm:max-h-[800px] sm:max-w-[600px] md:-bottom-96 md:max-h-[800px] md:max-w-[800px]">
           <div className="relative mx-auto brightness-75">
             <Image
               src={moon}
@@ -60,7 +60,7 @@ export default function Hero() {
               }}
             />
           </div>
-          <div className="absolute h-[240px] w-[240px] md:h-[350px] md:w-[350px] right-0 md:-right-28 top-10">
+          <div className="absolute right-0 top-10 h-[240px] w-[240px] md:-right-28 md:h-[350px] md:w-[350px]">
             <Image
               height={350}
               width={350}
@@ -81,31 +81,31 @@ export default function Hero() {
 
         <div
           data-atropos-offset="0"
-          className="h-full flex flex-col justify-center"
+          className="flex h-full flex-col justify-center"
         >
           <Image
             width={340}
             height={200}
             src="/images/codu.svg"
             alt="Codú logo"
-            className={`w-[240px] sm:w-[340px] mx-auto object-contain transition duration-500 ${
+            className={`mx-auto w-[240px] object-contain transition duration-500 sm:w-[340px] ${
               isReady ? "opacity-100" : "opacity-0"
             }`}
           />
           <h1
-            className={`drop-shadow-2xl text-5xl sm:text-7xl font-extrabold tracking-tight text-center text-white mt-8 duration-500 ${
+            className={`mt-8 text-center text-5xl font-extrabold tracking-tight text-white drop-shadow-2xl duration-500 sm:text-7xl ${
               isReady ? "opacity-100" : "opacity-0"
             }`}
           >
             A{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600">
+            <span className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-transparent">
               space
             </span>{" "}
             for coders
           </h1>
-          <div className="flex justify-center mt-12">
+          <div className="mt-12 flex justify-center">
             <button
-              className="border-2 rounded-full p-4 animate-bounce bg-neutral-900 bg-opacity-60 focus-style-rounded"
+              className="focus-style-rounded animate-bounce rounded-full border-2 bg-neutral-900 bg-opacity-60 p-4"
               onClick={() => handleScroll("cta")}
             >
               <svg
@@ -114,7 +114,7 @@ export default function Hero() {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="#ffffff"
-                className="w-8 h-8"
+                className="h-8 w-8"
               >
                 <path
                   strokeLinecap="round"
@@ -126,11 +126,11 @@ export default function Hero() {
           </div>
         </div>
         <div
-          className="absolute bottom-0 w-full h-20 bg-gradient-to-t from-black"
+          className="absolute bottom-0 h-20 w-full bg-gradient-to-t from-black"
           data-atropos-offset="-2"
         />
         <div
-          className="absolute top-0 w-full h-20 bg-gradient-to-b from-black"
+          className="absolute top-0 h-20 w-full bg-gradient-to-b from-black"
           data-atropos-offset="-2"
         />
       </Atropos>

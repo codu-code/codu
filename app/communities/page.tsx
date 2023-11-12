@@ -24,8 +24,8 @@ const EventsPage = () => {
 
   return (
     <div className="mx-2">
-      <div className="mx-auto lg:max-w-5xl sm:max-w-2xl">
-        <div className="flex justify-between items-center">
+      <div className="mx-auto sm:max-w-2xl lg:max-w-5xl">
+        <div className="flex items-center justify-between">
           <Tabs
             tabs={tabs}
             selectedTab={selectedTab}
@@ -34,10 +34,10 @@ const EventsPage = () => {
           {session && (
             <div>
               <Link
-                className="flex-inline items-center bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                className="flex-inline inline-flex items-center justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                 href="/communities/create"
               >
-                <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                 New Community
               </Link>
             </div>

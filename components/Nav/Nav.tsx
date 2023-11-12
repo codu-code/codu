@@ -38,12 +38,12 @@ const Nav = ({ session }: { session: Session | null }) => {
       {({ open }) => (
         <>
           <div className="relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+            <div className="flex h-16 items-center justify-between">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <span className="sr-only">Codú</span>
                   <Link
-                    className="hidden lg:flex items-baseline h-8 w-auto logo-focus"
+                    className="logo-focus hidden h-8 w-auto items-baseline lg:flex"
                     href="/"
                   >
                     <Image
@@ -59,7 +59,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                   </Link>
                   <div className="flex">
                     <Link
-                      className="flex lg:hidden w-auto items-end p-2"
+                      className="flex w-auto items-end p-2 lg:hidden"
                       href="/"
                     >
                       <span className="sr-only">Codú</span>
@@ -75,7 +75,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                   </div>
                 </div>
 
-                <div className="hidden md:block md:ml-6 text-sm lg:text-base font-medium">
+                <div className="hidden text-sm font-medium md:ml-6 md:block lg:text-base">
                   <div className="flex space-x-4">
                     {navigation.map((item) =>
                       item.href.includes("http") ? (
@@ -102,15 +102,15 @@ const Nav = ({ session }: { session: Session | null }) => {
                 </div>
               </div>
               <div className="hidden md:ml-6 md:block">
-                <div className="flex items-center text-sm lg:text-base font-medium">
+                <div className="flex items-center text-sm font-medium lg:text-base">
                   {session ? (
                     <>
                       <Link className="nav-button" href="/my-posts">
                         Your Posts
                       </Link>
 
-                      <Link className="primary-button px-4 ml-4" href="/create">
-                        <PlusSmIcon className="h-5 w-5 mr-1 -ml-2 p-0 text-white" />
+                      <Link className="primary-button ml-4 px-4" href="/create">
+                        <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                         New Post
                       </Link>
                     </>
@@ -137,17 +137,17 @@ const Nav = ({ session }: { session: Session | null }) => {
                       <Link
                         title="Notifications"
                         href="/notifications"
-                        className="relative p-2 flex-shrink-0 rounded-md  focus-style dark:text-neutral-400 dark:hover:text-white text-neutral-600 hover:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-900"
+                        className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-400 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
-                          <div className="absolute animate-pulse rounded-sm h-1 w-1 bg-pink-600 right-1 top-1 " />
+                          <div className="absolute right-1 top-1 h-1 w-1 animate-pulse rounded-sm bg-pink-600 " />
                         )}
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                       </Link>
-                      <Menu as="div" className="ml-4 relative">
+                      <Menu as="div" className="relative ml-4">
                         <div>
-                          <Menu.Button className="bg-black flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 ring-offset-2 focus:ring-offset-white">
+                          <Menu.Button className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-white">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
@@ -156,7 +156,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                                 alt={`${session.user?.name}'s avatar`}
                               />
                             ) : (
-                              <div className="h-10 w-10 rounded-full bg-black flex justify-center items-center">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black">
                                 {session.user?.name?.[0] || "C"}
                               </div>
                             )}
@@ -171,13 +171,13 @@ const Nav = ({ session }: { session: Session | null }) => {
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none">
+                          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {item.onClick ? (
                                   <button
                                     className={
-                                      "flex text-left w-full px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 rounded"
+                                      "flex w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200"
                                     }
                                     onClick={item.onClick}
                                   >
@@ -185,7 +185,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                                   </button>
                                 ) : (
                                   <Link
-                                    className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 rounded"
+                                    className="block rounded px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200"
                                     href={item.href || ""}
                                   >
                                     {item.name}
@@ -206,17 +206,17 @@ const Nav = ({ session }: { session: Session | null }) => {
                   <Link
                     title="Notifications"
                     href="/notifications"
-                    className="relative group block nav-button focus-style"
+                    className="nav-button focus-style group relative block"
                   >
                     <span className="sr-only">View notifications</span>
                     {hasNotifications && (
-                      <div className="absolute animate-pulse rounded-full h-2 w-2 bg-pink-500 right-1 top-1" />
+                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500" />
                     )}
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </Link>
                 )}
                 {/* Mobile menu button */}
-                <Disclosure.Button className="group nav-button focus-style">
+                <Disclosure.Button className="nav-button focus-style group">
                   <span className="sr-only">Open main menu</span>
                   <AnimatedHamburger open={open} />
                 </Disclosure.Button>

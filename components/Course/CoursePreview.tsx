@@ -8,16 +8,16 @@ interface Props {
 
 const CoursePreview = ({ name, description, thumbnail }: Props) => {
   return (
-    <div className="bg-neutral-800 flex flex-col md:flex-row">
+    <div className="flex flex-col bg-neutral-800 md:flex-row">
       {/**
        * `relative` and `overflow-hidden` are required for Image's `fill` to work
        * @see https://nextjs.org/docs/pages/api-reference/components/image#fill
        */}
-      <div className="order-1 md:order-2 relative overflow-hidden flex-shrink-0 aspect-video md:w-64 lg:w-96">
+      <div className="relative order-1 aspect-video flex-shrink-0 overflow-hidden md:order-2 md:w-64 lg:w-96">
         <Image alt={name} src={thumbnail} fill className="object-cover" />
       </div>
       <div className="order-2 md:order-1">
-        <h2 className="font-bold text-lg px-3 py-2 lg:px-6 lg:py-1 border-neutral-500 border-b">
+        <h2 className="border-b border-neutral-500 px-3 py-2 text-lg font-bold lg:px-6 lg:py-1">
           {name}
         </h2>
         <div
