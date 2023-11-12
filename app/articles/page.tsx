@@ -125,9 +125,11 @@ const ArticlesPage = () => {
               }}
               value={selectedSortFilter}
             >
-              <option>newest</option>
-              <option>oldest</option>
-              <option>top</option>
+              {filters.map((filter) => (
+                <option key={filter} value={filter}>
+                  {capitalize(filter)}
+                </option>
+              ))}
             </select>
           </div>
         </div>
