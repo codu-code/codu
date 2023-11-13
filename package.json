@@ -64,7 +64,7 @@
     "@trpc/client": "^10.38.2",
     "@trpc/next": "^10.38.2",
     "@trpc/react-query": "^10.38.2",
-    "@trpc/server": "^10.38.2",
+    "@trpc/server": "^10.41.0",
     "atropos": "^1.0.2",
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.3",
