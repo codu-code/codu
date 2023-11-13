@@ -143,10 +143,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                         {hasNotifications && (
                           <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-pink-600" />
                         )}
-                        <BellIcon
-                          className="h-6 w-6 text-neutral-400"
-                          aria-hidden="true"
-                        />
+                        <BellIcon className="h-6 w-6" aria-hidden="true" />
                       </Link>
                       <Menu as="div" className="relative ml-4">
                         <div>
