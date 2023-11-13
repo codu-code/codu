@@ -10,7 +10,7 @@ import { Fragment, useState } from "react";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import Markdoc from "@markdoc/markdoc";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "sonner";
 import z, { ZodError } from "zod";
 import { HeartIcon } from "@heroicons/react/outline";
 import Link from "next/link";
@@ -502,15 +502,6 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         )}
       </div>
       <div className="mb-8">{generateComments(comments)}</div>
-      <Toaster
-        toastOptions={{
-          style: {
-            borderRadius: 0,
-            border: "2px solid black",
-            background: "white",
-          },
-        }}
-      />
     </section>
   );
 };

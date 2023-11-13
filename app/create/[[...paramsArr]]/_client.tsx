@@ -1,10 +1,10 @@
 "use client";
-
+import * as Sentry from "@sentry/nextjs";
 import { ZodError } from "zod";
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import { useForm } from "react-hook-form";
 import CustomTextareaAutosize from "../../../components/CustomTextareAutosize/CustomTextareaAutosize";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "sonner";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
@@ -64,12 +64,18 @@ const Create = () => {
     mutate: publish,
     status: publishStatus,
     data: publishData,
-  } = api.post.publish.useMutation();
+  } = api.post.publish.useMutation({
+    onError(error) {
+      toast.error("Error saving settings.");
+      Sentry.captureException(error);
+    },
+  });
 
   const { mutate: save, status: saveStatus } = api.post.update.useMutation({
-    onError() {
+    onError(error) {
       // TODO: Add error messages from field validations
-      return toast.error("Something went wrong auto-saving");
+      toast.error("Error auto-saving");
+      Sentry.captureException(error);
     },
     onSuccess() {
       toast.success("Saved");
@@ -81,31 +87,41 @@ const Create = () => {
       );
     },
   });
-  const { mutate: create, data: createData } = api.post.create.useMutation({
-    onError() {
-      toast.error("Something went wrong creating draft");
-    },
-    onSuccess() {
-      toast.success("Saved draft");
-    },
-  });
+  const {
+    mutate: create,
+    data: createData,
+    isError,
+    isSuccess,
+  } = api.post.create.useMutation();
 
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
-  const { data, status: dataStatus } = api.post.editDraft.useQuery(
+  const {
+    data,
+    status: dataStatus,
+    isError: draftFetchError,
+  } = api.post.editDraft.useQuery(
     { id: postId },
     {
-      onError() {
-        toast.error(
-          "Something went wrong fetching your draft, refresh your page or you may lose data",
-          {
-            duration: 5000,
-          },
-        );
-      },
       enabled: !!postId && shouldRefetch,
     },
   );
+
+  useEffect(() => {
+    if (isError) {
+      toast.error("Error saving");
+    }
+
+    if (isSuccess) {
+      toast.success("Saved");
+    }
+
+    if (draftFetchError) {
+      toast.error(
+        "Something went wrong fetching your draft, refresh your page or you may lose data",
+      );
+    }
+  }, [draftFetchError, isError, isSuccess]);
 
   useEffect(() => {
     if (shouldRefetch) {
@@ -378,15 +394,6 @@ const Create = () => {
             </div>
           </div>
         </Transition.Root>
-        <Toaster
-          toastOptions={{
-            style: {
-              borderRadius: 0,
-              border: "2px solid black",
-              background: "white",
-            },
-          }}
-        />
         {dataStatus === "loading" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">

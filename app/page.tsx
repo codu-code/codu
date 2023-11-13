@@ -1,16 +1,12 @@
-"use client";
-
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import challenge from "public/images/announcements/challenge.png";
 import Hero from "@/components/Hero/Hero";
 import TrendingPostsHome from "@/components/TrendingPostsHome/TrendingPostsHome";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
+import { getServerAuthSession } from "@/server/auth";
 
-const Home = () => {
-  const { data: session } = useSession();
-
+const Home = async () => {
   const tagsToShow = [
     "JavaScript",
     "Web Development",
@@ -22,6 +18,8 @@ const Home = () => {
     "Python",
     "Tips",
   ];
+
+  const session = await getServerAuthSession();
 
   return (
     <>

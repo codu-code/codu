@@ -73,18 +73,6 @@ const Notifications = () => {
 
   return (
     <>
-      <Head>
-        <title>{`Notfications ${count ? `(${count})` : ""}`}</title>
-        <meta name="description" content="Your notifications" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="manifest" href="site.webmanifest" />
-        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#000000" />
-        <link rel="shortcut icon" href="favicon.ico" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-config" content="browserconfig.xml" />
-        <meta name="theme-color" content="#000" />
-        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
-      </Head>
       <div className="relative mx-4 max-w-2xl sm:mx-auto">
         <div className="relative mb-4">
           <PageHeading>Notifications</PageHeading>
@@ -153,21 +141,20 @@ const Notifications = () => {
                       return null;
                     return (
                       <div key={id}>
-                        <div className="my-2 flex justify-between border border-neutral-100 bg-neutral-100 p-4 shadow-xl dark:border-white dark:bg-black">
+                        <div className="my-2 flex justify-between border border-neutral-300 bg-white p-4 text-neutral-800 dark:border-white dark:bg-black dark:text-neutral-200">
                           <div>
                             <div className="flex gap-3 sm:gap-5">
-                              {image && (
-                                <Link
-                                  className="flex flex-shrink-0 font-semibold underline"
-                                  href={`/${username}`}
-                                >
-                                  <img
-                                    className="mb-2 h-10 rounded-full"
-                                    src={image}
-                                    alt={`${name}'s avatar`}
-                                  />
-                                </Link>
-                              )}
+                              <div>
+                                {image && (
+                                  <Link className="flex " href={`/${username}`}>
+                                    <img
+                                      className="h-10 w-10 rounded-full"
+                                      src={image}
+                                      alt={`${name}'s avatar`}
+                                    />
+                                  </Link>
+                                )}
+                              </div>
                               <div>
                                 <p className="mb-1">
                                   <Link
@@ -177,16 +164,17 @@ const Notifications = () => {
                                     {name}
                                   </Link>{" "}
                                   {type === NEW_COMMENT_ON_YOUR_POST &&
-                                    "started a discussion on your post "}
+                                    "started a discussion on your post:"}
                                   {type === NEW_REPLY_TO_YOUR_COMMENT &&
-                                    "replied to your comment on "}
+                                    "replied to your comment on:"}
+                                </p>
+                                <p>
                                   <Link
-                                    className="font-semibold underline"
+                                    className="text-lg font-semibold underline"
                                     href={`articles/${post.slug}`}
                                   >
                                     {post.title}
                                   </Link>
-                                  .
                                 </p>
                                 <time className="text-sm text-neutral-500">
                                   {readableDate}
@@ -194,10 +182,10 @@ const Notifications = () => {
                               </div>
                             </div>
                           </div>
-                          <div className="ml-2 flex w-10 flex-col justify-center border-l border-slate-700 pl-3">
+                          <div className="ml-2 flex w-10 flex-col justify-center border-l border-neutral-300 pl-3 dark:border-neutral-700">
                             <button
                               title="Mark as read"
-                              className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-300 dark:text-white dark:hover:bg-slate-700"
+                              className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-300 hover:bg-neutral-300 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
                               onClick={() => mutate({ id })}
                             >
                               <CheckIcon

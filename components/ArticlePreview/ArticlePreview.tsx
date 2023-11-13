@@ -1,5 +1,5 @@
 "use client";
-
+import * as Sentry from "@sentry/nextjs";
 import type { NextPage } from "next";
 import { Fragment, useState } from "react";
 import Link from "next/link";
@@ -8,7 +8,6 @@ import { BookmarkIcon, DotsHorizontalIcon } from "@heroicons/react/outline";
 import { Menu, Transition } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
-import { type Session } from "next-auth";
 
 type ButtonOptions = {
   label: string;
@@ -71,12 +70,12 @@ const ArticlePreview: NextPage<Props> = ({
       }
       return await bookmark({ postId, setBookmarked });
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
     }
   };
 
   return (
-    <article className="my-4 border-l-4 border-l-pink-600 bg-white p-4 shadow-lg dark:bg-neutral-900">
+    <article className="my-4 rounded-r border border-l-4 border-neutral-300 border-l-pink-600 bg-white p-4 dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
       <div className="flex justify-between">
         <div className="mb-4 flex items-center">
           <span className="sr-only">{name}</span>

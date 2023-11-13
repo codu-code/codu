@@ -8,7 +8,6 @@ type Props = {
   date: string;
   readTime: number;
   name: string;
-  image: string;
   username: string;
 };
 
@@ -18,7 +17,6 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
   date,
   readTime,
   name,
-  image,
   username,
 }) => {
   const dateTime = Temporal.Instant.from(date);
@@ -29,10 +27,10 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
   });
 
   return (
-    <article className="my-4 flex h-32 flex-col bg-white p-4 shadow-lg dark:bg-neutral-900">
+    <article className="my-2 flex flex-col border border-neutral-300 bg-white p-4 px-4 py-3 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
       <header className="flex grow items-center">
         <Link
-          className="cursor-pointer text-base font-semibold leading-6 tracking-wide hover:underline"
+          className="mb-2 cursor-pointer text-base font-semibold leading-6 tracking-wide hover:underline"
           href={`/articles/${slug}`}
         >
           {title}
@@ -40,13 +38,7 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
       </header>
       <div className="flex grow items-center">
         <span className="sr-only">{name}</span>
-        <Link href={`/${username}`}>
-          <img
-            className="mr-3 h-8 w-8 rounded-full object-cover"
-            src={image}
-            alt={`${name}'s avatar`}
-          />
-        </Link>
+
         <div className="flex flex-col justify-center text-[12px] text-neutral-500 ">
           <p className="font-medium text-neutral-500">
             Written by{" "}

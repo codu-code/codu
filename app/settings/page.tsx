@@ -4,7 +4,9 @@ import { getServerAuthSession } from "@/server/auth";
 import { customAlphabet } from "nanoid";
 import prisma from "../../server/db/client";
 
-// @TODO - Maybe add Metadata for this page
+export const metadata = {
+  title: "Settings - Update your profile",
+};
 
 // @TODO - Loading state for this page
 
