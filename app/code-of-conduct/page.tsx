@@ -1,5 +1,11 @@
 import React from "react";
 
+export const metadata = {
+  title: "Code of conduct",
+  description:
+    "We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone",
+};
+
 const CodeOfConduct = () => {
   return (
     <div>

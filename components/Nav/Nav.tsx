@@ -143,7 +143,10 @@ const Nav = ({ session }: { session: Session | null }) => {
                         {hasNotifications && (
                           <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-pink-600" />
                         )}
-                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                        <BellIcon
+                          className="h-6 w-6 text-neutral-400"
+                          aria-hidden="true"
+                        />
                       </Link>
                       <Menu as="div" className="relative ml-4">
                         <div>
@@ -206,11 +209,11 @@ const Nav = ({ session }: { session: Session | null }) => {
                   <Link
                     title="Notifications"
                     href="/notifications"
-                    className="nav-button focus-style group relative block"
+                    className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white  "
                   >
                     <span className="sr-only">View notifications</span>
                     {hasNotifications && (
-                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500" />
+                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500 " />
                     )}
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </Link>

@@ -1,8 +1,12 @@
-// @TODO metadata
+export const metadata = {
+  title: "Sponsor Codú - And Reach More Developers!",
+  description:
+    "The largest JavaScript and web developer community in Ireland! Reach thousands of developers in Ireland and beyond.",
+};
 
 const Sponsorship = () => {
   return (
-    <div className="">
+    <>
       <main className="relative bg-white lg:bg-transparent">
         <div className="relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-2 lg:px-8 ">
           <div className="lg:pl-8">
@@ -95,7 +99,7 @@ const Sponsorship = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

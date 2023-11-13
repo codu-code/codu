@@ -1,3 +1,4 @@
+"use client";
 import { api } from "@/server/trpc/react";
 import React, { Children } from "react";
 
@@ -39,7 +40,7 @@ export default React.memo(function SideBarSavedPosts() {
               id,
               slug,
               title,
-              user: { name, image, username },
+              user: { name, username },
               updatedAt,
               readTimeMins,
             }) => {
@@ -50,7 +51,6 @@ export default React.memo(function SideBarSavedPosts() {
                   slug={slug}
                   title={title}
                   name={name}
-                  image={image}
                   date={updatedAt.toISOString()}
                   readTime={readTimeMins}
                 />
