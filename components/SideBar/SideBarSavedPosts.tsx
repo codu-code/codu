@@ -16,7 +16,7 @@ export default React.memo(function SideBarSavedPosts() {
   if (bookmarks) bookmarks = bookmarks.slice(0, howManySavedToShow);
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       <h3 className="mb-4 mt-8 text-2xl font-semibold leading-6 tracking-wide">
         Recent bookmarks
       </h3>
