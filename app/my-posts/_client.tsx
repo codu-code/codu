@@ -12,7 +12,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { Modal } from "../../components/Modal/Modal";
-import { redirect } from "next/navigation";
+import { Tabs } from "@/components/Tabs";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -21,7 +21,7 @@ function classNames(...classes: string[]) {
 const MyPosts = () => {
   const searchParams = useSearchParams();
 
-  const tab = searchParams?.get("tab");
+  const tabFromParams = searchParams?.get("tab");
 
   const [selectedArticleToDelete, setSelectedArticleToDelete] =
     useState<string>();
@@ -36,26 +36,34 @@ const MyPosts = () => {
     },
   });
 
+  const TAB_VALUES_ARRAY = ["drafts", "published"];
+  const [DRAFTS, PUBLISHED] = TAB_VALUES_ARRAY;
+
+  const selectedTab =
+    tabFromParams && TAB_VALUES_ARRAY.includes(tabFromParams)
+      ? tabFromParams
+      : DRAFTS;
+
   const tabs = [
     {
       name: "Drafts",
-      href: "?tab=drafts",
-      value: "drafts",
+      href: `?tab=${DRAFTS}`,
+      value: DRAFTS,
       data: drafts.data,
       status: drafts.status,
-      current: tab !== "published",
+      current: selectedTab === DRAFTS,
     },
     {
       name: "Published",
-      href: "?tab=published",
-      value: "published",
+      href: `?tab=${PUBLISHED}`,
+      value: PUBLISHED,
       data: published.data,
       status: published.status,
-      current: tab === "published",
+      current: selectedTab === PUBLISHED,
     },
   ];
 
-  const selectedTabData = tab === "published" ? tabs[1] : tabs[0];
+  const selectedTabData = selectedTab === DRAFTS ? tabs[0] : tabs[1];
 
   return (
     <>
@@ -121,49 +129,8 @@ const MyPosts = () => {
       </Modal>
       <div className="relative mx-4 max-w-2xl bg-neutral-100 dark:bg-black sm:mx-auto">
         <div className="mb-4 mt-8">
-          <div className="sm:hidden">
-            <label htmlFor="tabs" className="sr-only">
-              Select a tab
-            </label>
-            {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-            <select
-              id="tabs"
-              name="tabs"
-              className="block w-full text-white"
-              onChange={(e) => {
-                const { value } = e.target;
-                redirect(`?tab=${value.toLowerCase()}`);
-              }}
-              defaultValue={tabs.find((tab) => tab.current)?.name}
-            >
-              {tabs.map((tab) => (
-                <option key={tab.name} value={tab.value}>
-                  {tab.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="hidden sm:block">
-            <nav className="flex gap-1" aria-label="Tabs">
-              {tabs.map((tab) => (
-                <Link
-                  className={classNames(
-                    tab.current
-                      ? "bg-neutral-800 text-neutral-200 dark:bg-neutral-100 dark:text-neutral-700"
-                      : "text-neutral-700 hover:bg-neutral-300 dark:text-neutral-200 dark:hover:bg-neutral-800",
-                    "rounded-md px-4 py-2 text-base font-medium",
-                  )}
-                  aria-current={tab.current ? "page" : undefined}
-                  key={tab.name}
-                  href={tab.href}
-                >
-                  {tab.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          <Tabs tabs={tabs} />
         </div>
-
         <div>
           {selectedTabData.status === "loading" && (
             <p className="py-4 font-medium">Fetching your posts...</p>
@@ -178,10 +145,10 @@ const MyPosts = () => {
             selectedTabData.data?.map(
               ({ id, title, excerpt, readTimeMins, slug }) => (
                 <article
-                  className="mb-4 border-2 border-neutral-100 bg-white p-4 dark:bg-black"
+                  className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
                   key={id}
                 >
-                  {tab === "published" ? (
+                  {selectedTab === PUBLISHED ? (
                     <Link href={`articles/${slug}`}>
                       <h2 className="mb-2 text-2xl font-semibold hover:underline">
                         {title}

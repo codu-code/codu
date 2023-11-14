@@ -87,14 +87,14 @@ export const rules = [
 export const footerNav = [
   { name: "Home", href: "/" },
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "/communities" },
+  { name: "Events", href: "/hub" },
   { name: "Sponsorship", href: "/sponsorship" },
   { name: "Code Of Conduct", href: "/code-of-conduct" },
 ];
 
 export const navigation = [
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "/communities" },
+  { name: "Events", href: "/hub" },
   { name: "Support us", href: "/sponsorship" },
 ];
 

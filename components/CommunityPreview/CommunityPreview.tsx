@@ -56,7 +56,7 @@ const CommunityPreview: NextPage<Props> = ({
             <div className="flex w-full items-center justify-between">
               <Link
                 className="fancy-link semibold text-lg"
-                href={`/communities/${slug}`}
+                href={`/hub/${slug}`}
               >
                 See community details
               </Link>

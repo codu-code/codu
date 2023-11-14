@@ -11,7 +11,7 @@ import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markd
 import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
 import { uploadFile } from "../../utils/s3helpers";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 interface Event {
   id?: string | null;
@@ -54,7 +54,7 @@ export function EventForm(props: EventFormProps) {
     },
     onSuccess() {
       toast.success("Saved!");
-      router.push("/communities");
+      redirect("/hub");
     },
   });
 

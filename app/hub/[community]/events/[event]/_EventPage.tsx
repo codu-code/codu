@@ -11,7 +11,7 @@ import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { PencilIcon } from "@heroicons/react/solid";
 import type { Prisma } from "@prisma/client";
 
@@ -57,7 +57,6 @@ interface EventPageProps {
 function EventPage(props: EventPageProps) {
   const { event } = props;
   const [eventDate, setEventDate] = useState("");
-  const [selectedTab, setSelectedTab] = useState("about");
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -76,7 +75,39 @@ function EventPage(props: EventPageProps) {
     }
   }, [event]);
 
-  if (!event) return null;
+  const searchParams = useSearchParams();
+
+  const tabFromParams = searchParams?.get("tab");
+  const TAB_VALUES_ARRAY = ["about", "attendees", "waiting"];
+  const [ABOUT, ATTENDEES, WAITING] = TAB_VALUES_ARRAY;
+
+  const selectedTab =
+    tabFromParams && TAB_VALUES_ARRAY.includes(tabFromParams)
+      ? tabFromParams
+      : ABOUT;
+
+  const tabs = [
+    {
+      name: `About`,
+      value: ABOUT,
+      href: `?tab=${ABOUT}`,
+      current: selectedTab === ABOUT,
+    },
+    {
+      name: "Attendees",
+      value: ATTENDEES,
+      href: `?tab=${ATTENDEES}`,
+      current: selectedTab === ATTENDEES,
+    },
+    {
+      name: "Waiting",
+      value: WAITING,
+      href: `?tab=${WAITING}`,
+      current: selectedTab === WAITING,
+    },
+  ];
+
+  if (!event) return notFound();
 
   const { mutate: deleteRsvpMutation } = trpc.event.deleteRSVP.useMutation({
     onError() {
@@ -108,29 +139,6 @@ function EventPage(props: EventPageProps) {
 
   const ast = Markdoc.parse(event.description);
   const content = Markdoc.transform(ast, config);
-
-  const tabs = [
-    {
-      id: "about",
-      title: "About",
-    },
-    {
-      id: "attendees",
-      title: "Attendees",
-      subtitle: `(${
-        event.RSVP.length <= event.capacity ? event.RSVP.length : event.capacity
-      })`,
-    },
-    {
-      id: "waiting-list",
-      title: "Waiting List",
-      subtitle: `(${
-        event.RSVP.length > event.capacity
-          ? event.RSVP.length - event.capacity
-          : 0
-      })`,
-    },
-  ];
 
   const organisers = event.community.members
     .filter((m) => m.isEventOrganiser)
@@ -215,7 +223,7 @@ function EventPage(props: EventPageProps) {
                     organisers.includes(session.user.id) && (
                       <Link
                         className="flex-inline inline-flex items-center justify-center whitespace-nowrap rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-                        href={`/communities/${event.community.slug}/events/${event.slug}/edit`}
+                        href={`/hub/${event.community.slug}/events/${event.slug}/edit`}
                       >
                         <PencilIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                         Edit Event
@@ -230,11 +238,7 @@ function EventPage(props: EventPageProps) {
                   alt={event.name}
                 />
               </div>
-              <Tabs
-                tabs={tabs}
-                selectedTab={selectedTab}
-                onTabSelected={(tabId) => setSelectedTab(tabId)}
-              />
+              <Tabs tabs={tabs} />
               {(() => {
                 switch (selectedTab) {
                   case "about":
@@ -268,7 +272,7 @@ function EventPage(props: EventPageProps) {
             <div className="my-3 break-words px-4 py-2 text-sm tracking-wide">
               <Link
                 className="block text-lg font-semibold leading-6 hover:underline"
-                href={`/communities/${event.community.slug}`}
+                href={`/hub/${event.community.slug}`}
               >
                 {event.community.name}
               </Link>
