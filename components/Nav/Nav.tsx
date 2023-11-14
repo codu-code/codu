@@ -200,7 +200,6 @@ const Nav = ({ session }: { session: Session | null }) => {
               </div>
             </div>
           </div>
-
           <MobileNav session={session} userNavigation={userNavigation} />
         </>
       )}
