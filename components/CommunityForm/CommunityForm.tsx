@@ -10,7 +10,7 @@ import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markd
 import { toast } from "sonner";
 import { trpc } from "@/utils/trpc";
 import { uploadFile } from "@/utils/s3helpers";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 interface Community {
   id?: string | null;
@@ -52,7 +52,7 @@ export function CommunityForm(props: CommunityFormProps) {
     },
     onSuccess() {
       toast.success("Saved!");
-      router.push("/communities");
+      redirect("/hub");
     },
   });
 
@@ -119,7 +119,7 @@ export function CommunityForm(props: CommunityFormProps) {
     >
       <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl font-bold tracking-tight text-white">
             Community editor
           </h2>
         </div>

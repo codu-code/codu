@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { signIn } from "next-auth/react";
 import { MapPinIcon } from "lucide-react";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { PlusSmIcon, PencilIcon } from "@heroicons/react/solid";
 import type { Prisma } from "@prisma/client";
 
@@ -49,13 +49,41 @@ interface CommunityPageProps {
 
 function CommunityPage(props: CommunityPageProps) {
   const { community } = props;
-  const [selectedTab, setSelectedTab] = useState("about");
   const { data: session } = useSession();
-  const { refresh, push } = useRouter();
+  const { refresh } = useRouter();
 
-  if (!community) {
-    push("/not-found");
-  }
+  const searchParams = useSearchParams();
+
+  const tabFromParams = searchParams?.get("tab");
+
+  const TAB_VALUES_ARRAY = ["about", "upcoming", "past"];
+  const [ABOUT, UPCOMING, PAST] = TAB_VALUES_ARRAY;
+
+  const selectedTab =
+    tabFromParams && TAB_VALUES_ARRAY.includes(tabFromParams)
+      ? tabFromParams
+      : ABOUT;
+
+  const tabs = [
+    {
+      name: `About`,
+      value: ABOUT,
+      href: `?tab=${ABOUT}`,
+      current: selectedTab === ABOUT,
+    },
+    {
+      name: "Upcoming events",
+      value: UPCOMING,
+      href: `?tab=${UPCOMING}`,
+      current: selectedTab === UPCOMING,
+    },
+    {
+      name: "Past events",
+      value: PAST,
+      href: `?tab=${PAST}`,
+      current: selectedTab === PAST,
+    },
+  ];
 
   const { mutate: deleteMembershipMutation } =
     trpc.community.deleteMembership.useMutation({
@@ -92,32 +120,6 @@ function CommunityPage(props: CommunityPageProps) {
 
   const now = new Date().getTime();
 
-  const tabs = [
-    {
-      id: "about",
-      title: "About",
-    },
-    {
-      id: "upcoming-events",
-      title: "Upcoming events",
-      subtitle: `(${
-        community.events.filter((e) => e.eventDate.getTime() - now > 0).length
-      })`,
-    },
-    {
-      id: "past-events",
-      title: "Past events",
-      subtitle: `(${
-        community.events.filter((e) => e.eventDate.getTime() - now < 0).length
-      })`,
-    },
-    {
-      id: "members",
-      title: "Members",
-      subtitle: `(${community.members.length})`,
-    },
-  ];
-
   return (
     <>
       <div className="mx-auto sm:max-w-2xl lg:max-w-5xl">
@@ -135,7 +137,7 @@ function CommunityPage(props: CommunityPageProps) {
                           (m) => m.userId === session.user?.id,
                         );
                         if (membership) {
-                          // Organisers cannoy leave their own community
+                          // Organisers cannot leave their own community
                           // TODO support this after there is support for multiple organisers
                           if (!membership.isEventOrganiser) {
                             return (
@@ -151,14 +153,14 @@ function CommunityPage(props: CommunityPageProps) {
                               <>
                                 <Link
                                   className="mr-2 inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-                                  href={`/communities/${community.slug}/events/create`}
+                                  href={`/hub/${community.slug}/events/create`}
                                 >
                                   <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                                   New Event
                                 </Link>
                                 <Link
                                   className="inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-                                  href={`/communities/${community.slug}/edit`}
+                                  href={`/hub/${community.slug}/edit`}
                                 >
                                   <PencilIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                                   Edit Community
@@ -203,11 +205,7 @@ function CommunityPage(props: CommunityPageProps) {
                   alt={community.name}
                 />
               </div>
-              <Tabs
-                tabs={tabs}
-                selectedTab={selectedTab}
-                onTabSelected={(tabId) => setSelectedTab(tabId)}
-              />
+              <Tabs tabs={tabs} />
               {(() => {
                 switch (selectedTab) {
                   case "about":

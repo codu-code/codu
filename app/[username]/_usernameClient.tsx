@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import * as Sentry from "@sentry/nextjs";
+import React from "react";
 import Link from "next/link";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import { LinkIcon } from "@heroicons/react/outline";
 import { api } from "@/server/trpc/react";
-import { useRouter } from "next/navigation";
-import EventPreview from "@/components/EventPreview/EventPreview";
-import CommunityPreview from "@/components/CommunityPreview/CommunityPreview";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Tabs } from "@/components/Tabs";
+import { toast } from "sonner";
 
 type Props = {
   session: Session | null;
@@ -64,7 +64,9 @@ type Props = {
 
 const Profile = ({ profile, isOwner, session }: Props) => {
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState("articles");
+  const searchParams = useSearchParams();
+
+  const tabFromParams = searchParams?.get("tab");
 
   const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
@@ -78,20 +80,8 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     },
   });
 
-  if (!profile) return null; // Should never happen because of serverside fetch or redirect
-
-  const {
-    name,
-    username,
-    image,
-    bio,
-    posts,
-    websiteUrl,
-    id,
-    accountLocked,
-    RSVP,
-    memberships,
-  } = profile;
+  const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
+    profile;
 
   const handleBanSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -105,25 +95,29 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     try {
       await banUser({ userId: id, note });
     } catch (error) {
-      console.error(error);
+      toast.error("Error occurred banning user");
+      Sentry.captureException(error);
     }
   };
 
+  const selectedTab =
+    tabFromParams && ["groups", "articles"].includes(tabFromParams)
+      ? tabFromParams
+      : "articles";
+
+  const [ARTICLES, GROUPS] = ["articles", "groups"];
   const tabs = [
     {
-      id: "articles",
-      title: "Published articles",
-      subtitle: `(${posts.length})`,
+      name: `Articles (${posts.length})`,
+      value: ARTICLES,
+      href: `?tab=${ARTICLES}`,
+      current: selectedTab === ARTICLES,
     },
     {
-      id: "events",
-      title: "Events",
-      subtitle: `(${RSVP.length})`,
-    },
-    {
-      id: "communities",
-      title: "Communities",
-      subtitle: `(${memberships.length})`,
+      name: "Groups",
+      value: GROUPS,
+      href: `?tab=${GROUPS}`,
+      current: selectedTab === GROUPS,
     },
   ];
 
@@ -165,19 +159,13 @@ const Profile = ({ profile, isOwner, session }: Props) => {
             <h1>Account locked 🔒</h1>
           </div>
         ) : (
-          <div className="mx-auto sm:max-w-2xl lg:max-w-5xl">
-            <div className="flex items-center justify-between pt-4">
-              <Tabs
-                tabs={tabs}
-                selectedTab={selectedTab}
-                onTabSelected={(tabId) => setSelectedTab(tabId)}
-              />
-            </div>
+          <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
+            <Tabs tabs={tabs} />
           </div>
         )}
         {(() => {
           switch (selectedTab) {
-            case "articles":
+            case ARTICLES:
               return (
                 <div>
                   {posts.length ? (
@@ -226,53 +214,9 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   )}
                 </div>
               );
-            case "events":
+            case GROUPS:
               return (
-                <>
-                  {RSVP.map(({ event }) => (
-                    <EventPreview
-                      key={event.name}
-                      id={event.id}
-                      address={event.address}
-                      eventSlug={event.slug}
-                      communitySlug={event.community.slug}
-                      name={event.name}
-                      description={event.description}
-                      eventDate={event.eventDate.toISOString()}
-                      attendees={RSVP.length}
-                      coverImage={event.coverImage}
-                      commnunityName={event.community.name}
-                    />
-                  ))}
-                  {memberships.length === 0 ? (
-                    <p className="py-4 font-medium">
-                      You have not joined an event yet... 🥲
-                    </p>
-                  ) : null}
-                </>
-              );
-            case "communities":
-              return (
-                <>
-                  {memberships.map(({ community }) => (
-                    <CommunityPreview
-                      key={community.id}
-                      id={community.id}
-                      slug={community.slug}
-                      name={community.name}
-                      excerpt={community.excerpt}
-                      image={community.coverImage}
-                      city={community.city}
-                      country={community.country}
-                      membersCount={community.members.length}
-                    />
-                  ))}
-                  {memberships.length === 0 ? (
-                    <p className="py-4 font-medium">
-                      You have not joined a community yet... 🥲
-                    </p>
-                  ) : null}
-                </>
+                <p className="py-4 font-medium">Groups are coming soon!</p>
               );
             default:
               return null;

@@ -71,7 +71,7 @@ const EventPreview: NextPage<Props> = (props) => {
             <div className="flex w-full items-center justify-between">
               <Link
                 className="fancy-link semibold text-lg"
-                href={`/communities/${communitySlug}/events/${eventSlug}`}
+                href={`/hub/${communitySlug}/events/${eventSlug}`}
               >
                 See event details
               </Link>

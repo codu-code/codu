@@ -22,7 +22,7 @@ const Courses = () => {
     <>
       <div className="mx-2">
         <div className="mt-8 flex max-w-5xl items-center justify-between border-b pb-4 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-50 sm:text-4xl ">
+          <h1 className="text-3xl font-extrabold tracking-tight text-neutral-50 sm:text-4xl">
             Courses
           </h1>
         </div>

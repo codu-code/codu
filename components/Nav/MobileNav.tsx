@@ -25,20 +25,20 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
       enterTo="transform translate-y-0 opacity-100"
       className="absolute z-10 w-screen bg-neutral-100 dark:bg-black"
     >
-      <Disclosure.Panel className="relative z-10 border-b-2 border-black dark:border-white md:hidden">
+      <Disclosure.Panel className="relative border-b border-neutral-400 dark:border-neutral-600 md:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
           {navigation.map((item) => (
             <NavItem item={item} key={item.name} />
           ))}
-          <div className="flex flex-col space-y-1 border-t border-neutral-700 pb-3 pt-3">
+          <div className="flex flex-col space-y-1 border-t border-neutral-400 pb-3 pt-3 dark:border-neutral-600">
             <SubNav session={session} />
           </div>
         </div>
 
         {session && (
           <div className="space-y-1 px-2 pt-2">
-            <div className="border-t border-neutral-700 pb-3 pt-4">
-              <div className="flex items-center px-5">
+            <div className="border-t border-neutral-400 pb-3 pt-4 dark:border-neutral-600">
+              <div className="flex items-center px-2">
                 <div className="flex-shrink-0">
                   <img
                     className="h-10 w-10 rounded-full"
