@@ -1,18 +1,49 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import React from "react";
 import Link from "next/link";
-import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
-import Head from "next/head";
+import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import { LinkIcon } from "@heroicons/react/outline";
 import { api } from "@/server/trpc/react";
-import { useRouter } from "next/navigation";
-import { Session } from "next-auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { Session } from "next-auth";
+import { Tabs } from "@/components/Tabs";
+import { toast } from "sonner";
 
 type Props = {
   session: Session | null;
   isOwner: boolean;
   profile: {
+    memberships: {
+      community: {
+        id: string;
+        slug: string;
+        name: string;
+        excerpt: string;
+        coverImage: string;
+        city: string;
+        country: string;
+        members: {
+          id: string;
+        }[];
+      };
+    }[];
+    RSVP: {
+      event: {
+        id: string;
+        slug: string;
+        name: string;
+        description: string;
+        address: string;
+        eventDate: Date;
+        coverImage: string;
+        community: {
+          slug: string;
+          name: string;
+        };
+      };
+    }[];
     posts: {
       published: string | undefined;
       title: string;
@@ -33,6 +64,9 @@ type Props = {
 
 const Profile = ({ profile, isOwner, session }: Props) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tabFromParams = searchParams?.get("tab");
 
   const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
@@ -45,8 +79,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
       router.refresh();
     },
   });
-
-  if (!profile) return null; // Should never happen because of serverside fetch or redirect
 
   const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
     profile;
@@ -63,46 +95,48 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     try {
       await banUser({ userId: id, note });
     } catch (error) {
-      console.error(error);
+      toast.error("Error occurred banning user");
+      Sentry.captureException(error);
     }
   };
 
+  const selectedTab =
+    tabFromParams && ["groups", "articles"].includes(tabFromParams)
+      ? tabFromParams
+      : "articles";
+
+  const [ARTICLES, GROUPS] = ["articles", "groups"];
+  const tabs = [
+    {
+      name: `Articles (${posts.length})`,
+      value: ARTICLES,
+      href: `?tab=${ARTICLES}`,
+      current: selectedTab === ARTICLES,
+    },
+    {
+      name: "Groups",
+      value: GROUPS,
+      href: `?tab=${GROUPS}`,
+      current: selectedTab === GROUPS,
+    },
+  ];
+
   return (
     <>
-      <Head>
-        <title>{`${name} - Codú`}</title>
-        <meta name="description" content={`${name}'s profile on Codú`} />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="manifest" href="site.webmanifest" />
-        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#000000" />
-        <link rel="shortcut icon" href="favicon.ico" />
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-config" content="browserconfig.xml" />
-        <meta name="theme-color" content="#000" />
-        <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
-        <meta
-          name="image"
-          property="og:image"
-          content={`/api/og?title=${encodeURIComponent(
-            `${name} - Codú Profile`,
-          )}`}
-        />
-        <meta property="og:type" content="website" />
-      </Head>
-      <div className="max-w-2xl px-4 mx-auto text-900 dark:text-white">
+      <div className="text-900 mx-auto max-w-2xl px-4 dark:text-white">
         <main className="flex pt-6">
           <div className="mr-4 flex-shrink-0 self-center">
             {image && (
               <img
-                className="rounded-full object-cover h-32 w-32"
+                className="h-32 w-32 rounded-full object-cover"
                 alt={`Avatar for ${name}`}
                 src={image}
               />
             )}
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="text-lg md:text-xl font-bold mb-0">{name}</h1>
-            <h2 className="text-neutral-500 dark:text-neutral-400 font-bold text-sm">
+            <h1 className="mb-0 text-lg font-bold md:text-xl">{name}</h1>
+            <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
               @{username}
             </h2>
             <p className="mt-1">{bio}</p>
@@ -112,7 +146,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                 className="flex flex-row items-center"
                 target="blank"
               >
-                <LinkIcon className="h-5 mr-2 text-neutral-500 dark:text-neutral-400" />
+                <LinkIcon className="mr-2 h-5 text-neutral-500 dark:text-neutral-400" />
                 <p className="mt-1 text-blue-500">
                   {getDomainFromUrl(websiteUrl)}
                 </p>
@@ -121,53 +155,77 @@ const Profile = ({ profile, isOwner, session }: Props) => {
           </div>
         </main>
         {accountLocked ? (
-          <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-900 dark:text-neutral-50">
+          <div className="mt-8 flex items-center justify-between border-b pb-4 text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-4xl">
             <h1>Account locked 🔒</h1>
           </div>
         ) : (
-          <div className="flex items-center justify-between pb-4 mt-8 text-3xl font-extrabold tracking-tight border-b sm:text-4xl text-neutral-900 dark:text-neutral-50">
-            <h1>Published articles</h1>
-            <span className="font-light">({posts.length})</span>
+          <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
+            <Tabs tabs={tabs} />
           </div>
         )}
-
-        {posts.length ? (
-          posts.map(({ slug, title, excerpt, readTimeMins, published, id }) => {
-            if (!published) return;
-            return (
-              <ArticlePreview
-                key={slug}
-                slug={slug}
-                title={title}
-                excerpt={excerpt}
-                name={name}
-                username={username || ""}
-                image={image}
-                date={published}
-                readTime={readTimeMins}
-                menuOptions={
-                  isOwner
-                    ? [
-                        {
-                          label: "Edit",
-                          href: `/create/${id}`,
-                          postId: id,
-                        },
-                      ]
-                    : undefined
-                }
-                showBookmark={!isOwner}
-                id={id}
-              />
-            );
-          })
-        ) : (
-          <p className="font-medium py-4">Nothing published yet... 🥲</p>
-        )}
+        {(() => {
+          switch (selectedTab) {
+            case ARTICLES:
+              return (
+                <div>
+                  {posts.length ? (
+                    posts.map(
+                      ({
+                        slug,
+                        title,
+                        excerpt,
+                        readTimeMins,
+                        published,
+                        id,
+                      }) => {
+                        if (!published) return;
+                        return (
+                          <ArticlePreview
+                            key={slug}
+                            slug={slug}
+                            title={title}
+                            excerpt={excerpt}
+                            name={name}
+                            username={username || ""}
+                            image={image}
+                            date={published}
+                            readTime={readTimeMins}
+                            menuOptions={
+                              isOwner
+                                ? [
+                                    {
+                                      label: "Edit",
+                                      href: `/create/${id}`,
+                                      postId: id,
+                                    },
+                                  ]
+                                : undefined
+                            }
+                            showBookmark={!isOwner}
+                            id={id}
+                          />
+                        );
+                      },
+                    )
+                  ) : (
+                    <p className="py-4 font-medium">
+                      Nothing published yet... 🥲
+                    </p>
+                  )}
+                </div>
+              );
+            case GROUPS:
+              return (
+                <p className="py-4 font-medium">Groups are coming soon!</p>
+              );
+            default:
+              return null;
+          }
+        })()}
       </div>
       {session?.user?.role === "ADMIN" && (
-        <div className="border-t-2 text-center pb-8">
-          <h4 className="text-2xl mb-6 mt-4">Admin Control</h4>
+        <div className="border-t-2 pb-8 text-center">
+          <h4 className="mb-6 mt-4 text-2xl">Admin Control</h4>
           {accountLocked ? (
             <button
               onClick={() => unbanUser({ userId: id })}
@@ -188,11 +246,11 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   rows={4}
                   name="note"
                   id="note"
-                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-900 dark:ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset  sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-inset dark:ring-gray-300  sm:text-sm sm:leading-6"
                   defaultValue={""}
                 />
               </div>
-              <button type="submit" className="mt-4 secondary-button">
+              <button type="submit" className="secondary-button mt-4">
                 Ban user
               </button>
             </form>

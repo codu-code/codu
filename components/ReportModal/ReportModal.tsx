@@ -1,7 +1,6 @@
 import React, { useRef, useState } from "react";
-import Flag from "../../icons/flag.svg";
-import { XIcon } from "@heroicons/react/outline";
-import toast from "react-hot-toast";
+import { XIcon, FlagIcon } from "@heroicons/react/outline";
+import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
 import { api } from "@/server/trpc/react";
 import { Dialog } from "@headlessui/react";
@@ -87,16 +86,16 @@ export const ReportModal = (props: Props) => {
           onClick={() => {
             session ? setIsModalOpen(true) : signIn();
           }}
-          className="mr-4 flex p-1.5 rounded-full hover:bg-neutral-800"
+          className="mr-4 flex rounded-full p-1.5 hover:bg-neutral-300 dark:hover:bg-neutral-800"
         >
-          <Flag className="h-5 " />
+          <FlagIcon className="h-5 " />
         </button>
       )}
 
       {!isComment && (
         <button
           onClick={() => (session ? setIsModalOpen(true) : signIn())}
-          className="w-full rounded text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200"
+          className="w-full rounded text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700"
         >
           <div className="w-ful text-left">Report Article</div>
         </button>
@@ -110,9 +109,9 @@ export const ReportModal = (props: Props) => {
       >
         <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
         <div className="fixed inset-0 flex w-screen items-center justify-center">
-          <Dialog.Panel className="p-0 border border-neutral-900 dark:border-neutral-50 bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50 max-w-lg rounded-lg relative ">
+          <Dialog.Panel className="relative max-w-lg rounded-lg border border-neutral-900 bg-neutral-100 p-0 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-900 dark:text-neutral-50 ">
             <div className="m-8">
-              <Dialog.Title className="text-2xl tracking-tight font-bold text-neutral-900 dark:text-neutral-50 text-center">
+              <Dialog.Title className="text-center text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
                 Submit a report
               </Dialog.Title>
 
@@ -121,7 +120,7 @@ export const ReportModal = (props: Props) => {
                   Is {isPost ? "something in this article" : "this comment"}{" "}
                   inappropriate?
                 </p>
-                <p className="rounded p-4 border border-neutral-800 dark:border-neutral-50 bg-neutral-300 dark:bg-neutral-400 text-neutral-900 dark:text-neutral-800">
+                <p className="rounded border border-neutral-800 bg-neutral-300 p-4 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-400 dark:text-neutral-800">
                   <span>{isPost ? "Article : " : "Comment : "}</span>
                   {isComment && props.comment}
                   {isPost && props.title}
@@ -151,7 +150,7 @@ export const ReportModal = (props: Props) => {
                   ref={textAreaRef}
                 />
 
-                <div className="flex justify-end text-sm mt-8">
+                <div className="mt-8 flex justify-end text-sm">
                   <button
                     disabled={loading}
                     className="primary-button uppercase"
@@ -167,7 +166,7 @@ export const ReportModal = (props: Props) => {
             <button
               onClick={() => setIsModalOpen(false)}
               aria-label="Close modal"
-              className="absolute top-6 right-6 p-1 hover:bg-neutral-800 rounded-full"
+              className="absolute right-6 top-6 rounded-full p-1 hover:bg-neutral-800"
             >
               <XIcon className="w-8" />
             </button>

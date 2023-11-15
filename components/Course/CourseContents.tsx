@@ -14,7 +14,7 @@ interface CourseContensProps {
 export const CourseContens = ({ title, contents }: CourseContensProps) => {
   return (
     <div className="bg-neutral-900">
-      <div className="p-4 border-b border-neutral-500">
+      <div className="border-b border-neutral-500 p-4">
         <p className="text-lg font-semibold leading-none">{title}</p>
       </div>
 

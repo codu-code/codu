@@ -1,4 +1,5 @@
 import { ReportSchema } from "@/schema/report";
+import * as Sentry from "@sentry/nextjs";
 import sendEmail from "@/utils/sendEmail";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
@@ -101,6 +102,7 @@ export const reportRouter = createTRPCRouter({
           message: "Invalid report",
         });
       } catch (error) {
+        Sentry.captureException(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Report failed to send",

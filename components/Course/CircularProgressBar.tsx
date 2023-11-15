@@ -6,7 +6,7 @@ export const CircularProgressBar = ({ progress }: { progress: number }) => {
   return (
     <div className="flex items-center justify-center overflow-hidden ">
       <svg
-        className="w-32 h-32 transform translate-x-1 translate-y-1"
+        className="h-32 w-32 translate-x-1 translate-y-1 transform"
         aria-hidden="true"
       >
         <circle

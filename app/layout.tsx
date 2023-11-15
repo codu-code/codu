@@ -7,6 +7,7 @@ import Footer from "@/components/Footer/Footer";
 import Nav from "@/components/Nav/Nav";
 import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
+import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
@@ -16,6 +17,23 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   publisher: "Codú",
   applicationName: "Codú",
+  keywords: [
+    "programming",
+    "frontend",
+    "community",
+    "learn",
+    "programmer",
+    "article",
+    "Python",
+    "JavaScript",
+    "AWS",
+    "HTML",
+    "CSS",
+    "Tailwind",
+    "React",
+    "Angular",
+    "backend",
+  ],
   metadataBase: new URL("https://www.codu.co"),
   openGraph: {
     images: "/images/og/home-og.png",
@@ -37,6 +55,7 @@ export default async function RootLayout({
           showSpinner={false}
           template='<div class="bar" role="bar"><div class="gradient"></div></div>'
         />
+        <Toaster />
         <AuthProvider>
           <ThemeProvider>
             <TRPCReactProvider headers={headers()}>

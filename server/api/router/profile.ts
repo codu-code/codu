@@ -62,7 +62,10 @@ export const profileRouter = createTRPCRouter({
         });
       }
 
-      const response = await getPresignedUrl(ctx.session.user.id, type, size);
+      const response = await getPresignedUrl(type, size, {
+        kind: "user",
+        userId: ctx.session.user.id,
+      });
 
       return response;
     }),

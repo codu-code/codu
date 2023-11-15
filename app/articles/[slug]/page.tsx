@@ -1,7 +1,6 @@
 import React from "react";
 import Markdoc from "@markdoc/markdoc";
 import Link from "next/link";
-import Head from "next/head";
 import BioBar from "@/components/BioBar/BioBar";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
@@ -78,8 +77,8 @@ const ArticlePage = async ({ params }: Props) => {
         postUsername={post?.user.username || ""}
         postUrl={`https://${host}/articles/${post.slug}`}
       />
-      <div className="mx-auto pb-4 md:max-w-3xl px-2 sm:px-4 break-words">
-        <article className="prose dark:prose-invert lg:prose-lg mx-auto max-w-3xl">
+      <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">
+        <article className="prose mx-auto max-w-3xl dark:prose-invert lg:prose-lg">
           <h1>{post.title}</h1>
           {Markdoc.renderers.react(content, React, {
             components: markdocComponents,
@@ -91,7 +90,7 @@ const ArticlePage = async ({ params }: Props) => {
               <Link
                 href={`/articles?tag=${tag.title.toLowerCase()}`}
                 key={tag.title}
-                className="bg-gradient-to-r from-orange-400 to-pink-600 hover:bg-pink-700 text-white py-1 px-3 rounded-full text-xs font-bold"
+                className="rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700"
               >
                 {tag.title}
               </Link>
@@ -99,12 +98,12 @@ const ArticlePage = async ({ params }: Props) => {
           </section>
         )}
       </div>
-      <div className="mx-auto pb-4 max-w-3xl px-2 sm:px-4">
+      <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
         <BioBar author={post.user} />
         {post.showComments ? (
           <CommentsArea postId={post.id} postOwnerId={post.userId} />
         ) : (
-          <h3 className="py-10 italic text-lg">
+          <h3 className="py-10 text-lg italic">
             Comments are disabled for this post
           </h3>
         )}

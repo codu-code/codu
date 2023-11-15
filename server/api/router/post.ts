@@ -483,6 +483,9 @@ export const postRouter = createTRPCRouter({
           include: { user: true },
         },
       },
+      orderBy: {
+        id: "desc",
+      },
     });
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),

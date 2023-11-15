@@ -2,11 +2,10 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import { TiptapEditorProps } from "./props";
-import { CustomTableRow, TiptapExtensions } from "./extensions";
+import { CustomCodeBlockEdit, TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
-import TableMenuBar from "./components/Table/TableMenuBar";
 
 interface EditorProps {
   initialValue: string;
@@ -15,7 +14,7 @@ interface EditorProps {
 
 export default function Editor({ onChange, initialValue }: EditorProps) {
   const editor = useEditor({
-    extensions: TiptapExtensions,
+    extensions: [...TiptapExtensions, CustomCodeBlockEdit],
     editorProps: TiptapEditorProps,
     content: JSON.parse(initialValue),
     onUpdate: (e) => {

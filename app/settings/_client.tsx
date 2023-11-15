@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "sonner";
 import type { saveSettingsInput } from "../../schema/profile";
 import { saveSettingsSchema } from "../../schema/profile";
 
 import { uploadFile } from "../../utils/s3helpers";
-import { Prisma } from "@prisma/client";
-import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -60,14 +59,17 @@ const Settings = ({ profile }: { profile: User }) => {
     url: profile.image,
   });
 
-  const { mutate } = api.profile.edit.useMutation({
-    onError() {
+  const { mutate, isError, isSuccess, isLoading } =
+    api.profile.edit.useMutation();
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Saved");
+    }
+    if (isError) {
       toast.error("Something went wrong saving settings.");
-    },
-    onSuccess() {
-      redirect(`/${username}`);
-    },
-  });
+    }
+  }, [isError, isSuccess]);
 
   const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
   const { mutate: updateUserPhotoUrl } =
@@ -127,29 +129,17 @@ const Settings = ({ profile }: { profile: User }) => {
   };
 
   return (
-    <div className="bg-black py-8">
-      <Toaster
-        toastOptions={{
-          style: {
-            borderRadius: 0,
-            border: "2px solid black",
-            background: "white",
-          },
-        }}
-      />
-      <div className="mx-auto lg:col-span-9 max-w-2xl flex-grow flex flex-col justify-center w-full px-4 sm:px-6">
-        <div className="bg-neutral-900 text-neutral-700 shadow-xl">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="border border-neutral-900"
-          >
+    <div className="py-8">
+      <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
+        <div className="text-neutral-700">
+          <form onSubmit={handleSubmit(onSubmit)}>
             {/* Profile section */}
-            <div className="py-6 px-4 sm:p-6 lg:pb-8 ">
+            <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
               <div>
-                <h2 className="text-3xl tracking-tight font-extrabold text-white">
+                <h2 className="text-3xl font-extrabold tracking-tight text-neutral-800 dark:text-white">
                   Profile Settings
                 </h2>
-                <p className="mt-1 text-neutral-400">
+                <p className="mt-1 text-neutral-600 dark:text-neutral-400">
                   This information will be displayed publicly so be careful what
                   you share.
                 </p>
@@ -175,8 +165,8 @@ const Settings = ({ profile }: { profile: User }) => {
 
                       <div>
                         <label htmlFor="username">Username</label>
-                        <div className="mt-1 shadow-sm flex">
-                          <span className="mt-1  bg-white px-3 items-center text-black text-sm font-semibold flex">
+                        <div className="mt-1 flex shadow-sm">
+                          <span className="mt-1  flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
                             codu.co/
                           </span>
                           <input type="text" {...register("username")} />
@@ -191,7 +181,7 @@ const Settings = ({ profile }: { profile: User }) => {
 
                     {/* Photo upload */}
 
-                    <div className="mt-6 flex-grow lg:mt-0 lg:ml-6 lg:flex-shrink-0 lg:flex-grow-0">
+                    <div className="mt-6 flex-grow lg:ml-6 lg:mt-0 lg:flex-shrink-0 lg:flex-grow-0">
                       <p
                         className="text-sm font-medium text-white"
                         aria-hidden="true"
@@ -201,15 +191,15 @@ const Settings = ({ profile }: { profile: User }) => {
                       <div className="mt-1 lg:hidden">
                         <div className="flex items-center">
                           <div
-                            className="relative flex-shrink-0 overflow-hidden rounded-full h-16 w-16 "
+                            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full "
                             aria-hidden="true"
                           >
                             {profilePhoto.status === "error" ||
                             profilePhoto.status === "loading" ? (
-                              <div className="rounded-full border-2 h-full w-full bg-black" />
+                              <div className="h-full w-full rounded-full border-2 bg-black" />
                             ) : (
                               <img
-                                className="rounded-full border-2 border-white object-cover h-full w-full"
+                                className="h-full w-full rounded-full border-2 border-white object-cover"
                                 src={`${
                                   profilePhoto.url
                                 }?t=${new Date().getTime()}`}
@@ -218,7 +208,7 @@ const Settings = ({ profile }: { profile: User }) => {
                             )}
                           </div>
                           <div className="ml-5 rounded-md shadow-sm">
-                            <div className="group relative flex items-center justify-center border-white border-2 py-2 px-3 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:bg-black">
+                            <div className="group relative flex items-center justify-center border-2 border-white px-3 py-2 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:bg-black">
                               <label
                                 htmlFor="mobile-user-photo"
                                 className="relative text-sm font-medium leading-4 text-white"
@@ -239,13 +229,13 @@ const Settings = ({ profile }: { profile: User }) => {
                         </div>
                       </div>
 
-                      <div className="relative hidden overflow-hidden lg:block rounded-full h-32 w-32">
+                      <div className="relative hidden h-32 w-32 overflow-hidden rounded-full lg:block">
                         {profilePhoto.status === "error" ||
                         profilePhoto.status === "loading" ? (
-                          <div className="rounded-full border-2 h-full w-full bg-black h-100 w-100" />
+                          <div className="h-100 w-100 h-full w-full rounded-full border-2 bg-black" />
                         ) : (
                           <img
-                            className="relative rounded-full border-2 border-white object-cover h-full w-full"
+                            className="relative h-full w-full rounded-full border-2 border-white object-cover"
                             src={`${
                               profilePhoto.url
                             }?t=${new Date().getTime()}`}
@@ -285,7 +275,7 @@ const Settings = ({ profile }: { profile: User }) => {
                         maxLength={200}
                       />
                     </div>
-                    <div className="mt-2 text-sm text-neutral-400 flex justify-between">
+                    <div className="mt-2 flex justify-between text-sm text-neutral-600 dark:text-neutral-400">
                       {errors.bio ? (
                         <p className="mt-1 text-sm text-red-600">
                           {`${errors.bio.message || "Required"}`}
@@ -336,13 +326,13 @@ const Settings = ({ profile }: { profile: User }) => {
                     </div>
                   </div>
                 </div>
-                <div className="pt-6 divide-y divide-neutral-200">
+                <div className="divide-y divide-neutral-200 pt-6">
                   <div>
-                    <div>
-                      <h2 className="text-xl tracking-tight font-bold text-white">
+                    <div className="text-neutral-600 dark:text-neutral-400">
+                      <h2 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white">
                         Privacy
                       </h2>
-                      <p className="mt-1 text-sm text-neutral-400">
+                      <p className="mt-1 text-sm">
                         We respect your privacy, change your settings here.
                       </p>
                     </div>
@@ -352,13 +342,13 @@ const Settings = ({ profile }: { profile: User }) => {
                     >
                       <Switch.Group
                         as="li"
-                        className="py-4 flex items-center justify-between"
+                        className="flex items-center justify-between py-4"
                       >
                         <div className="flex flex-col items-center">
                           <Switch.Label as="p" className="sr-only" passive>
                             Email notifications
                           </Switch.Label>
-                          <Switch.Description className="text-sm text-neutral-400">
+                          <Switch.Description className="text-sm text-neutral-600 dark:text-neutral-400">
                             Occasional email notifications from the platform.
                           </Switch.Description>
                         </div>
@@ -369,7 +359,7 @@ const Settings = ({ profile }: { profile: User }) => {
                             emailNotifications
                               ? "bg-green-600"
                               : "bg-neutral-400",
-                            "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300",
+                            "relative ml-4 inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2",
                           )}
                         >
                           <span
@@ -378,20 +368,20 @@ const Settings = ({ profile }: { profile: User }) => {
                               emailNotifications
                                 ? "translate-x-5"
                                 : "translate-x-0",
-                              "inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200",
+                              "inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
                           />
                         </Switch>
                       </Switch.Group>
                       <Switch.Group
                         as="li"
-                        className="py-4 flex items-center justify-between mt-2"
+                        className="mt-2 flex items-center justify-between py-4"
                       >
                         <div className="flex flex-col">
                           <Switch.Label as="p" className="sr-only" passive>
                             Weekly newsletter
                           </Switch.Label>
-                          <Switch.Description className="text-sm text-neutral-400">
+                          <Switch.Description className="text-sm text-neutral-600 dark:text-neutral-400">
                             Opt-in to our weekly newsletter.
                           </Switch.Description>
                         </div>
@@ -402,7 +392,7 @@ const Settings = ({ profile }: { profile: User }) => {
                             weeklyNewsletter
                               ? "bg-green-600"
                               : "bg-neutral-400",
-                            "ml-4 relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300",
+                            "relative ml-4 inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2",
                           )}
                         >
                           <span
@@ -411,23 +401,24 @@ const Settings = ({ profile }: { profile: User }) => {
                               weeklyNewsletter
                                 ? "translate-x-5"
                                 : "translate-x-0",
-                              "inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200",
+                              "inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                             )}
                           />
                         </Switch>
                       </Switch.Group>
                     </ul>
                   </div>
-                  <div className="mt-2 py-4 flex justify-end">
+                  <div className="mt-2 flex justify-end py-4">
                     <button
                       type="button"
-                      className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                      className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                     >
                       Cancel
                     </button>
                     <button
+                      disabled={isLoading}
                       type="submit"
-                      className="ml-5 w-20 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                      className="ml-5 inline-flex w-20 justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-20"
                     >
                       Save
                     </button>

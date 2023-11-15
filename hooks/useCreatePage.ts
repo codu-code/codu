@@ -3,9 +3,9 @@
 
 import { ZodError } from "zod";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 import type { SavePostInput } from "../schema/post";
 import { ConfirmPostSchema } from "../schema/post";

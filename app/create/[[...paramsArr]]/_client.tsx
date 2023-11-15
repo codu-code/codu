@@ -1,10 +1,10 @@
 "use client";
-
+import * as Sentry from "@sentry/nextjs";
 import { ZodError } from "zod";
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import { useForm } from "react-hook-form";
 import CustomTextareaAutosize from "../../../components/CustomTextareAutosize/CustomTextareaAutosize";
-import toast, { Toaster } from "react-hot-toast";
+import { toast } from "sonner";
 import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 import type { SavePostInput } from "../../../schema/post";
@@ -64,12 +64,18 @@ const Create = () => {
     mutate: publish,
     status: publishStatus,
     data: publishData,
-  } = api.post.publish.useMutation();
+  } = api.post.publish.useMutation({
+    onError(error) {
+      toast.error("Error saving settings.");
+      Sentry.captureException(error);
+    },
+  });
 
   const { mutate: save, status: saveStatus } = api.post.update.useMutation({
-    onError() {
+    onError(error) {
       // TODO: Add error messages from field validations
-      return toast.error("Something went wrong auto-saving");
+      toast.error("Error auto-saving");
+      Sentry.captureException(error);
     },
     onSuccess() {
       toast.success("Saved");
@@ -81,31 +87,41 @@ const Create = () => {
       );
     },
   });
-  const { mutate: create, data: createData } = api.post.create.useMutation({
-    onError() {
-      toast.error("Something went wrong creating draft");
-    },
-    onSuccess() {
-      toast.success("Saved draft");
-    },
-  });
+  const {
+    mutate: create,
+    data: createData,
+    isError,
+    isSuccess,
+  } = api.post.create.useMutation();
 
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
-  const { data, status: dataStatus } = api.post.editDraft.useQuery(
+  const {
+    data,
+    status: dataStatus,
+    isError: draftFetchError,
+  } = api.post.editDraft.useQuery(
     { id: postId },
     {
-      onError() {
-        toast.error(
-          "Something went wrong fetching your draft, refresh your page or you may lose data",
-          {
-            duration: 5000,
-          },
-        );
-      },
       enabled: !!postId && shouldRefetch,
     },
   );
+
+  useEffect(() => {
+    if (isError) {
+      toast.error("Error saving");
+    }
+
+    if (isSuccess) {
+      toast.success("Saved");
+    }
+
+    if (draftFetchError) {
+      toast.error(
+        "Something went wrong fetching your draft, refresh your page or you may lose data",
+      );
+    }
+  }, [draftFetchError, isError, isSuccess]);
 
   useEffect(() => {
     if (shouldRefetch) {
@@ -234,18 +250,18 @@ const Create = () => {
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition.Root show={open} as={Fragment}>
-          <div className="fixed left-0 bottom-0 top-0 z-50 w-full h-screen bg-black">
+          <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full bg-white dark:bg-black">
             <button
               type="button"
-              className="absolute right-8 top-8 underline cursor-pointer z-50"
+              className="absolute right-8 top-8 z-50 cursor-pointer underline"
               onClick={() => setOpen(false)}
             >
               Close
             </button>
-            <div className="relative mx-4 flex flex-col justify-center items-center h-full overflow-y-auto">
-              <div className="pt-16 pb-8">
-                <div className="block sm:grid gap-6 sm:grid-cols-12 w-full max-w-2xl">
-                  <div className="sm:col-span-6 mt-8 sm:mt-0">
+            <div className="relative mx-4 flex h-full flex-col items-center justify-center overflow-y-auto">
+              <div className="pb-8 pt-16">
+                <div className="block w-full max-w-2xl gap-6 sm:grid sm:grid-cols-12">
+                  <div className="mt-8 sm:col-span-6 sm:mt-0">
                     {" "}
                     <label htmlFor="excerpt">Excerpt</label>
                     <textarea
@@ -254,13 +270,13 @@ const Create = () => {
                       rows={3}
                       {...register("excerpt")}
                     />
-                    <p className="mt-2 text-sm text-neutral-400">
+                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       What readers will see before they click on your article.
                       Good SEO descriptions utilize keywords, summarize the
                       story and are between 140-156 characters long.
                     </p>
                   </div>
-                  <div className="sm:col-span-6 my-4 sm:my-0">
+                  <div className="my-4 sm:col-span-6 sm:my-0">
                     <label htmlFor="tags">Topics</label>
                     <input
                       id="tag"
@@ -279,20 +295,20 @@ const Create = () => {
                     {tags.map((tag) => (
                       <div
                         key={tag}
-                        className="bg-neutral-300 inline-flex items-center text-sm mt-2 mr-1 overflow-hidden"
+                        className="mr-1 mt-2 inline-flex items-center overflow-hidden bg-neutral-300 text-sm"
                       >
                         <span
-                          className="ml-2 mr-1 leading-relaxed truncate max-w-xs px-1 text-xs text-black font-semibold"
+                          className="ml-2 mr-1 max-w-xs truncate px-1 text-xs font-semibold leading-relaxed text-black"
                           x-text="tag"
                         >
                           {tag}
                         </span>
                         <button
                           onClick={() => onDelete(tag)}
-                          className="w-6 h-6 inline-block align-middle text-white bg-neutral-600 focus:outline-none"
+                          className="inline-block h-6 w-6 bg-neutral-600 align-middle text-white focus:outline-none"
                         >
                           <svg
-                            className="w-6 h-6 fill-current mx-auto"
+                            className="mx-auto h-6 w-6 fill-current"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                           >
@@ -304,7 +320,7 @@ const Create = () => {
                         </button>
                       </div>
                     ))}
-                    <p className="mt-2 text-sm text-neutral-400">
+                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       Tag with up to 5 topics. This makes it easier for readers
                       to find and know what your story is about.
                     </p>
@@ -313,7 +329,7 @@ const Create = () => {
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-blue-500 focus-visible:ring-opacity-75">
+                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-neutral-800 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75 dark:text-white">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
@@ -321,7 +337,7 @@ const Create = () => {
                               } h-5 w-5 text-neutral-400`}
                             />
                           </Disclosure.Button>
-                          <Disclosure.Panel className="pt-4 pb-2">
+                          <Disclosure.Panel className="pb-2 pt-4">
                             <label htmlFor="canonicalUrl">Canonical URL</label>
                             <input
                               id="canonicalUrl"
@@ -330,7 +346,7 @@ const Create = () => {
                               defaultValue=""
                               {...register("canonicalUrl")}
                             />
-                            <p className="mt-2 text-sm text-neutral-400">
+                            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                               Add this if the post was originally published
                               elsewhere and you want to link to it as the
                               original source.
@@ -340,12 +356,12 @@ const Create = () => {
                       )}
                     </Disclosure>
                   </div>
-                  <div className="mt-4 sm:mt-0 sm:col-span-12 flex justify-end w-full">
+                  <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
                     {!data?.published && (
                       <button
                         type="button"
                         disabled={isDisabled}
-                        className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
@@ -358,11 +374,11 @@ const Create = () => {
                     <button
                       type="submit"
                       disabled={isDisabled}
-                      className="ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                     >
                       {hasLoadingState ? (
                         <>
-                          <div className="mr-2 animate-spin h-5 w-5 border-2 border-orange-600 border-t-white rounded-full" />
+                          <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-orange-600 border-t-white" />
                           {"Saving"}
                         </>
                       ) : (
@@ -378,44 +394,35 @@ const Create = () => {
             </div>
           </div>
         </Transition.Root>
-        <Toaster
-          toastOptions={{
-            style: {
-              borderRadius: 0,
-              border: "2px solid black",
-              background: "white",
-            },
-          }}
-        />
         {dataStatus === "loading" && postId && (
-          <div className="fixed top-0 left-0 z-40 w-screen h-screen flex items-center justify-center bg-gray ">
-            <div className="bg-white z-50 py-2 px-5 flex items-center flex-col border-2 border-black opacity-100">
-              <div className="loader-dots block relative w-20 h-5 mt-2">
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 w-3 h-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
+            <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
+              <div className="loader-dots relative mt-2 block h-5 w-20">
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
               </div>
-              <div className="text-neutral-400 text-xs font-medium mt-2 text-center">
+              <div className="mt-2 text-center text-xs font-medium text-neutral-400">
                 Fetching post data.
               </div>
             </div>
-            <div className="absolute bg-black top-0 bottom-0 left-0 right-0 opacity-25 z-60" />
+            <div className="z-60 absolute bottom-0 left-0 right-0 top-0 bg-black opacity-25" />
           </div>
         )}
-        <div className="bg-black">
-          <div className="flex-grow w-full max-w-7xl mx-auto xl:px-8 lg:flex text-black">
+        <>
+          <div className="mx-auto w-full max-w-7xl flex-grow lg:flex xl:px-8">
             {/* Left sidebar & main wrapper */}
-            <div className="flex-1 min-w-0 xl:flex">
-              <div className="xl:flex-shrink-0 xl:w-64 ">
-                <div className="h-full pl-4 pr-6 py-6 sm:pl-6 xl:pl-0  lg:px-4">
+            <div className="min-w-0 flex-1 xl:flex">
+              <div className="xl:w-64 xl:flex-shrink-0 ">
+                <div className="h-full py-6 pl-4 pr-6 sm:pl-6 lg:px-4  xl:pl-0">
                   {/* Start left column area */}
-                  <div className="h-full relative">
-                    <div className="bg-neutral-900 text-neutral-600 shadow-xl p-6">
-                      <h1 className="text-3xl tracking-tight font-extrabold text-white">
-                        {viewPreview ? "Previewing" : "Editing"} your post
+                  <div className="relative h-full">
+                    <div className="bg-white p-6 text-neutral-600 shadow dark:bg-neutral-900">
+                      <h1 className="text-3xl font-extrabold tracking-tight text-neutral-800 dark:text-white">
+                        {viewPreview ? "Previewing" : "Editing"} post
                       </h1>
-                      <p className="mt-1 text-neutral-400">
+                      <p className="mt-2 text-neutral-600 dark:text-neutral-400">
                         The body of your content can be edited using markdown.
                         Your post remains private until you
                         &#8220;publish&#8221; the article.
@@ -423,7 +430,7 @@ const Create = () => {
                       <div className="flex">
                         <button
                           type="button"
-                          className="bg-white border border-neutral-300 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-neutral-600 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300 mt-4"
+                          className="mt-4 inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                           onClick={() => setViewPreview((current) => !current)}
                         >
                           {viewPreview ? "Back to editing" : "View preview"}
@@ -435,14 +442,14 @@ const Create = () => {
                 </div>
               </div>
               <div className="lg:min-w-0 lg:flex-1">
-                <div className="h-full py-0 lg:py-6 px-4 sm:px-6 lg:px-4 ">
+                <div className="h-full px-4 py-0 sm:px-6 lg:px-4 lg:py-6 ">
                   {/* Start main area*/}
                   <div className="relative h-full">
-                    <div className="bg-neutral-900 text-white  shadow-xl">
+                    <div className="bg-white text-white shadow dark:bg-neutral-900">
                       {viewPreview ? (
-                        <section className="mx-auto pb-4 max-w-xl py-6 px-4 sm:p-6 lg:pb-8">
+                        <section className="mx-auto max-w-xl px-4 py-6 pb-4 sm:p-6 lg:pb-8">
                           <article
-                            className="prose prose-invert lg:prose-lg"
+                            className="prose"
                             style={{
                               whiteSpace: "pre-wrap",
                               overflowWrap: "anywhere",
@@ -459,10 +466,10 @@ const Create = () => {
                           </article>
                         </section>
                       ) : (
-                        <div className="py-6 px-4 sm:p-6 lg:pb-8">
+                        <div className="px-4 py-6 sm:p-6 lg:pb-8">
                           <input
                             autoFocus
-                            className="border-none text-2xl leading-5 outline-none bg-neutral-900 focus:bg-black"
+                            className="border-none bg-white text-2xl leading-5 outline-none focus:bg-neutral-200 dark:bg-neutral-900 focus:dark:bg-black"
                             placeholder="Article title"
                             type="text"
                             aria-label="Post Content"
@@ -471,24 +478,24 @@ const Create = () => {
 
                           <CustomTextareaAutosize
                             placeholder="Enter your content here 💖"
-                            className="border-none text-lg outline-none shadow-none mb-8 bg-neutral-900 focus:bg-black"
+                            className="mb-8 border-none bg-white text-lg shadow-none outline-none focus:bg-neutral-200 dark:bg-neutral-900 dark:focus:bg-black"
                             minRows={25}
                             {...register("body")}
                             inputRef={textareaRef}
                           />
 
-                          <div className="flex justify-between items-center">
+                          <div className="flex items-center justify-between">
                             <>
                               {saveStatus === "loading" && (
                                 <p>Auto-saving...</p>
                               )}
                               {saveStatus === "error" && savedTime && (
-                                <p className="text-red-600 text-xs lg:text-sm">
+                                <p className="text-xs text-red-600 lg:text-sm">
                                   {`Error saving, last saved: ${savedTime.toString()}`}
                                 </p>
                               )}
                               {saveStatus === "success" && savedTime && (
-                                <p className="text-neutral-400 text-xs lg:text-sm">
+                                <p className="text-xs text-neutral-400 lg:text-sm">
                                   {`Saved: ${savedTime.toString()}`}
                                 </p>
                               )}
@@ -499,7 +506,7 @@ const Create = () => {
                               <button
                                 type="button"
                                 disabled={isDisabled}
-                                className="disabled:opacity-50 ml-5 bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+                                className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
                                 onClick={() => setOpen(true)}
                               >
                                 {!data?.published && "Publish"}
@@ -515,14 +522,14 @@ const Create = () => {
                 </div>
               </div>
             </div>
-            <div className="pr-4 sm:pr-6 lg:pr-8 lg:flex-shrink-0 xl:pr-0">
-              <div className="h-full sm:pl-6 xl:pl-4 py-6 lg:w-80 pl-4">
+            <div className="pr-4 sm:pr-6 lg:flex-shrink-0 lg:pr-8 xl:pr-0">
+              <div className="h-full py-6 pl-4 sm:pl-6 lg:w-80 xl:pl-4">
                 {/* Start right column area */}
-                <div className="bg-neutral-900 text-neutral-600 shadow-xl p-6">
-                  <h3 className="text-xl tracking-tight font-semibold text-white">
+                <div className="bg-white p-6 text-neutral-600 shadow dark:bg-neutral-900">
+                  <h3 className="text-xl font-semibold tracking-tight text-neutral-800 dark:text-white">
                     How to use the editor
                   </h3>
-                  <p className="mt-1 text-neutral-400">
+                  <p className="mt-1 text-neutral-600 dark:text-neutral-400">
                     You can edit and format the main content of your article
                     using Markdown. If you have never used Markdown, you can
                     check out{" "}
@@ -550,7 +557,7 @@ const Create = () => {
               </div>
             </div>
           </div>
-        </div>
+        </>
       </form>
     </>
   );

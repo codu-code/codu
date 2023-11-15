@@ -4,8 +4,47 @@ import prisma from "@/server/db/client";
 import { notFound } from "next/navigation";
 import Content from "./_usernameClient";
 import { getServerAuthSession } from "@/server/auth";
+import { type Metadata } from "next";
 
-// @TODO - Maybe add Metadata for this page
+type Props = { params: { username: string } };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const username = params.username;
+
+  const profile = await prisma.user.findUnique({
+    where: {
+      username,
+    },
+    select: {
+      bio: true,
+      name: true,
+    },
+  });
+
+  if (!profile) {
+    notFound();
+  }
+
+  const { bio, name } = profile;
+  const title = `@${username} ${name ? `(${name}) -` : " -"} Codú`;
+
+  const description = `Read writing from ${name}. ${bio}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      description,
+      type: "article",
+      images: [`/api/og?title=${encodeURIComponent(`${name} on Codú`)}`],
+      siteName: "Codú",
+    },
+    twitter: {
+      description,
+      images: [`/api/og?title=${encodeURIComponent(`${name} on Codú`)}`],
+    },
+  };
+}
 
 export default async function Page({
   params,
@@ -29,6 +68,24 @@ export default async function Page({
       image: true,
       id: true,
       websiteUrl: true,
+      RSVP: {
+        select: {
+          event: {
+            include: {
+              community: true,
+            },
+          },
+        },
+      },
+      memberships: {
+        select: {
+          community: {
+            include: {
+              members: true,
+            },
+          },
+        },
+      },
       posts: {
         where: {
           NOT: {

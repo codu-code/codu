@@ -62,10 +62,10 @@ const Sponsorship = () => {
   return (
     <>
       <div>
-        <header className="bg-white text-black text-center pt-10 pb-24 px-4 sm:pb-36 sm:text-left sm:px-10 md:pb-44 md:px-20 lg:px-36 lg:pt-14">
-          <h1 className="font-extrabold text-3xl md:text-4xl md:mb-2 lg:text-5xl">
+        <header className="bg-white px-4 pb-24 pt-10 text-center text-black sm:px-10 sm:pb-36 sm:text-left md:px-20 md:pb-44 lg:px-36 lg:pt-14">
+          <h1 className="text-3xl font-extrabold md:mb-2 md:text-4xl lg:text-5xl">
             Become a{" "}
-            <b className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-600 z-20 font-extrabold">
+            <b className="z-20 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text font-extrabold text-transparent">
               Sponsor
             </b>
           </h1>
@@ -73,7 +73,7 @@ const Sponsorship = () => {
             Reach thousands of developers every month!
           </h3>
         </header>
-        <section className="flex items-center relative bottom-12 justify-center overflow-hidden gap-8 sm:gap-20 sm:bottom-20 md:bottom-24  md:gap-36 lg:gap-44">
+        <section className="relative bottom-12 flex items-center justify-center gap-8 overflow-hidden sm:bottom-20 sm:gap-20 md:bottom-24  md:gap-36 lg:gap-44">
           {images.map((image) => (
             <div
               key={image.alt}
@@ -90,12 +90,12 @@ const Sponsorship = () => {
             </div>
           ))}
         </section>
-        <main className="bg-black px-4 sm:px-10 pb-20 flex flex-col lg:flex-row lg:items-center sm:pt-8 md:px-20 lg:pt-2 lg:pb-40 lg:px-36 lg:justify-between lg:gap-16">
-          <div className="flex flex-col gap-4 max-w-2xl">
-            <h2 className="text-xl sm:text-2xl font-bold">
+        <main className="flex flex-col bg-black px-4 pb-20 sm:px-10 sm:pt-8 md:px-20 lg:flex-row lg:items-center lg:justify-between lg:gap-16 lg:px-36 lg:pb-40 lg:pt-2">
+          <div className="flex max-w-2xl flex-col gap-4">
+            <h2 className="text-xl font-bold sm:text-2xl">
               Trusted by brands both large and small
             </h2>
-            <div className="flex flex-col gap-4 text-md sm:text-lg">
+            <div className="text-md flex flex-col gap-4 sm:text-lg">
               <p>
                 Codú aims to create one of the largest coding communities
                 globally. Your funds go directly towards building the community
@@ -113,7 +113,7 @@ const Sponsorship = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center flex-wrap gap-10 justify-between pt-10 flex-col sm:items-center sm:flex-row sm:justify-center">
+          <div className="flex flex-col flex-wrap items-center justify-between gap-10 pt-10 sm:flex-row sm:items-center sm:justify-center">
             <div className="max-w-[200px]">
               <Image
                 src="/images/sponsors/harveynash.png"
@@ -159,12 +159,12 @@ const Sponsorship = () => {
           </div>
         </main>
         <section className="sm:px-10 md:px-20 lg:px-36">
-          <div className="bg-white py-4 text-center w-full flex flex-col items-center gap-4 sm:rounded-lg lg:justify-between lg:py-8">
-            <h2 className="text-black font-extrabold text-lg lg:text-2xl">
+          <div className="flex w-full flex-col items-center gap-4 bg-white py-4 text-center sm:rounded-lg lg:justify-between lg:py-8">
+            <h2 className="text-lg font-extrabold text-black lg:text-2xl">
               Let us help you amplify your brand.
             </h2>
             <Link
-              className="flex-inline items-center ml-4 bg-gradient-to-r from-orange-400 to-pink-600 rounded-md shadow-sm py-2 px-4 inline-flex justify-center font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-300"
+              className="flex-inline ml-4 inline-flex items-center justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
               href="/sponsorship/docs/info.pdf"
             >
               Find out more
