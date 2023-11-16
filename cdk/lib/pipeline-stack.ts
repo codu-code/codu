@@ -7,7 +7,6 @@ import {
   ShellStep,
 } from "aws-cdk-lib/pipelines";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
@@ -17,13 +16,6 @@ export class PipelineStack extends cdk.Stack {
       input: CodePipelineSource.gitHub("codu-code/codu", "develop"),
       commands: ["cd cdk", "npm ci", "npm run build", "npx cdk synth"],
       primaryOutputDirectory: "cdk/cdk.out",
-      env: {
-        DATABASE_URL: secretsmanager.Secret.fromSecretNameV2(
-          this,
-          "DB_SECRET",
-          "prod/db/url",
-        ).secretValue.toString(),
-      },
     });
 
     const pipeline = new CodePipeline(this, "Pipeline", {
