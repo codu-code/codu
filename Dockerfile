@@ -24,6 +24,10 @@ ENV NEXT_PUBLIC_FATHOM_SITE_ID WCUALLLI
 ENV NEXT_PUBLIC_SENTRY_DSN https://a0460f6abac067ae72754b23ccd03aac@o4505895618215936.ingest.sentry.io/4505896707686400
 
 RUN npx prisma generate
+
+# Get argument from CodePipeline
+ARG DATABASE_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next
