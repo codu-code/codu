@@ -1,8 +1,10 @@
 # Install dependencies only when needed
-FROM public.ecr.aws/docker/library/node:18 AS base
+FROM public.ecr.aws/docker/library/node:18-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
+
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
@@ -31,7 +33,7 @@ RUN --mount=type=secret,id=TEST_VALUE export TEST_VALUE=$(cat /run/secrets/TEST_
 RUN --mount=type=secret,id=SECRET_TIME export SECRET_TIME=$(cat /run/secrets/SECRET_TIME) && \
     echo $SECRET_TIME
 
-RUN --mount=type=secret,id=DATABASE_URL export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) \
+RUN --mount=type=secret,id=DATABASE_URL export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
     npm run build
 
 # Production image, copy all the files and run next
@@ -40,7 +42,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
