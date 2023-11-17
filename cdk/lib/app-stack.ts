@@ -43,6 +43,9 @@ export class AppStack extends cdk.Stack {
       buildSecrets: {
         DATABASE_URL: "type=env",
       },
+      buildArgs: {
+        DOCKER_BUILDKIT: "1",
+      },
     });
 
     const taskDef = new ecs.FargateTaskDefinition(this, "ecs-taskdef");

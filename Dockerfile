@@ -25,11 +25,9 @@ ENV NEXT_PUBLIC_SENTRY_DSN https://a0460f6abac067ae72754b23ccd03aac@o45058956182
 
 RUN npx prisma generate
 
-# Get argument from CodePipeline
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
 
-RUN npm run build
+RUN --mount=type=secret,id=DATABASE_URL export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
+    npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
