@@ -2,8 +2,12 @@ import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
 import { AppStage } from "./app-stage";
 import { BuildEnvironmentVariableType } from "aws-cdk-lib/aws-codebuild";
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import {
+  Effect,
+  PolicyStatement,
+  Role,
+  ServicePrincipal,
+} from "aws-cdk-lib/aws-iam";
 
 import {
   CodePipeline,
@@ -16,13 +20,18 @@ export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
 
-    const secret = Secret.fromSecretNameV2(this, "DB_SECRET", "prod/db/url");
-
     const codeBuildRole = new Role(this, "CodeBuildRole", {
       assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
+      description: "Role for CodeBuild to access SSM parameters",
     });
 
-    secret.grantRead(codeBuildRole);
+    codeBuildRole.addToPolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ["ssm:GetParameter", "ssm:GetParameters"],
+        resources: ["*"],
+      }),
+    );
 
     const synthAction = new ShellStep("Synth", {
       input: CodePipelineSource.gitHub("codu-code/codu", "develop"),
@@ -40,8 +49,8 @@ export class PipelineStack extends cdk.Stack {
         buildEnvironment: {
           environmentVariables: {
             DATABASE_URL: {
-              type: BuildEnvironmentVariableType.SECRETS_MANAGER,
-              value: secret,
+              type: BuildEnvironmentVariableType.PARAMETER_STORE,
+              value: "/prod/db/url",
             },
           },
         },
