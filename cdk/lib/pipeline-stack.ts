@@ -54,6 +54,10 @@ export class PipelineStack extends cdk.Stack {
               type: BuildEnvironmentVariableType.PLAINTEXT,
               value: "TESTING MY PATIENCE",
             },
+            SECRET_TIME: {
+              type: BuildEnvironmentVariableType.PARAMETER_STORE,
+              value: "/prod/temp/test",
+            },
           },
         },
       },

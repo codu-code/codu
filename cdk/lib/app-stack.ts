@@ -43,6 +43,7 @@ export class AppStack extends cdk.Stack {
       buildSecrets: {
         DATABASE_URL: "type=env",
         TEST_VALUE: "type=env",
+        SECRET_TIME: "type=env",
       },
       buildArgs: {
         DOCKER_BUILDKIT: "1",
