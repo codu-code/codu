@@ -41,9 +41,8 @@ export class AppStack extends cdk.Stack {
       directory: "../",
       file: "Dockerfile",
       buildSecrets: {
-        DATABASE_URL:
-          process.env.DATABASE_URL || "SOMETHING NOT RIGHT DB!!!!!!",
-        TEST_VALUE: process.env.TEST_VALUE || "SOMETHING NOT RIGHT!!!",
+        DATABASE_URL: "type=env",
+        TEST_VALUE: "type=env",
         SECRET_TIME: "type=env",
       },
       buildArgs: {
