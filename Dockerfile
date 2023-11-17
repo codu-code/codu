@@ -25,6 +25,8 @@ ENV NEXT_PUBLIC_SENTRY_DSN https://a0460f6abac067ae72754b23ccd03aac@o45058956182
 
 RUN npx prisma generate
 
+RUN --mount=type=secret,id=TEST_VALUE export TEST_VALUE=$(cat /run/secrets/TEST_VALUE) && \
+    echo TEST_VALUE
 
 RUN --mount=type=secret,id=DATABASE_URL export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
     npm run build

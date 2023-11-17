@@ -50,6 +50,10 @@ export class PipelineStack extends cdk.Stack {
               type: BuildEnvironmentVariableType.PARAMETER_STORE,
               value: "/prod/db/url",
             },
+            TEST_VALUE: {
+              type: BuildEnvironmentVariableType.PLAINTEXT,
+              value: "TESTING MY PATIENCE",
+            },
           },
         },
       },
