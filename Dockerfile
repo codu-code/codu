@@ -27,6 +27,7 @@ RUN npx prisma generate
 
 # Get argument from CodePipeline
 ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
 
 RUN npm run build
 

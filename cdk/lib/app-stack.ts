@@ -40,6 +40,9 @@ export class AppStack extends cdk.Stack {
     const appAsset = new ecrAssets.DockerImageAsset(this, "app", {
       directory: "../",
       file: "Dockerfile",
+      buildSecrets: {
+        DATABASE_URL: "type=env",
+      },
     });
 
     const taskDef = new ecs.FargateTaskDefinition(this, "ecs-taskdef");
