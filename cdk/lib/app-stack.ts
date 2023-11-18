@@ -156,7 +156,7 @@ export class AppStack extends cdk.Stack {
     });
 
     if (!production) {
-      fargateService.listener.addAction("ListenerRule", {
+      fargateService.listener.addAction("RobotsListenerRule", {
         priority: 1,
         conditions: [elbv2.ListenerCondition.pathPatterns(["/robots.txt"])],
         action: elbv2.ListenerAction.fixedResponse(200, {
@@ -166,7 +166,7 @@ export class AppStack extends cdk.Stack {
         }),
       });
 
-      fargateService.listener.addAction("ListenerRule", {
+      fargateService.listener.addAction("SitemapListenerRule", {
         priority: 2,
         conditions: [elbv2.ListenerCondition.pathPatterns(["/sitemap.xml"])],
         action: elbv2.ListenerAction.fixedResponse(404, {
