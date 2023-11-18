@@ -6,12 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = ["/articles", "/sponsorship", "/code-of-conduct"];
 
-// @TODO - Lock down to codebuild domain after it works
-export const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+// @TODO - Lock down to codebuild/vercel domains after it works
 
 export async function GET() {
   const headersList = headers();
