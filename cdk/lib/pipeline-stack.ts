@@ -46,17 +46,9 @@ export class PipelineStack extends cdk.Stack {
       codeBuildDefaults: {
         buildEnvironment: {
           environmentVariables: {
-            DATABASE_URL: {
+            SENTRY_AUTH_TOKEN: {
               type: BuildEnvironmentVariableType.PARAMETER_STORE,
-              value: "/prod/db/url",
-            },
-            TEST_VALUE: {
-              type: BuildEnvironmentVariableType.PLAINTEXT,
-              value: "TESTING MY PATIENCE",
-            },
-            SECRET_TIME: {
-              type: BuildEnvironmentVariableType.PARAMETER_STORE,
-              value: "/prod/temp/test",
+              value: "sentry",
             },
           },
         },

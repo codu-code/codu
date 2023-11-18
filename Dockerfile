@@ -27,13 +27,7 @@ ENV NEXT_PUBLIC_SENTRY_DSN https://a0460f6abac067ae72754b23ccd03aac@o45058956182
 
 RUN npx prisma generate
 
-RUN --mount=type=secret,id=TEST_VALUE export TEST_VALUE=$(cat /run/secrets/TEST_VALUE) && \
-    echo $TEST_VALUE
-
-RUN --mount=type=secret,id=SECRET_TIME export SECRET_TIME=$(cat /run/secrets/SECRET_TIME) && \
-    echo $SECRET_TIME
-
-RUN --mount=type=secret,id=DATABASE_URL export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
     npm run build
 
 # Production image, copy all the files and run next
