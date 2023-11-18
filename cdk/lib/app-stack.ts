@@ -153,34 +153,34 @@ export class AppStack extends cdk.Stack {
       }),
     });
 
-    if (!production) {
-      fargateService.listener.addAction("RobotsListenerRule", {
-        priority: 1,
-        conditions: [elbv2.ListenerCondition.pathPatterns(["/robots.txt"])],
-        action: elbv2.ListenerAction.fixedResponse(200, {
-          contentType: "text/plain",
-          messageBody: `User-agent: *
-                        Disallow: /`.replace(/  +/g, ""),
-        }),
-      });
+    // if (!production) {
+    //   fargateService.listener.addAction("RobotsListenerRule", {
+    //     priority: 1,
+    //     conditions: [elbv2.ListenerCondition.pathPatterns(["/robots.txt"])],
+    //     action: elbv2.ListenerAction.fixedResponse(200, {
+    //       contentType: "text/plain",
+    //       messageBody: `User-agent: *
+    //                     Disallow: /`.replace(/  +/g, ""),
+    //     }),
+    //   });
 
-      fargateService.listener.addAction("SitemapListenerRule", {
-        priority: 2,
-        conditions: [elbv2.ListenerCondition.pathPatterns(["/sitemap.xml"])],
-        action: elbv2.ListenerAction.fixedResponse(404, {
-          contentType: "text/plain",
-          messageBody:
-            "404 Not Found: The requested URL /sitemap.xml was not found on this server.",
-        }),
-      });
-    }
+    //   fargateService.listener.addAction("SitemapListenerRule", {
+    //     priority: 2,
+    //     conditions: [elbv2.ListenerCondition.pathPatterns(["/sitemap.xml"])],
+    //     action: elbv2.ListenerAction.fixedResponse(404, {
+    //       contentType: "text/plain",
+    //       messageBody:
+    //         "404 Not Found: The requested URL /sitemap.xml was not found on this server.",
+    //     }),
+    //   });
+    // }
 
-    fargateService.listener.addAction("HostListenerRule", {
-      // priority updates if on dev enviornment to block crawlers
-      priority: !production ? 3 : 1,
-      conditions: [elbv2.ListenerCondition.hostHeaders(["*.codu.co"])],
-      action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
-    });
+    // fargateService.listener.addAction("HostListenerRule", {
+    //   // priority updates if on dev enviornment to block crawlers
+    //   priority: !production ? 3 : 1,
+    //   conditions: [elbv2.ListenerCondition.hostHeaders(["*.codu.co"])],
+    //   action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
+    // });
 
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
