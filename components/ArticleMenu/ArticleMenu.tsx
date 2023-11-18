@@ -90,7 +90,6 @@ const ArticleMenu = ({
       console.error(err);
     }
   };
-
   const handleCopyToClipboard = (e: React.FormEvent) => {
     if (label !== e.currentTarget.innerHTML) {
       setCopied(false);
@@ -99,6 +98,17 @@ const ArticleMenu = ({
       copy(href);
       setCopied(true);
     }
+  };
+
+  const [isPopoverPanelOpen, setIsPopoverPanelOpen] = useState(true);
+
+  const closePopoverPanel = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPopoverPanelOpen(false);
+  };
+
+  const openPopoverPanel = () => {
+    setIsPopoverPanelOpen(true);
   };
 
   return (
@@ -149,12 +159,14 @@ const ArticleMenu = ({
             />
           </button>
 
-          <Popover className="relative ml-4">
-            <Popover.Button className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
+          <Popover className="ml-4 relative">
+            <Popover.Button
+              onClick={openPopoverPanel}
+              className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
+            >
               <span className="sr-only">Open user menu</span>
               <DotsHorizontalIcon className="h-6 w-6" />
             </Popover.Button>
-
             <Transition
               as={Fragment}
               enter="transition ease-out duration-100"
@@ -164,7 +176,10 @@ const ArticleMenu = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Popover.Panel className="absolute bottom-14 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-white lg:bottom-0 lg:left-16">
+              <Popover.Panel
+                className={`origin-top-right absolute bottom-14 right-0 lg:left-16 lg:bottom-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-white ring-1 px-1 ring-black ring-opacity-5 focus:outline-none 
+                ${isPopoverPanelOpen ? "" : "hidden"}`}
+              >
                 <div>
                   <ul>
                     <li className="block rounded px-4 py-2 text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700">
@@ -190,8 +205,14 @@ const ArticleMenu = ({
                         {label}
                       </button>
                     </li>
-                    <li className="block rounded px-4 py-2 text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700">
-                      <ReportModal type="post" title={postTitle} id={postId} />
+                    <li className="block px-4 py-2 text-neutral-900 dark:text-neutral-700 hover:bg-neutral-200 rounded">
+                      <button onClick={closePopoverPanel}>
+                        <ReportModal
+                          type="post"
+                          title={postTitle}
+                          id={postId}
+                        />
+                      </button>
                     </li>
                   </ul>
                 </div>
