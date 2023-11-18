@@ -87,7 +87,7 @@
     "react-hook-form": "^7.46.1",
     "react-hotkeys-hook": "^4.4.1",
     "react-intersection-observer": "^9.5.2",
-    "react-moveable": "^0.54.1",
+    "react-moveable": "^0.55.0",
     "react-textarea-autosize": "^8.5.3",
     "satori": "^0.10.4",
     "sharp": "^0.32.6",
