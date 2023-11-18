@@ -69,7 +69,7 @@
     "clsx": "^1.2.1",
     "copy-to-clipboard": "^3.3.3",
     "dompurify": "^3.0.5",
-    "fathom-client": "^3.5.0",
+    "fathom-client": "^3.6.0",
     "framer-motion": "^10.16.1",
     "highlight.js": "^11.9.0",
     "lowlight": "^2.9.0",
