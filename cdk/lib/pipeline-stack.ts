@@ -1,7 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
 import { AppStage } from "./app-stage";
-import { BuildEnvironmentVariableType } from "aws-cdk-lib/aws-codebuild";
+import {
+  BuildEnvironmentVariableType,
+  LocalCacheMode,
+} from "aws-cdk-lib/aws-codebuild";
 import {
   Effect,
   PolicyStatement,
@@ -9,7 +12,6 @@ import {
   ServicePrincipal,
 } from "aws-cdk-lib/aws-iam";
 import { Cache } from "aws-cdk-lib/aws-codebuild";
-import { Bucket } from "aws-cdk-lib/aws-s3";
 
 import {
   CodePipeline,
@@ -41,14 +43,12 @@ export class PipelineStack extends cdk.Stack {
       primaryOutputDirectory: "cdk/cdk.out",
     });
 
-    const cacheBucket = new Bucket(this, "CacheBucket");
-
     const pipeline = new CodePipeline(this, "Pipeline", {
       pipelineName: "codu-pipline",
       crossAccountKeys: true,
       synth: synthAction,
       codeBuildDefaults: {
-        cache: Cache.bucket(cacheBucket),
+        cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
         buildEnvironment: {
           environmentVariables: {
             SENTRY_AUTH_TOKEN: {
