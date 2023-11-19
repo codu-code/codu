@@ -28,8 +28,8 @@ export async function GET() {
     lastModified: updatedAt,
   }));
 
-  const users = (await db.post.findMany()).map(({ userId, updatedAt }) => ({
-    url: `${BASE_URL}/${userId}`,
+  const users = (await db.user.findMany()).map(({ username, updatedAt }) => ({
+    url: `${BASE_URL}/${username}`,
     lastModified: updatedAt,
   }));
 
