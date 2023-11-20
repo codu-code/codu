@@ -424,11 +424,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
           </article>
         ) : (
           <>
-            <label
-              htmlFor="comment"
-              data-view-component="true"
-              className="sr-only"
-            >
+            <label htmlFor="comment" className="sr-only">
               What do you think?
             </label>
             <TextareaAutosize
