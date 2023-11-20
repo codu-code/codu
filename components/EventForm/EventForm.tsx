@@ -130,7 +130,7 @@ export function EventForm(props: EventFormProps) {
               <div className="flex-grow space-y-6">
                 <div>
                   <label htmlFor="name">Name</label>
-                  <input type="text" {...register("name")} />
+                  <input type="text" {...register("name")} id="name" />
                   {formState.errors.name && (
                     <p className="mt-1 text-sm text-red-600">
                       {`${formState.errors.name.message || "Required"}`}
@@ -145,6 +145,7 @@ export function EventForm(props: EventFormProps) {
                   <label htmlFor="city">Capacity</label>
                   <input
                     type="number"
+                    id="city"
                     {...register("capacity", {
                       valueAsNumber: true,
                     })}
@@ -188,10 +189,11 @@ export function EventForm(props: EventFormProps) {
               </div>
             </div>
             <div className="mt-6">
-              <label htmlFor="excerpt">Address</label>
+              <label htmlFor="address">Address</label>
               <div className="mt-1">
                 <textarea
                   {...register("address")}
+                  id="address"
                   rows={2}
                   defaultValue={""}
                   maxLength={200}
@@ -287,6 +289,7 @@ export function EventForm(props: EventFormProps) {
               <label htmlFor="bio">About</label>
               <div className="mt-1">
                 <CustomTextareaAutosize
+                  id="bio"
                   placeholder="Explain what is your event about here 💖"
                   className="mb-8 border-none bg-neutral-900 text-lg shadow-none outline-none focus:bg-black"
                   minRows={25}
