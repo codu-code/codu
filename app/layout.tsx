@@ -9,6 +9,9 @@ import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
 import { Toaster } from "sonner";
 import NextTopLoader from "nextjs-toploader";
+import React from "react";
+import A11yProvider from "@/components/A11yProvider/A11yProvider";
+
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
   title: "Codú - The Web Developer Community",
@@ -46,25 +49,28 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerAuthSession();
+
   return (
     <html lang="en" className="h-full">
       <Fathom />
       <body className="h-full" suppressHydrationWarning={true}>
-        <NextTopLoader
-          easing="linear"
-          showSpinner={false}
-          template='<div class="bar" role="bar"><div class="gradient"></div></div>'
-        />
-        <Toaster />
-        <AuthProvider>
-          <ThemeProvider>
-            <TRPCReactProvider headers={headers()}>
-              <Nav session={session} />
-              {children}
-              <Footer />
-            </TRPCReactProvider>
-          </ThemeProvider>
-        </AuthProvider>
+        <A11yProvider>
+          <NextTopLoader
+            easing="linear"
+            showSpinner={false}
+            template='<div class="bar" role="bar"><div class="gradient"></div></div>'
+          />
+          <Toaster />
+          <AuthProvider>
+            <ThemeProvider>
+              <TRPCReactProvider headers={headers()}>
+                <Nav session={session} />
+                {children}
+                <Footer />
+              </TRPCReactProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </A11yProvider>
       </body>
     </html>
   );

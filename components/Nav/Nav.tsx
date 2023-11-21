@@ -7,10 +7,9 @@ import Link from "next/link";
 import { Fragment } from "react";
 import { navigation } from "../../config/site_settings";
 import { type Session } from "next-auth";
-import ThemeToggle from "../Theme/ThemeToggle";
+import ThemeToggle from "../Theme/ThemeToggle/ThemeToggle";
 import AnimatedHamburger from "./AnimatedHamburger";
 import Logo from "@/icons/logo.svg";
-
 import MobileNav from "./MobileNav";
 
 const Nav = ({ session }: { session: Session | null }) => {

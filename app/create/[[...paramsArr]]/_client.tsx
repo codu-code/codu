@@ -467,19 +467,27 @@ const Create = () => {
                         </section>
                       ) : (
                         <div className="px-4 py-6 sm:p-6 lg:pb-8">
+                          {/* TODO: FOLLOW UP WITH THIS, LABEL SHOULD BE VISIBLE */}
+                          <label htmlFor="article-title" className="sr-only">
+                            Article title
+                          </label>
                           <input
-                            autoFocus
                             className="border-none bg-white text-2xl leading-5 outline-none focus:bg-neutral-200 dark:bg-neutral-900 focus:dark:bg-black"
                             placeholder="Article title"
                             type="text"
-                            aria-label="Post Content"
+                            id="article-title"
                             {...register("title")}
                           />
 
+                          {/* TODO: FOLLOW UP WITH THIS, LABEL SHOULD BE VISIBLE */}
+                          <label htmlFor="article-content" className="sr-only">
+                            Enter Article Content
+                          </label>
                           <CustomTextareaAutosize
                             placeholder="Enter your content here 💖"
                             className="mb-8 border-none bg-white text-lg shadow-none outline-none focus:bg-neutral-200 dark:bg-neutral-900 dark:focus:bg-black"
                             minRows={25}
+                            id="article-content"
                             {...register("body")}
                             inputRef={textareaRef}
                           />

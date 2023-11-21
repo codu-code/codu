@@ -1,7 +1,7 @@
 import styles from "./Toolbar.module.css";
-import { BubbleMenu, BubbleMenuProps, Editor } from "@tiptap/react";
-import { Popover, Transition } from "@headlessui/react";
-import { FC, useState, ChangeEvent, useCallback } from "react";
+import type { BubbleMenuProps } from "@tiptap/react";
+import type { ChangeEvent } from "react";
+import { useState } from "react";
 import {
   BoldIcon,
   ItalicIcon,
@@ -27,12 +27,7 @@ import {
   TableIcon,
 } from "lucide-react";
 
-// import { NodeSelector } from "./node-selector";
-// import { LinkSelector } from "./link-selector";
-import { cn } from "@/utils/utils";
 import ToolBarItemButton from "./ToolbarItemButton";
-// import TableMenuBar from "../Table/TableMenuBar";
-
 import ImageDetailsModal from "@/components/ImageDetailsModal/ImageDetailsModal";
 
 type ToolbarProps = Omit<BubbleMenuProps, "children">;
@@ -61,14 +56,6 @@ function Toolbar({ editor }: ToolbarProps) {
   const handleExpand = (e: ChangeEvent<HTMLInputElement>) => {
     setIsOpen(e.target.checked);
   };
-
-  // const addImage = useCallback(() => {
-  //   const url = window.prompt("URL");
-
-  //   if (url) {
-  //     editor?.chain().focus().setImage({ src: url }).run();
-  //   }
-  // }, [editor]);
 
   if (!editor) {
     return null;
@@ -433,7 +420,10 @@ function Toolbar({ editor }: ToolbarProps) {
             />
           </div>
         </div>
+        {/* TODO: temporary label needs replacing */}
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
         <label className={styles.switch}>
+          <span className="sr-only">Switch</span>
           <input type="checkbox" checked={isOpen} onChange={handleExpand} />
           <span
             className={`${styles.slider} ${

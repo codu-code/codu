@@ -5,6 +5,7 @@ export function YouTube(props: React.ReactPropTypes) {
     <div>
       <iframe
         {...props}
+        title="Youtube"
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen

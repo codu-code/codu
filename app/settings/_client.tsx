@@ -204,6 +204,8 @@ const Settings = ({ profile }: { profile: User }) => {
                             profilePhoto.status === "loading" ? (
                               <div className="h-full w-full rounded-full border-2 bg-black" />
                             ) : (
+                              // TODO: review this
+                              // eslint-disable-next-line jsx-a11y/img-redundant-alt
                               <img
                                 className="h-full w-full rounded-full border-2 border-white object-cover"
                                 src={`${
@@ -240,6 +242,8 @@ const Settings = ({ profile }: { profile: User }) => {
                         profilePhoto.status === "loading" ? (
                           <div className="h-100 w-100 h-full w-full rounded-full border-2 bg-black" />
                         ) : (
+                          // TODO: review this
+                          // eslint-disable-next-line jsx-a11y/img-redundant-alt
                           <img
                             className="relative h-full w-full rounded-full border-2 border-white object-cover"
                             src={`${
@@ -338,15 +342,20 @@ const Settings = ({ profile }: { profile: User }) => {
                 <div className="divide-y divide-neutral-200 pt-6">
                   <div>
                     <div className="text-neutral-600 dark:text-neutral-400">
-                      <h2 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white">
+                      <h2
+                        id="privacy-heading"
+                        className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white"
+                      >
                         Privacy
                       </h2>
                       <p className="mt-1 text-sm">
                         We respect your privacy, change your settings here.
                       </p>
                     </div>
+                    {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}
                     <ul
                       role="list"
+                      aria-labelledby="privacy-heading"
                       className="mt-2 divide-y divide-neutral-200"
                     >
                       <Switch.Group
