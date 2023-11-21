@@ -423,13 +423,19 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
             )}
           </article>
         ) : (
-          <TextareaAutosize
-            {...register(name)}
-            minLength={1}
-            className="mb-2 w-full rounded bg-neutral-300 p-2 dark:bg-black"
-            placeholder="What do you think?"
-            minRows={3}
-          />
+          <>
+            <label htmlFor="comment" className="sr-only">
+              What do you think?
+            </label>
+            <TextareaAutosize
+              {...register("comment")}
+              id="comment"
+              minLength={1}
+              className="mb-2 w-full rounded bg-neutral-300 p-2 dark:bg-black"
+              placeholder="What do you think?"
+              minRows={3}
+            />
+          </>
         )}
         <div className="flex items-center">
           <button

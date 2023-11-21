@@ -154,6 +154,7 @@ const Settings = ({ profile }: { profile: User }) => {
                         <input
                           type="text"
                           {...register("name")}
+                          id="name"
                           autoComplete="given-name"
                         />
                         {errors.name && (
@@ -169,7 +170,12 @@ const Settings = ({ profile }: { profile: User }) => {
                           <span className="mt-1  flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
                             codu.co/
                           </span>
-                          <input type="text" {...register("username")} />
+                          <input
+                            type="text"
+                            {...register("username")}
+                            id="username"
+                            autoComplete="username"
+                          />
                         </div>
                         {errors.username && (
                           <p className="mt-1 text-sm text-red-600">
@@ -270,6 +276,7 @@ const Settings = ({ profile }: { profile: User }) => {
                     <div className="mt-1">
                       <textarea
                         {...register("bio")}
+                        id="bio"
                         rows={2}
                         defaultValue={""}
                         maxLength={200}
@@ -294,6 +301,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <input
                         type="text"
                         {...register("location")}
+                        id="location"
                         placeholder="The moon 🌙"
                         autoComplete="country-name"
                       />
@@ -312,6 +320,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <input
                         type="text"
                         {...register("websiteUrl")}
+                        id="websiteUrl"
                         autoComplete="url"
                         placeholder="https://codu.co/"
                       />
