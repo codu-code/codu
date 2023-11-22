@@ -194,6 +194,8 @@ export function CommunityForm(props: CommunityFormProps) {
                     coverImage.status === "loading" ? (
                       <div className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 bg-black object-cover" />
                     ) : (
+                      // TODO Review
+                      // eslint-disable-next-line jsx-a11y/img-redundant-alt
                       <img
                         className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 border-white object-cover object-cover"
                         src={`${coverImage.url}`}
@@ -228,6 +230,8 @@ export function CommunityForm(props: CommunityFormProps) {
                 coverImage.status === "loading" ? (
                   <div className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 bg-black object-cover" />
                 ) : (
+                  // TODO Review
+                  // eslint-disable-next-line jsx-a11y/img-redundant-alt
                   <img
                     className="relative aspect-[16/9] w-full rounded-lg border-2 border-white object-cover object-cover"
                     src={coverImage.url}

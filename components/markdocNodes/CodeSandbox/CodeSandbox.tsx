@@ -4,6 +4,7 @@ export function CodeSandbox(props: React.ReactPropTypes) {
   return (
     <div style={{ marginInline: "16px 0px" }}>
       <iframe
+        title="Code Sandbox"
         {...props}
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

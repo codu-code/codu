@@ -29,6 +29,7 @@ export async function GET(request: Request) {
           style={{ padding: "0 88px" }}
         >
           <img
+            alt="Codu Logo"
             style={{
               position: "absolute",
               height: "28px",

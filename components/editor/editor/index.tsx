@@ -26,6 +26,8 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
   });
 
   return (
+    // TODO: Review this for no-static-element-interactions click-events-have-key-events
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className="relative"
       onClick={() => {

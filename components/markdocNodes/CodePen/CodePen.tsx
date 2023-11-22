@@ -16,6 +16,7 @@ export function CodePen({
 
   return (
     <iframe
+      title="Codepen"
       height={height}
       style={{ width: "100%" }}
       scrolling="no"
