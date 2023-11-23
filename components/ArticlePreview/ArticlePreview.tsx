@@ -1,13 +1,12 @@
 "use client";
-import * as Sentry from "@sentry/nextjs";
 import type { NextPage } from "next";
-import { Fragment, useState } from "react";
+import { Fragment, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
-import { BookmarkIcon, DotsHorizontalIcon } from "@heroicons/react/outline";
+import ArticleBookmark from "../ArticleBookmark/ArticleBookmark";
+import { DotsHorizontalIcon } from "@heroicons/react/outline";
 import { Menu, Transition } from "@headlessui/react";
-import { api } from "@/server/trpc/react";
-import { signIn, useSession } from "next-auth/react";
+import "./ArticlePreview.css";
 
 type ButtonOptions = {
   label: string;
@@ -45,9 +44,10 @@ const ArticlePreview: NextPage<Props> = ({
   showBookmark = true,
   bookmarkedInitialState = false,
 }) => {
-  const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
-  const { data: session } = useSession();
+  const ctaLinkId = useId();
+  const [mouseDownTime, setMouseDownTime] = useState(0);
 
+  const ctaRef = useRef<HTMLAnchorElement>(null);
   const dateTime = Temporal.Instant.from(date);
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
@@ -55,47 +55,41 @@ const ArticlePreview: NextPage<Props> = ({
     day: "numeric",
   });
 
-  const { mutate: bookmark, status: bookmarkStatus } =
-    api.post.bookmark.useMutation({
-      onSettled() {
-        setIsBookmarked((isBookmarked) => !isBookmarked);
-      },
-    });
+  const handleMouseDown = () => {
+    setMouseDownTime(+new Date());
+  };
 
-  const bookmarkPost = async (postId: string, setBookmarked = true) => {
-    if (bookmarkStatus === "loading") return;
-    try {
-      if (!session) {
-        signIn();
-      }
-      return await bookmark({ postId, setBookmarked });
-    } catch (err) {
-      Sentry.captureException(err);
+  const handleMouseUp = (event: React.SyntheticEvent) => {
+    event.stopPropagation();
+    const mouseUpTime = +new Date();
+    // detect how long the user is taking between mousedown and mouseup and suppress the event to allow for text selection
+    if (mouseUpTime - mouseDownTime < 200) {
+      ctaRef.current?.click();
     }
   };
 
   return (
-    <article className="my-2 rounded-r border border-l-4 border-neutral-300 border-l-pink-600 bg-white p-4 dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    <article
+      onMouseUp={handleMouseUp}
+      onMouseDown={handleMouseDown}
+      className="card my-2 cursor-pointer rounded-r border border-l-4 border-neutral-300 border-l-pink-600 bg-white p-4 dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900"
+    >
       <div className="flex justify-between">
-        <div className="mb-4 flex items-center">
-          <span className="sr-only">{name}</span>
-          <Link href={`/${username}`}>
-            <img
-              className="mr-3 h-12 w-12 rounded-full object-cover"
-              src={image}
-              alt={`${name}'s avatar`}
-            />
-          </Link>
+        <header className="mb-4 flex items-center">
+          <img
+            className="mr-3 h-12 w-12 rounded-full object-cover"
+            src={image}
+            alt=""
+          />
           <div className="flex flex-col justify-center text-xs text-neutral-500">
-            <p className="font-medium text-neutral-500">
-              Written by{" "}
-              <Link
-                href={`/${username}`}
-                className="font-semibold text-neutral-900 dark:text-neutral-400"
-              >
-                {name}
-              </Link>
-            </p>
+            <Link
+              href={`/${username}`}
+              className="font-semibold text-neutral-900 dark:text-neutral-400"
+            >
+              <span className="font-medium text-neutral-500">Written by</span>
+              &nbsp;{name}
+            </Link>
             <div className="flex space-x-2">
               <time dateTime={dateTime.toString()}>{readableDate}</time>
               {readTime && (
@@ -104,47 +98,39 @@ const ArticlePreview: NextPage<Props> = ({
                   <span>{readTime} min read</span>
                 </>
               )}
-              <div className="flex items-center justify-start"></div>
             </div>
           </div>
-        </div>
+        </header>
       </div>
-      <header>
+      <h3>
         <Link
-          className="cursor-pointer text-2xl font-semibold leading-6 tracking-wide hover:underline"
+          ref={ctaRef}
+          aria-labelledby={`${slug} ${ctaLinkId}`}
+          className="text-2xl font-semibold leading-6 tracking-wide hover:underline"
           href={`/articles/${slug}`}
+          id={slug}
         >
           {title}
         </Link>
-      </header>
+      </h3>
       <p className="my-3 break-words text-sm tracking-wide md:text-lg">
         {excerpt}
       </p>
-      <div className="flex w-full content-center justify-between">
+      <div className="test flex w-full content-center justify-between">
         <div className="flex w-full items-center justify-between">
-          <Link
-            className="fancy-link semibold text-lg"
-            href={`/articles/${slug}`}
+          <span
+            aria-hidden="true"
+            id={ctaLinkId}
+            className="cta fancy-link semibold text-lg"
           >
             Read full article
-          </Link>
+          </span>
           <div className="flex gap-x-2">
-            {showBookmark && (
-              <button
-                className="focus-style-rounded rounded-full p-2 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
-                onClick={() => {
-                  if (bookmarked) return bookmarkPost(id, false);
-                  bookmarkPost(id);
-                  if (!session) {
-                    signIn();
-                  }
-                }}
-              >
-                <BookmarkIcon
-                  className={`w-6 h-6${bookmarked ? " fill-blue-400" : ""}`}
-                />
-              </button>
-            )}
+            <ArticleBookmark
+              showBookmark={showBookmark}
+              id={id}
+              initialState={bookmarkedInitialState}
+            />
             {menuOptions && (
               <Menu as="div" className="relative">
                 <div>

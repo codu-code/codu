@@ -10,7 +10,7 @@ export default function TrendingPostsHome() {
 
   return (
     <div className="relative md:col-span-7">
-      <section>
+      <section aria-labelledby="trending">
         {status === "error" && (
           <div className="mt-8">
             Something went wrong... Please refresh your post.

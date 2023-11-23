@@ -1,0 +1,11 @@
+@tailwind base;
+
+.card h3 a:focus,
+.card h3 a:focus-visible {
+  @apply outline-none;
+  box-shadow: none !important;
+}
+
+.card h3:focus-within ~ div .cta {
+  @apply rounded ring-2 ring-pink-600;
+}
