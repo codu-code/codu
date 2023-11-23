@@ -116,7 +116,7 @@ const ArticlePreview: NextPage<Props> = ({
       <p className="my-3 break-words text-sm tracking-wide md:text-lg">
         {excerpt}
       </p>
-      <div className="test flex w-full content-center justify-between">
+      <div className="flex w-full content-center justify-between">
         <div className="flex w-full items-center justify-between">
           <span
             aria-hidden="true"
