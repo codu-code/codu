@@ -95,7 +95,7 @@
     "styled-components": "^5.3.11",
     "superjson": "^1.13.1",
     "tailwind-merge": "^1.14.0",
-    "tiptap-markdown": "^0.8.2",
+    "tiptap-markdown": "^0.8.3",
     "use-debounce": "^9.0.4",
     "zod": "^3.22.4"
   },
