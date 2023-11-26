@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import challenge from "public/images/announcements/challenge.png";
 import Hero from "@/components/Hero/Hero";
-import TrendingPostsHome from "@/components/TrendingPostsHome/TrendingPostsHome";
+import TrendingPosts from "@/components/TrendingPosts/TrendingPosts";
+import TrendingLoading from "@/components/TrendingPosts/TrendingPostsLoading";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { getServerAuthSession } from "@/server/auth";
 
@@ -54,7 +56,9 @@ const Home = async () => {
           </h1>
         </div>
         <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
-          <TrendingPostsHome />
+          <Suspense fallback={<TrendingLoading />}>
+            <TrendingPosts session={session} />
+          </Suspense>
           <section className="col-span-5 hidden lg:block">
             <div className="mb-8 mt-2 border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
