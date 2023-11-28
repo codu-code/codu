@@ -17,3 +17,5 @@ jobs:
         run: npm run lint
       - name: Run Prettier
         run: npm run prettier
+      - name: Run Jest tests
+        run: npm run test:jest
