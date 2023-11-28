@@ -84,7 +84,7 @@
     "prismjs": "^1.29.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.46.1",
+    "react-hook-form": "^7.48.2",
     "react-hotkeys-hook": "^4.4.1",
     "react-intersection-observer": "^9.5.2",
     "react-moveable": "^0.55.0",
@@ -96,7 +96,7 @@
     "styled-components": "^5.3.11",
     "superjson": "^1.13.1",
     "tailwind-merge": "^1.14.0",
-    "tiptap-markdown": "^0.8.3",
+    "tiptap-markdown": "^0.8.4",
     "use-debounce": "^9.0.4",
     "zod": "^3.22.4"
   },
