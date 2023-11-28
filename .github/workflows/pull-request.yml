@@ -23,3 +23,7 @@ jobs:
         run: npm run prettier
       - name: Run Jest tests
         run: npm run test:jest
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npm run test:e2e
