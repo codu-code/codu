@@ -51,9 +51,9 @@ const Home = async () => {
 
       <div className="mx-2">
         <div className="mt-6 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
+          <h3 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
             Trending
-          </h1>
+          </h3>
         </div>
         <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
           <Suspense fallback={<TrendingLoading />}>
@@ -82,9 +82,9 @@ const Home = async () => {
                 <p>Click the link to find out more.</p>
               </div>
             </div>
-            <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
+            <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Recommended topics
-            </h3>
+            </h4>
             <div className="flex flex-wrap gap-2">
               {tagsToShow.map((tag) => (
                 <Link

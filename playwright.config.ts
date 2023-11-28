@@ -1,11 +1,9 @@
-import { PlaywrightTestConfig, devices } from "@playwright/test";
+import { type PlaywrightTestConfig, devices } from "@playwright/test";
 import path from "path";
 
-// Use process.env.PORT by default and fallback to port 3000
-const PORT = process.env.PORT || 3000;
-
 // Set webServer.url and use.baseURL with the location of the WebServer respecting the correct set port
-const baseURL = `http://localhost:${PORT}`;
+const baseURL =
+  process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
 
 // Reference: https://playwright.dev/docs/test-configuration
 const config: PlaywrightTestConfig = {
@@ -36,7 +34,7 @@ const config: PlaywrightTestConfig = {
 
     // Retry a test if its failing with enabled tracing. This allows you to analyse the DOM, console logs, network traffic etc.
     // More information: https://playwright.dev/docs/trace-viewer
-    trace: "on",
+    trace: "retry-with-trace",
 
     // All available context options: https://playwright.dev/docs/api/class-browser#browser-new-context
     // contextOptions: {
@@ -64,12 +62,12 @@ const config: PlaywrightTestConfig = {
     //   },
     // },
     // Test against mobile viewports.
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: {
-    //     ...devices['Pixel 5'],
-    //   },
-    // },
+    {
+      name: "Mobile Chrome",
+      use: {
+        ...devices["Pixel 5"],
+      },
+    },
     // {
     //   name: 'Mobile Safari',
     //   use: devices['iPhone 12'],
