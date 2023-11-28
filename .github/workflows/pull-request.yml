@@ -1,0 +1,17 @@
+name: Check the pull request
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  check-style:
+    name: Make sure the code follows styling conventions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
