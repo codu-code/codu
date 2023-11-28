@@ -8,12 +8,13 @@
     "ci-build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "prettier": "prettier --check -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
+    "prettier:fix": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
     "test:e2e": "playwright test",
     "test:jest": "jest --collectCoverage",
     "studio": "prisma studio",
     "migrate": "npx prisma migrate",
-    "prettier": "prettier --check -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
-    "prettier:fix": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
     "prepare": "husky install"
   },
   "prisma": {
