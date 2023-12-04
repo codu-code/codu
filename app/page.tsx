@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import challenge from "public/images/announcements/challenge.png";
 import Hero from "@/components/Hero/Hero";
-import TrendingPostsHome from "@/components/TrendingPostsHome/TrendingPostsHome";
+import TrendingPosts from "@/components/TrendingPosts/TrendingPosts";
+import TrendingLoading from "@/components/TrendingPosts/TrendingPostsLoading";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { getServerAuthSession } from "@/server/auth";
 
@@ -49,12 +51,14 @@ const Home = async () => {
 
       <div className="mx-2">
         <div className="mt-6 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
+          <h3 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
             Trending
-          </h1>
+          </h3>
         </div>
         <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
-          <TrendingPostsHome />
+          <Suspense fallback={<TrendingLoading />}>
+            <TrendingPosts session={session} />
+          </Suspense>
           <section className="col-span-5 hidden lg:block">
             <div className="mb-8 mt-2 border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
@@ -78,9 +82,9 @@ const Home = async () => {
                 <p>Click the link to find out more.</p>
               </div>
             </div>
-            <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
+            <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Recommended topics
-            </h3>
+            </h4>
             <div className="flex flex-wrap gap-2">
               {tagsToShow.map((tag) => (
                 <Link

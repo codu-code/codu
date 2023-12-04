@@ -340,49 +340,6 @@ export const postRouter = createTRPCRouter({
 
     return { posts: cleaned, nextCursor };
   }),
-  randomTrending: publicProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session?.user?.id;
-    const response = await ctx.db.post.findMany({
-      where: {
-        NOT: {
-          published: null,
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        updatedAt: true,
-        readTimeMins: true,
-        slug: true,
-        excerpt: true,
-        user: {
-          select: { name: true, image: true, username: true },
-        },
-        bookmarks: {
-          select: { userId: true },
-          where: { userId: userId },
-        },
-      },
-      take: 20,
-      orderBy: {
-        likes: {
-          _count: "desc",
-        },
-      },
-    });
-
-    const cleaned = response.map((post) => {
-      let currentUserLikesPost = !!post.bookmarks.length;
-      if (userId === undefined) currentUserLikesPost = false;
-      post.bookmarks = [];
-      return { ...post, currentUserLikesPost };
-    });
-
-    const shuffled = cleaned.sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, 5);
-
-    return selected;
-  }),
   myPosts: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.post.findMany({
       where: {
