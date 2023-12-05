@@ -51,19 +51,19 @@ export default async function RootLayout({
   const session = await getServerAuthSession();
 
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <Fathom />
-      <body className="h-full" suppressHydrationWarning={true}>
+      <body className="h-full">
         <A11yProvider>
           <NextTopLoader
             easing="linear"
             showSpinner={false}
             template='<div class="bar" role="bar"><div class="gradient"></div></div>'
           />
-          <Toaster />
           <AuthProvider>
             <ThemeProvider>
               <TRPCReactProvider headers={headers()}>
+                <Toaster />
                 <Nav session={session} />
                 {children}
                 <Footer />
