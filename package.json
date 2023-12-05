@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.449.0",
-    "@aws-sdk/client-ses": "^3.449.0",
+    "@aws-sdk/client-ses": "^3.450.0",
     "@aws-sdk/s3-request-presigner": "^3.449.0",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^1.0.6",
