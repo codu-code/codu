@@ -72,7 +72,7 @@
     "copy-to-clipboard": "^3.3.3",
     "dompurify": "^3.0.5",
     "fathom-client": "^3.6.0",
-    "framer-motion": "^10.16.1",
+    "framer-motion": "^10.16.5",
     "highlight.js": "^11.9.0",
     "lowlight": "^2.9.0",
     "lucide-react": "^0.292.0",
