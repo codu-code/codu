@@ -2,14 +2,13 @@
 
 import { Children, Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { CheckIcon } from "@heroicons/react/solid";
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { Temporal } from "@js-temporal/polyfill";
 import Link from "next/link";
 import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "@/utils/notifications";
-import Head from "next/head";
 import PageHeading from "@/components/PageHeading/PageHeading";
 import { api } from "@/server/trpc/react";
 
@@ -185,11 +184,11 @@ const Notifications = () => {
                           <div className="ml-2 flex w-10 flex-col justify-center border-l border-neutral-300 pl-3 dark:border-neutral-700">
                             <button
                               title="Mark as read"
-                              className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-300 hover:bg-neutral-300 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700"
+                              className="h-8 w-8 fill-neutral-600  hover:fill-neutral-500 dark:text-white"
                               onClick={() => mutate({ id })}
                             >
-                              <CheckIcon
-                                className="h-6 w-6"
+                              <CheckCircleIcon
+                                className="h-full w-full fill-inherit"
                                 aria-hidden="true"
                               />
                             </button>

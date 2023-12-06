@@ -1,12 +1,12 @@
 import { useRouter } from "next/router";
 import React, { useState, useEffect, useCallback } from "react";
 import { Modal } from "../Modal/Modal";
-import { ExclamationIcon, XIcon } from "@heroicons/react/outline";
+import { ExclamationCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { Dialog } from "@headlessui/react";
 
 export interface serviceProps {
   shouldConfirmLeave: boolean;
-  updateParent: (...args: any[]) => any;
+  updateParent: (value: string) => void;
   title: string;
   subTitle: string;
   content?: string;
@@ -72,12 +72,12 @@ export const PromptDialog = ({
           onClick={cancelRouteChange}
         >
           <span className="sr-only">Close</span>
-          <XIcon className="h-6 w-6" aria-hidden="true" />
+          <XMarkIcon className="h-6 w-6" aria-hidden="true" />
         </button>
       </div>
       <div className="sm:flex sm:items-start">
         <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-pink-600 sm:mx-0 sm:h-10 sm:w-10">
-          <ExclamationIcon
+          <ExclamationCircleIcon
             className="text-white-600 h-6 w-6 "
             aria-hidden="true"
           />

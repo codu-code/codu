@@ -4,13 +4,13 @@ import { CodePen } from "../CodePen/CodePen";
 import { CodeSandbox } from "../CodeSandbox/CodeSandbox";
 import { FallbackMedia } from "../FallbackMedia/FallbackMedia";
 
-interface MediaProps {
+type MediaProps = {
   src: string;
   type?: string;
   width?: number | string;
   height?: number | string;
   alt?: string;
-}
+} & React.ReactPropTypes;
 
 const getYoutubeRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?=.*v=\w+)|embed\/)|youtu\.be\/)/i;
@@ -30,7 +30,7 @@ const embedUrlRegex = getEmbedUrlRegex();
 const codesandboxRegex = getCodesandboxRegex();
 const codepenRegex = getCodepenRegex();
 
-export function Media(props: React.ReactPropTypes) {
+export function Media(props: MediaProps) {
   const MEDIA_TYPES = {
     YOUTUBE: "youtube",
     CODEPEN: "codepen",
@@ -100,7 +100,7 @@ export function Media(props: React.ReactPropTypes) {
   };
 
   // uses type.current and process props to render correct component
-  const renderMediaComponent = (type: string, props: any) => {
+  const renderMediaComponent = (type: string, props: MediaProps) => {
     switch (type) {
       case "youtube":
         return <YouTube {...props} />;
@@ -124,7 +124,7 @@ export function Media(props: React.ReactPropTypes) {
   // format youtube url if it is not embed format
   // can happen when user copy and past direct from youtube url bar
   const formatEmbed = (src: string) => {
-    const videoId = src.match(/(?:\?v=|&v=|youtu\.be\/)([\w-]{11})/)[1] || "";
+    const videoId = src.match(/(?:\?v=|&v=|youtu\.be\/)([\w-]{11})/)?.[1] || "";
     src = `https://www.youtube.com/embed/${videoId}`;
     return src;
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Children, Fragment, useEffect, useState } from "react";
-import { TagIcon } from "@heroicons/react/outline";
+import { TagIcon } from "@heroicons/react/20/solid";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
 import { useInView } from "react-intersection-observer";

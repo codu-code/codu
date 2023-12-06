@@ -12,7 +12,7 @@ import { config } from "@/markdoc/config";
 import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
-import { PencilIcon } from "@heroicons/react/solid";
+import { PencilIcon } from "@heroicons/react/20/solid";
 import type { Prisma } from "@prisma/client";
 
 function getDomainFromUrl(url: string) {

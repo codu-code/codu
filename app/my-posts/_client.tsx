@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, Fragment } from "react";
-import { ExclamationIcon, XIcon } from "@heroicons/react/outline";
+import { ExclamationCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { Dialog, Transition, Menu } from "@headlessui/react";
 import Link from "next/link";
 import {
   ChevronDownIcon,
-  PencilAltIcon,
+  PencilIcon,
   TrashIcon,
-} from "@heroicons/react/solid";
+} from "@heroicons/react/20/solid";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { Modal } from "../../components/Modal/Modal";
@@ -78,12 +78,12 @@ const MyPosts = () => {
             onClick={() => setSelectedArticleToDelete(undefined)}
           >
             <span className="sr-only">Close</span>
-            <XIcon className="h-6 w-6" aria-hidden="true" />
+            <XMarkIcon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
         <div className="sm:flex sm:items-start">
           <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-pink-600 sm:mx-0 sm:h-10 sm:w-10">
-            <ExclamationIcon
+            <ExclamationCircleIcon
               className="text-white-600 h-6 w-6"
               aria-hidden="true"
             />
@@ -197,7 +197,7 @@ const MyPosts = () => {
                                   )}
                                   href={`/create/${id}`}
                                 >
-                                  <PencilAltIcon
+                                  <PencilIcon
                                     className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
                                     aria-hidden="true"
                                   />

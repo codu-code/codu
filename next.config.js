@@ -4,6 +4,18 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
 
+const REMOTE_PATTERNS = [
+  "images.ctfassets.net",
+  "images.unsplash.com",
+  "avatars.githubusercontent.com",
+  "www.gravatar.com",
+  // Temporary wildcard
+  "*.s3.eu-west-1.amazonaws.com",
+].map((hostname) => ({
+  hostname,
+  protocol: "https",
+}));
+
 module.exports = withBundleAnalyzer({
   webpack(config) {
     config.module.rules.push({
@@ -13,14 +25,7 @@ module.exports = withBundleAnalyzer({
     return config;
   },
   images: {
-    domains: [
-      "images.ctfassets.net",
-      "images.unsplash.com",
-      "avatars.githubusercontent.com",
-      "www.gravatar.com",
-      // Temporary wildcard
-      "*.s3.eu-west-1.amazonaws.com",
-    ],
+    remotePatterns: REMOTE_PATTERNS,
   },
   i18n: {
     locales: ["en"],

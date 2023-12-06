@@ -6,7 +6,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
-import { LockClosedIcon } from "@heroicons/react/solid";
+import { LockClosedIcon } from "@heroicons/react/20/solid";
 
 const GetStarted: NextPage = () => {
   const searchParams = useSearchParams();

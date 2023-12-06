@@ -4,7 +4,10 @@ import type { NextPage } from "next";
 import { Fragment, useState } from "react";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
-import { BookmarkIcon, DotsHorizontalIcon } from "@heroicons/react/outline";
+import {
+  BookmarkIcon,
+  EllipsisHorizontalIcon,
+} from "@heroicons/react/20/solid";
 import { Menu, Transition } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
@@ -141,7 +144,11 @@ const ArticlePreview: NextPage<Props> = ({
                 }}
               >
                 <BookmarkIcon
-                  className={`w-6 h-6${bookmarked ? " fill-blue-400" : ""}`}
+                  className={`w-6 h-6${
+                    bookmarked
+                      ? " fill-blue-400"
+                      : " fill-neutral-400 dark:fill-neutral-600"
+                  }`}
                 />
               </button>
             )}
@@ -150,7 +157,7 @@ const ArticlePreview: NextPage<Props> = ({
                 <div>
                   <Menu.Button className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
                     <span className="sr-only">Open user menu</span>
-                    <DotsHorizontalIcon className="h-6 w-6" />
+                    <EllipsisHorizontalIcon className="h-6 w-6" />
                   </Menu.Button>
                 </div>
                 <Transition

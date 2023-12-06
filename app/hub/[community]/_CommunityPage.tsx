@@ -12,8 +12,8 @@ import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
-import { notFound, useRouter, useSearchParams } from "next/navigation";
-import { PlusSmIcon, PencilIcon } from "@heroicons/react/solid";
+import { useRouter, useSearchParams } from "next/navigation";
+import { PlusSmallIcon, PencilIcon } from "@heroicons/react/20/solid";
 import type { Prisma } from "@prisma/client";
 
 function getDomainFromUrl(url: string) {
@@ -155,7 +155,7 @@ function CommunityPage(props: CommunityPageProps) {
                                   className="mr-2 inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                                   href={`/hub/${community.slug}/events/create`}
                                 >
-                                  <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
+                                  <PlusSmallIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                                   New Event
                                 </Link>
                                 <Link

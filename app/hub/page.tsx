@@ -4,7 +4,7 @@ import { Tabs } from "@/components/Tabs";
 import CommunitiesList from "@/containers/communities";
 import EventsList from "@/containers/events";
 import Link from "next/link";
-import { PlusSmIcon } from "@heroicons/react/solid";
+import { PlusSmallIcon } from "@heroicons/react/20/solid";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 
@@ -48,7 +48,7 @@ const EventsPage = () => {
                 className="flex-inline inline-flex items-center justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
                 href="/hub/create"
               >
-                <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
+                <PlusSmallIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                 New Community
               </Link>
             </div>

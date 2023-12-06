@@ -7,9 +7,9 @@ import { api } from "@/server/trpc/react";
 
 import {
   BookmarkIcon,
-  DotsHorizontalIcon,
+  EllipsisHorizontalIcon,
   HeartIcon,
-} from "@heroicons/react/outline";
+} from "@heroicons/react/20/solid";
 import copy from "copy-to-clipboard";
 import { type Session } from "next-auth";
 import { signIn } from "next-auth/react";
@@ -123,6 +123,7 @@ const ArticleMenu = ({
         <div className="flex h-full justify-evenly lg:flex-col">
           <div className="flex items-center lg:flex-col">
             <button
+              aria-label="like-trigger"
               className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
               onClick={() => {
                 if (data?.currentUserLiked) return likePost(postId, false);
@@ -134,7 +135,9 @@ const ArticleMenu = ({
             >
               <HeartIcon
                 className={`w-6 h-6${
-                  data?.currentUserLiked ? " fill-red-400" : ""
+                  data?.currentUserLiked
+                    ? " fill-red-400"
+                    : " fill-neutral-400 dark:fill-neutral-600"
                 }`}
               />
             </button>
@@ -143,6 +146,7 @@ const ArticleMenu = ({
 
           <button
             className="focus-style-rounded rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
+            aria-label="bookmark-trigger"
             onClick={() => {
               if (!session) {
                 signIn();
@@ -154,7 +158,9 @@ const ArticleMenu = ({
           >
             <BookmarkIcon
               className={`w-6 h-6${
-                data?.currentUserBookmarked ? " fill-blue-400" : ""
+                data?.currentUserBookmarked
+                  ? " fill-blue-400"
+                  : " fill-neutral-400 dark:fill-neutral-600"
               }`}
             />
           </button>
@@ -162,10 +168,11 @@ const ArticleMenu = ({
           <Popover className="relative ml-4">
             <Popover.Button
               onClick={openPopoverPanel}
+              aria-label="more-options-trigger"
               className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
             >
               <span className="sr-only">Open user menu</span>
-              <DotsHorizontalIcon className="h-6 w-6" />
+              <EllipsisHorizontalIcon className="h-6 w-6 fill-neutral-800 dark:fill-neutral-300" />
             </Popover.Button>
             <Transition
               as={Fragment}

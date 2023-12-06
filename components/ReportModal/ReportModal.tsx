@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { XIcon, FlagIcon } from "@heroicons/react/outline";
+import { XMarkIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
 import { api } from "@/server/trpc/react";
@@ -82,13 +82,13 @@ export const ReportModal = (props: Props) => {
     <>
       {isComment && (
         <button
-          aria-label="flag comment"
+          aria-label="flag-comment"
           onClick={() => {
             session ? setIsModalOpen(true) : signIn();
           }}
           className="mr-4 flex rounded-full p-1.5 hover:bg-neutral-300 dark:hover:bg-neutral-800"
         >
-          <FlagIcon className="h-5 " />
+          <FlagIcon className="h-5 fill-neutral-400 dark:fill-neutral-600" />
         </button>
       )}
 
@@ -168,7 +168,7 @@ export const ReportModal = (props: Props) => {
               aria-label="Close modal"
               className="absolute right-6 top-6 rounded-full p-1 hover:bg-neutral-800"
             >
-              <XIcon className="w-8" />
+              <XMarkIcon className="w-8" />
             </button>
           </Dialog.Panel>
         </div>

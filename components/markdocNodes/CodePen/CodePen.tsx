@@ -1,13 +1,13 @@
 interface Props {
   src: string;
   defaultTab?: string;
-  height?: string;
+  height?: number | string;
 }
 
 export function CodePen({
   src,
   defaultTab = "html,result",
-  height = "300px",
+  height = 300,
 }: Props) {
   const codePenSrc = new URL(src);
   if (!codePenSrc.searchParams.get("default-tab")) {

@@ -26,7 +26,19 @@ export default function Leaflet({
     });
   }, [controls, transitionProps]);
 
-  async function handleDragEnd(_: any, info: any) {
+  async function handleDragEnd(
+    _: unknown,
+    info: {
+      offset: {
+        x: number;
+        y: number;
+      };
+      velocity: {
+        x: number;
+        y: number;
+      };
+    },
+  ) {
     const offset = info.offset.y;
     const velocity = info.velocity.y;
     const height = leafletRef.current?.getBoundingClientRect().height || 0;

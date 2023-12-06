@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { Menu, Transition } from "@headlessui/react";
-import { DotsHorizontalIcon } from "@heroicons/react/solid";
+import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
@@ -12,7 +12,7 @@ import { config } from "@/markdoc/config";
 import Markdoc from "@markdoc/markdoc";
 import { toast } from "sonner";
 import z, { ZodError } from "zod";
-import { HeartIcon } from "@heroicons/react/outline";
+import { HeartIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 import { EditCommentSchema } from "@/schema/comment";
@@ -247,9 +247,9 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                   {isCurrentUser ? (
                     <Menu as="div" className="relative">
                       <div>
-                        <Menu.Button className="rounded-full bg-neutral-200 p-1 hover:bg-neutral-300 dark:bg-neutral-900 dark:hover:bg-neutral-200">
+                        <Menu.Button className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
                           <span className="sr-only">Open user menu</span>
-                          <DotsHorizontalIcon className="h-6 w-6" />
+                          <EllipsisHorizontalIcon className="h-6 w-6" />
                         </Menu.Button>
                       </div>
                       <Transition
@@ -308,7 +308,9 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     >
                       <HeartIcon
                         className={`w-6 h-6${
-                          youLikedThis ? " fill-red-400" : ""
+                          youLikedThis
+                            ? " fill-red-400"
+                            : " fill-neutral-400 dark:fill-neutral-600"
                         }`}
                       />
                     </button>

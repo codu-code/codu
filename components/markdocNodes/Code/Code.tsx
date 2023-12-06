@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import copy from "copy-to-clipboard";
 import Prism from "prismjs";
-import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/outline";
+import { DocumentDuplicateIcon, CheckIcon } from "@heroicons/react/20/solid";
 
 Prism.languages.ts = Prism.languages.js;
 Prism.languages.jsx = Prism.languages.html;

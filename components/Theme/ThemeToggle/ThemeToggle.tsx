@@ -1,6 +1,6 @@
 "use client";
 
-import { MoonIcon, SunIcon } from "@heroicons/react/solid";
+import { MoonIcon, SunIcon } from "@heroicons/react/20/solid";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 

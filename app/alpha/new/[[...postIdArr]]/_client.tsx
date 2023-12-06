@@ -4,7 +4,7 @@ import { redirect, useParams } from "next/navigation";
 import React, { Fragment } from "react";
 import { Controller } from "react-hook-form";
 import { Disclosure, Transition } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/solid";
+import { ChevronUpIcon } from "@heroicons/react/20/solid";
 // @TODO fix PromptDiaglog
 // import { PromptDialog } from "@/components/PromptService/PromptService";
 import Editor from "@/components/editor/editor";
