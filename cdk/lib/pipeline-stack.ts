@@ -55,6 +55,10 @@ export class PipelineStack extends cdk.Stack {
               type: BuildEnvironmentVariableType.PARAMETER_STORE,
               value: "sentry",
             },
+            DATABASE_URL: {
+              type: BuildEnvironmentVariableType.PARAMETER_STORE,
+              value: "/prod/db/url",
+            },
           },
         },
       },

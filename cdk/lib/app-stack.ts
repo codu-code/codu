@@ -42,6 +42,7 @@ export class AppStack extends cdk.Stack {
       file: "Dockerfile",
       buildSecrets: {
         SENTRY_AUTH_TOKEN: "type=env",
+        DATABASE_URL: "type=env",
       },
       buildArgs: {
         DOCKER_BUILDKIT: "1",
