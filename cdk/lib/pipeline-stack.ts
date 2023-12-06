@@ -34,7 +34,7 @@ export class PipelineStack extends cdk.Stack {
         effect: Effect.ALLOW,
         actions: ["ssm:GetParameter", "ssm:GetParameters"],
         resources: ["*"],
-      }),
+      })
     );
 
     const synthAction = new ShellStep("Synth", {
@@ -55,10 +55,6 @@ export class PipelineStack extends cdk.Stack {
               type: BuildEnvironmentVariableType.PARAMETER_STORE,
               value: "sentry",
             },
-            DATABASE_URL: {
-              type: BuildEnvironmentVariableType.PARAMETER_STORE,
-              value: "/prod/db/url",
-            },
           },
         },
       },
@@ -66,12 +62,12 @@ export class PipelineStack extends cdk.Stack {
 
     const devAccountId = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/dev/accountId`,
+      `/env/dev/accountId`
     );
 
     const prodAccountId = ssm.StringParameter.valueFromLookup(
       this,
-      `/env/prod/accountId`,
+      `/env/prod/accountId`
     );
 
     const defaultRegion = "eu-west-1";
