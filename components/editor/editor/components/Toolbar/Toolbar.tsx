@@ -41,7 +41,7 @@ export interface ToolbarItem {
 
 function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [isTableEditing, setIsTableEditing] = useState(false);
+  const [, setIsTableEditing] = useState(false);
   const [isImageDetailsModalOpen, setIsImageDetailsModalOpen] = useState(false);
 
   const isRootNode = () => {
@@ -98,8 +98,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("bold")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -114,8 +114,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("italic")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -130,8 +130,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("underline")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -146,8 +146,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("strike")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -162,8 +162,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("code")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -181,8 +181,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("heading", { level: 2 })
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -200,8 +200,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("heading", { level: 3 })
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -217,8 +217,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("bulletList")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -234,8 +234,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("orderedList")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -251,8 +251,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("codeBlock")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -268,8 +268,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("blockQuote")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -285,8 +285,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("setHorizontalRule")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -358,8 +358,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("subscript")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
@@ -381,8 +381,8 @@ function Toolbar({ editor }: ToolbarProps) {
                     isRootNode()
                       ? "gray"
                       : editor.isActive("superscript")
-                      ? "coral"
-                      : "white"
+                        ? "coral"
+                        : "white"
                   }
                 />
               }
