@@ -1,4 +1,4 @@
-import { BookOpenIcon, CheckCircleIcon } from "@heroicons/react/outline";
+import { BookOpenIcon, CheckCircleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 
 export interface IContent {

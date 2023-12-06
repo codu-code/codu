@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import CustomTextareaAutosize from "../../../components/CustomTextareAutosize/CustomTextareaAutosize";
 import { toast } from "sonner";
 import { Disclosure, Transition } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/solid";
+import { ChevronUpIcon } from "@heroicons/react/20/solid";
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
 // @TODO fix PromptDialog

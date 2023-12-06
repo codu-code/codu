@@ -1,7 +1,7 @@
 "use client";
 import { api } from "@/server/trpc/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, PlusSmIcon } from "@heroicons/react/solid";
+import { BellIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Fragment } from "react";
@@ -86,7 +86,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                       </Link>
 
                       <Link className="primary-button px-4" href="/create">
-                        <PlusSmIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
+                        <PlusIcon className="-ml-2 mr-1 h-5 w-5 p-0 text-white" />
                         New Post
                       </Link>
                     </>
