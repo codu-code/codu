@@ -51,5 +51,6 @@ export async function GET() {
     return Response.json({ data });
   } catch (error) {
     Sentry.captureException(error);
+    return new Response("Something went wrong.", { status: 500 });
   }
 }
