@@ -55,8 +55,10 @@ export default async function sitemap() {
         routes.length
       }, Articles Count = ${articles.length}, Users Count = ${users.length}`,
     );
+    console.log({ data });
     return data;
   } catch (error) {
+    console.log({ error });
     Sentry.captureException(error);
   }
 }
