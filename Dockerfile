@@ -27,7 +27,15 @@ ENV NEXT_PUBLIC_SENTRY_DSN https://a0460f6abac067ae72754b23ccd03aac@o45058956182
 
 RUN npx prisma generate
 
-RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) --mount=type=secret,id=DATABASE_URL export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
+
+
+# Mount the SENTRY_AUTH_TOKEN secret
+RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN)
+
+# Mount the DATABASE_URL secret and build
+RUN --mount=type=secret,id=DATABASE_URL \
+    export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
     npm run build
 
 # Production image, copy all the files and run next
