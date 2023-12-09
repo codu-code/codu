@@ -34,6 +34,7 @@ RUN --mount=type=secret,id=DATABASE_URL \
     export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) 
 
 RUN echo $SENTRY_AUTH_TOKEN
+RUN echo "Hello world!"
 
 RUN npm run build
 
