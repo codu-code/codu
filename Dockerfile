@@ -33,6 +33,8 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
 RUN --mount=type=secret,id=DATABASE_URL \
     export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) 
 
+RUN echo $SENTRY_AUTH_TOKEN
+
 RUN npm run build
 
 # Production image, copy all the files and run next
