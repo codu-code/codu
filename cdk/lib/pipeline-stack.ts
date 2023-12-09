@@ -50,7 +50,11 @@ export class PipelineStack extends cdk.Stack {
       codeBuildDefaults: {
         cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
         buildEnvironment: {
+          privileged: true,
           environmentVariables: {
+            DOCKER_BUILDKIT: {
+              value: "1",
+            },
             SENTRY_AUTH_TOKEN: {
               type: BuildEnvironmentVariableType.PARAMETER_STORE,
               value: "sentry",
