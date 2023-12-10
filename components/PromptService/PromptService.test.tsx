@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { PromptDialog } from "@/components/PromptService";
@@ -47,29 +47,29 @@ describe("PromptDialog Component", () => {
   );
 
   it("renders with provided title, subtitle and content", () => {
-    const { getByText } = render(PromptDialogTestComponent);
-    expect(getByText("Test Title")).toBeInTheDocument();
-    expect(getByText("Test Subtitle")).toBeInTheDocument();
-    expect(getByText("Test Content")).toBeInTheDocument();
+    render(PromptDialogTestComponent);
+    expect(screen.getByText("Test Title")).toBeInTheDocument();
+    expect(screen.getByText("Test Subtitle")).toBeInTheDocument();
+    expect(screen.getByText("Test Content")).toBeInTheDocument();
   });
 
   it("calls confirm callback when continue button is clicked", async () => {
-    const { getByRole } = render(PromptDialogTestComponent);
+    render(PromptDialogTestComponent);
     await userEvent.click(
-      getByRole("button", { name: "Continue without saving" }),
+      screen.getByRole("button", { name: "Continue without saving" }),
     );
     expect(mockConfirm).toHaveBeenCalled();
   });
 
   it("calls cancel callback when cancel button is clicked", async () => {
-    const { getByRole } = render(PromptDialogTestComponent);
-    await userEvent.click(getByRole("button", { name: "Keep editing" }));
+    render(PromptDialogTestComponent);
+    await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
     expect(mockCancel).toHaveBeenCalled();
   });
 
   it("calls cancel callback when close icon is clicked", () => {
-    const { getByRole } = render(PromptDialogTestComponent);
-    userEvent.click(getByRole("button", { name: "Close" }));
+    render(PromptDialogTestComponent);
+    userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(mockCancel).toHaveBeenCalled();
   });
 });
