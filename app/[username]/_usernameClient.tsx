@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import React from "react";
 import Link from "next/link";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
-import { LinkIcon } from "@heroicons/react/outline";
+import { LinkIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
