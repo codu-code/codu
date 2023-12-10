@@ -111,7 +111,6 @@ const Nav = ({ session }: { session: Session | null }) => {
                   {session && (
                     <>
                       <Link
-                        // title="Notifications"
                         to="/notifications"
                         className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
                       >
@@ -180,7 +179,6 @@ const Nav = ({ session }: { session: Session | null }) => {
                 <ThemeToggle />
                 {session && (
                   <Link
-                    // title="Notifications"
                     to="/notifications"
                     className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white  "
                   >
