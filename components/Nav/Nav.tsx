@@ -3,7 +3,7 @@ import { api } from "@/server/trpc/react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { BellIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut } from "next-auth/react";
-import { PromptLink as Link } from "../Link/Link";
+import { PromptLink as Link } from "../PromptService/PromptLink";
 import { Fragment } from "react";
 import { navigation } from "../../config/site_settings";
 import { type Session } from "next-auth";
