@@ -67,9 +67,9 @@ describe("PromptDialog Component", () => {
     expect(mockCancel).toHaveBeenCalled();
   });
 
-  it("calls cancel callback when close icon is clicked", () => {
+  it("calls cancel callback when close icon is clicked", async () => {
     render(PromptDialogTestComponent);
-    userEvent.click(screen.getByRole("button", { name: "Close" }));
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(mockCancel).toHaveBeenCalled();
   });
 });
