@@ -41,6 +41,8 @@ describe("PromptDialog Component", () => {
       content="Test Content"
       confirm={mockConfirm}
       cancel={mockCancel}
+      confirmText="Continue without saving"
+      cancelText="Keep editing"
     />
   );
 

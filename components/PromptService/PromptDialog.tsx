@@ -10,6 +10,8 @@ export interface serviceProps {
   title: string;
   subTitle?: string;
   content?: string;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 export const PromptDialog = ({
@@ -18,6 +20,8 @@ export const PromptDialog = ({
   title,
   subTitle,
   content,
+  confirmText,
+  cancelText,
 }: serviceProps): React.ReactElement<serviceProps> => {
   return (
     <Modal open={true} onClose={cancel}>
@@ -60,14 +64,14 @@ export const PromptDialog = ({
           disabled={false}
           onClick={confirm}
         >
-          Continue without saving
+          {confirmText}
         </button>
         <button
           type="button"
           className="mt-3 inline-flex w-full justify-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-base font-medium text-neutral-700 shadow-sm hover:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
           onClick={cancel}
         >
-          Keep editing
+          {cancelText}
         </button>
       </div>
     </Modal>

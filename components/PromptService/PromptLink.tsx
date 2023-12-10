@@ -61,6 +61,8 @@ export const PromptLink = ({ to, children, className }: LinkProps) => {
           subTitle="You have unsaved changes. Are you sure you want to leave?"
           confirm={confirmNavigation}
           cancel={cancelNavigation}
+          confirmText="Continue without saving"
+          cancelText="Keep editing"
         />
       )}
     </>
