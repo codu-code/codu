@@ -19,6 +19,7 @@ import { useMarkdownShortcuts } from "../../../markdoc/editor/shortcuts/shortcut
 import { markdocComponents } from "../../../markdoc/components";
 import { config } from "../../../markdoc/config";
 import { redirect, useParams } from "next/navigation";
+import { usePrompt } from "@/context/PromptContext";
 
 const Create = () => {
   const params = useParams();
@@ -34,6 +35,13 @@ const Create = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+
+  const { unsavedChanges: _unsaved, setUnsavedChanges: _setUnsaved } =
+    usePrompt();
+
+  useEffect(() => {
+    _setUnsaved(unsavedChanges);
+  }, [unsavedChanges, _setUnsaved]);
 
   const allowUpdate = unsavedChanges;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
