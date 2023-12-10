@@ -1,7 +1,7 @@
 import { type UserNavigationItem } from "@/types/types";
 import { Disclosure, Transition } from "@headlessui/react";
 import { type Session } from "next-auth";
-import { PromptLink as Link } from "../Link/Link";
+import { PromptLink as Link } from "../PromptService/PromptLink";
 import { type FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 

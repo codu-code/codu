@@ -11,7 +11,7 @@ import { Toaster } from "sonner";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import React from "react";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
-import { PromptProvider } from "@/context/PromptContext";
+import { PromptProvider } from "@/components/PromptService";
 
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
