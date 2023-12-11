@@ -9,7 +9,6 @@ import { Disclosure, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/20/solid";
 import type { SavePostInput } from "../../../schema/post";
 import { ConfirmPostSchema } from "../../../schema/post";
-// @TODO fix PromptDialog
 import { api } from "@/server/trpc/react";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -19,6 +18,7 @@ import { useMarkdownShortcuts } from "../../../markdoc/editor/shortcuts/shortcut
 import { markdocComponents } from "../../../markdoc/components";
 import { config } from "../../../markdoc/config";
 import { redirect, useParams } from "next/navigation";
+import { usePrompt } from "@/components/PromptService";
 
 const Create = () => {
   const params = useParams();
@@ -34,6 +34,13 @@ const Create = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+
+  const { unsavedChanges: _unsaved, setUnsavedChanges: _setUnsaved } =
+    usePrompt();
+
+  useEffect(() => {
+    _setUnsaved(unsavedChanges);
+  }, [unsavedChanges, _setUnsaved]);
 
   const allowUpdate = unsavedChanges;
   const textareaRef = useRef<HTMLTextAreaElement>(null);

@@ -1,7 +1,7 @@
 import { type UserNavigationItem } from "@/types/types";
 import { Disclosure, Transition } from "@headlessui/react";
 import { type Session } from "next-auth";
-import Link from "next/link";
+import { PromptLink as Link } from "../PromptService/PromptLink";
 import { type FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 
@@ -66,7 +66,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                       {item.name}
                     </button>
                   ) : (
-                    <Link key={item.name} href={item.href}>
+                    <Link key={item.name} to={item.href}>
                       <Disclosure.Button
                         as="div"
                         className="nav-button w-full font-medium"
@@ -133,7 +133,7 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
         <Disclosure key={item.name}>
           <Disclosure.Button
             as={Link}
-            href={item.href}
+            to={item.href}
             className={classNames(
               item.fancy
                 ? "block justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2"

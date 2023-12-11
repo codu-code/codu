@@ -1,75 +1,34 @@
-import { useRouter } from "next/router";
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import { Modal } from "../Modal/Modal";
 import { ExclamationCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
 import { Dialog } from "@headlessui/react";
 
 export interface serviceProps {
-  shouldConfirmLeave: boolean;
-  updateParent: (value: string) => void;
+  confirm: () => void;
+  cancel: () => void;
   title: string;
-  subTitle: string;
+  subTitle?: string;
   content?: string;
+  confirmText?: string;
+  cancelText?: string;
 }
 
 export const PromptDialog = ({
-  updateParent,
-  shouldConfirmLeave,
+  confirm,
+  cancel,
   title,
   subTitle,
   content,
+  confirmText,
+  cancelText,
 }: serviceProps): React.ReactElement<serviceProps> => {
-  const [showPromptDialog, setshowPromptDialog] = useState(false);
-  const [nextRouterPath, setNextRouterPath] = useState<string>();
-
-  const router = useRouter();
-
-  const routeChangeStart = useCallback(
-    (nextPath: string) => {
-      if (!shouldConfirmLeave) {
-        return;
-      }
-      console.log({ nextPath });
-      updateParent("initial");
-      setshowPromptDialog(true);
-      setNextRouterPath(nextPath);
-      // need to throw error to trick router
-      // look for better solution in the future
-      router.events.emit("routeChangeError");
-      throw "Aborting route change. Please ignore this error.";
-    },
-    [shouldConfirmLeave],
-  );
-
-  const cancelRouteChange = () => {
-    updateParent("cancel");
-    setNextRouterPath(undefined);
-    setshowPromptDialog(false);
-  };
-
-  const confirmRouteChange = () => {
-    updateParent("confirm");
-    setshowPromptDialog(false);
-    removeListener();
-    if (nextRouterPath) router.push(nextRouterPath);
-  };
-
-  const removeListener = () => {
-    router.events.off("routeChangeStart", routeChangeStart);
-  };
-
-  useEffect(() => {
-    router.events.on("routeChangeStart", routeChangeStart);
-    return removeListener;
-  }, [routeChangeStart]);
-
   return (
-    <Modal open={showPromptDialog} onClose={cancelRouteChange}>
+    <Modal open={true} onClose={cancel}>
       <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
         <button
           type="button"
           className="bg-neutral-900 text-neutral-400 hover:text-neutral-500 focus:outline-none"
-          onClick={cancelRouteChange}
+          onClick={cancel}
         >
           <span className="sr-only">Close</span>
           <XMarkIcon className="h-6 w-6" aria-hidden="true" />
@@ -102,16 +61,16 @@ export const PromptDialog = ({
           className="primary-button ml-4"
           type="button"
           disabled={false}
-          onClick={confirmRouteChange}
+          onClick={confirm}
         >
-          Continue without saving
+          {confirmText}
         </button>
         <button
           type="button"
           className="mt-3 inline-flex w-full justify-center rounded-md border border-neutral-300 bg-white px-4 py-2 text-base font-medium text-neutral-700 shadow-sm hover:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
-          onClick={cancelRouteChange}
+          onClick={cancel}
         >
-          Keep editing
+          {cancelText}
         </button>
       </div>
     </Modal>

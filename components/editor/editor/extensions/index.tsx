@@ -31,7 +31,8 @@ import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
 import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 
-import lowlight from "lowlight";
+import { common, createLowlight } from "lowlight";
+const lowlight = createLowlight(common);
 
 // Highlight syntax select your style from here (https://highlightjs.org/examples)
 import "highlight.js/styles/monokai-sublime.css";
