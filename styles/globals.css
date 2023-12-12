@@ -358,19 +358,3 @@ table div {
     transform: translate(24px, 0);
   }
 }
-
-@layer {
-  .gradient {
-    background-image: linear-gradient(
-      to right,
-      rgb(251, 146, 60),
-      rgb(219, 39, 119)
-    );
-    height: 0.25rem;
-    width: 100%;
-    left: 0px;
-    top: 0px;
-    position: fixed;
-    z-index: 50;
-  }
-}
