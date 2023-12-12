@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
-import { start, done } from "nprogress";
 import { usePrompt } from "@/components/PromptService/PromptContext";
-import { useEffect, useState, ReactNode } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PromptDialog } from "./PromptDialog";
 
@@ -32,13 +32,11 @@ export const PromptLink = ({ to, children, className }: LinkProps) => {
   const confirmNavigation = () => {
     setShowModal(false);
     setHasPrompt(false);
-    start();
     router.push(to);
   };
 
   const cancelNavigation = () => {
     setShowModal(false);
-    done(true);
     return false;
   };
 
@@ -46,8 +44,6 @@ export const PromptLink = ({ to, children, className }: LinkProps) => {
     if (hasPrompt === true) {
       setHasPrompt(false);
     }
-
-    done(true);
   }, [hasPrompt]);
 
   return (

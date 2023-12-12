@@ -81,7 +81,6 @@
     "next-auth": "^4.24.5",
     "next-superjson-plugin": "^0.5.10",
     "next-themes": "^0.2.1",
-    "nextjs-toploader": "^1.6.4",
     "nodemailer": "^6.9.7",
     "prismjs": "^1.29.0",
     "react": "^18.2.0",
