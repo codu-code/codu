@@ -1,22 +1,17 @@
 "use client";
-import NextTopLoader from "nextjs-toploader";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { done as _done } from "nprogress";
+import HolyLoader from "holy-loader";
 
 const ProgressBar = () => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    _done(true);
-  }, [pathname, searchParams]);
-
   return (
-    <NextTopLoader
+    <HolyLoader
       easing="linear"
-      showSpinner={false}
-      template='<div class="bar" role="bar"><div class="gradient"></div></div>'
+      color="linear-gradient(
+        to right,
+        rgb(251, 146, 60),
+        rgb(219, 39, 119)
+      )"
+      zIndex={50}
+      height="0.25rem"
     />
   );
 };
