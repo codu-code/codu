@@ -21,7 +21,8 @@
     "seed": "npx tsx ./prisma/seed.ts"
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*": "prettier --write --ignore-unknown",
+    "*.{js,jsx,ts,tsx}": "eslint"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.470.0",
