@@ -295,7 +295,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                 </div>
 
                 <div className="-mt-2 ml-4 border-l-2 border-neutral-400 pl-2 dark:border-neutral-700">
-                  <div className="prose overflow-x-hidden text-sm dark:prose-invert">
+                  <div className="prose-sm overflow-x-hidden text-sm dark:prose-invert">
                     {Markdoc.renderers.react(content, React, {
                       components: markdocComponents,
                     })}
@@ -413,7 +413,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         )}
         {viewPreviewId === id ? (
           <article
-            className="prose prose-invert overflow-x-hidden text-sm"
+            className="prose-sm prose-invert overflow-x-hidden text-sm"
             style={{ whiteSpace: "pre-wrap" }}
           >
             {Markdoc.renderers.react(
@@ -439,11 +439,11 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
             />
           </>
         )}
-        <div className="flex items-center">
+        <div className="flex">
           <button
             disabled={createCommentStatus === "loading"}
             type="submit"
-            className=" primary-button border-2 text-sm text-neutral-300 hover:text-white"
+            className="primary-button border-2 text-sm text-neutral-300 hover:text-white"
           >
             {editMode ? "Update" : "Submit"}
           </button>
