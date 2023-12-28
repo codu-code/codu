@@ -9,18 +9,16 @@ import ArticleMenu from "@/components/ArticleMenu/ArticleMenu";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
-import { api } from "@/server/trpc/server";
 import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { type Metadata } from "next";
+import { getPost } from "@/server/lib/posts";
 
 type Props = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = params.slug;
 
-  const post = await api.post.bySlug.query({
-    slug,
-  });
+  const post = await getPost({ slug });
 
   // Might revisit to give more defaults
   const tags = post?.tags.map((tag) => tag.tag.title);
@@ -57,9 +55,7 @@ const ArticlePage = async ({ params }: Props) => {
 
   const host = headers().get("host") || "";
 
-  const post = await api.post.bySlug.query({
-    slug,
-  });
+  const post = await getPost({ slug });
 
   if (!post) {
     notFound();
@@ -101,7 +97,7 @@ const ArticlePage = async ({ params }: Props) => {
       <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
         <BioBar author={post.user} />
         {post.showComments ? (
-          <CommentsArea postId={post.id} postOwnerId={post.userId} />
+          <CommentsArea postId={post.id} postOwnerId={post.user.id} />
         ) : (
           <h3 className="py-10 text-lg italic">
             Comments are disabled for this post
