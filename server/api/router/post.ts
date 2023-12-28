@@ -397,39 +397,6 @@ export const postRouter = createTRPCRouter({
 
       return currentPost;
     }),
-  bySlug: publicProcedure
-    .input(GetSinglePostSchema)
-    .query(async ({ input, ctx }) => {
-      const post = await ctx.db.post.findUnique({
-        where: {
-          slug: input.slug,
-        },
-        include: {
-          user: {
-            select: {
-              username: true,
-              name: true,
-              image: true,
-              bio: true,
-            },
-          },
-          tags: {
-            select: {
-              id: true,
-              tag: {
-                select: {
-                  title: true,
-                },
-              },
-            },
-          },
-        },
-      });
-      if (!post) {
-        return null;
-      }
-      return post;
-    }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
     const response = await ctx.db.bookmark.findMany({
       where: {
