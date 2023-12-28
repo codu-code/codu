@@ -8,7 +8,7 @@ export const GetPostSchema = z.object({
 });
 
 export const GetTrendingSchema = z.object({
-  currentUserId: z.string(),
+  currentUserId: z.string().optional(),
 });
 
 type GetPost = z.infer<typeof GetPostSchema>;
