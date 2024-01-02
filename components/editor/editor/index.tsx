@@ -6,13 +6,14 @@ import { CustomCodeBlockEdit, TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
-
+ 
 interface EditorProps {
   initialValue: string;
   onChange: (value: string) => void;
+  toolbarVis: string;
 }
 
-export default function Editor({ onChange, initialValue }: EditorProps) {
+export default function Editor({ onChange, initialValue, toolbarVis }: EditorProps) {
   const editor = useEditor({
     extensions: [...TiptapExtensions, CustomCodeBlockEdit],
     editorProps: TiptapEditorProps,
@@ -34,7 +35,7 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
         editor?.chain().focus().run();
       }}
     >
-      {editor && <Toolbar editor={editor} />}
+      {editor && <Toolbar editor={editor} toolbarVis={toolbarVis} />}
       {editor && <MediaResizer editor={editor} />}
       {editor && (
         <EditorBubbleMenu editor={editor} className="p-1 font-extrabold" />

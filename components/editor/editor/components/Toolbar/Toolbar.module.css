@@ -5,7 +5,7 @@
   width: 100%;
   margin-bottom: 1em;
 }
-
+ 
 .flex {
   display: flex;
   justify-content: space-between;
@@ -97,4 +97,9 @@ input:checked + .slider::before {
 .buttonContainer:hover .tooltip {
   visibility: 1;
   opacity: 1;
+}
+
+.hide {
+  visibility: hidden;
+  margin-bottom: 1em;
 }

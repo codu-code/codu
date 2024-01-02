@@ -25,6 +25,8 @@ export type useCreatePageReturnType = {
   setSavedTime: React.Dispatch<React.SetStateAction<string>>;
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  toolbarVis: string;
+  setToolbarVis: React.Dispatch<React.SetStateAction<string>>;
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
   allowUpdate: boolean;
@@ -65,6 +67,7 @@ function useCreatePage({
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const [toolbarVis, setToolbarVis] = useState<string>("styles.sticky");
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [delayDebounce, setDelayDebounce] = useState<boolean>(false);
@@ -286,6 +289,8 @@ function useCreatePage({
     setSavedTime,
     open,
     setOpen,
+    toolbarVis,
+    setToolbarVis,
     hasUnsavedChanges,
     setHasUnsavedChanges,
     allowUpdate,
