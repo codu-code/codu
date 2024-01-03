@@ -1,14 +1,8 @@
 import { cn, getUrlFromString } from "@/utils/utils";
-import { Editor } from "@tiptap/core";
+import type { Editor } from "@tiptap/core";
 import { Check, Trash } from "lucide-react";
-import {
-  Dispatch,
-  FC,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useCallback,
-} from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 interface LinkSelectorProps {
   editor: Editor;

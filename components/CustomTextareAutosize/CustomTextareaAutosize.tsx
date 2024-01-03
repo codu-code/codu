@@ -1,7 +1,7 @@
-import React, { forwardRef, Ref, ForwardRefRenderFunction } from "react";
-import TextareaAutosize, {
-  TextareaAutosizeProps,
-} from "react-textarea-autosize";
+import type { Ref, ForwardRefRenderFunction } from "react";
+import React, { forwardRef } from "react";
+import type { TextareaAutosizeProps } from "react-textarea-autosize";
+import TextareaAutosize from "react-textarea-autosize";
 
 interface TextareaAutosizeWrapperProps extends TextareaAutosizeProps {
   inputRef?: Ref<HTMLTextAreaElement>;

@@ -1,4 +1,5 @@
-import { NodeViewContent, NodeViewProps, NodeViewWrapper } from "@tiptap/react";
+import type { NodeViewProps } from "@tiptap/react";
+import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import {
   BookmarkMinus,
   ColumnsIcon,
@@ -6,7 +7,7 @@ import {
   RowsIcon,
   Trash2Icon,
 } from "lucide-react";
-import { FunctionComponent, ReactNode } from "react";
+import type { FunctionComponent, ReactNode } from "react";
 
 import styles from "../Toolbar/Toolbar.module.css";
 

@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction, useRef } from "react";
-import { Editor } from "@tiptap/core";
+import type { Dispatch, SetStateAction } from "react";
+import { useRef } from "react";
+import type { Editor } from "@tiptap/core";
 import { Modal } from "@/components/Modal/Modal";
 import { XIcon } from "lucide-react";
 import { z } from "zod";
