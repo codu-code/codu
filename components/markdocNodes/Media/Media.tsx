@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { YouTube } from "../Youtube/Youtube";
 import { CodePen } from "../CodePen/CodePen";
