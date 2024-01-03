@@ -27,7 +27,8 @@ import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
-import { ReactNodeViewRenderer, NodeViewProps } from "@tiptap/react";
+import type { NodeViewProps } from "@tiptap/react";
+import { ReactNodeViewRenderer } from "@tiptap/react";
 import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 

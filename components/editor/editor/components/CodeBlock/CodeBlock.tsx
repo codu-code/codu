@@ -1,5 +1,6 @@
-import { NodeViewContent, NodeViewProps, NodeViewWrapper } from "@tiptap/react";
-import { ChangeEvent, FunctionComponent } from "react";
+import type { NodeViewProps } from "@tiptap/react";
+import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
+import type { ChangeEvent, FunctionComponent } from "react";
 
 import styles from "./CodeBlock.module.css";
 

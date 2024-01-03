@@ -1,5 +1,7 @@
-import { BubbleMenu, BubbleMenuProps } from "@tiptap/react";
-import { FC, useState } from "react";
+import type { BubbleMenuProps } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react";
+import type { FC } from "react";
+import { useState } from "react";
 import {
   BoldIcon,
   ItalicIcon,

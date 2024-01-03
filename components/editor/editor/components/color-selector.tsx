@@ -1,6 +1,6 @@
-import { Editor } from "@tiptap/core";
+import type { Editor } from "@tiptap/core";
 import { Check, ChevronDown } from "lucide-react";
-import { Dispatch, FC, SetStateAction } from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
 
 export interface BubbleColorMenuItem {
   name: string;

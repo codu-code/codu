@@ -1,4 +1,4 @@
-import { Editor } from "@tiptap/core";
+import type { Editor } from "@tiptap/core";
 import {
   Check,
   ChevronDown,
@@ -12,9 +12,9 @@ import {
   CheckSquare,
   Heading,
 } from "lucide-react";
-import { Dispatch, FC, SetStateAction } from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
 
-import { BubbleMenuItem } from "./bubble-menu";
+import type { BubbleMenuItem } from "./bubble-menu";
 
 interface NodeSelectorProps {
   editor: Editor;
