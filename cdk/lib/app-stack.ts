@@ -141,7 +141,7 @@ export class AppStack extends cdk.Stack {
           cluster,
           taskDefinition: taskDef,
           memoryLimitMiB: production ? 1024 : 512, // Can alter if need more
-          cpu: production ? 256 : 256, // Can alter if need more
+          cpu: production ? 512 : 256, // Can alter if need more
           publicLoadBalancer: true,
           protocol: elbv2.ApplicationProtocol.HTTP,
         }
