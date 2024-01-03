@@ -2,7 +2,7 @@ name: Check the pull request
 
 on: 
   pull_request:
-    types: [opened, edited]
+    types: [opened, synchronize, reopened, edited]
 
 jobs:
   check-pull-request:
