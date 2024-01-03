@@ -38,7 +38,7 @@ export interface ToolbarItem {
   command: () => void;
   icon: typeof BoldIcon;
 }
-
+ 
 function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [, setIsTableEditing] = useState(false);
@@ -72,7 +72,7 @@ function Toolbar({ editor }: ToolbarProps) {
   };
 
   return (
-    <div className={`${styles.sticky} bg-neutral-900`}>
+    <div className={`${styles.sticky} bg-neutral-900 mb-4`}>
       <ImageDetailsModal
         isImageDetailsModalOpen={isImageDetailsModalOpen}
         setIsImageDetailsModalOpen={setIsImageDetailsModalOpen}
