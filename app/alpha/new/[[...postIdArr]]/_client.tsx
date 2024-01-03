@@ -21,8 +21,6 @@ const Create = () => {
     savedTime,
     open,
     setOpen,
-    toolbarVis,
-    setToolbarVis,
     hasUnsavedChanges,
     handleSubmit,
     register,
@@ -48,14 +46,6 @@ const Create = () => {
   useEffect(() => {
     _setUnsaved(hasUnsavedChanges);
   }, [hasUnsavedChanges, _setUnsaved]);
-
-  useEffect(() => {
-    if (open) {
-      setToolbarVis("styles.hide");
-    } else {
-      setToolbarVis("styles.sticky");
-    }
-  }, [open])
 
   return (
     <>
@@ -256,7 +246,7 @@ const Create = () => {
                               name="body"
                               control={control}
                               render={({ field }) => (
-                                <Editor {...field} initialValue={"{}"} toolbarVis={toolbarVis} />
+                                <Editor {...field} initialValue={"{}"} />
                               )}
                             />
                           )}
@@ -265,7 +255,7 @@ const Create = () => {
                               name="body"
                               control={control}
                               render={({ field }) => (
-                                <Editor {...field} initialValue={body} toolbarVis={toolbarVis} />
+                                <Editor {...field} initialValue={body} />
                               )}
                             />
                           )}

@@ -30,9 +30,7 @@ import {
 import ToolBarItemButton from "./ToolbarItemButton";
 import ImageDetailsModal from "@/components/ImageDetailsModal/ImageDetailsModal";
 
-type ToolbarProps = Omit<BubbleMenuProps, "children"> & {
-  toolbarVis: string;
-};
+type ToolbarProps = Omit<BubbleMenuProps, "children">;
 
 export interface ToolbarItem {
   name: string;
@@ -41,7 +39,7 @@ export interface ToolbarItem {
   icon: typeof BoldIcon;
 }
  
-function Toolbar({ editor, toolbarVis }: ToolbarProps) {
+function Toolbar({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [, setIsTableEditing] = useState(false);
   const [isImageDetailsModalOpen, setIsImageDetailsModalOpen] = useState(false);
@@ -74,7 +72,7 @@ function Toolbar({ editor, toolbarVis }: ToolbarProps) {
   };
 
   return (
-    <div className={`${toolbarVis} bg-neutral-900 mb-4`}>
+    <div className={`${styles.sticky} bg-neutral-900 mb-4`}>
       <ImageDetailsModal
         isImageDetailsModalOpen={isImageDetailsModalOpen}
         setIsImageDetailsModalOpen={setIsImageDetailsModalOpen}
