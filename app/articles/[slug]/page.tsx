@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const post = await getPost({ slug });
 
-  // Might revisit to give more defaults
+  // @TODO revisit to give more defaults
   const tags = post?.tags.map((tag) => tag.tag.title);
 
   if (!post) return {};
