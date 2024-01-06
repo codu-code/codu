@@ -39,7 +39,7 @@ const Create = () => {
     usePrompt();
 
   useEffect(() => {
-    _setUnsaved(unsavedChanges);
+    _setUnsaved();
   }, [unsavedChanges, _setUnsaved]);
 
   const allowUpdate = unsavedChanges;
@@ -350,7 +350,9 @@ const Create = () => {
                               id="canonicalUrl"
                               type="text"
                               placeholder="https://www.somesite.com/i-posted-here-first"
-                              defaultValue=""
+                              defaultValue={
+                                data?.canonicalUrl ? data.canonicalUrl : ""
+                              }
                               {...register("canonicalUrl")}
                             />
                             <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">

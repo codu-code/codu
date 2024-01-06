@@ -96,7 +96,7 @@ export const postRouter = createTRPCRouter({
           title,
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
-          canonicalUrl,
+          canonicalUrl: !!canonicalUrl ? canonicalUrl : null,
         },
       });
       return post;
