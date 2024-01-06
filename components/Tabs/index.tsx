@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 function classNames(...classes: string[]) {
@@ -18,6 +18,8 @@ type Props = {
 
 export function Tabs(props: Props) {
   const { tabs } = props;
+  const router = useRouter();
+
   return (
     <div className="max-w-5xl">
       <div className="sm:hidden">
@@ -30,11 +32,13 @@ export function Tabs(props: Props) {
           className="block w-full rounded-md border-neutral-300 focus:border-neutral-500 focus:ring-neutral-500"
           defaultValue={tabs.find((tab) => tab.current)?.name || tabs[0].name}
           onChange={(e) => {
-            redirect(`?tab=${e.target.value}`);
+            router.push(e.target.value);
           }}
         >
           {tabs.map((tab) => (
-            <option key={tab.name}>{tab.name}</option>
+            <option value={tab.href} key={tab.name}>
+              {tab.name}
+            </option>
           ))}
         </select>
       </div>
