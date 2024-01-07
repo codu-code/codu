@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Confirm homepage content", () => {
   test("Shared content", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("http://localhost:3000/");
     // Check headers
 
     await expect(page.locator("h1")).toContainText("A space for coders");
@@ -18,7 +18,7 @@ test.describe("Confirm homepage content", () => {
   });
 
   test("Different devices", async ({ page, isMobile }) => {
-    await page.goto("/");
+    await page.goto("http://localhost:3000/");
 
     const elementVisible = await page
       .locator('text="Recommended topics"')
