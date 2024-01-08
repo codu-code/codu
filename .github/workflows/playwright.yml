@@ -6,6 +6,8 @@ on:
     branches: [develop]
 jobs:
   test:
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
     environment: Preview
@@ -19,8 +21,6 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx playwright test
       - uses: actions/upload-artifact@v3
         if: always()
