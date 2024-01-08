@@ -18,6 +18,11 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+      - name: "check is DATABASE_URL exists"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        if: ${{ env.DATABASE_URL == '' }}
+        run: echo "The secret \"DATABASE_URL\" has not been made; echo please go to \"settings \> secrets \> actions\" to create it
       - name: Run Playwright tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
