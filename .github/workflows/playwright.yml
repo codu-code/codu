@@ -17,10 +17,13 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Run Playwright tests
+      - name: "check is DATABASE_URL exists"
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: echo ${{ secrets.DATABASE_URL }} && npx playwright test
+        if: ${{ env.DATABASE_URL == '' }}
+        run: echo "echo the secret \"DATABASE_URL\" has not been made; echo please go to \"settings \> secrets \> actions\" to create it
+      - name: Run Playwright tests
+        run: npx playwright test
       - uses: actions/upload-artifact@v3
         if: always()
         with:
