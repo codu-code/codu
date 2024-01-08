@@ -24,6 +24,8 @@ jobs:
         if: ${{ env.DATABASE_URL == '' }}
         run: echo "The secret \"DATABASE_URL\" has not been made; echo please go to \"settings \> secrets \> actions\" to create it
       - name: Run Playwright tests
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx playwright test
       - uses: actions/upload-artifact@v3
         if: always()
