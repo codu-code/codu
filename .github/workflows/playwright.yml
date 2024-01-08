@@ -20,7 +20,7 @@ jobs:
       - name: Run Playwright tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npx playwright test
+        run: echo ${{ secrets.DATABASE_URL }} && npx playwright test
       - uses: actions/upload-artifact@v3
         if: always()
         with:
