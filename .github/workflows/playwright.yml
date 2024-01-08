@@ -1,9 +1,6 @@
 name: Playwright Tests
 on:
-  push:
-    branches: [develop]
   pull_request_target:
-    branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
 jobs:
   test:
