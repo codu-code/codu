@@ -1,35 +1,38 @@
-import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import userEvent from "@testing-library/user-event";
-import { ThemeProvider } from "next-themes";
-import { axe, toHaveNoViolations } from "jest-axe";
-import ThemeToggle from "./ThemeToggle";
+// TODO refactor into e2e Playwright tests
+// Use @axe-core/playwright - https://playwright.dev/docs/accessibility-testing
 
-expect.extend(toHaveNoViolations);
+// import { render, screen } from "@testing-library/react";
+// import "@testing-library/jest-dom";
+// import userEvent from "@testing-library/user-event";
+// import { ThemeProvider } from "next-themes";
+// import { axe, toHaveNoViolations } from "jest-axe";
+// import ThemeToggle from "./ThemeToggle";
 
-describe("Theme Toggle", () => {
-  const user = userEvent.setup();
+// expect.extend(toHaveNoViolations);
 
-  it("renders with no axe violations", async () => {
-    const { container } = render(<ThemeToggle />, { wrapper: ThemeProvider });
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
+// describe("Theme Toggle", () => {
+//   const user = userEvent.setup();
 
-  it("renders a theme toggle button and toggles pressed state", async () => {
-    render(<ThemeToggle />, { wrapper: ThemeProvider });
+//   it("renders with no axe violations", async () => {
+//     const { container } = render(<ThemeToggle />, { wrapper: ThemeProvider });
+//     const results = await axe(container);
+//     expect(results).toHaveNoViolations();
+//   });
 
-    const toggleButton = screen.getByRole("button", {
-      name: "Toggle Dark Mode",
-      pressed: false,
-    });
+//   it("renders a theme toggle button and toggles pressed state", async () => {
+//     render(<ThemeToggle />, { wrapper: ThemeProvider });
 
-    expect(toggleButton).toBeInTheDocument();
+//     const toggleButton = screen.getByRole("button", {
+//       name: "Toggle Dark Mode",
+//       pressed: false,
+//     });
 
-    await user.click(toggleButton);
-    expect(toggleButton).toHaveAttribute("aria-pressed", "true");
+//     expect(toggleButton).toBeInTheDocument();
 
-    await user.click(toggleButton);
-    expect(toggleButton).toHaveAttribute("aria-pressed", "false");
-  });
-});
+//     await user.click(toggleButton);
+//     expect(toggleButton).toHaveAttribute("aria-pressed", "true");
+
+//     await user.click(toggleButton);
+//     expect(toggleButton).toHaveAttribute("aria-pressed", "false");
+//   });
+// });

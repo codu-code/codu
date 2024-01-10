@@ -8,9 +8,8 @@
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended",
     "prettier",
-    "plugin:testing-library/react",
-    "plugin:jest-dom/recommended",
-    "plugin:jsx-a11y/recommended"
+    "plugin:jsx-a11y/recommended",
+    "plugin:playwright/recommended"
   ],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "warn",
