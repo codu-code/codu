@@ -6,12 +6,9 @@ import type { Construct } from "constructs";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecsPatterns from "aws-cdk-lib/aws-ecs-patterns";
 import * as ecrAssets from "aws-cdk-lib/aws-ecr-assets";
-import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import * as sns from "aws-cdk-lib/aws-sns";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 
 interface Props extends cdk.StackProps {
   bucket: cdk.aws_s3.Bucket;
@@ -205,29 +202,5 @@ export class AppStack extends cdk.Stack {
     );
 
     this.loadbalancer = fargateService.loadBalancer;
-
-    // Cloudwatch notifications
-    const alarm = new cloudwatch.Alarm(this, "FargateServiceDownAlarm", {
-      alarmName: "FargateServiceDownAlarm",
-      alarmDescription: "Triggered when Fargate service is down",
-      metric: fargateService.service.metricCpuUtilization(),
-      threshold: 10,
-      evaluationPeriods: 1,
-      comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
-      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-    });
-
-    const snsTopic = new sns.Topic(this, "FargateServiceAlertTopic");
-    alarm.addAlarmAction(new cdk.aws_cloudwatch_actions.SnsAction(snsTopic));
-
-    snsTopic.addSubscription(
-      new snsSubscriptions.EmailSubscription(
-        ssm.StringParameter.fromStringParameterName(
-          this,
-          "alertEmail",
-          "/env/alertEmail",
-        ).toString(),
-      ),
-    );
   }
 }
