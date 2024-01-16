@@ -61,3 +61,11 @@ ssmSetup.zsh
 
 # Generated files
 .swc
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

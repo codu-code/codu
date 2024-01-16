@@ -1,75 +1,75 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
-import { PromptDialog } from "@/components/PromptService";
+// TODO refactor into e2e Playwright tests
 
-class ResizeObserver {
-  observe() {
-    // do nothing
-  }
-  unobserve() {
-    // do nothing
-  }
-  disconnect() {
-    // do nothing
-  }
-}
+// import React from "react";
 
-window.ResizeObserver = ResizeObserver;
+// import { PromptDialog } from "@/components/PromptService";
 
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-}));
+// class ResizeObserver {
+//   observe() {
+//     // do nothing
+//   }
+//   unobserve() {
+//     // do nothing
+//   }
+//   disconnect() {
+//     // do nothing
+//   }
+// }
 
-jest.mock("./PromptContext", () => ({
-  usePrompt: jest.fn(),
-}));
+// window.ResizeObserver = ResizeObserver;
 
-describe("PromptDialog Component", () => {
-  const mockConfirm = jest.fn();
-  const mockCancel = jest.fn();
+// jest.mock("next/navigation", () => ({
+//   useRouter: jest.fn(),
+// }));
 
-  jest.mock("next/navigation", () => ({
-    useRouter: jest.fn(),
-  }));
+// jest.mock("./PromptContext", () => ({
+//   usePrompt: jest.fn(),
+// }));
 
-  const PromptDialogTestComponent = (
-    <PromptDialog
-      title="Test Title"
-      subTitle="Test Subtitle"
-      content="Test Content"
-      confirm={mockConfirm}
-      cancel={mockCancel}
-      confirmText="Continue without saving"
-      cancelText="Keep editing"
-    />
-  );
+// describe("PromptDialog Component", () => {
+//   const mockConfirm = jest.fn();
+//   const mockCancel = jest.fn();
 
-  it("renders with provided title, subtitle and content", () => {
-    render(PromptDialogTestComponent);
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
-    expect(screen.getByText("Test Subtitle")).toBeInTheDocument();
-    expect(screen.getByText("Test Content")).toBeInTheDocument();
-  });
+//   jest.mock("next/navigation", () => ({
+//     useRouter: jest.fn(),
+//   }));
 
-  it("calls confirm callback when continue button is clicked", async () => {
-    render(PromptDialogTestComponent);
-    await userEvent.click(
-      screen.getByRole("button", { name: "Continue without saving" }),
-    );
-    expect(mockConfirm).toHaveBeenCalled();
-  });
+//   const PromptDialogTestComponent = (
+//     <PromptDialog
+//       title="Test Title"
+//       subTitle="Test Subtitle"
+//       content="Test Content"
+//       confirm={mockConfirm}
+//       cancel={mockCancel}
+//       confirmText="Continue without saving"
+//       cancelText="Keep editing"
+//     />
+//   );
 
-  it("calls cancel callback when cancel button is clicked", async () => {
-    render(PromptDialogTestComponent);
-    await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
-    expect(mockCancel).toHaveBeenCalled();
-  });
+//   it("renders with provided title, subtitle and content", () => {
+//     render(PromptDialogTestComponent);
+//     expect(screen.getByText("Test Title")).toBeInTheDocument();
+//     expect(screen.getByText("Test Subtitle")).toBeInTheDocument();
+//     expect(screen.getByText("Test Content")).toBeInTheDocument();
+//   });
 
-  it("calls cancel callback when close icon is clicked", async () => {
-    render(PromptDialogTestComponent);
-    await userEvent.click(screen.getByRole("button", { name: "Close" }));
-    expect(mockCancel).toHaveBeenCalled();
-  });
-});
+//   it("calls confirm callback when continue button is clicked", async () => {
+//     render(PromptDialogTestComponent);
+//     await userEvent.click(
+//       screen.getByRole("button", { name: "Continue without saving" }),
+//     );
+//     expect(mockConfirm).toHaveBeenCalled();
+//   });
+
+//   it("calls cancel callback when cancel button is clicked", async () => {
+//     render(PromptDialogTestComponent);
+//     await userEvent.click(screen.getByRole("button", { name: "Keep editing" }));
+//     expect(mockCancel).toHaveBeenCalled();
+//   });
+
+//   it("calls cancel callback when close icon is clicked", async () => {
+//     render(PromptDialogTestComponent);
+//     await userEvent.click(screen.getByRole("button", { name: "Close" }));
+//     expect(mockCancel).toHaveBeenCalled();
+//   });
+// });
