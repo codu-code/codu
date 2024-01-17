@@ -34,7 +34,7 @@ const Nav = ({ session }: { session: Session | null }) => {
 
   return (
     <Disclosure as="nav" className="bg-neutral-100 dark:bg-black">
-      {({ open }) => (
+      {({ close, open }) => (
         <>
           <div className="relative z-20 mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
@@ -197,7 +197,11 @@ const Nav = ({ session }: { session: Session | null }) => {
               </div>
             </div>
           </div>
-          <MobileNav session={session} userNavigation={userNavigation} />
+          <MobileNav
+            session={session}
+            userNavigation={userNavigation}
+            close={close}
+          />
         </>
       )}
     </Disclosure>
