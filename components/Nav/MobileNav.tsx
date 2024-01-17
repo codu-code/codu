@@ -2,7 +2,7 @@ import { type UserNavigationItem } from "@/types/types";
 import { Disclosure, Transition } from "@headlessui/react";
 import { type Session } from "next-auth";
 import { PromptLink as Link } from "../PromptService/PromptLink";
-import { type FunctionComponent } from "react";
+import { MutableRefObject, useRef, type FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 
 function classNames(...classes: string[]) {
@@ -12,11 +12,18 @@ function classNames(...classes: string[]) {
 interface MobileNavProps {
   session: Session | null;
   userNavigation: UserNavigationItem[];
+  close?: (
+    focusableElement?:
+      | HTMLElement
+      | MutableRefObject<HTMLElement | null>
+      | undefined,
+  ) => void;
 }
 
 const MobileNav: FunctionComponent<MobileNavProps> = ({
   session,
   userNavigation,
+  close,
 }) => {
   return (
     <Transition
@@ -31,7 +38,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
             <NavItem item={item} key={item.name} />
           ))}
           <div className="flex flex-col space-y-1 border-t border-neutral-400 pb-3 pt-3 dark:border-neutral-600">
-            <SubNav session={session} />
+            <SubNav session={session} close={close} />
           </div>
         </div>
 
@@ -123,9 +130,16 @@ const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
 
 interface SubNavProps {
   session: Session | null;
+  close?: (
+    focusableElement?:
+      | HTMLElement
+      | MutableRefObject<HTMLElement | null>
+      | undefined,
+  ) => void;
 }
 
-const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
+const SubNav: FunctionComponent<SubNavProps> = ({ session, close }) => {
+  const disclosureButtonRef = useRef(null);
   const data = session ? userSubNav : subNav;
   return (
     <>
@@ -134,6 +148,8 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session }) => {
           <Disclosure.Button
             as={Link}
             to={item.href}
+            close={close}
+            ref={disclosureButtonRef}
             className={classNames(
               item.fancy
                 ? "block justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
