@@ -124,11 +124,11 @@ const Profile = ({ profile, isOwner, session }: Props) => {
   return (
     <>
       <div className="text-900 mx-auto max-w-2xl px-4 dark:text-white">
-        <main className="flex pt-6">
+        <main className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             {image && (
               <img
-                className="h-32 w-32 rounded-full object-cover"
+                className="mb-2 h-20 w-20 rounded-full object-cover sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32"
                 alt={`Avatar for ${name}`}
                 src={image}
               />
