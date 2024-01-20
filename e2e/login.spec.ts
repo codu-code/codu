@@ -4,7 +4,7 @@ test.afterEach(async ({ page }) => {
   // Sign out the user after all tests are done
   await page.goto("http://localhost:3000/api/auth/signout");
   await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page.locator("#submitButton")).not.toBeVisible();
+  await expect(page.locator("#submitButton")).toBeHidden();
 });
 
 test.beforeEach(async ({ page }) => {
@@ -29,8 +29,9 @@ test.describe("Login Page", () => {
     await button.click();
     await page.waitForURL("https://github.com/**");
 
-    expect(page.getByLabel("Username or email address")).toBeTruthy();
+    await page.waitForSelector("#login_field");
 
+    expect(page.getByLabel("Username or email address")).toBeTruthy();
     expect(page.getByLabel("Password")).toBeTruthy();
   });
 });
