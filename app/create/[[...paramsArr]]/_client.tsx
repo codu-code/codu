@@ -19,6 +19,7 @@ import { markdocComponents } from "../../../markdoc/components";
 import { config } from "../../../markdoc/config";
 import { redirect, useParams } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
+import { Switch } from "@/components/Switch/Switch";
 
 const Create = () => {
   const params = useParams();
@@ -32,6 +33,7 @@ const Create = () => {
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const [isPostScheduled, setIsPostScheduled] = useState<boolean>(false);
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
@@ -227,9 +229,9 @@ const Create = () => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags } = data;
+    const { body, excerpt, title, id, tags, published } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    reset({ body, excerpt, title, id });
+    reset({ body, excerpt, title, id, published: published ?? undefined });
   }, [data]);
 
   useEffect(() => {
@@ -332,6 +334,33 @@ const Create = () => {
                       to find and know what your story is about.
                     </p>
                   </div>
+
+                  {data &&
+                    (data.published === null ||
+                      data.published > new Date()) && (
+                      <div className="col-span-12">
+                        <div className="mb-2 flex items-center gap-2">
+                          <label
+                            htmlFor="schedule-switch"
+                            className="text-sm font-medium text-neutral-800 dark:text-white"
+                          >
+                            Schedule post
+                          </label>
+                          <Switch
+                            id="schedule-switch"
+                            checked={isPostScheduled}
+                            onCheckedChange={setIsPostScheduled}
+                          />
+                        </div>
+                        {isPostScheduled && (
+                          <input
+                            type="datetime-local"
+                            {...register("published")}
+                          />
+                        )}
+                      </div>
+                    )}
+
                   <div className="col-span-12  border-b border-neutral-300 pb-4">
                     <Disclosure>
                       {({ open }) => (

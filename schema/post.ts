@@ -24,6 +24,7 @@ export const SavePostSchema = z.object({
   ),
   canonicalUrl: z.optional(z.string().trim().url()),
   tags: z.string().array().max(5).optional(),
+  published: z.date().optional(),
 });
 
 export const PublishPostSchema = z.object({
