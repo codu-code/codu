@@ -340,7 +340,7 @@ const Create = () => {
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
-                                open ? "rotate-180 transform" : ""
+                                open ? "" : "rotate-180 transform"
                               } h-5 w-5 text-neutral-400`}
                             />
                           </Disclosure.Button>
@@ -526,8 +526,7 @@ const Create = () => {
                                 className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
                                 onClick={() => setOpen(true)}
                               >
-                                {!data?.published && "Publish"}
-                                {data?.published && "Save Changes"}
+                                Next
                               </button>
                             </div>
                           </div>
