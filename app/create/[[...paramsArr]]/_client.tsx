@@ -302,7 +302,7 @@ const Create = () => {
                   <div className="my-4 sm:col-span-6 sm:my-0">
                     <label htmlFor="tags">Topics</label>
                     <input
-                      id="tag"
+                      id="tags"
                       name="tag"
                       disabled={tags.length >= 5}
                       placeholder={
