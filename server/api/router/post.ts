@@ -268,7 +268,7 @@ export const postRouter = createTRPCRouter({
             published: null,
           },
           published: {
-            lte: input.published,
+            lte: input.published ?? new Date(),
           },
           ...(tag
             ? {
