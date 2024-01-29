@@ -279,11 +279,11 @@ const Create = () => {
                       rows={3}
                       {...register("excerpt")}
                     />
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       What readers will see before they click on your article.
                       Good SEO descriptions utilize keywords, summarize the
                       story and are between 140-156 characters long.
-                    </p>
+                    </small>
                   </div>
                   <div className="my-4 sm:col-span-6 sm:my-0">
                     <label htmlFor="tags">Topics</label>
@@ -329,10 +329,10 @@ const Create = () => {
                         </button>
                       </div>
                     ))}
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       Tag with up to 5 topics. This makes it easier for readers
                       to find and know what your story is about.
-                    </p>
+                    </small>
                   </div>
 
                   {data &&
@@ -358,6 +358,9 @@ const Create = () => {
                             {...register("published")}
                           />
                         )}
+                        <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                          Publish your post at a later time.
+                        </small>
                       </div>
                     )}
 
@@ -421,8 +424,11 @@ const Create = () => {
                         </>
                       ) : (
                         <>
-                          {!data?.published && "Publish"}
-                          {data?.published && "Save Changes"}
+                          {data?.published
+                            ? "Save Changes"
+                            : isPostScheduled
+                              ? "Schedule"
+                              : "Publish"}
                         </>
                       )}
                     </button>
