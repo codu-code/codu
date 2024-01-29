@@ -104,7 +104,17 @@ export const postRouter = createTRPCRouter({
   publish: protectedProcedure
     .input(PublishPostSchema)
     .mutation(async ({ input, ctx }) => {
-      const { published, id } = input;
+      const { published, id, publishTime } = input;
+
+      const getPublishedTime = () => {
+        if (!published) {
+          return null;
+        }
+        if (publishTime) {
+          return publishTime.toISOString();
+        }
+        return new Date().toISOString();
+      };
 
       const currentPost = await ctx.db.post.findUnique({
         where: { id },
@@ -117,8 +127,6 @@ export const postRouter = createTRPCRouter({
       }
 
       const { excerpt, title } = currentPost;
-
-      const publishedValue = published ? new Date().toISOString() : null;
 
       const excerptOrCreatedExcerpt: string =
         excerpt.length > 0
@@ -133,7 +141,7 @@ export const postRouter = createTRPCRouter({
           slug: `${title.replace(/\W+/g, "-")}-${id}`
             .toLowerCase()
             .replace(/^-+|-+(?=-|$)/g, ""),
-          published: publishedValue,
+          published: getPublishedTime(),
           excerpt: excerptOrCreatedExcerpt,
         },
       });

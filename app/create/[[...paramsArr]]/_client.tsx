@@ -151,6 +151,8 @@ const Create = () => {
 
   const savePost = async () => {
     const formData = getFormData();
+    // Don't include published time when saving post, handle separately in onSubmit
+    delete formData.published;
     if (!formData.id) {
       create({ ...formData });
     } else {
@@ -164,10 +166,10 @@ const Create = () => {
     saveStatus === "loading" ||
     dataStatus === "loading";
 
-  const published = !!data?.published || false;
+  const published = data?.published ? data.published < new Date() : false;
 
   const onSubmit = async (data: SavePostInput) => {
-    // vaidate markdoc syntax
+    // validate markdoc syntax
     const ast = Markdoc.parse(data.body);
     const errors = Markdoc.validate(ast, config).filter(
       (e) => e.error.level === "critical",
@@ -184,7 +186,13 @@ const Create = () => {
       try {
         const formData = getFormData();
         ConfirmPostSchema.parse(formData);
-        publish({ id: postId, published: !published });
+        publish({
+          id: postId,
+          published: !published,
+          publishTime: formData.published
+            ? new Date(formData.published)
+            : undefined,
+        });
       } catch (err) {
         if (err instanceof ZodError) {
           return toast.error(err.issues[0].message);
@@ -231,7 +239,13 @@ const Create = () => {
     if (!data) return;
     const { body, excerpt, title, id, tags, published } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    reset({ body, excerpt, title, id, published: published ?? undefined });
+    reset({
+      body,
+      excerpt,
+      title,
+      id,
+      published: published?.toISOString() ?? undefined,
+    });
   }, [data]);
 
   useEffect(() => {

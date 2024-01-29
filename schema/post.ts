@@ -24,12 +24,13 @@ export const SavePostSchema = z.object({
   ),
   canonicalUrl: z.optional(z.string().trim().url()),
   tags: z.string().array().max(5).optional(),
-  published: z.date().optional(),
+  published: z.string().datetime().optional(),
 });
 
 export const PublishPostSchema = z.object({
   id: z.string(),
   published: z.boolean(),
+  publishTime: z.date().optional(),
 });
 
 export const ConfirmPostSchema = z.object({
