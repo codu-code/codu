@@ -209,7 +209,11 @@ const Create = () => {
   };
 
   if (publishStatus === "success" && publishData?.slug) {
-    router.push(`/articles/${publishData.slug}`);
+    if (isPostScheduled) {
+      router.push("/my-posts?tab=scheduled");
+    } else {
+      router.push(`/articles/${publishData.slug}`);
+    }
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -417,7 +421,7 @@ const Create = () => {
                     </Disclosure>
                   </div>
                   <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
-                    {!data?.published && (
+                    {postStatus === PostStatus.draft && (
                       <button
                         type="button"
                         disabled={isDisabled}
@@ -443,11 +447,12 @@ const Create = () => {
                         </>
                       ) : (
                         <>
-                          {data?.published
-                            ? "Save Changes"
-                            : isPostScheduled
-                              ? "Schedule"
-                              : "Publish"}
+                          {postStatus === PostStatus.draft &&
+                            (isPostScheduled ? "Schedule" : "Publish now")}
+                          {postStatus === PostStatus.scheduled &&
+                            (isPostScheduled ? "Save changes" : "Publish now")}
+                          {postStatus === PostStatus.published &&
+                            "Save changes"}
                         </>
                       )}
                     </button>
