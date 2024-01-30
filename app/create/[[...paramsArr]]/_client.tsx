@@ -17,12 +17,13 @@ import { useMarkdownHotkeys } from "../../../markdoc/editor/hotkeys/hotkeys.mark
 import { useMarkdownShortcuts } from "../../../markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "../../../markdoc/components";
 import { config } from "../../../markdoc/config";
-import { redirect, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 
 const Create = () => {
   const params = useParams();
+  const router = useRouter();
 
   const postId = params?.paramsArr?.[0] || "";
 
@@ -205,7 +206,7 @@ const Create = () => {
   };
 
   if (publishStatus === "success" && publishData?.slug) {
-    redirect(`/articles/${publishData.slug}`);
+    router.push(`/articles/${publishData.slug}`);
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -257,7 +258,7 @@ const Create = () => {
 
   useEffect(() => {
     if (!createData?.id) return;
-    redirect(`create/${createData.id}`);
+    router.push(`create/${createData.id}`);
   }, [createData]);
 
   const hasContent = title.length >= 5 && body.length >= 10;
@@ -420,7 +421,7 @@ const Create = () => {
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
-                          redirect("/my-posts?tab=drafts");
+                          router.push("/my-posts?tab=drafts");
                         }}
                       >
                         Save Draft
