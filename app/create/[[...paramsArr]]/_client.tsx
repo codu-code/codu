@@ -89,15 +89,6 @@ const Create = () => {
       toast.error("Error auto-saving");
       Sentry.captureException(error);
     },
-    onSuccess() {
-      toast.success("Saved");
-      setSavedTime(
-        new Date().toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }),
-      );
-    },
   });
   const {
     mutate: create,
@@ -160,6 +151,13 @@ const Create = () => {
       await create({ ...formData });
     } else {
       await save({ ...formData, id: postId });
+      toast.success("Saved");
+      setSavedTime(
+        new Date().toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }),
+      );
     }
     setUnsavedChanges(false);
   };
