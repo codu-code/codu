@@ -20,6 +20,7 @@ import { config } from "../../../markdoc/config";
 import { useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
+import { dateToLocalDatetimeStr } from "@/utils/datetime";
 
 const Create = () => {
   const params = useParams();
@@ -245,8 +246,9 @@ const Create = () => {
       excerpt,
       title,
       id,
-      published: published?.toISOString() ?? undefined,
+      published: dateToLocalDatetimeStr(published),
     });
+    setIsPostScheduled(published ? published > new Date() : false);
   }, [data]);
 
   useEffect(() => {
