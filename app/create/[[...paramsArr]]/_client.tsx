@@ -157,9 +157,9 @@ const Create = () => {
     // Don't include published time when saving post, handle separately in onSubmit
     delete formData.published;
     if (!formData.id) {
-      create({ ...formData });
+      await create({ ...formData });
     } else {
-      save({ ...formData, id: postId });
+      await save({ ...formData, id: postId });
     }
     setUnsavedChanges(false);
   };
@@ -171,9 +171,9 @@ const Create = () => {
 
   const postStatus = data ? getPostStatus(data.published) : PostStatus.draft;
 
-  const onSubmit = async (data: SavePostInput) => {
+  const onSubmit = async (inputData: SavePostInput) => {
     // validate markdoc syntax
-    const ast = Markdoc.parse(data.body);
+    const ast = Markdoc.parse(inputData.body);
     const errors = Markdoc.validate(ast, config).filter(
       (e) => e.error.level === "critical",
     );
@@ -185,36 +185,35 @@ const Create = () => {
       });
       return;
     }
-    if (postStatus !== PostStatus.published) {
-      try {
-        const formData = getFormData();
-        ConfirmPostSchema.parse(formData);
-        publish({
-          id: postId,
-          published: true,
-          publishTime:
-            isPostScheduled && formData.published
-              ? new Date(formData.published)
-              : new Date(),
-        });
-      } catch (err) {
-        if (err instanceof ZodError) {
-          return toast.error(err.issues[0].message);
-        } else {
-          return toast.error("Something went when trying to publish.");
-        }
+
+    await savePost();
+
+    if (postStatus === PostStatus.published) {
+      if (data) {
+        router.push(`/articles/${data.slug}`);
+      }
+      return;
+    }
+
+    try {
+      const formData = getFormData();
+      ConfirmPostSchema.parse(formData);
+      await publish({
+        id: postId,
+        published: true,
+        publishTime:
+          isPostScheduled && formData.published
+            ? new Date(formData.published)
+            : new Date(),
+      });
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return toast.error(err.issues[0].message);
+      } else {
+        return toast.error("Something went when trying to publish.");
       }
     }
-    await savePost();
   };
-
-  if (publishStatus === "success" && publishData?.slug) {
-    if (isPostScheduled) {
-      router.push("/my-posts?tab=scheduled");
-    } else {
-      router.push(`/articles/${publishData.slug}`);
-    }
-  }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -277,6 +276,16 @@ const Create = () => {
     if ((title + body).length < 5) return;
     if (isDirty) setUnsavedChanges(true);
   }, [title, body]);
+
+  useEffect(() => {
+    if (publishStatus === "success" && publishData?.slug) {
+      if (isPostScheduled) {
+        router.push("/my-posts?tab=scheduled");
+      } else {
+        router.push(`/articles/${publishData.slug}`);
+      }
+    }
+  }, [publishStatus, publishData, isPostScheduled, router]);
 
   return (
     <>
