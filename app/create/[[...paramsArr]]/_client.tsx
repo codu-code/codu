@@ -439,7 +439,7 @@ const Create = () => {
                           router.push("/my-posts?tab=drafts");
                         }}
                       >
-                        Save Draft
+                        Save draft
                       </button>
                     )}
                     <button
