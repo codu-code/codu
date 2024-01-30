@@ -21,6 +21,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 import { dateToLocalDatetimeStr } from "@/utils/datetime";
+import { PostStatus, getPostStatus } from "@/utils/post";
 
 const Create = () => {
   const params = useParams();
@@ -168,7 +169,7 @@ const Create = () => {
     saveStatus === "loading" ||
     dataStatus === "loading";
 
-  const published = data?.published ? data.published < new Date() : false;
+  const postStatus = data ? getPostStatus(data.published) : PostStatus.draft;
 
   const onSubmit = async (data: SavePostInput) => {
     // validate markdoc syntax
@@ -184,16 +185,17 @@ const Create = () => {
       });
       return;
     }
-    if (!published) {
+    if (postStatus !== PostStatus.published) {
       try {
         const formData = getFormData();
         ConfirmPostSchema.parse(formData);
         publish({
           id: postId,
-          published: !published,
-          publishTime: formData.published
-            ? new Date(formData.published)
-            : undefined,
+          published: true,
+          publishTime:
+            isPostScheduled && formData.published
+              ? new Date(formData.published)
+              : new Date(),
         });
       } catch (err) {
         if (err instanceof ZodError) {
@@ -252,7 +254,7 @@ const Create = () => {
   }, [data]);
 
   useEffect(() => {
-    if (published) return;
+    if (postStatus !== PostStatus.draft) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     if (allowUpdate) savePost();
