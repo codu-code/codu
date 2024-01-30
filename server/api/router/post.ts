@@ -353,10 +353,13 @@ export const postRouter = createTRPCRouter({
 
       return { posts: cleaned, nextCursor };
     }),
-  myPosts: protectedProcedure.query(async ({ ctx }) => {
+  myPublished: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.post.findMany({
       where: {
         NOT: [{ published: null }],
+        published: {
+          lte: new Date(),
+        },
         userId: ctx?.session?.user?.id,
       },
       include: {
@@ -371,7 +374,28 @@ export const postRouter = createTRPCRouter({
       },
     });
   }),
-  drafts: protectedProcedure.query(async ({ ctx }) => {
+  myScheduled: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.post.findMany({
+      where: {
+        NOT: [{ published: null }],
+        published: {
+          gt: new Date(),
+        },
+        userId: ctx?.session?.user?.id,
+      },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+      },
+      orderBy: {
+        published: "asc",
+      },
+    });
+  }),
+  myDrafts: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.post.findMany({
       where: {
         published: null,
