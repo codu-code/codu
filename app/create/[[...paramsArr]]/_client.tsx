@@ -21,7 +21,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 import { dateToLocalDatetimeStr } from "@/utils/datetime";
-import { PostStatus, getPostStatus } from "@/utils/post";
+import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
 
 const Create = () => {
   const params = useParams();
@@ -68,7 +68,7 @@ const Create = () => {
     },
   });
 
-  const { title, body } = watch();
+  const { title, body, published } = watch();
 
   const debouncedValue = useDebounce(title + body, 1500);
 
@@ -301,7 +301,6 @@ const Create = () => {
               <div className="pb-8 pt-16">
                 <div className="block w-full max-w-2xl gap-6 sm:grid sm:grid-cols-12">
                   <div className="mt-8 sm:col-span-6 sm:mt-0">
-                    {" "}
                     <label htmlFor="excerpt">Excerpt</label>
                     <textarea
                       maxLength={156}
@@ -386,6 +385,7 @@ const Create = () => {
                           <input
                             type="datetime-local"
                             {...register("published")}
+                            min={dateToLocalDatetimeStr(new Date())}
                           />
                         )}
                         <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
@@ -432,7 +432,7 @@ const Create = () => {
                       <button
                         type="button"
                         disabled={isDisabled}
-                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50"
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
@@ -444,8 +444,11 @@ const Create = () => {
                     )}
                     <button
                       type="submit"
-                      disabled={isDisabled}
-                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                      disabled={
+                        isDisabled ||
+                        (isPostScheduled && isValidScheduleTime(published))
+                      }
+                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:from-orange-300 active:hover:to-pink-500 disabled:opacity-50"
                     >
                       {hasLoadingState ? (
                         <>

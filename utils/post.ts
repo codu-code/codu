@@ -16,3 +16,13 @@ export function getPostStatus(
   }
   return PostStatus.published;
 }
+
+export function isValidScheduleTime(
+  scheduleTime: string | undefined,
+  now = new Date(),
+) {
+  if (!scheduleTime) {
+    return false;
+  }
+  return new Date(scheduleTime) < now;
+}
