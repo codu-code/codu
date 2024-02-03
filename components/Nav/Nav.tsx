@@ -11,6 +11,10 @@ import ThemeToggle from "../Theme/ThemeToggle/ThemeToggle";
 import AnimatedHamburger from "./AnimatedHamburger";
 import Logo from "@/icons/logo.svg";
 import MobileNav from "./MobileNav";
+import { MobileSearch, Search } from "@/components/ui/Search";
+
+const enableSearch =
+  !!process.env.ALPHA || process.env.NODE_ENV === "development";
 
 const Nav = ({ session }: { session: Session | null }) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
@@ -77,6 +81,8 @@ const Nav = ({ session }: { session: Session | null }) => {
                   </div>
                 </div>
               </div>
+              {enableSearch && <MobileSearch />}
+              {enableSearch && <Search />}
               <div className="ml-4 hidden md:block">
                 <div className="flex items-center space-x-2 text-sm font-medium lg:text-base">
                   {session ? (
