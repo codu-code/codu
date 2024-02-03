@@ -91,6 +91,9 @@ export default async function Page({
           NOT: {
             published: null,
           },
+          published: {
+            lte: new Date(),
+          },
         },
         orderBy: {
           published: "desc",
