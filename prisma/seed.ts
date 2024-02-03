@@ -167,35 +167,43 @@ async function main() {
     });
     console.log(`Added community: ${community.name}`);
   });
+
   const users = await prisma.user.findMany();
-  communityData.forEach(async (community) => {
-    users.forEach(async (user, index) => {
-      const id = nanoid(8);
-      await prisma.membership.create({
-        data: {
-          id: id,
-          userId: user.id,
-          communityId: community.id,
-          isEventOrganiser: index === 0,
-        },
+  await Promise.all(
+    communityData.map(async (community) => {
+      const membershipPromises = users.map(async (user, index) => {
+        const id = nanoid(8);
+        await prisma.membership.create({
+          data: {
+            id: id,
+            userId: user.id,
+            communityId: community.id,
+            isEventOrganiser: index === 0,
+          },
+        });
+        console.log(`Added membership: ${id}`);
       });
-      console.log(`Added membership: ${id}`);
-    });
-  });
+      await Promise.all(membershipPromises);
+    }),
+  );
+
   const events = await prisma.event.findMany();
-  events.forEach(async (event) => {
-    users.forEach(async (user) => {
+  const rsvpPromises: Promise<void>[] = [];
+  events.forEach((event) => {
+    const eventRSVPPromises = users.map(async (user) => {
       const id = nanoid(8);
       await prisma.rSVP.create({
         data: {
-          id: nanoid(8),
+          id: id,
           userId: user.id,
           eventId: event.id,
         },
       });
       console.log(`Added RSVP: ${id}`);
     });
+    rsvpPromises.push(...eventRSVPPromises);
   });
+  await Promise.all(rsvpPromises);
   console.log(`Seeding finished.`);
 }
 
