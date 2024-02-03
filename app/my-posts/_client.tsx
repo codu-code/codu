@@ -12,6 +12,7 @@ import { useSearchParams } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { Tabs } from "@/components/Tabs";
 import { PromptDialog } from "@/components/PromptService";
+import { PostStatus, getPostStatus } from "@/utils/post";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -24,8 +25,9 @@ const MyPosts = () => {
 
   const [selectedArticleToDelete, setSelectedArticleToDelete] =
     useState<string>();
-  const drafts = api.post.drafts.useQuery();
-  const published = api.post.myPosts.useQuery();
+  const drafts = api.post.myDrafts.useQuery();
+  const scheduled = api.post.myScheduled.useQuery();
+  const published = api.post.myPublished.useQuery();
 
   const { mutate, status: deleteStatus } = api.post.delete.useMutation({
     onSuccess() {
@@ -35,8 +37,8 @@ const MyPosts = () => {
     },
   });
 
-  const TAB_VALUES_ARRAY = ["drafts", "published"];
-  const [DRAFTS, PUBLISHED] = TAB_VALUES_ARRAY;
+  const TAB_VALUES_ARRAY = ["drafts", "scheduled", "published"];
+  const [DRAFTS, SCHEDULED, PUBLISHED] = TAB_VALUES_ARRAY;
 
   const selectedTab =
     tabFromParams && TAB_VALUES_ARRAY.includes(tabFromParams)
@@ -53,6 +55,14 @@ const MyPosts = () => {
       current: selectedTab === DRAFTS,
     },
     {
+      name: "Scheduled",
+      href: `?tab=${SCHEDULED}`,
+      value: SCHEDULED,
+      data: scheduled.data,
+      status: scheduled.status,
+      current: selectedTab === SCHEDULED,
+    },
+    {
       name: "Published",
       href: `?tab=${PUBLISHED}`,
       value: PUBLISHED,
@@ -62,7 +72,8 @@ const MyPosts = () => {
     },
   ];
 
-  const selectedTabData = selectedTab === DRAFTS ? tabs[0] : tabs[1];
+  const selectedTabData =
+    tabs[TAB_VALUES_ARRAY.findIndex((t) => t === selectedTab)];
 
   return (
     <>
@@ -96,95 +107,122 @@ const MyPosts = () => {
 
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
-              ({ id, title, excerpt, readTimeMins, slug }) => (
-                <article
-                  className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
-                  key={id}
-                >
-                  {selectedTab === PUBLISHED ? (
-                    <Link href={`articles/${slug}`}>
-                      <h2 className="mb-2 text-2xl font-semibold hover:underline">
-                        {title}
-                      </h2>
-                    </Link>
-                  ) : (
-                    <h2 className=" mb-2 text-2xl font-semibold">{title}</h2>
-                  )}
-                  <p className="break-words">
-                    {excerpt || "No excerpt yet... Write more to see one."}
-                  </p>
-                  <p className="mt-2 text-sm font-light text-neutral-400">
-                    Read time so far: {readTimeMins} mins
-                  </p>
-                  <div className="flex justify-end">
-                    <Menu as="div" className="relative inline-block text-left">
-                      <div>
-                        <Menu.Button className="inline-flex w-full justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neutral-100">
-                          Options
-                          <ChevronDownIcon
-                            className="-mr-1 ml-2 h-5 w-5"
-                            aria-hidden="true"
-                          />
-                        </Menu.Button>
+              ({ id, title, excerpt, readTimeMins, slug, published }) => {
+                const postStatus = getPostStatus(published);
+                return (
+                  <article
+                    className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
+                    key={id}
+                  >
+                    {selectedTab === PUBLISHED ? (
+                      <Link href={`articles/${slug}`}>
+                        <h2 className="mb-2 text-2xl font-semibold hover:underline">
+                          {title}
+                        </h2>
+                      </Link>
+                    ) : (
+                      <h2 className=" mb-2 text-2xl font-semibold">{title}</h2>
+                    )}
+                    <p className="break-words">
+                      {excerpt || "No excerpt yet... Write more to see one."}
+                    </p>
+                    <p className="mt-2 text-sm font-light text-neutral-400">
+                      Read time so far: {readTimeMins} mins
+                    </p>
+                    <div className="flex items-center">
+                      <div className="flex-grow">
+                        {postStatus === PostStatus.scheduled ? (
+                          <small>
+                            Scheduled to publish on{" "}
+                            {published?.toLocaleDateString()} at{" "}
+                            {published?.toLocaleTimeString(undefined, {
+                              hour12: true,
+                            })}
+                          </small>
+                        ) : postStatus === PostStatus.published ? (
+                          <small>
+                            Published on {published?.toLocaleDateString()} at{" "}
+                            {published?.toLocaleTimeString(undefined, {
+                              hour12: true,
+                            })}
+                          </small>
+                        ) : null}
                       </div>
 
-                      <Transition
-                        as={Fragment}
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
+                      <Menu
+                        as="div"
+                        className="relative inline-block text-left"
                       >
-                        <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <div className="py-1">
-                            <Menu.Item>
-                              {({ active }) => (
-                                <Link
-                                  className={classNames(
-                                    active
-                                      ? "bg-neutral-100 text-black"
-                                      : "text-neutral-700",
-                                    "group flex items-center px-4 py-2 text-sm",
-                                  )}
-                                  href={`/create/${id}`}
-                                >
-                                  <PencilIcon
-                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
-                                    aria-hidden="true"
-                                  />
-                                  Edit
-                                </Link>
-                              )}
-                            </Menu.Item>
+                        <div>
+                          <Menu.Button className="inline-flex w-full justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neutral-100">
+                            Options
+                            <ChevronDownIcon
+                              className="-mr-1 ml-2 h-5 w-5"
+                              aria-hidden="true"
+                            />
+                          </Menu.Button>
+                        </div>
 
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  onClick={() => setSelectedArticleToDelete(id)}
-                                  className={classNames(
-                                    active
-                                      ? "bg-neutral-100 text-black"
-                                      : "text-neutral-700",
-                                    "group flex w-full items-center px-4 py-2 text-sm",
-                                  )}
-                                >
-                                  <TrashIcon
-                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
-                                    aria-hidden="true"
-                                  />
-                                  Delete
-                                </button>
-                              )}
-                            </Menu.Item>
-                          </div>
-                        </Menu.Items>
-                      </Transition>
-                    </Menu>
-                  </div>
-                </article>
-              ),
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="py-1">
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <Link
+                                    className={classNames(
+                                      active
+                                        ? "bg-neutral-100 text-black"
+                                        : "text-neutral-700",
+                                      "group flex items-center px-4 py-2 text-sm",
+                                    )}
+                                    href={`/create/${id}`}
+                                  >
+                                    <PencilIcon
+                                      className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
+                                      aria-hidden="true"
+                                    />
+                                    Edit
+                                  </Link>
+                                )}
+                              </Menu.Item>
+
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button
+                                    onClick={() =>
+                                      setSelectedArticleToDelete(id)
+                                    }
+                                    className={classNames(
+                                      active
+                                        ? "bg-neutral-100 text-black"
+                                        : "text-neutral-700",
+                                      "group flex w-full items-center px-4 py-2 text-sm",
+                                    )}
+                                  >
+                                    <TrashIcon
+                                      className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
+                                      aria-hidden="true"
+                                    />
+                                    Delete
+                                  </button>
+                                )}
+                              </Menu.Item>
+                            </div>
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
+                    </div>
+                  </article>
+                );
+              },
             )}
           {selectedTabData.status === "success" &&
             selectedTabData.data?.length === 0 && (

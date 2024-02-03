@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, Fragment, useEffect, useState } from "react";
+import { Children, Fragment, useEffect, useRef, useState } from "react";
 import { TagIcon } from "@heroicons/react/20/solid";
 import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
@@ -49,9 +49,16 @@ const ArticlesPage = () => {
 
   const selectedSortFilter = getSortBy();
 
+  const nowRef = useRef(new Date());
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    api.post.all.useInfiniteQuery(
-      { limit: 15, sort: selectedSortFilter, tag, searchTerm },
+    api.post.published.useInfiniteQuery(
+      {
+        limit: 15,
+        sort: selectedSortFilter,
+        tag,
+        searchTerm,
+        published: nowRef.current,
+      },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },

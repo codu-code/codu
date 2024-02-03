@@ -17,11 +17,15 @@ import { useMarkdownHotkeys } from "../../../markdoc/editor/hotkeys/hotkeys.mark
 import { useMarkdownShortcuts } from "../../../markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "../../../markdoc/components";
 import { config } from "../../../markdoc/config";
-import { redirect, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
+import { Switch } from "@/components/Switch/Switch";
+import { dateToLocalDatetimeStr } from "@/utils/datetime";
+import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
 
 const Create = () => {
   const params = useParams();
+  const router = useRouter();
 
   const postId = params?.paramsArr?.[0] || "";
 
@@ -32,6 +36,7 @@ const Create = () => {
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const [isPostScheduled, setIsPostScheduled] = useState<boolean>(false);
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
@@ -63,7 +68,7 @@ const Create = () => {
     },
   });
 
-  const { title, body } = watch();
+  const { title, body, published } = watch();
 
   const debouncedValue = useDebounce(title + body, 1500);
 
@@ -83,15 +88,6 @@ const Create = () => {
       // TODO: Add error messages from field validations
       toast.error("Error auto-saving");
       Sentry.captureException(error);
-    },
-    onSuccess() {
-      toast.success("Saved");
-      setSavedTime(
-        new Date().toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }),
-      );
     },
   });
   const {
@@ -149,10 +145,19 @@ const Create = () => {
 
   const savePost = async () => {
     const formData = getFormData();
+    // Don't include published time when saving post, handle separately in onSubmit
+    delete formData.published;
     if (!formData.id) {
-      create({ ...formData });
+      await create({ ...formData });
     } else {
-      save({ ...formData, id: postId });
+      await save({ ...formData, id: postId });
+      toast.success("Saved");
+      setSavedTime(
+        new Date().toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }),
+      );
     }
     setUnsavedChanges(false);
   };
@@ -162,11 +167,11 @@ const Create = () => {
     saveStatus === "loading" ||
     dataStatus === "loading";
 
-  const published = !!data?.published || false;
+  const postStatus = data ? getPostStatus(data.published) : PostStatus.draft;
 
-  const onSubmit = async (data: SavePostInput) => {
-    // vaidate markdoc syntax
-    const ast = Markdoc.parse(data.body);
+  const onSubmit = async (inputData: SavePostInput) => {
+    // validate markdoc syntax
+    const ast = Markdoc.parse(inputData.body);
     const errors = Markdoc.validate(ast, config).filter(
       (e) => e.error.level === "critical",
     );
@@ -178,25 +183,35 @@ const Create = () => {
       });
       return;
     }
-    if (!published) {
-      try {
-        const formData = getFormData();
-        ConfirmPostSchema.parse(formData);
-        publish({ id: postId, published: !published });
-      } catch (err) {
-        if (err instanceof ZodError) {
-          return toast.error(err.issues[0].message);
-        } else {
-          return toast.error("Something went when trying to publish.");
-        }
+
+    await savePost();
+
+    if (postStatus === PostStatus.published) {
+      if (data) {
+        router.push(`/articles/${data.slug}`);
+      }
+      return;
+    }
+
+    try {
+      const formData = getFormData();
+      ConfirmPostSchema.parse(formData);
+      await publish({
+        id: postId,
+        published: true,
+        publishTime:
+          isPostScheduled && formData.published
+            ? new Date(formData.published)
+            : new Date(),
+      });
+    } catch (err) {
+      if (err instanceof ZodError) {
+        return toast.error(err.issues[0].message);
+      } else {
+        return toast.error("Something went when trying to publish.");
       }
     }
-    await savePost();
   };
-
-  if (publishStatus === "success" && publishData?.slug) {
-    redirect(`/articles/${publishData.slug}`);
-  }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -227,13 +242,20 @@ const Create = () => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags } = data;
+    const { body, excerpt, title, id, tags, published } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    reset({ body, excerpt, title, id });
+    reset({
+      body,
+      excerpt,
+      title,
+      id,
+      published: dateToLocalDatetimeStr(published),
+    });
+    setIsPostScheduled(published ? published > new Date() : false);
   }, [data]);
 
   useEffect(() => {
-    if (published) return;
+    if (postStatus !== PostStatus.draft) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     if (allowUpdate) savePost();
@@ -241,7 +263,7 @@ const Create = () => {
 
   useEffect(() => {
     if (!createData?.id) return;
-    redirect(`create/${createData.id}`);
+    router.push(`create/${createData.id}`);
   }, [createData]);
 
   const hasContent = title.length >= 5 && body.length >= 10;
@@ -252,6 +274,16 @@ const Create = () => {
     if ((title + body).length < 5) return;
     if (isDirty) setUnsavedChanges(true);
   }, [title, body]);
+
+  useEffect(() => {
+    if (publishStatus === "success" && publishData?.slug) {
+      if (isPostScheduled) {
+        router.push("/my-posts?tab=scheduled");
+      } else {
+        router.push(`/articles/${publishData.slug}`);
+      }
+    }
+  }, [publishStatus, publishData, isPostScheduled, router]);
 
   return (
     <>
@@ -269,7 +301,6 @@ const Create = () => {
               <div className="pb-8 pt-16">
                 <div className="block w-full max-w-2xl gap-6 sm:grid sm:grid-cols-12">
                   <div className="mt-8 sm:col-span-6 sm:mt-0">
-                    {" "}
                     <label htmlFor="excerpt">Excerpt</label>
                     <textarea
                       maxLength={156}
@@ -277,16 +308,16 @@ const Create = () => {
                       rows={3}
                       {...register("excerpt")}
                     />
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       What readers will see before they click on your article.
                       Good SEO descriptions utilize keywords, summarize the
                       story and are between 140-156 characters long.
-                    </p>
+                    </small>
                   </div>
                   <div className="my-4 sm:col-span-6 sm:my-0">
                     <label htmlFor="tags">Topics</label>
                     <input
-                      id="tag"
+                      id="tags"
                       name="tag"
                       disabled={tags.length >= 5}
                       placeholder={
@@ -327,11 +358,42 @@ const Create = () => {
                         </button>
                       </div>
                     ))}
-                    <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       Tag with up to 5 topics. This makes it easier for readers
                       to find and know what your story is about.
-                    </p>
+                    </small>
                   </div>
+
+                  {data &&
+                    (data.published === null ||
+                      data.published > new Date()) && (
+                      <div className="col-span-12">
+                        <div className="mb-2 flex items-center gap-2">
+                          <label
+                            htmlFor="schedule-switch"
+                            className="text-sm font-medium text-neutral-800 dark:text-white"
+                          >
+                            Schedule post
+                          </label>
+                          <Switch
+                            id="schedule-switch"
+                            checked={isPostScheduled}
+                            onCheckedChange={setIsPostScheduled}
+                          />
+                        </div>
+                        {isPostScheduled && (
+                          <input
+                            type="datetime-local"
+                            {...register("published")}
+                            min={dateToLocalDatetimeStr(new Date())}
+                          />
+                        )}
+                        <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                          Publish your post at a later time.
+                        </small>
+                      </div>
+                    )}
+
                   <div className="col-span-12  border-b border-neutral-300 pb-4">
                     <Disclosure>
                       {({ open }) => (
@@ -340,7 +402,7 @@ const Create = () => {
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
-                                open ? "rotate-180 transform" : ""
+                                open ? "" : "rotate-180 transform"
                               } h-5 w-5 text-neutral-400`}
                             />
                           </Disclosure.Button>
@@ -366,24 +428,27 @@ const Create = () => {
                     </Disclosure>
                   </div>
                   <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
-                    {!data?.published && (
+                    {postStatus === PostStatus.draft && (
                       <button
                         type="button"
                         disabled={isDisabled}
-                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50"
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
-                          redirect("/my-posts?tab=drafts");
+                          router.push("/my-posts?tab=drafts");
                         }}
                       >
-                        Save Draft
+                        Save draft
                       </button>
                     )}
                     <button
                       type="submit"
-                      disabled={isDisabled}
-                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                      disabled={
+                        isDisabled ||
+                        (isPostScheduled && isValidScheduleTime(published))
+                      }
+                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:from-orange-300 active:hover:to-pink-500 disabled:opacity-50"
                     >
                       {hasLoadingState ? (
                         <>
@@ -392,8 +457,12 @@ const Create = () => {
                         </>
                       ) : (
                         <>
-                          {!data?.published && "Publish"}
-                          {data?.published && "Save Changes"}
+                          {postStatus === PostStatus.draft &&
+                            (isPostScheduled ? "Schedule" : "Publish now")}
+                          {postStatus === PostStatus.scheduled &&
+                            (isPostScheduled ? "Save changes" : "Publish now")}
+                          {postStatus === PostStatus.published &&
+                            "Save changes"}
                         </>
                       )}
                     </button>
@@ -526,8 +595,7 @@ const Create = () => {
                                 className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
                                 onClick={() => setOpen(true)}
                               >
-                                {!data?.published && "Publish"}
-                                {data?.published && "Save Changes"}
+                                Next
                               </button>
                             </div>
                           </div>
