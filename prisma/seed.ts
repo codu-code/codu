@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { Chance } from "chance";
 
@@ -106,7 +106,7 @@ ${chance.paragraph()} If you want to try a link click this [test link](https://w
 ${"```"}
 
 function test() {
-  console.log("notice the blank line before this function?");
+   console.log("notice the blank line before this function?");
 }
 ${"```"}
 
@@ -149,7 +149,7 @@ const generateUserData = (count = 100) => {
 const userData = generateUserData();
 const communityData = generateCommunityData(10);
 
-async function main() {
+async function addSeedDataToDb() {
   console.log(`Start seeding, please wait...`);
   userData.forEach(async (user) => {
     await prisma.user.upsert({
@@ -207,7 +207,28 @@ async function main() {
   console.log(`Seeding finished.`);
 }
 
-main()
+async function deleteDataFromAllTables() {
+  const models = Object.keys(prisma) as (keyof typeof prisma)[];
+
+  for (const model of models) {
+    const modelInstance = prisma[model] as {
+      deleteMany?: (
+        options?: Prisma.UserDeleteManyArgs,
+      ) => Prisma.PrismaPromise<Prisma.BatchPayload>;
+    };
+
+    if (modelInstance?.deleteMany) {
+      await modelInstance.deleteMany({});
+    }
+  }
+  await prisma.$disconnect();
+}
+
+deleteDataFromAllTables()
+  .then(() => {
+    console.log("Data deleted");
+    addSeedDataToDb();
+  })
   .then(async () => {
     await prisma.$disconnect();
   })
