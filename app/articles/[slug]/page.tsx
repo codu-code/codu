@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {};
   const host = headers().get("host") || "";
   return {
-    title: post.title,
+    title: `${post.title} | by ${post.user.name} | Codú`,
     authors: {
       name: post.user.name,
       url: `https://www.${host}/${post.user.username}`,
