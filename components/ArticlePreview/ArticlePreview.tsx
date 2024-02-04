@@ -136,11 +136,9 @@ const ArticlePreview: NextPage<Props> = ({
               <button
                 className="focus-style-rounded rounded-full p-2 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
                 onClick={() => {
-                  if (bookmarked) return bookmarkPost(id, false);
-                  bookmarkPost(id);
-                  if (!session) {
-                    signIn();
-                  }
+                  if (!session) signIn();
+                  else if (bookmarked) return bookmarkPost(id, false);
+                  else bookmarkPost(id);
                 }}
               >
                 <BookmarkIcon
