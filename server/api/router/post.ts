@@ -104,7 +104,17 @@ export const postRouter = createTRPCRouter({
   publish: protectedProcedure
     .input(PublishPostSchema)
     .mutation(async ({ input, ctx }) => {
-      const { published, id } = input;
+      const { published, id, publishTime } = input;
+
+      const getPublishedTime = () => {
+        if (!published) {
+          return null;
+        }
+        if (publishTime) {
+          return publishTime.toISOString();
+        }
+        return new Date().toISOString();
+      };
 
       const currentPost = await ctx.db.post.findUnique({
         where: { id },
@@ -117,8 +127,6 @@ export const postRouter = createTRPCRouter({
       }
 
       const { excerpt, title } = currentPost;
-
-      const publishedValue = published ? new Date().toISOString() : null;
 
       const excerptOrCreatedExcerpt: string =
         excerpt.length > 0
@@ -133,7 +141,7 @@ export const postRouter = createTRPCRouter({
           slug: `${title.replace(/\W+/g, "-")}-${id}`
             .toLowerCase()
             .replace(/^-+|-+(?=-|$)/g, ""),
-          published: publishedValue,
+          published: getPublishedTime(),
           excerpt: excerptOrCreatedExcerpt,
         },
       });
@@ -239,111 +247,119 @@ export const postRouter = createTRPCRouter({
           !!ctx.session?.user?.id && !!currentUserBookmarkedCount,
       };
     }),
-  all: publicProcedure.input(GetPostsSchema).query(async ({ ctx, input }) => {
-    const userId = ctx.session?.user?.id;
-    const limit = input?.limit ?? 50;
-    const { cursor, sort, tag, searchTerm } = input;
+  published: publicProcedure
+    .input(GetPostsSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+      const limit = input?.limit ?? 50;
+      const { cursor, sort, tag, searchTerm } = input;
 
-    const orderMapping = {
-      newest: {
-        published: "desc" as Prisma.SortOrder,
-      },
-      oldest: {
-        published: "asc" as Prisma.SortOrder,
-      },
-      top: {
-        likes: {
-          _count: "desc" as Prisma.SortOrder,
+      const orderMapping = {
+        newest: {
+          published: "desc" as Prisma.SortOrder,
         },
-      },
-    };
-    const orderBy = orderMapping[sort] || orderMapping["newest"];
+        oldest: {
+          published: "asc" as Prisma.SortOrder,
+        },
+        top: {
+          likes: {
+            _count: "desc" as Prisma.SortOrder,
+          },
+        },
+      };
+      const orderBy = orderMapping[sort] || orderMapping["newest"];
 
-    const response = await ctx.db.post.findMany({
-      take: limit + 1,
-      where: {
-        NOT: {
-          published: null,
-        },
-        ...(tag
-          ? {
-              tags: {
-                some: {
-                  tag: {
-                    title: {
-                      contains: tag?.toUpperCase() || "",
+      const response = await ctx.db.post.findMany({
+        take: limit + 1,
+        where: {
+          NOT: {
+            published: null,
+          },
+          published: {
+            lte: input.published ?? new Date(),
+          },
+          ...(tag
+            ? {
+                tags: {
+                  some: {
+                    tag: {
+                      title: {
+                        contains: tag?.toUpperCase() || "",
+                      },
                     },
                   },
                 },
-              },
-            }
-          : {}),
-        ...(searchTerm
-          ? {
-              OR: [
-                {
-                  user: {
-                    name: {
+              }
+            : {}),
+          ...(searchTerm
+            ? {
+                OR: [
+                  {
+                    user: {
+                      name: {
+                        contains: searchTerm || "",
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    title: {
                       contains: searchTerm || "",
                       mode: "insensitive",
                     },
                   },
-                },
-                {
-                  title: {
-                    contains: searchTerm || "",
-                    mode: "insensitive",
+                  {
+                    excerpt: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
                   },
-                },
-                {
-                  excerpt: {
-                    contains: searchTerm || "",
-                    mode: "insensitive",
-                  },
-                },
-              ],
-            }
-          : {}),
-      },
-      select: {
-        id: true,
-        title: true,
-        updatedAt: true,
-        readTimeMins: true,
-        slug: true,
-        excerpt: true,
-        user: {
-          select: { name: true, image: true, username: true },
+                ],
+              }
+            : {}),
         },
-        bookmarks: {
-          select: { userId: true },
-          where: { userId: userId },
+        select: {
+          id: true,
+          title: true,
+          updatedAt: true,
+          readTimeMins: true,
+          slug: true,
+          excerpt: true,
+          user: {
+            select: { name: true, image: true, username: true },
+          },
+          bookmarks: {
+            select: { userId: true },
+            where: { userId: userId },
+          },
         },
-      },
-      cursor: cursor ? { id: cursor } : undefined,
-      skip: cursor ? 1 : 0,
-      orderBy,
-    });
+        cursor: cursor ? { id: cursor } : undefined,
+        skip: cursor ? 1 : 0,
+        orderBy,
+      });
 
-    const cleaned = response.map((post) => {
-      let currentUserLikesPost = !!post.bookmarks.length;
-      if (userId === undefined) currentUserLikesPost = false;
-      post.bookmarks = [];
-      return { ...post, currentUserLikesPost };
-    });
+      const cleaned = response.map((post) => {
+        let currentUserLikesPost = !!post.bookmarks.length;
+        if (userId === undefined) currentUserLikesPost = false;
+        post.bookmarks = [];
+        return { ...post, currentUserLikesPost };
+      });
 
-    let nextCursor: typeof cursor | undefined = undefined;
-    if (response.length > limit) {
-      const nextItem = response.pop();
-      nextCursor = nextItem?.id;
-    }
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (response.length > limit) {
+        const nextItem = response.pop();
+        nextCursor = nextItem?.id;
+      }
 
-    return { posts: cleaned, nextCursor };
-  }),
-  myPosts: protectedProcedure.query(async ({ ctx }) => {
+      return { posts: cleaned, nextCursor };
+    }),
+  myPublished: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.post.findMany({
       where: {
         NOT: [{ published: null }],
+        published: {
+          lte: new Date(),
+        },
         userId: ctx?.session?.user?.id,
       },
       include: {
@@ -358,7 +374,28 @@ export const postRouter = createTRPCRouter({
       },
     });
   }),
-  drafts: protectedProcedure.query(async ({ ctx }) => {
+  myScheduled: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.post.findMany({
+      where: {
+        NOT: [{ published: null }],
+        published: {
+          gt: new Date(),
+        },
+        userId: ctx?.session?.user?.id,
+      },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
+      },
+      orderBy: {
+        published: "asc",
+      },
+    });
+  }),
+  myDrafts: protectedProcedure.query(async ({ ctx }) => {
     return ctx.db.post.findMany({
       where: {
         published: null,

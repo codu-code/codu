@@ -24,11 +24,13 @@ export const SavePostSchema = z.object({
   ),
   canonicalUrl: z.optional(z.string().trim().url()),
   tags: z.string().array().max(5).optional(),
+  published: z.string().datetime().optional(),
 });
 
 export const PublishPostSchema = z.object({
   id: z.string(),
   published: z.boolean(),
+  publishTime: z.date().optional(),
 });
 
 export const ConfirmPostSchema = z.object({
@@ -61,6 +63,7 @@ export const GetPostsSchema = z.object({
   sort: z.enum(["newest", "oldest", "top"]),
   tag: z.string().nullish(),
   searchTerm: z.string().nullish(),
+  published: z.date().optional(),
 });
 
 export type SavePostInput = z.TypeOf<typeof SavePostSchema>;

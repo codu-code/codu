@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { Chance } from "chance";
 
@@ -106,7 +106,7 @@ ${chance.paragraph()} If you want to try a link click this [test link](https://w
 ${"```"}
 
 function test() {
-  console.log("notice the blank line before this function?");
+   console.log("notice the blank line before this function?");
 }
 ${"```"}
 
@@ -149,7 +149,7 @@ const generateUserData = (count = 100) => {
 const userData = generateUserData();
 const communityData = generateCommunityData(10);
 
-async function main() {
+async function addSeedDataToDb() {
   console.log(`Start seeding, please wait...`);
   userData.forEach(async (user) => {
     await prisma.user.upsert({
@@ -167,39 +167,68 @@ async function main() {
     });
     console.log(`Added community: ${community.name}`);
   });
+
   const users = await prisma.user.findMany();
-  communityData.forEach(async (community) => {
-    users.forEach(async (user, index) => {
-      const id = nanoid(8);
-      await prisma.membership.create({
-        data: {
-          id: id,
-          userId: user.id,
-          communityId: community.id,
-          isEventOrganiser: index === 0,
-        },
+  await Promise.all(
+    communityData.map(async (community) => {
+      const membershipPromises = users.map(async (user, index) => {
+        const id = nanoid(8);
+        await prisma.membership.create({
+          data: {
+            id: id,
+            userId: user.id,
+            communityId: community.id,
+            isEventOrganiser: index === 0,
+          },
+        });
+        console.log(`Added membership: ${id}`);
       });
-      console.log(`Added membership: ${id}`);
-    });
-  });
+      await Promise.all(membershipPromises);
+    }),
+  );
+
   const events = await prisma.event.findMany();
-  events.forEach(async (event) => {
-    users.forEach(async (user) => {
+  const rsvpPromises: Promise<void>[] = [];
+  events.forEach((event) => {
+    const eventRSVPPromises = users.map(async (user) => {
       const id = nanoid(8);
       await prisma.rSVP.create({
         data: {
-          id: nanoid(8),
+          id: id,
           userId: user.id,
           eventId: event.id,
         },
       });
       console.log(`Added RSVP: ${id}`);
     });
+    rsvpPromises.push(...eventRSVPPromises);
   });
+  await Promise.all(rsvpPromises);
   console.log(`Seeding finished.`);
 }
 
-main()
+async function deleteDataFromAllTables() {
+  const models = Object.keys(prisma) as (keyof typeof prisma)[];
+
+  for (const model of models) {
+    const modelInstance = prisma[model] as {
+      deleteMany?: (
+        options?: Prisma.UserDeleteManyArgs,
+      ) => Prisma.PrismaPromise<Prisma.BatchPayload>;
+    };
+
+    if (modelInstance?.deleteMany) {
+      await modelInstance.deleteMany({});
+    }
+  }
+  await prisma.$disconnect();
+}
+
+deleteDataFromAllTables()
+  .then(() => {
+    console.log("Data deleted");
+    addSeedDataToDb();
+  })
   .then(async () => {
     await prisma.$disconnect();
   })
