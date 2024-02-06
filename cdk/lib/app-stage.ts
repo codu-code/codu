@@ -3,6 +3,7 @@ import type { Construct } from "constructs";
 import { StorageStack } from "./storage-stack";
 import { AppStack } from "./app-stack";
 import { CdnStack } from "./cdn-stack";
+import { CronStack } from "./cron-stack";
 
 interface Props extends cdk.StageProps {
   production?: boolean;
@@ -24,5 +25,6 @@ export class AppStage extends cdk.Stage {
     new CdnStack(this, "CdnStack", {
       loadbalancer: appStack.loadbalancer,
     });
+    new CronStack(this, "CronStack");
   }
 }
