@@ -27,7 +27,7 @@ export default function Alpha({ children }: { children: ChildNode }) {
       <div className="py-16">
         <div className="text-center">
           <p className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
-            Something awesome
+            New event platform
           </p>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black sm:text-5xl">
             Coming Soon
@@ -38,12 +38,15 @@ export default function Alpha({ children }: { children: ChildNode }) {
             wait.`}
           </p>
           <div className="mt-6">
-            <Link
+            <a
               className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-base font-semibold tracking-wide text-transparent"
-              href="/"
+              href="https://www.meetup.com/codu-community/"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Return home<span aria-hidden="true"> &rarr;</span>
-            </Link>
+              Until then, join us on Meetup
+              <span aria-hidden="true"> &rarr;</span>
+            </a>
           </div>
         </div>
       </div>
