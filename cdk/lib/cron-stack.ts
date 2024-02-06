@@ -16,10 +16,10 @@ export class CronStack extends cdk.Stack {
       entry: path.join(__dirname, "/../lambdas/testCron.js"),
     });
 
-    // Every 5 minutes between 8:00 AM (UTC+0) and 5:55 PM (UTC+0) weekdays
+    // Every 5 minutes between 8:00 AM (UTC+0) and 10:55 PM (UTC+0) weekdays
     // See https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html
     const rule = new events.Rule(this, "Rule", {
-      schedule: events.Schedule.expression("cron(0/5 8-17 ? * MON-FRI *)"),
+      schedule: events.Schedule.expression("cron(0/5 8-22 ? * MON-FRI *)"),
     });
 
     rule.addTarget(new targets.LambdaFunction(lambdaFn));
