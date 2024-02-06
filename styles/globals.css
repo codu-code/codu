@@ -18,6 +18,8 @@ body {
 @tailwind components;
 @tailwind utilities;
 
+/* Removed search styles because it upset new search bar */
+
 @layer base {
   [type="text"],
   [type="email"],
@@ -27,7 +29,6 @@ body {
   [type="date"],
   [type="datetime-local"],
   [type="month"],
-  [type="search"],
   [type="tel"],
   [type="time"],
   [type="week"],
