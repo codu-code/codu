@@ -15,12 +15,15 @@ export class CronStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(120),
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, "/../lambdas/algoliaIndex.js"),
+      bundling: {
+        nodeModules: ["@aws-sdk/client-ssm"],
+      },
     });
 
     const algoliaIdx = ssm.StringParameter.fromStringParameterName(
       this,
       "AlgoliaIdx",
-      "/env/algoliaIdx",
+      "/env/algoliaIdx"
     );
     algoliaIdx.grantRead(lambdaFn);
     // 8:00 AM (UTC+0) on the first day of the month
