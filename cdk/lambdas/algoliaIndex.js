@@ -22,9 +22,7 @@ exports.handler = async function (event, context) {
 
   try {
     const result = await getSecretValue("/env/algoliaIdx");
-    const parameterValue = result.Parameter.Value;
-    console.log("Parameter Value:", parameterValue);
-    // Use the parameter value as needed
+    console.log("Parameter Value:", result);
   } catch (error) {
     console.error("Error fetching parameter:", error);
     // Handle the error accordingly
