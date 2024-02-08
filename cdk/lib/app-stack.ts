@@ -125,6 +125,34 @@ export class AppStack extends cdk.Stack {
               "/env/adminEmail",
             ),
           ),
+          ALGOLIA_ADMIN_KEY: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "algoliaAdminKey",
+              { parameterName: "/env/algoliaAdminKey", version: 1 },
+            ),
+          ),
+          NEXT_PUBLIC_ALGOLIA_APP_ID: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "algoliaAppId",
+              "/env/algoliaAppId",
+            ),
+          ),
+          NEXT_PUBLIC_ALGOLIA_SEARCH_API: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "algoliaSearchApi",
+              "/env/algoliaSearchApi",
+            ),
+          ),
+          NEXT_PUBLIC_ALGOLIA_SOURCE_IDX: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "algoliaIdx",
+              "/env/algoliaIdx",
+            ),
+          ),
         },
         logging: ecs.LogDrivers.awsLogs({
           streamPrefix: "AppContainer",

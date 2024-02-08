@@ -4,7 +4,7 @@ const ssmClient = new SSMClient({ region: "eu-west-1" });
 async function getSecretValue(secretName) {
   const params = {
     Name: secretName,
-    WithDecryption: true,
+    WithDecryption: true, // Required for secureString
   };
 
   try {
