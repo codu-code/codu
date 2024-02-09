@@ -14,7 +14,11 @@ export class CronStack extends cdk.Stack {
     const lambdaFn = new NodejsFunction(this, "Singleton", {
       timeout: cdk.Duration.seconds(120),
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: path.join(__dirname, "/../lambdas/algoliaIndex.js"),
+      entry: path.join(__dirname, "/../lambdas/algoliaIndex/index.js"),
+      depsLockFilePath: path.join(
+        __dirname,
+        "/../lambdas/algoliaIndex/package-lock.json",
+      ),
       bundling: {
         nodeModules: ["@aws-sdk/client-ssm"],
       },
