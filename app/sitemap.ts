@@ -13,6 +13,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         NOT: {
           published: null,
         },
+        published: {
+          lte: new Date(),
+        },
       },
     })
   ).map(({ slug, updatedAt }) => ({
