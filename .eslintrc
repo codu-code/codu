@@ -19,5 +19,5 @@
     "@typescript-eslint/no-unused-vars": "warn",
     "no-console": "warn"
   },
-  "ignorePatterns": ["next.config.js"]
+  "ignorePatterns": ["next.config.js", "*/lambdas/**/*.js"]
 }
