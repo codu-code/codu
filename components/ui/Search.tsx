@@ -23,12 +23,14 @@ import algoliasearch from "algoliasearch/lite";
 import { Dialog, Transition } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import Image from "next/image";
 
 type Result = {
   title: string;
-  summary: string;
+  description: string;
   url: string;
-  type: string;
+  category: string;
+  image: string | null;
 };
 
 type EmptyObject = Record<string, never>;
@@ -103,6 +105,7 @@ function useAutocomplete({ close }: { close: () => void }) {
       navigator: {
         navigate,
       },
+
       getSources({ query }) {
         return [
           {
@@ -201,10 +204,6 @@ function SearchResult({
 }) {
   const id = useId();
 
-  const hierarchy = [result.type, result.title].filter(
-    (x): x is string => typeof x === "string",
-  );
-
   return (
     <li
       className={clsx(
@@ -221,34 +220,19 @@ function SearchResult({
       <div
         id={`${id}-title`}
         aria-hidden="true"
-        className="text-sm font-medium text-neutral-900 group-aria-selected:text-pink-500 dark:text-white"
+        className="flex h-full gap-3 font-medium text-neutral-900 group-aria-selected:text-pink-500 dark:text-white"
       >
+        {result.image ? (
+          <Image
+            height={24}
+            width={24}
+            src={result.image}
+            alt={`Avatar for ${result.title}`}
+            className="h-6 w-6 flex-none rounded-full"
+          />
+        ) : null}
         <HighlightQuery text={result.title} query={query} />
       </div>
-      {hierarchy.length > 0 && (
-        <div
-          id={`${id}-hierarchy`}
-          aria-hidden="true"
-          className="text-2xs mt-1 truncate whitespace-nowrap text-neutral-500"
-        >
-          {hierarchy.map((item, itemIndex, items) => (
-            <Fragment key={itemIndex}>
-              <span className="capitalize">
-                <HighlightQuery text={item} query={query} />
-              </span>
-              <span
-                className={
-                  itemIndex === items.length - 1
-                    ? "sr-only"
-                    : "mx-2 text-neutral-300 dark:text-neutral-700"
-                }
-              >
-                /
-              </span>
-            </Fragment>
-          ))}
-        </div>
-      )}
     </li>
   );
 }
@@ -277,19 +261,38 @@ function SearchResults({
     );
   }
 
+  const groups: { [key: string]: Result[] } = collection.items.reduce(
+    (groups: { [key: string]: Result[] }, item) => {
+      return {
+        ...groups,
+        [item.category]: [...(groups[item.category] || []), item],
+      };
+    },
+    {},
+  );
+
   return (
-    <ul {...autocomplete.getListProps()}>
-      {collection.items.map((result, resultIndex) => (
-        <SearchResult
-          key={result.url}
-          result={result}
-          resultIndex={resultIndex}
-          autocomplete={autocomplete}
-          collection={collection}
-          query={query}
-        />
+    <>
+      {Object.entries(groups).map(([category, items]: [string, Result[]]) => (
+        <div key={category}>
+          <h2 className="bg-neutral-800 px-4 py-2.5 text-xs font-semibold uppercase text-neutral-100">
+            {category}
+          </h2>
+          <ul {...autocomplete.getListProps()}>
+            {items.map((result: Result, resultIndex: number) => (
+              <SearchResult
+                key={result.url}
+                result={result}
+                resultIndex={resultIndex}
+                autocomplete={autocomplete}
+                collection={collection}
+                query={query}
+              />
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </>
   );
 }
 
@@ -391,7 +394,7 @@ function SearchDialog({
     >
       <Dialog
         onClose={setOpen}
-        className={clsx("fixed inset-0 z-50 opacity-95", className)}
+        className={clsx("fixed inset-0 z-50 opacity-[98%]", className)}
       >
         <Transition.Child
           as={Fragment}
@@ -490,10 +493,10 @@ export function Search() {
   }, []);
 
   return (
-    <div className="hidden lg:block lg:max-w-md lg:flex-auto">
+    <div className="hidden md:block md:max-w-52 md:flex-auto lg:max-w-md">
       <button
         type="button"
-        className="ui-not-focus-visible:outline-none hidden h-8 w-full items-center gap-2 rounded-full bg-white pl-2 pr-3 text-sm text-neutral-500 ring-1 ring-neutral-900/10 transition hover:ring-neutral-900/20 dark:bg-white/5 dark:text-neutral-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20 lg:flex"
+        className="ui-not-focus-visible:outline-none hidden h-8 w-full items-center gap-2 rounded-full bg-white pl-2 pr-3 text-sm text-neutral-500 ring-1 ring-neutral-900/10 transition hover:ring-neutral-900/20 dark:bg-white/5 dark:text-neutral-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20 md:flex"
         {...buttonProps}
       >
         <MagnifyingGlassIcon className="h-4 w-4 stroke-current" />
@@ -517,11 +520,11 @@ export function MobileSearch() {
     <div className="contents lg:hidden">
       <button
         type="button"
-        className="ui-not-focus-visible:outline-none flex h-6 w-6 items-center justify-center rounded-md transition hover:bg-neutral-900/5 dark:hover:bg-white/5 lg:hidden"
+        className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
         aria-label="Search the site"
         {...buttonProps}
       >
-        <MagnifyingGlassIcon className="h-5 w-5 stroke-current" />
+        <MagnifyingGlassIcon className="h-6 w-6 stroke-current" />
       </button>
       <Suspense fallback={null}>
         <SearchDialog className="lg:hidden" {...dialogProps} />
