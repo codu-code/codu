@@ -23,7 +23,7 @@ export class CronStack extends cdk.Stack {
     const algoliaIdx = ssm.StringParameter.fromStringParameterName(
       this,
       "AlgoliaIdx",
-      "/env/algoliaIdx"
+      "/env/algoliaIdx",
     );
     algoliaIdx.grantRead(lambdaFn);
     // 8:00 AM (UTC+0) on the first day of the month
