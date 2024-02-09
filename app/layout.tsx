@@ -44,6 +44,28 @@ export const metadata = {
   },
 };
 
+const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID || "";
+const ALGOLIA_SEARCH_API = process.env.ALGOLIA_SEARCH_API || "";
+const ALGOLIA_SOURCE_IDX = process.env.ALGOLIA_SOURCE_IDX || "";
+
+if (!process.env.ALGOLIA_APP_ID || !process.env.ALGOLIA_SEARCH_API) {
+  console.error(
+    ".env values required for Algolia search (ALGOLIA_APP_ID and ALGOLIA_SEARCH_API). Visit https://www.algolia.com/ to create a free account and get your API keys.",
+  );
+}
+
+if (!process.env.ALGOLIA_SOURCE_IDX) {
+  console.error(
+    ".env value required for Algolia source ID (ALGOLIA_SOURCE_IDX). Create an index in your Algolia account and set the value to the index name.",
+  );
+}
+
+const algoliaSearchConfig = {
+  ALGOLIA_APP_ID,
+  ALGOLIA_SEARCH_API,
+  ALGOLIA_SOURCE_IDX,
+};
+
 export default async function RootLayout({
   children,
 }: {
@@ -62,7 +84,10 @@ export default async function RootLayout({
               <TRPCReactProvider headers={headers()}>
                 <PromptProvider>
                   <Toaster />
-                  <Nav session={session} />
+                  <Nav
+                    session={session}
+                    algoliaSearchConfig={algoliaSearchConfig}
+                  />
                   {children}
                   <Footer />
                 </PromptProvider>

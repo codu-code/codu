@@ -13,7 +13,19 @@ import Logo from "@/icons/logo.svg";
 import MobileNav from "./MobileNav";
 import { MobileSearch, Search } from "@/components/ui/Search";
 
-const Nav = ({ session }: { session: Session | null }) => {
+type AlgoliaConfig = {
+  ALGOLIA_APP_ID: string;
+  ALGOLIA_SEARCH_API: string;
+  ALGOLIA_SOURCE_IDX: string;
+};
+
+const Nav = ({
+  session,
+  algoliaSearchConfig,
+}: {
+  session: Session | null;
+  algoliaSearchConfig: AlgoliaConfig;
+}) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: session ? true : false,
   });
@@ -78,7 +90,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                   </div>
                 </div>
               </div>
-              <Search />
+              <Search algoliaSearchConfig={algoliaSearchConfig} />
 
               <div className="ml-4 hidden md:block">
                 <div className="flex items-center space-x-2 text-sm font-medium lg:text-base">
@@ -179,7 +191,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                 </div>
               </div>
               <div className="-mr-2 flex items-center md:hidden">
-                <MobileSearch />
+                <MobileSearch algoliaSearchConfig={algoliaSearchConfig} />
                 <ThemeToggle />
                 {session && (
                   <Link
