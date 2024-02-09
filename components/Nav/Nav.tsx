@@ -13,9 +13,6 @@ import Logo from "@/icons/logo.svg";
 import MobileNav from "./MobileNav";
 import { MobileSearch, Search } from "@/components/ui/Search";
 
-const enableSearch =
-  !!process.env.ALPHA || process.env.NODE_ENV === "development";
-
 const Nav = ({ session }: { session: Session | null }) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: session ? true : false,
@@ -81,8 +78,8 @@ const Nav = ({ session }: { session: Session | null }) => {
                   </div>
                 </div>
               </div>
-              {enableSearch && <MobileSearch />}
-              {enableSearch && <Search />}
+              <Search />
+
               <div className="ml-4 hidden md:block">
                 <div className="flex items-center space-x-2 text-sm font-medium lg:text-base">
                   {session ? (
@@ -109,7 +106,7 @@ const Nav = ({ session }: { session: Session | null }) => {
                       </button>
                     </>
                   )}
-                  {/* Profile dropdown */}
+
                   <div className="ml-3">
                     <ThemeToggle />
                   </div>
@@ -182,11 +179,12 @@ const Nav = ({ session }: { session: Session | null }) => {
                 </div>
               </div>
               <div className="-mr-2 flex items-center md:hidden">
+                <MobileSearch />
                 <ThemeToggle />
                 {session && (
                   <Link
                     to="/notifications"
-                    className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white  "
+                    className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
                   >
                     <span className="sr-only">View notifications</span>
                     {hasNotifications && (
