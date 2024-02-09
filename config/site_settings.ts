@@ -9,7 +9,6 @@ export const footerNav = [
 export const navigation = [
   { name: "Articles", href: "/articles" },
   { name: "Events", href: "/hub" },
-  { name: "Support us", href: "/sponsorship" },
 ];
 
 export const userSubNav = [
