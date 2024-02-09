@@ -9,7 +9,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import challenge from "../../public/images/announcements/challenge.png";
-import SearchBar from "../../components/ArticleSearch/SearchBar";
 import { api } from "@/server/trpc/react";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { useSession } from "next-auth/react";
@@ -35,7 +34,6 @@ const ArticlesPage = () => {
   const dirtyTag = searchParams?.get("tag");
 
   const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
-  const [searchTerm, setSearchTerm] = useState("");
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
 
@@ -56,7 +54,6 @@ const ArticlesPage = () => {
         limit: 15,
         sort: selectedSortFilter,
         tag,
-        searchTerm,
         published: nowRef.current,
       },
       {
@@ -90,7 +87,6 @@ const ArticlesPage = () => {
               "Articles"
             )}
           </h1>
-          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <div className="min-w-fit">
             <label htmlFor="filter" className="sr-only">
               Location
