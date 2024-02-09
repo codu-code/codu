@@ -33,6 +33,12 @@ type Result = {
   image: string | null;
 };
 
+type AlgoliaConfig = {
+  ALGOLIA_APP_ID: string;
+  ALGOLIA_SEARCH_API: string;
+  ALGOLIA_SOURCE_IDX: string;
+};
+
 type EmptyObject = Record<string, never>;
 
 type Autocomplete = AutocompleteApi<
@@ -42,29 +48,17 @@ type Autocomplete = AutocompleteApi<
   React.KeyboardEvent
 >;
 
-if (
-  !process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ||
-  !process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API
-) {
-  console.error(
-    ".env values required for Algolia search (NEXT_PUBLIC_ALGOLIA_APP_ID and NEXT_PUBLIC_ALGOLIA_SEARCH_API). Visit https://www.algolia.com/ to create a free account and get your API keys.",
-  );
-}
-
-if (!process.env.NEXT_PUBLIC_ALGOLIA_SOURCE_IDX) {
-  console.error(
-    ".env value required for Algolia source ID (NEXT_PUBLIC_ALGOLIA_SOURCE_IDX). Create an index in your Algolia account and set the value to the index name.",
-  );
-}
-
-const searchClient = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || "",
-  process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API || "",
-);
-
-function useAutocomplete({ close }: { close: () => void }) {
+function useAutocomplete({
+  close,
+  algoliaSearchConfig,
+}: {
+  close: () => void;
+  algoliaSearchConfig: AlgoliaConfig;
+}) {
   const id = useId();
   const router = useRouter();
+  const { ALGOLIA_APP_ID, ALGOLIA_SEARCH_API, ALGOLIA_SOURCE_IDX } =
+    algoliaSearchConfig;
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<Result> | EmptyObject
   >({});
@@ -83,8 +77,6 @@ function useAutocomplete({ close }: { close: () => void }) {
       close();
     }
   }
-
-  const sourceId = process.env.NEXT_PUBLIC_ALGOLIA_SOURCE_IDX || "";
 
   const [autocomplete] = useState<Autocomplete>(() =>
     createAutocomplete<
@@ -109,13 +101,13 @@ function useAutocomplete({ close }: { close: () => void }) {
       getSources({ query }) {
         return [
           {
-            sourceId,
+            sourceId: ALGOLIA_SOURCE_IDX,
             getItems() {
               return getAlgoliaResults({
-                searchClient,
+                searchClient: algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API),
                 queries: [
                   {
-                    indexName: sourceId,
+                    indexName: ALGOLIA_SOURCE_IDX,
                     query,
                     params: {
                       hitsPerPage: 6,
@@ -347,10 +339,13 @@ function SearchDialog({
   open,
   setOpen,
   className,
+  algoliaSearchConfig,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   className?: string;
+
+  algoliaSearchConfig: AlgoliaConfig;
 }) {
   const formRef = useRef<React.ElementRef<"form">>(null);
   const panelRef = useRef<React.ElementRef<"div">>(null);
@@ -359,6 +354,7 @@ function SearchDialog({
     close() {
       setOpen(false);
     },
+    algoliaSearchConfig,
   });
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -482,7 +478,11 @@ function useSearchProps() {
   };
 }
 
-export function Search() {
+export function Search({
+  algoliaSearchConfig,
+}: {
+  algoliaSearchConfig: AlgoliaConfig;
+}) {
   const [modifierKey, setModifierKey] = useState<string>();
   const { buttonProps, dialogProps } = useSearchProps();
 
@@ -507,13 +507,21 @@ export function Search() {
         </kbd>
       </button>
       <Suspense fallback={null}>
-        <SearchDialog className="hidden lg:block" {...dialogProps} />
+        <SearchDialog
+          algoliaSearchConfig={algoliaSearchConfig}
+          className="hidden lg:block"
+          {...dialogProps}
+        />
       </Suspense>
     </div>
   );
 }
 
-export function MobileSearch() {
+export function MobileSearch({
+  algoliaSearchConfig,
+}: {
+  algoliaSearchConfig: AlgoliaConfig;
+}) {
   const { buttonProps, dialogProps } = useSearchProps();
 
   return (
@@ -527,7 +535,11 @@ export function MobileSearch() {
         <MagnifyingGlassIcon className="h-6 w-6 stroke-current" />
       </button>
       <Suspense fallback={null}>
-        <SearchDialog className="lg:hidden" {...dialogProps} />
+        <SearchDialog
+          algoliaSearchConfig={algoliaSearchConfig}
+          className="lg:hidden"
+          {...dialogProps}
+        />
       </Suspense>
     </div>
   );

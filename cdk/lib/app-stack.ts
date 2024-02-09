@@ -132,21 +132,21 @@ export class AppStack extends cdk.Stack {
               { parameterName: "/env/algoliaAdminKey", version: 1 },
             ),
           ),
-          NEXT_PUBLIC_ALGOLIA_APP_ID: ecs.Secret.fromSsmParameter(
+          ALGOLIA_APP_ID: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "algoliaAppId",
               "/env/algoliaAppId",
             ),
           ),
-          NEXT_PUBLIC_ALGOLIA_SEARCH_API: ecs.Secret.fromSsmParameter(
+          ALGOLIA_SEARCH_API: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "algoliaSearchApi",
               "/env/algoliaSearchApi",
             ),
           ),
-          NEXT_PUBLIC_ALGOLIA_SOURCE_IDX: ecs.Secret.fromSsmParameter(
+          ALGOLIA_SOURCE_IDX: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromStringParameterName(
               this,
               "algoliaIdx",
