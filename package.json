@@ -79,7 +79,7 @@
     "highlight.js": "^11.9.0",
     "holy-loader": "^2.0.1",
     "lowlight": "^3.1.0",
-    "lucide-react": "^0.312.0",
+    "lucide-react": "^0.314.0",
     "nanoid": "^5.0.4",
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
