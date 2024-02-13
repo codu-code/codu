@@ -13,6 +13,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         NOT: {
           published: null,
         },
+        canonicalUrl: {
+          equals: null,
+        },
         published: {
           lte: new Date(),
         },
