@@ -106,6 +106,7 @@ model User {
   flaggedNotifier    Flagged[]      @relation("notifier")
   RSVP               RSVP[]
   memberships        Membership[]
+  developerDetails   DeveloperDetails?
 
   @@index(fields: [username, id])
 }
@@ -234,7 +235,7 @@ model Event {
 }
 
 model Membership {
-  id               String @id @unique
+  id               String @id 
   user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
   community        Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
@@ -244,10 +245,28 @@ model Membership {
 }
 
 model RSVP {
-  id      String @id @unique
+  id      String @id 
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId String
   createdAt  DateTime @default(now())
 }
+
+model DeveloperDetails {
+    id                      String         @id @default(cuid())
+    user                    User           @relation(fields: [id], references: [id],  onDelete: Cascade)
+  
+    location                String
+    gender                  String
+    dateOfBirth             DateTime
+    professionalOrStudent   String
+    workplace               String?
+    jobTitle                String?
+    levelOfStudy            String?
+    course                  String?
+
+    createdAt               DateTime       @default(now())
+    updatedAt               DateTime       @updatedAt
+
+  }
