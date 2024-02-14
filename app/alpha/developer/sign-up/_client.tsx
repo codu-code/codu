@@ -1,8 +1,14 @@
 "use client";
 
-import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { DeveloperDetailsSchema } from "@/schema/developerDetails";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Prisma } from "@prisma/client";
+import { handleFormSubmit } from "./actions";
+import { toast } from "sonner";
 import {
   type TypeDeveloperDetailsSchema,
   professionalOrStudentOptions,
@@ -11,12 +17,6 @@ import {
   levelOfStudyOptions,
   months,
 } from "@/schema/developerDetails";
-import { DeveloperDetailsSchema } from "@/schema/developerDetails";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { Prisma } from "@prisma/client";
-import { handleMyFormSubmit } from "./actions";
-import { toast } from "sonner";
 
 type SlideProps = {
   setCurrentSlide: React.Dispatch<React.SetStateAction<number>>;
@@ -75,8 +75,8 @@ export default function SignUp({
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const onMyFormSubmit = async (data: TypeDeveloperDetailsSchema) => {
-    const isSuccess = await handleMyFormSubmit(data);
+  const onFormSubmit = async (data: TypeDeveloperDetailsSchema) => {
+    const isSuccess = await handleFormSubmit(data);
 
     if (isSuccess) {
       toast.success("Saved");
@@ -91,7 +91,7 @@ export default function SignUp({
       <FormProvider {...useFormObject}>
         <form
           className="min-h-[41rem]"
-          onSubmit={useFormObject.handleSubmit((data) => onMyFormSubmit(data))}
+          onSubmit={useFormObject.handleSubmit((data) => onFormSubmit(data))}
         >
           <SignupProgressBar currentSlide={currentSlide} />
 
@@ -111,7 +111,12 @@ export default function SignUp({
 
 function SlideOne(props: SlideProps) {
   const { setCurrentSlide } = props;
-  const { register, trigger, getFieldState } = useFormContext();
+  const {
+    register,
+    trigger,
+    getFieldState,
+    formState: { errors },
+  } = useFormContext();
 
   let nameError = getFieldState("name").error;
   let usernameError = getFieldState("username").error;
@@ -172,7 +177,6 @@ function SlideOne(props: SlideProps) {
             </label>
             <div className="mt-2">
               <input
-                // id="last_name"
                 type="text"
                 placeholder="And your last name?"
                 disabled
@@ -245,12 +249,9 @@ function SlideTwo(props: SlideProps) {
   } = useFormContext();
 
   const dob = getValues("developerDetails.dateOfBirth");
-
   const [year, setYear] = useState<number | undefined>(dob?.getFullYear());
   const [month, setMonth] = useState<number | undefined>(dob?.getMonth());
   const [day, setDay] = useState<number | undefined>(dob?.getDate());
-
-  console.log("dob ==", dob, year, month, day);
 
   const [listOfDaysInSelectedMonth, setListOfDaysInSelectedMonth] = useState([
     0,
@@ -280,7 +281,6 @@ function SlideTwo(props: SlideProps) {
         selectedDate = new Date(year, month, day);
       }
       setValue("developerDetails.dateOfBirth", selectedDate);
-      console.log("dob == in", dob, year, month, day);
     }
   }, [year, month, day]);
 
@@ -378,7 +378,6 @@ function SlideTwo(props: SlideProps) {
                   name="month"
                   value={month !== undefined ? months[month] : ""}
                   required
-                  //   value={month !== undefined ? months[month] : ""}
                   className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
                   onChange={(e) => setMonth(months.indexOf(e.target.value))}
                 >
@@ -400,7 +399,6 @@ function SlideTwo(props: SlideProps) {
                   name="day"
                   value={day ? day : ""}
                   className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  //   value={day ? day : ""}
                   disabled={!year || month === undefined}
                   required
                   onChange={(e) => setDay(Number(e.target.value))}
@@ -570,7 +568,6 @@ function SlideThree(props: SlideProps) {
                     {...register("developerDetails.jobTitle")}
                     type="text"
                     placeholder="Codú corp"
-                    // required , { required: " required" }
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
                   />
                 </div>
@@ -641,12 +638,6 @@ function SlideFour(props: SlideProps) {
 
   const {
     getValues,
-    register,
-    watch,
-    trigger,
-    handleSubmit,
-    getFieldState,
-
     formState: { errors },
   } = useFormContext();
 
@@ -654,7 +645,7 @@ function SlideFour(props: SlideProps) {
   const username = getValues("username");
   const location = getValues("developerDetails.location");
   const gender = getValues("developerDetails.gender");
-  // const dateOfBirth = getValues("developerDetails.dateOfBirth");
+  const dateOfBirth = getValues("developerDetails.dateOfBirth");
   const professionalOrStudent = getValues(
     "developerDetails.professionalOrStudent",
   );
@@ -673,7 +664,7 @@ function SlideFour(props: SlideProps) {
         <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
           Review
         </h2>
-        <p>Please review your details before submitting.</p>
+        <p>Please review the details before submitting.</p>
       </div>
 
       <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm">
@@ -694,6 +685,17 @@ function SlideFour(props: SlideProps) {
 
           <div className="flex min-w-[20rem]">
             <p className="w-1/2">Gender: </p> <p className="w-1/2"> {gender}</p>
+          </div>
+
+          <div className="flex min-w-[20rem]">
+            <p className="w-1/2">Date of birth: </p>{" "}
+            <p className="w-1/2">
+              {" "}
+              {dateOfBirth.getDate()}
+              {" / "}
+              {dateOfBirth.getMonth() + 1} {" / "}
+              {dateOfBirth.getFullYear()}
+            </p>
           </div>
 
           <div className="flex min-w-[20rem]">
@@ -736,9 +738,6 @@ function SlideFour(props: SlideProps) {
       </div>
     </div>
   );
-}
-{
-  /* <div>{dateOfBirth}</div> */
 }
 
 function SignupProgressBar({ currentSlide }: { currentSlide: number }) {

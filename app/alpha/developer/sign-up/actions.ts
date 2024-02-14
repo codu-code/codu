@@ -5,25 +5,13 @@ import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
 import { redirect } from "next/navigation";
 
-export async function handleMyFormSubmit(
-  dataInput: TypeDeveloperDetailsSchema,
-) {
+export async function handleFormSubmit(dataInput: TypeDeveloperDetailsSchema) {
   const session = await getServerAuthSession();
-
   if (!session || !session.user) {
     redirect("/get-started");
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
-      include: {
-        developerDetails: true,
-      },
-    });
-
     await prisma.user.update({
       where: {
         id: session.user.id,
@@ -38,6 +26,7 @@ export async function handleMyFormSubmit(
     // A record will always exist in the User model
     // So first we need to check to see if a record exists in the DeveloperDetails model for the user id
     // Then either update it or create it
+
     const isExistDeveloperDetails = await prisma.developerDetails.findUnique({
       where: { id: session.user.id },
     });

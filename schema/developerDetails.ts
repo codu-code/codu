@@ -48,12 +48,12 @@ export const DeveloperDetailsSchema = z.object({
     .string()
     .trim()
     .min(2, "Min name length is 2 characters.")
-    .max(30, "Max name length is 30 characters."),
+    .max(50, "Max name length is 30 characters."),
   username: z
     .string()
     .trim()
-    .min(2, "Min name length is 2 characters.")
-    .max(30, "Max name length is 30 characters."),
+    .min(3, "Min name length is 2 characters.")
+    .max(40, "Max name length is 30 characters."),
 
   developerDetails: z
     .object({
@@ -61,8 +61,8 @@ export const DeveloperDetailsSchema = z.object({
       gender: z.string().min(1, "Gender is required"),
       dateOfBirth: z.date(),
       professionalOrStudent: z.string().min(1, "Select an option"),
-      workplace: z.string(),
 
+      workplace: z.string().max(30, "Max length is 30 characters."),
       jobTitle: z.string().max(30, "Max length is 30 characters."),
       levelOfStudy: z.string(),
       course: z.string().max(30, "Max name length is 30 characters."),
