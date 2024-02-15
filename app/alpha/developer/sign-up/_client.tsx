@@ -349,7 +349,7 @@ function SlideTwo(props: SlideProps) {
           <fieldset>
             <legend>Date of Birth</legend>
 
-            <div className="flex justify-between gap-1">
+            <div className="flex justify-between gap-1 sm:gap-8">
               <div className="flex-grow">
                 <label htmlFor="year" className="hidden">
                   Year
@@ -748,7 +748,7 @@ function SignupProgressBar({ currentSlide }: { currentSlide: number }) {
   const progressPercentage = (100 / 4) * (currentSlide + 1);
 
   return (
-    <div className="mx-auto flex h-2 max-w-7xl items-center">
+    <div className="flex h-2">
       <div className="h-full grow">
         <div
           style={{ width: `${progressPercentage}%` }}
