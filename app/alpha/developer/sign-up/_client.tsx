@@ -4,12 +4,11 @@ import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  type TypeDeveloperDetailsSchema,
   DeveloperDetailsSchema,
+  TypeDeveloperDetailsWithNullDateOfBirth,
 } from "@/schema/developerDetails";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Prisma } from "@prisma/client";
 import { handleFormSubmit } from "./actions";
 import { toast } from "sonner";
 import {
@@ -24,60 +23,26 @@ type SlideProps = {
   setCurrentSlide: React.Dispatch<React.SetStateAction<number>>;
 };
 
-type DeveloperDetailsPayload = Prisma.UserGetPayload<{
-  select: {
-    name: true;
-    username: true;
-    developerDetails: {
-      select: {
-        course: true;
-        dateOfBirth: true;
-        gender: true;
-        levelOfStudy: true;
-        jobTitle: true;
-        workplace: true;
-        professionalOrStudent: true;
-        location: true;
-      };
-    };
-  };
-}>;
-
 export default function SignUp({
   details,
 }: {
-  details: DeveloperDetailsPayload | null;
+  details: TypeDeveloperDetailsWithNullDateOfBirth | null;
 }) {
   const { data: session } = useSession();
   if (!session) {
     redirect("/get-started");
   }
 
-  const defaultDetails = {
-    ...details,
-    name: details?.name,
-    username: details?.username || "",
-    developerDetails: {
-      dateOfBirth: details?.developerDetails?.dateOfBirth,
-      course: details?.developerDetails?.course || "",
-      gender: details?.developerDetails?.gender || "",
-      levelOfStudy: details?.developerDetails?.levelOfStudy || "",
-      jobTitle: details?.developerDetails?.jobTitle || "",
-      workplace: details?.developerDetails?.workplace || "",
-      professionalOrStudent:
-        details?.developerDetails?.professionalOrStudent || "",
-      location: details?.developerDetails?.location || "",
-    },
-  };
-
-  const useFormObject = useForm<TypeDeveloperDetailsSchema>({
+  const useFormObject = useForm<TypeDeveloperDetailsWithNullDateOfBirth>({
     resolver: zodResolver(DeveloperDetailsSchema),
-    defaultValues: defaultDetails ?? {},
+    defaultValues: details ?? {},
   });
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const onFormSubmit = async (data: TypeDeveloperDetailsSchema) => {
+  const onFormSubmit = async (
+    data: TypeDeveloperDetailsWithNullDateOfBirth,
+  ) => {
     const isSuccess = await handleFormSubmit(data);
 
     if (isSuccess) {
@@ -116,25 +81,18 @@ function SlideOne(props: SlideProps) {
   const {
     register,
     trigger,
-    getFieldState,
     formState: { errors },
   } = useFormContext();
-
-  let nameError = getFieldState("name").error;
-  let usernameError = getFieldState("username").error;
-  let locationError = getFieldState("developerDetails.location").error;
 
   const handleClickNextSlide = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
-    await trigger(["name", "username", "developerDetails.location"]);
+    const isError = await trigger(["name", "username", "location"], {
+      shouldFocus: true,
+    });
 
-    nameError = getFieldState("name").error;
-    usernameError = getFieldState("username").error;
-    locationError = getFieldState("developerDetails.location").error;
-
-    if (!nameError && !usernameError && !locationError) {
+    if (isError) {
       setCurrentSlide((curr) => curr + 1);
     }
   };
@@ -164,7 +122,7 @@ function SlideOne(props: SlideProps) {
                 type="text"
                 className="block w-full rounded-md border-0 bg-white/5  py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
               />
-              {nameError && <p>{`${nameError.message}`}</p>}
+              {errors.name && <p>{`${errors.name.message}`}</p>}
             </div>
           </div>
 
@@ -208,7 +166,7 @@ function SlideOne(props: SlideProps) {
                 className="relative top-[-2px] block rounded-r-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
               />
             </div>
-            {usernameError && <p>{`${usernameError.message}`}</p>}
+            {errors.username && <p>{`${errors.username.message}`}</p>}
           </div>
           <div>
             <label
@@ -219,7 +177,7 @@ function SlideOne(props: SlideProps) {
             </label>
             <select
               id="location"
-              {...register("developerDetails.location")}
+              {...register("location")}
               className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
             >
               <option value="" disabled>
@@ -229,7 +187,7 @@ function SlideOne(props: SlideProps) {
                 <option key={location}>{location}</option>
               ))}
             </select>
-            {locationError && <p>{`${locationError.message}`}</p>}
+            {errors.location && <p>{`${errors.location.message}`}</p>}
           </div>
         </div>
         <SlideButtons handleClickNextSlide={handleClickNextSlide} />
@@ -250,7 +208,7 @@ function SlideTwo(props: SlideProps) {
     formState: { errors },
   } = useFormContext();
 
-  const dob = getValues("developerDetails.dateOfBirth");
+  const dob = getValues("dateOfBirth");
   const [year, setYear] = useState<number | undefined>(dob?.getFullYear());
   const [month, setMonth] = useState<number | undefined>(dob?.getMonth());
   const [day, setDay] = useState<number | undefined>(dob?.getDate());
@@ -282,7 +240,7 @@ function SlideTwo(props: SlideProps) {
       } else {
         selectedDate = new Date(year, month, day);
       }
-      setValue("developerDetails.dateOfBirth", selectedDate);
+      setValue("dateOfBirth", selectedDate);
     }
   }, [year, month, day]);
 
@@ -293,18 +251,14 @@ function SlideTwo(props: SlideProps) {
     (_, index) => startYearAgeDropdown + index,
   ).reverse();
 
-  let genderError = getFieldState("developerDetails.gender").error;
-
   const handleClickNextSlide = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
 
-    await trigger(["developerDetails.gender"]);
+    const isError = await trigger(["gender"], { shouldFocus: true });
 
-    genderError = getFieldState("developerDetails.gender").error;
-
-    if (!genderError && dob !== undefined) {
+    if (isError && dob !== undefined) {
       setCurrentSlide((curr) => curr + 1);
     }
   };
@@ -333,7 +287,7 @@ function SlideTwo(props: SlideProps) {
             </label>
             <select
               id="gender"
-              {...register("developerDetails.gender")}
+              {...register("gender")}
               className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
             >
               <option value="" disabled>
@@ -343,7 +297,8 @@ function SlideTwo(props: SlideProps) {
                 <option key={gender}>{gender}</option>
               ))}
             </select>
-            {genderError && <p>{`${genderError.message}`}</p>}
+
+            {errors.gender && <p>{`${errors.gender.message}`}</p>}
           </div>
 
           <fieldset>
@@ -445,51 +400,27 @@ function SlideThree(props: SlideProps) {
     formState: { errors },
   } = useFormContext();
 
-  watch("developerDetails.professionalOrStudent");
-
-  const professionalOrStudentError = getFieldState(
-    "developerDetails.professionalOrStudent",
-  ).error;
-
-  let workplaceError = getFieldState("developerDetails.workplace").error;
-  let jobTitleError = getFieldState("developerDetails.jobTitle").error;
-
-  let levelOfStudyError = getFieldState("developerDetails.levelOfStudy").error;
-  let courseError = getFieldState("developerDetails.course").error;
+  watch("professionalOrStudent");
 
   const handleClickNextSlide = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
-    await trigger(["developerDetails.professionalOrStudent"]);
+    let isError = await trigger(["professionalOrStudent"]);
 
-    if (!professionalOrStudentError) {
-      const professionalOrStudent = getValues(
-        "developerDetails.professionalOrStudent",
-      );
+    if (isError) {
+      const professionalOrStudent = getValues("professionalOrStudent");
 
       if (professionalOrStudent === "Working professional") {
-        await trigger([
-          "developerDetails.workplace",
-          "developerDetails.jobTitle",
-        ]);
-        workplaceError = getFieldState("developerDetails.workplace").error;
-        jobTitleError = getFieldState("developerDetails.jobTitle").error;
+        isError = await trigger(["workplace", "jobTitle"]);
 
-        if (!workplaceError && !jobTitleError) {
+        if (isError) {
           setCurrentSlide((curr) => curr + 1);
         }
       } else if (professionalOrStudent === "Current student") {
-        await trigger([
-          "developerDetails.levelOfStudy",
-          "developerDetails.course",
-        ]);
-        levelOfStudyError = getFieldState(
-          "developerDetails.levelOfStudy",
-        ).error;
-        courseError = getFieldState("developerDetails.course").error;
+        isError = await trigger(["levelOfStudy", "course"]);
 
-        if (!levelOfStudyError && !courseError) {
+        if (isError) {
           setCurrentSlide((curr) => curr + 1);
         }
       } else if (professionalOrStudent === "None of the above") {
@@ -521,7 +452,7 @@ function SlideThree(props: SlideProps) {
             </label>
             <select
               id="professional-or-student"
-              {...register("developerDetails.professionalOrStudent")}
+              {...register("professionalOrStudent")}
               className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
             >
               <option value="" disabled>
@@ -532,13 +463,13 @@ function SlideThree(props: SlideProps) {
                 <option key={status}>{status}</option>
               ))}
             </select>
-            {professionalOrStudentError && (
-              <p>{`${professionalOrStudentError.message}`}</p>
+
+            {errors.professionalOrStudent && (
+              <p>{`${errors.professionalOrStudent.message}`}</p>
             )}
           </div>
 
-          {getValues("developerDetails.professionalOrStudent") ===
-            "Working professional" && (
+          {getValues("professionalOrStudent") === "Working professional" && (
             <>
               <div>
                 <label
@@ -550,13 +481,13 @@ function SlideThree(props: SlideProps) {
                 <div className="mt-2">
                   <input
                     id="workplace"
-                    {...register("developerDetails.workplace")}
+                    {...register("workplace")}
                     type="text"
                     placeholder="Codú corp"
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
                   />
                 </div>
-                {workplaceError && <p>{`${workplaceError.message}`}</p>}
+                {errors.workplace && <p>{`${errors.workplace.message}`}</p>}
               </div>
 
               <div>
@@ -569,19 +500,18 @@ function SlideThree(props: SlideProps) {
                 <div className="mt-2">
                   <input
                     id="job-title"
-                    {...register("developerDetails.jobTitle")}
+                    {...register("jobTitle")}
                     type="text"
                     placeholder="Codú corp"
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
                   />
                 </div>
-                {jobTitleError && <p>{`${jobTitleError.message}`}</p>}
+                {errors.jobTitle && <p>{`${errors.jobTitle.message}`}</p>}
               </div>
             </>
           )}
 
-          {getValues("developerDetails.professionalOrStudent") ===
-            "Current student" && (
+          {getValues("professionalOrStudent") === "Current student" && (
             <>
               <div>
                 <label
@@ -592,7 +522,7 @@ function SlideThree(props: SlideProps) {
                 </label>
                 <select
                   id="level-of-study"
-                  {...register("developerDetails.levelOfStudy")}
+                  {...register("levelOfStudy")}
                   className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
                 >
                   <option value="" disabled>
@@ -603,7 +533,9 @@ function SlideThree(props: SlideProps) {
                     <option key={level}>{level}</option>
                   ))}
                 </select>
-                {levelOfStudyError && <p>{`${levelOfStudyError.message}`}</p>}
+                {errors.levelOfStudy && (
+                  <p>{`${errors.levelOfStudy.message}`}</p>
+                )}
               </div>
 
               <div>
@@ -616,13 +548,13 @@ function SlideThree(props: SlideProps) {
                 <div className="mt-2">
                   <input
                     id="course"
-                    {...register("developerDetails.course")}
+                    {...register("course")}
                     type="text"
                     placeholder="Course name"
                     className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
                   />
                 </div>
-                {courseError && <p>{`${courseError.message}`}</p>}
+                {errors.course && <p>{`${errors.course.message}`}</p>}
               </div>
             </>
           )}
@@ -647,16 +579,14 @@ function SlideFour(props: SlideProps) {
 
   const name = getValues("name");
   const username = getValues("username");
-  const location = getValues("developerDetails.location");
-  const gender = getValues("developerDetails.gender");
-  const dateOfBirth = getValues("developerDetails.dateOfBirth");
-  const professionalOrStudent = getValues(
-    "developerDetails.professionalOrStudent",
-  );
-  const workplace = getValues("developerDetails.workplace");
-  const jobTitle = getValues("developerDetails.jobTitle");
-  const levelOfStudy = getValues("developerDetails.levelOfStudy");
-  const course = getValues("developerDetails.course");
+  const location = getValues("location");
+  const gender = getValues("gender");
+  const dateOfBirth = getValues("dateOfBirth");
+  const professionalOrStudent = getValues("professionalOrStudent");
+  const workplace = getValues("workplace");
+  const jobTitle = getValues("jobTitle");
+  const levelOfStudy = getValues("levelOfStudy");
+  const course = getValues("course");
 
   const handleClickPreviousSlide = () => {
     setCurrentSlide((curr) => curr - 1);

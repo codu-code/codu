@@ -1,14 +1,16 @@
 "use server";
 
 import {
-  type TypeDeveloperDetailsSchema,
   DeveloperDetailsSchema,
+  type TypeDeveloperDetailsWithNullDateOfBirth,
 } from "@/schema/developerDetails";
 import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
 import { redirect } from "next/navigation";
 
-export async function handleFormSubmit(dataInput: TypeDeveloperDetailsSchema) {
+export async function handleFormSubmit(
+  dataInput: TypeDeveloperDetailsWithNullDateOfBirth,
+) {
   const session = await getServerAuthSession();
   if (!session || !session.user) {
     redirect("/get-started");
@@ -35,30 +37,28 @@ export async function handleFormSubmit(dataInput: TypeDeveloperDetailsSchema) {
       await prisma.developerDetails.update({
         where: { id: session.user.id },
         data: {
-          location: validatedData.developerDetails.location,
-          gender: validatedData.developerDetails.gender,
-          dateOfBirth: validatedData.developerDetails.dateOfBirth,
-          professionalOrStudent:
-            validatedData.developerDetails.professionalOrStudent,
-          workplace: validatedData.developerDetails.workplace,
-          jobTitle: validatedData.developerDetails.jobTitle,
-          levelOfStudy: validatedData.developerDetails.levelOfStudy,
-          course: validatedData.developerDetails.course,
+          location: validatedData.location,
+          gender: validatedData.gender,
+          dateOfBirth: validatedData.dateOfBirth,
+          professionalOrStudent: validatedData.professionalOrStudent,
+          workplace: validatedData.workplace,
+          jobTitle: validatedData.jobTitle,
+          levelOfStudy: validatedData.levelOfStudy,
+          course: validatedData.course,
         },
       });
     } else {
       await prisma.developerDetails.create({
         data: {
           id: session.user.id,
-          location: validatedData.developerDetails.location,
-          gender: validatedData.developerDetails.gender,
-          dateOfBirth: validatedData.developerDetails.dateOfBirth,
-          professionalOrStudent:
-            validatedData.developerDetails.professionalOrStudent,
-          workplace: validatedData.developerDetails.workplace,
-          jobTitle: validatedData.developerDetails.jobTitle,
-          levelOfStudy: validatedData.developerDetails.levelOfStudy,
-          course: validatedData.developerDetails.course,
+          location: validatedData.location,
+          gender: validatedData.gender,
+          dateOfBirth: validatedData.dateOfBirth,
+          professionalOrStudent: validatedData.professionalOrStudent,
+          workplace: validatedData.workplace,
+          jobTitle: validatedData.jobTitle,
+          levelOfStudy: validatedData.levelOfStudy,
+          course: validatedData.course,
         },
       });
     }
