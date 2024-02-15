@@ -3,20 +3,22 @@
 import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { DeveloperDetailsSchema } from "@/schema/developerDetails";
+import {
+  type TypeDeveloperDetailsSchema,
+  DeveloperDetailsSchema,
+} from "@/schema/developerDetails";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Prisma } from "@prisma/client";
 import { handleFormSubmit } from "./actions";
 import { toast } from "sonner";
 import {
-  type TypeDeveloperDetailsSchema,
   professionalOrStudentOptions,
   genderOptions,
   locationOptions,
   levelOfStudyOptions,
-  months,
-} from "@/schema/developerDetails";
+  monthsOptions,
+} from "@/app/alpha/developer/sign-up/selectOptions";
 
 type SlideProps = {
   setCurrentSlide: React.Dispatch<React.SetStateAction<number>>;
@@ -376,15 +378,17 @@ function SlideTwo(props: SlideProps) {
                 <select
                   id="month"
                   name="month"
-                  value={month !== undefined ? months[month] : ""}
+                  value={month !== undefined ? monthsOptions[month] : ""}
                   required
                   className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  onChange={(e) => setMonth(months.indexOf(e.target.value))}
+                  onChange={(e) =>
+                    setMonth(monthsOptions.indexOf(e.target.value))
+                  }
                 >
                   <option value="" disabled>
                     Month
                   </option>
-                  {months.map((month) => (
+                  {monthsOptions.map((month) => (
                     <option key={month}>{month}</option>
                   ))}
                 </select>

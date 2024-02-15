@@ -2,47 +2,6 @@ import z from "zod";
 
 // Tried with enums/tuple but would have had to define an enum in prisma?
 
-export const genderOptions = ["Male", "Female", "Other", "Rather not say"];
-
-export const professionalOrStudentOptions = [
-  "Current student",
-  "Working professional",
-  "None of the above",
-];
-
-export const locationOptions = [
-  "Ireland",
-  "United States",
-  "Canada",
-  "England",
-  "Timbuktu",
-];
-
-export const levelOfStudyOptions = [
-  "Elementry / Middle School / Primary School",
-  "High School / Secondary School",
-  "Univeristy (Undergraduate)",
-  "Univeristy (Masters / Doctoral)",
-  "Vocational / Code school",
-  "Not currently a student",
-  "Other",
-];
-
-export const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 export const DeveloperDetailsSchema = z.object({
   name: z
     .string()
