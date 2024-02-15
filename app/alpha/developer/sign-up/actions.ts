@@ -1,6 +1,9 @@
 "use server";
 
-import { TypeDeveloperDetailsSchema } from "@/schema/developerDetails";
+import {
+  type TypeDeveloperDetailsSchema,
+  DeveloperDetailsSchema,
+} from "@/schema/developerDetails";
 import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
 import { redirect } from "next/navigation";
@@ -12,20 +15,17 @@ export async function handleFormSubmit(dataInput: TypeDeveloperDetailsSchema) {
   }
 
   try {
+    const validatedData = DeveloperDetailsSchema.parse(dataInput);
+
     await prisma.user.update({
       where: {
         id: session.user.id,
       },
       data: {
-        name: dataInput.name,
-        username: dataInput.username,
+        name: validatedData.name,
+        username: validatedData.username,
       },
     });
-
-    // Prisma does not seem to have a find or create query
-    // A record will always exist in the User model
-    // So first we need to check to see if a record exists in the DeveloperDetails model for the user id
-    // Then either update it or create it
 
     const isExistDeveloperDetails = await prisma.developerDetails.findUnique({
       where: { id: session.user.id },
@@ -35,36 +35,33 @@ export async function handleFormSubmit(dataInput: TypeDeveloperDetailsSchema) {
       await prisma.developerDetails.update({
         where: { id: session.user.id },
         data: {
-          location: dataInput.developerDetails.location,
-          gender: dataInput.developerDetails.gender,
-          dateOfBirth: dataInput.developerDetails.dateOfBirth,
+          location: validatedData.developerDetails.location,
+          gender: validatedData.developerDetails.gender,
+          dateOfBirth: validatedData.developerDetails.dateOfBirth,
           professionalOrStudent:
-            dataInput.developerDetails.professionalOrStudent,
-          workplace: dataInput.developerDetails.workplace,
-          jobTitle: dataInput.developerDetails.jobTitle,
-          levelOfStudy: dataInput.developerDetails.levelOfStudy,
-          course: dataInput.developerDetails.course,
+            validatedData.developerDetails.professionalOrStudent,
+          workplace: validatedData.developerDetails.workplace,
+          jobTitle: validatedData.developerDetails.jobTitle,
+          levelOfStudy: validatedData.developerDetails.levelOfStudy,
+          course: validatedData.developerDetails.course,
         },
       });
     } else {
       await prisma.developerDetails.create({
         data: {
           id: session.user.id,
-          location: dataInput.developerDetails.location,
-          gender: dataInput.developerDetails.gender,
-          dateOfBirth: dataInput.developerDetails.dateOfBirth,
+          location: validatedData.developerDetails.location,
+          gender: validatedData.developerDetails.gender,
+          dateOfBirth: validatedData.developerDetails.dateOfBirth,
           professionalOrStudent:
-            dataInput.developerDetails.professionalOrStudent,
-          workplace: dataInput.developerDetails.workplace,
-          jobTitle: dataInput.developerDetails.jobTitle,
-          levelOfStudy: dataInput.developerDetails.levelOfStudy,
-          course: dataInput.developerDetails.course,
+            validatedData.developerDetails.professionalOrStudent,
+          workplace: validatedData.developerDetails.workplace,
+          jobTitle: validatedData.developerDetails.jobTitle,
+          levelOfStudy: validatedData.developerDetails.levelOfStudy,
+          course: validatedData.developerDetails.course,
         },
       });
     }
-
-    // Is this ok for error handling
-    // return boolean and toast on the client?
     return true;
   } catch (error) {
     console.error(
