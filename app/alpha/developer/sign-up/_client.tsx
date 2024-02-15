@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   DeveloperDetailsSchema,
@@ -19,10 +19,6 @@ import {
   monthsOptions,
 } from "@/app/alpha/developer/sign-up/selectOptions";
 
-type SlideProps = {
-  setCurrentSlide: React.Dispatch<React.SetStateAction<number>>;
-};
-
 export default function SignUp({
   details,
 }: {
@@ -38,7 +34,8 @@ export default function SignUp({
     defaultValues: details ?? {},
   });
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const searchParams = useSearchParams();
+  const slide = Number(searchParams.get("slide")) || 1;
 
   const onFormSubmit = async (
     data: TypeDeveloperDetailsWithNullDateOfBirth,
@@ -60,29 +57,26 @@ export default function SignUp({
           className="min-h-[41rem]"
           onSubmit={useFormObject.handleSubmit((data) => onFormSubmit(data))}
         >
-          <SignupProgressBar currentSlide={currentSlide} />
+          <SignupProgressBar currentSlide={slide} />
 
-          {currentSlide === 0 && <SlideOne setCurrentSlide={setCurrentSlide} />}
-          {currentSlide === 1 && <SlideTwo setCurrentSlide={setCurrentSlide} />}
-          {currentSlide === 2 && (
-            <SlideThree setCurrentSlide={setCurrentSlide} />
-          )}
-          {currentSlide === 3 && (
-            <SlideFour setCurrentSlide={setCurrentSlide} />
-          )}
+          {slide === 1 && <SlideOne />}
+          {slide === 2 && <SlideTwo />}
+          {slide === 3 && <SlideThree />}
+          {slide === 4 && <SlideFour />}
         </form>
       </FormProvider>
     </>
   );
 }
 
-function SlideOne(props: SlideProps) {
-  const { setCurrentSlide } = props;
+function SlideOne() {
   const {
     register,
     trigger,
     formState: { errors },
   } = useFormContext();
+
+  const router = useRouter();
 
   const handleClickNextSlide = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -93,7 +87,7 @@ function SlideOne(props: SlideProps) {
     });
 
     if (isError) {
-      setCurrentSlide((curr) => curr + 1);
+      router.push(`?slide=${2}`, { scroll: false });
     }
   };
 
@@ -196,8 +190,8 @@ function SlideOne(props: SlideProps) {
   );
 }
 
-function SlideTwo(props: SlideProps) {
-  const { setCurrentSlide } = props;
+function SlideTwo() {
+  const router = useRouter();
 
   const {
     getValues,
@@ -259,12 +253,14 @@ function SlideTwo(props: SlideProps) {
     const isError = await trigger(["gender"], { shouldFocus: true });
 
     if (isError && dob !== undefined) {
-      setCurrentSlide((curr) => curr + 1);
+      // setCurrentSlide((curr) => curr + 1);
+      router.push(`?slide=${3}`, { scroll: false });
     }
   };
 
   const handleClickPreviousSlide = () => {
-    setCurrentSlide((curr) => curr - 1);
+    // setCurrentSlide((curr) => curr - 1);
+    router.push(`?slide=${1}`, { scroll: false });
   };
 
   return (
@@ -384,11 +380,11 @@ function SlideTwo(props: SlideProps) {
   );
 }
 
-function SlideThree(props: SlideProps) {
-  const { setCurrentSlide } = props;
+function SlideThree() {
+  const router = useRouter();
 
   const handleClickPreviousSlide = () => {
-    setCurrentSlide((curr) => curr - 1);
+    router.push(`?slide=${2}`, { scroll: false });
   };
 
   const {
@@ -415,16 +411,19 @@ function SlideThree(props: SlideProps) {
         isError = await trigger(["workplace", "jobTitle"]);
 
         if (isError) {
-          setCurrentSlide((curr) => curr + 1);
+          // setCurrentSlide((curr) => curr + 1);
+          router.push(`?slide=${4}`, { scroll: false });
         }
       } else if (professionalOrStudent === "Current student") {
         isError = await trigger(["levelOfStudy", "course"]);
 
         if (isError) {
-          setCurrentSlide((curr) => curr + 1);
+          // setCurrentSlide((curr) => curr + 1);
+          router.push(`?slide=${4}`, { scroll: false });
         }
       } else if (professionalOrStudent === "None of the above") {
-        setCurrentSlide((curr) => curr + 1);
+        // setCurrentSlide((curr) => curr + 1);
+        router.push(`?slide=${4}`, { scroll: false });
       }
     }
   };
@@ -569,13 +568,13 @@ function SlideThree(props: SlideProps) {
   );
 }
 
-function SlideFour(props: SlideProps) {
-  const { setCurrentSlide } = props;
-
+function SlideFour() {
   const {
     getValues,
     formState: { errors },
   } = useFormContext();
+
+  const router = useRouter();
 
   const name = getValues("name");
   const username = getValues("username");
@@ -589,7 +588,8 @@ function SlideFour(props: SlideProps) {
   const course = getValues("course");
 
   const handleClickPreviousSlide = () => {
-    setCurrentSlide((curr) => curr - 1);
+    // setCurrentSlide((curr) => curr - 1);
+    router.push(`?slide=${3}`, { scroll: false });
   };
 
   return (
