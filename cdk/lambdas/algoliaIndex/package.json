@@ -10,6 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.509.0"
+    "@aws-sdk/client-ssm": "^3.509.0",
+    "algoliasearch": "^4.22.1",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "pg-types": "^4.0.2"
   }
 }
