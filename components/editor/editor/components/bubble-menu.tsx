@@ -20,7 +20,7 @@ export interface BubbleMenuItem {
   icon: typeof BoldIcon;
 }
 
-type EditorBubbleMenuProps = Omit<BubbleMenuProps, "children">;
+type EditorBubbleMenuProps = Omit<Required<Pick<BubbleMenuProps, "editor">> & BubbleMenuProps, "children">;
 
 export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const items: BubbleMenuItem[] = [
@@ -53,8 +53,8 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const bubbleMenuProps: EditorBubbleMenuProps = {
     ...props,
     shouldShow: ({ editor }) => {
-      // don't show if image is selected
-      if (editor.isActive("image")) {
+      // don't show if image is selected or a heading
+      if (editor.isActive("image") || editor.isActive("heading")) {
         return false;
       }
 

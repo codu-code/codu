@@ -3,7 +3,14 @@ import z from "zod";
 export const saveSettingsSchema = z.object({
   name: z.string().min(1).max(50),
   bio: z.string().max(200).optional(),
-  username: z.string().min(3).max(40, "Max username length is 40 characters."),
+  username: z
+    .string()
+    .min(3)
+    .max(40, "Max username length is 40 characters.")
+    .regex(
+      /^[a-zA-Z0-9-]+$/,
+      "Username can only contain alphanumerics and dashes.",
+    ),
   location: z
     .string()
     .max(100, "Max location length is 100 characters.")
