@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
-import { TypeDeveloperDetailsWithNullDateOfBirth } from "@/schema/developerDetails";
 
 export default async function Page() {
   const session = await getServerAuthSession();
@@ -11,20 +10,17 @@ export default async function Page() {
   }
 
   const select = {
-    name: true,
+    firstName: true,
+    surname: true,
     username: true,
-    developerDetails: {
-      select: {
-        course: true,
-        dateOfBirth: true,
-        gender: true,
-        levelOfStudy: true,
-        jobTitle: true,
-        workplace: true,
-        professionalOrStudent: true,
-        location: true,
-      },
-    },
+    gender: true,
+    dateOfBirth: true,
+    location: true,
+    professionalOrStudent: true,
+    course: true,
+    levelOfStudy: true,
+    jobTitle: true,
+    workplace: true,
   };
 
   const details = await prisma.user.findUnique({
@@ -34,23 +30,23 @@ export default async function Page() {
     select,
   });
 
-  let flattenedDetails: TypeDeveloperDetailsWithNullDateOfBirth | null = null;
+  // let flattenedDetails: TypeDeveloperDetailsWithNullDateOfBirth | null = null;
 
-  if (details) {
-    flattenedDetails = {
-      name: details.name,
-      username: details.username || "",
-      dateOfBirth: details.developerDetails?.dateOfBirth || null,
-      course: details.developerDetails?.course || "",
-      gender: details.developerDetails?.gender || "",
-      levelOfStudy: details.developerDetails?.levelOfStudy || "",
-      jobTitle: details.developerDetails?.jobTitle || "",
-      workplace: details.developerDetails?.workplace || "",
-      professionalOrStudent:
-        details.developerDetails?.professionalOrStudent || "",
-      location: details.developerDetails?.location || "",
-    };
-  }
+  // if (details) {
+  //   flattenedDetails = {
+  //     name: details.name,
+  //     username: details.username || "",
+  //     dateOfBirth: details.developerDetails?.dateOfBirth || null,
+  //     course: details.developerDetails?.course || "",
+  //     gender: details.developerDetails?.gender || "",
+  //     levelOfStudy: details.developerDetails?.levelOfStudy || "",
+  //     jobTitle: details.developerDetails?.jobTitle || "",
+  //     workplace: details.developerDetails?.workplace || "",
+  //     professionalOrStudent:
+  //       details.developerDetails?.professionalOrStudent || "",
+  //     location: details.developerDetails?.location || "",
+  //   };
+  // }
 
   return <Content details={flattenedDetails} />;
 }

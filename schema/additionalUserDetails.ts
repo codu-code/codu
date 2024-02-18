@@ -2,9 +2,9 @@ import z from "zod";
 
 // Tried with enums/tuple but would have had to define an enum in prisma?
 
-export const DeveloperDetailsSchema = z
+export const AdditionalDetailsSchema = z
   .object({
-    name: z
+    firstName: z
       .string()
       .trim()
       .min(2, "Min name length is 2 characters.")
@@ -68,11 +68,11 @@ export const DeveloperDetailsSchema = z
     }
   });
 
-export type TypeDeveloperDetailsSchema = z.TypeOf<
-  typeof DeveloperDetailsSchema
+export type TypeAdditionalDetailsSchema = z.TypeOf<
+  typeof AdditionalDetailsSchema
 >;
 
-export type TypeDeveloperDetailsWithNullDateOfBirth = Omit<
-  TypeDeveloperDetailsSchema,
-  "dateOfBirth"
-> & { dateOfBirth: Date | null };
+// export type TypeDeveloperDetailsWithNullDateOfBirth = Omit<
+//   TypeDeveloperDetailsSchema,
+//   "dateOfBirth"
+// > & { dateOfBirth: Date | null };
