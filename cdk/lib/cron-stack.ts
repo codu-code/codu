@@ -11,10 +11,10 @@ export class CronStack extends cdk.Stack {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const lambdaFn = new NodejsFunction(this, "Singleton", {
+    const lambdaFn = new NodejsFunction(this, "AlgoliaLambda", {
       timeout: cdk.Duration.seconds(120),
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: path.join(__dirname, "/../lambdas/algoliaIndex/index.js"),
+      entry: path.join(__dirname, "/../lambdas/algoliaIndex/index.ts"),
       depsLockFilePath: path.join(
         __dirname,
         "/../lambdas/algoliaIndex/package-lock.json",
