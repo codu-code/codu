@@ -20,7 +20,7 @@ export class CronStack extends cdk.Stack {
         "/../lambdas/algoliaIndex/package-lock.json",
       ),
       bundling: {
-        nodeModules: ["@aws-sdk/client-ssm"],
+        nodeModules: ["@aws-sdk/client-ssm", "algoliasearch", "pg"],
       },
     });
 
