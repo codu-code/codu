@@ -78,34 +78,43 @@ model Session {
 }
 
 model User {
-  id                 String         @id @default(cuid())
-  username           String?        @unique @db.VarChar(40)
-  name               String         @default("")
-  email              String?        @unique
-  emailVerified      DateTime?
-  image              String         @default("/images/person.png")
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  bio                String         @default("") @db.VarChar(200)
-  location           String         @default("")
-  websiteUrl         String         @default("")
-  emailNotifications Boolean        @default(true)
-  newsletter         Boolean        @default(true)
-  accounts           Account[]
-  sessions           Session[]
-  posts              Post[]
-  role               Role           @default(USER)
-  likes              Like[]
-  bookmarks          Bookmark[]
-  comments           Comment[]
-  notification       Notification[]
-  notfier            Notification[] @relation("notifier")
-  BannedUsers        BannedUsers?
-  bans               BannedUsers[]  @relation("bannedBy")
-  Flagged            Flagged[]
-  flaggedNotifier    Flagged[]      @relation("notifier")
-  RSVP               RSVP[]
-  memberships        Membership[]
+  id                     String         @id @default(cuid())
+  username               String?        @unique @db.VarChar(40)
+  name                   String         @default("")
+  email                  String?        @unique
+  emailVerified          DateTime?
+  image                  String         @default("/images/person.png")
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  bio                    String         @default("") @db.VarChar(200)
+  location               String         @default("")
+  websiteUrl             String         @default("")
+  emailNotifications     Boolean        @default(true)
+  newsletter             Boolean        @default(true)
+  firstName           	 String?    	 
+  surname             	 String?   	 
+  gender              	 String?    	 
+  dateOfBirth         	 DateTime?
+  professionalOrStudent  String?
+  workplace           	 String?
+  jobTitle            	 String?
+  levelOfStudy        	 String?
+  course              	 String?
+  accounts               Account[]
+  sessions               Session[]
+  posts                  Post[]
+  role                   Role           @default(USER)
+  likes                  Like[]
+  bookmarks              Bookmark[]
+  comments               Comment[]
+  notification           Notification[]
+  notfier                Notification[] @relation("notifier")
+  BannedUsers            BannedUsers?
+  bans                   BannedUsers[]  @relation("bannedBy")
+  Flagged                Flagged[]
+  flaggedNotifier        Flagged[]      @relation("notifier")
+  RSVP                   RSVP[]
+  memberships            Membership[]
 
   @@index(fields: [username, id])
 }
@@ -234,7 +243,7 @@ model Event {
 }
 
 model Membership {
-  id               String @id @unique
+  id               String @id 
   user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId           String
   community        Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
@@ -244,7 +253,7 @@ model Membership {
 }
 
 model RSVP {
-  id      String @id @unique
+  id      String @id 
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String
   event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
