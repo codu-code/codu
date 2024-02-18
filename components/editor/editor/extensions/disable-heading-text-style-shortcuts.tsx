@@ -8,7 +8,7 @@ const DisableHeadingTextStyleShortcuts = Extension.create({
       'Mod-i': () => this.editor.isActive("heading") ?? this.editor.commands.toggleItalic(),
       'Mod-u': () => this.editor.isActive("heading") ?? this.editor.commands.toggleUnderline(),
       'Mod-e': () => this.editor.isActive("heading") ?? this.editor.commands.toggleCode(),
-      'Mod-shift-x': () => this.editor.isActive("heading") ?? this.editor.commands.toggleStrike(),
+      'Mod-shift-s': () => this.editor.isActive("heading") ?? this.editor.commands.toggleStrike(),
       'Mod-shift-h': () => this.editor.isActive("heading") ?? this.editor.commands.toggleHighlight(),
     };
   },
