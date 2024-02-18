@@ -33,7 +33,7 @@ export class CronStack extends cdk.Stack {
     // 8:00 AM (UTC+0) on the first day of the month
     // See https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html
     const rule = new events.Rule(this, "Rule", {
-      schedule: events.Schedule.expression("cron(0 8 1 * ? *)"),
+      schedule: events.Schedule.expression("cron(0 6 * * ? *)"),
     });
 
     rule.addTarget(new targets.LambdaFunction(lambdaFn));
