@@ -7,9 +7,8 @@ import {
   AdditionalDetailsSchema,
   type TypeAdditionalDetailsSchema,
 } from "@/schema/additionalUserDetails";
-
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { handleFormSubmit } from "./actions";
 import { toast } from "sonner";
 import {
@@ -19,42 +18,34 @@ import {
   levelOfStudyOptions,
   monthsOptions,
 } from "@/app/alpha/additional-details/selectOptions";
-import { Prisma } from "@prisma/client";
-import { selectUserDetails } from "@/app/alpha/additional-details/page";
 
-type UserDetails = Prisma.UserGetPayload<{
-  select: typeof selectUserDetails;
-}>;
+type UserDetails = {
+  username: string;
+  firstName: string;
+  surname: string;
+  gender: string;
+  dateOfBirth: Date | undefined;
+  location: string;
+  professionalOrStudent: string;
+  course: string;
+  levelOfStudy: string;
+  jobTitle: string;
+  workplace: string;
+};
 
 export default function AdditionalSignUpDetails({
   details,
 }: {
-  details: UserDetails | null;
+  details: UserDetails;
 }) {
-  const { data: session } = useSession();
-
-  console.log("ses", session);
+  const session = useSession();
   if (!session) {
     redirect("/get-started");
   }
 
-  const detailsWithNullsRemoved = {
-    username: details?.username || "",
-    firstName: details?.firstName || "",
-    surname: details?.surname || "",
-    gender: details?.gender || "",
-    dateOfBirth: details?.dateOfBirth || undefined,
-    location: details?.location || "",
-    professionalOrStudent: details?.professionalOrStudent || "",
-    course: details?.course || "",
-    levelOfStudy: details?.levelOfStudy || "",
-    jobTitle: details?.jobTitle || "",
-    workplace: details?.workplace || "",
-  };
-
   const useFormObject = useForm<TypeAdditionalDetailsSchema>({
     resolver: zodResolver(AdditionalDetailsSchema),
-    defaultValues: detailsWithNullsRemoved,
+    defaultValues: details,
   });
 
   const searchParams = useSearchParams();
@@ -595,7 +586,8 @@ function SlideFour() {
 
   const router = useRouter();
 
-  const name = getValues("name");
+  const firstName = getValues("firstName");
+  const surname = getValues("surname");
   const username = getValues("username");
   const location = getValues("location");
   const gender = getValues("gender");
@@ -622,8 +614,12 @@ function SlideFour() {
       <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm">
         <div className="bg-yellow-400... flex h-[21.75rem] flex-col items-start space-y-3 ">
           <div className="flex min-w-[20rem]">
-            <p className="bg-red-400... w-1/2">Name: </p>{" "}
-            <p className="w-1/2"> {name}</p>
+            <p className="bg-red-400... w-1/2">First name: </p>{" "}
+            <p className="w-1/2"> {firstName}</p>
+          </div>
+          <div className="flex min-w-[20rem]">
+            <p className="bg-red-400... w-1/2">Surname: </p>{" "}
+            <p className="w-1/2"> {surname}</p>
           </div>
           <div className="flex min-w-[20rem]">
             <p className="w-1/2">Username: </p>{" "}
@@ -693,7 +689,7 @@ function SlideFour() {
 }
 
 function SignupProgressBar({ currentSlide }: { currentSlide: number }) {
-  const progressPercentage = (100 / 4) * (currentSlide + 1);
+  const progressPercentage = (100 / 4) * currentSlide;
 
   return (
     <div className="flex h-2">

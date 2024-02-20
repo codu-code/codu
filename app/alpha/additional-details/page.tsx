@@ -3,7 +3,7 @@ import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
 
-export const selectUserDetails = {
+const selectUserDetails = {
   username: true,
   firstName: true,
   surname: true,
@@ -30,5 +30,19 @@ export default async function Page() {
     select: selectUserDetails,
   });
 
-  return <Content details={details} />;
+  const detailsWithNullsRemoved = {
+    username: details?.username || "",
+    firstName: details?.firstName || "",
+    surname: details?.surname || "",
+    gender: details?.gender || "",
+    dateOfBirth: details?.dateOfBirth || undefined,
+    location: details?.location || "",
+    professionalOrStudent: details?.professionalOrStudent || "",
+    course: details?.course || "",
+    levelOfStudy: details?.levelOfStudy || "",
+    jobTitle: details?.jobTitle || "",
+    workplace: details?.workplace || "",
+  };
+
+  return <Content details={detailsWithNullsRemoved} />;
 }
