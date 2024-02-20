@@ -153,6 +153,27 @@ export class AppStack extends cdk.Stack {
               "/env/algoliaIdx",
             ),
           ),
+          EMAIL_API_KEY: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "emailKey",
+              { parameterName: "/env/email/key", version: 1 },
+            ),
+          ),
+          EMAIL_API_ENDPOINT: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "emailEndpoint",
+              "/env/email/endpoint",
+            ),
+          ),
+          EMAIL_NEWSLETTER_ID: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "emailNewsletterId",
+              "/env/email/id",
+            ),
+          ),
         },
         logging: ecs.LogDrivers.awsLogs({
           streamPrefix: "AppContainer",
