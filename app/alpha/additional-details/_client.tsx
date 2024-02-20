@@ -4,9 +4,9 @@ import React, { useEffect, useState } from "react";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  DeveloperDetailsSchema,
-  TypeDeveloperDetailsWithNullDateOfBirth,
-} from "@/schema/developerDetails";
+  AdditionalDetailsSchema,
+  type TypeAdditionalDetailsSchema,
+} from "@/schema/additionalUserDetails";
 
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,29 +18,49 @@ import {
   locationOptions,
   levelOfStudyOptions,
   monthsOptions,
-} from "@/app/alpha/developer/sign-up/selectOptions";
+} from "@/app/alpha/additional-details/selectOptions";
+import { Prisma } from "@prisma/client";
+import { selectUserDetails } from "@/app/alpha/additional-details/page";
 
-export default function SignUp({
+type UserDetails = Prisma.UserGetPayload<{
+  select: typeof selectUserDetails;
+}>;
+
+export default function AdditionalSignUpDetails({
   details,
 }: {
-  details: TypeDeveloperDetailsWithNullDateOfBirth | null;
+  details: UserDetails | null;
 }) {
   const { data: session } = useSession();
+
+  console.log("ses", session);
   if (!session) {
     redirect("/get-started");
   }
 
-  const useFormObject = useForm<TypeDeveloperDetailsWithNullDateOfBirth>({
-    resolver: zodResolver(DeveloperDetailsSchema),
-    defaultValues: details ?? {},
+  const detailsWithNullsRemoved = {
+    username: details?.username || "",
+    firstName: details?.firstName || "",
+    surname: details?.surname || "",
+    gender: details?.gender || "",
+    dateOfBirth: details?.dateOfBirth || undefined,
+    location: details?.location || "",
+    professionalOrStudent: details?.professionalOrStudent || "",
+    course: details?.course || "",
+    levelOfStudy: details?.levelOfStudy || "",
+    jobTitle: details?.jobTitle || "",
+    workplace: details?.workplace || "",
+  };
+
+  const useFormObject = useForm<TypeAdditionalDetailsSchema>({
+    resolver: zodResolver(AdditionalDetailsSchema),
+    defaultValues: detailsWithNullsRemoved,
   });
 
   const searchParams = useSearchParams();
   const slide = Number(searchParams.get("slide")) || 1;
 
-  const onFormSubmit = async (
-    data: TypeDeveloperDetailsWithNullDateOfBirth,
-  ) => {
+  const onFormSubmit = async (data: TypeAdditionalDetailsSchema) => {
     const isSuccess = await handleFormSubmit(data);
 
     if (isSuccess) {
@@ -83,9 +103,12 @@ function SlideOne() {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.preventDefault();
-    const isError = await trigger(["name", "username", "location"], {
-      shouldFocus: true,
-    });
+    const isError = await trigger(
+      ["firstName", "surname", "username", "location"],
+      {
+        shouldFocus: true,
+      },
+    );
 
     if (isError) {
       router.push(`?slide=${2}`, { scroll: false });
@@ -112,35 +135,33 @@ function SlideOne() {
             <div className="mt-2 ">
               <input
                 id="name"
-                {...register("name")}
+                {...register("firstName")}
                 placeholder="What should we call you?"
                 type="text"
                 className="block w-full rounded-md border-0 bg-white/5  py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
               />
-              {errors.name && <p>{`${errors.name.message}`}</p>}
+              {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
             </div>
           </div>
-
-          {/* ------------------------------------------------------------------------------------------------------------- */}
 
           <div>
             <label
-              htmlFor="last_name"
+              htmlFor="surname"
               className="block text-sm font-medium leading-6 text-white"
             >
-              Last Name
+              Surname
             </label>
             <div className="mt-2">
               <input
+                id="surname"
+                {...register("surname")}
                 type="text"
-                placeholder="And your last name?"
-                disabled
+                placeholder="And your surname?"
                 className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
               />
+              {errors.surname && <p>{`${errors.surname.message}`}</p>}
             </div>
           </div>
-
-          {/* ------------------------------------------------------------------------------------------------------------- */}
 
           <div>
             <label
@@ -198,7 +219,6 @@ function SlideTwo() {
     getValues,
     setValue,
     register,
-    getFieldState,
     trigger,
     formState: { errors },
   } = useFormContext();
@@ -251,16 +271,16 @@ function SlideTwo() {
   ) => {
     e.preventDefault();
 
-    const isError = await trigger(["gender"], { shouldFocus: true });
+    const isError = await trigger(["dateOfBirth", "gender"], {
+      shouldFocus: true,
+    });
 
     if (isError && dob !== undefined) {
-      // setCurrentSlide((curr) => curr + 1);
       router.push(`?slide=${3}`, { scroll: false });
     }
   };
 
   const handleClickPreviousSlide = () => {
-    // setCurrentSlide((curr) => curr - 1);
     router.push(`?slide=${1}`, { scroll: false });
   };
 
@@ -369,6 +389,7 @@ function SlideTwo() {
                 </select>
               </div>
             </div>
+            {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
           </fieldset>
         </div>
 
@@ -412,18 +433,15 @@ function SlideThree() {
         isError = await trigger(["workplace", "jobTitle"]);
 
         if (isError) {
-          // setCurrentSlide((curr) => curr + 1);
           router.push(`?slide=${4}`, { scroll: false });
         }
       } else if (professionalOrStudent === "Current student") {
         isError = await trigger(["levelOfStudy", "course"]);
 
         if (isError) {
-          // setCurrentSlide((curr) => curr + 1);
           router.push(`?slide=${4}`, { scroll: false });
         }
       } else if (professionalOrStudent === "None of the above") {
-        // setCurrentSlide((curr) => curr + 1);
         router.push(`?slide=${4}`, { scroll: false });
       }
     }
@@ -589,7 +607,6 @@ function SlideFour() {
   const course = getValues("course");
 
   const handleClickPreviousSlide = () => {
-    // setCurrentSlide((curr) => curr - 1);
     router.push(`?slide=${3}`, { scroll: false });
   };
 

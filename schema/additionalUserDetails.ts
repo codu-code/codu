@@ -9,12 +9,16 @@ export const AdditionalDetailsSchema = z
       .trim()
       .min(2, "Min name length is 2 characters.")
       .max(50, "Max name length is 30 characters."),
+    surname: z
+      .string()
+      .trim()
+      .min(2, "Min name length is 2 characters.")
+      .max(50, "Max name length is 30 characters."),
     username: z
       .string()
       .trim()
       .min(3, "Min name length is 2 characters.")
       .max(40, "Max name length is 30 characters."),
-
     location: z.string().min(1, "Location is required"),
     gender: z.string().min(1, "Gender is required"),
     dateOfBirth: z.date(),
@@ -71,8 +75,3 @@ export const AdditionalDetailsSchema = z
 export type TypeAdditionalDetailsSchema = z.TypeOf<
   typeof AdditionalDetailsSchema
 >;
-
-// export type TypeDeveloperDetailsWithNullDateOfBirth = Omit<
-//   TypeDeveloperDetailsSchema,
-//   "dateOfBirth"
-// > & { dateOfBirth: Date | null };
