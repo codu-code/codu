@@ -15,10 +15,10 @@ export default function NewsletterConfirmationPage() {
         <div className="mx-auto max-w-2xl grid-cols-1 gap-x-8 gap-y-16">
           <div className="max-w-xl lg:max-w-lg">
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              You email is confirmed!
+              Your email is confirmed!
             </h2>
             <p className="mt-4 text-lg leading-8 text-gray-300">
-              {`Your email has been confirmed! Now you just have to wait for the next newsletter to arrive.`}
+              {`Now, you just have to wait for the next newsletter to arrive. Thanks for joining!`}
             </p>
           </div>
         </div>
