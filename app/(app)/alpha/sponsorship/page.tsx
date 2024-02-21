@@ -3,7 +3,6 @@
 import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
-import Head from "next/head";
 import { useEffect } from "react";
 
 import pic1 from "@/public/images/sponsors/pic1.png";

@@ -2,13 +2,13 @@
 
 import { Children, Fragment, useEffect, useRef, useState } from "react";
 import { TagIcon } from "@heroicons/react/20/solid";
-import ArticlePreview from "../../components/ArticlePreview/ArticlePreview";
-import ArticleLoading from "../../components/ArticlePreview/ArticleLoading";
+import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
+import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import challenge from "../../public/images/announcements/challenge.png";
+import challenge from "@/public/images/announcements/challenge.png";
 import { api } from "@/server/trpc/react";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { useSession } from "next-auth/react";

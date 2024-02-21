@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import prisma from "../../../../../server/db/client";
+import prisma from "@/server/db/client";
 import EventPage from "./_EventPage";
 
 type Props = { params: { event: string } };
