@@ -5,7 +5,6 @@ import Footer from "@/components/Footer/Footer";
 import Nav from "@/components/Nav/Nav";
 import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
-import { Toaster } from "sonner";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import React from "react";
 import { PromptProvider } from "@/components/PromptService";
@@ -77,7 +76,6 @@ export default async function RootLayout({
         <ThemeProvider>
           <TRPCReactProvider headers={headers()}>
             <PromptProvider>
-              <Toaster />
               <Nav
                 session={session}
                 algoliaSearchConfig={algoliaSearchConfig}

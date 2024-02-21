@@ -29,9 +29,14 @@ export function SignupForm() {
 
   useEffect(() => {
     if (state.message === "success") {
-      toast.success("You're subscribed!");
+      toast.success(
+        "Nearly there! Check your inbox to confirm your subsciption.",
+        { duration: 5000, position: "bottom-center" },
+      );
     } else if (state.message === "error") {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.", {
+        position: "bottom-center",
+      });
     }
   }, [state.message]);
 

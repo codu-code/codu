@@ -1,3 +1,13 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Your email has been confirmed! Welcome to Codú Weekly.",
+  robots: {
+    follow: false,
+    index: false,
+  },
+};
+
 export default function NewsletterConfirmationPage() {
   return (
     <div className="relative isolate min-h-svh overflow-hidden bg-black py-16 sm:flex sm:items-center sm:py-24 lg:py-32">
