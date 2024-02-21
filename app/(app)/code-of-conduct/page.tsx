@@ -1,5 +1,3 @@
-import React from "react";
-
 export const metadata = {
   title: "Code of conduct",
   description:
