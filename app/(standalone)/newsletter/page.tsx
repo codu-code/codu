@@ -6,7 +6,6 @@ export const metadata: Metadata = {
   title: "Codú Weekly - The Newsletter for Web Developers",
   description:
     "The newsletter for Web Developers delivered weekly and 100% free. Get weekly articles delivered to your inbox.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
   keywords: [
     "programming",
     "frontend",
@@ -21,7 +20,7 @@ export const metadata: Metadata = {
     "CSS",
     "Tailwind",
     "React",
-    "Angular",
+    "email",
     "backend",
     "newsletter",
   ],
