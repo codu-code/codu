@@ -99,7 +99,7 @@
     "satori": "^0.10.11",
     "server-only": "^0.0.1",
     "sharp": "^0.33.0",
-    "sonner": "^1.2.4",
+    "sonner": "^1.4.0",
     "styled-components": "^6.1.1",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.1",
