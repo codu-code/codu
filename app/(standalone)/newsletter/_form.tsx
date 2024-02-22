@@ -30,7 +30,7 @@ export function SignupForm() {
   useEffect(() => {
     if (state.message === "success") {
       toast.success(
-        "Nearly there! Check your inbox to confirm your subsciption.",
+        "Nearly there! Check your inbox to confirm your subscription.",
         { duration: 5000, position: "bottom-center" },
       );
     } else if (state.message === "error") {
