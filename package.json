@@ -80,7 +80,7 @@
     "holy-loader": "^2.0.1",
     "lowlight": "^3.1.0",
     "lucide-react": "^0.334.0",
-    "nanoid": "^5.0.4",
+    "nanoid": "^5.0.5",
     "next": "^14.0.4",
     "next-auth": "^4.24.5",
     "next-superjson-plugin": "^0.6.1",
