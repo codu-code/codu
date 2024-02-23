@@ -232,6 +232,15 @@ export class AppStack extends cdk.Stack {
       action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
     });
 
+    fargateService.targetGroup.configureHealthCheck({
+      path: "/api/health",
+      interval: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(5),
+      healthyHttpCodes: "200",
+      unhealthyThresholdCount: 2,
+      healthyThresholdCount: 3,
+    });
+
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
       maxCapacity: production ? 3 : 1,
