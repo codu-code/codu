@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const AdditionalDetailsSchema = z.object({
+export const slideOneSchema = z.object({
   firstName: z
     .string()
     .trim()
@@ -17,76 +17,63 @@ export const AdditionalDetailsSchema = z.object({
     .min(3, "Min name length is 2 characters.")
     .max(40, "Max name length is 30 characters."),
   location: z.string().min(1, "Location is required"),
+});
+
+export const slideTwoSchema = z.object({
   gender: z.string().min(1, "Gender is required"),
   dateOfBirth: z.date(),
-  professionalOrStudent: z.string().min(1, "Select an option"),
-  workplace: z.string().max(30, "Max length is 30 characters."),
-  jobTitle: z.string().max(30, "Max length is 30 characters."),
-  levelOfStudy: z.string(),
-  course: z.string().max(30, "Max name length is 30 characters."),
 });
 
-export const slideOneSchema = AdditionalDetailsSchema.pick({
-  firstName: true,
-  surname: true,
-  username: true,
-  location: true,
-});
+export const slideThreeSchema = z
+  .object({
+    professionalOrStudent: z.string().min(1, "Select an option"),
+    workplace: z.string().max(30, "Max length is 30 characters."),
+    jobTitle: z.string().max(30, "Max length is 30 characters."),
+    levelOfStudy: z.string(),
+    course: z.string().max(30, "Max name length is 30 characters."),
+  })
+  .superRefine((val, ctx) => {
+    if (
+      val.professionalOrStudent === "Current student" &&
+      val.levelOfStudy === ""
+    ) {
+      ctx.addIssue({
+        path: ["levelOfStudy"],
+        code: "custom",
+        message: "required",
+      });
+    }
+    if (val.professionalOrStudent === "Current student" && val.course === "") {
+      ctx.addIssue({
+        path: ["course"],
+        code: "custom",
+        message: "required",
+      });
+    }
+    if (
+      val.professionalOrStudent === "Working professional" &&
+      val.workplace === ""
+    ) {
+      ctx.addIssue({
+        path: ["workplace"],
+        code: "custom",
+        message: "required",
+      });
+    }
+    if (
+      val.professionalOrStudent === "Working professional" &&
+      val.jobTitle === ""
+    ) {
+      ctx.addIssue({
+        path: ["jobTitle"],
+        code: "custom",
+        message: "required",
+      });
+    }
+  });
 
-export const slideTwoSchema = AdditionalDetailsSchema.pick({
-  dateOfBirth: true,
-  gender: true,
-});
+export type TypeSlideOneSchema = z.TypeOf<typeof slideOneSchema>;
 
-export const slideThreeSchema = AdditionalDetailsSchema.pick({
-  professionalOrStudent: true,
-  workplace: true,
-  jobTitle: true,
-  levelOfStudy: true,
-  course: true,
-}).superRefine((val, ctx) => {
-  if (
-    val.professionalOrStudent === "Current student" &&
-    val.levelOfStudy === ""
-  ) {
-    ctx.addIssue({
-      path: ["levelOfStudy"],
-      code: "custom",
-      message: "required",
-    });
-  }
+export type TypeSlideTwoSchema = z.TypeOf<typeof slideTwoSchema>;
 
-  if (val.professionalOrStudent === "Current student" && val.course === "") {
-    ctx.addIssue({
-      path: ["course"],
-      code: "custom",
-      message: "required",
-    });
-  }
-
-  if (
-    val.professionalOrStudent === "Working professional" &&
-    val.workplace === ""
-  ) {
-    ctx.addIssue({
-      path: ["workplace"],
-      code: "custom",
-      message: "required",
-    });
-  }
-
-  if (
-    val.professionalOrStudent === "Working professional" &&
-    val.jobTitle === ""
-  ) {
-    ctx.addIssue({
-      path: ["jobTitle"],
-      code: "custom",
-      message: "required",
-    });
-  }
-});
-
-export type TypeAdditionalDetailsSchema = z.TypeOf<
-  typeof AdditionalDetailsSchema
->;
+export type TypeSlideThreeSchema = z.TypeOf<typeof slideTwoSchema>;
