@@ -88,6 +88,15 @@ model User {
   websiteUrl         String         @default("")
   emailNotifications Boolean        @default(true)
   newsletter         Boolean        @default(true)
+  firstName           	 String?    	 
+  surname             	 String?   	 
+  gender              	 String?    	 
+  dateOfBirth         	 DateTime?
+  professionalOrStudent  String?
+  workplace           	 String?
+  jobTitle            	 String?
+  levelOfStudy        	 String?
+  course              	 String?
   role               Role           @default(USER)
   accounts           Account[]
   bans               BannedUsers[]  @relation("bannedBy")
