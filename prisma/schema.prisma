@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -34,22 +31,22 @@ model Post {
   canonicalUrl  String?
   coverImage    String?
   approved      Boolean        @default(true)
-  body          String         @db.Text()
+  body          String
   excerpt       String         @default("") @db.VarChar(156)
   readTimeMins  Int
   published     DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   slug          String         @unique
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
-  tags          PostTag[]
-  likes         Like[]
+  showComments  Boolean        @default(true)
   bookmarks     Bookmark[]
   comments      Comment[]
-  notifications Notification[]
-  showComments  Boolean        @default(true)
   Flagged       Flagged[]
+  likes         Like[]
+  notifications Notification[]
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags          PostTag[]
 }
 
 model Tag {
@@ -63,10 +60,10 @@ model PostTag {
   id     Int    @id @default(autoincrement())
   tagId  Int
   postId String
-  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
-  @@unique(fields: [tagId, postId])
+  @@unique([tagId, postId])
 }
 
 model Session {
@@ -78,19 +75,19 @@ model Session {
 }
 
 model User {
-  id                     String         @id @default(cuid())
-  username               String?        @unique @db.VarChar(40)
-  name                   String         @default("")
-  email                  String?        @unique
-  emailVerified          DateTime?
-  image                  String         @default("/images/person.png")
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
-  bio                    String         @default("") @db.VarChar(200)
-  location               String         @default("")
-  websiteUrl             String         @default("")
-  emailNotifications     Boolean        @default(true)
-  newsletter             Boolean        @default(true)
+  id                 String         @id @default(cuid())
+  username           String?        @unique @db.VarChar(40)
+  name               String         @default("")
+  email              String?        @unique
+  emailVerified      DateTime?
+  image              String         @default("/images/person.png")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  bio                String         @default("") @db.VarChar(200)
+  location           String         @default("")
+  websiteUrl         String         @default("")
+  emailNotifications Boolean        @default(true)
+  newsletter         Boolean        @default(true)
   firstName           	 String?    	 
   surname             	 String?   	 
   gender              	 String?    	 
@@ -100,23 +97,23 @@ model User {
   jobTitle            	 String?
   levelOfStudy        	 String?
   course              	 String?
-  accounts               Account[]
-  sessions               Session[]
-  posts                  Post[]
-  role                   Role           @default(USER)
-  likes                  Like[]
-  bookmarks              Bookmark[]
-  comments               Comment[]
-  notification           Notification[]
-  notfier                Notification[] @relation("notifier")
-  BannedUsers            BannedUsers?
-  bans                   BannedUsers[]  @relation("bannedBy")
-  Flagged                Flagged[]
-  flaggedNotifier        Flagged[]      @relation("notifier")
-  RSVP                   RSVP[]
-  memberships            Membership[]
+  role               Role           @default(USER)
+  accounts           Account[]
+  bans               BannedUsers[]  @relation("bannedBy")
+  BannedUsers        BannedUsers?
+  bookmarks          Bookmark[]
+  comments           Comment[]
+  flaggedNotifier    Flagged[]      @relation("notifier")
+  Flagged            Flagged[]
+  likes              Like[]
+  memberships        Membership[]
+  notfier            Notification[] @relation("notifier")
+  notification       Notification[]
+  posts              Post[]
+  RSVP               RSVP[]
+  sessions           Session[]
 
-  @@index(fields: [username, id])
+  @@index([username, id])
 }
 
 model VerificationToken {
@@ -127,37 +124,31 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-enum Role {
-  USER
-  ADMIN
-  MODERATOR
-}
-
 model Bookmark {
   id     Int    @id @default(autoincrement())
   postId String
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
 }
 
 model Comment {
   id           Int            @id @default(autoincrement())
-  body         String         @db.Text()
+  body         String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   postId       String
   userId       String
   parentId     Int?
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
-  children     Comment[]      @relation("Comment_Children")
   parent       Comment?       @relation("Comment_Children", fields: [parentId], references: [id], onDelete: Cascade)
+  children     Comment[]      @relation("Comment_Children")
+  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Flagged      Flagged[]
   likes        Like[]
   Notification Notification[]
-  Flagged      Flagged[]
 }
 
 model Like {
@@ -183,10 +174,10 @@ model Notification {
   postId     String?
   commentId  Int?
   notifierId String?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  notifier   User?    @relation(name: "notifier", fields: [notifierId], references: [id], onDelete: Cascade)
+  notifier   User?    @relation("notifier", fields: [notifierId], references: [id], onDelete: Cascade)
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BannedUsers {
@@ -196,8 +187,8 @@ model BannedUsers {
   userId     String   @unique
   bannedById String
   note       String?
+  bannedBy   User     @relation("bannedBy", fields: [bannedById], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bannedBy   User     @relation(name: "bannedBy", fields: [bannedById], references: [id], onDelete: Cascade)
 }
 
 model Flagged {
@@ -209,54 +200,60 @@ model Flagged {
   note       String?
   postId     String?
   commentId  Int?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  notifier   User?    @relation(name: "notifier", fields: [notifierId], references: [id], onDelete: Cascade)
+  notifier   User     @relation("notifier", fields: [notifierId], references: [id], onDelete: Cascade)
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Community {
-  id          String         @id @unique
+  id          String       @id @unique
   name        String
   city        String
   country     String
   coverImage  String
-  description String         @db.Text()
-  excerpt     String         @default("") @db.VarChar(156)
-  slug        String         @unique
+  description String
+  excerpt     String       @default("") @db.VarChar(156)
+  slug        String       @unique
   events      Event[]
   members     Membership[]
 }
 
 model Event {
   id          String    @id @unique
-  eventDate   DateTime
+  eventDate   DateTime?
   name        String
   coverImage  String
-  address     String
   capacity    Int
-  description String    @db.Text()
+  description String
+  address     String
   slug        String    @unique
-  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
   communityId String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
   RSVP        RSVP[]
 }
 
 model Membership {
-  id               String @id 
-  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId           String
-  community        Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  id               String    @id
   communityId      String
-  isEventOrganiser Boolean
-  createdAt  DateTime @default(now())
+  userId           String
+  isEventOrganiser Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  community        Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RSVP {
-  id      String @id 
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId String
-  createdAt  DateTime @default(now())
+  id        String   @id
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
 }
