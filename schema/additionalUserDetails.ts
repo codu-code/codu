@@ -76,4 +76,4 @@ export type TypeSlideOneSchema = z.TypeOf<typeof slideOneSchema>;
 
 export type TypeSlideTwoSchema = z.TypeOf<typeof slideTwoSchema>;
 
-export type TypeSlideThreeSchema = z.TypeOf<typeof slideTwoSchema>;
+export type TypeSlideThreeSchema = z.TypeOf<typeof slideThreeSchema>;
