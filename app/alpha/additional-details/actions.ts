@@ -15,24 +15,36 @@ export async function handleFormSubmit(dataInput: TypeAdditionalDetailsSchema) {
   }
 
   try {
-    const validatedData = AdditionalDetailsSchema.parse(dataInput);
+    const {
+      firstName,
+      surname,
+      username,
+      location,
+      gender,
+      dateOfBirth,
+      professionalOrStudent,
+      workplace,
+      jobTitle,
+      levelOfStudy,
+      course,
+    } = AdditionalDetailsSchema.parse(dataInput);
 
     await prisma.user.update({
       where: {
         id: session.user.id,
       },
       data: {
-        firstName: validatedData.firstName,
-        surname: validatedData.surname,
-        username: validatedData.username,
-        location: validatedData.location,
-        gender: validatedData.gender,
-        dateOfBirth: validatedData.dateOfBirth,
-        professionalOrStudent: validatedData.professionalOrStudent,
-        workplace: validatedData.workplace,
-        jobTitle: validatedData.jobTitle,
-        levelOfStudy: validatedData.levelOfStudy,
-        course: validatedData.course,
+        firstName,
+        surname,
+        username,
+        location,
+        gender,
+        dateOfBirth,
+        professionalOrStudent,
+        workplace,
+        jobTitle,
+        levelOfStudy,
+        course,
       },
     });
     return true;

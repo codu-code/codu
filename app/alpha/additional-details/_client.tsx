@@ -39,9 +39,6 @@ export default function AdditionalSignUpDetails({
   details: UserDetails;
 }) {
   const session = useSession();
-  if (!session) {
-    redirect("/get-started");
-  }
 
   const useFormObject = useForm<TypeAdditionalDetailsSchema>({
     resolver: zodResolver(AdditionalDetailsSchema),
@@ -52,15 +49,20 @@ export default function AdditionalSignUpDetails({
   const slide = Number(searchParams.get("slide")) || 1;
 
   const onFormSubmit = async (data: TypeAdditionalDetailsSchema) => {
-    const isSuccess = await handleFormSubmit(data);
-
-    if (isSuccess) {
-      toast.success("Saved");
-    }
-    if (!isSuccess) {
-      toast.error("Error, saving was unsuccessful.");
+    try {
+      const isSuccess = await handleFormSubmit(data);
+      if (isSuccess) {
+        toast.success("Saved");
+      } else {
+        toast.error("Error, saving was unsuccessful.");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
     }
   };
+  if (!session) {
+    return redirect("/get-started");
+  }
 
   return (
     <>

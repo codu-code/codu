@@ -20,7 +20,7 @@ const selectUserDetails = {
 export default async function Page() {
   const session = await getServerAuthSession();
   if (!session || !session.user) {
-    redirect("/get-started");
+    return redirect("/get-started");
   }
 
   const details = await prisma.user.findUnique({
