@@ -346,10 +346,10 @@ const Settings = ({ profile }: { profile: User }) => {
                         id="privacy-heading"
                         className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white"
                       >
-                        Privacy
+                        Email Notifications
                       </h2>
                       <p className="mt-1 text-sm">
-                        We respect your privacy, change your settings here.
+                        Change your notification settings here.
                       </p>
                     </div>
                     {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}

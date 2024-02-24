@@ -2,9 +2,11 @@ import { type NextAuthOptions, getServerSession } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
+import * as Sentry from "@sentry/nextjs";
 
 import prisma from "@/server/db/client";
 import sendEmail from "@/utils/sendEmail";
+import { manageNewsletterSubscription } from "./lib/newsletter";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -41,19 +43,25 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     async createUser({ user }) {
-      if (!user.email) {
-        console.error("Missing user.email so cannot send welcome email");
+      const { email } = user;
+
+      if (!email) {
+        console.error("Missing email so cannot send welcome email");
+        Sentry.captureMessage("Missing 'email' so cannot send welcome email");
         return;
       }
       const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
       try {
-        sendEmail({
-          recipient: user.email,
+        await await manageNewsletterSubscription(email, "subscribe");
+        await sendEmail({
+          recipient: email,
           htmlMessage,
-          subject: "Welcome to Codú 🎉 | Here is your community invite 💌",
+          subject:
+            "Thanks for Joining Codú 🎉 + Your Excluisve Community Invite.",
         });
       } catch (error) {
         console.log("Error in createUser event:", error);
+        Sentry.captureException(error);
       }
     },
   },
