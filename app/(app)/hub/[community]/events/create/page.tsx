@@ -1,13 +1,9 @@
-import { CommunityForm } from "@/components/CommunityForm/CommunityForm";
-import prisma from "../../../../server/db/client";
+import { EventForm } from "@/components/EventForm/EventForm";
+import prisma from "@/server/db/client";
 import { getServerAuthSession } from "@/server/auth";
-import { notFound, redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
-async function EditCommunityPage({
-  params,
-}: {
-  params: { community: string };
-}) {
+async function CreateEventPage({ params }: { params: { community: string } }) {
   const session = await getServerAuthSession();
 
   if (!session) {
@@ -24,17 +20,10 @@ async function EditCommunityPage({
     },
     include: {
       members: {
-        include: {
-          user: true,
-        },
-      },
-      events: {
-        include: {
-          RSVP: {
-            select: {
-              id: true,
-            },
-          },
+        select: {
+          id: true,
+          isEventOrganiser: true,
+          userId: true,
         },
       },
     },
@@ -52,20 +41,18 @@ async function EditCommunityPage({
     redirect("/forbidden");
   }
 
-  const { id, name, city, country, coverImage, description, excerpt } =
-    community;
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
       <div className="bg-neutral-900 text-neutral-700 shadow-xl">
-        <CommunityForm
+        <EventForm
           defaultValues={{
-            id,
-            name,
-            city,
-            country,
-            coverImage: coverImage ? coverImage : "",
-            description,
-            excerpt,
+            address: "",
+            description: "",
+            name: "",
+            capacity: 50,
+            eventDate: new Date(),
+            communityId: community.id,
+            coverImage: "",
           }}
         />
       </div>
@@ -73,4 +60,4 @@ async function EditCommunityPage({
   );
 }
 
-export default EditCommunityPage;
+export default CreateEventPage;

@@ -169,28 +169,24 @@ async function addSeedDataToDb() {
   });
 
   const users = await prisma.user.findMany();
-  await Promise.all(
-    communityData.map(async (community) => {
-      const membershipPromises = users.map(async (user, index) => {
-        const id = nanoid(8);
-        await prisma.membership.create({
-          data: {
-            id: id,
-            userId: user.id,
-            communityId: community.id,
-            isEventOrganiser: index === 0,
-          },
-        });
-        console.log(`Added membership: ${id}`);
+  communityData.forEach(async (community) => {
+    users.forEach(async (user, index) => {
+      const id = nanoid(8);
+      await prisma.membership.create({
+        data: {
+          id: id,
+          userId: user.id,
+          communityId: community.id,
+          isEventOrganiser: index === 0,
+        },
       });
-      await Promise.all(membershipPromises);
-    }),
-  );
+      console.log(`Added membership: ${id}`);
+    });
+  });
 
   const events = await prisma.event.findMany();
-  const rsvpPromises: Promise<void>[] = [];
   events.forEach((event) => {
-    const eventRSVPPromises = users.map(async (user) => {
+    users.forEach(async (user) => {
       const id = nanoid(8);
       await prisma.rSVP.create({
         data: {
@@ -201,9 +197,8 @@ async function addSeedDataToDb() {
       });
       console.log(`Added RSVP: ${id}`);
     });
-    rsvpPromises.push(...eventRSVPPromises);
   });
-  await Promise.all(rsvpPromises);
+
   console.log(`Seeding finished.`);
 }
 

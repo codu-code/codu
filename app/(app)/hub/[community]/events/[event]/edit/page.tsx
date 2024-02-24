@@ -1,5 +1,5 @@
 import { EventForm } from "@/components/EventForm/EventForm";
-import prisma from "../../../../../../server/db/client";
+import prisma from "@/server/db/client";
 import { getServerAuthSession } from "@/server/auth";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";

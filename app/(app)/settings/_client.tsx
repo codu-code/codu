@@ -7,10 +7,10 @@ import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
-import type { saveSettingsInput } from "../../schema/profile";
-import { saveSettingsSchema } from "../../schema/profile";
+import type { saveSettingsInput } from "@/schema/profile";
+import { saveSettingsSchema } from "@/schema/profile";
 
-import { uploadFile } from "../../utils/s3helpers";
+import { uploadFile } from "@/utils/s3helpers";
 import type { Prisma } from "@prisma/client";
 
 function classNames(...classes: string[]) {

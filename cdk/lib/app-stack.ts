@@ -153,6 +153,27 @@ export class AppStack extends cdk.Stack {
               "/env/algoliaIdx",
             ),
           ),
+          EMAIL_API_KEY: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromSecureStringParameterAttributes(
+              this,
+              "emailKey",
+              { parameterName: "/env/email/key", version: 1 },
+            ),
+          ),
+          EMAIL_API_ENDPOINT: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "emailEndpoint",
+              "/env/email/endpoint",
+            ),
+          ),
+          EMAIL_NEWSLETTER_ID: ecs.Secret.fromSsmParameter(
+            ssm.StringParameter.fromStringParameterName(
+              this,
+              "emailNewsletterId",
+              "/env/email/id",
+            ),
+          ),
         },
         logging: ecs.LogDrivers.awsLogs({
           streamPrefix: "AppContainer",
@@ -209,6 +230,15 @@ export class AppStack extends cdk.Stack {
       priority: !production ? 3 : 1,
       conditions: [elbv2.ListenerCondition.hostHeaders(["*.codu.co"])],
       action: elbv2.ListenerAction.forward([fargateService.targetGroup]),
+    });
+
+    fargateService.targetGroup.configureHealthCheck({
+      path: "/api/health",
+      interval: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(5),
+      healthyHttpCodes: "200",
+      unhealthyThresholdCount: 2,
+      healthyThresholdCount: 3,
     });
 
     const scaling = fargateService.service.autoScaleTaskCount({

@@ -1,17 +1,8 @@
 import "../styles/globals.css";
-import { headers } from "next/headers";
 import Fathom from "@/components/Fathom/Fathom";
-import ThemeProvider from "@/components/Theme/ThemeProvider";
-import { TRPCReactProvider } from "@/server/trpc/react";
-import Footer from "@/components/Footer/Footer";
-import Nav from "@/components/Nav/Nav";
-import { getServerAuthSession } from "@/server/auth";
-import AuthProvider from "@/context/AuthProvider";
-import { Toaster } from "sonner";
-import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import React from "react";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
-import { PromptProvider } from "@/components/PromptService";
+import { Toaster } from "sonner";
 
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
@@ -44,57 +35,17 @@ export const metadata = {
   },
 };
 
-const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID || "";
-const ALGOLIA_SEARCH_API = process.env.ALGOLIA_SEARCH_API || "";
-const ALGOLIA_SOURCE_IDX = process.env.ALGOLIA_SOURCE_IDX || "";
-
-if (!ALGOLIA_APP_ID || !ALGOLIA_SEARCH_API) {
-  console.error(
-    ".env values required for Algolia search (ALGOLIA_APP_ID and ALGOLIA_SEARCH_API). Visit https://www.algolia.com/ to create a free account and get your API keys.",
-  );
-}
-
-if (!ALGOLIA_SOURCE_IDX) {
-  console.error(
-    ".env value required for Algolia source ID (ALGOLIA_SOURCE_IDX). Create an index in your Algolia account and set the value to the index name.",
-  );
-}
-
-const algoliaSearchConfig = {
-  ALGOLIA_APP_ID,
-  ALGOLIA_SEARCH_API,
-  ALGOLIA_SOURCE_IDX,
-};
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerAuthSession();
-
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <Fathom />
       <body className="h-full">
-        <A11yProvider>
-          <ProgressBar />
-          <AuthProvider>
-            <ThemeProvider>
-              <TRPCReactProvider headers={headers()}>
-                <PromptProvider>
-                  <Toaster />
-                  <Nav
-                    session={session}
-                    algoliaSearchConfig={algoliaSearchConfig}
-                  />
-                  {children}
-                  <Footer />
-                </PromptProvider>
-              </TRPCReactProvider>
-            </ThemeProvider>
-          </AuthProvider>
-        </A11yProvider>
+        <Toaster />
+        <A11yProvider>{children}</A11yProvider>
       </body>
     </html>
   );

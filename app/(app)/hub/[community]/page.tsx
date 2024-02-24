@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import prisma from "../../../server/db/client";
+import prisma from "@/server/db/client";
 import CommunityPage from "./_CommunityPage";
 
 type Props = { params: { community: string } };
