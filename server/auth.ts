@@ -52,7 +52,7 @@ export const authOptions: NextAuthOptions = {
       }
       const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
       try {
-        await await manageNewsletterSubscription(email, "subscribe");
+        await manageNewsletterSubscription(email, "subscribe");
         await sendEmail({
           recipient: email,
           htmlMessage,
