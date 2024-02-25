@@ -144,6 +144,9 @@ const ArticlePreview: NextPage<Props> = ({
                   }
                   bookmarkPost(id);
                 }}
+                aria-label={
+                  bookmarked ? "Remove bookmark" : "Bookmark this post"
+                }
               >
                 <BookmarkIcon
                   className={`w-6 h-6${
