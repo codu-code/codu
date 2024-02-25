@@ -114,7 +114,7 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
 
-Example .env file can be found [here](./sample.env). You can rename this to .env to get started
+**Example .env file can be found [here](./sample.env). You can rename this to .env to get started**
 
 ## 👨‍💻 Contribution Guidelines
 
