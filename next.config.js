@@ -38,7 +38,6 @@ module.exports = withBundleAnalyzer({
     ignoreBuildErrors: true,
   },
   experimental: {
-    outputStandalone: true,
     swcPlugins: [
       [
         "next-superjson-plugin",
