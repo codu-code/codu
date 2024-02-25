@@ -117,7 +117,7 @@ export class StorageStack extends cdk.Stack {
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
       publiclyAccessible: true,
-      deletionProtection: false,
+      deletionProtection: true,
       autoMinorVersionUpgrade: true,
       backupRetention: cdk.Duration.days(props?.production ? 3 : 0),
     });
