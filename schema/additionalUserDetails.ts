@@ -6,17 +6,17 @@ export const AdditionalDetailsSchema = z
       .string()
       .trim()
       .min(2, "Min name length is 2 characters.")
-      .max(50, "Max name length is 30 characters."),
+      .max(50, "Max name length is 50 characters."),
     surname: z
       .string()
       .trim()
       .min(2, "Min name length is 2 characters.")
-      .max(50, "Max name length is 30 characters."),
+      .max(50, "Max name length is 50 characters."),
     username: z
       .string()
       .trim()
-      .min(3, "Min name length is 2 characters.")
-      .max(40, "Max name length is 30 characters."),
+      .min(3, "Min name length is 3 characters.")
+      .max(40, "Max name length is 40 characters."),
     location: z.string().min(1, "Location is required"),
     gender: z.string().min(1, "Gender is required"),
     dateOfBirth: z.date(),
