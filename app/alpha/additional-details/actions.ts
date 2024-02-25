@@ -1,33 +1,23 @@
 "use server";
 
 import {
-  AdditionalDetailsSchema,
-  type TypeAdditionalDetailsSchema,
+  type TypeSlideOneSchema,
+  slideOneSchema,
 } from "@/schema/additionalUserDetails";
+
 import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
 import { redirect } from "next/navigation";
 
-export async function handleFormSubmit(dataInput: TypeAdditionalDetailsSchema) {
+export async function handleFormSlideOneSubmit(dataInput: TypeSlideOneSchema) {
   const session = await getServerAuthSession();
   if (!session || !session.user) {
     redirect("/get-started");
   }
 
   try {
-    const {
-      firstName,
-      surname,
-      username,
-      location,
-      gender,
-      dateOfBirth,
-      professionalOrStudent,
-      workplace,
-      jobTitle,
-      levelOfStudy,
-      course,
-    } = AdditionalDetailsSchema.parse(dataInput);
+    const { firstName, surname, username, location } =
+      slideOneSchema.parse(dataInput);
 
     await prisma.user.update({
       where: {
@@ -38,13 +28,6 @@ export async function handleFormSubmit(dataInput: TypeAdditionalDetailsSchema) {
         surname,
         username,
         location,
-        gender,
-        dateOfBirth,
-        professionalOrStudent,
-        workplace,
-        jobTitle,
-        levelOfStudy,
-        course,
       },
     });
     return true;

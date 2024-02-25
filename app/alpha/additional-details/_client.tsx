@@ -4,12 +4,11 @@ import React, { useEffect, useState } from "react";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  AdditionalDetailsSchema,
-  type TypeAdditionalDetailsSchema,
+  type TypeSlideOneSchema,
+  slideOneSchema,
 } from "@/schema/additionalUserDetails";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { handleFormSubmit } from "./actions";
+import { useForm, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 import {
   professionalOrStudentOptions,
@@ -18,6 +17,7 @@ import {
   levelOfStudyOptions,
   monthsOptions,
 } from "@/app/alpha/additional-details/selectOptions";
+import { handleFormSlideOneSubmit } from "./actions";
 
 type UserDetails = {
   username: string;
@@ -38,170 +38,167 @@ export default function AdditionalSignUpDetails({
 }: {
   details: UserDetails;
 }) {
-  const session = useSession();
+  // const session = useSession();
 
-  const useFormObject = useForm<TypeAdditionalDetailsSchema>({
-    resolver: zodResolver(AdditionalDetailsSchema),
-    defaultValues: details,
-  });
+  // if (!session) {
+  //   return redirect("/get-started");
+  // }
 
   const searchParams = useSearchParams();
   const slide = Number(searchParams.get("slide")) || 1;
 
-  const onFormSubmit = async (data: TypeAdditionalDetailsSchema) => {
+  return (
+    <div className="min-h-[41rem]">
+      <SignupProgressBar currentSlide={slide} />
+
+      {slide === 1 && <SlideOne details={details} />}
+      {/* {slide === 2 && <SlideTwo />} */}
+      {/* {slide === 3 && <SlideThree />} */}
+      {/* {slide === 4 && <SlideFour />} */}
+    </div>
+  );
+}
+
+function SlideOne({ details }: { details: UserDetails }) {
+  const router = useRouter();
+
+  const { username, firstName, surname, location } = details;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideOneSchema>({
+    resolver: zodResolver(slideOneSchema),
+    defaultValues: { username, firstName, surname, location },
+  });
+
+  const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      const isSuccess = await handleFormSubmit(data);
-      if (isSuccess) {
-        toast.success("Saved");
-      } else {
-        toast.error("Error, saving was unsuccessful.");
-      }
+      await handleFormSlideOneSubmit(data);
+      toast.success("Saved");
+      router.push(`?slide=${2}`, { scroll: false });
     } catch (error) {
       toast.error("An unexpected error occurred.");
     }
   };
-  if (!session) {
-    return redirect("/get-started");
-  }
+
+  // const onFormSubmit = async (data: TypeSlideOneSchema) => {
+  //   try {
+  //     const isSuccess = await handleFormSlideOneSubmit(data);
+  //     if (isSuccess) {
+  //       toast.success("Saved");
+  //       router.push(`?slide=${2}`, { scroll: false });
+  //     } else {
+  //       toast.error("Error, saving was unsuccessful.");
+  //     }
+  //   } catch (error) {
+  //     toast.error("An unexpected error occurred.");
+  //   }
+  // };
 
   return (
-    <>
-      <FormProvider {...useFormObject}>
-        <form
-          className="min-h-[41rem]"
-          onSubmit={useFormObject.handleSubmit((data) => onFormSubmit(data))}
-        >
-          <SignupProgressBar currentSlide={slide} />
-
-          {slide === 1 && <SlideOne />}
-          {slide === 2 && <SlideTwo />}
-          {slide === 3 && <SlideThree />}
-          {slide === 4 && <SlideFour />}
-        </form>
-      </FormProvider>
-    </>
-  );
-}
-
-function SlideOne() {
-  const {
-    register,
-    trigger,
-    formState: { errors },
-  } = useFormContext();
-
-  const router = useRouter();
-
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
-    const isError = await trigger(
-      ["firstName", "surname", "username", "location"],
-      {
-        shouldFocus: true,
-      },
-    );
-
-    if (isError) {
-      router.push(`?slide=${2}`, { scroll: false });
-    }
-  };
-
-  return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
-          Profile information
-        </h2>
-        <p>This information will be displayed on your profile</p>
-      </div>
-      <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
-        <div className="space-y-6">
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium leading-6 text-white"
-            >
-              First Name
-            </label>
-            <div className="mt-2 ">
-              <input
-                id="name"
-                {...register("firstName")}
-                placeholder="What should we call you?"
-                type="text"
-                className="block w-full rounded-md border-0 bg-white/5  py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-              />
-              {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="surname"
-              className="block text-sm font-medium leading-6 text-white"
-            >
-              Surname
-            </label>
-            <div className="mt-2">
-              <input
-                id="surname"
-                {...register("surname")}
-                type="text"
-                placeholder="And your surname?"
-                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-              />
-              {errors.surname && <p>{`${errors.surname.message}`}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium leading-6 text-white"
-            >
-              Username
-            </label>
-            <div className="relative flex items-center">
-              <div className="flex h-[36px] w-[7rem] items-center justify-center rounded-l-md bg-white text-black">
-                <span>codu.co/</span>
-              </div>
-              <input
-                id="username"
-                {...register("username")}
-                placeholder="thehacker"
-                type="text"
-                className="relative top-[-2px] block rounded-r-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-              />
-            </div>
-            {errors.username && <p>{`${errors.username.message}`}</p>}
-          </div>
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Location
-            </label>
-            <select
-              id="location"
-              {...register("location")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-            >
-              <option value="" disabled>
-                Select
-              </option>
-              {locationOptions.map((location: string) => (
-                <option key={location}>{location}</option>
-              ))}
-            </select>
-            {errors.location && <p>{`${errors.location.message}`}</p>}
-          </div>
+    <form onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
+            Profile information
+          </h2>
+          <p>This information will be displayed on your profile</p>
         </div>
-        <SlideButtons handleClickNextSlide={handleClickNextSlide} />
+        <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
+          <div className="space-y-6">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                First Name
+              </label>
+              <div className="mt-2 ">
+                <input
+                  id="name"
+                  {...register("firstName")}
+                  placeholder="What should we call you?"
+                  type="text"
+                  className="block w-full rounded-md border-0 bg-white/5  py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                />
+                {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="surname"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Surname
+              </label>
+              <div className="mt-2">
+                <input
+                  id="surname"
+                  {...register("surname")}
+                  type="text"
+                  placeholder="And your surname?"
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                />
+                {errors.surname && <p>{`${errors.surname.message}`}</p>}
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Username
+              </label>
+              <div className="relative flex items-center">
+                <div className="flex h-[36px] w-[7rem] items-center justify-center rounded-l-md bg-white text-black">
+                  <span>codu.co/</span>
+                </div>
+                <input
+                  id="username"
+                  {...register("username")}
+                  placeholder="thehacker"
+                  type="text"
+                  className="relative top-[-2px] block rounded-r-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                />
+              </div>
+              {errors.username && <p>{`${errors.username.message}`}</p>}
+            </div>
+            <div>
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Location
+              </label>
+              <select
+                id="location"
+                {...register("location")}
+                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+              >
+                <option value="" disabled>
+                  Select
+                </option>
+                {locationOptions.map((location: string) => (
+                  <option key={location}>{location}</option>
+                ))}
+              </select>
+              {errors.location && <p>{`${errors.location.message}`}</p>}
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Next
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
 
