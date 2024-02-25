@@ -48,6 +48,7 @@ export class PipelineStack extends cdk.Stack {
       crossAccountKeys: true,
       synth: synthAction,
       codeBuildDefaults: {
+        cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
         buildEnvironment: {
           privileged: true,
           environmentVariables: {
