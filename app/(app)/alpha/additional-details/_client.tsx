@@ -17,7 +17,7 @@ import {
   locationOptions,
   levelOfStudyOptions,
   monthsOptions,
-} from "@/app/alpha/additional-details/selectOptions";
+} from "@/app/(app)/alpha/additional-details/selectOptions";
 
 type UserDetails = {
   username: string;
