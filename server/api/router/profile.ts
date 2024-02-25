@@ -8,6 +8,7 @@ import {
 import { getPresignedUrl } from "../../common/getPresignedUrl";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { manageNewsletterSubscription } from "@/server/lib/newsletter";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 
@@ -15,6 +16,30 @@ export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
+      const existingProfile = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.session.user.id,
+        },
+      });
+
+      if (existingProfile?.newsletter !== input.newsletter) {
+        const email = existingProfile?.email;
+        const action = input.newsletter ? "subscribe" : "unsubscribe";
+        if (!email) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Email not found",
+          });
+        }
+        const response = await manageNewsletterSubscription(email, action);
+        if (!response) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update newsletter subscription",
+          });
+        }
+      }
+
       const profile = await ctx.db.user.update({
         where: {
           id: ctx.session.user.id,
