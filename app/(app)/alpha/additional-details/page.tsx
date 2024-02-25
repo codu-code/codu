@@ -3,8 +3,6 @@ import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import prisma from "@/server/db/client";
 
-export const dynamic = "force-dynamic";
-
 const selectUserDetails = {
   username: true,
   firstName: true,
