@@ -19,12 +19,6 @@ export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
-      const existingProfile = await ctx.db.user.findUnique({
-        where: {
-          id: ctx.session.user.id,
-        },
-      });
-
       const { email } = ctx.session.user;
 
       if (!email) {
@@ -37,7 +31,6 @@ export const profileRouter = createTRPCRouter({
       const newsletter = await isUserSubscribedToNewsletter(email);
 
       if (newsletter !== input.newsletter) {
-        const email = existingProfile?.email;
         const action = input.newsletter ? "subscribe" : "unsubscribe";
         if (!email) {
           throw new TRPCError({
