@@ -19,7 +19,7 @@ jobs:
       - name: Run Playwright tests
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          NEXTAUTH_URL: http://localhost:3000/api/auth
+          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           GITHUB_ID: ${{ secrets.APP_GITHUB_ID }}
           GITHUB_SECRET: ${{ secrets.APP_GITHUB_SECRET }}
