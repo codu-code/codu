@@ -19,6 +19,7 @@ import {
   ShellStep,
 } from "aws-cdk-lib/pipelines";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as codebuild from "aws-cdk-lib/aws-codebuild";
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
@@ -50,6 +51,7 @@ export class PipelineStack extends cdk.Stack {
       codeBuildDefaults: {
         cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
         buildEnvironment: {
+          computeType: codebuild.ComputeType.MEDIUM,
           privileged: true,
           environmentVariables: {
             DOCKER_BUILDKIT: {
