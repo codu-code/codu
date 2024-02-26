@@ -62,7 +62,6 @@ export default async function Page() {
 
   try {
     const newsletter = await isUserSubscribedToNewsletter(session.user.email);
-    console.log("newsletter", newsletter);
     const cleanedUser = {
       ...user,
       newsletter,
