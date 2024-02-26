@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import { customAlphabet } from "nanoid";
 import prisma from "@/server/db/client";
+import { isUserSubscribedToNewsletter } from "@/server/lib/newsletter";
 
 export const metadata = {
   title: "Settings - Update your profile",
@@ -55,5 +56,19 @@ export default async function Page() {
     return <Content profile={newUser} />;
   }
 
-  return <Content profile={user} />;
+  if (!session.user.email) {
+    return notFound();
+  }
+
+  try {
+    const newsletter = await isUserSubscribedToNewsletter(session.user.email);
+    console.log("newsletter", newsletter);
+    const cleanedUser = {
+      ...user,
+      newsletter,
+    };
+    return <Content profile={cleanedUser} />;
+  } catch (error) {
+    return <Content profile={user} />;
+  }
 }
