@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix",
     "prettier": "prettier --check -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
     "prettier:fix": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
-    "test": "playwright test",
+    "test": "npx playwright install && playwright test",
     "studio": "prisma studio",
     "migrate": "npx prisma migrate",
     "prepare": "husky install"

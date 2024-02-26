@@ -8,7 +8,10 @@ import {
 import { getPresignedUrl } from "../../common/getPresignedUrl";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-import { manageNewsletterSubscription } from "@/server/lib/newsletter";
+import {
+  isUserSubscribedToNewsletter,
+  manageNewsletterSubscription,
+} from "@/server/lib/newsletter";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 
@@ -16,14 +19,18 @@ export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
-      const existingProfile = await ctx.db.user.findUnique({
-        where: {
-          id: ctx.session.user.id,
-        },
-      });
+      const { email } = ctx.session.user;
 
-      if (existingProfile?.newsletter !== input.newsletter) {
-        const email = existingProfile?.email;
+      if (!email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email not found",
+        });
+      }
+
+      const newsletter = await isUserSubscribedToNewsletter(email);
+
+      if (newsletter !== input.newsletter) {
         const action = input.newsletter ? "subscribe" : "unsubscribe";
         if (!email) {
           throw new TRPCError({
