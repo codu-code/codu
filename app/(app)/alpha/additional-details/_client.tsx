@@ -72,28 +72,18 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      // TODO add server action logic
-      // await handleFormSlideOneSubmit(data);
-      toast.success("Saved");
-      router.push(`?slide=${2}`, { scroll: false });
+      // const isSuccess = await handleFormSlideOneSubmit(data); TODO add server action
+      const isSuccess = true;
+      if (isSuccess) {
+        toast.success("Saved");
+        router.push(`?slide=${2}`, { scroll: false });
+      } else {
+        toast.error("Error, saving was unsuccessful.");
+      }
     } catch (error) {
       toast.error("An unexpected error occurred.");
     }
   };
-
-  // const onFormSubmit = async (data: TypeSlideOneSchema) => {
-  //   try {
-  //     const isSuccess = await handleFormSlideOneSubmit(data);
-  //     if (isSuccess) {
-  //       toast.success("Saved");
-  //       router.push(`?slide=${2}`, { scroll: false });
-  //     } else {
-  //       toast.error("Error, saving was unsuccessful.");
-  //     }
-  //   } catch (error) {
-  //     toast.error("An unexpected error occurred.");
-  //   }
-  // };
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
