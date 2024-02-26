@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Your email has been confirmed! Welcome to Codú Weekly.",
+  title: "You are now unsubscribed. We are sad to see you go.",
   robots: {
     follow: false,
     index: false,
