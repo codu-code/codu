@@ -68,6 +68,7 @@ export default async function Page() {
     };
     return <Content profile={cleanedUser} />;
   } catch (error) {
+    Sentry.captureException(error);
     return <Content profile={user} />;
   }
 }
