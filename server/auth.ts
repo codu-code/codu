@@ -1,5 +1,8 @@
-import { type NextAuthOptions, getServerSession } from "next-auth";
+import { type NextAuthOptions, getServerSession, Theme } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+import EmailProvider, {
+  SendVerificationRequestParams,
+} from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
 import * as Sentry from "@sentry/nextjs";
@@ -7,6 +10,28 @@ import * as Sentry from "@sentry/nextjs";
 import prisma from "@/server/db/client";
 import sendEmail from "@/utils/sendEmail";
 import { manageNewsletterSubscription } from "./lib/newsletter";
+import { createTransport } from "nodemailer";
+import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
+
+const sendPassworldLessEmail = async (
+  params: SendVerificationRequestParams,
+) => {
+  const { identifier, url, provider } = params;
+  const transport = createTransport(provider.server);
+
+  const result = await transport.sendMail({
+    to: identifier,
+    from: provider.from,
+    subject: `Sign in to Codú 🚀`,
+    /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
+    text: `Sign in to Codú 🚀\n\n`,
+    html: createPasswordLessEmailTemplate(url),
+  });
+  const failed = result.rejected.concat(result.pending).filter(Boolean);
+  if (failed.length) {
+    throw new Error(`Email(s) (${failed.join(", ")}) could not be sent`);
+  }
+};
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -15,7 +40,20 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
     }),
+    EmailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: process.env.EMAIL_SERVER_PORT,
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      },
+      sendVerificationRequest: sendPassworldLessEmail,
+      from: process.env.EMAIL_FROM,
+    }),
   ],
+  secret: "testsecret",
   pages: {
     signIn: "/get-started",
     newUser: "/settings",
