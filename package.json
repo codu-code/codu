@@ -67,7 +67,7 @@
     "@tiptap/starter-kit": "^2.2.3",
     "@tiptap/suggestion": "^2.2.3",
     "@trpc/client": "^10.44.1",
-    "@trpc/next": "^10.44.1",
+    "@trpc/next": "^10.45.1",
     "@trpc/react-query": "^10.44.1",
     "@trpc/server": "^10.44.1",
     "atropos": "^2.0.2",
