@@ -105,6 +105,7 @@ export default function Hero() {
           </h1>
           <div className="mt-12 flex justify-center">
             <button
+              aria-label="Scroll to call to action"
               className="focus-style-rounded animate-bounce rounded-full border-2 bg-neutral-900 bg-opacity-60 p-4"
               onClick={() => handleScroll("cta")}
             >
