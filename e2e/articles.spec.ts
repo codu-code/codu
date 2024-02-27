@@ -18,7 +18,7 @@ test.describe("Articles", () => {
     });
 
     await expect(page.locator(".animate-pulse")).toBeVisible();
-    await expect(page.locator(".animate-pulse")).not.toBeVisible();
+    await expect(page.locator(".animate-pulse")).toBeHidden();
 
     const finalArticleCount = await page.$$eval(
       "article",

@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 test.describe("Login Page", () => {
   test("should display the login button", async ({ page }) => {
     const loginButton = page.getByRole("button", {
-      name: "Sign in with GitHub Login",
+      name: "Login with GitHub",
     });
     expect(loginButton).toBeTruthy();
   });
@@ -23,13 +23,14 @@ test.describe("Login Page", () => {
     page,
   }) => {
     const button = page.getByRole("button", {
-      name: "Sign in with GitHub Login",
+      name: "Login with GitHub",
     });
 
     await button.click();
     await page.waitForURL("https://github.com/**");
 
-    await page.waitForSelector("#login_field");
+    const loginField = page.locator("#login_field");
+    await loginField.isVisible();
 
     expect(page.getByLabel("Username or email address")).toBeTruthy();
     expect(page.getByLabel("Password")).toBeTruthy();

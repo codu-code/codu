@@ -22,31 +22,39 @@ We have a fantastic community growing on Discord. Click [here](https://discord.g
 2. Clone with `git clone https://github.com/YOUR_USERNAME/codu.git`.
 3. Navigate to the project directory `cd codu`.
 4. Install dependencies with:
+
 ```bash
 npm install
 ```
-  - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
-5. Create a `.env` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env`.
-  ```
-  # This default value is if you run our local docker-compose.yml file to create the database.
-  DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres
-  # Setup your GitHub ID & Secret on GitHub: https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps
-  # For development, make sure you set up this with a Homepage URL of http://localhost:3000/ and an Authorization callback URL of http://localhost:3000/api/auth
-  GITHUB_ID=YOUR_GITHUB_APP_ID
-  GITHUB_SECRET=YOUR_GITHUB_APP_SECRET
-  NEXTAUTH_URL=http://localhost:3000/api/auth
-  ```
 
-  For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
+- If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
+
+5. Create a `.env` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env`.
+
+```
+# This default value is if you run our local docker-compose.yml file to create the database.
+DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres
+# Setup your GitHub ID & Secret on GitHub: https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps
+# For development, make sure you set up this with a Homepage URL of http://localhost:3000/ and an Authorization callback URL of http://localhost:3000/api/auth
+GITHUB_ID=YOUR_GITHUB_APP_ID
+GITHUB_SECRET=YOUR_GITHUB_APP_SECRET
+NEXTAUTH_URL=http://localhost:3000/api/auth
+```
+
+For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
 
 6. [Make sure your database is running](#database_url) and setup the tables in the database with Prisma by running:
+
 ```bash
 npx prisma db push
 ```
+
 7. Seed the database with some mock data by running:
+
 ```bash
 npx prisma db seed
 ```
+
 8. Finally, run the development server:
 
 ```bash
@@ -105,11 +113,11 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 ```
 
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
+**Example .env file can be found [here](./sample.env). You can rename this to .env to get started**
 
 ## 👨‍💻 Contribution Guidelines
 
 - Contributions are **greatly appreciated**. Contributions make the open-source community an amazing place to learn, inspire, and create.
-
 - Check out our [contribution guidelines](/CONTRIBUTING.md) for contributiong to our repo. It includes
   - How to Contribute
   - How to create a Pull Request
