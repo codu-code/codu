@@ -233,7 +233,7 @@ export class AppStack extends cdk.Stack {
     });
 
     fargateService.targetGroup.configureHealthCheck({
-      path: production ? "https://www.codu.co/api/health" : "https://www.dev1.codu.co/api/health",
+      path: "/api/health",
       interval: cdk.Duration.seconds(30),
       timeout: cdk.Duration.seconds(5),
       healthyHttpCodes: "200",
