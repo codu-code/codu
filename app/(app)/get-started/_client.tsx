@@ -5,13 +5,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const GetStarted: NextPage = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl");
 
   const [userEmail, setUserEmail] = useState<string>("");
+  const [isAlpha, setIsAlpha] = useState<boolean>();
+
+  useEffect(() => {
+    // toLowerCase can maybe be removed. Just want to make sure its not TRUE in Prod
+    setIsAlpha(process.env.ALPHA?.toLowerCase() === "true");
+  }, []);
 
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
@@ -43,41 +49,45 @@ const GetStarted: NextPage = () => {
             </Link>
           </p>
         </div>
-        <div>
-          <input
-            className="focus:border-white-500 w-full flex-auto rounded-md border-white bg-neutral-100 pl-6 font-medium text-neutral-950 ring-offset-0 placeholder:text-xl placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-transparent focus:ring-offset-2 dark:bg-neutral-900 dark:text-white  [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
-            placeholder="Enter your email"
-            onChange={(event) => {
-              setUserEmail(event.target.value);
-            }}
-            value={userEmail}
-          />
-          <button
-            type="button"
-            onClick={async () => {
-              await signIn("email", {
-                callbackUrl: redirectTo,
-                email: userEmail,
-              });
-            }}
-            className="group relative mt-6 inline-flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-xl font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-          >
-            Sign In / Sign Up
-          </button>
-        </div>
-        <div className="relative">
-          <div
-            className="absolute inset-0 flex items-center"
-            aria-hidden="true"
-          >
-            <div className="w-full border-t border-gray-200" />
-          </div>
-          <div className="relative flex justify-center text-sm font-medium leading-6">
-            <span className="bg-black px-6 text-xl text-neutral-900  dark:text-white">
-              Or continue with
-            </span>
-          </div>
-        </div>
+        {isAlpha && (
+          <>
+            <div>
+              <input
+                className="focus:border-white-500 w-full flex-auto rounded-md border-white bg-neutral-100 pl-6 font-medium text-neutral-950 ring-offset-0 placeholder:text-xl placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-transparent focus:ring-offset-2 dark:bg-neutral-900 dark:text-white  [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+                placeholder="Enter your email"
+                onChange={(event) => {
+                  setUserEmail(event.target.value);
+                }}
+                value={userEmail}
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  await signIn("email", {
+                    callbackUrl: redirectTo,
+                    email: userEmail,
+                  });
+                }}
+                className="group relative mt-6 inline-flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-xl font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+              >
+                Sign In / Sign Up
+              </button>
+            </div>
+            <div className="relative">
+              <div
+                className="absolute inset-0 flex items-center"
+                aria-hidden="true"
+              >
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm font-medium leading-6">
+                <span className="bg-black px-6 text-xl text-neutral-900  dark:text-white">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+          </>
+        )}
         <button
           type="button"
           onClick={async () => {
