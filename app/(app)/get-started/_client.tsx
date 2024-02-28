@@ -18,7 +18,6 @@ const GetStarted: NextPage = () => {
     // toLowerCase can maybe be removed. Just want to make sure its not TRUE in Prod
     setIsAlpha(process.env.ALPHA?.toLowerCase() === "true");
   }, []);
-
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
 
@@ -49,7 +48,7 @@ const GetStarted: NextPage = () => {
             </Link>
           </p>
         </div>
-        {true && (
+        {isAlpha && (
           <>
             <div>
               <input

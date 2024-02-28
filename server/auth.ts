@@ -58,7 +58,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/get-started",
     newUser: "/settings",
     verifyRequest: "/auth",
-    // (used for any errors which
     error: "/auth/error", // (used for any errors which occur during auth
   },
   callbacks: {
