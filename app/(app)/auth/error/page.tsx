@@ -26,7 +26,7 @@ const Auth: NextPage = () => {
   const error = (useSearchParams().get("error")?.toLowerCase() ??
     "unknown") as keyof typeof errorHeadings;
   // Checking does the error query param has been covered in errorHeading if not falling back to unknown
-  return PostAuthPage(errorHeadings[error] ?? errorHeadings[error]);
+  return PostAuthPage(errorHeadings[error] ? errorHeadings[error] : errorHeadings.unknown);
 };
 
 export default Auth;
