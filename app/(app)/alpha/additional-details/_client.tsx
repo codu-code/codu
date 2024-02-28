@@ -22,6 +22,11 @@ import {
   levelOfStudyOptions,
   monthsOptions,
 } from "@/app/(app)/alpha/additional-details/selectOptions";
+import {
+  handleFormSlideOneSubmit,
+  handleFormSlideThreeSubmit,
+  handleFormSlideTwoSubmit,
+} from "./_actions";
 
 type UserDetails = {
   username: string;
@@ -76,8 +81,7 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      // const isSuccess = await handleFormSlideOneSubmit(data); TODO add server action
-      const isSuccess = true;
+      const isSuccess = await handleFormSlideOneSubmit(data);
       if (isSuccess) {
         toast.success("Saved");
         router.push(`?slide=${2}`, { scroll: false });
@@ -258,8 +262,8 @@ function SlideTwo({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideTwoSchema) => {
     try {
-      // const isSuccess = await handleFormSlideTwoSubmit(data); TODO add server action
-      const isSuccess = true;
+      const isSuccess = await handleFormSlideTwoSubmit(data);
+
       if (isSuccess) {
         toast.success("Saved");
         router.push(`?slide=${3}`, { scroll: false });
@@ -443,8 +447,7 @@ function SlideThree({ details }: { details: UserDetails }) {
 
     if (isError) {
       try {
-        // const isSuccess = await handleFormSlideThreeSubmit(data); TODO add server action
-        const isSuccess = true;
+        const isSuccess = await handleFormSlideThreeSubmit(data);
         if (isSuccess) {
           toast.success("Saved");
           router.push(`/`, { scroll: false });
