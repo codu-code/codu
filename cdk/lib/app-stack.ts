@@ -247,11 +247,11 @@ export class AppStack extends cdk.Stack {
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 70,
+      targetUtilizationPercent: 90,
     });
 
     scaling.scaleOnMemoryUtilization("MemoryScaling", {
-      targetUtilizationPercent: 70,
+      targetUtilizationPercent: 90,
     });
 
     fargateService.service.connections.allowFromAnyIpv4(
