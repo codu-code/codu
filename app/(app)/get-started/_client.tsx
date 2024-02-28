@@ -49,11 +49,11 @@ const GetStarted: NextPage = () => {
             </Link>
           </p>
         </div>
-        {isAlpha && (
+        {true && (
           <>
             <div>
               <input
-                className="focus:border-white-500 w-full flex-auto rounded-md border-white bg-neutral-100 pl-6 font-medium text-neutral-950 ring-offset-0 placeholder:text-xl placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-transparent focus:ring-offset-2 dark:bg-neutral-900 dark:text-white  [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+                className="w-full flex-auto appearance-none rounded-md border-neutral-200 bg-white pl-6 font-medium text-neutral-950 ring-offset-0 placeholder:text-xl placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-transparent focus:ring-offset-2 dark:border-none dark:bg-neutral-900 dark:bg-neutral-900 dark:text-white dark:text-white  [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
                 placeholder="Enter your email"
                 onChange={(event) => {
                   setUserEmail(event.target.value);
@@ -78,10 +78,10 @@ const GetStarted: NextPage = () => {
                 className="absolute inset-0 flex items-center"
                 aria-hidden="true"
               >
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-black dark:border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm font-medium leading-6">
-                <span className="bg-black px-6 text-xl text-neutral-900  dark:text-white">
+                <span className="bg-neutral-100 px-6 text-xl text-neutral-900 dark:bg-black  dark:text-white">
                   Or continue with
                 </span>
               </div>
