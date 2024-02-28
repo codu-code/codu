@@ -5,17 +5,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { THEME_MODES } from "@/components/Theme/ThemeToggle/ThemeToggle";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const PostAuthPage = (content: {
   heading: string;
   subHeading: string;
 }) => {
-  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
 
+  // useEffect only happens on client not server
   useEffect(() => {
-    if (resolvedTheme) setTheme(resolvedTheme);
-  }, [resolvedTheme, setTheme]);
+    setMounted(true);
+  }, []);
+
+  // if on server dont render. needed to prevent a hydration mismatch error
+  if (!mounted) return null;
 
   return (
     <main className="flex w-full flex-grow flex-col justify-center bg-neutral-100 px-4 py-20 dark:bg-black sm:px-6 lg:py-40">

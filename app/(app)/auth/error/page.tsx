@@ -4,7 +4,7 @@ import type { NextPage } from "next";
 import { useSearchParams } from "next/navigation";
 import { PostAuthPage } from "../page";
 
-const Auth: NextPage = () => {
+const Page: NextPage = () => {
   const errorHeadings = {
     // sign in link already used or expired
     verification: {
@@ -26,7 +26,9 @@ const Auth: NextPage = () => {
   const error = (useSearchParams().get("error")?.toLowerCase() ??
     "unknown") as keyof typeof errorHeadings;
   // Checking does the error query param has been covered in errorHeading if not falling back to unknown
-  return PostAuthPage(errorHeadings[error] ? errorHeadings[error] : errorHeadings.unknown);
+  return PostAuthPage(
+    errorHeadings[error] ? errorHeadings[error] : errorHeadings.unknown,
+  );
 };
 
-export default Auth;
+export default Page;
