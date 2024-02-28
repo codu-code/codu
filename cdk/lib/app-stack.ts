@@ -233,7 +233,7 @@ export class AppStack extends cdk.Stack {
     });
 
     fargateService.targetGroup.configureHealthCheck({
-      path: "/api/health",
+      path: production ? "https://www.codu.co/api/health" : "https://www.dev1.codu.co/api/health",
       interval: cdk.Duration.seconds(30),
       timeout: cdk.Duration.seconds(5),
       healthyHttpCodes: "200",
@@ -247,11 +247,11 @@ export class AppStack extends cdk.Stack {
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 70,
+      targetUtilizationPercent: 90,
     });
 
     scaling.scaleOnMemoryUtilization("MemoryScaling", {
-      targetUtilizationPercent: 70,
+      targetUtilizationPercent: 90,
     });
 
     fargateService.service.connections.allowFromAnyIpv4(
