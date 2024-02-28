@@ -61,6 +61,7 @@ const GetStarted: NextPage = () => {
               />
               <button
                 type="button"
+                disabled={!userEmail}
                 onClick={async () => {
                   await signIn("email", {
                     callbackUrl: redirectTo,

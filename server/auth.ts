@@ -13,9 +13,7 @@ import { manageNewsletterSubscription } from "./lib/newsletter";
 import { createTransport } from "nodemailer";
 import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
 
-const sendPassworldLessEmail = async (
-  params: SendVerificationRequestParams,
-) => {
+const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
   const { identifier, url, provider } = params;
   const transport = createTransport(provider.server);
 
@@ -49,11 +47,10 @@ export const authOptions: NextAuthOptions = {
           pass: process.env.EMAIL_SERVER_PASSWORD,
         },
       },
-      sendVerificationRequest: sendPassworldLessEmail,
+      sendVerificationRequest: sendPasswordLessEmail,
       from: process.env.EMAIL_FROM,
     }),
   ],
-  secret: "testsecret",
   pages: {
     signIn: "/get-started",
     newUser: "/settings",
