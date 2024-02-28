@@ -6,8 +6,10 @@ import { useSession } from "next-auth/react";
 import {
   type TypeSlideOneSchema,
   type TypeSlideTwoSchema,
+  type TypeSlideThreeSchema,
   slideOneSchema,
   slideTwoSchema,
+  slideThreeSchema,
 } from "@/schema/additionalUserDetails";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFormContext } from "react-hook-form";
@@ -53,7 +55,7 @@ export default function AdditionalSignUpDetails({
 
       {slide === 1 && <SlideOne details={details} />}
       {slide === 2 && <SlideTwo details={details} />}
-      {/* {slide === 3 && <SlideThree details={details} />} */}
+      {slide === 3 && <SlideThree details={details} />}
     </div>
   );
 }
@@ -401,53 +403,65 @@ function SlideTwo({ details }: { details: UserDetails }) {
   );
 }
 
-function SlideThree() {
+function SlideThree({ details }: { details: UserDetails }) {
   const router = useRouter();
 
-  const handleClickPreviousSlide = () => {
-    router.push(`?slide=${2}`, { scroll: false });
-  };
+  const { professionalOrStudent, workplace, jobTitle, course, levelOfStudy } =
+    details;
 
   const {
-    getValues,
     register,
-    watch,
+    handleSubmit,
     trigger,
-    getFieldState,
-    formState: { errors },
-  } = useFormContext();
+    watch,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideThreeSchema>({
+    resolver: zodResolver(slideThreeSchema),
+    defaultValues: {
+      professionalOrStudent,
+      workplace,
+      jobTitle,
+      course,
+      levelOfStudy,
+    },
+  });
 
   watch("professionalOrStudent");
 
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: TypeSlideThreeSchema) => {
     let isError = await trigger(["professionalOrStudent"]);
+    const professionalOrStudent = getValues("professionalOrStudent");
+
+    if (isError && professionalOrStudent === "Working professional") {
+      isError = await trigger(["workplace", "jobTitle"]);
+    }
+
+    if (isError && professionalOrStudent === "Current student") {
+      isError = await trigger(["levelOfStudy", "course"]);
+    }
 
     if (isError) {
-      const professionalOrStudent = getValues("professionalOrStudent");
-
-      if (professionalOrStudent === "Working professional") {
-        isError = await trigger(["workplace", "jobTitle"]);
-
-        if (isError) {
-          router.push(`?slide=${4}`, { scroll: false });
+      try {
+        // const isSuccess = await handleFormSlideThreeSubmit(data); TODO add server action
+        const isSuccess = true;
+        if (isSuccess) {
+          toast.success("Saved");
+          router.push(`/`, { scroll: false });
+        } else {
+          toast.error("Error, saving was unsuccessful.");
         }
-      } else if (professionalOrStudent === "Current student") {
-        isError = await trigger(["levelOfStudy", "course"]);
-
-        if (isError) {
-          router.push(`?slide=${4}`, { scroll: false });
-        }
-      } else if (professionalOrStudent === "None of the above") {
-        router.push(`?slide=${4}`, { scroll: false });
+      } catch (error) {
+        toast.error("An unexpected error occurred.");
       }
     }
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
+    >
       <div className="bg-red-400... h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
           Work and education
@@ -577,12 +591,24 @@ function SlideThree() {
           )}
         </div>
 
-        <SlideButtons
-          handleClickPreviousSlide={handleClickPreviousSlide}
-          handleClickNextSlide={handleClickNextSlide}
-        />
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={() => router.push(`?slide=${2}`, { scroll: false })}
+            className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+          >
+            Go back
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Submit
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
 
