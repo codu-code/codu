@@ -12,12 +12,11 @@ export default {
     };
   },
   stacks(app) {
+    const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
+    if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL)
+      throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
+    app.addDefaultFunctionEnv({ ALGOLIA_ADMIN_KEY, DATABASE_URL });
     app.stack(function Site({ stack }) {
-      const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
-
-      if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL)
-        throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
-
       const site = new NextjsSite(stack, "site", {
         edge: true,
         environment: {
@@ -33,7 +32,6 @@ export default {
             this,
             "/env/sentry/dsn",
           ),
-          DATABASE_URL,
           GITHUB_SECRET: ssm.StringParameter.valueFromLookup(
             this,
             "/env/githubSecret",
@@ -51,7 +49,6 @@ export default {
             this,
             "/env/adminEmail",
           ),
-          ALGOLIA_ADMIN_KEY,
           ALGOLIA_APP_ID: ssm.StringParameter.valueFromLookup(
             this,
             "/env/algoliaAppId",
