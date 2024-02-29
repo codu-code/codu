@@ -69,7 +69,10 @@ export class AppStack extends cdk.Stack {
           S3_BUCKET_NAME: bucket.bucketName,
         },
         healthCheck: {
-          command: ['CMD-SHELL', `curl -f http://localhost:${this.appPort}/api/health || exit 1`],
+          command: [
+            "CMD-SHELL",
+            `curl -f http://localhost:${this.appPort}/api/health || exit 1`,
+          ],
         },
         // Plain text not for secrets
         secrets: {
