@@ -20,6 +20,8 @@ export default {
       const site = new NextjsSite(stack, "site", {
         edge: true,
         environment: {
+          ALGOLIA_ADMIN_KEY,
+          DATABASE_URL,
           // Bucket name still needed
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
