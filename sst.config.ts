@@ -1,5 +1,5 @@
-import { SSTConfig } from "sst";
-import { NextjsSite } from "sst/constructs";
+import { type SSTConfig } from "sst";
+import { NextjsSite, Config } from "sst/constructs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
 const wwwDomainName = "www.dev1.codu.co";
@@ -13,15 +13,23 @@ export default {
   },
   stacks(app) {
     const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
-    if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL)
+    if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL) {
       throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
+    }
     app.addDefaultFunctionEnv({ ALGOLIA_ADMIN_KEY, DATABASE_URL });
     app.stack(function Site({ stack }) {
+      const ALGOLIA_ADMIN_KEY = new Config.Secret(stack, "ALGOLIA_ADMIN_KEY");
+      const DATABASE_URL = new Config.Secret(stack, "DATABASE_URL");
+
+      if (!process.env.ALGOLIA_ADMIN_KEY || !process.env.DATABASE_URL) {
+        throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
+      }
       const site = new NextjsSite(stack, "site", {
         edge: true,
+        bind: [ALGOLIA_ADMIN_KEY, DATABASE_URL],
         environment: {
-          ALGOLIA_ADMIN_KEY,
-          DATABASE_URL,
+          ALGOLIA_ADMIN_KEY: process.env.ALGOLIA_ADMIN_KEY,
+          DATABASE_URL: process.env.DATABASE_URL,
           // Bucket name still needed
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
