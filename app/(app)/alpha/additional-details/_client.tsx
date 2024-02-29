@@ -4,12 +4,16 @@ import React, { useEffect, useState } from "react";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  AdditionalDetailsSchema,
-  type TypeAdditionalDetailsSchema,
+  type TypeSlideOneSchema,
+  type TypeSlideTwoSchema,
+  type TypeSlideThreeSchema,
+  slideOneSchema,
+  slideTwoSchema,
+  slideThreeSchema,
 } from "@/schema/additionalUserDetails";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { handleFormSubmit } from "./actions";
+import { useForm, useFormContext } from "react-hook-form";
+
 import { toast } from "sonner";
 import {
   professionalOrStudentOptions,
@@ -18,6 +22,11 @@ import {
   levelOfStudyOptions,
   monthsOptions,
 } from "@/app/(app)/alpha/additional-details/selectOptions";
+import {
+  handleFormSlideOneSubmit,
+  handleFormSlideThreeSubmit,
+  handleFormSlideTwoSubmit,
+} from "./_actions";
 
 type UserDetails = {
   username: string;
@@ -39,20 +48,43 @@ export default function AdditionalSignUpDetails({
   details: UserDetails;
 }) {
   const session = useSession();
+  const searchParams = useSearchParams();
 
-  const useFormObject = useForm<TypeAdditionalDetailsSchema>({
-    resolver: zodResolver(AdditionalDetailsSchema),
-    defaultValues: details,
+  const slide = Number(searchParams.get("slide")) || 1;
+  if (!session) {
+    return redirect("/get-started");
+  }
+  return (
+    <div className="min-h-[41rem]">
+      <SignupProgressBar currentSlide={slide} />
+
+      {slide === 1 && <SlideOne details={details} />}
+      {slide === 2 && <SlideTwo details={details} />}
+      {slide === 3 && <SlideThree details={details} />}
+    </div>
+  );
+}
+
+function SlideOne({ details }: { details: UserDetails }) {
+  const router = useRouter();
+
+  const { username, firstName, surname, location } = details;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideOneSchema>({
+    resolver: zodResolver(slideOneSchema),
+    defaultValues: { username, firstName, surname, location },
   });
 
-  const searchParams = useSearchParams();
-  const slide = Number(searchParams.get("slide")) || 1;
-
-  const onFormSubmit = async (data: TypeAdditionalDetailsSchema) => {
+  const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      const isSuccess = await handleFormSubmit(data);
+      const isSuccess = await handleFormSlideOneSubmit(data);
       if (isSuccess) {
         toast.success("Saved");
+        router.push(`?slide=${2}`, { scroll: false });
       } else {
         toast.error("Error, saving was unsuccessful.");
       }
@@ -60,166 +92,135 @@ export default function AdditionalSignUpDetails({
       toast.error("An unexpected error occurred.");
     }
   };
-  if (!session) {
-    return redirect("/get-started");
-  }
 
   return (
-    <>
-      <FormProvider {...useFormObject}>
-        <form
-          className="min-h-[41rem]"
-          onSubmit={useFormObject.handleSubmit((data) => onFormSubmit(data))}
-        >
-          <SignupProgressBar currentSlide={slide} />
-
-          {slide === 1 && <SlideOne />}
-          {slide === 2 && <SlideTwo />}
-          {slide === 3 && <SlideThree />}
-          {slide === 4 && <SlideFour />}
-        </form>
-      </FormProvider>
-    </>
-  );
-}
-
-function SlideOne() {
-  const {
-    register,
-    trigger,
-    formState: { errors },
-  } = useFormContext();
-
-  const router = useRouter();
-
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
-    const isError = await trigger(
-      ["firstName", "surname", "username", "location"],
-      {
-        shouldFocus: true,
-      },
-    );
-
-    if (isError) {
-      router.push(`?slide=${2}`, { scroll: false });
-    }
-  };
-
-  return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
-          Profile information
-        </h2>
-        <p>This information will be displayed on your profile</p>
-      </div>
-      <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
-        <div className="space-y-6">
-          <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium leading-6 text-white"
-            >
-              First Name
-            </label>
-            <div className="mt-2 ">
-              <input
-                id="name"
-                {...register("firstName")}
-                placeholder="What should we call you?"
-                type="text"
-                className="block w-full rounded-md border-0 bg-white/5  py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-              />
-              {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="surname"
-              className="block text-sm font-medium leading-6 text-white"
-            >
-              Surname
-            </label>
-            <div className="mt-2">
-              <input
-                id="surname"
-                {...register("surname")}
-                type="text"
-                placeholder="And your surname?"
-                className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-              />
-              {errors.surname && <p>{`${errors.surname.message}`}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium leading-6 text-white"
-            >
-              Username
-            </label>
-            <div className="relative flex items-center">
-              <div className="flex h-[36px] w-[7rem] items-center justify-center rounded-l-md bg-white text-black">
-                <span>codu.co/</span>
+    <form onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
+            Profile information
+          </h2>
+          <p>This information will be displayed on your profile</p>
+        </div>
+        <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
+          <div className="space-y-6">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                First Name
+              </label>
+              <div className="mt-2 ">
+                <input
+                  id="name"
+                  {...register("firstName")}
+                  placeholder="What should we call you?"
+                  type="text"
+                  className="block w-full rounded-md border-0 bg-white/5  py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                />
+                {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
               </div>
-              <input
-                id="username"
-                {...register("username")}
-                placeholder="thehacker"
-                type="text"
-                className="relative top-[-2px] block rounded-r-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
-              />
             </div>
-            {errors.username && <p>{`${errors.username.message}`}</p>}
+
+            <div>
+              <label
+                htmlFor="surname"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Surname
+              </label>
+              <div className="mt-2">
+                <input
+                  id="surname"
+                  {...register("surname")}
+                  type="text"
+                  placeholder="And your surname?"
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                />
+                {errors.surname && <p>{`${errors.surname.message}`}</p>}
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Username
+              </label>
+              <div className="relative flex items-center">
+                <div className="flex h-[36px] w-[7rem] items-center justify-center rounded-l-md bg-white text-black">
+                  <span>codu.co/</span>
+                </div>
+                <input
+                  id="username"
+                  {...register("username")}
+                  placeholder="thehacker"
+                  type="text"
+                  className="relative top-[-2px] block rounded-r-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-red-500 sm:text-sm sm:leading-6"
+                />
+              </div>
+              {errors.username && <p>{`${errors.username.message}`}</p>}
+            </div>
+            <div>
+              <label
+                htmlFor="location"
+                className="block text-sm font-medium leading-6 text-white"
+              >
+                Location
+              </label>
+              <select
+                id="location"
+                {...register("location")}
+                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+              >
+                <option value="" disabled>
+                  Select
+                </option>
+                {locationOptions.map((location: string) => (
+                  <option key={location}>{location}</option>
+                ))}
+              </select>
+              {errors.location && <p>{`${errors.location.message}`}</p>}
+            </div>
           </div>
-          <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium leading-6 text-gray-900"
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              Location
-            </label>
-            <select
-              id="location"
-              {...register("location")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-            >
-              <option value="" disabled>
-                Select
-              </option>
-              {locationOptions.map((location: string) => (
-                <option key={location}>{location}</option>
-              ))}
-            </select>
-            {errors.location && <p>{`${errors.location.message}`}</p>}
+              Next
+            </button>
           </div>
         </div>
-        <SlideButtons handleClickNextSlide={handleClickNextSlide} />
       </div>
-    </div>
+    </form>
   );
 }
 
-function SlideTwo() {
+function SlideTwo({ details }: { details: UserDetails }) {
   const router = useRouter();
+  const { dateOfBirth, gender } = details;
 
   const {
-    getValues,
-    setValue,
     register,
-    trigger,
-    formState: { errors },
-  } = useFormContext();
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideTwoSchema>({
+    resolver: zodResolver(slideTwoSchema),
+    defaultValues: { dateOfBirth, gender },
+  });
 
-  const dob = getValues("dateOfBirth");
-  const [year, setYear] = useState<number | undefined>(dob?.getFullYear());
-  const [month, setMonth] = useState<number | undefined>(dob?.getMonth());
-  const [day, setDay] = useState<number | undefined>(dob?.getDate());
+  const [year, setYear] = useState<number | undefined>(
+    dateOfBirth?.getFullYear(),
+  );
+  const [month, setMonth] = useState<number | undefined>(
+    dateOfBirth?.getMonth(),
+  );
+  const [day, setDay] = useState<number | undefined>(dateOfBirth?.getDate());
 
   const [listOfDaysInSelectedMonth, setListOfDaysInSelectedMonth] = useState([
     0,
@@ -259,189 +260,211 @@ function SlideTwo() {
     (_, index) => startYearAgeDropdown + index,
   ).reverse();
 
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: TypeSlideTwoSchema) => {
+    try {
+      const isSuccess = await handleFormSlideTwoSubmit(data);
 
-    const isError = await trigger(["dateOfBirth", "gender"], {
-      shouldFocus: true,
-    });
-
-    if (isError && dob !== undefined) {
-      router.push(`?slide=${3}`, { scroll: false });
+      if (isSuccess) {
+        toast.success("Saved");
+        router.push(`?slide=${3}`, { scroll: false });
+      } else {
+        toast.error("Error, saving was unsuccessful.");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
     }
   };
 
-  const handleClickPreviousSlide = () => {
-    router.push(`?slide=${1}`, { scroll: false });
-  };
-
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
-          Demographic
-        </h2>
-        <p>This information is private, but helps us improve</p>
-      </div>
-
-      <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
-        <div className="h-[21.75rem] space-y-6">
-          <div>
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Gender
-            </label>
-            <select
-              id="gender"
-              {...register("gender")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-            >
-              <option value="" disabled>
-                Gender
-              </option>
-              {genderOptions.map((gender: string) => (
-                <option key={gender}>{gender}</option>
-              ))}
-            </select>
-
-            {errors.gender && <p>{`${errors.gender.message}`}</p>}
-          </div>
-
-          <fieldset>
-            <legend>Date of Birth</legend>
-
-            <div className="flex justify-between gap-1 sm:gap-8">
-              <div className="flex-grow">
-                <label htmlFor="year" className="hidden">
-                  Year
-                </label>
-                <select
-                  id="year"
-                  name="year"
-                  value={year ? year : ""}
-                  required
-                  onChange={(e) => setYear(Number(e.target.value))}
-                  className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                >
-                  <option value="" disabled>
-                    Year
-                  </option>
-                  {years.map((year) => (
-                    <option key={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-grow">
-                <label htmlFor="month" className="hidden">
-                  Month
-                </label>
-                <select
-                  id="month"
-                  name="month"
-                  value={month !== undefined ? monthsOptions[month] : ""}
-                  required
-                  className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  onChange={(e) =>
-                    setMonth(monthsOptions.indexOf(e.target.value))
-                  }
-                >
-                  <option value="" disabled>
-                    Month
-                  </option>
-                  {monthsOptions.map((month) => (
-                    <option key={month}>{month}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-grow">
-                <label htmlFor="day" className="hidden">
-                  day
-                </label>
-                <select
-                  id="day"
-                  name="day"
-                  value={day ? day : ""}
-                  className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  disabled={!year || month === undefined}
-                  required
-                  onChange={(e) => setDay(Number(e.target.value))}
-                >
-                  <option value="" disabled>
-                    Day
-                  </option>
-
-                  {listOfDaysInSelectedMonth.map((day) => (
-                    <option key={day}>{day}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
-          </fieldset>
+    <form onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
+            Demographic
+          </h2>
+          <p>This information is private, but helps us improve</p>
         </div>
 
-        <SlideButtons
-          handleClickNextSlide={handleClickNextSlide}
-          handleClickPreviousSlide={handleClickPreviousSlide}
-        />
+        <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
+          <div className="h-[21.75rem] space-y-6">
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Gender
+              </label>
+              <select
+                id="gender"
+                {...register("gender")}
+                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+              >
+                <option value="" disabled>
+                  Gender
+                </option>
+                {genderOptions.map((gender: string) => (
+                  <option key={gender}>{gender}</option>
+                ))}
+              </select>
+
+              {errors.gender && <p>{`${errors.gender.message}`}</p>}
+            </div>
+
+            <fieldset>
+              <legend>Date of Birth</legend>
+
+              <div className="flex justify-between gap-1 sm:gap-8">
+                <div className="flex-grow">
+                  <label htmlFor="year" className="hidden">
+                    Year
+                  </label>
+                  <select
+                    id="year"
+                    name="year"
+                    value={year ? year : ""}
+                    required
+                    onChange={(e) => setYear(Number(e.target.value))}
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                  >
+                    <option value="" disabled>
+                      Year
+                    </option>
+                    {years.map((year) => (
+                      <option key={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-grow">
+                  <label htmlFor="month" className="hidden">
+                    Month
+                  </label>
+                  <select
+                    id="month"
+                    name="month"
+                    value={month !== undefined ? monthsOptions[month] : ""}
+                    required
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    onChange={(e) =>
+                      setMonth(monthsOptions.indexOf(e.target.value))
+                    }
+                  >
+                    <option value="" disabled>
+                      Month
+                    </option>
+                    {monthsOptions.map((month) => (
+                      <option key={month}>{month}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-grow">
+                  <label htmlFor="day" className="hidden">
+                    day
+                  </label>
+                  <select
+                    id="day"
+                    name="day"
+                    value={day ? day : ""}
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    disabled={!year || month === undefined}
+                    required
+                    onChange={(e) => setDay(Number(e.target.value))}
+                  >
+                    <option value="" disabled>
+                      Day
+                    </option>
+
+                    {listOfDaysInSelectedMonth.map((day) => (
+                      <option key={day}>{day}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
+            </fieldset>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              type="button"
+              onClick={() => router.push(`?slide=${1}`, { scroll: false })}
+              className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+            >
+              Go back
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
 
-function SlideThree() {
+function SlideThree({ details }: { details: UserDetails }) {
   const router = useRouter();
 
-  const handleClickPreviousSlide = () => {
-    router.push(`?slide=${2}`, { scroll: false });
-  };
+  const { professionalOrStudent, workplace, jobTitle, course, levelOfStudy } =
+    details;
 
   const {
-    getValues,
     register,
-    watch,
+    handleSubmit,
     trigger,
-    getFieldState,
-    formState: { errors },
-  } = useFormContext();
+    watch,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideThreeSchema>({
+    resolver: zodResolver(slideThreeSchema),
+    defaultValues: {
+      professionalOrStudent,
+      workplace,
+      jobTitle,
+      course,
+      levelOfStudy,
+    },
+  });
 
   watch("professionalOrStudent");
 
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: TypeSlideThreeSchema) => {
     let isError = await trigger(["professionalOrStudent"]);
+    const professionalOrStudent = getValues("professionalOrStudent");
+
+    if (isError && professionalOrStudent === "Working professional") {
+      isError = await trigger(["workplace", "jobTitle"]);
+    }
+
+    if (isError && professionalOrStudent === "Current student") {
+      isError = await trigger(["levelOfStudy", "course"]);
+    }
 
     if (isError) {
-      const professionalOrStudent = getValues("professionalOrStudent");
-
-      if (professionalOrStudent === "Working professional") {
-        isError = await trigger(["workplace", "jobTitle"]);
-
-        if (isError) {
-          router.push(`?slide=${4}`, { scroll: false });
+      try {
+        const isSuccess = await handleFormSlideThreeSubmit(data);
+        if (isSuccess) {
+          toast.success("Saved");
+          router.push(`/`, { scroll: false });
+        } else {
+          toast.error("Error, saving was unsuccessful.");
         }
-      } else if (professionalOrStudent === "Current student") {
-        isError = await trigger(["levelOfStudy", "course"]);
-
-        if (isError) {
-          router.push(`?slide=${4}`, { scroll: false });
-        }
-      } else if (professionalOrStudent === "None of the above") {
-        router.push(`?slide=${4}`, { scroll: false });
+      } catch (error) {
+        toast.error("An unexpected error occurred.");
       }
     }
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
+    >
       <div className="bg-red-400... h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
           Work and education
@@ -571,12 +594,24 @@ function SlideThree() {
           )}
         </div>
 
-        <SlideButtons
-          handleClickPreviousSlide={handleClickPreviousSlide}
-          handleClickNextSlide={handleClickNextSlide}
-        />
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={() => router.push(`?slide=${2}`, { scroll: false })}
+            className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+          >
+            Go back
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Submit
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
 
