@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "sst:dev": "sst bind next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "ci-build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
