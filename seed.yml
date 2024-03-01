@@ -1,5 +1,2 @@
 before_compile:
   - n 20.11.1
-
-before_build:
-  - npx prisma generate
