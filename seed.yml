@@ -1,6 +1,6 @@
 before_compile:
   - n 20.11.1
 
-before_build:
+before_deploy:
   - curl -sf https://gobinaries.com/tj/node-prune | sh
   - node-prune
