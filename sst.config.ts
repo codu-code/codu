@@ -12,23 +12,16 @@ export default {
     };
   },
   stacks(app) {
-    const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
-    if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL) {
-      throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
-    }
-    app.addDefaultFunctionEnv({ ALGOLIA_ADMIN_KEY, DATABASE_URL });
-    app.setDefaultFunctionProps({
-      environment: { ALGOLIA_ADMIN_KEY, DATABASE_URL },
-    });
     app.stack(function Site({ stack }) {
-      const ALGOLIA_ADMIN_KEY = new Config.Secret(stack, "ALGOLIA_ADMIN_KEY");
-      const DATABASE_URL = new Config.Secret(stack, "DATABASE_URL");
-
+      const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
+      if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL) {
+        throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
+      }
       const site = new NextjsSite(stack, "site", {
         edge: true,
-        bind: [ALGOLIA_ADMIN_KEY, DATABASE_URL],
         environment: {
           // Bucket name still needed
+          DATABASE_URL,
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
           NEXTAUTH_URL: `https://${wwwDomainName}`,
