@@ -32,6 +32,19 @@ const generateEventData = (count: number) => {
     });
 };
 
+const sampleTags = [
+  "JAVASCRIPT",
+  "WEB DEVELOPMENT",
+  "TUTORIAL",
+  "PRODUCTIVITY",
+  "CSS",
+  "TERMINAL",
+  "DJANGO",
+  "PYTHON",
+  "TIPS",
+  "BACKEND",
+];
+
 const generateCommunityData = (count: number) => {
   return Array(count)
     .fill(null)
@@ -116,6 +129,17 @@ ${chance.paragraph()}
     });
 };
 
+const generateTagData = () => {
+  return Array(sampleTags.length)
+    .fill(null)
+    .map((_elem, index) => {
+      return {
+        title: sampleTags[index],
+        createdAt: new Date(),
+      };
+    });
+};
+
 const generateUserData = (count = 100) => {
   const users = Array(count)
     .fill(null)
@@ -148,45 +172,63 @@ const generateUserData = (count = 100) => {
 
 const userData = generateUserData();
 const communityData = generateCommunityData(10);
+const tagData = generateTagData();
 
 async function addSeedDataToDb() {
   console.log(`Start seeding, please wait...`);
-  userData.forEach(async (user) => {
+
+  for (let i = 0; i < 100; i++) {
+    const user = userData[i];
     await prisma.user.upsert({
       where: { email: user.email },
       update: {},
       create: user,
     });
     console.log(`Added user: ${user.username}`);
-  });
-  communityData.forEach(async (community) => {
+  }
+
+  for (let i = 0; i < 10; i++) {
+    const community = communityData[i];
     await prisma.community.upsert({
       where: { id: community.id },
       update: {},
       create: community,
     });
     console.log(`Added community: ${community.name}`);
-  });
+  }
+
+  for (let i = 0; i < 10; i++) {
+    const tag = tagData[i];
+    await prisma.tag.create({
+      data: tag,
+    });
+    console.log(`Added tag: ${tag.title}`);
+  }
 
   const users = await prisma.user.findMany();
-  communityData.forEach(async (community) => {
-    users.forEach(async (user, index) => {
+
+  for (let i = 0; i < communityData.length; i++) {
+    const community = communityData[i];
+    for (let j = 0; j < users.length; j++) {
+      const user = users[j];
       const id = nanoid(8);
       await prisma.membership.create({
         data: {
           id: id,
           userId: user.id,
           communityId: community.id,
-          isEventOrganiser: index === 0,
+          isEventOrganiser: j === 0,
         },
       });
       console.log(`Added membership: ${id}`);
-    });
-  });
+    }
+  }
 
   const events = await prisma.event.findMany();
-  events.forEach((event) => {
-    users.forEach(async (user) => {
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    for (let j = 0; j < users.length; j++) {
+      const user = users[j];
       const id = nanoid(8);
       await prisma.rSVP.create({
         data: {
@@ -196,8 +238,20 @@ async function addSeedDataToDb() {
         },
       });
       console.log(`Added RSVP: ${id}`);
+    }
+  }
+
+  const tags = await prisma.tag.findMany();
+  const posts = await prisma.post.findMany();
+
+  for (let i = 0; i < posts.length; i++) {
+    const post = posts[i];
+    const randomTag = tags[Math.floor(Math.random() * 10)];
+    await prisma.postTag.create({
+      data: { postId: post.id, tagId: randomTag.id },
     });
-  });
+    console.log(`Added Tag ${randomTag.id} to Post ${post.id}`);
+  }
 
   console.log(`Seeding finished.`);
 }
