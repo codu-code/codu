@@ -197,7 +197,7 @@ async function addSeedDataToDb() {
     console.log(`Added community: ${community.name}`);
   }
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < tagData.length; i++) {
     const tag = tagData[i];
     await prisma.tag.create({
       data: tag,
