@@ -25,7 +25,7 @@ export default {
         customDomain: {
           domainName: wwwDomainName,
           domainAlias: domainName,
-          hostedZone: "codu.co",
+          hostedZone: domainName,
         },
         environment: {
           // Bucket name still needed
