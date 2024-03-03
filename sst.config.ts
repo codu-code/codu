@@ -18,7 +18,8 @@ export default {
         throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
       }
       const site = new NextjsSite(stack, "site", {
-        edge: true,
+        // @TODO: Fix Prisma bundle issue
+        // edge: true, 
         environment: {
           // Bucket name still needed
           DATABASE_URL,
