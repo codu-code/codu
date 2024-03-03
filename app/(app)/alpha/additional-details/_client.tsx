@@ -50,7 +50,29 @@ export default function AdditionalSignUpDetails({
   const session = useSession();
   const searchParams = useSearchParams();
 
-  const slide = Number(searchParams.get("slide")) || 1;
+  const {
+    surname,
+    firstName,
+    username,
+    location,
+    dateOfBirth,
+    gender,
+    professionalOrStudent,
+  } = details;
+
+  let slide: number;
+  if (searchParams.get("slide")) {
+    slide = Number(searchParams.get("slide"));
+  } else if (!surname || !firstName || !username || !location) {
+    slide = 1;
+  } else if (!dateOfBirth || !gender) {
+    slide = 2;
+  } else if (!professionalOrStudent) {
+    slide = 3;
+  } else {
+    return redirect("/settings");
+  }
+
   if (!session) {
     return redirect("/get-started");
   }
