@@ -17,14 +17,6 @@ export class AppStage extends cdk.Stage {
     const storageStack = new StorageStack(this, "StorageStack", {
       production,
     });
-    const appStack = new AppStack(this, "AppStack", {
-      vpc: storageStack.vpc,
-      bucket: storageStack.bucket,
-      production,
-    });
-    new CdnStack(this, "CdnStack", {
-      loadbalancer: appStack.loadbalancer,
-    });
     new CronStack(this, "CronStack");
   }
 }

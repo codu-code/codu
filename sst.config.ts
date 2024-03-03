@@ -1,11 +1,9 @@
 import { type SSTConfig } from "sst";
-import { NextjsSite, Config } from "sst/constructs";
+import { NextjsSite } from "sst/constructs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
-const wwwDomainName = "www.dev1.codu.co";
-
 export default {
-  config(_input) {
+  config() {
     return {
       name: "codu",
       region: "eu-west-1",
@@ -13,14 +11,27 @@ export default {
   },
   stacks(app) {
     app.stack(function Site({ stack }) {
+      const domainName = app.stage === "dev" ? "dev1.codu.co" : "codu.co";
+      const bucketName = app.stage === "dev" ? "dev.codu" : "codu.uploads";
+      const wwwDomainName = `www.${domainName}`;
+
       const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
       if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL) {
         throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
       }
       const site = new NextjsSite(stack, "site", {
-        edge: true,
+        // @TODO: Fix Prisma bundle issue
+        // edge: true,
+        experimental: {
+          streaming: true,
+        },
+        customDomain: {
+          domainName: wwwDomainName,
+          domainAlias: domainName,
+          hostedZone: domainName,
+        },
         environment: {
-          // Bucket name still needed
+          S3_BUCKET_NAME: bucketName,
           DATABASE_URL,
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
