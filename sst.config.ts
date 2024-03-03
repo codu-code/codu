@@ -25,6 +25,7 @@ export default {
         experimental: {
           streaming: true,
         },
+        permissions: ["ses", "s3"],
         customDomain: {
           domainName: wwwDomainName,
           domainAlias: domainName,
