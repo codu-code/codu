@@ -15,9 +15,21 @@ export default {
       const bucketName = app.stage === "dev" ? "dev.codu" : "codu.uploads";
       const wwwDomainName = `www.${domainName}`;
 
-      const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
-      if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL) {
-        throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
+      const {
+        ALGOLIA_ADMIN_KEY,
+        DATABASE_URL,
+        NEXT_PUBLIC_FATHOM_SITE_ID,
+        NEXT_PUBLIC_SENTRY_DSN,
+      } = process.env;
+      if (
+        !ALGOLIA_ADMIN_KEY ||
+        !DATABASE_URL ||
+        !NEXT_PUBLIC_FATHOM_SITE_ID ||
+        !NEXT_PUBLIC_SENTRY_DSN
+      ) {
+        throw new Error(
+          `ALGOLIA_ADMIN_KEY, DATABASE_URL, NEXT_PUBLIC_FATHOM_SITE_ID and NEXT_PUBLIC_SENTRY_DSN are required`,
+        );
       }
       const site = new NextjsSite(stack, "site", {
         // @TODO: Fix Prisma bundle issue
@@ -37,6 +49,8 @@ export default {
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
           NEXTAUTH_URL: `https://${wwwDomainName}`,
+          NEXT_PUBLIC_FATHOM_SITE_ID: NEXT_PUBLIC_FATHOM_SITE_ID,
+          NEXT_PUBLIC_SENTRY_DSN: NEXT_PUBLIC_SENTRY_DSN,
           SENTRY_ENVIRONMENT: ssm.StringParameter.valueFromLookup(
             this,
             "/env/sentry/environment",
