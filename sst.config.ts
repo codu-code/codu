@@ -2,8 +2,6 @@ import { type SSTConfig } from "sst";
 import { NextjsSite } from "sst/constructs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
-const wwwDomainName = "www.dev1.codu.co";
-
 export default {
   config(_input) {
     return {
@@ -14,16 +12,7 @@ export default {
   stacks(app) {
     app.stack(function Site({ stack }) {
 
-      const domainName = ssm.StringParameter.valueFromLookup(
-        this,
-        "/env/domainName",
-      );
-
-      const hostedZoneId = ssm.StringParameter.valueFromLookup(
-        this,
-        `/env/hostedZoneId`
-      );
-
+      const domainName = app.stage === "dev" ? "dev1.codu.co" : "codu.co";
       const wwwDomainName = `www.${domainName}`;
 
       const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
