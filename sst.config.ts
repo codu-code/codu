@@ -3,7 +3,7 @@ import { NextjsSite } from "sst/constructs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
 export default {
-  config(_input) {
+  config() {
     return {
       name: "codu",
       region: "eu-west-1",
@@ -11,8 +11,8 @@ export default {
   },
   stacks(app) {
     app.stack(function Site({ stack }) {
-
       const domainName = app.stage === "dev" ? "dev1.codu.co" : "codu.co";
+      const bucketName = app.stage === "dev" ? "dev.codu" : "codu.uploads";
       const wwwDomainName = `www.${domainName}`;
 
       const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
@@ -21,7 +21,7 @@ export default {
       }
       const site = new NextjsSite(stack, "site", {
         // @TODO: Fix Prisma bundle issue
-        // edge: true, 
+        // edge: true,
         experimental: {
           streaming: true,
         },
@@ -31,7 +31,7 @@ export default {
           hostedZone: domainName,
         },
         environment: {
-          // Bucket name still needed
+          S3_BUCKET_NAME: bucketName,
           DATABASE_URL,
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
