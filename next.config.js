@@ -32,35 +32,10 @@ module.exports = withBundleAnalyzer({
     locales: ["en"],
     defaultLocale: "en",
   },
-  output: "standalone",
   typescript: {
     // Temporary to check pipelines due to weird error I can only get on CodePipeline
     ignoreBuildErrors: true,
   },
-  transpilePackages: [
-    "@tiptap/extension-code-block-lowlight",
-    "@tiptap/extension-color",
-    "@tiptap/extension-highlight",
-    "@tiptap/extension-image",
-    "@tiptap/extension-link",
-    "@tiptap/extension-placeholder",
-    "@tiptap/extension-subscript",
-    "@tiptap/extension-superscript",
-    "@tiptap/extension-table",
-    "@tiptap/extension-table-cell",
-    "@tiptap/extension-table-header",
-    "@tiptap/extension-table-row",
-    "@tiptap/extension-task-item",
-    "@tiptap/extension-task-list",
-    "@tiptap/extension-text-align",
-    "@tiptap/extension-text-style",
-    "@tiptap/extension-underline",
-    "@tiptap/extension-youtube",
-    "@heroicons/react",
-    "@radix-ui/react-popover",
-    "@radix-ui/react-switch",
-    "lucide-react"
-  ],
   experimental: {
     swcPlugins: [
       [
