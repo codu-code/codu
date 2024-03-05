@@ -16,8 +16,9 @@ const GetStarted: NextPage = () => {
 
   useEffect(() => {
     // toLowerCase can maybe be removed. Just want to make sure its not TRUE in Prod
-    setIsAlpha(process.env.ALPHA?.toLowerCase() === "true");
+    setIsAlpha(!!process.env.ALPHA);
   }, []);
+
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
 
