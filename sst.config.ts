@@ -1,39 +1,56 @@
 import { type SSTConfig } from "sst";
-import { NextjsSite, Config } from "sst/constructs";
+import { NextjsSite } from "sst/constructs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
-const wwwDomainName = "www.dev1.codu.co";
-
 export default {
-  config(_input) {
+  config() {
     return {
       name: "codu",
       region: "eu-west-1",
     };
   },
   stacks(app) {
-    const { ALGOLIA_ADMIN_KEY, DATABASE_URL } = process.env;
-    if (!ALGOLIA_ADMIN_KEY || !DATABASE_URL) {
-      throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
-    }
-    app.addDefaultFunctionEnv({ ALGOLIA_ADMIN_KEY, DATABASE_URL });
     app.stack(function Site({ stack }) {
-      const ALGOLIA_ADMIN_KEY = new Config.Secret(stack, "ALGOLIA_ADMIN_KEY");
-      const DATABASE_URL = new Config.Secret(stack, "DATABASE_URL");
+      const domainName = app.stage === "dev" ? "dev1.codu.co" : "codu.co";
+      const bucketName = app.stage === "dev" ? "dev.codu" : "codu.uploads";
+      const wwwDomainName = `www.${domainName}`;
 
-      if (!process.env.ALGOLIA_ADMIN_KEY || !process.env.DATABASE_URL) {
-        throw new Error("ALGOLIA_ADMIN_KEY and DATABASE_URL are required");
+      const {
+        ALGOLIA_ADMIN_KEY,
+        DATABASE_URL,
+        NEXT_PUBLIC_FATHOM_SITE_ID,
+        NEXT_PUBLIC_SENTRY_DSN,
+      } = process.env;
+      if (
+        !ALGOLIA_ADMIN_KEY ||
+        !DATABASE_URL ||
+        !NEXT_PUBLIC_FATHOM_SITE_ID ||
+        !NEXT_PUBLIC_SENTRY_DSN
+      ) {
+        throw new Error(
+          `ALGOLIA_ADMIN_KEY, DATABASE_URL, NEXT_PUBLIC_FATHOM_SITE_ID and NEXT_PUBLIC_SENTRY_DSN are required`,
+        );
       }
       const site = new NextjsSite(stack, "site", {
-        edge: true,
-        bind: [ALGOLIA_ADMIN_KEY, DATABASE_URL],
+        // @TODO: Fix Prisma bundle issue
+        // edge: true,
+        experimental: {
+          streaming: true,
+        },
+        permissions: ["ses", "s3"],
+        customDomain: {
+          domainName: wwwDomainName,
+          domainAlias: domainName,
+          hostedZone: domainName,
+        },
         environment: {
-          ALGOLIA_ADMIN_KEY: process.env.ALGOLIA_ADMIN_KEY,
-          DATABASE_URL: process.env.DATABASE_URL,
-          // Bucket name still needed
+          S3_BUCKET_NAME: bucketName,
+          DATABASE_URL,
           BASE_URL: `https://${wwwDomainName}`,
           DOMAIN_NAME: wwwDomainName,
           NEXTAUTH_URL: `https://${wwwDomainName}`,
+          NEXT_PUBLIC_FATHOM_SITE_ID: NEXT_PUBLIC_FATHOM_SITE_ID,
+          NEXT_PUBLIC_SENTRY_DSN: NEXT_PUBLIC_SENTRY_DSN,
           SENTRY_ENVIRONMENT: ssm.StringParameter.valueFromLookup(
             this,
             "/env/sentry/environment",
