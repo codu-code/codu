@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 
-const withMDX = require("@next/mdx")();
-
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
@@ -19,7 +17,7 @@ const REMOTE_PATTERNS = [
   protocol: "https",
 }));
 
-const config = {
+module.exports = withBundleAnalyzer({
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -48,14 +46,14 @@ const config = {
       ],
     ],
   },
-};
+});
 
 // Injected content via Sentry wizard below
 
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
-  withMDX(withBundleAnalyzer(config)),
+  module.exports,
   {
     silent: true,
     org: "codu",
