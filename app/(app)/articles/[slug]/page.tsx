@@ -12,6 +12,7 @@ import { getServerAuthSession } from "@/server/auth";
 import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { type Metadata } from "next";
 import { getPost } from "@/server/lib/posts";
+import { getCamelCaseFromLower } from "@/utils/utils";
 
 type Props = { params: { slug: string } };
 
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPost({ slug });
 
   // @TODO revisit to give more defaults
+  // @TODO can we parse article and give recommended tags?
   const tags = post?.tags.map((tag) => tag.tag.title);
 
   if (!post) return {};
@@ -84,11 +86,12 @@ const ArticlePage = async ({ params }: Props) => {
           <section className="flex flex-wrap gap-3">
             {post.tags.map(({ tag }) => (
               <Link
+                // only reason this is toLowerCase is to make url look nicer. Not needed for functionality
                 href={`/articles?tag=${tag.title.toLowerCase()}`}
                 key={tag.title}
                 className="rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700"
               >
-                {tag.title}
+                {getCamelCaseFromLower(tag.title)}
               </Link>
             ))}
           </section>
