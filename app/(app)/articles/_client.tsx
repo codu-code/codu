@@ -12,19 +12,8 @@ import challenge from "@/public/images/announcements/challenge.png";
 import { api } from "@/server/trpc/react";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { useSession } from "next-auth/react";
-
-// Needs to be added to DB but testing with hardcoding
-const tagsToShow = [
-  "JavaScript",
-  "Web Development",
-  "Tutorial",
-  "Productivity",
-  "CSS",
-  "Terminal",
-  "Django",
-  "Python",
-  "Tips",
-];
+import { getCamelCaseFromLower } from "@/utils/utils";
+import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
 
 const ArticlesPage = () => {
   const searchParams = useSearchParams();
@@ -33,7 +22,7 @@ const ArticlesPage = () => {
   const filter = searchParams?.get("filter");
   const dirtyTag = searchParams?.get("tag");
 
-  const tag = typeof dirtyTag === "string" ? dirtyTag.toLowerCase() : null;
+  const tag = typeof dirtyTag === "string" ? dirtyTag : null;
   type Filter = "newest" | "oldest" | "top";
   const filters: Filter[] = ["newest", "oldest", "top"];
 
@@ -61,6 +50,10 @@ const ArticlesPage = () => {
       },
     );
 
+  const { status: tagsStatus, data: tagsData } = api.tag.get.useQuery({
+    take: 10,
+  });
+
   const { ref, inView } = useInView();
 
   useEffect(() => {
@@ -68,11 +61,6 @@ const ArticlesPage = () => {
       fetchNextPage();
     }
   }, [inView]);
-
-  // @TODO make a list of words like "JavaScript" that we can map the words to if they exist
-  const capitalize = (str: string) =>
-    str.replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
-
   return (
     <>
       <div className="mx-2">
@@ -81,7 +69,7 @@ const ArticlesPage = () => {
             {typeof tag === "string" ? (
               <div className="flex items-center justify-center">
                 <TagIcon className="mr-3 h-6 w-6 text-neutral-800 dark:text-neutral-200" />
-                {capitalize(tag)}
+                {getCamelCaseFromLower(tag)}
               </div>
             ) : (
               "Articles"
@@ -106,7 +94,7 @@ const ArticlesPage = () => {
             >
               {filters.map((filter) => (
                 <option key={filter} value={filter}>
-                  {capitalize(filter)}
+                  {getCamelCaseFromLower(filter)}
                 </option>
               ))}
             </select>
@@ -192,18 +180,21 @@ const ArticlesPage = () => {
               </div>
             </div>
             <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
-              Recommended topics
+              Popular topics
             </h3>
             <div className="flex flex-wrap gap-2">
-              {tagsToShow.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
-                >
-                  {tag}
-                </Link>
-              ))}
+              {tagsStatus === "loading" && <PopularTagsLoading />}
+              {tagsStatus === "success" &&
+                tagsData.data.map((tag) => (
+                  <Link
+                    key={tag.id}
+                    // only reason this is toLowerCase is to make url look nicer. Not needed for functionality
+                    href={`/articles?tag=${tag.title.toLowerCase()}`}
+                    className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
+                  >
+                    {getCamelCaseFromLower(tag.title)}
+                  </Link>
+                ))}
             </div>
             {session && (
               <div className="flex flex-wrap gap-2">
