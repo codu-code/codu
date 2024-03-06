@@ -1,5 +1,6 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { GetTagsSchema } from "../../../schema/tag";
+import { TRPCError } from "@trpc/server";
 
 export const tagRouter = createTRPCRouter({
   get: publicProcedure.input(GetTagsSchema).query(async ({ ctx, input }) => {
@@ -16,7 +17,10 @@ export const tagRouter = createTRPCRouter({
 
       return { data: response, count };
     } catch (error) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to fetch tags' });
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch tags",
+      });
     }
   }),
 });
