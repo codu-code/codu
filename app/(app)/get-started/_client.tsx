@@ -12,12 +12,6 @@ const GetStarted: NextPage = () => {
   const callbackUrl = searchParams?.get("callbackUrl");
 
   const [userEmail, setUserEmail] = useState<string>("");
-  const [isAlpha, setIsAlpha] = useState<boolean>();
-
-  useEffect(() => {
-    // toLowerCase can maybe be removed. Just want to make sure its not TRUE in Prod
-    setIsAlpha(!!process.env.ALPHA);
-  }, []);
 
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
@@ -49,7 +43,7 @@ const GetStarted: NextPage = () => {
             </Link>
           </p>
         </div>
-        {isAlpha && (
+        {!!process?.env.NEXT_PUBLIC_ALPHA && (
           <>
             <div>
               <input
