@@ -97,7 +97,9 @@ export class PipelineStack extends cdk.Stack {
       production: true,
     });
 
-    pipeline.addStage(dev);
+    pipeline.addStage(dev, {
+      pre: [new cdk.pipelines.ManualApprovalStep("Deploy to develop")],
+    });
     pipeline.addStage(prod, {
       pre: [new cdk.pipelines.ManualApprovalStep("Deploy to production")],
     });

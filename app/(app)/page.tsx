@@ -7,20 +7,10 @@ import TrendingPosts from "@/components/TrendingPosts/TrendingPosts";
 import TrendingLoading from "@/components/TrendingPosts/TrendingPostsLoading";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { getServerAuthSession } from "@/server/auth";
+import PopularTags from "@/components/PopularTags/PopularTags";
+import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
 
 const Home = async () => {
-  const tagsToShow = [
-    "JavaScript",
-    "Web Development",
-    "Tutorial",
-    "Productivity",
-    "CSS",
-    "Terminal",
-    "Django",
-    "Python",
-    "Tips",
-  ];
-
   const session = await getServerAuthSession();
 
   return (
@@ -83,18 +73,12 @@ const Home = async () => {
               </div>
             </div>
             <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
-              Recommended topics
+              Popular topics
             </h4>
             <div className="flex flex-wrap gap-2">
-              {tagsToShow.map((tag) => (
-                <Link
-                  key={tag}
-                  href={`/articles?tag=${tag.toLowerCase()}`}
-                  className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
-                >
-                  {tag}
-                </Link>
-              ))}
+              <Suspense fallback={<PopularTagsLoading />}>
+                <PopularTags />
+              </Suspense>
             </div>
             {session && (
               <div className="flex flex-wrap gap-2">

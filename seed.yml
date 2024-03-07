@@ -1,0 +1,3 @@
+before_compile:
+  - n 20.11.1
+

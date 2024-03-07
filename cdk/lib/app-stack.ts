@@ -67,7 +67,14 @@ export class AppStack extends cdk.Stack {
           DOMAIN_NAME: wwwDomainName,
           NEXTAUTH_URL: `https://${wwwDomainName}`,
           S3_BUCKET_NAME: bucket.bucketName,
-        }, // Plain text not for secrets
+        },
+        healthCheck: {
+          command: [
+            "CMD-SHELL",
+            `curl -f http://localhost:${this.appPort}/api/health || exit 1`,
+          ],
+        },
+        // Plain text not for secrets
         secrets: {
           SENTRY_ENVIRONMENT: ecs.Secret.fromSsmParameter(
             ssm.StringParameter.fromSecureStringParameterAttributes(
@@ -247,11 +254,11 @@ export class AppStack extends cdk.Stack {
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {
-      targetUtilizationPercent: 70,
+      targetUtilizationPercent: 90,
     });
 
     scaling.scaleOnMemoryUtilization("MemoryScaling", {
-      targetUtilizationPercent: 70,
+      targetUtilizationPercent: 90,
     });
 
     fargateService.service.connections.allowFromAnyIpv4(

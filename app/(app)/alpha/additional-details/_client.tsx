@@ -5,7 +5,11 @@ import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   type TypeSlideOneSchema,
+  type TypeSlideTwoSchema,
+  type TypeSlideThreeSchema,
   slideOneSchema,
+  slideTwoSchema,
+  slideThreeSchema,
 } from "@/schema/additionalUserDetails";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFormContext } from "react-hook-form";
@@ -18,6 +22,11 @@ import {
   levelOfStudyOptions,
   monthsOptions,
 } from "@/app/(app)/alpha/additional-details/selectOptions";
+import {
+  handleFormSlideOneSubmit,
+  handleFormSlideThreeSubmit,
+  handleFormSlideTwoSubmit,
+} from "./_actions";
 
 type UserDetails = {
   username: string;
@@ -41,7 +50,29 @@ export default function AdditionalSignUpDetails({
   const session = useSession();
   const searchParams = useSearchParams();
 
-  const slide = Number(searchParams.get("slide")) || 1;
+  const {
+    surname,
+    firstName,
+    username,
+    location,
+    dateOfBirth,
+    gender,
+    professionalOrStudent,
+  } = details;
+
+  let slide: number;
+  if (searchParams.get("slide")) {
+    slide = Number(searchParams.get("slide"));
+  } else if (!surname || !firstName || !username || !location) {
+    slide = 1;
+  } else if (!dateOfBirth || !gender) {
+    slide = 2;
+  } else if (!professionalOrStudent) {
+    slide = 3;
+  } else {
+    return redirect("/settings");
+  }
+
   if (!session) {
     return redirect("/get-started");
   }
@@ -50,8 +81,8 @@ export default function AdditionalSignUpDetails({
       <SignupProgressBar currentSlide={slide} />
 
       {slide === 1 && <SlideOne details={details} />}
-      {/* {slide === 2 && <SlideTwo details={details} />} */}
-      {/* {slide === 3 && <SlideThree details={details} />} */}
+      {slide === 2 && <SlideTwo details={details} />}
+      {slide === 3 && <SlideThree details={details} />}
     </div>
   );
 }
@@ -72,8 +103,7 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      // const isSuccess = await handleFormSlideOneSubmit(data); TODO add server action
-      const isSuccess = true;
+      const isSuccess = await handleFormSlideOneSubmit(data);
       if (isSuccess) {
         toast.success("Saved");
         router.push(`?slide=${2}`, { scroll: false });
@@ -94,7 +124,7 @@ function SlideOne({ details }: { details: UserDetails }) {
           </h2>
           <p>This information will be displayed on your profile</p>
         </div>
-        <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
           <div className="space-y-6">
             <div>
               <label
@@ -192,21 +222,27 @@ function SlideOne({ details }: { details: UserDetails }) {
   );
 }
 
-function SlideTwo() {
+function SlideTwo({ details }: { details: UserDetails }) {
   const router = useRouter();
+  const { dateOfBirth, gender } = details;
 
   const {
-    getValues,
-    setValue,
     register,
-    trigger,
-    formState: { errors },
-  } = useFormContext();
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideTwoSchema>({
+    resolver: zodResolver(slideTwoSchema),
+    defaultValues: { dateOfBirth, gender },
+  });
 
-  const dob = getValues("dateOfBirth");
-  const [year, setYear] = useState<number | undefined>(dob?.getFullYear());
-  const [month, setMonth] = useState<number | undefined>(dob?.getMonth());
-  const [day, setDay] = useState<number | undefined>(dob?.getDate());
+  const [year, setYear] = useState<number | undefined>(
+    dateOfBirth?.getFullYear(),
+  );
+  const [month, setMonth] = useState<number | undefined>(
+    dateOfBirth?.getMonth(),
+  );
+  const [day, setDay] = useState<number | undefined>(dateOfBirth?.getDate());
 
   const [listOfDaysInSelectedMonth, setListOfDaysInSelectedMonth] = useState([
     0,
@@ -246,190 +282,212 @@ function SlideTwo() {
     (_, index) => startYearAgeDropdown + index,
   ).reverse();
 
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: TypeSlideTwoSchema) => {
+    try {
+      const isSuccess = await handleFormSlideTwoSubmit(data);
 
-    const isError = await trigger(["dateOfBirth", "gender"], {
-      shouldFocus: true,
-    });
-
-    if (isError && dob !== undefined) {
-      router.push(`?slide=${3}`, { scroll: false });
+      if (isSuccess) {
+        toast.success("Saved");
+        router.push(`?slide=${3}`, { scroll: false });
+      } else {
+        toast.error("Error, saving was unsuccessful.");
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
     }
   };
 
-  const handleClickPreviousSlide = () => {
-    router.push(`?slide=${1}`, { scroll: false });
-  };
-
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
-          Demographic
-        </h2>
-        <p>This information is private, but helps us improve</p>
-      </div>
-
-      <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm ">
-        <div className="h-[21.75rem] space-y-6">
-          <div>
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Gender
-            </label>
-            <select
-              id="gender"
-              {...register("gender")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-            >
-              <option value="" disabled>
-                Gender
-              </option>
-              {genderOptions.map((gender: string) => (
-                <option key={gender}>{gender}</option>
-              ))}
-            </select>
-
-            {errors.gender && <p>{`${errors.gender.message}`}</p>}
-          </div>
-
-          <fieldset>
-            <legend>Date of Birth</legend>
-
-            <div className="flex justify-between gap-1 sm:gap-8">
-              <div className="flex-grow">
-                <label htmlFor="year" className="hidden">
-                  Year
-                </label>
-                <select
-                  id="year"
-                  name="year"
-                  value={year ? year : ""}
-                  required
-                  onChange={(e) => setYear(Number(e.target.value))}
-                  className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                >
-                  <option value="" disabled>
-                    Year
-                  </option>
-                  {years.map((year) => (
-                    <option key={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-grow">
-                <label htmlFor="month" className="hidden">
-                  Month
-                </label>
-                <select
-                  id="month"
-                  name="month"
-                  value={month !== undefined ? monthsOptions[month] : ""}
-                  required
-                  className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  onChange={(e) =>
-                    setMonth(monthsOptions.indexOf(e.target.value))
-                  }
-                >
-                  <option value="" disabled>
-                    Month
-                  </option>
-                  {monthsOptions.map((month) => (
-                    <option key={month}>{month}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-grow">
-                <label htmlFor="day" className="hidden">
-                  day
-                </label>
-                <select
-                  id="day"
-                  name="day"
-                  value={day ? day : ""}
-                  className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  disabled={!year || month === undefined}
-                  required
-                  onChange={(e) => setDay(Number(e.target.value))}
-                >
-                  <option value="" disabled>
-                    Day
-                  </option>
-
-                  {listOfDaysInSelectedMonth.map((day) => (
-                    <option key={day}>{day}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
-          </fieldset>
+    <form onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
+            Demographic
+          </h2>
+          <p>This information is private, but helps us improve</p>
         </div>
 
-        <SlideButtons
-          handleClickNextSlide={handleClickNextSlide}
-          handleClickPreviousSlide={handleClickPreviousSlide}
-        />
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
+          <div className="h-[21.75rem] space-y-6">
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Gender
+              </label>
+              <select
+                id="gender"
+                {...register("gender")}
+                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+              >
+                <option value="" disabled>
+                  Gender
+                </option>
+                {genderOptions.map((gender: string) => (
+                  <option key={gender}>{gender}</option>
+                ))}
+              </select>
+
+              {errors.gender && <p>{`${errors.gender.message}`}</p>}
+            </div>
+
+            <fieldset>
+              <legend>Date of Birth</legend>
+
+              <div className="flex justify-between gap-1 sm:gap-8">
+                <div className="flex-grow">
+                  <label htmlFor="year" className="hidden">
+                    Year
+                  </label>
+                  <select
+                    id="year"
+                    name="year"
+                    value={year ? year : ""}
+                    required
+                    onChange={(e) => setYear(Number(e.target.value))}
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                  >
+                    <option value="" disabled>
+                      Year
+                    </option>
+                    {years.map((year) => (
+                      <option key={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-grow">
+                  <label htmlFor="month" className="hidden">
+                    Month
+                  </label>
+                  <select
+                    id="month"
+                    name="month"
+                    value={month !== undefined ? monthsOptions[month] : ""}
+                    required
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    onChange={(e) =>
+                      setMonth(monthsOptions.indexOf(e.target.value))
+                    }
+                  >
+                    <option value="" disabled>
+                      Month
+                    </option>
+                    {monthsOptions.map((month) => (
+                      <option key={month}>{month}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-grow">
+                  <label htmlFor="day" className="hidden">
+                    day
+                  </label>
+                  <select
+                    id="day"
+                    name="day"
+                    value={day ? day : ""}
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    disabled={!year || month === undefined}
+                    required
+                    onChange={(e) => setDay(Number(e.target.value))}
+                  >
+                    <option value="" disabled>
+                      Day
+                    </option>
+
+                    {listOfDaysInSelectedMonth.map((day) => (
+                      <option key={day}>{day}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
+            </fieldset>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              type="button"
+              onClick={() => router.push(`?slide=${1}`, { scroll: false })}
+              className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+            >
+              Go back
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
 
-function SlideThree() {
+function SlideThree({ details }: { details: UserDetails }) {
   const router = useRouter();
 
-  const handleClickPreviousSlide = () => {
-    router.push(`?slide=${2}`, { scroll: false });
-  };
+  const { professionalOrStudent, workplace, jobTitle, course, levelOfStudy } =
+    details;
 
   const {
-    getValues,
     register,
-    watch,
+    handleSubmit,
     trigger,
-    getFieldState,
-    formState: { errors },
-  } = useFormContext();
+    watch,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<TypeSlideThreeSchema>({
+    resolver: zodResolver(slideThreeSchema),
+    defaultValues: {
+      professionalOrStudent,
+      workplace,
+      jobTitle,
+      course,
+      levelOfStudy,
+    },
+  });
 
   watch("professionalOrStudent");
 
-  const handleClickNextSlide = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: TypeSlideThreeSchema) => {
     let isError = await trigger(["professionalOrStudent"]);
+    const professionalOrStudent = getValues("professionalOrStudent");
+
+    if (isError && professionalOrStudent === "Working professional") {
+      isError = await trigger(["workplace", "jobTitle"]);
+    }
+
+    if (isError && professionalOrStudent === "Current student") {
+      isError = await trigger(["levelOfStudy", "course"]);
+    }
 
     if (isError) {
-      const professionalOrStudent = getValues("professionalOrStudent");
-
-      if (professionalOrStudent === "Working professional") {
-        isError = await trigger(["workplace", "jobTitle"]);
-
-        if (isError) {
-          router.push(`?slide=${4}`, { scroll: false });
+      try {
+        const isSuccess = await handleFormSlideThreeSubmit(data);
+        if (isSuccess) {
+          toast.success("Saved");
+          router.push(`/`, { scroll: false });
+        } else {
+          toast.error("Error, saving was unsuccessful.");
         }
-      } else if (professionalOrStudent === "Current student") {
-        isError = await trigger(["levelOfStudy", "course"]);
-
-        if (isError) {
-          router.push(`?slide=${4}`, { scroll: false });
-        }
-      } else if (professionalOrStudent === "None of the above") {
-        router.push(`?slide=${4}`, { scroll: false });
+      } catch (error) {
+        toast.error("An unexpected error occurred.");
       }
     }
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="bg-red-400... h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
+    >
+      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
           Work and education
         </h2>
@@ -439,8 +497,8 @@ function SlideThree() {
         </p>
       </div>
 
-      <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="bg-yellow-400... h-[21.75rem] space-y-6">
+      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+        <div className="h-[21.75rem] space-y-6">
           <div>
             <label
               htmlFor="professional-or-student"
@@ -558,122 +616,24 @@ function SlideThree() {
           )}
         </div>
 
-        <SlideButtons
-          handleClickPreviousSlide={handleClickPreviousSlide}
-          handleClickNextSlide={handleClickNextSlide}
-        />
-      </div>
-    </div>
-  );
-}
-
-function SlideFour() {
-  const {
-    getValues,
-    formState: { errors },
-  } = useFormContext();
-
-  const router = useRouter();
-
-  const firstName = getValues("firstName");
-  const surname = getValues("surname");
-  const username = getValues("username");
-  const location = getValues("location");
-  const gender = getValues("gender");
-  const dateOfBirth = getValues("dateOfBirth");
-  const professionalOrStudent = getValues("professionalOrStudent");
-  const workplace = getValues("workplace");
-  const jobTitle = getValues("jobTitle");
-  const levelOfStudy = getValues("levelOfStudy");
-  const course = getValues("course");
-
-  const handleClickPreviousSlide = () => {
-    router.push(`?slide=${3}`, { scroll: false });
-  };
-
-  return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-white">
-          Review
-        </h2>
-        <p>Please review the details before submitting.</p>
-      </div>
-
-      <div className="mt-10... sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="bg-yellow-400... flex h-[21.75rem] flex-col items-start space-y-3 ">
-          <div className="flex min-w-[20rem]">
-            <p className="bg-red-400... w-1/2">First name: </p>{" "}
-            <p className="w-1/2"> {firstName}</p>
-          </div>
-          <div className="flex min-w-[20rem]">
-            <p className="bg-red-400... w-1/2">Surname: </p>{" "}
-            <p className="w-1/2"> {surname}</p>
-          </div>
-          <div className="flex min-w-[20rem]">
-            <p className="w-1/2">Username: </p>{" "}
-            <p className="w-1/2"> {username}</p>
-          </div>
-
-          <div className="flex min-w-[20rem]">
-            <p className="w-1/2">Location: </p>{" "}
-            <p className="w-1/2"> {location}</p>
-          </div>
-
-          <div className="flex min-w-[20rem]">
-            <p className="w-1/2">Gender: </p> <p className="w-1/2"> {gender}</p>
-          </div>
-
-          <div className="flex min-w-[20rem]">
-            <p className="w-1/2">Date of birth: </p>{" "}
-            <p className="w-1/2">
-              {" "}
-              {dateOfBirth.getDate()}
-              {" / "}
-              {dateOfBirth.getMonth() + 1} {" / "}
-              {dateOfBirth.getFullYear()}
-            </p>
-          </div>
-
-          <div className="flex min-w-[20rem]">
-            <p className="w-1/2">Occupation Status: </p>{" "}
-            <p className="w-1/2"> {professionalOrStudent}</p>
-          </div>
-
-          {workplace && (
-            <div className="flex min-w-[20rem]">
-              <p className="w-1/2">Workplace: </p>{" "}
-              <p className="w-1/2"> {workplace}</p>
-            </div>
-          )}
-
-          {jobTitle && (
-            <div className="flex min-w-[20rem]">
-              <p className="w-1/2">Job title: </p>{" "}
-              <p className="w-1/2"> {jobTitle}</p>
-            </div>
-          )}
-
-          {levelOfStudy && (
-            <div className="flex min-w-[20rem]">
-              <p className="w-1/2">Level of study: </p>{" "}
-              <p className="w-1/2"> {levelOfStudy}</p>
-            </div>
-          )}
-
-          {course && (
-            <div className="flex min-w-[20rem]">
-              <p className="w-1/2">Course: </p>{" "}
-              <p className="w-1/2"> {course}</p>
-            </div>
-          )}
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={() => router.push(`?slide=${2}`, { scroll: false })}
+            className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+          >
+            Go back
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Submit
+          </button>
         </div>
-        <SlideButtons
-          handleClickPreviousSlide={handleClickPreviousSlide}
-          isSubmitButton={true}
-        />
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -689,57 +649,6 @@ function SignupProgressBar({ currentSlide }: { currentSlide: number }) {
         ></div>
       </div>
       <div className="pr-4">{progressPercentage}%</div>
-    </div>
-  );
-}
-
-type SlideButtonsProps = {
-  handleClickNextSlide?: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => void;
-  handleClickPreviousSlide?: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => void;
-  isSubmitButton?: boolean;
-};
-
-function SlideButtons(props: SlideButtonsProps) {
-  const { handleClickNextSlide, handleClickPreviousSlide, isSubmitButton } =
-    props;
-
-  const {
-    formState: { isSubmitting },
-  } = useFormContext();
-
-  return (
-    <div className="mt-6 flex justify-end">
-      {handleClickPreviousSlide && (
-        <button
-          onClick={(e) => handleClickPreviousSlide(e)}
-          className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-        >
-          Go back
-        </button>
-      )}
-
-      {handleClickNextSlide && (
-        <button
-          onClick={(e) => handleClickNextSlide(e)}
-          className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          Next
-        </button>
-      )}
-
-      {isSubmitButton && (
-        <button
-          disabled={isSubmitting}
-          type="submit"
-          className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white "
-        >
-          Submit
-        </button>
-      )}
     </div>
   );
 }
