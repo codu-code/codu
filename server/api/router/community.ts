@@ -17,7 +17,7 @@ export const communityRouter = createTRPCRouter({
       const filter = input.filter ?? undefined;
       const { cursor } = input;
 
-      const response = await ctx.db.community.findMany({
+      const response = await ctx.prisma.community.findMany({
         take: limit + 1,
         where: {
           name: {
@@ -87,7 +87,7 @@ export const communityRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       if (ctx.session.user.id) {
         if (input.id !== null && input.id !== undefined) {
-          const membership = await ctx.db.membership.findFirst({
+          const membership = await ctx.prisma.membership.findFirst({
             where: {
               communityId: input.id,
               userId: ctx.session.user.id,
@@ -104,7 +104,7 @@ export const communityRouter = createTRPCRouter({
             });
           }
 
-          const community = await ctx.db.community.update({
+          const community = await ctx.prisma.community.update({
             where: {
               id: input.id,
             },
@@ -124,7 +124,7 @@ export const communityRouter = createTRPCRouter({
 
           return community;
         } else {
-          const community = await ctx.db.community.create({
+          const community = await ctx.prisma.community.create({
             data: {
               id: nanoid(8),
               slug: `${input.name
@@ -139,7 +139,7 @@ export const communityRouter = createTRPCRouter({
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
             },
           });
-          const membership = await ctx.db.membership.create({
+          const membership = await ctx.prisma.membership.create({
             data: {
               id: nanoid(8),
               communityId: community.id,
@@ -157,7 +157,7 @@ export const communityRouter = createTRPCRouter({
   createMembership: protectedProcedure
     .input(deleteCommunitySchema)
     .mutation(async ({ input, ctx }) => {
-      await ctx.db.membership.create({
+      await ctx.prisma.membership.create({
         data: {
           id: nanoid(8),
           communityId: input.id,
@@ -169,14 +169,14 @@ export const communityRouter = createTRPCRouter({
   deleteMembership: protectedProcedure
     .input(deleteCommunitySchema)
     .mutation(async ({ input, ctx }) => {
-      const membership = await ctx.db.membership.findFirst({
+      const membership = await ctx.prisma.membership.findFirst({
         where: {
           communityId: input.id,
           userId: ctx.session.user.id,
         },
       });
       if (membership) {
-        await ctx.db.membership.delete({
+        await ctx.prisma.membership.delete({
           where: {
             id: membership.id,
           },

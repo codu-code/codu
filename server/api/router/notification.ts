@@ -11,7 +11,7 @@ export const notificationRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentNotification = await ctx.db.notification.findUnique({
+      const currentNotification = await ctx.prisma.notification.findUnique({
         where: { id },
       });
 
@@ -21,7 +21,7 @@ export const notificationRouter = createTRPCRouter({
         });
       }
 
-      const notification = await ctx.db.notification.delete({
+      const notification = await ctx.prisma.notification.delete({
         where: {
           id,
         },
@@ -30,7 +30,7 @@ export const notificationRouter = createTRPCRouter({
       return notification.id;
     }),
   deleteAll: protectedProcedure.mutation(async ({ ctx }) => {
-    const notification = await ctx.db.notification.deleteMany({
+    const notification = await ctx.prisma.notification.deleteMany({
       where: {
         userId: ctx.session.user.id,
       },
@@ -45,7 +45,7 @@ export const notificationRouter = createTRPCRouter({
 
       const limit = input?.limit ?? 50;
       const { cursor } = input;
-      const response = await ctx.db.notification.findMany({
+      const response = await ctx.prisma.notification.findMany({
         take: limit + 1,
         where: {
           userId,
@@ -87,7 +87,7 @@ export const notificationRouter = createTRPCRouter({
   getCount: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx?.session?.user?.id;
 
-    const count = await ctx.db.notification.count({
+    const count = await ctx.prisma.notification.count({
       where: {
         userId,
       },
