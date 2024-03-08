@@ -29,6 +29,8 @@ export function getUrlFromString(str: string) {
 const commonCamelCaseCSWords = new Map([
   ["javascript", "JavaScript"],
   ["css", "CSS"],
+  ["js", "Js"],
+  ["typescript", "TypeScript"],
 ]);
 
 // @TODO make a list of words like "JavaScript" that we can map the words to if they exist
