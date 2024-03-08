@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+const withMDX = require("@next/mdx")();
+
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
 });
@@ -17,7 +19,7 @@ const REMOTE_PATTERNS = [
   protocol: "https",
 }));
 
-module.exports = withBundleAnalyzer({
+const config = {
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
@@ -36,24 +38,14 @@ module.exports = withBundleAnalyzer({
     // Temporary to check pipelines due to weird error I can only get on CodePipeline
     ignoreBuildErrors: true,
   },
-  experimental: {
-    swcPlugins: [
-      [
-        "next-superjson-plugin",
-        {
-          excluded: [],
-        },
-      ],
-    ],
-  },
-});
+};
 
 // Injected content via Sentry wizard below
 
 const { withSentryConfig } = require("@sentry/nextjs");
 
 module.exports = withSentryConfig(
-  module.exports,
+  withMDX(withBundleAnalyzer(config)),
   {
     silent: true,
     org: "codu",
