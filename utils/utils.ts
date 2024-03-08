@@ -29,7 +29,7 @@ export function getUrlFromString(str: string) {
 const commonCamelCaseCSWords = new Map([
   ["javascript", "JavaScript"],
   ["css", "CSS"],
-  ["js", "Js"],
+  ["js", "JS"],
   ["typescript", "TypeScript"],
 ]);
 
