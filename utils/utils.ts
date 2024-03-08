@@ -24,3 +24,22 @@ export function getUrlFromString(str: string) {
     return null;
   }
 }
+
+// @TODO move this somewhere nicer
+const commonCamelCaseCSWords = new Map([
+  ["javascript", "JavaScript"],
+  ["css", "CSS"],
+  ["js", "JS"],
+  ["typescript", "TypeScript"],
+]);
+
+// @TODO make a list of words like "JavaScript" that we can map the words to if they exist
+export const getCamelCaseFromLower = (str: string) => {
+  let formatedString = commonCamelCaseCSWords.get(str.toLowerCase());
+  if (!formatedString) {
+    formatedString = str
+      .toLowerCase()
+      .replace(/(?:^|\s|["'([{])+\S/g, (match) => match.toUpperCase());
+  }
+  return formatedString;
+};

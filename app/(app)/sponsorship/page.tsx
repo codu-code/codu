@@ -14,7 +14,7 @@ const Sponsorship = () => {
               <h2 className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
                 Support us
               </h2>
-              <h3 className="mt-2 border-b-2 pb-8 text-3xl font-extrabold leading-8 tracking-tight text-black sm:text-6xl">
+              <h3 className="mt-2 border-b-2 pb-8 text-3xl font-extrabold leading-8 tracking-tight text-black dark:text-white sm:text-6xl">
                 Sponsor Codú
               </h3>
               <p className="mt-8 text-lg text-neutral-500">
@@ -29,7 +29,7 @@ const Sponsorship = () => {
               </p>
               <p className="mt-3 text-lg text-neutral-500"></p>
               <div className="relative">
-                <p className="mt-8 text-lg font-semibold text-black">
+                <p className="mt-8 text-lg font-semibold text-black dark:text-white">
                   For more info contact us:
                 </p>
                 <a
@@ -42,7 +42,7 @@ const Sponsorship = () => {
             </div>
           </div>
         </div>
-        <div className="-z-10 bg-white lg:absolute lg:inset-0">
+        <div className="-z-10 bg-white dark:bg-black lg:absolute lg:inset-0">
           <div className="bg-black lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
             <img
               className="h-56 w-full object-cover lg:absolute lg:h-full"
