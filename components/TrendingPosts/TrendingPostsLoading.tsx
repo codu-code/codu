@@ -1,5 +1,3 @@
-"use server";
-
 import { Children } from "react";
 import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
 
