@@ -47,7 +47,7 @@ export const profileRouter = createTRPCRouter({
         }
       }
 
-      const profile = await ctx.db.user.update({
+      const profile = await ctx.prisma.user.update({
         where: {
           id: ctx.session.user.id,
         },
@@ -60,7 +60,7 @@ export const profileRouter = createTRPCRouter({
   updateProfilePhotoUrl: protectedProcedure
     .input(updateProfilePhotoUrlSchema)
     .mutation(async ({ input, ctx }) => {
-      const profile = await ctx.db.user.update({
+      const profile = await ctx.prisma.user.update({
         where: {
           id: ctx.session.user.id,
         },
@@ -103,7 +103,7 @@ export const profileRouter = createTRPCRouter({
     }),
   get: publicProcedure.input(getProfileSchema).query(({ ctx, input }) => {
     const { username } = input;
-    return ctx.db.user.findUnique({
+    return ctx.prisma.user.findUnique({
       where: {
         username,
       },
