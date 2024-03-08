@@ -119,7 +119,7 @@ function SlideOne({ details }: { details: UserDetails }) {
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
             Profile information
           </h2>
           <p>This information will be displayed on your profile</p>
@@ -129,7 +129,7 @@ function SlideOne({ details }: { details: UserDetails }) {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
               >
                 First Name
               </label>
@@ -139,7 +139,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                   {...register("firstName")}
                   placeholder="What should we call you?"
                   type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
                 />
                 {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
               </div>
@@ -148,7 +148,7 @@ function SlideOne({ details }: { details: UserDetails }) {
             <div>
               <label
                 htmlFor="surname"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
               >
                 Surname
               </label>
@@ -158,7 +158,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                   {...register("surname")}
                   type="text"
                   placeholder="And your surname?"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
                 />
                 {errors.surname && <p>{`${errors.surname.message}`}</p>}
               </div>
@@ -167,7 +167,7 @@ function SlideOne({ details }: { details: UserDetails }) {
             <div>
               <label
                 htmlFor="username"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
               >
                 Username
               </label>
@@ -180,7 +180,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                   {...register("username")}
                   placeholder="thehacker"
                   type="text"
-                  className="ring-white/10... relative top-[-2px] block rounded-r-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
+                  className="ring-white/10... relative top-[-2px] block rounded-r-md border-0 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
                 />
               </div>
               {errors.username && <p>{`${errors.username.message}`}</p>}
@@ -188,14 +188,14 @@ function SlideOne({ details }: { details: UserDetails }) {
             <div>
               <label
                 htmlFor="location"
-                className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
               >
                 Location
               </label>
               <select
                 id="location"
                 {...register("location")}
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
               >
                 <option value="" disabled>
                   Select
@@ -211,7 +211,7 @@ function SlideOne({ details }: { details: UserDetails }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-gray-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
+              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
             >
               Next
             </button>
@@ -301,7 +301,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
             Demographic
           </h2>
           <p>This information is private, but helps us improve</p>
@@ -312,14 +312,14 @@ function SlideTwo({ details }: { details: UserDetails }) {
             <div>
               <label
                 htmlFor="gender"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-neutral-900"
               >
                 Gender
               </label>
               <select
                 id="gender"
                 {...register("gender")}
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset  ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset  ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
               >
                 <option value="" disabled>
                   Gender
@@ -346,7 +346,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
                     value={year ? year : ""}
                     required
                     onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
                   >
                     <option value="" disabled>
                       Year
@@ -366,7 +366,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
                     name="month"
                     value={month !== undefined ? monthsOptions[month] : ""}
                     required
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
                     onChange={(e) =>
                       setMonth(monthsOptions.indexOf(e.target.value))
                     }
@@ -388,7 +388,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
                     id="day"
                     name="day"
                     value={day ? day : ""}
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
                     disabled={!year || undefined}
                     required
                     onChange={(e) => setDay(Number(e.target.value))}
@@ -418,7 +418,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-gray-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
+              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
             >
               Next
             </button>
@@ -488,7 +488,7 @@ function SlideThree({ details }: { details: UserDetails }) {
       className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
     >
       <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-white">
+        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
           Work and education
         </h2>
         <p>
@@ -502,14 +502,14 @@ function SlideThree({ details }: { details: UserDetails }) {
           <div>
             <label
               htmlFor="professional-or-student"
-              className="block text-sm font-medium leading-6 text-gray-900"
+              className="block text-sm font-medium leading-6 text-neutral-900"
             >
               Which best describes you?
             </label>
             <select
               id="professional-or-student"
               {...register("professionalOrStudent")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-black  focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black  focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
             >
               <option value="" disabled>
                 Select one
@@ -530,7 +530,7 @@ function SlideThree({ details }: { details: UserDetails }) {
               <div>
                 <label
                   htmlFor="workplace"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
                 >
                   Where are you working?
                 </label>
@@ -540,7 +540,7 @@ function SlideThree({ details }: { details: UserDetails }) {
                     {...register("workplace")}
                     type="text"
                     placeholder="Codú corp"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
+                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
                   />
                 </div>
                 {errors.workplace && <p>{`${errors.workplace.message}`}</p>}
@@ -549,7 +549,7 @@ function SlideThree({ details }: { details: UserDetails }) {
               <div>
                 <label
                   htmlFor="job-title"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
                 >
                   What is your job title?
                 </label>
@@ -559,7 +559,7 @@ function SlideThree({ details }: { details: UserDetails }) {
                     {...register("jobTitle")}
                     type="text"
                     placeholder="Chief transponster"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
+                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
                   />
                 </div>
                 {errors.jobTitle && <p>{`${errors.jobTitle.message}`}</p>}
@@ -572,14 +572,14 @@ function SlideThree({ details }: { details: UserDetails }) {
               <div>
                 <label
                   htmlFor="level-of-study"
-                  className="block text-sm font-medium leading-6 text-gray-900"
+                  className="block text-sm font-medium leading-6 text-neutral-900"
                 >
                   What is your current level of study?
                 </label>
                 <select
                   id="level-of-study"
                   {...register("levelOfStudy")}
-                  className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+                  className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
                 >
                   <option value="" disabled>
                     Select level of study
@@ -597,7 +597,7 @@ function SlideThree({ details }: { details: UserDetails }) {
               <div>
                 <label
                   htmlFor="course"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
+                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
                 >
                   What are you studying?
                 </label>
@@ -607,7 +607,7 @@ function SlideThree({ details }: { details: UserDetails }) {
                     {...register("course")}
                     type="text"
                     placeholder="Course name"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
+                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
                   />
                 </div>
                 {errors.course && <p>{`${errors.course.message}`}</p>}
@@ -627,7 +627,7 @@ function SlideThree({ details }: { details: UserDetails }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6  text-gray-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
+            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6  text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
           >
             Submit
           </button>
