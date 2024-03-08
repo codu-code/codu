@@ -10,7 +10,7 @@ export const adminRouter = createTRPCRouter({
       const { userId, note } = input;
       const currentUserId = ctx.session.user.id;
 
-      const user = await ctx.db.user.findFirstOrThrow({
+      const user = await ctx.prisma.user.findFirstOrThrow({
         where: {
           id: userId,
         },
@@ -22,14 +22,14 @@ export const adminRouter = createTRPCRouter({
         });
       }
 
-      await ctx.db.bannedUsers.create({
+      await ctx.prisma.bannedUsers.create({
         data: {
           userId,
           note,
           bannedById: currentUserId,
         },
       });
-      await ctx.db.session.deleteMany({
+      await ctx.prisma.session.deleteMany({
         where: {
           userId,
         },
@@ -42,7 +42,7 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { userId } = input;
 
-      await ctx.db.bannedUsers.deleteMany({
+      await ctx.prisma.bannedUsers.deleteMany({
         where: {
           userId,
         },

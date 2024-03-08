@@ -5,8 +5,8 @@ import { TRPCError } from "@trpc/server";
 export const tagRouter = createTRPCRouter({
   get: publicProcedure.input(GetTagsSchema).query(async ({ ctx, input }) => {
     try {
-      const count = await ctx.db.tag.count({});
-      const response = await ctx.db.tag.findMany({
+      const count = await ctx.prisma.tag.count({});
+      const response = await ctx.prisma.tag.findMany({
         orderBy: {
           PostTag: {
             _count: "desc",
