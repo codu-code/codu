@@ -1,7 +1,7 @@
-import { type NextAuthOptions, getServerSession, Theme } from "next-auth";
+import { type NextAuthOptions, getServerSession } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import EmailProvider, {
-  SendVerificationRequestParams,
+  type SendVerificationRequestParams,
 } from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
@@ -13,7 +13,7 @@ import { manageNewsletterSubscription } from "./lib/newsletter";
 import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
 
 const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
-  const { identifier, url, provider } = params;
+  const { identifier, url } = params;
 
   try {
     await nodemailerSesTransporter.sendMail({
@@ -25,6 +25,7 @@ const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
       html: createPasswordLessEmailTemplate(url),
     });
   } catch (error) {
+    Sentry.captureException(error);
     throw new Error(`Sign in email could not be sent`);
   }
 };
