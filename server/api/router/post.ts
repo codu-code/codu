@@ -4,7 +4,6 @@ import { readingTime } from "../../../utils/readingTime";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   PublishPostSchema,
-  GetSinglePostSchema,
   SavePostSchema,
   CreatePostSchema,
   DeletePostSchema,
@@ -15,6 +14,7 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
+import { post } from "@/server/db/schema";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -22,23 +22,26 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { body } = input;
       const id = nanoid(8);
-      const post = await ctx.db.post.create({
-        data: {
+      const [newPost] = await ctx.db
+        .insert(post)
+        .values({
           ...input,
           id,
           readTimeMins: readingTime(body),
           slug: id,
           userId: ctx.session.user.id,
-        },
-      });
-      return post;
+          updatedAt: new Date(),
+        })
+        .returning();
+
+      return newPost;
     }),
   update: protectedProcedure
     .input(SavePostSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
 
-      const currentPost = await ctx.db.post.findUnique({
+      const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
       });
 
@@ -50,7 +53,7 @@ export const postRouter = createTRPCRouter({
 
       const tagResponse = await Promise.all(
         tags.map((tag) =>
-          ctx.db.tag.upsert({
+          ctx.prisma.tag.upsert({
             where: {
               title: tag,
             },
@@ -60,7 +63,7 @@ export const postRouter = createTRPCRouter({
         ),
       );
 
-      await ctx.db.postTag.deleteMany({
+      await ctx.prisma.postTag.deleteMany({
         where: {
           postId: id,
         },
@@ -68,7 +71,7 @@ export const postRouter = createTRPCRouter({
 
       await Promise.all(
         tagResponse.map((tag) =>
-          ctx.db.postTag.create({
+          ctx.prisma.postTag.create({
             data: {
               tagId: tag.id,
               postId: id,
@@ -86,7 +89,7 @@ export const postRouter = createTRPCRouter({
         return excerpt;
       };
 
-      const post = await ctx.db.post.update({
+      const post = await ctx.prisma.post.update({
         where: {
           id,
         },
@@ -116,7 +119,7 @@ export const postRouter = createTRPCRouter({
         return new Date().toISOString();
       };
 
-      const currentPost = await ctx.db.post.findUnique({
+      const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
       });
 
@@ -133,7 +136,7 @@ export const postRouter = createTRPCRouter({
           ? excerpt
           : removeMarkdown(currentPost.body, {}).substring(0, 156);
 
-      const post = await ctx.db.post.update({
+      const post = await ctx.prisma.post.update({
         where: {
           id,
         },
@@ -152,7 +155,7 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentPost = await ctx.db.post.findUnique({
+      const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
       });
 
@@ -164,7 +167,7 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      const post = await ctx.db.post.delete({
+      const post = await ctx.prisma.post.delete({
         where: {
           id,
         },
@@ -178,7 +181,7 @@ export const postRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
 
       if (setLiked) {
-        const res = await ctx.db.like.create({
+        const res = await ctx.prisma.like.create({
           data: {
             postId,
             userId,
@@ -186,7 +189,7 @@ export const postRouter = createTRPCRouter({
         });
         return res;
       }
-      const res = await ctx.db.like.deleteMany({
+      const res = await ctx.prisma.like.deleteMany({
         where: {
           AND: [{ postId }, { userId: ctx.session?.user?.id }],
         },
@@ -199,7 +202,7 @@ export const postRouter = createTRPCRouter({
       const { postId, setBookmarked } = input;
 
       if (setBookmarked) {
-        const res = await ctx.db.bookmark.create({
+        const res = await ctx.prisma.bookmark.create({
           data: {
             postId,
             userId: ctx.session?.user?.id,
@@ -207,7 +210,7 @@ export const postRouter = createTRPCRouter({
         });
         return res;
       }
-      const res = await ctx.db.bookmark.deleteMany({
+      const res = await ctx.prisma.bookmark.deleteMany({
         where: {
           AND: [{ postId }, { userId: ctx.session?.user?.id }],
         },
@@ -221,18 +224,18 @@ export const postRouter = createTRPCRouter({
 
       const [likes, currentUserLikedCount, currentUserBookmarkedCount] =
         await Promise.all([
-          ctx.db.like.count({
+          ctx.prisma.like.count({
             where: {
               postId: id,
             },
           }),
-          ctx.db.like.count({
+          ctx.prisma.like.count({
             where: {
               postId: id,
               userId: ctx.session?.user?.id,
             },
           }),
-          ctx.db.bookmark.count({
+          ctx.prisma.bookmark.count({
             where: {
               postId: id,
               userId: ctx.session?.user?.id,
@@ -269,7 +272,7 @@ export const postRouter = createTRPCRouter({
       };
       const orderBy = orderMapping[sort] || orderMapping["newest"];
 
-      const response = await ctx.db.post.findMany({
+      const response = await ctx.prisma.post.findMany({
         take: limit + 1,
         where: {
           NOT: {
@@ -354,7 +357,7 @@ export const postRouter = createTRPCRouter({
       return { posts: cleaned, nextCursor };
     }),
   myPublished: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.post.findMany({
+    return ctx.prisma.post.findMany({
       where: {
         NOT: [{ published: null }],
         published: {
@@ -375,7 +378,7 @@ export const postRouter = createTRPCRouter({
     });
   }),
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.post.findMany({
+    return ctx.prisma.post.findMany({
       where: {
         NOT: [{ published: null }],
         published: {
@@ -396,7 +399,7 @@ export const postRouter = createTRPCRouter({
     });
   }),
   myDrafts: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.post.findMany({
+    return ctx.prisma.post.findMany({
       where: {
         published: null,
         userId: ctx.session.user.id,
@@ -411,7 +414,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentPost = await ctx.db.post.findUnique({
+      const currentPost = await ctx.prisma.post.findUnique({
         where: { id },
         include: {
           tags: {
@@ -435,7 +438,7 @@ export const postRouter = createTRPCRouter({
       return currentPost;
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
-    const response = await ctx.db.bookmark.findMany({
+    const response = await ctx.prisma.bookmark.findMany({
       where: {
         userId: ctx.session.user.id,
       },

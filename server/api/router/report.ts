@@ -29,7 +29,7 @@ export const reportRouter = createTRPCRouter({
         }
 
         if (type === "comment" && typeof id === "number") {
-          const comment = await ctx.db.comment.findUniqueOrThrow({
+          const comment = await ctx.prisma.comment.findUniqueOrThrow({
             where: { id },
             include: {
               user: true,
@@ -67,7 +67,7 @@ export const reportRouter = createTRPCRouter({
         }
 
         if (type === "post" && typeof id === "string") {
-          const post = await ctx.db.post.findUniqueOrThrow({
+          const post = await ctx.prisma.post.findUniqueOrThrow({
             where: { id },
             include: {
               user: true,

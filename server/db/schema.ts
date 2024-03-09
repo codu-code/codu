@@ -78,9 +78,7 @@ export const post_tagRelations = relations(post_tag, ({ one, many }) => ({
 export const tag = pgTable(
   "Tag",
   {
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
     id: bigserial("id", { mode: "number" }).primaryKey(),
     title: varchar("title", { length: 256 }),
   },
@@ -119,12 +117,8 @@ export const post = pgTable(
     excerpt: varchar("excerpt", { length: 256 }),
     readTimeMins: integer("readTimeMins").notNull(),
     published: timestamp("published"),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
-    updatedAt: timestamp("updatedAt").default(
-      sql`current_timestamp(3) on update current_timestamp(3)`,
-    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     slug: varchar("slug", { length: 256 }),
     userId: varchar("userId", { length: 256 }),
     showComments: integer("showComments").default(1),
@@ -153,12 +147,8 @@ export const user = pgTable(
     email: varchar("email", { length: 256 }),
     emailVerified: timestamp("emailVerified"),
     image: varchar("image", { length: 256 }).default("/images/person.png"),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
-    updatedAt: timestamp("updatedAt").default(
-      sql`current_timestamp(3) on update current_timestamp(3)`,
-    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     bio: varchar("bio", { length: 256 }),
     location: varchar("location", { length: 256 }).default(""),
     websiteUrl: varchar("websiteUrl", { length: 256 }).default(""),
@@ -214,12 +204,8 @@ export const comment = pgTable(
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     body: varchar("body", { length: 256 }),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
-    updatedAt: timestamp("updatedAt").default(
-      sql`current_timestamp(3) on update current_timestamp(3)`,
-    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     postId: varchar("postId", { length: 256 }),
     userId: varchar("userId", { length: 256 }),
     parentId: integer("parentId"),
@@ -246,9 +232,7 @@ export const like = pgTable(
   "Like",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
     userId: varchar("userId", { length: 256 }),
     postId: varchar("postId", { length: 256 }),
     commentId: integer("commentId"),
@@ -271,12 +255,8 @@ export const banned_users = pgTable(
   "BannedUsers",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
-    updatedAt: timestamp("updatedAt").default(
-      sql`current_timestamp(3) on update current_timestamp(3)`,
-    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     userId: varchar("userId", { length: 256 }),
     bannedById: varchar("bannedById", { length: 256 }),
     note: varchar("note", { length: 256 }),
@@ -326,9 +306,7 @@ export const membership = pgTable(
     communityId: varchar("communityId", { length: 256 }),
     userId: varchar("userId", { length: 256 }),
     isEventOrganiser: integer("isEventOrganiser").default(0),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (t) => {
     return {};
@@ -349,9 +327,7 @@ export const r_s_v_p = pgTable(
     id: varchar("id", { length: 256 }),
     eventId: varchar("eventId", { length: 256 }),
     userId: varchar("userId", { length: 256 }),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (t) => {
     return {};
@@ -367,12 +343,8 @@ export const flagged = pgTable(
   "Flagged",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
-    updatedAt: timestamp("updatedAt").default(
-      sql`current_timestamp(3) on update current_timestamp(3)`,
-    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     userId: varchar("userId", { length: 256 }),
     notifierId: varchar("notifierId", { length: 256 }),
     note: varchar("note", { length: 256 }),
@@ -398,12 +370,8 @@ export const notification = pgTable(
   "Notification",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt")
-      .notNull()
-      .default(sql`current_timestamp(3)`),
-    updatedAt: timestamp("updatedAt").default(
-      sql`current_timestamp(3) on update current_timestamp(3)`,
-    ),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
     type: integer("type").notNull(),
     userId: varchar("userId", { length: 256 }),
     postId: varchar("postId", { length: 256 }),
