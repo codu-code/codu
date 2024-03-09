@@ -18,7 +18,7 @@ const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
   try {
     await nodemailerSesTransporter.sendMail({
       to: identifier,
-      from: provider.from,
+      from: process.env.ADMIN_EMAIL,
       subject: `Sign in to Codú 🚀`,
       /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
       text: `Sign in to Codú 🚀\n\n`,
@@ -39,7 +39,6 @@ export const authOptions: NextAuthOptions = {
     EmailProvider({
       server: {},
       sendVerificationRequest: sendPasswordLessEmail,
-      from: process.env.EMAIL_FROM,
     }),
   ],
   pages: {
