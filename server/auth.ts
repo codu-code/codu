@@ -14,10 +14,12 @@ import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmail
 
 const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
   const { identifier, url } = params;
-
   try {
+    if (!process.env.ADMIN_EMAIL) {
+      throw new Error("ADMIN_EMAIL not set");
+    }
     await nodemailerSesTransporter.sendMail({
-      to: identifier,
+      to: `Niall (Codú) ${identifier}`,
       from: process.env.ADMIN_EMAIL,
       subject: `Sign in to Codú 🚀`,
       /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
@@ -25,7 +27,12 @@ const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
       html: createPasswordLessEmailTemplate(url),
     });
   } catch (error) {
-    Sentry.captureException(error);
+    // Temporary exessive data logging to debug deployment issue
+    Sentry.captureException({
+      error,
+      to: `Niall (Codú) ${identifier}`,
+      from: process.env.ADMIN_EMAIL,
+    });
     throw new Error(`Sign in email could not be sent`);
   }
 };
