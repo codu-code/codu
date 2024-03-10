@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, Fragment, useEffect, useRef, useState } from "react";
+import { Children, Fragment, useEffect } from "react";
 import { TagIcon } from "@heroicons/react/20/solid";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
@@ -36,14 +36,12 @@ const ArticlesPage = () => {
 
   const selectedSortFilter = getSortBy();
 
-  const nowRef = useRef(new Date());
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     api.post.published.useInfiniteQuery(
       {
         limit: 15,
         sort: selectedSortFilter,
         tag,
-        published: nowRef.current,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -124,25 +122,29 @@ const ArticlesPage = () => {
                           title,
                           excerpt,
                           user: { name, image, username },
-                          updatedAt,
+                          published,
                           readTimeMins,
                           id,
                           currentUserLikesPost,
-                        }) => (
-                          <ArticlePreview
-                            key={title}
-                            id={id}
-                            slug={slug}
-                            title={title}
-                            excerpt={excerpt}
-                            name={name}
-                            username={username || ""}
-                            image={image}
-                            date={updatedAt.toISOString()}
-                            readTime={readTimeMins}
-                            bookmarkedInitialState={currentUserLikesPost}
-                          />
-                        ),
+                        }) => {
+                          // TODO: Bump posts that were recently updated to the top and show that they were updated recently
+                          if (!published) return null;
+                          return (
+                            <ArticlePreview
+                              key={title}
+                              id={id}
+                              slug={slug}
+                              title={title}
+                              excerpt={excerpt}
+                              name={name}
+                              username={username || ""}
+                              image={image}
+                              date={published.toISOString()}
+                              readTime={readTimeMins}
+                              bookmarkedInitialState={currentUserLikesPost}
+                            />
+                          );
+                        },
                       )}
                     </Fragment>
                   );
