@@ -15,7 +15,7 @@ export const eventRouter = createTRPCRouter({
     const filter = input.filter ?? undefined;
     const { cursor } = input;
 
-    const response = await ctx.db.event.findMany({
+    const response = await ctx.prisma.event.findMany({
       take: limit + 1,
       where: {
         OR: [
@@ -69,7 +69,7 @@ export const eventRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       if (ctx.session.user.id) {
         if (input.id !== null && input.id !== undefined) {
-          const eventSearchResult = await ctx.db.event.findFirst({
+          const eventSearchResult = await ctx.prisma.event.findFirst({
             where: {
               id: input.id,
             },
@@ -84,7 +84,7 @@ export const eventRouter = createTRPCRouter({
             });
           }
 
-          const membership = await ctx.db.membership.findFirst({
+          const membership = await ctx.prisma.membership.findFirst({
             where: {
               communityId: eventSearchResult?.communityId,
               userId: ctx.session.user.id,
@@ -101,7 +101,7 @@ export const eventRouter = createTRPCRouter({
             });
           }
 
-          const event = await ctx.db.event.update({
+          const event = await ctx.prisma.event.update({
             where: {
               id: input.id,
             },
@@ -121,7 +121,7 @@ export const eventRouter = createTRPCRouter({
 
           return event;
         } else {
-          const event = await ctx.db.event.create({
+          const event = await ctx.prisma.event.create({
             data: {
               id: nanoid(8),
               communityId: input.communityId,
@@ -137,7 +137,7 @@ export const eventRouter = createTRPCRouter({
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
             },
           });
-          const membership = await ctx.db.rSVP.create({
+          const membership = await ctx.prisma.rSVP.create({
             data: {
               id: nanoid(8),
               eventId: event.id,
@@ -184,7 +184,7 @@ export const eventRouter = createTRPCRouter({
   createRSVP: protectedProcedure
     .input(deleteEventSchema)
     .mutation(async ({ input, ctx }) => {
-      await ctx.db.rSVP.create({
+      await ctx.prisma.rSVP.create({
         data: {
           id: nanoid(8),
           eventId: input.id,
@@ -195,14 +195,14 @@ export const eventRouter = createTRPCRouter({
   deleteRSVP: protectedProcedure
     .input(deleteEventSchema)
     .mutation(async ({ input, ctx }) => {
-      const rsvp = await ctx.db.rSVP.findFirst({
+      const rsvp = await ctx.prisma.rSVP.findFirst({
         where: {
           eventId: input.id,
           userId: ctx.session.user.id,
         },
       });
       if (rsvp) {
-        await ctx.db.rSVP.delete({
+        await ctx.prisma.rSVP.delete({
           where: {
             id: rsvp.id,
           },
