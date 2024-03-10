@@ -27,12 +27,7 @@ const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
       html: createPasswordLessEmailTemplate(url),
     });
   } catch (error) {
-    // Temporary exessive data logging to debug deployment issue
-    Sentry.captureException({
-      error,
-      to: `Niall (Codú) ${identifier}`,
-      from: process.env.ADMIN_EMAIL,
-    });
+    Sentry.captureException(error);
     throw new Error(`Sign in email could not be sent`);
   }
 };
