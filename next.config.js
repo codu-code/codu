@@ -27,6 +27,7 @@ const config = {
     });
     return config;
   },
+  pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   images: {
     remotePatterns: REMOTE_PATTERNS,
   },

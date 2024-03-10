@@ -275,11 +275,9 @@ export const postRouter = createTRPCRouter({
       const response = await ctx.prisma.post.findMany({
         take: limit + 1,
         where: {
-          NOT: {
-            published: null,
-          },
           published: {
-            lte: input.published ?? new Date(),
+            lte: new Date(),
+            not: null,
           },
           ...(tag
             ? {
@@ -325,6 +323,7 @@ export const postRouter = createTRPCRouter({
           id: true,
           title: true,
           updatedAt: true,
+          published: true,
           readTimeMins: true,
           slug: true,
           excerpt: true,
