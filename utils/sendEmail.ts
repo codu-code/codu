@@ -18,7 +18,7 @@ const ses = new aws.SES({
 });
 
 // create Nodemailer SES transporter
-const transporter = nodemailer.createTransport({
+export const nodemailerSesTransporter = nodemailer.createTransport({
   SES: { ses, aws },
 });
 
@@ -36,7 +36,7 @@ const sendEmail = async (config: MailConfig) => {
   const to = emailSchema.parse(recipient);
   // send some mail
   return new Promise((resolve, reject) => {
-    transporter.sendMail(
+    nodemailerSesTransporter.sendMail(
       {
         from: "hi@codu.co",
         to,

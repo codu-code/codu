@@ -1,12 +1,36 @@
 import { type NextAuthOptions, getServerSession } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+import EmailProvider, {
+  type SendVerificationRequestParams,
+} from "next-auth/providers/email";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
 import * as Sentry from "@sentry/nextjs";
 
 import prisma from "@/server/db/client";
-import sendEmail from "@/utils/sendEmail";
+import sendEmail, { nodemailerSesTransporter } from "@/utils/sendEmail";
 import { manageNewsletterSubscription } from "./lib/newsletter";
+import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
+
+const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
+  const { identifier, url } = params;
+  try {
+    if (!process.env.ADMIN_EMAIL) {
+      throw new Error("ADMIN_EMAIL not set");
+    }
+    await nodemailerSesTransporter.sendMail({
+      to: `Niall (Codú) ${identifier}`,
+      from: process.env.ADMIN_EMAIL,
+      subject: `Sign in to Codú 🚀`,
+      /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
+      text: `Sign in to Codú 🚀\n\n`,
+      html: createPasswordLessEmailTemplate(url),
+    });
+  } catch (error) {
+    Sentry.captureException(error);
+    throw new Error(`Sign in email could not be sent`);
+  }
+};
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -15,10 +39,16 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
     }),
+    EmailProvider({
+      server: {},
+      sendVerificationRequest: sendPasswordLessEmail,
+    }),
   ],
   pages: {
     signIn: "/get-started",
     newUser: "/settings",
+    verifyRequest: "/auth",
+    error: "/auth/error", // (used for any errors which occur during auth
   },
   callbacks: {
     async session({ session, user }) {

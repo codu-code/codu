@@ -104,6 +104,16 @@ After you click the "Register application" button you should see the `GITHUB_ID`
 After generating the secret, make sure you copy this value to your `.env` file as this value can not be seen again once you refresh the page. 👇
 ![Screenshot 2022-10-25 at 08 26 04](https://user-images.githubusercontent.com/12615742/197710697-ef791d9e-b205-4667-a97c-477148917897.png)
 
+### Setting up Passwordless auth locally
+
+In order to use Passwordless login locally you need to have a `ACCESS_KEY` and `SECRET_KEY` value.
+
+Niall has written a [tutorial](https://www.codu.co/articles/sending-emails-with-aws-ses-and-nodemailer-in-node-js-xfuucrri) on how to send emails with AWS SES and shows how to get these values.
+
+Check out the example .env file [here](./sample.env) to see how to populate these values
+
+**Note: Currenly the AWS region of the SNS service is hardcoded to "eu-west-1" it may be necessary to change this if your SNS service is in a different region**
+
 ### NEXTAUTH_URL
 
 You shouldn't need to change the default value here. This is a variable used by Next Auth as the authentication URL to your site.

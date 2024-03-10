@@ -135,15 +135,19 @@ const MyPosts = () => {
                           <small>
                             Scheduled to publish on{" "}
                             {published?.toLocaleDateString()} at{" "}
-                            {published?.toLocaleTimeString(undefined, {
-                              hour12: true,
+                            {published?.toLocaleTimeString(navigator.language, {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
                             })}
                           </small>
                         ) : postStatus === PostStatus.published ? (
                           <small>
                             Published on {published?.toLocaleDateString()} at{" "}
-                            {published?.toLocaleTimeString(undefined, {
-                              hour12: true,
+                            {published?.toLocaleTimeString(navigator.language, {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
                             })}
                           </small>
                         ) : null}
