@@ -30,38 +30,22 @@ export default async function Page() {
     redirect("/get-started");
   }
 
-  let user = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id: session.user.id,
     },
     select,
   });
 
-  const userName = user?.username;
-  if (userName) {
+  if (!user?.username) {
+    const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 3);
+
+    const userName = session.user.name || "";
     const cleanedUserName = userName
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
-
-    if (userName !== cleanedUserName) {
-      user = await prisma.user.update({
-        where: {
-          id: session.user.id,
-        },
-        data: {
-          username: cleanedUserName,
-        },
-        select,
-      });
-    }
-  }
-
-  if (!user?.username) {
-    const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 3);
-    const initialUsername = `${(session.user.name || "").replace(
-      /\s/g,
-      "-",
-    )}-${nanoid()}`.toLowerCase();
+    const initialUsername =
+      `${cleanedUserName.replace(/\s/g, "-")}-${nanoid()}`.toLowerCase();
 
     const newUser = await prisma.user.update({
       where: {
