@@ -158,7 +158,7 @@ const MyPosts = () => {
                         className="relative inline-block text-left"
                       >
                         <div>
-                          <Menu.Button className="inline-flex w-full justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-neutral-100">
+                          <Menu.Button className="dropdown-button">
                             Options
                             <ChevronDownIcon
                               className="-mr-1 ml-2 h-5 w-5"
@@ -177,7 +177,7 @@ const MyPosts = () => {
                           leaveTo="transform opacity-0 scale-95"
                         >
                           <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            <div className="py-1">
+                            <div className="dropdown-bg py-1">
                               <Menu.Item>
                                 {({ active }) => (
                                   <Link
@@ -185,7 +185,7 @@ const MyPosts = () => {
                                       active
                                         ? "bg-neutral-100 text-black"
                                         : "text-neutral-700",
-                                      "group flex items-center px-4 py-2 text-sm",
+                                      "dropdown-item group flex items-center px-4 py-2 text-sm",
                                     )}
                                     href={`/create/${id}`}
                                   >
@@ -208,7 +208,7 @@ const MyPosts = () => {
                                       active
                                         ? "bg-neutral-100 text-black"
                                         : "text-neutral-700",
-                                      "group flex w-full items-center px-4 py-2 text-sm",
+                                      "dropdown-item group flex w-full items-center px-4 py-2 text-sm",
                                     )}
                                   >
                                     <TrashIcon
