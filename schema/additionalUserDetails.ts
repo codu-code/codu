@@ -14,8 +14,12 @@ export const slideOneSchema = z.object({
   username: z
     .string()
     .trim()
-    .min(3, "Min name length is 2 characters.")
-    .max(40, "Max name length is 40 characters."),
+    .min(3, "Min username length is 3 characters.")
+    .max(40, "Max username length is 40 characters.")
+    .regex(
+      /^[a-zA-Z0-9-]+$/,
+      "Username can only contain alphanumerics and dashes.",
+    ),
   location: z.string().min(1, "Location is required"),
 });
 

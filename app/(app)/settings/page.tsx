@@ -39,10 +39,13 @@ export default async function Page() {
 
   if (!user?.username) {
     const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 3);
-    const initialUsername = `${(session.user.name || "").replace(
-      /\s/g,
-      "-",
-    )}-${nanoid()}`.toLowerCase();
+
+    const userName = session.user.name || "";
+    const cleanedUserName = userName
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    const initialUsername =
+      `${cleanedUserName.replace(/\s/g, "-")}-${nanoid()}`.toLowerCase();
 
     const newUser = await prisma.user.update({
       where: {
