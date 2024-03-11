@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CalendarDaysIcon, HandRaisedIcon } from "@heroicons/react/24/outline";
 import { SignupForm } from "./_form";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Codú Weekly - The Newsletter for Web Developers",
@@ -40,7 +41,7 @@ export default function NewsletterPage() {
               Subscribe to Codú Weekly.
             </h2>
             <p className="mt-4 text-lg leading-8 text-gray-300">
-              {`Stay updated with the latest articles, tips, and insights on web development, productivity, indie hacking, and more. Don't miss out on valuable content delivered straight to your inbox!`}
+              {`Join our free newsletter! Stay updated with the latest articles, tips, and insights on web development. Don't miss out on valuable content delivered straight to your inbox!`}
             </p>
             <SignupForm />
           </div>
@@ -52,10 +53,12 @@ export default function NewsletterPage() {
                   aria-hidden="true"
                 />
               </div>
-              <dt className="mt-4 font-semibold text-white">Weekly articles</dt>
+              <dt className="mt-4 font-semibold text-white">
+                Weekly newsletter
+              </dt>
               <dd className="mt-2 leading-7 text-gray-400">
-                Learn something new every week. We cover a wide range of topics,
-                from web development and productivity to indie hacking.
+                Learn something new every Tuesday. We cover a wide range of
+                topics web development - frontend, backend and full stack.
               </dd>
             </div>
             <div className="flex flex-col items-start">
@@ -85,6 +88,13 @@ export default function NewsletterPage() {
               "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
           }}
         />
+      </div>
+      <div className="absolute bottom-0 left-0 right-0">
+        <div className="flex justify-center p-8">
+          <Link className="text-white underline" href="/privacy">
+            Privacy
+          </Link>
+        </div>
       </div>
     </div>
   );
