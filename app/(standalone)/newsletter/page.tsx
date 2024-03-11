@@ -58,7 +58,7 @@ export default function NewsletterPage() {
               </dt>
               <dd className="mt-2 leading-7 text-gray-400">
                 Learn something new every Tuesday. We cover a wide range of
-                topics web development - frontend, backend and full stack.
+                topics in web development - frontend, backend, and full stack.
               </dd>
             </div>
             <div className="flex flex-col items-start">
