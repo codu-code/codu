@@ -243,7 +243,7 @@ const Create = () => {
   useEffect(() => {
     if (!data) return;
     const { body, excerpt, title, id, tags, published } = data;
-    setTags(tags.map((tag: { title: string }) => tag.title));
+    setTags(tags.map(({ tag }) => tag.title));
     reset({
       body,
       excerpt,
@@ -334,7 +334,7 @@ const Create = () => {
                       {tags.map((tag) => (
                         <div
                           key={tag}
-                          className="mr-1 mt-2 inline-flex items-center overflow-hidden rounded-md bg-neutral-300 text-sm"
+                          className="mr-1 mt-2 inline-flex items-center overflow-hidden bg-neutral-300 text-sm"
                         >
                           <span
                             className="ml-2 mr-1 max-w-xs truncate px-1 text-xs font-semibold leading-relaxed text-black"
