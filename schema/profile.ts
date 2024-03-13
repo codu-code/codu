@@ -1,7 +1,16 @@
 import z from "zod";
 
 export const saveSettingsSchema = z.object({
-  name: z.string().min(1).max(50),
+  firstName: z
+    .string()
+    .trim()
+    .min(2, "Min name length is 2 characters.")
+    .max(50, "Max name length is 50 characters."),
+  surname: z
+    .string()
+    .trim()
+    .min(2, "Min name length is 2 characters.")
+    .max(50, "Max name length is 50 characters."),
   bio: z.string().max(200).optional(),
   username: z
     .string()
