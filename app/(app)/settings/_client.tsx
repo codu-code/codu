@@ -45,7 +45,12 @@ const Settings = ({ profile }: { profile: User }) => {
     formState: { errors },
   } = useForm<saveSettingsInput>({
     resolver: zodResolver(saveSettingsSchema),
-    defaultValues: { ...profile, username: profile.username || "" },
+    defaultValues: {
+      ...profile,
+      username: profile.username || "",
+      firstName: profile.firstName || "",
+      surname: profile.surname || "",
+    },
   });
 
   const bio = watch("bio");
@@ -152,16 +157,30 @@ const Settings = ({ profile }: { profile: User }) => {
                   <div className="mt-6 flex flex-col lg:flex-row">
                     <div className="flex-grow space-y-6">
                       <div>
-                        <label htmlFor="name">Full Name</label>
+                        <label htmlFor="firstName">First Name</label>
                         <input
                           type="text"
-                          {...register("name")}
-                          id="name"
+                          {...register("firstName")}
+                          id="firstName"
                           autoComplete="given-name"
                         />
-                        {errors.name && (
+                        {errors.firstName && (
                           <p className="mt-1 text-sm text-red-600">
-                            {`${errors.name.message || "Required"}`}
+                            {`${errors.firstName.message || "Required"}`}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label htmlFor="surname">Surname</label>
+                        <input
+                          type="text"
+                          {...register("surname")}
+                          id="surname"
+                          autoComplete="family-name"
+                        />
+                        {errors.surname && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {`${errors.surname.message || "Required"}`}
                           </p>
                         )}
                       </div>
