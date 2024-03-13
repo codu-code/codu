@@ -41,7 +41,16 @@ export default function NewsletterPage() {
               Subscribe to Codú Weekly.
             </h2>
             <p className="mt-4 text-lg leading-8 text-gray-300">
-              {`Join our free newsletter! Stay updated with the latest articles, tips, and insights on web development. Don't miss out on valuable content delivered straight to your inbox!`}
+              Join our free newsletter!{" "}
+              <Link
+                className="text-white underline"
+                href="/letters/your-weekly-codu-fix-planetscale-alternatives-git-explained-and-more"
+              >
+                One newsletter
+              </Link>{" "}
+              per week with the latest articles, tips, and insights on web
+              development. Don&apos;t miss out on valuable content delivered
+              straight to your inbox!
             </p>
             <SignupForm />
           </div>
