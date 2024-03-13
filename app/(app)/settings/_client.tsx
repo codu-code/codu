@@ -20,6 +20,8 @@ function classNames(...classes: string[]) {
 type User = Prisma.UserGetPayload<{
   select: {
     name: true;
+    firstName: true;
+    surname: true;
     username: true;
     bio: true;
     location: true;

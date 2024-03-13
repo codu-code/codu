@@ -17,6 +17,8 @@ export default async function Page() {
 
   const select = {
     name: true,
+    firstName: true,
+    surname: true,
     username: true,
     bio: true,
     location: true,
@@ -30,12 +32,33 @@ export default async function Page() {
     redirect("/get-started");
   }
 
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: {
       id: session.user.id,
     },
     select,
   });
+
+  if (user && user.name && !user?.firstName && !user?.surname) {
+    const trimmedName = user.name.trim();
+    const nameParts = trimmedName.split(" ");
+
+    if (nameParts.length > 1) {
+      const surname = nameParts.pop();
+      const firstName = nameParts.join(" ");
+
+      user = await prisma.user.update({
+        where: {
+          id: session.user.id,
+        },
+        data: {
+          firstName,
+          surname,
+        },
+        select,
+      });
+    }
+  }
 
   if (!user?.username) {
     const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 3);
