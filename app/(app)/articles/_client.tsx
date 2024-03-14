@@ -48,9 +48,7 @@ const ArticlesPage = () => {
       },
     );
 
-  const { status: tagsStatus, data: tagsData } = api.tag.get.useQuery({
-    take: 10,
-  });
+  const { status: tagsStatus, data: tagsData } = api.tag.get.useQuery();
 
   const { ref, inView } = useInView();
 
@@ -59,6 +57,7 @@ const ArticlesPage = () => {
       fetchNextPage();
     }
   }, [inView]);
+
   return (
     <>
       <div className="mx-2">
@@ -187,14 +186,14 @@ const ArticlesPage = () => {
             <div className="flex flex-wrap gap-2">
               {tagsStatus === "loading" && <PopularTagsLoading />}
               {tagsStatus === "success" &&
-                tagsData.data.map((tag) => (
+                tagsData.data.map(({ title }) => (
                   <Link
-                    key={tag.id}
+                    key={title}
                     // only reason this is toLowerCase is to make url look nicer. Not needed for functionality
-                    href={`/articles?tag=${tag.title.toLowerCase()}`}
+                    href={`/articles?tag=${title.toLowerCase()}`}
                     className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
                   >
-                    {getCamelCaseFromLower(tag.title)}
+                    {getCamelCaseFromLower(title)}
                   </Link>
                 ))}
             </div>

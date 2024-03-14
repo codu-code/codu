@@ -80,7 +80,7 @@ export const tag = pgTable(
   {
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    title: varchar("title", { length: 256 }),
+    title: varchar("title", { length: 256 }).notNull(),
   },
   (t) => {
     return {};
