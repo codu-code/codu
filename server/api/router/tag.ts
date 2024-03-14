@@ -1,21 +1,23 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { GetTagsSchema } from "../../../schema/tag";
 import { TRPCError } from "@trpc/server";
+import { post_tag, tag } from "@/server/db/schema";
+import { desc, eq, count } from "drizzle-orm";
 
 export const tagRouter = createTRPCRouter({
-  get: publicProcedure.input(GetTagsSchema).query(async ({ ctx, input }) => {
+  get: publicProcedure.query(async ({ ctx }) => {
     try {
-      const count = await ctx.prisma.tag.count({});
-      const response = await ctx.prisma.tag.findMany({
-        orderBy: {
-          PostTag: {
-            _count: "desc",
-          },
-        },
-        take: input.take,
-      });
+      const data = await ctx.db
+        .select({
+          title: tag.title,
+          count: count(tag.title),
+        })
+        .from(tag)
+        .groupBy(tag.title)
+        .leftJoin(post_tag, eq(post_tag.tagId, tag.id))
+        .limit(10)
+        .orderBy(desc(count(tag.title)));
 
-      return { data: response, count };
+      return { data };
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
