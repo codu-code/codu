@@ -14,7 +14,8 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
-import { post } from "@/server/db/schema";
+import { post, post_tag, tag } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -41,8 +42,14 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
-        where: { id },
+      // const currentPost = await ctx.prisma.post.findUnique({
+      //   where: { id },
+      // });
+
+      console.log("HERE 1");
+
+      const currentPost = await ctx.db.query.post.findFirst({
+        where: (posts, { eq }) => eq(posts.id, id),
       });
 
       if (currentPost?.userId !== ctx.session.user.id) {
@@ -51,31 +58,45 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      const tagResponse = await Promise.all(
-        tags.map((tag) =>
-          ctx.prisma.tag.upsert({
-            where: {
-              title: tag,
-            },
-            update: {},
-            create: { title: tag },
-          }),
+      // only returns newly added tags
+      const [tagResponse] = await Promise.all(
+        tags.map((tagTitle) =>
+          ctx.db
+            .insert(tag)
+            .values({ title: tagTitle })
+            .onConflictDoNothing({
+              target: [tag.title],
+            })
+            .returning(),
         ),
       );
 
-      await ctx.prisma.postTag.deleteMany({
-        where: {
-          postId: id,
-        },
-      });
+      console.log("tagResponse", tagResponse);
+
+      // await ctx.prisma.postTag.deleteMany({
+      //   where: {
+      //     postId: id,
+      //   },
+      // });
+
+      await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
+
+      // await Promise.all(
+      //   tagResponse.map((tag) =>
+      //     ctx.prisma.postTag.create({
+      //       data: {
+      //         tagId: tag.id,
+      //         postId: id,
+      //       },
+      //     }),
+      //   ),
+      // );
 
       await Promise.all(
         tagResponse.map((tag) =>
-          ctx.prisma.postTag.create({
-            data: {
-              tagId: tag.id,
-              postId: id,
-            },
+          ctx.db.insert(post_tag).values({
+            tagId: tag.id,
+            postId: id,
           }),
         ),
       );
@@ -84,25 +105,39 @@ export const postRouter = createTRPCRouter({
         if (currentPost.published) {
           return excerpt && excerpt.length > 0
             ? excerpt
-            : removeMarkdown(currentPost.body, {}).substring(0, 156);
+            : // @Todo why is body string | null ?
+              removeMarkdown(currentPost.body as string, {}).substring(0, 156);
         }
         return excerpt;
       };
 
-      const post = await ctx.prisma.post.update({
-        where: {
-          id,
-        },
-        data: {
+      // const post = await ctx.prisma.post.update({
+      //   where: {
+      //     id,
+      //   },
+      //   data: {
+      //     id,
+      //     body,
+      //     title,
+      //     excerpt: getExcerptValue() || "",
+      //     readTimeMins: readingTime(body),
+      //     canonicalUrl: !!canonicalUrl ? canonicalUrl : null,
+      //   },
+      // });
+
+      const postResponse = await ctx.db
+        .update(post)
+        .set({
           id,
           body,
           title,
           excerpt: getExcerptValue() || "",
           readTimeMins: readingTime(body),
           canonicalUrl: !!canonicalUrl ? canonicalUrl : null,
-        },
-      });
-      return post;
+        })
+        .where(eq(post.id, id));
+
+      return postResponse;
     }),
   publish: protectedProcedure
     .input(PublishPostSchema)
