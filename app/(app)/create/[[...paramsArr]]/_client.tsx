@@ -330,34 +330,36 @@ const Create = () => {
                       value={tagValue}
                       onKeyDown={onKeyDown}
                     />
-                    {tags.map((tag) => (
-                      <div
-                        key={tag}
-                        className="mr-1 mt-2 inline-flex items-center overflow-hidden bg-neutral-300 text-sm"
-                      >
-                        <span
-                          className="ml-2 mr-1 max-w-xs truncate px-1 text-xs font-semibold leading-relaxed text-black"
-                          x-text="tag"
+                    <div>
+                      {tags.map((tag) => (
+                        <div
+                          key={tag}
+                          className="mr-1 mt-2 inline-flex items-center overflow-hidden bg-neutral-300 text-sm"
                         >
-                          {tag}
-                        </span>
-                        <button
-                          onClick={() => onDelete(tag)}
-                          className="inline-block h-6 w-6 bg-neutral-600 align-middle text-white focus:outline-none"
-                        >
-                          <svg
-                            className="mx-auto h-6 w-6 fill-current"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
+                          <span
+                            className="ml-2 mr-1 max-w-xs truncate px-1 text-xs font-semibold leading-relaxed text-black"
+                            x-text="tag"
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
+                            {tag}
+                          </span>
+                          <button
+                            onClick={() => onDelete(tag)}
+                            className="inline-block h-6 w-6 bg-neutral-600 align-middle text-white focus:outline-none"
+                          >
+                            <svg
+                              className="mx-auto h-6 w-6 fill-current"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                     <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
                       Tag with up to 5 topics. This makes it easier for readers
                       to find and know what your story is about.
