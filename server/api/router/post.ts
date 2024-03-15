@@ -14,8 +14,8 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
-import { post, post_tag, tag } from "@/server/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
+import { and, count, eq, inArray } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -52,37 +52,41 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      const existingTags = await ctx.db
-        .select()
-        .from(tag)
-        .where(inArray(tag.title, tags));
+      // if user doesnt link any tags to the article no point in doing the tag operations
+      // This also makes autosave during writing faster
+      if (tags.length > 0) {
+        const existingTags = await ctx.db
+          .select()
+          .from(tag)
+          .where(inArray(tag.title, tags));
 
-      const tagResponse = (
+        const tagResponse = (
+          await Promise.all(
+            tags.map((tagTitle) =>
+              ctx.db
+                .insert(tag)
+                .values({ title: tagTitle })
+                .onConflictDoNothing({
+                  target: [tag.title],
+                })
+                .returning(),
+            ),
+          )
+        ).flat(2);
+
+        const tagsToLinkToPost = [...tagResponse, ...existingTags];
+
+        await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
+
         await Promise.all(
-          tags.map((tagTitle) =>
-            ctx.db
-              .insert(tag)
-              .values({ title: tagTitle })
-              .onConflictDoNothing({
-                target: [tag.title],
-              })
-              .returning(),
+          tagsToLinkToPost.map((tag) =>
+            ctx.db.insert(post_tag).values({
+              tagId: tag.id,
+              postId: id,
+            }),
           ),
-        )
-      ).flat(2);
-
-      const tagsToLinkToPost = [...tagResponse, ...existingTags];
-
-      await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
-
-      await Promise.all(
-        tagsToLinkToPost.map((tag) =>
-          ctx.db.insert(post_tag).values({
-            tagId: tag.id,
-            postId: id,
-          }),
-        ),
-      );
+        );
+      }
 
       const getExcerptValue = (): string | undefined => {
         if (currentPost.published) {
@@ -118,13 +122,13 @@ export const postRouter = createTRPCRouter({
           return null;
         }
         if (publishTime) {
-          return publishTime.toISOString();
+          return publishTime;
         }
-        return new Date().toISOString();
+        return new Date();
       };
 
-      const currentPost = await ctx.prisma.post.findUnique({
-        where: { id },
+      const currentPost = await ctx.db.query.post.findFirst({
+        where: (posts, { eq }) => eq(posts.id, id),
       });
 
       if (currentPost?.userId !== ctx.session.user.id) {
@@ -140,27 +144,27 @@ export const postRouter = createTRPCRouter({
           ? excerpt
           : removeMarkdown(currentPost.body, {}).substring(0, 156);
 
-      const post = await ctx.prisma.post.update({
-        where: {
-          id,
-        },
-        data: {
+      const [updatedPost] = await ctx.db
+        .update(post)
+        .set({
           slug: `${title.replace(/\W+/g, "-")}-${id}`
             .toLowerCase()
             .replace(/^-+|-+(?=-|$)/g, ""),
           published: getPublishedTime(),
           excerpt: excerptOrCreatedExcerpt,
-        },
-      });
-      return post;
+        })
+        .where(eq(post.id, id))
+        .returning();
+
+      return updatedPost;
     }),
   delete: protectedProcedure
     .input(DeletePostSchema)
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
-        where: { id },
+      const currentPost = await ctx.db.query.post.findFirst({
+        where: (posts, { eq }) => eq(posts.id, id),
       });
 
       const isAdmin = ctx.session.user.role === "ADMIN";
@@ -171,12 +175,12 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      const post = await ctx.prisma.post.delete({
-        where: {
-          id,
-        },
-      });
-      return post;
+      const [deletedPost] = await ctx.db
+        .delete(post)
+        .where(eq(post.id, id))
+        .returning();
+
+      return deletedPost;
     }),
   like: protectedProcedure
     .input(LikePostSchema)
@@ -185,19 +189,19 @@ export const postRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
 
       if (setLiked) {
-        const res = await ctx.prisma.like.create({
-          data: {
-            postId,
-            userId,
-          },
-        });
+        const [res] = await ctx.db
+          .insert(like)
+          .values({ postId, userId })
+          .returning();
         return res;
       }
-      const res = await ctx.prisma.like.deleteMany({
-        where: {
-          AND: [{ postId }, { userId: ctx.session?.user?.id }],
-        },
-      });
+
+      const res = await ctx.db
+        .delete(like)
+        .where(
+          and(eq(like.postId, postId), eq(like.userId, ctx.session?.user?.id)),
+        );
+
       return res;
     }),
   bookmark: protectedProcedure
@@ -206,19 +210,20 @@ export const postRouter = createTRPCRouter({
       const { postId, setBookmarked } = input;
 
       if (setBookmarked) {
-        const res = await ctx.prisma.bookmark.create({
-          data: {
-            postId,
-            userId: ctx.session?.user?.id,
-          },
-        });
+        const res = await ctx.db
+          .insert(bookmark)
+          .values({ postId, userId: ctx.session?.user?.id });
         return res;
       }
-      const res = await ctx.prisma.bookmark.deleteMany({
-        where: {
-          AND: [{ postId }, { userId: ctx.session?.user?.id }],
-        },
-      });
+
+      const res = await ctx.db
+        .delete(bookmark)
+        .where(
+          and(
+            eq(bookmark.postId, postId),
+            eq(bookmark.userId, ctx.session?.user?.id),
+          ),
+        );
       return res;
     }),
   sidebarData: publicProcedure
@@ -226,32 +231,41 @@ export const postRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const [likes, currentUserLikedCount, currentUserBookmarkedCount] =
+      const [[likes], [currentUserLikedCount], [currentUserBookmarkedCount]] =
         await Promise.all([
-          ctx.prisma.like.count({
-            where: {
-              postId: id,
-            },
-          }),
-          ctx.prisma.like.count({
-            where: {
-              postId: id,
-              userId: ctx.session?.user?.id,
-            },
-          }),
-          ctx.prisma.bookmark.count({
-            where: {
-              postId: id,
-              userId: ctx.session?.user?.id,
-            },
-          }),
+          ctx.db
+            .select({ value: count() })
+            .from(like)
+            .where(eq(like.postId, id)),
+          // if user not logged in and they wont have any liked posts so default to a count of 0
+          ctx.session?.user?.id
+            ? ctx.db
+                .select({ value: count() })
+                .from(like)
+                .where(
+                  and(
+                    eq(like.postId, id),
+                    eq(like.userId, ctx.session.user.id),
+                  ),
+                )
+            : [{ value: 0 }],
+          // if user not logged in and they wont have any bookmarked posts so default to a count of 0
+          ctx.session?.user?.id
+            ? ctx.db
+                .select({ value: count() })
+                .from(bookmark)
+                .where(
+                  and(
+                    eq(bookmark.postId, id),
+                    eq(bookmark.userId, ctx.session.user.id),
+                  ),
+                )
+            : [{ value: 0 }],
         ]);
-
       return {
-        likes,
-        currentUserLiked: !!ctx.session?.user?.id && !!currentUserLikedCount,
-        currentUserBookmarked:
-          !!ctx.session?.user?.id && !!currentUserBookmarkedCount,
+        likes: likes.value,
+        currentUserLiked: !!currentUserLikedCount?.value,
+        currentUserBookmarked: !!currentUserBookmarkedCount?.value,
       };
     }),
   published: publicProcedure
