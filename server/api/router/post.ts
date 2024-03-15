@@ -15,7 +15,7 @@ import {
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
 import { post, post_tag, tag } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -52,37 +52,31 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      const existingTags = await Promise.all(
-        tags.map((tagTitle) =>
-          ctx.db.select().from(tag).where(eq(tag.title, tagTitle)),
-        ),
-      );
+      const existingTags = await ctx.db
+        .select()
+        .from(tag)
+        .where(inArray(tag.title, tags));
 
-      const tagResponse = await Promise.all(
-        tags.map((tagTitle) =>
-          ctx.db
-            .insert(tag)
-            .values({ title: tagTitle })
-            .onConflictDoNothing({
-              target: [tag.title],
-            })
-            .returning(),
-        ),
-      );
+      const tagResponse = (
+        await Promise.all(
+          tags.map((tagTitle) =>
+            ctx.db
+              .insert(tag)
+              .values({ title: tagTitle })
+              .onConflictDoNothing({
+                target: [tag.title],
+              })
+              .returning(),
+          ),
+        )
+      ).flat(2);
 
-      //If you think you hate this.. I hate it more
-      // drizzle is giving back an empty array when it hits a conflict
-      // drizzle is giving back an empty array when it cant find a row
-      // @TODO can we destructure inside the promise.all()
-      const tagsToLinkToPost = [
-        ...tagResponse.filter((res) => res.length),
-        ...existingTags.filter((res) => res.length),
-      ];
+      const tagsToLinkToPost = [...tagResponse, ...existingTags];
 
       await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
 
       await Promise.all(
-        tagsToLinkToPost.map(([tag]) =>
+        tagsToLinkToPost.map((tag) =>
           ctx.db.insert(post_tag).values({
             tagId: tag.id,
             postId: id,
