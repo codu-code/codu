@@ -57,7 +57,7 @@ export const postRouter = createTRPCRouter({
           ctx.db.select().from(tag).where(eq(tag.title, tagTitle)),
         ),
       );
-      // only returns newly added tags
+
       const tagResponse = await Promise.all(
         tags.map((tagTitle) =>
           ctx.db
@@ -73,14 +73,14 @@ export const postRouter = createTRPCRouter({
       //If you think you hate this.. I hate it more
       // drizzle is giving back an empty array when it hits a conflict
       // drizzle is giving back an empty array when it cant find a row
+      // @TODO can we destructure inside the promise.all()
       const tagsToLinkToPost = [
         ...tagResponse.filter((res) => res.length),
         ...existingTags.filter((res) => res.length),
       ];
 
-      console.log("tagsToLinkToPost", tagsToLinkToPost);
-
       await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
+
       await Promise.all(
         tagsToLinkToPost.map(([tag]) =>
           ctx.db.insert(post_tag).values({
@@ -99,20 +99,6 @@ export const postRouter = createTRPCRouter({
         }
         return excerpt;
       };
-
-      // const post = await ctx.prisma.post.update({
-      //   where: {
-      //     id,
-      //   },
-      //   data: {
-      //     id,
-      //     body,
-      //     title,
-      //     excerpt: getExcerptValue() || "",
-      //     readTimeMins: readingTime(body),
-      //     canonicalUrl: !!canonicalUrl ? canonicalUrl : null,
-      //   },
-      // });
 
       const postResponse = await ctx.db
         .update(post)
