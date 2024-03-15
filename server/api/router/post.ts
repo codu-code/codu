@@ -42,12 +42,6 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
 
-      // const currentPost = await ctx.prisma.post.findUnique({
-      //   where: { id },
-      // });
-
-      console.log("HERE 1");
-
       const currentPost = await ctx.db.query.post.findFirst({
         where: (posts, { eq }) => eq(posts.id, id),
       });
@@ -58,8 +52,13 @@ export const postRouter = createTRPCRouter({
         });
       }
 
+      const existingTags = await Promise.all(
+        tags.map((tagTitle) =>
+          ctx.db.select().from(tag).where(eq(tag.title, tagTitle)),
+        ),
+      );
       // only returns newly added tags
-      const [tagResponse] = await Promise.all(
+      const tagResponse = await Promise.all(
         tags.map((tagTitle) =>
           ctx.db
             .insert(tag)
@@ -71,29 +70,19 @@ export const postRouter = createTRPCRouter({
         ),
       );
 
-      console.log("tagResponse", tagResponse);
+      //If you think you hate this.. I hate it more
+      // drizzle is giving back an empty array when it hits a conflict
+      // drizzle is giving back an empty array when it cant find a row
+      const tagsToLinkToPost = [
+        ...tagResponse.filter((res) => res.length),
+        ...existingTags.filter((res) => res.length),
+      ];
 
-      // await ctx.prisma.postTag.deleteMany({
-      //   where: {
-      //     postId: id,
-      //   },
-      // });
+      console.log("tagsToLinkToPost", tagsToLinkToPost);
 
       await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
-
-      // await Promise.all(
-      //   tagResponse.map((tag) =>
-      //     ctx.prisma.postTag.create({
-      //       data: {
-      //         tagId: tag.id,
-      //         postId: id,
-      //       },
-      //     }),
-      //   ),
-      // );
-
       await Promise.all(
-        tagResponse.map((tag) =>
+        tagsToLinkToPost.map(([tag]) =>
           ctx.db.insert(post_tag).values({
             tagId: tag.id,
             postId: id,
