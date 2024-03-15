@@ -357,24 +357,14 @@ export const postRouter = createTRPCRouter({
       return { posts: cleaned, nextCursor };
     }),
   myPublished: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.post.findMany({
-      where: {
-        NOT: [{ published: null }],
-        published: {
-          lte: new Date(),
-        },
-        userId: ctx?.session?.user?.id,
-      },
-      include: {
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
-      },
-      orderBy: {
-        published: "desc",
-      },
+    return await ctx.db.query.post.findMany({
+      where: (posts, { lte, isNotNull, eq }) =>
+        and(
+          isNotNull(posts.published),
+          lte(posts.published, new Date()),
+          eq(posts.userId, ctx?.session?.user?.id),
+        ),
+      orderBy: (posts, { desc }) => [desc(posts.published)],
     });
   }),
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
