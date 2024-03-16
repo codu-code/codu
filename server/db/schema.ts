@@ -7,22 +7,33 @@ import {
   bigserial,
   varchar,
   unique,
+  text,
+  uniqueIndex,
+  serial,
+  foreignKey,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 import { relations, sql } from "drizzle-orm";
 
-export const role = pgEnum("Role", ["USER", "ADMIN", "MODERATOR"]);
+export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
 export const session = pgTable(
   "Session",
   {
-    id: varchar("id", { length: 256 }),
-    sessionToken: varchar("sessionToken", { length: 256 }),
-    userId: varchar("userId", { length: 256 }),
-    expires: timestamp("expires"),
+    id: text("id").primaryKey().notNull(),
+    sessionToken: text("sessionToken").notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    expires: timestamp("expires", { precision: 3, mode: "string" }).notNull(),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      sessionTokenKey: uniqueIndex("Session_sessionToken_key").on(
+        table.sessionToken,
+      ),
+    };
   },
 );
 
@@ -33,22 +44,26 @@ export const sessionRelations = relations(session, ({ one, many }) => ({
 export const account = pgTable(
   "Account",
   {
-    id: varchar("id", { length: 256 }),
-    userId: varchar("userId", { length: 256 }),
-    type: varchar("type", { length: 256 }),
-    provider: varchar("provider", { length: 256 }),
-    providerAccountId: varchar("providerAccountId", { length: 256 }),
-    refresh_token: varchar("refresh_token", { length: 256 }),
-    access_token: varchar("access_token", { length: 256 }),
-    expires_at: integer("expires_at"),
-    token_type: varchar("token_type", { length: 256 }),
-    scope: varchar("scope", { length: 256 }),
-    id_token: varchar("id_token", { length: 256 }),
-    session_state: varchar("session_state", { length: 256 }),
+    id: text("id").primaryKey().notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refreshToken: text("refresh_token"),
+    accessToken: text("access_token"),
+    expiresAt: integer("expires_at"),
+    tokenType: text("token_type"),
+    scope: text("scope"),
+    idToken: text("id_token"),
+    sessionState: text("session_state"),
   },
-  (t) => {
+  (table) => {
     return {
-      indx0: unique().on(t.provider, t.providerAccountId),
+      providerProviderAccountIdKey: uniqueIndex(
+        "Account_provider_providerAccountId_key",
+      ).on(table.provider, table.providerAccountId),
     };
   },
 );
@@ -60,13 +75,20 @@ export const accountRelations = relations(account, ({ one, many }) => ({
 export const post_tag = pgTable(
   "PostTag",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    tagId: integer("tagId").notNull(),
-    postId: varchar("postId", { length: 256 }),
+    id: serial("id").primaryKey().notNull(),
+    tagId: integer("tagId")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    postId: text("postId")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade", onUpdate: "cascade" }),
   },
-  (t) => {
+  (table) => {
     return {
-      indx0: unique().on(t.tagId, t.postId),
+      tagIdPostIdKey: uniqueIndex("PostTag_tagId_postId_key").on(
+        table.tagId,
+        table.postId,
+      ),
     };
   },
 );
@@ -78,12 +100,16 @@ export const post_tagRelations = relations(post_tag, ({ one, many }) => ({
 export const tag = pgTable(
   "Tag",
   {
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    title: varchar("title", { length: 256 }).notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    id: serial("id").primaryKey().notNull(),
+    title: varchar("title", { length: 20 }).notNull(),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      titleKey: uniqueIndex("Tag_title_key").on(table.title),
+    };
   },
 );
 
@@ -184,13 +210,20 @@ export const userRelations = relations(user, ({ one, many }) => ({
 export const bookmark = pgTable(
   "Bookmark",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    postId: varchar("postId", { length: 256 }),
-    userId: varchar("userId", { length: 256 }),
+    id: serial("id").primaryKey().notNull(),
+    postId: text("postId")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   },
-  (t) => {
+  (table) => {
     return {
-      indx0: unique().on(t.userId, t.postId),
+      userIdPostIdKey: uniqueIndex("Bookmark_userId_postId_key").on(
+        table.postId,
+        table.userId,
+      ),
     };
   },
 );
@@ -202,16 +235,33 @@ export const bookmarkRelations = relations(bookmark, ({ one, many }) => ({
 export const comment = pgTable(
   "Comment",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    body: varchar("body", { length: 256 }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-    postId: varchar("postId", { length: 256 }),
-    userId: varchar("userId", { length: 256 }),
+    id: serial("id").primaryKey().notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+    postId: text("postId")
+      .notNull()
+      .references(() => post.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     parentId: integer("parentId"),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      commentParentIdFkey: foreignKey({
+        columns: [table.parentId],
+        foreignColumns: [table.id],
+        name: "Comment_parentId_fkey",
+      })
+        .onUpdate("cascade")
+        .onDelete("cascade"),
+    };
   },
 );
 
@@ -231,16 +281,32 @@ export const commentRelations = relations(comment, ({ one, many }) => ({
 export const like = pgTable(
   "Like",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    userId: varchar("userId", { length: 256 }).notNull(),
-    postId: varchar("postId", { length: 256 }),
-    commentId: integer("commentId"),
+    id: serial("id").primaryKey().notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    postId: text("postId").references(() => post.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    commentId: integer("commentId").references(() => comment.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
   },
-  (t) => {
+  (table) => {
     return {
-      indx0: unique().on(t.userId, t.commentId),
-      indx1: unique().on(t.userId, t.postId),
+      userIdCommentIdKey: uniqueIndex("Like_userId_commentId_key").on(
+        table.userId,
+        table.commentId,
+      ),
+      userIdPostIdKey: uniqueIndex("Like_userId_postId_key").on(
+        table.userId,
+        table.postId,
+      ),
     };
   },
 );
@@ -254,15 +320,26 @@ export const likeRelations = relations(like, ({ one, many }) => ({
 export const banned_users = pgTable(
   "BannedUsers",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-    userId: varchar("userId", { length: 256 }),
-    bannedById: varchar("bannedById", { length: 256 }),
-    note: varchar("note", { length: 256 }),
+    id: serial("id").primaryKey().notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    bannedById: text("bannedById")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    note: text("note"),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      userIdKey: uniqueIndex("BannedUsers_userId_key").on(table.userId),
+    };
   },
 );
 
@@ -280,17 +357,20 @@ export const banned_usersRelations = relations(
 export const community = pgTable(
   "Community",
   {
-    id: varchar("id", { length: 256 }),
-    name: varchar("name", { length: 256 }),
-    city: varchar("city", { length: 256 }),
-    country: varchar("country", { length: 256 }),
-    coverImage: varchar("coverImage", { length: 256 }),
-    description: varchar("description", { length: 256 }),
-    excerpt: varchar("excerpt", { length: 256 }),
-    slug: varchar("slug", { length: 256 }),
+    id: text("id").primaryKey().notNull(),
+    name: text("name").notNull(),
+    city: text("city").notNull(),
+    country: text("country").notNull(),
+    coverImage: text("coverImage").notNull(),
+    description: text("description").notNull(),
+    excerpt: varchar("excerpt", { length: 156 }).default("").notNull(),
+    slug: text("slug").notNull(),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      idKey: uniqueIndex("Community_id_key").on(table.id),
+      slugKey: uniqueIndex("Community_slug_key").on(table.slug),
+    };
   },
 );
 
@@ -299,19 +379,22 @@ export const communityRelations = relations(community, ({ one, many }) => ({
   members: many(membership),
 }));
 
-export const membership = pgTable(
-  "Membership",
-  {
-    id: varchar("id", { length: 256 }),
-    communityId: varchar("communityId", { length: 256 }),
-    userId: varchar("userId", { length: 256 }),
-    isEventOrganiser: integer("isEventOrganiser").default(0),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-  },
-  (t) => {
-    return {};
-  },
-);
+export const membership = pgTable("Membership", {
+  id: text("id").primaryKey().notNull(),
+  communityId: text("communityId")
+    .notNull()
+    .references(() => community.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  isEventOrganiser: boolean("isEventOrganiser").default(false).notNull(),
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
 
 export const membershipRelations = relations(membership, ({ one, many }) => ({
   community: one(community, {
@@ -321,40 +404,46 @@ export const membershipRelations = relations(membership, ({ one, many }) => ({
   user: one(user, { fields: [membership.userId], references: [user.id] }),
 }));
 
-export const r_s_v_p = pgTable(
-  "RSVP",
-  {
-    id: varchar("id", { length: 256 }),
-    eventId: varchar("eventId", { length: 256 }),
-    userId: varchar("userId", { length: 256 }),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-  },
-  (t) => {
-    return {};
-  },
-);
+export const r_s_v_p = pgTable("RSVP", {
+  id: text("id").primaryKey().notNull(),
+  eventId: text("eventId")
+    .notNull()
+    .references(() => event.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
 
 export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
   event: one(event, { fields: [r_s_v_p.eventId], references: [event.id] }),
   user: one(user, { fields: [r_s_v_p.userId], references: [user.id] }),
 }));
 
-export const flagged = pgTable(
-  "Flagged",
-  {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-    userId: varchar("userId", { length: 256 }),
-    notifierId: varchar("notifierId", { length: 256 }),
-    note: varchar("note", { length: 256 }),
-    postId: varchar("postId", { length: 256 }),
-    commentId: integer("commentId"),
-  },
-  (t) => {
-    return {};
-  },
-);
+export const flagged = pgTable("Flagged", {
+  id: serial("id").primaryKey().notNull(),
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" }).notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  notifierId: text("notifierId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  note: text("note"),
+  postId: text("postId").references(() => post.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
+  commentId: integer("commentId").references(() => comment.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
+});
 
 export const flaggedRelations = relations(flagged, ({ one, many }) => ({
   comment: one(comment, {
@@ -366,22 +455,29 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
   user: one(user, { fields: [flagged.userId], references: [user.id] }),
 }));
 
-export const notification = pgTable(
-  "Notification",
-  {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-    type: integer("type").notNull(),
-    userId: varchar("userId", { length: 256 }),
-    postId: varchar("postId", { length: 256 }),
-    commentId: integer("commentId"),
-    notifierId: varchar("notifierId", { length: 256 }),
-  },
-  (t) => {
-    return {};
-  },
-);
+export const notification = pgTable("Notification", {
+  id: serial("id").primaryKey().notNull(),
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" }).notNull(),
+  type: integer("type").notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  postId: text("postId").references(() => post.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
+  commentId: integer("commentId").references(() => comment.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
+  notifierId: text("notifierId").references(() => user.id, {
+    onDelete: "cascade",
+    onUpdate: "cascade",
+  }),
+});
 
 export const notificationRelations = relations(
   notification,
@@ -402,18 +498,26 @@ export const notificationRelations = relations(
 export const event = pgTable(
   "Event",
   {
-    id: varchar("id", { length: 256 }),
-    eventDate: timestamp("eventDate"),
-    name: varchar("name", { length: 256 }),
-    coverImage: varchar("coverImage", { length: 256 }),
+    id: text("id").primaryKey().notNull(),
+    eventDate: timestamp("eventDate", { precision: 3, mode: "string" }),
+    name: text("name").notNull(),
+    coverImage: text("coverImage").notNull(),
     capacity: integer("capacity").notNull(),
-    description: varchar("description", { length: 256 }),
-    address: varchar("address", { length: 256 }),
-    slug: varchar("slug", { length: 256 }),
-    communityId: varchar("communityId", { length: 256 }),
+    description: text("description").notNull(),
+    address: text("address").notNull(),
+    slug: text("slug").notNull(),
+    communityId: text("communityId")
+      .notNull()
+      .references(() => community.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      idKey: uniqueIndex("Event_id_key").on(table.id),
+      slugKey: uniqueIndex("Event_slug_key").on(table.slug),
+    };
   },
 );
 
