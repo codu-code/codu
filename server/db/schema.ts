@@ -192,8 +192,8 @@ export const user = pgTable(
 
 export const userRelations = relations(user, ({ one, many }) => ({
   accounts: many(account),
-  bans: many(bannedUsers),
-  BannedUsers: one(bannedUsers),
+  bans: many(banned_users),
+  BannedUsers: one(banned_users),
   bookmarks: many(bookmark),
   comments: many(comment),
   flaggedNotifier: many(flagged),
@@ -317,7 +317,7 @@ export const likeRelations = relations(like, ({ one, many }) => ({
   user: one(user, { fields: [like.userId], references: [user.id] }),
 }));
 
-export const bannedUsers = pgTable(
+export const banned_users = pgTable(
   "BannedUsers",
   {
     id: serial("id").primaryKey().notNull(),
@@ -344,13 +344,13 @@ export const bannedUsers = pgTable(
 );
 
 export const banned_usersRelations = relations(
-  bannedUsers,
+  banned_users,
   ({ one, many }) => ({
     bannedBy: one(user, {
-      fields: [bannedUsers.bannedById],
+      fields: [banned_users.bannedById],
       references: [user.id],
     }),
-    user: one(user, { fields: [bannedUsers.userId], references: [user.id] }),
+    user: one(user, { fields: [banned_users.userId], references: [user.id] }),
   }),
 );
 
