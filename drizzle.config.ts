@@ -8,5 +8,7 @@ export default {
   dbCredentials: {
     connectionString: env.DATABASE_URL,
   },
-  tablesFilter: ["drizzle_*"],
+  out: "./drizzle",
+  verbose: true,
+  strict: true,
 } satisfies Config;
