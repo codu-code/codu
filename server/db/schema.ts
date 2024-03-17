@@ -167,25 +167,40 @@ export const postRelations = relations(post, ({ one, many }) => ({
 export const user = pgTable(
   "User",
   {
-    id: varchar("id", { length: 256 }),
-    username: varchar("username", { length: 256 }),
-    name: varchar("name", { length: 256 }).default(""),
-    email: varchar("email", { length: 256 }),
-    emailVerified: timestamp("emailVerified"),
-    image: varchar("image", { length: 256 }).default("/images/person.png"),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-    bio: varchar("bio", { length: 256 }),
-    location: varchar("location", { length: 256 }).default(""),
-    websiteUrl: varchar("websiteUrl", { length: 256 }).default(""),
-    emailNotifications: integer("emailNotifications").default(1),
-    newsletter: integer("newsletter").default(1),
-    professionalOrStudent: varchar("professionalOrStudent", { length: 256 }),
-    role: role("USER"),
+    id: text("id").primaryKey().notNull(),
+    username: varchar("username", { length: 40 }),
+    name: text("name").default("").notNull(),
+    email: text("email"),
+    emailVerified: timestamp("emailVerified", { precision: 3, mode: "string" }),
+    image: text("image").default("/images/person.png").notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+    bio: varchar("bio", { length: 200 }).default("").notNull(),
+    location: text("location").default("").notNull(),
+    websiteUrl: text("websiteUrl").default("").notNull(),
+    emailNotifications: boolean("emailNotifications").default(true).notNull(),
+    newsletter: boolean("newsletter").default(true).notNull(),
+    firstName: text("firstName"),
+    surname: text("surname"),
+    gender: text("gender"),
+    dateOfBirth: timestamp("dateOfBirth", { precision: 3, mode: "string" }),
+    professionalOrStudent: text("professionalOrStudent"),
+    workplace: text("workplace"),
+    jobTitle: text("jobTitle"),
+    levelOfStudy: text("levelOfStudy"),
+    course: text("course"),
+    role: role("role").default("USER").notNull(),
   },
-  (t) => {
+  (table) => {
     return {
-      indx0: index("username_t.id").on(t.username, t.id),
+      usernameKey: uniqueIndex("User_username_key").on(table.username),
+      emailKey: uniqueIndex("User_email_key").on(table.email),
+      usernameIdIdx: index("User_username_id_idx").on(table.id, table.username),
     };
   },
 );
