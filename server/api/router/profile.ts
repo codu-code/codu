@@ -55,6 +55,12 @@ export const profileRouter = createTRPCRouter({
         .where(eq(user.id, ctx.session.user.id))
         .returning();
 
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Profile not found or update failed",
+        });
+      }
       return profile;
     }),
   updateProfilePhotoUrl: protectedProcedure
@@ -66,6 +72,12 @@ export const profileRouter = createTRPCRouter({
         .where(eq(user.id, ctx.session.user.id))
         .returning();
 
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Profile not found or update failed",
+        });
+      }
       return profile;
     }),
   getUploadUrl: protectedProcedure
@@ -105,6 +117,13 @@ export const profileRouter = createTRPCRouter({
       .select()
       .from(user)
       .where(eq(user.username, username));
+
+    if (!profile) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Profile not found",
+      });
+    }
     return profile;
   }),
 });
