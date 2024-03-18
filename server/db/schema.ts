@@ -134,23 +134,33 @@ export const verification_token = pgTable(
 export const post = pgTable(
   "Post",
   {
-    id: varchar("id", { length: 256 }).notNull(),
-    title: varchar("title", { length: 256 }).notNull(),
-    canonicalUrl: varchar("canonicalUrl", { length: 256 }),
-    coverImage: varchar("coverImage", { length: 256 }),
-    approved: integer("approved").default(1),
-    body: varchar("body", { length: 256 }).notNull(),
-    excerpt: varchar("excerpt", { length: 256 }).default("").notNull(),
+    id: text("id").primaryKey().notNull(),
+    title: text("title").notNull(),
+    canonicalUrl: text("canonicalUrl"),
+    coverImage: text("coverImage"),
+    approved: boolean("approved").default(true).notNull(),
+    body: text("body").notNull(),
+    excerpt: varchar("excerpt", { length: 156 }).default("").notNull(),
     readTimeMins: integer("readTimeMins").notNull(),
-    published: timestamp("published"),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
-    slug: varchar("slug", { length: 256 }).unique(),
-    userId: varchar("userId", { length: 256 }).notNull(),
-    showComments: integer("showComments").default(1),
+    published: timestamp("published", { precision: 3, mode: "date" }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "date",
+    }).notNull(),
+    slug: text("slug").notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    showComments: boolean("showComments").default(true).notNull(),
   },
-  (t) => {
-    return {};
+  (table) => {
+    return {
+      idKey: uniqueIndex("Post_id_key").on(table.id),
+      slugKey: uniqueIndex("Post_slug_key").on(table.slug),
+    };
   },
 );
 
