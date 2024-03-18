@@ -15,7 +15,10 @@
     "test": "npx playwright install && playwright test",
     "studio": "prisma studio",
     "migrate": "npx prisma migrate",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "drizzle:generate": "drizzle-kit generate:pg",
+    "drizzle:push": "drizzle-kit push:pg",
+    "drizzle:seed": "node --loader esbuild-register/loader -r esbuild-register ./drizzle/seed.ts"
   },
   "prisma": {
     "seed": "npx tsx ./prisma/seed.ts"
@@ -40,6 +43,7 @@
     "@next-auth/prisma-adapter": "^1.0.7",
     "@next/bundle-analyzer": "^14.1.3",
     "@next/mdx": "^14.1.3",
+    "@paralleldrive/cuid2": "^2.2.2",
     "@prisma/client": "^5.10.2",
     "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-switch": "^1.0.3",
@@ -132,6 +136,7 @@
     "chance": "^1.1.11",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.14",
+    "esbuild-register": "^3.5.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.1.3",
     "eslint-config-prettier": "^9.1.0",
