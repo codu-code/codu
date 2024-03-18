@@ -1,3 +1,4 @@
+import { user } from "@/server/db/schema";
 import {
   saveSettingsSchema,
   getProfileSchema,
@@ -14,6 +15,7 @@ import {
 } from "@/server/lib/newsletter";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
+import { eq } from "drizzle-orm";
 
 export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
@@ -47,27 +49,35 @@ export const profileRouter = createTRPCRouter({
         }
       }
 
-      const profile = await ctx.prisma.user.update({
-        where: {
-          id: ctx.session.user.id,
-        },
-        data: {
-          ...input,
-        },
-      });
+      const [profile] = await ctx.db
+        .update(user)
+        .set({ ...input })
+        .where(eq(user.id, ctx.session.user.id))
+        .returning();
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Profile not found or update failed",
+        });
+      }
       return profile;
     }),
   updateProfilePhotoUrl: protectedProcedure
     .input(updateProfilePhotoUrlSchema)
     .mutation(async ({ input, ctx }) => {
-      const profile = await ctx.prisma.user.update({
-        where: {
-          id: ctx.session.user.id,
-        },
-        data: {
-          image: `${input.url}?id=${nanoid(3)}`,
-        },
-      });
+      const [profile] = await ctx.db
+        .update(user)
+        .set({ image: `${input.url}?id=${nanoid(3)}` })
+        .where(eq(user.id, ctx.session.user.id))
+        .returning();
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Profile not found or update failed",
+        });
+      }
       return profile;
     }),
   getUploadUrl: protectedProcedure
@@ -101,12 +111,19 @@ export const profileRouter = createTRPCRouter({
 
       return response;
     }),
-  get: publicProcedure.input(getProfileSchema).query(({ ctx, input }) => {
+  get: publicProcedure.input(getProfileSchema).query(async ({ ctx, input }) => {
     const { username } = input;
-    return ctx.prisma.user.findUnique({
-      where: {
-        username,
-      },
-    });
+    const [profile] = await ctx.db
+      .select()
+      .from(user)
+      .where(eq(user.username, username));
+
+    if (!profile) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Profile not found",
+      });
+    }
+    return profile;
   }),
 });

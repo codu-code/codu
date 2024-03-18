@@ -5,6 +5,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { createCommentReportEmailTemplate } from "@/utils/createCommentReportEmailTemplate";
 import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEmailTemplate";
+import { comment, post, user } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const reportRouter = createTRPCRouter({
   send: protectedProcedure
@@ -19,7 +21,7 @@ export const reportRouter = createTRPCRouter({
         }
 
         const { type, id, body } = input;
-        const user = ctx.session.user;
+        const reportingUser = ctx.session.user;
 
         function getBaseUrl() {
           if (typeof window !== "undefined") return "";
@@ -29,30 +31,33 @@ export const reportRouter = createTRPCRouter({
         }
 
         if (type === "comment" && typeof id === "number") {
-          const comment = await ctx.prisma.comment.findUniqueOrThrow({
-            where: { id },
-            include: {
-              user: true,
-              post: {
-                select: {
-                  slug: true,
-                },
+          const [commentDetails] = await ctx.db
+            .select({
+              body: comment.body,
+              post: { slug: post.slug },
+              user: {
+                email: user.email,
+                userId: user.id,
+                username: user.username,
               },
-            },
-          });
+            })
+            .from(comment)
+            .innerJoin(user, eq(user.id, comment.userId))
+            .innerJoin(post, eq(comment.postId, post.id))
+            .where(eq(comment.id, id));
 
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/articles/${comment.post.slug}`,
+            url: `${getBaseUrl()}/articles/${commentDetails.post.slug}`,
             id,
-            email: comment.user.email || "",
-            comment: comment.body,
-            userId: comment.user.id,
-            username: comment.user.username || "",
+            email: commentDetails.user.email || "",
+            comment: commentDetails.body || "",
+            userId: commentDetails.user.userId || "",
+            username: commentDetails.user.username || "",
             reportedBy: {
-              username: user.username,
-              id: user.id,
-              email: user?.email || "",
+              username: reportingUser.username,
+              id: reportingUser.id,
+              email: reportingUser?.email || "",
             },
           };
 
@@ -67,25 +72,32 @@ export const reportRouter = createTRPCRouter({
         }
 
         if (type === "post" && typeof id === "string") {
-          const post = await ctx.prisma.post.findUniqueOrThrow({
-            where: { id },
-            include: {
-              user: true,
-            },
-          });
+          const [postDetails] = await ctx.db
+            .select({
+              slug: post.slug,
+              title: post.title,
+              user: {
+                email: user.email,
+                userId: user.id,
+                username: user.username,
+              },
+            })
+            .from(post)
+            .innerJoin(user, eq(user.id, post.userId))
+            .where(eq(post.id, id));
 
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/articles/${post.slug}`,
+            url: `${getBaseUrl()}/articles/${postDetails.slug}`,
             id,
-            email: post.user.email || "",
-            title: post.title,
-            userId: post.user.id,
-            username: post.user.username || "",
+            email: postDetails.user.email || "",
+            title: postDetails.title,
+            userId: postDetails.user.userId || "",
+            username: postDetails.user.username || "",
             reportedBy: {
-              username: user.username,
-              id: user.id,
-              email: user?.email || "",
+              username: reportingUser.username,
+              id: reportingUser.id,
+              email: reportingUser?.email || "",
             },
           };
           const htmlMessage = createArticleReportEmailTemplate(report);
