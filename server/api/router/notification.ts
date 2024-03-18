@@ -4,6 +4,8 @@ import {
   GetNotificationsSchema,
   DeleteNotificationSchema,
 } from "../../../schema/notification";
+import { notification } from "@/server/db/schema";
+import { count, eq } from "drizzle-orm";
 
 export const notificationRouter = createTRPCRouter({
   delete: protectedProcedure
@@ -11,9 +13,10 @@ export const notificationRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentNotification = await ctx.prisma.notification.findUnique({
-        where: { id },
-      });
+      const [currentNotification] = await ctx.db
+        .select()
+        .from(notification)
+        .where(eq(notification.id, id));
 
       if (currentNotification?.userId !== ctx.session.user.id) {
         throw new TRPCError({
@@ -21,22 +24,20 @@ export const notificationRouter = createTRPCRouter({
         });
       }
 
-      const notification = await ctx.prisma.notification.delete({
-        where: {
-          id,
-        },
-      });
+      const [notificationRes] = await ctx.db
+        .delete(notification)
+        .where(eq(notification.id, id))
+        .returning();
 
-      return notification.id;
+      return notificationRes.id;
     }),
   deleteAll: protectedProcedure.mutation(async ({ ctx }) => {
-    const notification = await ctx.prisma.notification.deleteMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-    });
+    const notificationRes = await ctx.db
+      .delete(notification)
+      .where(eq(notification.userId, ctx.session.user.id))
+      .returning();
 
-    return notification;
+    return notificationRes.length;
   }),
   get: protectedProcedure
     .input(GetNotificationsSchema)
@@ -87,12 +88,11 @@ export const notificationRouter = createTRPCRouter({
   getCount: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx?.session?.user?.id;
 
-    const count = await ctx.prisma.notification.count({
-      where: {
-        userId,
-      },
-    });
+    const [notificationRes] = await ctx.db
+      .select({ count: count() })
+      .from(notification)
+      .where(eq(notification.userId, userId));
 
-    return count;
+    return notificationRes.count;
   }),
 });
