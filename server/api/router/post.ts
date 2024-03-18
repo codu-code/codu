@@ -422,19 +422,12 @@ export const postRouter = createTRPCRouter({
       return currentPost;
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
-    const response = await ctx.prisma.bookmark.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-      include: {
-        post: {
-          include: { user: true },
-        },
-      },
-      orderBy: {
-        id: "desc",
-      },
+    const response = await ctx.db.query.bookmark.findMany({
+      where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
+      with: { post: { with: { user: true } } },
+      orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
     });
+
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),
 });
