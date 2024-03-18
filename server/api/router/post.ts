@@ -290,64 +290,92 @@ export const postRouter = createTRPCRouter({
       const { cursor, sort, tag, searchTerm } = input;
 
       const orderMapping = {
-        newest: desc(post.published) as SQL | AnyPgColumn,
-        oldest: asc(post.published) as SQL | AnyPgColumn,
-        // todo deal with this it should be sorted by likes currently it just defaults to newest
-        top: desc(post.published) as SQL | AnyPgColumn,
+        newest: {
+          published: "desc" as Prisma.SortOrder,
+        },
+        oldest: {
+          published: "asc" as Prisma.SortOrder,
+        },
+        top: {
+          likes: {
+            _count: "desc" as Prisma.SortOrder,
+          },
+        },
       };
-      const sortOrder = orderMapping[sort] || orderMapping["newest"];
+      const orderBy = orderMapping[sort] || orderMapping["newest"];
 
-      const response = await ctx.db
-        .select({
-          id: post.id,
-          title: post.title,
-          updatedAt: post.updatedAt,
-          published: post.published,
-          readTimeMins: post.readTimeMins,
-          slug: post.slug,
-          excerpt: post.excerpt,
+      const response = await ctx.prisma.post.findMany({
+        take: limit + 1,
+        where: {
+          published: {
+            lte: new Date(),
+            not: null,
+          },
+          ...(tag
+            ? {
+                tags: {
+                  some: {
+                    tag: {
+                      title: {
+                        contains: tag?.toUpperCase() || "",
+                      },
+                    },
+                  },
+                },
+              }
+            : {}),
+          ...(searchTerm
+            ? {
+                OR: [
+                  {
+                    user: {
+                      name: {
+                        contains: searchTerm || "",
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    title: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    excerpt: {
+                      contains: searchTerm || "",
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
+        select: {
+          id: true,
+          title: true,
+          updatedAt: true,
+          published: true,
+          readTimeMins: true,
+          slug: true,
+          excerpt: true,
           user: {
-            name: user.name,
-            image: user.image,
-            username: user.username,
+            select: { name: true, image: true, username: true },
           },
           bookmarks: {
-            userId: bookmark.userId,
+            select: { userId: true },
+            where: { userId: userId },
           },
-        })
-        .from(post)
-        .leftJoin(user, eq(user.id, post.userId))
-        .leftJoin(bookmark, eq(bookmark.userId, post.userId))
-        .where(
-          and(
-            or(
-              and(
-                and(isNotNull(post.published), lte(post.published, new Date())),
-              ),
-              // @todo add search for tag here
-              // Do we need it though?
-              //sql`to_tsvector('simple', ${tag}) @@ to_tsquery('simple', ${searchTerm})`,
-              searchTerm
-                ? sql`to_tsvector('simple', ${post.title}) @@ to_tsquery('simple', ${searchTerm})`
-                : undefined,
-              searchTerm
-                ? sql`to_tsvector('simple', ${post.excerpt}) @@ to_tsquery('simple', ${searchTerm})`
-                : undefined,
-              // todo add search for user here
-              searchTerm
-                ? sql`to_tsvector('simple', ${user}) @@ to_tsquery('simple', ${searchTerm})`
-                : undefined,
-            ),
-            cursor ? gt(post.id, cursor) : undefined,
-          ),
-        )
-        .limit(limit + 1)
-        .orderBy(sortOrder);
+        },
+        cursor: cursor ? { id: cursor } : undefined,
+        skip: cursor ? 1 : 0,
+        orderBy,
+      });
 
       const cleaned = response.map((post) => {
-        let currentUserLikesPost = !!post.bookmarks;
+        let currentUserLikesPost = !!post.bookmarks.length;
         if (userId === undefined) currentUserLikesPost = false;
-        post.bookmarks = { userId: userId ?? null };
+        post.bookmarks = [];
         return { ...post, currentUserLikesPost };
       });
 
