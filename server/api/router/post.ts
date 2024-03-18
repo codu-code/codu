@@ -13,23 +13,9 @@ import {
   GetByIdSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
+import type { Prisma } from "@prisma/client";
 import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
-import {
-  and,
-  count,
-  eq,
-  gt,
-  inArray,
-  isNotNull,
-  isNull,
-  lte,
-  or,
-  sql,
-  desc,
-  SQL,
-  asc,
-} from "drizzle-orm";
-import { AnyPgColumn } from "drizzle-orm/pg-core";
+import { and, count, eq, gt, inArray, isNotNull, isNull } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -449,27 +435,6 @@ export const postRouter = createTRPCRouter({
         id: "desc",
       },
     });
-
-    console.log("response", response);
-
-    // const response1 = await ctx.db.query.bookmark.findMany({
-    //   where: (posts, { eq }) => eq(posts.userId, ctx.session.user.id),
-    //   with: {
-    //     post: {
-    //       with: {
-    //         user: true,
-    //       },
-    //     },
-    //   },
-    // });
-    const response1 = await ctx.db
-      .select()
-      .from(bookmark)
-      .where(eq(bookmark.userId, ctx.session.user.id))
-      .leftJoin(post, eq(post.userId, bookmark.userId))
-      .leftJoin(user, eq(user.id, bookmark.userId));
-    console.log("response1", response1);
-
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),
 });
