@@ -26,7 +26,7 @@ export const session = pgTable(
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    expires: timestamp("expires", { precision: 3, mode: "string" }).notNull(),
+    expires: timestamp("expires", { precision: 3, mode: "date" }).notNull(),
   },
   (table) => {
     return {
@@ -100,7 +100,7 @@ export const post_tagRelations = relations(post_tag, ({ one, many }) => ({
 export const tag = pgTable(
   "Tag",
   {
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
       .defaultNow()
       .notNull(),
     id: serial("id").primaryKey().notNull(),
@@ -181,14 +181,14 @@ export const user = pgTable(
     username: varchar("username", { length: 40 }),
     name: text("name").default("").notNull(),
     email: text("email"),
-    emailVerified: timestamp("emailVerified", { precision: 3, mode: "string" }),
+    emailVerified: timestamp("emailVerified", { precision: 3, mode: "date" }),
     image: text("image").default("/images/person.png").notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updatedAt", {
       precision: 3,
-      mode: "string",
+      mode: "date",
     }).notNull(),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
     location: text("location").default("").notNull(),
@@ -198,7 +198,7 @@ export const user = pgTable(
     firstName: text("firstName"),
     surname: text("surname"),
     gender: text("gender"),
-    dateOfBirth: timestamp("dateOfBirth", { precision: 3, mode: "string" }),
+    dateOfBirth: timestamp("dateOfBirth", { precision: 3, mode: "date" }),
     professionalOrStudent: text("professionalOrStudent"),
     workplace: text("workplace"),
     jobTitle: text("jobTitle"),
@@ -262,12 +262,12 @@ export const comment = pgTable(
   {
     id: serial("id").primaryKey().notNull(),
     body: text("body").notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updatedAt", {
       precision: 3,
-      mode: "string",
+      mode: "date",
     }).notNull(),
     postId: text("postId")
       .notNull()
@@ -307,7 +307,7 @@ export const like = pgTable(
   "Like",
   {
     id: serial("id").primaryKey().notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
       .defaultNow()
       .notNull(),
     userId: text("userId")
@@ -346,12 +346,12 @@ export const banned_users = pgTable(
   "BannedUsers",
   {
     id: serial("id").primaryKey().notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
       .defaultNow()
       .notNull(),
     updatedAt: timestamp("updatedAt", {
       precision: 3,
-      mode: "string",
+      mode: "date",
     }).notNull(),
     userId: text("userId")
       .notNull()
@@ -416,7 +416,7 @@ export const membership = pgTable("Membership", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   isEventOrganiser: boolean("isEventOrganiser").default(false).notNull(),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
     .defaultNow()
     .notNull(),
 });
@@ -437,7 +437,7 @@ export const r_s_v_p = pgTable("RSVP", {
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
     .defaultNow()
     .notNull(),
 });
@@ -449,10 +449,10 @@ export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
 
 export const flagged = pgTable("Flagged", {
   id: serial("id").primaryKey().notNull(),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" }).notNull(),
+  updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" }).notNull(),
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -482,10 +482,10 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
 
 export const notification = pgTable("Notification", {
   id: serial("id").primaryKey().notNull(),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" }).notNull(),
+  updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" }).notNull(),
   type: integer("type").notNull(),
   userId: text("userId")
     .notNull()
@@ -524,7 +524,7 @@ export const event = pgTable(
   "Event",
   {
     id: text("id").primaryKey().notNull(),
-    eventDate: timestamp("eventDate", { precision: 3, mode: "string" }),
+    eventDate: timestamp("eventDate", { precision: 3, mode: "date" }),
     name: text("name").notNull(),
     coverImage: text("coverImage").notNull(),
     capacity: integer("capacity").notNull(),
