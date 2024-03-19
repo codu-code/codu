@@ -2,6 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { BanUserSchema, UnbanUserSchema } from "../../../schema/admin";
 
 import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
+import { banned_users, session } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const adminRouter = createTRPCRouter({
   ban: adminOnlyProcedure
@@ -10,11 +12,11 @@ export const adminRouter = createTRPCRouter({
       const { userId, note } = input;
       const currentUserId = ctx.session.user.id;
 
-      const user = await ctx.prisma.user.findFirstOrThrow({
-        where: {
-          id: userId,
-        },
+      const user = await ctx.db.query.user.findFirst({
+        where: (user, { eq }) => eq(user.id, userId),
       });
+
+      if (!user) throw new Error("User not found");
 
       if (user.role === "ADMIN") {
         throw new TRPCError({
@@ -22,18 +24,15 @@ export const adminRouter = createTRPCRouter({
         });
       }
 
-      await ctx.prisma.bannedUsers.create({
-        data: {
-          userId,
-          note,
-          bannedById: currentUserId,
-        },
+      await ctx.db.insert(banned_users).values({
+        bannedById: currentUserId,
+        userId: userId,
+        note: note,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
-      await ctx.prisma.session.deleteMany({
-        where: {
-          userId,
-        },
-      });
+
+      await ctx.db.delete(session).where(eq(session.userId, userId));
 
       return { banned: true };
     }),
@@ -42,11 +41,7 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { userId } = input;
 
-      await ctx.prisma.bannedUsers.deleteMany({
-        where: {
-          userId,
-        },
-      });
+      await ctx.db.delete(banned_users).where(eq(banned_users.userId, userId));
 
       return { unbanned: true };
     }),
