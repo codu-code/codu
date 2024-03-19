@@ -39,7 +39,7 @@ const EventPreview: NextPage<Props> = (props) => {
   });
 
   return (
-    <article className="my-4 border-l-4 border-l-pink-600 bg-neutral-900 p-4 shadow-lg">
+    <article className="my-4 border-l-4 border-neutral-300 border-l-pink-600 bg-white p-4 shadow-lg dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
       <div className="flex flex-row">
         <div className="mb-4 basis-1/4">
           <span className="sr-only">{name}</span>
