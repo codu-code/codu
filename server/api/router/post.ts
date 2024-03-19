@@ -14,8 +14,17 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
-import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
-import { and, count, eq, gt, inArray, isNotNull, isNull } from "drizzle-orm";
+import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNotNull,
+  isNull,
+} from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -290,6 +299,35 @@ export const postRouter = createTRPCRouter({
       };
       const orderBy = orderMapping[sort] || orderMapping["newest"];
 
+      const response1 = await ctx.db.query.post.findMany({
+        columns: {
+          id: true,
+          title: true,
+          updatedAt: true,
+          published: true,
+          readTimeMins: true,
+          slug: true,
+          excerpt: true,
+        },
+        with: {
+          user: { columns: { name: true, image: true, username: true } },
+          bookmarks: {
+            where: (bookmarks, { eq }) =>
+              // if user isnt logged in userId will be undefined so no need to grab bookmarks
+              userId ? eq(bookmarks.userId, userId) : undefined,
+            columns: { userId: true },
+          },
+        },
+        where: (posts, { and, lte, gt }) =>
+          and(
+            and(isNotNull(posts.published), lte(posts.published, new Date())),
+            cursor ? gt(posts.id, cursor) : undefined,
+          ),
+        limit: limit + 1,
+        offset: cursor ? 1 : 0,
+        orderBy: [desc(post.published)],
+      });
+
       const response = await ctx.prisma.post.findMany({
         take: limit + 1,
         where: {
@@ -366,8 +404,21 @@ export const postRouter = createTRPCRouter({
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
+      console.log(
+        "Prisma Response",
+        response.map((elem) => elem.id),
+      );
+      console.log("Prisma nextItem", response[response.length - 1].id);
+
+      console.log(
+        "Drizzle Response",
+        response1.map((elem) => elem.id),
+      );
+      console.log("Drizzle nextItem", response1[response1.length - 1].id);
+
       if (response.length > limit) {
         const nextItem = response.pop();
+        console.log("nextItem", nextItem?.id);
         nextCursor = nextItem?.id;
       }
 
