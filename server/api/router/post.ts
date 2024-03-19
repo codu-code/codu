@@ -14,8 +14,8 @@ import {
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
-import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
-import { and, count, eq, inArray } from "drizzle-orm";
+import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
+import { and, count, eq, gt, inArray, isNotNull, isNull } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -374,56 +374,31 @@ export const postRouter = createTRPCRouter({
       return { posts: cleaned, nextCursor };
     }),
   myPublished: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.post.findMany({
-      where: {
-        NOT: [{ published: null }],
-        published: {
-          lte: new Date(),
-        },
-        userId: ctx?.session?.user?.id,
-      },
-      include: {
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
-      },
-      orderBy: {
-        published: "desc",
-      },
+    return await ctx.db.query.post.findMany({
+      where: (posts, { lte, isNotNull, eq }) =>
+        and(
+          isNotNull(posts.published),
+          lte(posts.published, new Date()),
+          eq(posts.userId, ctx?.session?.user?.id),
+        ),
+      orderBy: (posts, { desc }) => [desc(posts.published)],
     });
   }),
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.post.findMany({
-      where: {
-        NOT: [{ published: null }],
-        published: {
-          gt: new Date(),
-        },
-        userId: ctx?.session?.user?.id,
-      },
-      include: {
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
-      },
-      orderBy: {
-        published: "asc",
-      },
+    return await ctx.db.query.post.findMany({
+      where: (posts, { eq }) =>
+        and(
+          gt(posts.published, new Date()),
+          isNotNull(posts.published),
+          eq(posts.userId, ctx?.session?.user?.id),
+        ),
+      orderBy: (posts, { asc }) => [asc(posts.published)],
     });
   }),
   myDrafts: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.post.findMany({
-      where: {
-        published: null,
-        userId: ctx.session.user.id,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
+    return ctx.db.query.post.findMany({
+      where: (posts, { eq }) =>
+        and(eq(posts.userId, ctx.session.user.id), isNull(posts.published)),
     });
   }),
   editDraft: protectedProcedure
@@ -431,18 +406,10 @@ export const postRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentPost = await ctx.prisma.post.findUnique({
-        where: { id },
-        include: {
-          tags: {
-            select: {
-              tag: {
-                select: {
-                  title: true,
-                },
-              },
-            },
-          },
+      const currentPost = await ctx.db.query.post.findFirst({
+        where: (posts, { eq }) => eq(posts.id, id),
+        with: {
+          tags: { with: { tag: true } },
         },
       });
 
@@ -455,19 +422,12 @@ export const postRouter = createTRPCRouter({
       return currentPost;
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
-    const response = await ctx.prisma.bookmark.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-      include: {
-        post: {
-          include: { user: true },
-        },
-      },
-      orderBy: {
-        id: "desc",
-      },
+    const response = await ctx.db.query.bookmark.findMany({
+      where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
+      with: { post: { with: { user: true } } },
+      orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
     });
+
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),
 });
