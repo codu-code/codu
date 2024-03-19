@@ -273,7 +273,7 @@ ${chance.paragraph()}
     }
 
     console.log(`Seeding finished.`);
-    process.exit(1);
+    process.exit(0);
   }
 
   async function deleteDataFromAllTables() {
