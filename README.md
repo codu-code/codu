@@ -29,7 +29,7 @@ npm install
 
 - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
 
-5. Create a `.env` file and add the following variables. You can copy the contents of `.env.example` with `cat .env.example > .env`.
+5. Create a `.env` file and add the following variables. You can copy the contents of `sample.env` with `cat sample.env > .env`.
 
 ```
 # This default value is if you run our local docker-compose.yml file to create the database.
