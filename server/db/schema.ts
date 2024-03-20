@@ -257,6 +257,7 @@ export const bookmarkRelations = relations(bookmark, ({ one, many }) => ({
   post: one(post, { fields: [bookmark.postId], references: [post.id] }),
   user: one(user, { fields: [bookmark.userId], references: [user.id] }),
 }));
+
 export const comment = pgTable(
   "Comment",
   {
@@ -291,11 +292,11 @@ export const comment = pgTable(
 );
 
 export const commentRelations = relations(comment, ({ one, many }) => ({
-  parent: one(comment, {
-    fields: [comment.parentId],
-    references: [comment.id],
-  }),
-  children: many(comment),
+  // parent: one(comment, {
+  //   fields: [comment.parentId],
+  //   references: [comment.id],
+  // }),
+  // children: many(comment),
   post: one(post, { fields: [comment.postId], references: [post.id] }),
   user: one(user, { fields: [comment.userId], references: [user.id] }),
   Flagged: many(flagged),
@@ -375,7 +376,7 @@ export const banned_usersRelations = relations(
       fields: [banned_users.bannedById],
       references: [user.id],
     }),
-    user: one(user, { fields: [banned_users.userId], references: [user.id] }),
+    // user: one(user, { fields: [banned_users.userId], references: [user.id] }),
   }),
 );
 
@@ -477,7 +478,7 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
   }),
   notifier: one(user, { fields: [flagged.notifierId], references: [user.id] }),
   post: one(post, { fields: [flagged.postId], references: [post.id] }),
-  user: one(user, { fields: [flagged.userId], references: [user.id] }),
+  // user: one(user, { fields: [flagged.userId], references: [user.id] }),
 }));
 
 export const notification = pgTable("Notification", {
@@ -516,7 +517,7 @@ export const notificationRelations = relations(
       references: [user.id],
     }),
     post: one(post, { fields: [notification.postId], references: [post.id] }),
-    user: one(user, { fields: [notification.userId], references: [user.id] }),
+    // user: one(user, { fields: [notification.userId], references: [user.id] }),
   }),
 );
 

@@ -59,7 +59,7 @@ export const DeletePostSchema = z.object({
 export const GetPostsSchema = z.object({
   userId: z.string().optional(),
   limit: z.number().min(1).max(100).nullish(),
-  cursor: z.string().nullish(),
+  cursor: z.object({ id: z.string(), published: z.date() }).nullish(),
   sort: z.enum(["newest", "oldest", "top"]),
   tag: z.string().nullish(),
   searchTerm: z.string().nullish(),

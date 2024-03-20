@@ -18,13 +18,14 @@ import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
 import {
   and,
   count,
-  desc,
   eq,
   gt,
   inArray,
   isNotNull,
   isNull,
+  lte,
 } from "drizzle-orm";
+import { withCursorPagination } from "drizzle-pagination";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -297,7 +298,32 @@ export const postRouter = createTRPCRouter({
           },
         },
       };
+
+      type Order = "desc" | "asc";
+
+      const orderMapping1 = {
+        newest: {
+          primaryCursorColumn: post.published,
+          secondaryCursorColumn: post.id,
+          direction: "desc" as Order,
+          primaryCursorDefault: new Date(),
+        },
+        oldest: {
+          primaryCursorColumn: post.published,
+          secondaryCursorColumn: post.id,
+          direction: "asc" as Order,
+          primaryCursorDefault: new Date(0),
+        },
+        top: {
+          primaryCursorColumn: post.published,
+          secondaryCursorColumn: post.id,
+          direction: "desc" as Order,
+          primaryCursorDefault: new Date(),
+        },
+      };
+
       const orderBy = orderMapping[sort] || orderMapping["newest"];
+      const orderBy1 = orderMapping1[sort] || orderMapping1["newest"];
 
       const response1 = await ctx.db.query.post.findMany({
         columns: {
@@ -318,14 +344,25 @@ export const postRouter = createTRPCRouter({
             columns: { userId: true },
           },
         },
-        where: (posts, { and, lte, gt }) =>
-          and(
-            and(isNotNull(posts.published), lte(posts.published, new Date())),
-            cursor ? gt(posts.id, cursor) : undefined,
+        ...withCursorPagination({
+          limit: limit + 1,
+          cursors: [
+            [
+              orderBy1.primaryCursorColumn,
+              orderBy1.direction,
+              cursor?.published ?? orderBy1.primaryCursorDefault,
+            ],
+            [
+              orderBy1.secondaryCursorColumn,
+              orderBy1.direction,
+              cursor?.id ?? "",
+            ],
+          ],
+          where: and(
+            isNotNull(post.published),
+            lte(post.published, new Date()),
           ),
-        limit: limit + 1,
-        offset: cursor ? 1 : 0,
-        orderBy: [desc(post.published)],
+        }),
       });
 
       const response = await ctx.prisma.post.findMany({
@@ -391,12 +428,12 @@ export const postRouter = createTRPCRouter({
             where: { userId: userId },
           },
         },
-        cursor: cursor ? { id: cursor } : undefined,
+        cursor: cursor ? { id: cursor.id } : undefined,
         skip: cursor ? 1 : 0,
         orderBy,
       });
 
-      const cleaned = response.map((post) => {
+      const cleaned = response1.map((post) => {
         let currentUserLikesPost = !!post.bookmarks.length;
         if (userId === undefined) currentUserLikesPost = false;
         post.bookmarks = [];
@@ -416,10 +453,14 @@ export const postRouter = createTRPCRouter({
       );
       console.log("Drizzle nextItem", response1[response1.length - 1].id);
 
-      if (response.length > limit) {
-        const nextItem = response.pop();
+      if (response1.length > limit) {
+        const nextItem = response1.pop();
         console.log("nextItem", nextItem?.id);
-        nextCursor = nextItem?.id;
+        if (nextItem)
+          nextCursor = {
+            id: nextItem.id,
+            published: nextItem.published as Date,
+          };
       }
 
       return { posts: cleaned, nextCursor };

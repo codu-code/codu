@@ -114,7 +114,7 @@ const ArticlesPage = () => {
               {status === "success" &&
                 data.pages.map((page) => {
                   return (
-                    <Fragment key={page.nextCursor ?? "lastPage"}>
+                    <Fragment key={page.nextCursor?.id ?? "lastPage"}>
                       {page.posts.map(
                         ({
                           slug,
