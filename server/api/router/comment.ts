@@ -11,6 +11,7 @@ import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "../../../utils/notifications";
+import { comment, notification } from "@/server/db/schema";
 
 export const commentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -19,61 +20,53 @@ export const commentRouter = createTRPCRouter({
       const { body, postId, parentId } = input;
       const userId = ctx.session.user.id;
 
-      const postData = await ctx.prisma.post.findUnique({
-        where: {
-          id: postId,
-        },
-        select: {
-          userId: true,
-        },
+      const postData = await ctx.db.query.post.findFirst({
+        where: (posts, { eq }) => eq(posts.id, postId),
       });
 
       const postOwnerId = postData?.userId;
 
-      const { id } = await ctx.prisma.comment.create({
-        data: {
+      const [createdComment] = await ctx.db
+        .insert(comment)
+        .values({
           userId,
-          body,
           postId,
+          body,
           parentId,
-        },
-      });
+          updatedAt: new Date(),
+        })
+        .returning();
 
       if (parentId) {
-        const commentData = await ctx.prisma.comment.findUnique({
-          where: {
-            id: parentId,
-          },
-          select: {
-            userId: true,
-          },
+        const commentData = await ctx.db.query.comment.findFirst({
+          where: (posts, { eq }) => eq(posts.id, parentId),
+          columns: { userId: true },
         });
+
         if (commentData?.userId && commentData?.userId !== userId) {
-          await ctx.prisma.notification.create({
-            data: {
-              notifierId: userId,
-              type: NEW_REPLY_TO_YOUR_COMMENT,
-              postId,
-              userId: commentData.userId,
-              commentId: id,
-            },
+          await ctx.db.insert(notification).values({
+            notifierId: userId,
+            type: NEW_REPLY_TO_YOUR_COMMENT,
+            postId,
+            userId: commentData.userId,
+            commentId: createdComment.id,
+            updatedAt: new Date(),
           });
         }
       }
 
       if (!parentId && postOwnerId && postOwnerId !== userId) {
-        await ctx.prisma.notification.create({
-          data: {
-            notifierId: userId,
-            type: NEW_COMMENT_ON_YOUR_POST,
-            postId,
-            userId: postOwnerId,
-            commentId: id,
-          },
+        await ctx.db.insert(notification).values({
+          notifierId: userId,
+          type: NEW_COMMENT_ON_YOUR_POST,
+          postId,
+          userId: postOwnerId,
+          commentId: createdComment.id,
+          updatedAt: new Date(),
         });
       }
 
-      return id;
+      return createdComment.id;
     }),
   edit: protectedProcedure
     .input(EditCommentSchema)
