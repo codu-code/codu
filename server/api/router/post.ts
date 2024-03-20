@@ -13,7 +13,6 @@ import {
   GetByIdSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
-import type { Prisma } from "@prisma/client";
 import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
 import {
   and,
@@ -283,21 +282,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 50;
-      const { cursor, sort, tag, searchTerm } = input;
-
-      const orderMapping = {
-        newest: {
-          published: "desc" as Prisma.SortOrder,
-        },
-        oldest: {
-          published: "asc" as Prisma.SortOrder,
-        },
-        top: {
-          likes: {
-            _count: "desc" as Prisma.SortOrder,
-          },
-        },
-      };
+      const { cursor, sort, tag } = input;
 
       type Order = "desc" | "asc";
 
@@ -322,10 +307,9 @@ export const postRouter = createTRPCRouter({
         },
       };
 
-      const orderBy = orderMapping[sort] || orderMapping["newest"];
-      const orderBy1 = orderMapping1[sort] || orderMapping1["newest"];
+      const orderBy = orderMapping1[sort] || orderMapping1["newest"];
 
-      const response1 = await ctx.db.query.post.findMany({
+      const response = await ctx.db.query.post.findMany({
         columns: {
           id: true,
           title: true,
@@ -348,13 +332,13 @@ export const postRouter = createTRPCRouter({
           limit: limit + 1,
           cursors: [
             [
-              orderBy1.primaryCursorColumn,
-              orderBy1.direction,
-              cursor?.published ?? orderBy1.primaryCursorDefault,
+              orderBy.primaryCursorColumn,
+              orderBy.direction,
+              cursor?.published ?? orderBy.primaryCursorDefault,
             ],
             [
-              orderBy1.secondaryCursorColumn,
-              orderBy1.direction,
+              orderBy.secondaryCursorColumn,
+              orderBy.direction,
               cursor?.id ?? "",
             ],
           ],
@@ -365,75 +349,7 @@ export const postRouter = createTRPCRouter({
         }),
       });
 
-      const response = await ctx.prisma.post.findMany({
-        take: limit + 1,
-        where: {
-          published: {
-            lte: new Date(),
-            not: null,
-          },
-          ...(tag
-            ? {
-                tags: {
-                  some: {
-                    tag: {
-                      title: {
-                        contains: tag?.toUpperCase() || "",
-                      },
-                    },
-                  },
-                },
-              }
-            : {}),
-          ...(searchTerm
-            ? {
-                OR: [
-                  {
-                    user: {
-                      name: {
-                        contains: searchTerm || "",
-                        mode: "insensitive",
-                      },
-                    },
-                  },
-                  {
-                    title: {
-                      contains: searchTerm || "",
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    excerpt: {
-                      contains: searchTerm || "",
-                      mode: "insensitive",
-                    },
-                  },
-                ],
-              }
-            : {}),
-        },
-        select: {
-          id: true,
-          title: true,
-          updatedAt: true,
-          published: true,
-          readTimeMins: true,
-          slug: true,
-          excerpt: true,
-          user: {
-            select: { name: true, image: true, username: true },
-          },
-          bookmarks: {
-            select: { userId: true },
-            where: { userId: userId },
-          },
-        },
-        cursor: cursor ? { id: cursor.id } : undefined,
-        skip: cursor ? 1 : 0,
-        orderBy,
-      });
-
-      const cleaned = response1.map((post) => {
+      const cleaned = response.map((post) => {
         let currentUserLikesPost = !!post.bookmarks.length;
         if (userId === undefined) currentUserLikesPost = false;
         post.bookmarks = [];
@@ -441,20 +357,8 @@ export const postRouter = createTRPCRouter({
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
-      console.log(
-        "Prisma Response",
-        response.map((elem) => elem.id),
-      );
-      console.log("Prisma nextItem", response[response.length - 1].id);
-
-      console.log(
-        "Drizzle Response",
-        response1.map((elem) => elem.id),
-      );
-      console.log("Drizzle nextItem", response1[response1.length - 1].id);
-
-      if (response1.length > limit) {
-        const nextItem = response1.pop();
+      if (response.length > limit) {
+        const nextItem = response.pop();
         console.log("nextItem", nextItem?.id);
         if (nextItem)
           nextCursor = {
