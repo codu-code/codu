@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
-import { Logger } from "drizzle-orm/logger";
+import { type Logger } from "drizzle-orm/logger";
 
 import postgres from "postgres";
 
