@@ -22,6 +22,7 @@ export const commentRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
 
       const postData = await ctx.db.query.post.findFirst({
+        columns: { userId: true },
         where: (posts, { eq }) => eq(posts.id, postId),
       });
 
