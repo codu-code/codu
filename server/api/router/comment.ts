@@ -33,7 +33,6 @@ export const commentRouter = createTRPCRouter({
           postId,
           body,
           parentId,
-          updatedAt: new Date(),
         })
         .returning();
 
@@ -50,7 +49,6 @@ export const commentRouter = createTRPCRouter({
             postId,
             userId: commentData.userId,
             commentId: createdComment.id,
-            updatedAt: new Date(),
           });
         }
       }
@@ -62,7 +60,6 @@ export const commentRouter = createTRPCRouter({
           postId,
           userId: postOwnerId,
           commentId: createdComment.id,
-          updatedAt: new Date(),
         });
       }
 
