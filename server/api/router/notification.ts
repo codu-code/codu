@@ -5,7 +5,7 @@ import {
   DeleteNotificationSchema,
 } from "../../../schema/notification";
 import { notification } from "@/server/db/schema";
-import { count, eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 
 export const notificationRouter = createTRPCRouter({
   delete: protectedProcedure
@@ -46,34 +46,31 @@ export const notificationRouter = createTRPCRouter({
 
       const limit = input?.limit ?? 50;
       const { cursor } = input;
-      const response = await ctx.prisma.notification.findMany({
-        take: limit + 1,
-        where: {
-          userId,
-        },
-        select: {
-          id: true,
-          type: true,
-          createdAt: true,
+      const response = await ctx.db.query.notification.findMany({
+        columns: { id: true, type: true, createdAt: true },
+        with: {
           notifier: {
-            select: {
+            columns: {
               name: true,
               username: true,
               image: true,
             },
           },
           post: {
-            select: {
+            columns: {
               title: true,
               slug: true,
             },
           },
         },
-        cursor: cursor ? { id: cursor } : undefined,
-        skip: cursor ? 1 : 0,
-        orderBy: {
-          createdAt: "desc",
-        },
+        where: (notifications, { eq, and, lte, or }) =>
+          and(
+            eq(notifications.userId, userId),
+            cursor ? lte(notifications.id, cursor) : undefined,
+          ),
+        limit: limit + 1,
+        offset: cursor ? 1 : 0,
+        orderBy: [desc(notification.createdAt)],
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
