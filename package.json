@@ -80,7 +80,6 @@
     "@trpc/server": "^10.45.1",
     "atropos": "^2.0.2",
     "clsx": "^2.1.0",
-    "console-log-colors": "^0.4.0",
     "copy-to-clipboard": "^3.3.3",
     "drizzle-orm": "^0.29.5",
     "fathom-client": "^3.6.0",

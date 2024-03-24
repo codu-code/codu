@@ -5,7 +5,6 @@ import postgres from "postgres";
 
 import { env } from "@/config/env";
 import * as schema from "@/server/db/schema";
-import { green } from "console-log-colors";
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
@@ -18,7 +17,7 @@ const globalForDb = globalThis as unknown as {
 // drizzles default is ugly
 const drizzlelogger: Logger = {
   logQuery(query: string, params: unknown[]): void {
-    console.log(green("drizzle:query"), query, params.join(","));
+    console.log("\x1b[32m%s\x1b[0m", "drizzle:query", query, params.join(",")); //cyan
   },
 };
 
