@@ -3,14 +3,14 @@ import GitHubProvider from "next-auth/providers/github";
 import EmailProvider, {
   type SendVerificationRequestParams,
 } from "next-auth/providers/email";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
 import * as Sentry from "@sentry/nextjs";
-
-import prisma from "@/server/db/client";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { db } from "./db";
 import sendEmail, { nodemailerSesTransporter } from "@/utils/sendEmail";
 import { manageNewsletterSubscription } from "./lib/newsletter";
 import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
+import type { Adapter } from "next-auth/adapters";
 
 const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
   const { identifier, url } = params;
@@ -33,7 +33,7 @@ const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
 };
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: DrizzleAdapter(db) as Adapter,
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
@@ -62,11 +62,10 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user }) {
-      const userIsBanned = !!(await prisma.bannedUsers.findFirst({
-        where: {
-          userId: user.id,
-        },
-      }));
+      const userIsBanned = await db.query.banned_users.findFirst({
+        where: (banned_users, { eq }) => eq(banned_users.id, parseInt(user.id)),
+      });
+
       // Allows signin or not
       return !userIsBanned;
     },
