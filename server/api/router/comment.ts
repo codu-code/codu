@@ -11,7 +11,8 @@ import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "../../../utils/notifications";
-import { comment, notification } from "@/server/db/schema";
+import { comment, notification, like } from "@/server/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export const commentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -21,10 +22,12 @@ export const commentRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
 
       const postData = await ctx.db.query.post.findFirst({
+        columns: { userId: true },
         where: (posts, { eq }) => eq(posts.id, postId),
       });
 
       const postOwnerId = postData?.userId;
+      const now = new Date();
 
       const [createdComment] = await ctx.db
         .insert(comment)
@@ -33,6 +36,7 @@ export const commentRouter = createTRPCRouter({
           postId,
           body,
           parentId,
+          updatedAt: now,
         })
         .returning();
 
@@ -49,6 +53,7 @@ export const commentRouter = createTRPCRouter({
             postId,
             userId: commentData.userId,
             commentId: createdComment.id,
+            updatedAt: now,
           });
         }
       }
@@ -60,6 +65,7 @@ export const commentRouter = createTRPCRouter({
           postId,
           userId: postOwnerId,
           commentId: createdComment.id,
+          updatedAt: now,
         });
       }
 
@@ -69,10 +75,9 @@ export const commentRouter = createTRPCRouter({
     .input(EditCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, id } = input;
-      const currentComment = await ctx.prisma.comment.findFirstOrThrow({
-        where: {
-          id,
-        },
+
+      const currentComment = await ctx.db.query.comment.findFirst({
+        where: (comments, { eq }) => eq(comments.id, id),
       });
 
       if (currentComment?.userId !== ctx.session.user.id) {
@@ -85,23 +90,23 @@ export const commentRouter = createTRPCRouter({
         return currentComment;
       }
 
-      const comment = await ctx.prisma.comment.update({
-        where: {
-          id,
-        },
-        data: {
+      const updatedComment = await ctx.db
+        .update(comment)
+        .set({
           body,
-        },
-      });
-      return comment;
+          updatedAt: new Date(),
+        })
+        .where(eq(comment.id, id));
+
+      return updatedComment;
     }),
   delete: protectedProcedure
     .input(DeleteCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
 
-      const currentComment = await ctx.prisma.comment.findUnique({
-        where: { id },
+      const currentComment = await ctx.db.query.comment.findFirst({
+        where: (comments, { eq }) => eq(comments.id, id),
       });
 
       if (currentComment?.userId !== ctx.session.user.id) {
@@ -110,13 +115,12 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      const comment = await ctx.prisma.comment.delete({
-        where: {
-          id,
-        },
-      });
+      const [deletedComment] = await ctx.db
+        .delete(comment)
+        .where(eq(comment.id, id))
+        .returning();
 
-      return comment.id;
+      return deletedComment.id;
     }),
   like: protectedProcedure
     .input(LikeCommentSchema)
@@ -124,28 +128,23 @@ export const commentRouter = createTRPCRouter({
       const { commentId } = input;
       const userId = ctx.session.user.id;
 
-      const liked = await ctx.prisma.like.findUnique({
-        where: {
-          userId_commentId: { userId, commentId },
-        },
+      const commentLiked = await ctx.db.query.like.findFirst({
+        where: (likes, { eq }) =>
+          and(eq(likes.userId, userId), eq(likes.commentId, commentId)),
       });
 
-      if (liked) {
-        const res = await ctx.prisma.like.delete({
-          where: {
-            userId_commentId: { userId, commentId },
-          },
-        });
-
-        return res;
-      }
-
-      const res = await ctx.prisma.like.create({
-        data: {
-          commentId,
-          userId,
-        },
-      });
+      const [res] = commentLiked
+        ? await ctx.db
+            .delete(like)
+            .where(and(eq(like.userId, userId), eq(like.commentId, commentId)))
+            .returning()
+        : await ctx.db
+            .insert(like)
+            .values({
+              commentId,
+              userId,
+            })
+            .returning();
 
       return res;
     }),
