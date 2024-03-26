@@ -222,8 +222,12 @@ export const user = pgTable(
 
 export const userRelations = relations(user, ({ one, many }) => ({
   accounts: many(account),
-  bans: many(banned_users),
-  BannedUsers: one(banned_users),
+  bans: many(banned_users, { relationName: "bans" }),
+  BannedUsers: one(banned_users, {
+    fields: [user.id],
+    references: [banned_users.userId],
+    relationName: "BannedUsers",
+  }),
   bookmarks: many(bookmark),
   comments: many(comment),
   flaggedNotifier: many(flagged),
@@ -367,8 +371,13 @@ export const banned_usersRelations = relations(
     bannedBy: one(user, {
       fields: [banned_users.bannedById],
       references: [user.id],
+      relationName: "bannedBy",
     }),
-    user: one(user, { fields: [banned_users.userId], references: [user.id] }),
+    user: one(user, {
+      fields: [banned_users.userId],
+      references: [user.id],
+      relationName: "user",
+    }),
   }),
 );
 
@@ -523,7 +532,7 @@ export const event = pgTable(
       .notNull()
       .primaryKey()
       .unique(),
-    eventDate: timestamp("eventDate"),
+    eventDate: timestamp("eventDate").notNull(),
     name: text("name").notNull(),
     coverImage: text("coverImage").notNull(),
     capacity: integer("capacity").notNull(),
