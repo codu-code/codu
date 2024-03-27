@@ -16,13 +16,10 @@
     "studio": "prisma studio",
     "migrate": "npx prisma migrate",
     "prepare": "husky install",
-    "drizzle:generate": "drizzle-kit generate:pg",
-    "drizzle:push": "drizzle-kit push:pg",
-    "drizzle:migrate": "npx tsx -r dotenv/config ./drizzle/migrate.ts",
-    "seed": "npx tsx -r dotenv/config ./drizzle/seed.ts"
-  },
-  "prisma": {
-    "seed": "npx tsx ./prisma/seed.ts"
+    "db:generate": "drizzle-kit generate:pg",
+    "db:push": "drizzle-kit push:pg",
+    "db:migrate": "npx tsx -r dotenv/config ./drizzle/migrate.ts",
+    "db:seed": "npx tsx -r dotenv/config ./drizzle/seed.ts"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown",
