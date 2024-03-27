@@ -59,7 +59,9 @@ const Create = () => {
     watch,
     reset,
     getValues,
-    formState: { isDirty },
+    formState: { isDirty, errors },
+    setError,
+    clearErrors,
   } = useForm<SavePostInput>({
     mode: "onSubmit",
     defaultValues: {
@@ -224,6 +226,9 @@ const Create = () => {
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    if (errors.tags) {
+      clearErrors("tags");
+    }
     const { key } = e;
     const trimmedInput = tagValue
       .trim()
@@ -231,12 +236,20 @@ const Create = () => {
       .replace(/[^\w\s]/gi, "");
     if (
       (key === "," || key === "." || key === "Enter") &&
-      trimmedInput.length &&
-      !tags.includes(trimmedInput)
+      trimmedInput.length
     ) {
-      e.preventDefault();
-      setTags((prevState) => [...prevState, trimmedInput]);
-      setTagValue("");
+      if (!tags.includes(trimmedInput)) {
+        e.preventDefault();
+        setTags((prevState) => [...prevState, trimmedInput]);
+        setTagValue("");
+      } else {
+        setError("tags", {
+          type: "manual",
+          message: "Tag already exists",
+        });
+        e.preventDefault();
+        setTagValue("");
+      }
     }
   };
 
@@ -330,6 +343,14 @@ const Create = () => {
                       value={tagValue}
                       onKeyDown={onKeyDown}
                     />
+                    {errors.tags && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {`${
+                          errors.tags.message ||
+                          "Something is wrong with the tags"
+                        }`}
+                      </p>
+                    )}
                     <div>
                       {tags.map((tag) => (
                         <div
