@@ -5,6 +5,9 @@ import { customAlphabet } from "nanoid";
 import prisma from "@/server/db/client";
 import * as Sentry from "@sentry/nextjs";
 import { isUserSubscribedToNewsletter } from "@/server/lib/newsletter";
+import { db } from "@/server/db";
+import { user } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const metadata = {
   title: "Settings - Update your profile",
@@ -30,14 +33,21 @@ export default async function Page() {
     redirect("/get-started");
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
+  const existingUser = await db.query.user.findFirst({
+    columns: {
+      name: true,
+      username: true,
+      bio: true,
+      location: true,
+      websiteUrl: true,
+      emailNotifications: true,
+      newsletter: true,
+      image: true,
     },
-    select,
+    where: (users, { eq }) => eq(users.id, session.user!.id),
   });
 
-  if (!user?.username) {
+  if (!existingUser?.username) {
     const nanoid = customAlphabet("1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", 3);
 
     const userName = session.user.name || "";
@@ -47,15 +57,20 @@ export default async function Page() {
     const initialUsername =
       `${cleanedUserName.replace(/\s/g, "-")}-${nanoid()}`.toLowerCase();
 
-    const newUser = await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
-        username: initialUsername,
-      },
-      select,
-    });
+    const [newUser] = await db
+      .update(user)
+      .set({ username: initialUsername })
+      .where(eq(user.id, session.user.id))
+      .returning({
+        name: user.name,
+        username: user.username,
+        bio: user.bio,
+        location: user.location,
+        websiteUrl: user.websiteUrl,
+        emailNotifications: user.emailNotifications,
+        newsletter: user.newsletter,
+        image: user.image,
+      });
 
     return <Content profile={newUser} />;
   }
@@ -67,12 +82,12 @@ export default async function Page() {
   try {
     const newsletter = await isUserSubscribedToNewsletter(session.user.email);
     const cleanedUser = {
-      ...user,
+      ...existingUser,
       newsletter,
     };
     return <Content profile={cleanedUser} />;
   } catch (error) {
     Sentry.captureException(error);
-    return <Content profile={user} />;
+    return <Content profile={existingUser} />;
   }
 }
