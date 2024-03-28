@@ -46,13 +46,13 @@ For a more detailed how to guide on setting them up [go to the Environment Varia
 6. [Make sure your database is running](#database_url) and setup the tables in the database with Prisma by running:
 
 ```bash
-npx prisma db push
+npm run db:push
 ```
 
 7. Seed the database with some mock data by running:
 
 ```bash
-npx prisma db seed
+npm run db:seed
 ```
 
 8. Finally, run the development server:

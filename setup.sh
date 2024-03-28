@@ -20,7 +20,7 @@ read -p "Copy and past your auth callback url here: " URL
 
 echo "- Nice, now open two terminals and run the following commands: "
 echo "- Terminal 1) - docker-compose up "
-echo "- Terminal 2) - npx prisma db push, npx prisma db seed, npm run dev "
+echo "- Terminal 2) - npm db:push, npm db:seed, npm run dev "
 
 # Create .env file
 echo "DATABASE_URL=postgresql://postgres:secret@127.0.0.1:5432/postgres" > .env
