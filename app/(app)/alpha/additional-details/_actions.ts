@@ -1,7 +1,6 @@
 "use server";
 
 import { getServerAuthSession } from "@/server/auth";
-import prisma from "@/server/db/client";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -13,6 +12,9 @@ import {
   slideTwoSchema,
   slideThreeSchema,
 } from "@/schema/additionalUserDetails";
+import { db } from "@/server/db";
+import { user } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function handleFormSlideOneSubmit(dataInput: TypeSlideOneSchema) {
   const session = await getServerAuthSession();
@@ -24,17 +26,16 @@ export async function handleFormSlideOneSubmit(dataInput: TypeSlideOneSchema) {
     const { firstName, surname, username, location } =
       slideOneSchema.parse(dataInput);
 
-    await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
+    await db
+      .update(user)
+      .set({
         firstName,
         surname,
         username,
         location,
-      },
-    });
+      })
+      .where(eq(user.id, session.user.id));
+
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -55,15 +56,14 @@ export async function handleFormSlideTwoSubmit(dataInput: TypeSlideTwoSchema) {
   try {
     const { dateOfBirth, gender } = slideTwoSchema.parse(dataInput);
 
-    await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
+    await db
+      .update(user)
+      .set({
         dateOfBirth,
         gender,
-      },
-    });
+      })
+      .where(eq(user.id, session.user.id));
+
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -87,18 +87,17 @@ export async function handleFormSlideThreeSubmit(
     const { professionalOrStudent, course, jobTitle, levelOfStudy, workplace } =
       slideThreeSchema.parse(dataInput);
 
-    await prisma.user.update({
-      where: {
-        id: session.user.id,
-      },
-      data: {
+    await db
+      .update(user)
+      .set({
         professionalOrStudent,
         course,
         jobTitle,
         levelOfStudy,
         workplace,
-      },
-    });
+      })
+      .where(eq(user.id, session.user.id));
+
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
