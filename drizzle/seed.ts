@@ -163,7 +163,7 @@ ${chance.paragraph()}
           )}`,
           name,
           email: chance.email(),
-          image: `https://robohash.org/${name}?bgset=bg1`,
+          image: `https://robohash.org/${encodeURIComponent(name)}?bgset=bg1`,
           location: chance.country({ full: true }),
           bio: chance.sentence({ words: 10 }),
           websiteUrl: chance.url(),
