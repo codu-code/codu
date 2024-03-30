@@ -13,7 +13,7 @@ import {
   GetByIdSchema,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
-import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
+import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
 import {
   and,
   count,
@@ -23,6 +23,10 @@ import {
   isNotNull,
   isNull,
   lte,
+  desc,
+  lt,
+  asc,
+  gte,
 } from "drizzle-orm";
 import { withCursorPagination } from "drizzle-pagination";
 
@@ -282,87 +286,60 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 50;
-      const { cursor, sort, tag } = input;
+      const { cursor, sort, tag: tagFilter } = input;
 
-      type Order = "desc" | "asc";
-
-      const orderMapping1 = {
+      const paginationMapping = {
         newest: {
-          primaryCursorColumn: post.published,
-          secondaryCursorColumn: post.id,
-          direction: "desc" as Order,
-          primaryCursorDefault: new Date(),
+          orderBy: desc(post.published),
+          cursor: lte(post.published, cursor?.published as Date),
         },
         oldest: {
-          primaryCursorColumn: post.published,
-          secondaryCursorColumn: post.id,
-          direction: "asc" as Order,
-          primaryCursorDefault: new Date(0),
+          orderBy: asc(post.published),
+          cursor: gte(post.published, cursor?.published as Date),
         },
         top: {
-          primaryCursorColumn: post.published,
-          secondaryCursorColumn: post.id,
-          direction: "desc" as Order,
-          primaryCursorDefault: new Date(),
+          orderBy: desc(post.published),
+          cursor: lt(post.published, cursor?.published as Date),
         },
       };
 
-      const orderBy = orderMapping1[sort] || orderMapping1["newest"];
-
-      const response = await ctx.db.query.post.findMany({
-        columns: {
-          id: true,
-          title: true,
-          updatedAt: true,
-          published: true,
-          readTimeMins: true,
-          slug: true,
-          excerpt: true,
-        },
-        with: {
-          user: { columns: { name: true, image: true, username: true } },
-          bookmarks: {
-            where: (bookmarks, { eq }) =>
-              // if user isnt logged in userId will be undefined so no need to grab bookmarks
-              userId ? eq(bookmarks.userId, userId) : undefined,
-            columns: { userId: true },
-          },
-        },
-        ...withCursorPagination({
-          limit: limit + 1,
-          cursors: [
-            [
-              orderBy.primaryCursorColumn,
-              orderBy.direction,
-              cursor?.published ?? orderBy.primaryCursorDefault,
-            ],
-            [
-              orderBy.secondaryCursorColumn,
-              orderBy.direction,
-              cursor?.id ?? "",
-            ],
-          ],
-          where: and(
+      const response = await ctx.db
+        .select({ post, bookmarked: bookmark, user })
+        .from(post)
+        .leftJoin(user, eq(post.userId, user.id))
+        .leftJoin(bookmark, eq(post.id, bookmark.userId))
+        .leftJoin(post_tag, eq(post.id, post_tag.postId))
+        .leftJoin(tag, eq(post_tag.tagId, tag.id))
+        .where(
+          and(
             isNotNull(post.published),
             lte(post.published, new Date()),
+            tagFilter ? eq(tag.title, tagFilter.toUpperCase()) : undefined,
+            cursor ? paginationMapping[sort].cursor : undefined,
           ),
-        }),
-      });
+        )
+        .limit(limit + 1)
+        .orderBy(paginationMapping[sort].orderBy);
 
       const cleaned = response.map((post) => {
-        let currentUserLikesPost = !!post.bookmarks.length;
+        let currentUserLikesPost = !!post.bookmarked;
         if (userId === undefined) currentUserLikesPost = false;
-        post.bookmarks = [];
-        return { ...post, currentUserLikesPost };
+        post.bookmarked = null;
+        return {
+          ...post.post,
+          user: post.user,
+          bookmarks: post.bookmarked,
+          currentUserLikesPost,
+        };
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
       if (response.length > limit) {
-        const nextItem = response.pop();
-        console.log("nextItem", nextItem?.id);
+        const nextItem = cleaned.pop();
+        console.log("nextItem", nextItem?.title);
         if (nextItem)
           nextCursor = {
-            id: nextItem.id,
+            id: nextItem?.id,
             published: nextItem.published as Date,
           };
       }

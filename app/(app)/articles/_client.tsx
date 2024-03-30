@@ -120,7 +120,7 @@ const ArticlesPage = () => {
                           slug,
                           title,
                           excerpt,
-                          user: { name, image, username },
+                          user,
                           published,
                           readTimeMins,
                           id,
@@ -130,14 +130,14 @@ const ArticlesPage = () => {
                           if (!published) return null;
                           return (
                             <ArticlePreview
-                              key={title}
+                              key={id}
                               id={id}
                               slug={slug}
                               title={title}
                               excerpt={excerpt}
-                              name={name}
-                              username={username || ""}
-                              image={image}
+                              name={user?.name || ""}
+                              username={user?.username || ""}
+                              image={user?.image || ""}
                               date={published.toISOString()}
                               readTime={readTimeMins}
                               bookmarkedInitialState={currentUserLikesPost}
