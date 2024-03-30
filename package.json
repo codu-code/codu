@@ -76,7 +76,7 @@
     "atropos": "^2.0.2",
     "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
-    "drizzle-orm": "^0.29.5",
+    "drizzle-orm": "^0.30.6",
     "fathom-client": "^3.6.0",
     "framer-motion": "^10.18.0",
     "highlight.js": "^11.9.0",
