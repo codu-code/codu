@@ -77,7 +77,6 @@
     "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
     "drizzle-orm": "^0.29.5",
-    "drizzle-pagination": "^1.0.10",
     "fathom-client": "^3.6.0",
     "framer-motion": "^10.18.0",
     "highlight.js": "^11.9.0",

@@ -28,7 +28,6 @@ import {
   asc,
   gte,
 } from "drizzle-orm";
-import { withCursorPagination } from "drizzle-pagination";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
