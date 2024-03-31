@@ -16,7 +16,6 @@ import { removeMarkdown } from "../../../utils/removeMarkdown";
 import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
 import {
   and,
-  count,
   eq,
   gt,
   inArray,
