@@ -123,6 +123,7 @@ const main = async () => {
             alpha: true,
             casing: "lower",
           })}`,
+          likes: chance.integer({ min: 0, max: 1000 }),
           readTimeMins: chance.integer({ min: 1, max: 10 }),
           // The body needs this indentation or it all appears as codeblocks when rendered
           body: `Hello world -

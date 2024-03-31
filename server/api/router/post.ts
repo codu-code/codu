@@ -28,6 +28,7 @@ import {
   asc,
   gte,
 } from "drizzle-orm";
+import { decrement, increment } from "./utils";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -205,6 +206,14 @@ export const postRouter = createTRPCRouter({
           .insert(like)
           .values({ postId, userId })
           .returning();
+
+        await ctx.db
+          .update(post)
+          .set({
+            likes: increment(post.likes),
+          })
+          .where(eq(post.id, postId));
+
         return res;
       }
 
@@ -213,6 +222,13 @@ export const postRouter = createTRPCRouter({
         .where(
           and(eq(like.postId, postId), eq(like.userId, ctx.session?.user?.id)),
         );
+
+      await ctx.db
+        .update(post)
+        .set({
+          likes: decrement(post.likes),
+        })
+        .where(eq(post.id, postId));
 
       return res;
     }),
@@ -297,13 +313,17 @@ export const postRouter = createTRPCRouter({
           cursor: gte(post.published, cursor?.published as Date),
         },
         top: {
-          orderBy: desc(post.published),
-          cursor: lt(post.published, cursor?.published as Date),
+          orderBy: desc(post.likes),
+          cursor: lt(post.likes, cursor?.likes as number),
         },
       };
 
       const response = await ctx.db
-        .select({ post, bookmarked: bookmark, user })
+        .select({
+          post,
+          bookmarked: bookmark,
+          user,
+        })
         .from(post)
         .leftJoin(user, eq(post.userId, user.id))
         .leftJoin(bookmark, eq(post.id, bookmark.userId))
@@ -335,11 +355,11 @@ export const postRouter = createTRPCRouter({
       let nextCursor: typeof cursor | undefined = undefined;
       if (response.length > limit) {
         const nextItem = cleaned.pop();
-        console.log("nextItem", nextItem?.title);
         if (nextItem)
           nextCursor = {
             id: nextItem?.id,
             published: nextItem.published as Date,
+            likes: nextItem.likes,
           };
       }
 

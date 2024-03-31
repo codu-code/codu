@@ -161,6 +161,7 @@ export const post = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     showComments: boolean("showComments").default(true).notNull(),
+    likes: integer("likes").default(0).notNull(),
   },
   (table) => {
     return {
