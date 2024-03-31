@@ -302,11 +302,11 @@ export const comment = pgTable(
 );
 
 export const commentRelations = relations(comment, ({ one, many }) => ({
-  // parent: one(comment, {
-  //   fields: [comment.parentId],
-  //   references: [comment.id],
-  // }),
-  // children: many(comment),
+  parent: one(comment, {
+    fields: [comment.parentId],
+    references: [comment.id],
+  }),
+  children: many(comment),
   post: one(post, { fields: [comment.postId], references: [post.id] }),
   user: one(user, { fields: [comment.userId], references: [user.id] }),
   Flagged: many(flagged),
@@ -496,7 +496,7 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
   }),
   notifier: one(user, { fields: [flagged.notifierId], references: [user.id] }),
   post: one(post, { fields: [flagged.postId], references: [post.id] }),
-  // user: one(user, { fields: [flagged.userId], references: [user.id] }),
+  user: one(user, { fields: [flagged.userId], references: [user.id] }),
 }));
 
 export const notification = pgTable("Notification", {
@@ -536,7 +536,7 @@ export const notificationRelations = relations(
       references: [user.id],
     }),
     post: one(post, { fields: [notification.postId], references: [post.id] }),
-    // user: one(user, { fields: [notification.userId], references: [user.id] }),
+    user: one(user, { fields: [notification.userId], references: [user.id] }),
   }),
 );
 
