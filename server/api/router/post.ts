@@ -198,35 +198,34 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { postId, setLiked } = input;
       const userId = ctx.session.user.id;
+      let res;
 
-      if (setLiked) {
-        const [res] = await ctx.db
-          .insert(like)
-          .values({ postId, userId })
-          .returning();
-
-        await ctx.db
-          .update(post)
-          .set({
-            likes: increment(post.likes),
+      setLiked
+        ? await ctx.db.transaction(async (tx) => {
+            res = await tx.insert(like).values({ postId, userId }).returning();
+            await tx
+              .update(post)
+              .set({
+                likes: increment(post.likes),
+              })
+              .where(eq(post.id, postId));
           })
-          .where(eq(post.id, postId));
-
-        return res;
-      }
-
-      const res = await ctx.db
-        .delete(like)
-        .where(
-          and(eq(like.postId, postId), eq(like.userId, ctx.session?.user?.id)),
-        );
-
-      await ctx.db
-        .update(post)
-        .set({
-          likes: decrement(post.likes),
-        })
-        .where(eq(post.id, postId));
+        : await ctx.db.transaction(async (tx) => {
+            res = await tx
+              .delete(like)
+              .where(
+                and(
+                  eq(like.postId, postId),
+                  eq(like.userId, ctx.session?.user?.id),
+                ),
+              );
+            await tx
+              .update(post)
+              .set({
+                likes: decrement(post.likes),
+              })
+              .where(eq(post.id, postId));
+          });
 
       return res;
     }),
@@ -234,22 +233,20 @@ export const postRouter = createTRPCRouter({
     .input(BookmarkPostSchema)
     .mutation(async ({ input, ctx }) => {
       const { postId, setBookmarked } = input;
+      let res;
 
-      if (setBookmarked) {
-        const res = await ctx.db
-          .insert(bookmark)
-          .values({ postId, userId: ctx.session?.user?.id });
-        return res;
-      }
-
-      const res = await ctx.db
-        .delete(bookmark)
-        .where(
-          and(
-            eq(bookmark.postId, postId),
-            eq(bookmark.userId, ctx.session?.user?.id),
-          ),
-        );
+      setBookmarked
+        ? await ctx.db
+            .insert(bookmark)
+            .values({ postId, userId: ctx.session?.user?.id })
+        : await ctx.db
+            .delete(bookmark)
+            .where(
+              and(
+                eq(bookmark.postId, postId),
+                eq(bookmark.userId, ctx.session?.user?.id),
+              ),
+            );
       return res;
     }),
   sidebarData: publicProcedure
