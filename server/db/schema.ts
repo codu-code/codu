@@ -269,7 +269,6 @@ export const bookmarkRelations = relations(bookmark, ({ one, many }) => ({
   post: one(post, { fields: [bookmark.postId], references: [post.id] }),
   user: one(user, { fields: [bookmark.userId], references: [user.id] }),
 }));
-
 export const comment = pgTable(
   "Comment",
   {
