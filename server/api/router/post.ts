@@ -258,16 +258,16 @@ export const postRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const [[likes], [currentUserLikedCount], [currentUserBookmarkedCount]] =
+      const [[likes], [userLikesPost], [userBookedmarkedPost]] =
         await Promise.all([
           ctx.db
-            .select({ value: count() })
-            .from(like)
-            .where(eq(like.postId, id)),
+            .selectDistinct({ count: post.likes })
+            .from(post)
+            .where(eq(post.id, id)),
           // if user not logged in and they wont have any liked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
-                .select({ value: count() })
+                .selectDistinct()
                 .from(like)
                 .where(
                   and(
@@ -275,11 +275,11 @@ export const postRouter = createTRPCRouter({
                     eq(like.userId, ctx.session.user.id),
                   ),
                 )
-            : [{ value: 0 }],
+            : [false],
           // if user not logged in and they wont have any bookmarked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
-                .select({ value: count() })
+                .selectDistinct()
                 .from(bookmark)
                 .where(
                   and(
@@ -287,12 +287,12 @@ export const postRouter = createTRPCRouter({
                     eq(bookmark.userId, ctx.session.user.id),
                   ),
                 )
-            : [{ value: 0 }],
+            : [false],
         ]);
       return {
-        likes: likes.value,
-        currentUserLiked: !!currentUserLikedCount?.value,
-        currentUserBookmarked: !!currentUserBookmarkedCount?.value,
+        likes: likes.count,
+        currentUserLiked: !!userLikesPost,
+        currentUserBookmarked: !!userBookedmarkedPost,
       };
     }),
   published: publicProcedure
