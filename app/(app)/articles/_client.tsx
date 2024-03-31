@@ -124,7 +124,7 @@ const ArticlesPage = () => {
                           published,
                           readTimeMins,
                           id,
-                          currentUserLikesPost,
+                          currentUserBookmarkedPost,
                         }) => {
                           // TODO: Bump posts that were recently updated to the top and show that they were updated recently
                           if (!published) return null;
@@ -140,7 +140,7 @@ const ArticlesPage = () => {
                               image={user?.image || ""}
                               date={published.toISOString()}
                               readTime={readTimeMins}
-                              bookmarkedInitialState={currentUserLikesPost}
+                              bookmarkedInitialState={currentUserBookmarkedPost}
                             />
                           );
                         },

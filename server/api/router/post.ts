@@ -317,15 +317,29 @@ export const postRouter = createTRPCRouter({
         },
       };
 
+      const bookmarked = ctx.db
+        .select()
+        .from(bookmark)
+        .where(eq(bookmark.userId, userId as string))
+        .as("bookmarked");
+
       const response = await ctx.db
         .select({
-          post,
-          bookmarked: bookmark,
-          user,
+          post: {
+            id: post.id,
+            slug: post.slug,
+            title: post.title,
+            excerpt: post.excerpt,
+            published: post.published,
+            readTimeMins: post.readTimeMins,
+            likes: post.likes,
+          },
+          bookmarked: { id: bookmarked.id },
+          user: { name: user.name, username: user.username, image: user.image },
         })
         .from(post)
         .leftJoin(user, eq(post.userId, user.id))
-        .leftJoin(bookmark, eq(post.id, bookmark.userId))
+        .leftJoin(bookmarked, eq(bookmarked.postId, post.id))
         .leftJoin(post_tag, eq(post.id, post_tag.postId))
         .leftJoin(tag, eq(post_tag.tagId, tag.id))
         .where(
@@ -339,15 +353,12 @@ export const postRouter = createTRPCRouter({
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 
-      const cleaned = response.map((post) => {
-        let currentUserLikesPost = !!post.bookmarked;
-        if (userId === undefined) currentUserLikesPost = false;
-        post.bookmarked = null;
+      const cleaned = response.map((elem) => {
+        const currentUserBookmarkedPost = userId ? !!elem.bookmarked : false;
         return {
-          ...post.post,
-          user: post.user,
-          bookmarks: post.bookmarked,
-          currentUserLikesPost,
+          ...elem.post,
+          user: elem.user,
+          currentUserBookmarkedPost,
         };
       });
 
