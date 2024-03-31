@@ -164,7 +164,7 @@ ${chance.paragraph()}
           )}`,
           name,
           email: chance.email(),
-          image: chance.avatar({ protocol: "https" }),
+          image: `https://robohash.org/${encodeURIComponent(name)}?bgset=bg1`,
           location: chance.country({ full: true }),
           bio: chance.sentence({ words: 10 }),
           websiteUrl: chance.url(),

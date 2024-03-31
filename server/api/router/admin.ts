@@ -29,7 +29,6 @@ export const adminRouter = createTRPCRouter({
         userId: userId,
         note: note,
         createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
       await ctx.db.delete(session).where(eq(session.userId, userId));

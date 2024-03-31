@@ -27,7 +27,6 @@ export const commentRouter = createTRPCRouter({
       });
 
       const postOwnerId = postData?.userId;
-      const now = new Date();
 
       const [createdComment] = await ctx.db
         .insert(comment)
@@ -36,7 +35,6 @@ export const commentRouter = createTRPCRouter({
           postId,
           body,
           parentId,
-          updatedAt: now,
         })
         .returning();
 
@@ -53,7 +51,6 @@ export const commentRouter = createTRPCRouter({
             postId,
             userId: commentData.userId,
             commentId: createdComment.id,
-            updatedAt: now,
           });
         }
       }
@@ -65,7 +62,6 @@ export const commentRouter = createTRPCRouter({
           postId,
           userId: postOwnerId,
           commentId: createdComment.id,
-          updatedAt: now,
         });
       }
 
@@ -94,7 +90,6 @@ export const commentRouter = createTRPCRouter({
         .update(comment)
         .set({
           body,
-          updatedAt: new Date(),
         })
         .where(eq(comment.id, id));
 

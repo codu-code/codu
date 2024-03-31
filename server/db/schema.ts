@@ -152,10 +152,9 @@ export const post = pgTable(
     createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updatedAt", {
-      precision: 3,
-      mode: "date",
-    }).notNull(),
+    updatedAt: timestamp("updatedAt")
+      .notNull()
+      .$onUpdate(() => new Date()),
     slug: text("slug").notNull(),
     userId: text("userId")
       .notNull()
@@ -195,7 +194,10 @@ export const user = pgTable(
     emailVerified: timestamp("emailVerified"),
     image: text("image").default("/images/person.png").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
     location: text("location").default("").notNull(),
     websiteUrl: text("websiteUrl").default("").notNull(),
@@ -274,7 +276,10 @@ export const comment = pgTable(
     id: serial("id").primaryKey().notNull().unique(),
     body: text("body").notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
     postId: text("postId")
       .notNull()
       .references(() => post.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -351,7 +356,10 @@ export const banned_users = pgTable(
   {
     id: serial("id").primaryKey().notNull().unique(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -460,7 +468,10 @@ export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
 export const flagged = pgTable("Flagged", {
   id: serial("id").primaryKey().notNull().unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -491,7 +502,10 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
 export const notification = pgTable("Notification", {
   id: serial("id").primaryKey().notNull().unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
   type: integer("type").notNull(),
   userId: text("userId")
     .notNull()

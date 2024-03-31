@@ -44,7 +44,6 @@ export const postRouter = createTRPCRouter({
           readTimeMins: readingTime(body),
           slug: id,
           userId: ctx.session.user.id,
-          updatedAt: new Date(),
         })
         .returning();
 
