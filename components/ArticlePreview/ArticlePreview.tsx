@@ -11,6 +11,8 @@ import {
 import { Menu, Transition } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 type ButtonOptions = {
   label: string;
@@ -58,10 +60,16 @@ const ArticlePreview: NextPage<Props> = ({
     day: "numeric",
   });
 
+  const queryClient = useQueryClient();
+
   const { mutate: bookmark, status: bookmarkStatus } =
     api.post.bookmark.useMutation({
       onSettled() {
         setIsBookmarked((isBookmarked) => !isBookmarked);
+      },
+      async onSuccess() {
+        await queryClient.invalidateQueries();
+        toast.success("Bookmarks updated!");
       },
     });
 
