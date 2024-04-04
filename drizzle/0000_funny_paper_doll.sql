@@ -1,6 +1,6 @@
 -- Current sql file was generated after introspecting the database
 -- If you want to run this migration please uncomment this code before executing migrations
-/*
+
 DO $$ BEGIN
  CREATE TYPE "Role" AS ENUM('MODERATOR', 'ADMIN', 'USER');
 EXCEPTION
@@ -531,5 +531,3 @@ DO $$ BEGIN
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
-
-*/
