@@ -1,0 +1,20 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1711993414515,
+      "tag": "0000_funny_paper_doll",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712090679712,
+      "tag": "0001_green_oracle",
+      "breakpoints": true
+    }
+  ]
+}
