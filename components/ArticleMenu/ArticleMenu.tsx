@@ -141,7 +141,7 @@ const ArticleMenu = ({
                 }`}
               />
             </button>
-            <span className="ml-2 w-4">{data?.likes || 0}</span>
+            <span>{data?.likes || 0}</span>
           </div>
 
           <button
