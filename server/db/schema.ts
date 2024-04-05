@@ -4,24 +4,24 @@ import {
   integer,
   pgEnum,
   pgTable,
-  varchar,
-  unique,
   text,
+  unique,
   uniqueIndex,
   serial,
   foreignKey,
   boolean,
+  varchar,
 } from "drizzle-orm/pg-core";
 import { createId } from "@paralleldrive/cuid2";
 
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
 export const session = pgTable(
   "Session",
   {
-    id: varchar("id", { length: 128 })
+    id: text("id")
       .$defaultFn(() => createId())
       .notNull()
       .primaryKey()
@@ -30,7 +30,7 @@ export const session = pgTable(
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    expires: timestamp("expires").notNull(),
+    expires: timestamp("expires", { mode: "string", precision: 3 }).notNull(),
   },
   (table) => {
     return {
@@ -48,7 +48,7 @@ export const sessionRelations = relations(session, ({ one, many }) => ({
 export const account = pgTable(
   "Account",
   {
-    id: varchar("id", { length: 128 })
+    id: text("id")
       .$defaultFn(() => createId())
       .notNull()
       .primaryKey()
@@ -108,7 +108,9 @@ export const post_tagRelations = relations(post_tag, ({ one, many }) => ({
 export const tag = pgTable(
   "Tag",
   {
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
     id: serial("id").primaryKey().notNull().unique(),
     title: varchar("title", { length: 20 }).notNull(),
   },
@@ -126,9 +128,9 @@ export const tagRelations = relations(tag, ({ one, many }) => ({
 export const verification_token = pgTable(
   "VerificationToken",
   {
-    identifier: varchar("identifier", { length: 256 }).unique(),
-    token: varchar("token", { length: 256 }),
-    expires: timestamp("expires"),
+    identifier: text("identifier").unique().notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { precision: 3, mode: "string" }).notNull(),
   },
   (t) => {
     return {
@@ -140,21 +142,21 @@ export const verification_token = pgTable(
 export const post = pgTable(
   "Post",
   {
-    id: varchar("id", { length: 256 }).notNull().unique(),
-    title: varchar("title", { length: 256 }).notNull(),
-    canonicalUrl: varchar("canonicalUrl", { length: 256 }),
-    coverImage: varchar("coverImage", { length: 256 }),
-    approved: integer("approved").default(1),
+    id: text("id").notNull().unique(),
+    title: text("title").notNull(),
+    canonicalUrl: text("canonicalUrl"),
+    coverImage: text("coverImage"),
+    approved: boolean("approved").default(true).notNull(),
     body: text("body").notNull(),
-    excerpt: varchar("excerpt", { length: 256 }).default("").notNull(),
+    excerpt: varchar("excerpt", { length: 156 }).default("").notNull(),
     readTimeMins: integer("readTimeMins").notNull(),
-    published: timestamp("published", { precision: 3, mode: "date" }),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-      .defaultNow()
+    published: timestamp("published", { precision: 3, mode: "string" }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt")
+    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
       .notNull()
-      .$onUpdate(() => new Date()),
+      .$onUpdate(() => new Date().toISOString()),
     slug: text("slug").notNull(),
     userId: text("userId")
       .notNull()
@@ -182,7 +184,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
 export const user = pgTable(
   "User",
   {
-    id: varchar("id", { length: 128 })
+    id: text("id")
       .$defaultFn(() => createId())
       .notNull()
       .primaryKey()
@@ -190,13 +192,14 @@ export const user = pgTable(
     username: varchar("username", { length: 40 }),
     name: text("name").default("").notNull(),
     email: text("email"),
-    emailVerified: timestamp("emailVerified"),
+    emailVerified: timestamp("emailVerified", { precision: 3, mode: "string" }),
     image: text("image").default("/images/person.png").notNull(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt")
-      .defaultNow()
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
       .notNull()
-      .$onUpdate(() => new Date()),
+      .$onUpdate(() => new Date().toISOString()),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
     location: text("location").default("").notNull(),
     websiteUrl: text("websiteUrl").default("").notNull(),
@@ -205,7 +208,7 @@ export const user = pgTable(
     firstName: text("firstName"),
     surname: text("surname"),
     gender: text("gender"),
-    dateOfBirth: timestamp("dateOfBirth"),
+    dateOfBirth: timestamp("dateOfBirth", { precision: 3, mode: "string" }),
     professionalOrStudent: text("professionalOrStudent"),
     workplace: text("workplace"),
     jobTitle: text("jobTitle"),
@@ -273,11 +276,12 @@ export const comment = pgTable(
   {
     id: serial("id").primaryKey().notNull().unique(),
     body: text("body").notNull(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt")
-      .defaultNow()
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
       .notNull()
-      .$onUpdate(() => new Date()),
+      .$onUpdate(() => new Date().toISOString()),
     postId: text("postId")
       .notNull()
       .references(() => post.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -316,7 +320,9 @@ export const like = pgTable(
   "Like",
   {
     id: serial("id").primaryKey().notNull().unique(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -353,11 +359,12 @@ export const banned_users = pgTable(
   "BannedUsers",
   {
     id: serial("id").primaryKey().notNull().unique(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt")
-      .defaultNow()
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
       .notNull()
-      .$onUpdate(() => new Date()),
+      .$onUpdate(() => new Date().toISOString()),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -392,7 +399,7 @@ export const banned_usersRelations = relations(
 export const community = pgTable(
   "Community",
   {
-    id: varchar("id", { length: 128 })
+    id: text("id")
       .$defaultFn(() => createId())
       .notNull()
       .primaryKey()
@@ -419,7 +426,7 @@ export const communityRelations = relations(community, ({ one, many }) => ({
 }));
 
 export const membership = pgTable("Membership", {
-  id: varchar("id", { length: 128 })
+  id: text("id")
     .$defaultFn(() => createId())
     .notNull()
     .unique(),
@@ -433,7 +440,9 @@ export const membership = pgTable("Membership", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   isEventOrganiser: boolean("isEventOrganiser").default(false).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
 export const membershipRelations = relations(membership, ({ one, many }) => ({
@@ -445,7 +454,7 @@ export const membershipRelations = relations(membership, ({ one, many }) => ({
 }));
 
 export const r_s_v_p = pgTable("RSVP", {
-  id: varchar("id", { length: 128 })
+  id: text("id")
     .$defaultFn(() => createId())
     .notNull()
     .unique(),
@@ -455,7 +464,9 @@ export const r_s_v_p = pgTable("RSVP", {
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
 export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
@@ -465,11 +476,12 @@ export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
 
 export const flagged = pgTable("Flagged", {
   id: serial("id").primaryKey().notNull().unique(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
     .notNull()
-    .$onUpdate(() => new Date()),
+    .$onUpdate(() => new Date().toISOString()),
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -499,11 +511,12 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
 
 export const notification = pgTable("Notification", {
   id: serial("id").primaryKey().notNull().unique(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
+  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
     .notNull()
-    .$onUpdate(() => new Date()),
+    .$onUpdate(() => new Date().toISOString()),
   type: integer("type").notNull(),
   userId: text("userId")
     .notNull()
@@ -541,12 +554,15 @@ export const notificationRelations = relations(
 export const event = pgTable(
   "Event",
   {
-    id: varchar("id", { length: 128 })
+    id: text("id")
       .$defaultFn(() => createId())
       .notNull()
       .primaryKey()
       .unique(),
-    eventDate: timestamp("eventDate").notNull(),
+    eventDate: timestamp("eventDate", {
+      precision: 3,
+      mode: "string",
+    }),
     name: text("name").notNull(),
     coverImage: text("coverImage").notNull(),
     capacity: integer("capacity").notNull(),
