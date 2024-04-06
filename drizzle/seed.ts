@@ -216,19 +216,12 @@ ${chance.paragraph()}
     for (let i = 0; i < usersResponse.length; i++) {
       const numberOfLikedPosts = chance.integer({
         min: 1,
-        max: posts.length,
+        max: posts.length / 2,
       });
 
       const likedPosts: Array<string> = [];
 
       for (let j = 0; j < numberOfLikedPosts; j++) {
-        // const postToLike =
-        //   posts[
-        //     chance.integer({
-        //       min: 0,
-        //       max: posts.length - 1,
-        //     })
-        //   ].id;
         likedPosts.push(
           posts[
             chance.integer({
@@ -237,24 +230,19 @@ ${chance.paragraph()}
             })
           ].id,
         );
-        // if (!likedPosts.find((post) => post === postToLike)) {
-        //   likedPosts.push(postToLike);
-        // }
       }
 
-      console.log(
-        `Adding ${likedPosts.length} likes for user ${usersResponse[i].email}`,
+      await Promise.all(
+        likedPosts.map((post) =>
+          db
+            .insert(like)
+            .values({ userId: usersResponse[i].id, postId: post })
+            .onConflictDoNothing(),
+        ),
       );
-
-      for (let j = 0; j < likedPosts.length; j++) {
-        await db
-          .insert(like)
-          .values({ userId: usersResponse[i].id, postId: likedPosts[j] })
-          .onConflictDoNothing();
-      }
     }
 
-    console.log(`Added ${usersResponse.length} users with posts`);
+    console.log(`Added ${usersResponse.length} users with posts and likes`);
   };
 
   const addEventData = async () => {
