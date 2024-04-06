@@ -4,9 +4,9 @@ import {
   getProfileSchema,
   uploadPhotoUrlSchema,
   updateProfilePhotoUrlSchema,
-} from "../../../schema/profile";
+} from "@/schema/profile";
 
-import { getPresignedUrl } from "../../common/getPresignedUrl";
+import { getPresignedUrl } from "@/server/common/getPresignedUrl";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
