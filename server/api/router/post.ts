@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-import { readingTime } from "../../../utils/readingTime";
+import { readingTime } from "@/utils/readingTime";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   PublishPostSchema,
@@ -11,10 +11,10 @@ import {
   LikePostSchema,
   BookmarkPostSchema,
   GetByIdSchema,
-} from "../../../schema/post";
-import { removeMarkdown } from "../../../utils/removeMarkdown";
+} from "@/schema/post";
+import { removeMarkdown } from "@/utils/removeMarkdown";
 import type { Prisma } from "@prisma/client";
-import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
+import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
 import { and, count, eq, gt, inArray, isNotNull, isNull } from "drizzle-orm";
 
 export const postRouter = createTRPCRouter({
@@ -121,9 +121,9 @@ export const postRouter = createTRPCRouter({
           return null;
         }
         if (publishTime) {
-          return publishTime;
+          return new Date(publishTime).toISOString();
         }
-        return new Date();
+        return new Date().toISOString();
       };
 
       const currentPost = await ctx.db.query.post.findFirst({
@@ -377,7 +377,7 @@ export const postRouter = createTRPCRouter({
       where: (posts, { lte, isNotNull, eq }) =>
         and(
           isNotNull(posts.published),
-          lte(posts.published, new Date()),
+          lte(posts.published, new Date().toISOString()),
           eq(posts.userId, ctx?.session?.user?.id),
         ),
       orderBy: (posts, { desc }) => [desc(posts.published)],
@@ -387,7 +387,7 @@ export const postRouter = createTRPCRouter({
     return await ctx.db.query.post.findMany({
       where: (posts, { eq }) =>
         and(
-          gt(posts.published, new Date()),
+          gt(posts.published, new Date().toISOString()),
           isNotNull(posts.published),
           eq(posts.userId, ctx?.session?.user?.id),
         ),
@@ -422,10 +422,38 @@ export const postRouter = createTRPCRouter({
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
     const response = await ctx.db.query.bookmark.findMany({
+      columns: {
+        id: true,
+      },
       where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
-      with: { post: { with: { user: true } } },
+      with: {
+        post: {
+          columns: {
+            id: true,
+            title: true,
+            excerpt: true,
+            updatedAt: true,
+            published: true,
+            readTimeMins: true,
+            slug: true,
+          },
+          with: {
+            user: {
+              columns: {
+                name: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
     });
+
+    console.log(
+      "fihuhfhfdskgf djhasgjfd agskjgf daj gfdjkhg kfsjg fdjasg jsdfg ",
+      response,
+    );
 
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),
