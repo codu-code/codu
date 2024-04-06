@@ -410,7 +410,7 @@ const Create = () => {
                           <input
                             type="datetime-local"
                             {...register("published")}
-                            min={new Date().toISOString()}
+                            min={new Date().toISOString().slice(0, 16)}
                           />
                         )}
                         <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
