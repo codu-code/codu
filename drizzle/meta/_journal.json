@@ -15,6 +15,13 @@
       "when": 1712090679712,
       "tag": "0001_green_oracle",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712434468357,
+      "tag": "0002_productive_satana",
+      "breakpoints": true
     }
   ]
 }
