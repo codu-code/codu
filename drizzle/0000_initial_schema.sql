@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS "Post" (
 	"excerpt" varchar(156) DEFAULT ''::character varying NOT NULL,
 	"readTimeMins" integer NOT NULL,
 	"published" timestamp(3),
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updatedAt" timestamp(3) NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"slug" text NOT NULL,
 	"userId" text NOT NULL,
 	"showComments" boolean DEFAULT true NOT NULL
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS "PostTag" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Tag" (
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"id" serial PRIMARY KEY NOT NULL,
 	"title" varchar(20) NOT NULL
 );
@@ -46,20 +46,20 @@ CREATE TABLE IF NOT EXISTS "Session" (
 	"id" text PRIMARY KEY NOT NULL,
 	"sessionToken" text NOT NULL,
 	"userId" text NOT NULL,
-	"expires" timestamp(3) NOT NULL
+	"expires" timestamp(3) with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "VerificationToken" (
 	"identifier" text NOT NULL,
 	"token" text NOT NULL,
-	"expires" timestamp(3) NOT NULL
+	"expires" timestamp(3) with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Comment" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"body" text NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updatedAt" timestamp(3) NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"postId" text NOT NULL,
 	"userId" text NOT NULL,
 	"parentId" integer
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS "Comment" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Like" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"userId" text NOT NULL,
 	"postId" text,
 	"commentId" integer
@@ -80,8 +80,8 @@ CREATE TABLE IF NOT EXISTS "User" (
 	"email" text,
 	"emailVerified" timestamp(3),
 	"image" text DEFAULT '/images/person.png' NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updatedAt" timestamp(3) NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"bio" varchar(200) DEFAULT ''::character varying NOT NULL,
 	"location" text DEFAULT '' NOT NULL,
 	"websiteUrl" text DEFAULT '' NOT NULL,
@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS "User" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Flagged" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updatedAt" timestamp(3) NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"userId" text NOT NULL,
 	"notifierId" text NOT NULL,
 	"note" text,
@@ -112,8 +112,8 @@ CREATE TABLE IF NOT EXISTS "Flagged" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Notification" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updatedAt" timestamp(3) NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"type" integer NOT NULL,
 	"userId" text NOT NULL,
 	"postId" text,
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS "RSVP" (
 	"id" text PRIMARY KEY NOT NULL,
 	"eventId" text NOT NULL,
 	"userId" text NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "Account" (
@@ -156,8 +156,8 @@ CREATE TABLE IF NOT EXISTS "Account" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "BannedUsers" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updatedAt" timestamp(3) NOT NULL,
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"userId" text NOT NULL,
 	"bannedById" text NOT NULL,
 	"note" text
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS "Membership" (
 	"communityId" text NOT NULL,
 	"userId" text NOT NULL,
 	"isEventOrganiser" boolean DEFAULT false NOT NULL,
-	"createdAt" timestamp(3) DEFAULT CURRENT_TIMESTAMP NOT NULL
+	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "Post_id_key" ON "Post" ("id");--> statement-breakpoint

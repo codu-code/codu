@@ -138,7 +138,7 @@ const ArticlesPage = () => {
                               name={user?.name || ""}
                               username={user?.username || ""}
                               image={user?.image || ""}
-                              date={published.toISOString()}
+                              date={published}
                               readTime={readTimeMins}
                               bookmarkedInitialState={currentUserBookmarkedPost}
                             />

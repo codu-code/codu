@@ -316,7 +316,9 @@ export const postRouter = createTRPCRouter({
       const bookmarked = ctx.db
         .select()
         .from(bookmark)
-        .where(eq(bookmark.userId, userId as string))
+        // if user not logged in just default to searching for "" as user which will always result in post not being bookmarked
+        // TODO figure out a way to skip this entire block if user is not logged in
+        .where(eq(bookmark.userId, userId || ""))
         .as("bookmarked");
 
       const response = await ctx.db
@@ -448,11 +450,6 @@ export const postRouter = createTRPCRouter({
       },
       orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
     });
-
-    console.log(
-      "fihuhfhfdskgf djhasgjfd agskjgf daj gfdjkhg kfsjg fdjasg jsdfg ",
-      response,
-    );
 
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),
