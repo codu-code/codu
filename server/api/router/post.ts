@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-import { readingTime } from "../../../utils/readingTime";
+import { readingTime } from "@/utils/readingTime";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   PublishPostSchema,
@@ -133,9 +133,9 @@ export const postRouter = createTRPCRouter({
           return null;
         }
         if (publishTime) {
-          return publishTime;
+          return new Date(publishTime).toISOString();
         }
-        return new Date();
+        return new Date().toISOString();
       };
 
       const currentPost = await ctx.db.query.post.findFirst({
@@ -301,11 +301,11 @@ export const postRouter = createTRPCRouter({
       const paginationMapping = {
         newest: {
           orderBy: desc(post.published),
-          cursor: lte(post.published, cursor?.published as Date),
+          cursor: lte(post.published, cursor?.published as string),
         },
         oldest: {
           orderBy: asc(post.published),
-          cursor: gte(post.published, cursor?.published as Date),
+          cursor: gte(post.published, cursor?.published as string),
         },
         top: {
           orderBy: desc(post.likes),
@@ -341,7 +341,7 @@ export const postRouter = createTRPCRouter({
         .where(
           and(
             isNotNull(post.published),
-            lte(post.published, new Date()),
+            lte(post.published, new Date().toISOString()),
             tagFilter ? eq(tag.title, tagFilter.toUpperCase()) : undefined,
             cursor ? paginationMapping[sort].cursor : undefined,
           ),
@@ -364,7 +364,7 @@ export const postRouter = createTRPCRouter({
         if (nextItem)
           nextCursor = {
             id: nextItem?.id,
-            published: nextItem.published as Date,
+            published: nextItem.published as string,
             likes: nextItem.likes,
           };
       }
@@ -376,7 +376,7 @@ export const postRouter = createTRPCRouter({
       where: (posts, { lte, isNotNull, eq }) =>
         and(
           isNotNull(posts.published),
-          lte(posts.published, new Date()),
+          lte(posts.published, new Date().toISOString()),
           eq(posts.userId, ctx?.session?.user?.id),
         ),
       orderBy: (posts, { desc }) => [desc(posts.published)],
@@ -386,7 +386,7 @@ export const postRouter = createTRPCRouter({
     return await ctx.db.query.post.findMany({
       where: (posts, { eq }) =>
         and(
-          gt(posts.published, new Date()),
+          gt(posts.published, new Date().toISOString()),
           isNotNull(posts.published),
           eq(posts.userId, ctx?.session?.user?.id),
         ),
@@ -421,10 +421,38 @@ export const postRouter = createTRPCRouter({
     }),
   myBookmarks: protectedProcedure.query(async ({ ctx }) => {
     const response = await ctx.db.query.bookmark.findMany({
+      columns: {
+        id: true,
+      },
       where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
-      with: { post: { with: { user: true } } },
+      with: {
+        post: {
+          columns: {
+            id: true,
+            title: true,
+            excerpt: true,
+            updatedAt: true,
+            published: true,
+            readTimeMins: true,
+            slug: true,
+          },
+          with: {
+            user: {
+              columns: {
+                name: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
     });
+
+    console.log(
+      "fihuhfhfdskgf djhasgjfd agskjgf daj gfdjkhg kfsjg fdjasg jsdfg ",
+      response,
+    );
 
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),

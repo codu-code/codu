@@ -41,7 +41,7 @@ export default React.memo(function SideBarSavedPosts() {
               slug,
               title,
               user: { name, username },
-              updatedAt,
+              published,
               readTimeMins,
             }) => {
               return (
@@ -51,7 +51,7 @@ export default React.memo(function SideBarSavedPosts() {
                   slug={slug}
                   title={title}
                   name={name}
-                  date={updatedAt.toISOString()}
+                  date={published}
                   readTime={readTimeMins}
                 />
               );

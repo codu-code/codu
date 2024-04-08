@@ -1,20 +1,19 @@
-export enum PostStatus {
-  draft = "draft",
-  scheduled = "scheduled",
-  published = "published",
-}
+const [SCHEDULED, PUBLISHED, DRAFT] = ["scheduled", "published", "draft"];
 
-export function getPostStatus(
-  published: Date | null,
-  now = new Date(),
-): PostStatus {
+export const PostStatus = {
+  SCHEDULED,
+  PUBLISHED,
+  DRAFT,
+};
+
+export function getPostStatus(published: Date | null, now = new Date()) {
   if (!published) {
-    return PostStatus.draft;
+    return DRAFT;
   }
   if (published > now) {
-    return PostStatus.scheduled;
+    return SCHEDULED;
   }
-  return PostStatus.published;
+  return PUBLISHED;
 }
 
 export function isValidScheduleTime(

@@ -42,7 +42,7 @@ const main = async () => {
           .replace(/[^\w-]+/g, "")}-${nanoid(8)}`;
         return {
           id: nanoid(8),
-          eventDate: chance.date(),
+          eventDate: chance.date().toISOString(),
           address: chance.address(),
           coverImage: chance.avatar({ protocol: "https" }),
           capacity: chance.integer({ min: 1, max: 100 }),
@@ -51,7 +51,7 @@ const main = async () => {
             words: chance.integer({ min: 200, max: 1000 }),
           }),
           slug,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         };
       });
   };
@@ -108,13 +108,13 @@ const main = async () => {
           id: nanoid(8),
           title: title,
           published: chance.pickone([
-            new Date(chance.date({ year: 2023 })),
+            new Date(chance.date({ year: 2023 })).toISOString(),
             undefined,
           ]),
           excerpt: chance.sentence({
             words: chance.integer({ min: 10, max: 20 }),
           }),
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
           slug: `${title
             .toLowerCase()
             .replace(/ /g, "-")
