@@ -4,6 +4,7 @@ import {
   post,
   user,
   tag,
+  like,
   post_tag,
   community,
   membership,
@@ -211,7 +212,38 @@ ${chance.paragraph()}
       }
     }
 
-    console.log(`Added ${usersResponse.length} users with posts`);
+    const posts = await db.select().from(post);
+
+    for (let i = 0; i < usersResponse.length; i++) {
+      const numberOfLikedPosts = chance.integer({
+        min: 1,
+        max: posts.length / 2,
+      });
+
+      const likedPosts: Array<string> = [];
+
+      for (let j = 0; j < numberOfLikedPosts; j++) {
+        likedPosts.push(
+          posts[
+            chance.integer({
+              min: 0,
+              max: posts.length - 1,
+            })
+          ].id,
+        );
+      }
+
+      await Promise.all(
+        likedPosts.map((post) =>
+          db
+            .insert(like)
+            .values({ userId: usersResponse[i].id, postId: post })
+            .onConflictDoNothing(),
+        ),
+      );
+    }
+
+    console.log(`Added ${usersResponse.length} users with posts and likes`);
   };
 
   const addEventData = async () => {
