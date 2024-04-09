@@ -6,21 +6,14 @@
       "idx": 0,
       "version": "5",
       "when": 1711993414515,
-      "tag": "0000_initial_schema",
+      "tag": "0000_funny_paper_doll",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
       "when": 1712090679712,
-      "tag": "0001_drizzle_migration",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1712434468357,
-      "tag": "0002_add-likes-to-posts",
+      "tag": "0001_green_oracle",
       "breakpoints": true
     }
   ]
