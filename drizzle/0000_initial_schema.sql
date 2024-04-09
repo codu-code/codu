@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS "Post" (
 	"body" text NOT NULL,
 	"excerpt" varchar(156) DEFAULT ''::character varying NOT NULL,
 	"readTimeMins" integer NOT NULL,
-	"published" timestamp(3),
+	"published" timestamp(3) with time zone,
 	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"slug" text NOT NULL,
