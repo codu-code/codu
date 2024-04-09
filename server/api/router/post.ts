@@ -11,11 +11,23 @@ import {
   LikePostSchema,
   BookmarkPostSchema,
   GetByIdSchema,
-} from "@/schema/post";
-import { removeMarkdown } from "@/utils/removeMarkdown";
-import type { Prisma } from "@prisma/client";
-import { bookmark, like, post, post_tag, tag } from "@/server/db/schema";
-import { and, count, eq, gt, inArray, isNotNull, isNull } from "drizzle-orm";
+} from "../../../schema/post";
+import { removeMarkdown } from "../../../utils/removeMarkdown";
+import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
+import {
+  and,
+  eq,
+  gt,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  desc,
+  lt,
+  asc,
+  gte,
+} from "drizzle-orm";
+import { decrement, increment } from "./utils";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -186,20 +198,34 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { postId, setLiked } = input;
       const userId = ctx.session.user.id;
+      let res;
 
-      if (setLiked) {
-        const [res] = await ctx.db
-          .insert(like)
-          .values({ postId, userId })
-          .returning();
-        return res;
-      }
-
-      const res = await ctx.db
-        .delete(like)
-        .where(
-          and(eq(like.postId, postId), eq(like.userId, ctx.session?.user?.id)),
-        );
+      setLiked
+        ? await ctx.db.transaction(async (tx) => {
+            res = await tx.insert(like).values({ postId, userId }).returning();
+            await tx
+              .update(post)
+              .set({
+                likes: increment(post.likes),
+              })
+              .where(eq(post.id, postId));
+          })
+        : await ctx.db.transaction(async (tx) => {
+            res = await tx
+              .delete(like)
+              .where(
+                and(
+                  eq(like.postId, postId),
+                  eq(like.userId, ctx.session?.user?.id),
+                ),
+              );
+            await tx
+              .update(post)
+              .set({
+                likes: decrement(post.likes),
+              })
+              .where(eq(post.id, postId));
+          });
 
       return res;
     }),
@@ -207,22 +233,20 @@ export const postRouter = createTRPCRouter({
     .input(BookmarkPostSchema)
     .mutation(async ({ input, ctx }) => {
       const { postId, setBookmarked } = input;
+      let res;
 
-      if (setBookmarked) {
-        const res = await ctx.db
-          .insert(bookmark)
-          .values({ postId, userId: ctx.session?.user?.id });
-        return res;
-      }
-
-      const res = await ctx.db
-        .delete(bookmark)
-        .where(
-          and(
-            eq(bookmark.postId, postId),
-            eq(bookmark.userId, ctx.session?.user?.id),
-          ),
-        );
+      setBookmarked
+        ? await ctx.db
+            .insert(bookmark)
+            .values({ postId, userId: ctx.session?.user?.id })
+        : await ctx.db
+            .delete(bookmark)
+            .where(
+              and(
+                eq(bookmark.postId, postId),
+                eq(bookmark.userId, ctx.session?.user?.id),
+              ),
+            );
       return res;
     }),
   sidebarData: publicProcedure
@@ -230,16 +254,16 @@ export const postRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const [[likes], [currentUserLikedCount], [currentUserBookmarkedCount]] =
+      const [[likes], [userLikesPost], [userBookedmarkedPost]] =
         await Promise.all([
           ctx.db
-            .select({ value: count() })
-            .from(like)
-            .where(eq(like.postId, id)),
+            .selectDistinct({ count: post.likes })
+            .from(post)
+            .where(eq(post.id, id)),
           // if user not logged in and they wont have any liked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
-                .select({ value: count() })
+                .selectDistinct()
                 .from(like)
                 .where(
                   and(
@@ -247,11 +271,11 @@ export const postRouter = createTRPCRouter({
                     eq(like.userId, ctx.session.user.id),
                   ),
                 )
-            : [{ value: 0 }],
+            : [false],
           // if user not logged in and they wont have any bookmarked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
-                .select({ value: count() })
+                .selectDistinct()
                 .from(bookmark)
                 .where(
                   and(
@@ -259,12 +283,12 @@ export const postRouter = createTRPCRouter({
                     eq(bookmark.userId, ctx.session.user.id),
                   ),
                 )
-            : [{ value: 0 }],
+            : [false],
         ]);
       return {
-        likes: likes.value,
-        currentUserLiked: !!currentUserLikedCount?.value,
-        currentUserBookmarked: !!currentUserBookmarkedCount?.value,
+        likes: likes.count,
+        currentUserLiked: !!userLikesPost,
+        currentUserBookmarked: !!userBookedmarkedPost,
       };
     }),
   published: publicProcedure
@@ -272,102 +296,79 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 50;
-      const { cursor, sort, tag, searchTerm } = input;
+      const { cursor, sort, tag: tagFilter } = input;
 
-      const orderMapping = {
+      const paginationMapping = {
         newest: {
-          published: "desc" as Prisma.SortOrder,
+          orderBy: desc(post.published),
+          cursor: lte(post.published, cursor?.published as string),
         },
         oldest: {
-          published: "asc" as Prisma.SortOrder,
+          orderBy: asc(post.published),
+          cursor: gte(post.published, cursor?.published as string),
         },
         top: {
-          likes: {
-            _count: "desc" as Prisma.SortOrder,
-          },
+          orderBy: desc(post.likes),
+          cursor: lt(post.likes, cursor?.likes as number),
         },
       };
-      const orderBy = orderMapping[sort] || orderMapping["newest"];
 
-      const response = await ctx.prisma.post.findMany({
-        take: limit + 1,
-        where: {
-          published: {
-            lte: new Date(),
-            not: null,
-          },
-          ...(tag
-            ? {
-                tags: {
-                  some: {
-                    tag: {
-                      title: {
-                        contains: tag?.toUpperCase() || "",
-                      },
-                    },
-                  },
-                },
-              }
-            : {}),
-          ...(searchTerm
-            ? {
-                OR: [
-                  {
-                    user: {
-                      name: {
-                        contains: searchTerm || "",
-                        mode: "insensitive",
-                      },
-                    },
-                  },
-                  {
-                    title: {
-                      contains: searchTerm || "",
-                      mode: "insensitive",
-                    },
-                  },
-                  {
-                    excerpt: {
-                      contains: searchTerm || "",
-                      mode: "insensitive",
-                    },
-                  },
-                ],
-              }
-            : {}),
-        },
-        select: {
-          id: true,
-          title: true,
-          updatedAt: true,
-          published: true,
-          readTimeMins: true,
-          slug: true,
-          excerpt: true,
-          user: {
-            select: { name: true, image: true, username: true },
-          },
-          bookmarks: {
-            select: { userId: true },
-            where: { userId: userId },
-          },
-        },
-        cursor: cursor ? { id: cursor } : undefined,
-        skip: cursor ? 1 : 0,
-        orderBy,
-      });
+      const bookmarked = ctx.db
+        .select()
+        .from(bookmark)
+        // if user not logged in just default to searching for "" as user which will always result in post not being bookmarked
+        // TODO figure out a way to skip this entire block if user is not logged in
+        .where(eq(bookmark.userId, userId || ""))
+        .as("bookmarked");
 
-      const cleaned = response.map((post) => {
-        let currentUserLikesPost = !!post.bookmarks.length;
-        if (userId === undefined) currentUserLikesPost = false;
-        post.bookmarks = [];
-        return { ...post, currentUserLikesPost };
+      const response = await ctx.db
+        .select({
+          post: {
+            id: post.id,
+            slug: post.slug,
+            title: post.title,
+            excerpt: post.excerpt,
+            published: post.published,
+            readTimeMins: post.readTimeMins,
+            likes: post.likes,
+          },
+          bookmarked: { id: bookmarked.id },
+          user: { name: user.name, username: user.username, image: user.image },
+        })
+        .from(post)
+        .leftJoin(user, eq(post.userId, user.id))
+        .leftJoin(bookmarked, eq(bookmarked.postId, post.id))
+        .leftJoin(post_tag, eq(post.id, post_tag.postId))
+        .leftJoin(tag, eq(post_tag.tagId, tag.id))
+        .where(
+          and(
+            isNotNull(post.published),
+            lte(post.published, new Date().toISOString()),
+            tagFilter ? eq(tag.title, tagFilter.toUpperCase()) : undefined,
+            cursor ? paginationMapping[sort].cursor : undefined,
+          ),
+        )
+        .limit(limit + 1)
+        .orderBy(paginationMapping[sort].orderBy);
+
+      const cleaned = response.map((elem) => {
+        const currentUserBookmarkedPost = userId ? !!elem.bookmarked : false;
+        return {
+          ...elem.post,
+          user: elem.user,
+          currentUserBookmarkedPost,
+        };
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
       if (response.length > limit) {
-        const nextItem = response.pop();
-        nextCursor = nextItem?.id;
+        const nextItem = cleaned.pop();
+        if (nextItem)
+          nextCursor = {
+            id: nextItem?.id,
+            published: nextItem.published as string,
+            likes: nextItem.likes,
+          };
       }
 
       return { posts: cleaned, nextCursor };
@@ -449,11 +450,6 @@ export const postRouter = createTRPCRouter({
       },
       orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
     });
-
-    console.log(
-      "fihuhfhfdskgf djhasgjfd agskjgf daj gfdjkhg kfsjg fdjasg jsdfg ",
-      response,
-    );
 
     return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
   }),
