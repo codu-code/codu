@@ -14,7 +14,26 @@ const client = postgres(DATABASE_URL, { max: 1 });
 const db: PostgresJsDatabase = drizzle(client);
 
 // By passing a number we get a repeatable source of random generation.
+import readline from 'readline';
+
 const main = async () => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const answer = await new Promise(resolve => {
+    rl.question('This will delete all data. Are you sure? (y/n) ', (ans) => {
+      rl.close();
+      resolve(ans);
+    });
+  });
+
+  if (answer.toLowerCase() !== 'y') {
+    console.log('Operation cancelled.');
+    return;
+  }
+
   async function deleteDataFromAllTables() {
     const query = sql<string>`
     DROP SCHEMA public CASCADE;
