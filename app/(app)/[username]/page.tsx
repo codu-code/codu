@@ -92,7 +92,10 @@ export default async function Page({
           id: true,
         },
         where: (posts, { isNotNull, and, lte }) =>
-          and(isNotNull(posts.published), lte(posts.published, new Date())),
+          and(
+            isNotNull(posts.published),
+            lte(posts.published, new Date().toISOString()),
+          ),
         orderBy: (posts, { desc }) => [desc(posts.published)],
       },
       BannedUsers: {
@@ -128,7 +131,7 @@ export default async function Page({
       ? []
       : profile.posts.map((post) => ({
           ...post,
-          published: post.published?.toISOString(),
+          published: post.published,
         })),
     accountLocked,
   };

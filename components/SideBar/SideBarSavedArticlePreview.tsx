@@ -5,7 +5,7 @@ import { Temporal } from "@js-temporal/polyfill";
 type Props = {
   title: string;
   slug: string;
-  date: string;
+  date: string | null;
   readTime: number;
   name: string;
   username: string;
@@ -19,7 +19,9 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
   name,
   username,
 }) => {
-  const dateTime = Temporal.Instant.from(date);
+  if (!date) return null;
+
+  const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
     month: "long",

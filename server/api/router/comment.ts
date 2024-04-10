@@ -6,11 +6,11 @@ import {
   DeleteCommentSchema,
   GetCommentsSchema,
   LikeCommentSchema,
-} from "../../../schema/comment";
+} from "@/schema/comment";
 import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
-} from "../../../utils/notifications";
+} from "@/utils/notifications";
 import { comment, notification, like } from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
 

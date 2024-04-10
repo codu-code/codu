@@ -214,7 +214,6 @@ ALTER TABLE "Post" ADD CONSTRAINT "Post_id_unique" UNIQUE("id");--> statement-br
 ALTER TABLE "Tag" ADD CONSTRAINT "Tag_id_unique" UNIQUE("id");--> statement-breakpoint
 ALTER TABLE "Bookmark" ADD CONSTRAINT "Bookmark_id_unique" UNIQUE("id");--> statement-breakpoint
 ALTER TABLE "Session" ADD CONSTRAINT "Session_id_unique" UNIQUE("id");--> statement-breakpoint
-ALTER TABLE "VerificationToken" ADD CONSTRAINT "VerificationToken_identifier_unique" UNIQUE("identifier");--> statement-breakpoint
 ALTER TABLE "VerificationToken" ADD CONSTRAINT "VerificationToken_identifier_token_unique" UNIQUE("identifier","token");--> statement-breakpoint
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_id_unique" UNIQUE("id");--> statement-breakpoint
 ALTER TABLE "Like" ADD CONSTRAINT "Like_id_unique" UNIQUE("id");--> statement-breakpoint

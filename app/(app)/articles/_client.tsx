@@ -114,33 +114,33 @@ const ArticlesPage = () => {
               {status === "success" &&
                 data.pages.map((page) => {
                   return (
-                    <Fragment key={page.nextCursor ?? "lastPage"}>
+                    <Fragment key={page.nextCursor?.id ?? "lastPage"}>
                       {page.posts.map(
                         ({
                           slug,
                           title,
                           excerpt,
-                          user: { name, image, username },
+                          user,
                           published,
                           readTimeMins,
                           id,
-                          currentUserLikesPost,
+                          currentUserBookmarkedPost,
                         }) => {
                           // TODO: Bump posts that were recently updated to the top and show that they were updated recently
                           if (!published) return null;
                           return (
                             <ArticlePreview
-                              key={title}
+                              key={id}
                               id={id}
                               slug={slug}
                               title={title}
                               excerpt={excerpt}
-                              name={name}
-                              username={username || ""}
-                              image={image}
-                              date={published.toISOString()}
+                              name={user?.name || ""}
+                              username={user?.username || ""}
+                              image={user?.image || ""}
+                              date={published}
                               readTime={readTimeMins}
-                              bookmarkedInitialState={currentUserLikesPost}
+                              bookmarkedInitialState={currentUserBookmarkedPost}
                             />
                           );
                         },

@@ -30,7 +30,11 @@ export const session = pgTable(
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    expires: timestamp("expires", { mode: "string", precision: 3 }).notNull(),
+    expires: timestamp("expires", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
   },
   (table) => {
     return {
@@ -108,7 +112,11 @@ export const post_tagRelations = relations(post_tag, ({ one, many }) => ({
 export const tag = pgTable(
   "Tag",
   {
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     id: serial("id").primaryKey().notNull().unique(),
@@ -130,7 +138,11 @@ export const verification_token = pgTable(
   {
     identifier: text("identifier").unique().notNull(),
     token: text("token").notNull(),
-    expires: timestamp("expires", { precision: 3, mode: "string" }).notNull(),
+    expires: timestamp("expires", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }).notNull(),
   },
   (t) => {
     return {
@@ -150,11 +162,23 @@ export const post = pgTable(
     body: text("body").notNull(),
     excerpt: varchar("excerpt", { length: 156 }).default("").notNull(),
     readTimeMins: integer("readTimeMins").notNull(),
-    published: timestamp("published", { precision: 3, mode: "string" }),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    published: timestamp("published", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .notNull()
       .$onUpdate(() => new Date().toISOString()),
     slug: text("slug").notNull(),
@@ -162,6 +186,7 @@ export const post = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     showComments: boolean("showComments").default(true).notNull(),
+    likes: integer("likes").default(0).notNull(),
   },
   (table) => {
     return {
@@ -192,12 +217,24 @@ export const user = pgTable(
     username: varchar("username", { length: 40 }),
     name: text("name").default("").notNull(),
     email: text("email"),
-    emailVerified: timestamp("emailVerified", { precision: 3, mode: "string" }),
+    emailVerified: timestamp("emailVerified", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
     image: text("image").default("/images/person.png").notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .notNull()
       .$onUpdate(() => new Date().toISOString()),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
@@ -208,7 +245,11 @@ export const user = pgTable(
     firstName: text("firstName"),
     surname: text("surname"),
     gender: text("gender"),
-    dateOfBirth: timestamp("dateOfBirth", { precision: 3, mode: "string" }),
+    dateOfBirth: timestamp("dateOfBirth", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
     professionalOrStudent: text("professionalOrStudent"),
     workplace: text("workplace"),
     jobTitle: text("jobTitle"),
@@ -276,10 +317,18 @@ export const comment = pgTable(
   {
     id: serial("id").primaryKey().notNull().unique(),
     body: text("body").notNull(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .notNull()
       .$onUpdate(() => new Date().toISOString()),
     postId: text("postId")
@@ -320,7 +369,11 @@ export const like = pgTable(
   "Like",
   {
     id: serial("id").primaryKey().notNull().unique(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     userId: text("userId")
@@ -359,10 +412,18 @@ export const banned_users = pgTable(
   "BannedUsers",
   {
     id: serial("id").primaryKey().notNull().unique(),
-    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
       .notNull()
       .$onUpdate(() => new Date().toISOString()),
     userId: text("userId")
@@ -440,7 +501,11 @@ export const membership = pgTable("Membership", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   isEventOrganiser: boolean("isEventOrganiser").default(false).notNull(),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -464,7 +529,11 @@ export const r_s_v_p = pgTable("RSVP", {
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -476,10 +545,18 @@ export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
 
 export const flagged = pgTable("Flagged", {
   id: serial("id").primaryKey().notNull().unique(),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
+  updatedAt: timestamp("updatedAt", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
     .notNull()
     .$onUpdate(() => new Date().toISOString()),
   userId: text("userId")
@@ -511,10 +588,18 @@ export const flaggedRelations = relations(flagged, ({ one, many }) => ({
 
 export const notification = pgTable("Notification", {
   id: serial("id").primaryKey().notNull().unique(),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+  createdAt: timestamp("createdAt", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp("updatedAt", { precision: 3, mode: "string" })
+  updatedAt: timestamp("updatedAt", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
     .notNull()
     .$onUpdate(() => new Date().toISOString()),
   type: integer("type").notNull(),
@@ -562,6 +647,7 @@ export const event = pgTable(
     eventDate: timestamp("eventDate", {
       precision: 3,
       mode: "string",
+      withTimezone: true,
     }),
     name: text("name").notNull(),
     coverImage: text("coverImage").notNull(),

@@ -29,23 +29,8 @@ type Props = {
         }[];
       };
     }[];
-    RSVP: {
-      event: {
-        id: string;
-        slug: string;
-        name: string;
-        description: string;
-        address: string;
-        eventDate: Date;
-        coverImage: string;
-        community: {
-          slug: string;
-          name: string;
-        };
-      };
-    }[];
     posts: {
-      published: string | undefined;
+      published: string | null;
       title: string;
       excerpt: string;
       slug: string;
@@ -188,7 +173,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                             name={name}
                             username={username || ""}
                             image={image}
-                            date={published}
+                            date={new Date(published).toISOString()}
                             readTime={readTimeMins}
                             menuOptions={
                               isOwner

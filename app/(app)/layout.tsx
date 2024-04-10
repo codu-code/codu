@@ -9,11 +9,10 @@ import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import React from "react";
 import { PromptProvider } from "@/components/PromptService";
 
-// @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
-  title: "Codú - The Web Developer Community",
+  title: "Codú - Join Our Web Developer Community",
   description:
-    "A free network and community for web developers. Learn and grow together.",
+    "Connect with fellow web developers, learn new skills, and grow together in the supportive Codú community. Sign up now for free!",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   publisher: "Codú",
   applicationName: "Codú",

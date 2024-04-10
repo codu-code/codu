@@ -15,8 +15,8 @@ const db: PostgresJsDatabase = drizzle(migrationClient);
 const main = async () => {
   console.log("Migrating database...");
   await migrate(db, { migrationsFolder: "./drizzle" });
+  await migrationClient.end();
   console.log("Database migrated successfully!");
-  process.exit(0);
 };
 
 main();
