@@ -70,15 +70,15 @@ export async function getTrending({ currentUserId }: GetTrending) {
     GetTrendingSchema.parse({ currentUserId });
     const TRENDING_COUNT = 5;
 
-    const bookmarked = db
-      .select()
-      .from(bookmark)
-      // if user not logged in just default to searching for "" as user which will always result in post not being bookmarked
-      // TODO figure out a way to skip this entire block if user is not logged in
-      .where(eq(bookmark.userId, currentUserId || ""))
-      .as("bookmarked");
+    let bookmarked;
+    if (currentUserId)
+      bookmarked = db
+        .select()
+        .from(bookmark)
+        .where(eq(bookmark.userId, currentUserId))
+        .as("bookmarked");
 
-    const response = await db
+    const baseQuery = db
       .select({
         post: {
           id: post.id,
@@ -90,12 +90,13 @@ export async function getTrending({ currentUserId }: GetTrending) {
           likes: post.likes,
           updatedAt: post.updatedAt,
         },
-        bookmarked: { id: bookmarked.id },
         user: { name: user.name, username: user.username, image: user.image },
+        ...(currentUserId && bookmarked
+          ? { bookmarked: { id: bookmarked.id } }
+          : {}),
       })
       .from(post)
       .leftJoin(user, eq(post.userId, user.id))
-      .leftJoin(bookmarked, eq(bookmarked.postId, post.id))
       .where(
         and(
           isNotNull(post.published),
@@ -105,9 +106,15 @@ export async function getTrending({ currentUserId }: GetTrending) {
       .limit(20)
       .orderBy(desc(post.likes));
 
+    if (currentUserId && bookmarked) {
+      baseQuery.leftJoin(bookmarked, eq(bookmarked.postId, post.id));
+    }
+
+    const response = await baseQuery.execute();
+
     const cleaned = response.map((elem) => {
-      let currentUserBookmarkedPost = !!elem.bookmarked;
-      if (currentUserId === undefined) currentUserBookmarkedPost = false;
+      const currentUserBookmarkedPost =
+        currentUserId && elem.bookmarked ? !!elem.bookmarked : false;
       return { ...elem.post, user: elem.user, currentUserBookmarkedPost };
     });
 
