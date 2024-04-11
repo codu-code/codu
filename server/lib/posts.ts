@@ -91,9 +91,7 @@ export async function getTrending({ currentUserId }: GetTrending) {
           updatedAt: post.updatedAt,
         },
         user: { name: user.name, username: user.username, image: user.image },
-        ...(currentUserId && bookmarked
-          ? { bookmarked: { id: bookmarked.id } }
-          : {}),
+        ...(bookmarked ? { bookmarked: { id: bookmarked.id } } : {}),
       })
       .from(post)
       .leftJoin(user, eq(post.userId, user.id))
@@ -106,15 +104,16 @@ export async function getTrending({ currentUserId }: GetTrending) {
       .limit(20)
       .orderBy(desc(post.likes));
 
-    if (currentUserId && bookmarked) {
+    if (bookmarked) {
       baseQuery.leftJoin(bookmarked, eq(bookmarked.postId, post.id));
     }
 
     const response = await baseQuery.execute();
 
     const cleaned = response.map((elem) => {
-      const currentUserBookmarkedPost =
-        currentUserId && elem.bookmarked ? !!elem.bookmarked : false;
+      const currentUserBookmarkedPost = elem.bookmarked
+        ? !!elem.bookmarked
+        : false;
       return { ...elem.post, user: elem.user, currentUserBookmarkedPost };
     });
 
