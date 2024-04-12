@@ -10,8 +10,7 @@ type TrendingPostsProps = {
 };
 
 export default async function TrendingPosts({ session }: TrendingPostsProps) {
-  const userId =
-    session?.user?.id === typeof "string" ? session.user?.id : undefined;
+  const userId = session?.user?.id ?? undefined;
 
   const trendingPosts = await getTrending({
     currentUserId: userId,
@@ -33,11 +32,11 @@ export default async function TrendingPosts({ session }: TrendingPostsProps) {
             slug,
             title,
             excerpt,
-            user: { name, image, username },
+            user,
             updatedAt,
             readTimeMins,
             id,
-            currentUserLikesPost,
+            currentUserBookmarkedPost,
           }) => (
             <ArticlePreview
               key={title}
@@ -45,12 +44,12 @@ export default async function TrendingPosts({ session }: TrendingPostsProps) {
               slug={slug}
               title={title}
               excerpt={excerpt}
-              name={name}
-              username={username || ""}
-              image={image}
-              date={updatedAt.toISOString()}
+              name={user?.name || ""}
+              username={user?.username || ""}
+              image={user?.image || ""}
+              date={updatedAt}
               readTime={readTimeMins}
-              bookmarkedInitialState={currentUserLikesPost}
+              bookmarkedInitialState={currentUserBookmarkedPost}
             />
           ),
         )}
