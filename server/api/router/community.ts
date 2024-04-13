@@ -96,6 +96,7 @@ export const communityRouter = createTRPCRouter({
                 eq(memberships.userId, ctx.session.user.id),
                 eq(memberships.isEventOrganiser, true),
               ),
+            throw new TRPCError({ code: "FORBIDDEN", message: "Only event organisers can update communities." });
           });
 
           if (membership === null || membership?.isEventOrganiser === false) {
