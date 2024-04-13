@@ -8,24 +8,19 @@ import {
   uploadPhotoUrlSchema,
   upsertCommunitySchema,
 } from "../../../schema/community";
+import { desc, eq, ilike } from "drizzle-orm";
+import { community, membership } from "@/server/db/schema";
 
 export const communityRouter = createTRPCRouter({
   all: publicProcedure
     .input(getCommunitySchema)
     .query(async ({ ctx, input }) => {
-      const limit = input?.limit ?? 50;
+      const limit = input?.limit ?? 15;
       const filter = input.filter ?? undefined;
       const { cursor } = input;
 
-      const response = await ctx.prisma.community.findMany({
-        take: limit + 1,
-        where: {
-          name: {
-            contains: filter,
-            mode: "insensitive",
-          },
-        },
-        select: {
+      const communities = await ctx.db.query.community.findMany({
+        columns: {
           id: true,
           name: true,
           description: true,
@@ -34,23 +29,29 @@ export const communityRouter = createTRPCRouter({
           country: true,
           excerpt: true,
           coverImage: true,
+        },
+        with: {
           members: {
-            include: {
-              user: true,
-            },
+            with: { user: true },
           },
         },
-        cursor: cursor ? { id: cursor } : undefined,
-        skip: cursor ? 1 : 0,
+        where: (community, { eq, and, lte, or }) =>
+          and(
+            cursor ? lte(community.id, cursor) : undefined,
+            filter ? ilike(community.name, `%${filter}%`) : undefined,
+          ),
+        limit: limit + 1,
+        offset: cursor ? 1 : 0,
+        orderBy: [desc(community.id)],
       });
 
       let nextCursor: typeof cursor | undefined = undefined;
-      if (response.length > limit) {
-        const nextItem = response.pop();
+      if (communities.length > limit) {
+        const nextItem = communities.pop();
         nextCursor = nextItem?.id;
       }
 
-      return { communities: response, nextCursor };
+      return { communities, nextCursor };
     }),
   getUploadUrl: protectedProcedure
     .input(uploadPhotoUrlSchema)
@@ -87,28 +88,25 @@ export const communityRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       if (ctx.session.user.id) {
         if (input.id !== null && input.id !== undefined) {
-          const membership = await ctx.prisma.membership.findFirst({
-            where: {
-              communityId: input.id,
-              userId: ctx.session.user.id,
-              isEventOrganiser: true,
-            },
-            select: {
-              isEventOrganiser: true,
-            },
+          const membership = await ctx.db.query.membership.findFirst({
+            columns: { isEventOrganiser: true },
+            where: (memberships, { eq, and }) =>
+              and(
+                eq(memberships.id, input.id as string),
+                eq(memberships.userId, ctx.session.user.id),
+                eq(memberships.isEventOrganiser, true),
+              ),
           });
 
-          if (membership === null || membership.isEventOrganiser === false) {
+          if (membership === null || membership?.isEventOrganiser === false) {
             throw new TRPCError({
               code: "FORBIDDEN",
             });
           }
 
-          const community = await ctx.prisma.community.update({
-            where: {
-              id: input.id,
-            },
-            data: {
+          const updatedCommunity = await ctx.db
+            .update(community)
+            .set({
               slug: `${input.name
                 .toLowerCase()
                 .replace(/ /g, "-")
@@ -119,13 +117,15 @@ export const communityRouter = createTRPCRouter({
               city: input.city,
               excerpt: input.excerpt,
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
-            },
-          });
+            })
+            .where(eq(community.id, input.id))
+            .returning();
 
-          return community;
+          return updatedCommunity;
         } else {
-          const community = await ctx.prisma.community.create({
-            data: {
+          const [createdCommunity] = await ctx.db
+            .insert(community)
+            .values({
               id: nanoid(8),
               slug: `${input.name
                 .toLowerCase()
@@ -137,19 +137,22 @@ export const communityRouter = createTRPCRouter({
               city: input.city,
               excerpt: input.excerpt,
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
-            },
-          });
-          const membership = await ctx.prisma.membership.create({
-            data: {
+            })
+            .returning();
+
+          const members = await ctx.db
+            .insert(membership)
+            .values({
               id: nanoid(8),
-              communityId: community.id,
+              communityId: createdCommunity.id,
               userId: ctx.session.user.id,
               isEventOrganiser: true,
-            },
-          });
+            })
+            .returning();
+
           return {
             ...community,
-            members: [membership],
+            members,
           };
         }
       }
@@ -157,30 +160,29 @@ export const communityRouter = createTRPCRouter({
   createMembership: protectedProcedure
     .input(deleteCommunitySchema)
     .mutation(async ({ input, ctx }) => {
-      await ctx.prisma.membership.create({
-        data: {
-          id: nanoid(8),
-          communityId: input.id,
-          userId: ctx.session.user.id,
-          isEventOrganiser: false,
-        },
+      await ctx.db.insert(membership).values({
+        id: nanoid(8),
+        communityId: input.id,
+        userId: ctx.session.user.id,
+        isEventOrganiser: false,
       });
     }),
   deleteMembership: protectedProcedure
     .input(deleteCommunitySchema)
     .mutation(async ({ input, ctx }) => {
-      const membership = await ctx.prisma.membership.findFirst({
-        where: {
-          communityId: input.id,
-          userId: ctx.session.user.id,
-        },
+      const membershipDetails = await ctx.db.query.membership.findFirst({
+        columns: { id: true },
+        where: (memberships, { eq, and }) =>
+          and(
+            eq(memberships.communityId, input.id as string),
+            eq(memberships.userId, ctx.session.user.id),
+          ),
       });
-      if (membership) {
-        await ctx.prisma.membership.delete({
-          where: {
-            id: membership.id,
-          },
-        });
+
+      if (membershipDetails) {
+        await ctx.db
+          .delete(membership)
+          .where(eq(membership.id, membershipDetails.id));
       }
     }),
 });
