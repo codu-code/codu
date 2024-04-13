@@ -1,7 +1,9 @@
 import PageHeading from "@/components/PageHeading/PageHeading";
-import prisma from "@/server/db/client";
 import { getServerAuthSession } from "@/server/auth";
 import { notFound } from "next/navigation";
+import { post, post_tag, tag, user } from "@/server/db/schema";
+import { count, eq, isNotNull, isNull } from "drizzle-orm";
+import { db } from "@/server/db";
 
 const Metrics = async () => {
   const session = await getServerAuthSession();
@@ -11,25 +13,22 @@ const Metrics = async () => {
     notFound();
   }
 
-  const postsPublishedStats = await prisma.post.count({
-    where: {
-      published: { not: null },
-    },
-  });
+  const [postsPublishedStats] = await db
+    .select({ count: count() })
+    .from(post)
+    .where(isNotNull(post.published));
 
-  const postsNotPublishedStats = await prisma.post.count({
-    where: {
-      published: null,
-    },
-  });
+  const [postsNotPublishedStats] = await db
+    .select({ count: count() })
+    .from(post)
+    .where(isNull(post.published));
 
-  const userCount = await prisma.user.count();
+  const [users] = await db.select({ count: count() }).from(user);
 
-  const tags = await prisma.postTag.findMany({
-    include: {
-      tag: true,
-    },
-  });
+  const tags = await db
+    .select()
+    .from(post_tag)
+    .leftJoin(tag, eq(tag.id, post_tag.tagId));
 
   const grouped = tags.reduce(
     (
@@ -41,11 +40,11 @@ const Metrics = async () => {
       },
       item,
     ) => {
-      const groupValue = item["tagId"];
+      const groupValue = item.Tag!.id;
       if (!result[groupValue]) {
         result[groupValue] = {
           count: 0,
-          tag: item.tag.title,
+          tag: item.Tag!.title,
         };
       }
       result[groupValue].count++;
@@ -65,17 +64,21 @@ const Metrics = async () => {
         <div className="mt-4 grid-cols-2 gap-8 sm:grid">
           <div className="mb-4 border-l-4 border-l-orange-400 bg-neutral-800 p-8 sm:mb-0">
             <h2 className="text-2xl font-bold">User Count</h2>
-            <p className="text-8xl font-semibold">{userCount}</p>
+            <p className="text-8xl font-semibold">{users.count}</p>
           </div>
 
           <div className="mb-4 border-l-4 border-l-pink-600 bg-neutral-800 p-8 sm:mb-0">
             <h2 className="text-2xl font-bold">Published Posts</h2>
-            <p className="text-8xl font-semibold">{postsPublishedStats}</p>
+            <p className="text-8xl font-semibold">
+              {postsPublishedStats.count}
+            </p>
           </div>
 
           <div className="mb-4 border-l-4 border-l-pink-600 bg-neutral-800 p-8 sm:mb-0">
             <h2 className="text-2xl font-bold">Unpublished Posts</h2>
-            <p className="text-8xl font-semibold">{postsNotPublishedStats}</p>
+            <p className="text-8xl font-semibold">
+              {postsNotPublishedStats.count}
+            </p>
           </div>
         </div>
         <div className="border-l-4 border-l-orange-400 bg-neutral-800 p-8 sm:mt-8">
