@@ -173,7 +173,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                             name={name}
                             username={username || ""}
                             image={image}
-                            date={new Date(published).toISOString()}
+                            date={published}
                             readTime={readTimeMins}
                             menuOptions={
                               isOwner
