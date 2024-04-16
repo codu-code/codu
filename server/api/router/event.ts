@@ -8,6 +8,8 @@ import {
   uploadPhotoUrlSchema,
 } from "../../../schema/event";
 import { getPresignedUrl } from "@/server/common/getPresignedUrl";
+import { desc, eq } from "drizzle-orm";
+import { event, r_s_v_p } from "@/server/db/schema";
 
 export const eventRouter = createTRPCRouter({
   all: publicProcedure.input(getEventsSchema).query(async ({ ctx, input }) => {
@@ -15,19 +17,8 @@ export const eventRouter = createTRPCRouter({
     const filter = input.filter ?? undefined;
     const { cursor } = input;
 
-    const response = await ctx.prisma.event.findMany({
-      take: limit + 1,
-      where: {
-        OR: [
-          {
-            name: {
-              contains: filter,
-              mode: "insensitive",
-            },
-          },
-        ],
-      },
-      select: {
+    const response = await ctx.db.query.event.findMany({
+      columns: {
         id: true,
         name: true,
         slug: true,
@@ -36,8 +27,10 @@ export const eventRouter = createTRPCRouter({
         address: true,
         capacity: true,
         coverImage: true,
+      },
+      with: {
         community: {
-          select: {
+          columns: {
             name: true,
             slug: true,
             coverImage: true,
@@ -46,20 +39,25 @@ export const eventRouter = createTRPCRouter({
           },
         },
         RSVP: {
-          select: { id: true },
+          columns: {
+            id: true,
+          },
         },
       },
-      cursor: cursor ? { id: cursor } : undefined,
-      skip: cursor ? 1 : 0,
-      orderBy: {
-        eventDate: "desc",
-      },
+      where: (event, { and, lte, ilike }) =>
+        and(
+          cursor ? lte(event.eventDate, cursor) : undefined,
+          filter ? ilike(event.name, `%${filter}%`) : undefined,
+        ),
+      limit: limit + 1,
+      offset: cursor ? 1 : 0,
+      orderBy: [desc(event.eventDate)],
     });
 
     let nextCursor: typeof cursor | undefined = undefined;
     if (response.length > limit) {
       const nextItem = response.pop();
-      nextCursor = nextItem?.id;
+      nextCursor = nextItem?.eventDate;
     }
 
     return { events: response, nextCursor };
@@ -69,13 +67,10 @@ export const eventRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       if (ctx.session.user.id) {
         if (input.id !== null && input.id !== undefined) {
-          const eventSearchResult = await ctx.prisma.event.findFirst({
-            where: {
-              id: input.id,
-            },
-            select: {
-              communityId: true,
-            },
+          const eventSearchResult = await ctx.db.query.event.findFirst({
+            columns: { communityId: true },
+            where: (event, { eq, and }) =>
+              and(eq(event.id, input.id as string)),
           });
 
           if (!eventSearchResult) {
@@ -83,29 +78,28 @@ export const eventRouter = createTRPCRouter({
               code: "NOT_FOUND",
             });
           }
+          console.log(0);
 
-          const membership = await ctx.prisma.membership.findFirst({
-            where: {
-              communityId: eventSearchResult?.communityId,
-              userId: ctx.session.user.id,
-              isEventOrganiser: true,
-            },
-            select: {
-              isEventOrganiser: true,
-            },
+          const membership = await ctx.db.query.membership.findFirst({
+            columns: { isEventOrganiser: true },
+            where: (membership, { eq, and }) =>
+              and(
+                eq(membership.id, input.id as string),
+                eq(membership.isEventOrganiser, true),
+                eq(membership.userId, ctx.session.user.id),
+              ),
           });
+          console.log(1);
 
-          if (membership === null || membership.isEventOrganiser === false) {
+          if (membership === null || membership?.isEventOrganiser === false) {
             throw new TRPCError({
               code: "FORBIDDEN",
             });
           }
 
-          const event = await ctx.prisma.event.update({
-            where: {
-              id: input.id,
-            },
-            data: {
+          const [updatedEvent] = await ctx.db
+            .update(event)
+            .set({
               slug: `${input.name
                 .toLowerCase()
                 .replace(/ /g, "-")
@@ -116,13 +110,16 @@ export const eventRouter = createTRPCRouter({
               eventDate: input.eventDate,
               capacity: input.capacity,
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
-            },
-          });
+            })
+            .where(eq(event.id, input.id))
+            .returning();
 
-          return event;
+          return updatedEvent;
         } else {
-          const event = await ctx.prisma.event.create({
-            data: {
+          console.log(2);
+          const [createdEvent] = await ctx.db
+            .insert(event)
+            .values({
               id: nanoid(8),
               communityId: input.communityId,
               slug: `${input.name
@@ -135,17 +132,22 @@ export const eventRouter = createTRPCRouter({
               eventDate: input.eventDate,
               capacity: input.capacity,
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
-            },
-          });
-          const membership = await ctx.prisma.rSVP.create({
-            data: {
+            })
+            .returning();
+          console.log(3);
+
+          const membership = await ctx.db
+            .insert(r_s_v_p)
+            .values({
               id: nanoid(8),
-              eventId: event.id,
+              eventId: createdEvent.id,
               userId: ctx.session.user.id,
-            },
-          });
+            })
+            .returning();
+          console.log(4);
+
           return {
-            ...event,
+            ...createdEvent,
             members: [membership],
           };
         }
@@ -184,29 +186,26 @@ export const eventRouter = createTRPCRouter({
   createRSVP: protectedProcedure
     .input(deleteEventSchema)
     .mutation(async ({ input, ctx }) => {
-      await ctx.prisma.rSVP.create({
-        data: {
-          id: nanoid(8),
-          eventId: input.id,
-          userId: ctx.session.user.id,
-        },
+      await ctx.db.insert(r_s_v_p).values({
+        id: nanoid(8),
+        eventId: input.id,
+        userId: ctx.session.user.id,
       });
     }),
   deleteRSVP: protectedProcedure
     .input(deleteEventSchema)
     .mutation(async ({ input, ctx }) => {
-      const rsvp = await ctx.prisma.rSVP.findFirst({
-        where: {
-          eventId: input.id,
-          userId: ctx.session.user.id,
-        },
+      const rsvp = await ctx.db.query.r_s_v_p.findFirst({
+        columns: { id: true },
+        where: (event, { eq, and }) =>
+          and(
+            eq(event.id, input.id as string),
+            eq(event.userId, ctx.session.user.id),
+          ),
       });
+
       if (rsvp) {
-        await ctx.prisma.rSVP.delete({
-          where: {
-            id: rsvp.id,
-          },
-        });
+        await ctx.db.delete(r_s_v_p).where(eq(r_s_v_p.id, rsvp.id));
       }
     }),
 });

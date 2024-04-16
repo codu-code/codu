@@ -18,7 +18,7 @@ interface Event {
   communityId: string;
   name: string;
   address: string;
-  eventDate: Date;
+  eventDate: string;
   capacity: number;
   description: string;
   coverImage: string;
@@ -96,7 +96,8 @@ export function EventForm(props: EventFormProps) {
             );
           },
           async onSuccess(signedUrl) {
-            const url = await uploadToUrl(signedUrl, file);
+            //  const url = await uploadToUrl(signedUrl, file);
+            const url = "www.test.com";
             if (!url) {
               return toast.error(
                 "Something went wrong uploading the photo, please retry.",
@@ -168,14 +169,14 @@ export function EventForm(props: EventFormProps) {
                       <input
                         type="datetime-local"
                         onChange={(e) => {
-                          const date = new Date(e.currentTarget.value);
+                          const date = new Date(
+                            e.currentTarget.value,
+                          ).toISOString();
                           setValue("eventDate", date, {
                             shouldDirty: true,
                           });
                         }}
-                        defaultValue={defaultValues.eventDate
-                          .toISOString()
-                          .slice(0, 16)}
+                        defaultValue={defaultValues.eventDate.slice(0, 16)}
                         onFocus={(e) => e.currentTarget.showPicker()}
                       />
                     )}

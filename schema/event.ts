@@ -16,7 +16,7 @@ export const upsertEventSchema = z.object({
   communityId: z.string(),
   name: z.string().trim().max(100, "Max title length is 100 characters."),
   address: z.string().trim().max(200, "Max title length is 100 characters."),
-  eventDate: z.date(),
+  eventDate: z.string(),
   capacity: z.number(),
   description: z.string().trim(),
   coverImage: z.string().url(),
