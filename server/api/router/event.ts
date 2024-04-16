@@ -78,7 +78,6 @@ export const eventRouter = createTRPCRouter({
               code: "NOT_FOUND",
             });
           }
-          console.log(0);
 
           const membership = await ctx.db.query.membership.findFirst({
             columns: { isEventOrganiser: true },
@@ -89,7 +88,6 @@ export const eventRouter = createTRPCRouter({
                 eq(membership.userId, ctx.session.user.id),
               ),
           });
-          console.log(1);
 
           if (membership === null || membership?.isEventOrganiser === false) {
             throw new TRPCError({
@@ -116,7 +114,6 @@ export const eventRouter = createTRPCRouter({
 
           return updatedEvent;
         } else {
-          console.log(2);
           const [createdEvent] = await ctx.db
             .insert(event)
             .values({
@@ -134,7 +131,6 @@ export const eventRouter = createTRPCRouter({
               coverImage: `${input.coverImage}?id=${nanoid(3)}`,
             })
             .returning();
-          console.log(3);
 
           const membership = await ctx.db
             .insert(r_s_v_p)
@@ -144,7 +140,6 @@ export const eventRouter = createTRPCRouter({
               userId: ctx.session.user.id,
             })
             .returning();
-          console.log(4);
 
           return {
             ...createdEvent,
