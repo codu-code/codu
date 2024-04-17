@@ -108,11 +108,10 @@ const Notifications = () => {
                   {page.data.map(({ id, createdAt, type, post, notifier }) => {
                     if (!post || !notifier) return null;
 
-                    const dateTime = Temporal.Instant.from(
-                      createdAt.toISOString(),
-                    );
+                    const dateTime = Temporal.Instant.from(createdAt);
                     const isCurrentYear =
-                      new Date().getFullYear() === createdAt.getFullYear();
+                      new Date().getFullYear() ===
+                      new Date(createdAt).getFullYear();
 
                     const readableDate = dateTime.toLocaleString(
                       ["en-IE"],
