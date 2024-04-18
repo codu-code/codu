@@ -51,7 +51,7 @@ const ArticlePreview: NextPage<Props> = ({
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
   const { data: session } = useSession();
 
-  const dateTime = Temporal.Instant.from(date);
+  const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
     month: "long",

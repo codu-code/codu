@@ -294,18 +294,18 @@ const main = async () => {
     return Array(count)
       .fill(null)
       .map(() => {
-        const name = chance.sentence({
-          words: chance.integer({ min: 4, max: 8 }),
-        });
+        const id = nanoid(8);
+        const name = `${chance.country({ full: true }) + " " + chance.profession()} Appreciation Day`;
+
         const slug = `${name
           .toLowerCase()
           .replace(/ /g, "-")
-          .replace(/[^\w-]+/g, "")}-${nanoid(8)}`;
+          .replace(/[^\w-]+/g, "")}-${id}`;
         return {
-          id: nanoid(8),
-          eventDate: chance.date().toISOString(),
+          id,
+          eventDate: new Date(chance.date({ year: 2024 })).toISOString(),
           address: chance.address(),
-          coverImage: chance.avatar({ protocol: "https" }),
+          coverImage: `https://picsum.photos/seed/${id}/300/300`,
           capacity: chance.integer({ min: 1, max: 100 }),
           name: name,
           description: chance.sentence({

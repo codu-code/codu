@@ -72,7 +72,7 @@ export default function EventsList() {
                       communitySlug={event.community.slug}
                       name={event.name}
                       description={event.description}
-                      eventDate={event.eventDate.toISOString()}
+                      eventDate={event.eventDate as string}
                       attendees={event.RSVP.length}
                       coverImage={event.coverImage}
                       commnunityName={event.community.name}

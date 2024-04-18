@@ -4,6 +4,7 @@ import "dotenv/config";
 
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import readline from "readline";
 
 const DATABASE_URL = process.env.DATABASE_URL || "";
 
@@ -12,9 +13,6 @@ if (!DATABASE_URL) {
 }
 const client = postgres(DATABASE_URL, { max: 1 });
 const db: PostgresJsDatabase = drizzle(client);
-
-// By passing a number we get a repeatable source of random generation.
-import readline from "readline";
 
 const main = async () => {
   const rl = readline.createInterface({

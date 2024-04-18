@@ -348,6 +348,7 @@ export const postRouter = createTRPCRouter({
             cursor ? paginationMapping[sort].cursor : undefined,
           ),
         )
+        .groupBy(post.id, bookmarked.id, user.id)
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 

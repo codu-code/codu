@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ALTER COLUMN "eventDate" SET DATA TYPE timestamp(3) with time zone;--> statement-breakpoint
