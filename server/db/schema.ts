@@ -20,67 +20,34 @@ import { AdapterAccount } from "next-auth/adapters";
 
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
-export const session = pgTable(
-  "Session",
-  {
-    id: text("id")
-      .$defaultFn(() => createId())
-      .notNull()
-      .primaryKey()
-      .unique(),
-    sessionToken: text("sessionToken").notNull(),
-    userId: text("userId")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    expires: timestamp("expires", {
-      mode: "string",
-      withTimezone: true,
-      precision: 3,
-    }).notNull(),
-  },
-  (table) => {
-    return {
-      sessionTokenKey: uniqueIndex("Session_sessionToken_key").on(
-        table.sessionToken,
-      ),
-    };
-  },
-);
+export const session = pgTable("session", {
+  id: text("id")
+    .$defaultFn(() => createId())
+    .notNull()
+    .primaryKey()
+    .unique(),
+  sessionToken: text("sessionToken").notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+});
 
-export const sessionRelations = relations(session, ({ one, many }) => ({
-  user: one(user, { fields: [session.userId], references: [user.id] }),
-}));
-
-export const account = pgTable(
-  "account",
-  {
-    id: text("id")
-      .$defaultFn(() => createId())
-      .notNull()
-      .primaryKey()
-      .unique(),
-    userId: text("userId")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    type: text("type").$type<AdapterAccount["type"]>().notNull(),
-    provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
-    scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
-  },
-  (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
-  }),
-);
-
-export const accountRelations = relations(account, ({ one, many }) => ({
-  user: one(user, { fields: [account.userId], references: [user.id] }),
-}));
+export const account = pgTable("account", {
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  type: text("type").$type<AdapterAccount["type"]>().notNull(),
+  provider: text("provider").notNull(),
+  providerAccountId: text("providerAccountId").notNull(),
+  refresh_token: text("refresh_token"),
+  access_token: text("access_token"),
+  expires_at: integer("expires_at"),
+  token_type: text("token_type"),
+  scope: text("scope"),
+  id_token: text("id_token"),
+  session_state: text("session_state"),
+});
 
 export const post_tag = pgTable(
   "PostTag",
@@ -131,22 +98,16 @@ export const tagRelations = relations(tag, ({ one, many }) => ({
   PostTag: many(post_tag),
 }));
 
-export const verification_token = pgTable(
+export const verificationToken = pgTable(
   "verificationToken",
   {
-    identifier: text("identifier").unique().notNull(),
+    identifier: text("identifier").notNull(),
     token: text("token").notNull(),
-    expires: timestamp("expires", {
-      precision: 3,
-      mode: "string",
-      withTimezone: true,
-    }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (t) => {
-    return {
-      indx0: unique().on(t.identifier, t.token),
-    };
-  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  }),
 );
 
 export const post = pgTable(
@@ -210,8 +171,8 @@ export const user = pgTable(
     id: text("id")
       .$defaultFn(() => createId())
       .notNull()
-      .primaryKey()
-      .unique(),
+      .primaryKey(),
+
     username: varchar("username", { length: 40 }),
     name: text("name").default("").notNull(),
     email: text("email"),
@@ -225,16 +186,12 @@ export const user = pgTable(
       precision: 3,
       mode: "string",
       withTimezone: true,
-    })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    }).default(sql`CURRENT_TIMESTAMP`),
     updatedAt: timestamp("updatedAt", {
       precision: 3,
       mode: "string",
       withTimezone: true,
-    })
-      .notNull()
-      .$onUpdate(() => new Date().toISOString()),
+    }).$onUpdate(() => new Date().toISOString()),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
     location: text("location").default("").notNull(),
     websiteUrl: text("websiteUrl").default("").notNull(),
