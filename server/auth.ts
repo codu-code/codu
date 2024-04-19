@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user }) {
       const userIsBanned = await db.query.banned_users.findFirst({
-        where: (banned_users, { eq }) => eq(banned_users.id, parseInt(user.id)),
+        where: (banned_users, { eq }) => eq(banned_users.userId, user.id),
       });
 
       // Allows signin or not
