@@ -108,7 +108,9 @@ const MyPosts = () => {
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
               ({ id, title, excerpt, readTimeMins, slug, published }) => {
-                const postStatus = getPostStatus(published);
+                const postStatus = published
+                  ? getPostStatus(new Date(published))
+                  : PostStatus.DRAFT;
                 return (
                   <article
                     className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
@@ -131,24 +133,31 @@ const MyPosts = () => {
                     </p>
                     <div className="flex items-center">
                       <div className="flex-grow">
-                        {postStatus === PostStatus.scheduled ? (
+                        {published && postStatus === PostStatus.SCHEDULED ? (
                           <small>
                             Scheduled to publish on{" "}
-                            {published?.toLocaleDateString()} at{" "}
-                            {published?.toLocaleTimeString(navigator.language, {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            })}
+                            {new Date(published).toLocaleDateString()} at{" "}
+                            {new Date(published).toLocaleTimeString(
+                              navigator.language,
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              },
+                            )}
                           </small>
-                        ) : postStatus === PostStatus.published ? (
+                        ) : published && postStatus === PostStatus.PUBLISHED ? (
                           <small>
-                            Published on {published?.toLocaleDateString()} at{" "}
-                            {published?.toLocaleTimeString(navigator.language, {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            })}
+                            Published on{" "}
+                            {new Date(published).toLocaleDateString()} at{" "}
+                            {new Date(published).toLocaleTimeString(
+                              navigator.language,
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              },
+                            )}
                           </small>
                         ) : null}
                       </div>
