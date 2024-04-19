@@ -62,16 +62,19 @@ const ArticlePreview: NextPage<Props> = ({
 
   const queryClient = useQueryClient();
 
-  const { mutate: bookmark, status: bookmarkStatus } =
-    api.post.bookmark.useMutation({
-      onSettled() {
-        setIsBookmarked((isBookmarked) => !isBookmarked);
-      },
-      async onSuccess() {
-        await queryClient.invalidateQueries();
-        toast.success("Bookmarks updated!");
-      },
-    });
+  const {
+    mutate: bookmark,
+    status: bookmarkStatus,
+    isLoading,
+  } = api.post.bookmark.useMutation({
+    onSettled() {
+      setIsBookmarked((isBookmarked) => !isBookmarked);
+    },
+    async onSuccess() {
+      await queryClient.invalidateQueries();
+      toast.success("Bookmarks updated!");
+    },
+  });
 
   const bookmarkPost = async (postId: string, setBookmarked = true) => {
     if (bookmarkStatus === "loading") return;
@@ -142,6 +145,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
+                disabled={isLoading}
                 className="focus-style-rounded rounded-full p-2 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
                 onClick={() => {
                   if (!session) {
