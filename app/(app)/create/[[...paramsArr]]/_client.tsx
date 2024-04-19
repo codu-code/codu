@@ -20,7 +20,7 @@ import { config } from "@/markdoc/config";
 import { useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
-import { dateToLocalDatetimeStr } from "@/utils/datetime";
+
 import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
 
 const Create = () => {
@@ -59,7 +59,9 @@ const Create = () => {
     watch,
     reset,
     getValues,
-    formState: { isDirty },
+    formState: { isDirty, errors },
+    setError,
+    clearErrors,
   } = useForm<SavePostInput>({
     mode: "onSubmit",
     defaultValues: {
@@ -167,7 +169,9 @@ const Create = () => {
     saveStatus === "loading" ||
     dataStatus === "loading";
 
-  const postStatus = data ? getPostStatus(data.published) : PostStatus.draft;
+  const postStatus = data?.published
+    ? getPostStatus(new Date(data.published))
+    : PostStatus.DRAFT;
 
   const onSubmit = async (inputData: SavePostInput) => {
     // validate markdoc syntax
@@ -186,7 +190,7 @@ const Create = () => {
 
     await savePost();
 
-    if (postStatus === PostStatus.published) {
+    if (postStatus === PostStatus.PUBLISHED) {
       if (data) {
         router.push(`/articles/${data.slug}`);
       }
@@ -224,6 +228,9 @@ const Create = () => {
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    if (errors.tags) {
+      clearErrors("tags");
+    }
     const { key } = e;
     const trimmedInput = tagValue
       .trim()
@@ -231,12 +238,20 @@ const Create = () => {
       .replace(/[^\w\s]/gi, "");
     if (
       (key === "," || key === "." || key === "Enter") &&
-      trimmedInput.length &&
-      !tags.includes(trimmedInput)
+      trimmedInput.length
     ) {
-      e.preventDefault();
-      setTags((prevState) => [...prevState, trimmedInput]);
-      setTagValue("");
+      if (!tags.includes(trimmedInput)) {
+        e.preventDefault();
+        setTags((prevState) => [...prevState, trimmedInput]);
+        setTagValue("");
+      } else {
+        setError("tags", {
+          type: "manual",
+          message: "Tag already exists",
+        });
+        e.preventDefault();
+        setTagValue("");
+      }
     }
   };
 
@@ -249,13 +264,13 @@ const Create = () => {
       excerpt,
       title,
       id,
-      published: dateToLocalDatetimeStr(published),
+      published: published ? published : undefined,
     });
-    setIsPostScheduled(published ? published > new Date() : false);
+    setIsPostScheduled(published ? new Date(published) > new Date() : false);
   }, [data]);
 
   useEffect(() => {
-    if (postStatus !== PostStatus.draft) return;
+    if (postStatus !== PostStatus.DRAFT) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     if (allowUpdate) savePost();
@@ -330,6 +345,14 @@ const Create = () => {
                       value={tagValue}
                       onKeyDown={onKeyDown}
                     />
+                    {errors.tags && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {`${
+                          errors.tags.message ||
+                          "Something is wrong with the tags"
+                        }`}
+                      </p>
+                    )}
                     <div>
                       {tags.map((tag) => (
                         <div
@@ -368,7 +391,7 @@ const Create = () => {
 
                   {data &&
                     (data.published === null ||
-                      data.published > new Date()) && (
+                      new Date(data.published) > new Date()) && (
                       <div className="col-span-12">
                         <div className="mb-2 flex items-center gap-2">
                           <label
@@ -387,7 +410,7 @@ const Create = () => {
                           <input
                             type="datetime-local"
                             {...register("published")}
-                            min={dateToLocalDatetimeStr(new Date())}
+                            min={new Date().toISOString().slice(0, 16)}
                           />
                         )}
                         <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
@@ -430,7 +453,7 @@ const Create = () => {
                     </Disclosure>
                   </div>
                   <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
-                    {postStatus === PostStatus.draft && (
+                    {postStatus === PostStatus.DRAFT && (
                       <button
                         type="button"
                         disabled={isDisabled}
@@ -459,11 +482,11 @@ const Create = () => {
                         </>
                       ) : (
                         <>
-                          {postStatus === PostStatus.draft &&
+                          {postStatus === PostStatus.DRAFT &&
                             (isPostScheduled ? "Schedule" : "Publish now")}
-                          {postStatus === PostStatus.scheduled &&
+                          {postStatus === PostStatus.SCHEDULED &&
                             (isPostScheduled ? "Save changes" : "Publish now")}
-                          {postStatus === PostStatus.published &&
+                          {postStatus === PostStatus.PUBLISHED &&
                             "Save changes"}
                         </>
                       )}

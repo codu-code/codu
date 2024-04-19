@@ -1,21 +1,7 @@
 import { redirect } from "next/navigation";
 import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
-import prisma from "@/server/db/client";
-
-const selectUserDetails = {
-  username: true,
-  firstName: true,
-  surname: true,
-  gender: true,
-  dateOfBirth: true,
-  location: true,
-  professionalOrStudent: true,
-  course: true,
-  levelOfStudy: true,
-  jobTitle: true,
-  workplace: true,
-};
+import { db } from "@/server/db";
 
 export default async function Page() {
   const session = await getServerAuthSession();
@@ -23,11 +9,22 @@ export default async function Page() {
     return redirect("/get-started");
   }
 
-  const details = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
+  const userId = session.user.id;
+  const details = await db.query.user.findFirst({
+    columns: {
+      username: true,
+      firstName: true,
+      surname: true,
+      gender: true,
+      dateOfBirth: true,
+      location: true,
+      professionalOrStudent: true,
+      course: true,
+      levelOfStudy: true,
+      jobTitle: true,
+      workplace: true,
     },
-    select: selectUserDetails,
+    where: (user, { eq }) => eq(user.id, userId),
   });
 
   const detailsWithNullsRemoved = {

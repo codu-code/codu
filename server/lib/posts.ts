@@ -1,7 +1,10 @@
-import db from "@/server/db/client";
+import { db } from "@/server/db/index";
+
 import * as Sentry from "@sentry/nextjs";
 import "server-only";
 import { z } from "zod";
+import { bookmark, post, user } from "../db/schema";
+import { eq, and, isNotNull, lte, desc } from "drizzle-orm";
 
 export const GetPostSchema = z.object({
   slug: z.string(),
@@ -18,9 +21,8 @@ export async function getPost({ slug }: GetPost) {
   try {
     GetPostSchema.parse({ slug });
 
-    const response = await db.post.findUnique({
-      where: { slug },
-      select: {
+    const response = await db.query.post.findFirst({
+      columns: {
         id: true,
         title: true,
         body: true,
@@ -31,26 +33,21 @@ export async function getPost({ slug }: GetPost) {
         excerpt: true,
         canonicalUrl: true,
         showComments: true,
+      },
+      where: (posts, { eq }) => eq(posts.slug, slug),
+      with: {
+        bookmarks: { columns: { userId: true } },
+        tags: {
+          columns: { id: true },
+          with: { tag: { columns: { title: true } } },
+        },
         user: {
-          select: {
+          columns: {
             name: true,
             image: true,
             username: true,
             bio: true,
             id: true,
-          },
-        },
-        bookmarks: {
-          select: { userId: true },
-        },
-        tags: {
-          select: {
-            id: true,
-            tag: {
-              select: {
-                title: true,
-              },
-            },
           },
         },
       },
@@ -59,9 +56,9 @@ export async function getPost({ slug }: GetPost) {
     if (!response || response.published === null) {
       return null;
     }
-    const currentUserLikesPost = !!response.bookmarks.length;
+    const currentUserBookmarkedPost = !!response.bookmarks.length;
     response.bookmarks = [];
-    return { ...response, currentUserLikesPost };
+    return { ...response, currentUserBookmarkedPost };
   } catch (error) {
     Sentry.captureException(error);
     throw new Error("Error fetching post");
@@ -73,40 +70,51 @@ export async function getTrending({ currentUserId }: GetTrending) {
     GetTrendingSchema.parse({ currentUserId });
     const TRENDING_COUNT = 5;
 
-    const response = await db.post.findMany({
-      where: {
-        NOT: {
-          published: null,
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        updatedAt: true,
-        readTimeMins: true,
-        slug: true,
-        excerpt: true,
-        user: {
-          select: { name: true, image: true, username: true },
-        },
-        bookmarks: {
-          select: { userId: true },
-          where: { userId: currentUserId },
-        },
-      },
-      take: 20,
-      orderBy: {
-        likes: {
-          _count: "desc",
-        },
-      },
-    });
+    let bookmarked;
+    if (currentUserId)
+      bookmarked = db
+        .select()
+        .from(bookmark)
+        .where(eq(bookmark.userId, currentUserId))
+        .as("bookmarked");
 
-    const cleaned = response.map((post) => {
-      let currentUserLikesPost = !!post.bookmarks.length;
-      if (currentUserId === undefined) currentUserLikesPost = false;
-      post.bookmarks = [];
-      return { ...post, currentUserLikesPost };
+    const baseQuery = db
+      .select({
+        post: {
+          id: post.id,
+          slug: post.slug,
+          title: post.title,
+          excerpt: post.excerpt,
+          published: post.published,
+          readTimeMins: post.readTimeMins,
+          likes: post.likes,
+          updatedAt: post.updatedAt,
+        },
+        user: { name: user.name, username: user.username, image: user.image },
+        ...(bookmarked ? { bookmarked: { id: bookmarked.id } } : {}),
+      })
+      .from(post)
+      .leftJoin(user, eq(post.userId, user.id))
+      .where(
+        and(
+          isNotNull(post.published),
+          lte(post.published, new Date().toISOString()),
+        ),
+      )
+      .limit(20)
+      .orderBy(desc(post.likes));
+
+    if (bookmarked) {
+      baseQuery.leftJoin(bookmarked, eq(bookmarked.postId, post.id));
+    }
+
+    const response = await baseQuery.execute();
+
+    const cleaned = response.map((elem) => {
+      const currentUserBookmarkedPost = elem.bookmarked
+        ? !!elem.bookmarked
+        : false;
+      return { ...elem.post, user: elem.user, currentUserBookmarkedPost };
     });
 
     const shuffled = cleaned.sort(() => 0.5 - Math.random());

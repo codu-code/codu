@@ -1,24 +1,21 @@
 import React from "react";
-import prisma from "@/server/db/client";
-
 import { notFound } from "next/navigation";
 import Content from "./_usernameClient";
 import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
+import { db } from "@/server/db";
 
 type Props = { params: { username: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const username = params.username;
 
-  const profile = await prisma.user.findUnique({
-    where: {
-      username,
-    },
-    select: {
+  const profile = await db.query.user.findFirst({
+    columns: {
       bio: true,
       name: true,
     },
+    where: (users, { eq }) => eq(users.username, username),
   });
 
   if (!profile) {
@@ -57,48 +54,36 @@ export default async function Page({
     notFound();
   }
 
-  const profile = await prisma.user.findUnique({
-    where: {
-      username,
-    },
-    select: {
+  const profile = await db.query.user.findFirst({
+    columns: {
       bio: true,
       username: true,
       name: true,
       image: true,
       id: true,
       websiteUrl: true,
+    },
+    with: {
       RSVP: {
-        select: {
+        with: {
           event: {
-            include: {
+            with: {
               community: true,
             },
           },
         },
       },
       memberships: {
-        select: {
+        with: {
           community: {
-            include: {
+            with: {
               members: true,
             },
           },
         },
       },
       posts: {
-        where: {
-          NOT: {
-            published: null,
-          },
-          published: {
-            lte: new Date(),
-          },
-        },
-        orderBy: {
-          published: "desc",
-        },
-        select: {
+        columns: {
           title: true,
           excerpt: true,
           slug: true,
@@ -106,13 +91,20 @@ export default async function Page({
           published: true,
           id: true,
         },
+        where: (posts, { isNotNull, and, lte }) =>
+          and(
+            isNotNull(posts.published),
+            lte(posts.published, new Date().toISOString()),
+          ),
+        orderBy: (posts, { desc }) => [desc(posts.published)],
       },
       BannedUsers: {
-        select: {
+        columns: {
           id: true,
         },
       },
     },
+    where: (users, { eq }) => eq(users.username, username),
   });
 
   if (!profile) {
@@ -139,7 +131,7 @@ export default async function Page({
       ? []
       : profile.posts.map((post) => ({
           ...post,
-          published: post.published?.toISOString(),
+          published: post.published,
         })),
     accountLocked,
   };

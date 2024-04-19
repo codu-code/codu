@@ -109,10 +109,11 @@ const Notifications = () => {
                     if (!post || !notifier) return null;
 
                     const dateTime = Temporal.Instant.from(
-                      createdAt.toISOString(),
+                      new Date(createdAt).toISOString(),
                     );
                     const isCurrentYear =
-                      new Date().getFullYear() === createdAt.getFullYear();
+                      new Date().getFullYear() ===
+                      new Date(createdAt).getFullYear();
 
                     const readableDate = dateTime.toLocaleString(
                       ["en-IE"],
