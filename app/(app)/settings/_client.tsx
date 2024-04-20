@@ -11,24 +11,23 @@ import type { saveSettingsInput } from "@/schema/profile";
 import { saveSettingsSchema } from "@/schema/profile";
 
 import { uploadFile } from "@/utils/s3helpers";
-import type { Prisma } from "@prisma/client";
+import { user } from "@/server/db/schema";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-type User = Prisma.UserGetPayload<{
-  select: {
-    name: true;
-    username: true;
-    bio: true;
-    location: true;
-    websiteUrl: true;
-    emailNotifications: true;
-    newsletter: true;
-    image: true;
-  };
-}>;
+type User = Pick<
+  typeof user.$inferSelect,
+  | "name"
+  | "username"
+  | "bio"
+  | "location"
+  | "websiteUrl"
+  | "emailNotifications"
+  | "newsletter"
+  | "image"
+>;
 
 type ProfilePhoto = {
   status: "success" | "error" | "loading" | "idle";

@@ -14,7 +14,7 @@ import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PlusSmallIcon, PencilIcon } from "@heroicons/react/20/solid";
-import type { Prisma } from "@prisma/client";
+import { event, r_s_v_p, user } from "@/server/db/schema";
 
 function getDomainFromUrl(url: string) {
   const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
@@ -24,24 +24,28 @@ function getDomainFromUrl(url: string) {
   return domain;
 }
 
-type Community = Prisma.CommunityGetPayload<{
-  include: {
-    members: {
-      include: {
-        user: true;
-      };
-    };
-    events: {
-      include: {
-        RSVP: {
-          select: {
-            id: true;
-          };
-        };
-      };
-    };
-  };
-}>;
+type Community = {
+  id: string;
+  name: string;
+  description: string;
+  coverImage: string;
+  excerpt: string;
+  slug: string;
+  city: string;
+  country: string;
+  events: Array<
+    typeof event.$inferSelect & {
+      RSVP: Array<Pick<typeof r_s_v_p.$inferSelect, "id">>;
+    }
+  >;
+  members: Array<{
+    id: string;
+    isEventOrganiser: boolean;
+    userId: string;
+    createdAt: string;
+    user: typeof user.$inferSelect;
+  }>;
+};
 
 interface CommunityPageProps {
   community: Community;
@@ -220,10 +224,16 @@ function CommunityPage(props: CommunityPageProps) {
                     return (
                       <div>
                         {community.events
-                          .filter((e) => e.eventDate.getTime() - now > 0)
+                          .filter((e) => {
+                            return (
+                              e.eventDate !== null &&
+                              parseInt(e.eventDate) - now > 0
+                            );
+                          })
                           .sort(
                             (a, b) =>
-                              a.eventDate.getTime() - b.eventDate.getTime(),
+                              parseInt(a.eventDate as string) -
+                              parseInt(b.eventDate as string),
                           )
                           .map((event) => (
                             <EventPreview
@@ -234,15 +244,18 @@ function CommunityPage(props: CommunityPageProps) {
                               communitySlug={community.slug}
                               name={event.name}
                               description={event.description}
-                              eventDate={event.eventDate.toISOString()}
+                              eventDate={event.eventDate as string}
                               attendees={event.RSVP.length}
                               coverImage={event.coverImage}
                               commnunityName={community.name}
                             />
                           ))}
-                        {community.events.filter(
-                          (e) => e.eventDate.getTime() - now > 0,
-                        ).length === 0 ? (
+                        {community.events.filter((e) => {
+                          return (
+                            e.eventDate !== null &&
+                            parseInt(e.eventDate) - now > 0
+                          );
+                        }).length === 0 ? (
                           <p className="py-4 font-medium">
                             There are no events yet... 🥲
                           </p>
@@ -253,10 +266,14 @@ function CommunityPage(props: CommunityPageProps) {
                     return (
                       <div>
                         {community.events
-                          .filter((e) => e.eventDate.getTime() - now < 0)
+                          .filter((e) => {
+                            e.eventDate !== null &&
+                              parseInt(e.eventDate) - now < 0;
+                          })
                           .sort(
                             (a, b) =>
-                              b.eventDate.getTime() - a.eventDate.getTime(),
+                              parseInt(b.eventDate as string) -
+                              parseInt(a.eventDate as string),
                           )
                           .map((event) => (
                             <EventPreview
@@ -267,14 +284,14 @@ function CommunityPage(props: CommunityPageProps) {
                               communitySlug={community.slug}
                               name={event.name}
                               description={event.description}
-                              eventDate={event.eventDate.toISOString()}
+                              eventDate={event.eventDate as string}
                               attendees={event.RSVP.length}
                               coverImage={event.coverImage}
                               commnunityName={community.name}
                             />
                           ))}
                         {community.events.filter(
-                          (e) => e.eventDate.getTime() - now < 0,
+                          (e) => parseInt(e.eventDate as string) - now < 0,
                         ).length === 0 ? (
                           <p className="py-4 font-medium">
                             There are no events yet... 🥲
@@ -288,7 +305,7 @@ function CommunityPage(props: CommunityPageProps) {
                         {community.members
                           .sort(
                             (a, b) =>
-                              b.createdAt.getTime() - a.createdAt.getTime(),
+                              parseInt(b.createdAt) - parseInt(a.createdAt),
                           )
                           .sort((a) => (a.isEventOrganiser ? -1 : 1))
                           .map((member) => (
