@@ -29,6 +29,13 @@
       "when": 1713300744316,
       "tag": "0003_convert-missed-timestamps-to-tz",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1713555447109,
+      "tag": "0004_drizzle-auth-table-renames",
+      "breakpoints": true
     }
   ]
 }
