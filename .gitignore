@@ -37,11 +37,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# Env Variables
-
-
-# Prisma generated client
-/prisma/generated
 
 !jest.config.js
 *.d.ts

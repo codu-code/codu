@@ -32,7 +32,6 @@ export default {
         );
       }
       const site = new NextjsSite(stack, "site", {
-        // @TODO: Fix Prisma bundle issue
         // edge: true,
         experimental: {
           streaming: true,

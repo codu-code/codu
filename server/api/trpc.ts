@@ -15,7 +15,6 @@ import { ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
 
 import { db } from "@/server/db";
-import prisma from "@/server/db/client";
 
 /**
  * 1. CONTEXT
@@ -46,8 +45,6 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
     session,
     headers: opts.headers,
     db,
-    // Phase out Prisma
-    prisma,
   };
 };
 
