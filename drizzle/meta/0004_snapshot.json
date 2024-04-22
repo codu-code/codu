@@ -1,19 +1,13 @@
 {
-  "id": "4dd7f18b-d35d-41e5-ad57-2495819ccf0f",
-  "prevId": "b9520c92-c29a-4bee-8b6a-148740056446",
+  "id": "066b537b-ac22-46aa-87b1-8d1ba9f84ca2",
+  "prevId": "4dd7f18b-d35d-41e5-ad57-2495819ccf0f",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "Account": {
-      "name": "Account",
+    "account": {
+      "name": "account",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "userId": {
           "name": "userId",
           "type": "text",
@@ -81,32 +75,20 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "Account_provider_providerAccountId_key": {
-          "name": "Account_provider_providerAccountId_key",
-          "columns": ["provider", "providerAccountId"],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "Account_userId_User_id_fk": {
-          "name": "Account_userId_User_id_fk",
-          "tableFrom": "Account",
-          "tableTo": "User",
+        "account_userId_user_id_fk": {
+          "name": "account_userId_user_id_fk",
+          "tableFrom": "account",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "Account_id_unique": {
-          "name": "Account_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "BannedUsers": {
       "name": "BannedUsers",
@@ -158,19 +140,19 @@
         }
       },
       "foreignKeys": {
-        "BannedUsers_userId_User_id_fk": {
-          "name": "BannedUsers_userId_User_id_fk",
+        "BannedUsers_userId_user_id_fk": {
+          "name": "BannedUsers_userId_user_id_fk",
           "tableFrom": "BannedUsers",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "BannedUsers_bannedById_User_id_fk": {
-          "name": "BannedUsers_bannedById_User_id_fk",
+        "BannedUsers_bannedById_user_id_fk": {
+          "name": "BannedUsers_bannedById_user_id_fk",
           "tableFrom": "BannedUsers",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["bannedById"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -226,10 +208,10 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "Bookmark_userId_User_id_fk": {
-          "name": "Bookmark_userId_User_id_fk",
+        "Bookmark_userId_user_id_fk": {
+          "name": "Bookmark_userId_user_id_fk",
           "tableFrom": "Bookmark",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -304,10 +286,10 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "Comment_userId_User_id_fk": {
-          "name": "Comment_userId_User_id_fk",
+        "Comment_userId_user_id_fk": {
+          "name": "Comment_userId_user_id_fk",
           "tableFrom": "Comment",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -555,19 +537,19 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Flagged_userId_User_id_fk": {
-          "name": "Flagged_userId_User_id_fk",
+        "Flagged_userId_user_id_fk": {
+          "name": "Flagged_userId_user_id_fk",
           "tableFrom": "Flagged",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "Flagged_notifierId_User_id_fk": {
-          "name": "Flagged_notifierId_User_id_fk",
+        "Flagged_notifierId_user_id_fk": {
+          "name": "Flagged_notifierId_user_id_fk",
           "tableFrom": "Flagged",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["notifierId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -650,10 +632,10 @@
         }
       },
       "foreignKeys": {
-        "Like_userId_User_id_fk": {
-          "name": "Like_userId_User_id_fk",
+        "Like_userId_user_id_fk": {
+          "name": "Like_userId_user_id_fk",
           "tableFrom": "Like",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -735,10 +717,10 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "Membership_userId_User_id_fk": {
-          "name": "Membership_userId_User_id_fk",
+        "Membership_userId_user_id_fk": {
+          "name": "Membership_userId_user_id_fk",
           "tableFrom": "Membership",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -810,10 +792,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Notification_userId_User_id_fk": {
-          "name": "Notification_userId_User_id_fk",
+        "Notification_userId_user_id_fk": {
+          "name": "Notification_userId_user_id_fk",
           "tableFrom": "Notification",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -837,10 +819,10 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "Notification_notifierId_User_id_fk": {
-          "name": "Notification_notifierId_User_id_fk",
+        "Notification_notifierId_user_id_fk": {
+          "name": "Notification_notifierId_user_id_fk",
           "tableFrom": "Notification",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["notifierId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -969,10 +951,10 @@
         }
       },
       "foreignKeys": {
-        "Post_userId_User_id_fk": {
-          "name": "Post_userId_User_id_fk",
+        "Post_userId_user_id_fk": {
+          "name": "Post_userId_user_id_fk",
           "tableFrom": "Post",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -1082,10 +1064,10 @@
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
-        "RSVP_userId_User_id_fk": {
-          "name": "RSVP_userId_User_id_fk",
+        "RSVP_userId_user_id_fk": {
+          "name": "RSVP_userId_user_id_fk",
           "tableFrom": "RSVP",
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
@@ -1101,8 +1083,8 @@
         }
       }
     },
-    "Session": {
-      "name": "Session",
+    "session": {
+      "name": "session",
       "schema": "",
       "columns": {
         "id": {
@@ -1125,33 +1107,27 @@
         },
         "expires": {
           "name": "expires",
-          "type": "timestamp(3) with time zone",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         }
       },
-      "indexes": {
-        "Session_sessionToken_key": {
-          "name": "Session_sessionToken_key",
-          "columns": ["sessionToken"],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "Session_userId_User_id_fk": {
-          "name": "Session_userId_User_id_fk",
-          "tableFrom": "Session",
-          "tableTo": "User",
+        "session_userId_user_id_fk": {
+          "name": "session_userId_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
           "columnsFrom": ["userId"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "Session_id_unique": {
-          "name": "Session_id_unique",
+        "session_id_unique": {
+          "name": "session_id_unique",
           "nullsNotDistinct": false,
           "columns": ["id"]
         }
@@ -1198,8 +1174,8 @@
         }
       }
     },
-    "User": {
-      "name": "User",
+    "user": {
+      "name": "user",
       "schema": "",
       "columns": {
         "id": {
@@ -1244,14 +1220,14 @@
           "name": "createdAt",
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp(3) with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "bio": {
           "name": "bio",
@@ -1369,16 +1345,10 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "User_id_unique": {
-          "name": "User_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
-        }
-      }
+      "uniqueConstraints": {}
     },
-    "VerificationToken": {
-      "name": "VerificationToken",
+    "verificationToken": {
+      "name": "verificationToken",
       "schema": "",
       "columns": {
         "identifier": {
@@ -1395,21 +1365,20 @@
         },
         "expires": {
           "name": "expires",
-          "type": "timestamp(3) with time zone",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "VerificationToken_identifier_token_unique": {
-          "name": "VerificationToken_identifier_token_unique",
-          "nullsNotDistinct": false,
+      "compositePrimaryKeys": {
+        "verificationToken_identifier_token_pk": {
+          "name": "verificationToken_identifier_token_pk",
           "columns": ["identifier", "token"]
         }
-      }
+      },
+      "uniqueConstraints": {}
     }
   },
   "enums": {
