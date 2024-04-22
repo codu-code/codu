@@ -12,7 +12,8 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "@/utils/notifications";
 import { comment, notification, like } from "@/server/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
+import { db } from "@/server/db";
 
 export const commentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -27,6 +28,7 @@ export const commentRouter = createTRPCRouter({
       });
 
       const postOwnerId = postData?.userId;
+      const now = new Date().toISOString();
 
       const [createdComment] = await ctx.db
         .insert(comment)
@@ -35,6 +37,8 @@ export const commentRouter = createTRPCRouter({
           postId,
           body,
           parentId,
+          createdAt: now,
+          updatedAt: now,
         })
         .returning();
 
@@ -149,82 +153,142 @@ export const commentRouter = createTRPCRouter({
       const { postId } = input;
       const userId = ctx?.session?.user?.id;
 
-      const SELECT_CHILD_CONFIG = {
-        id: true,
-        body: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
-        user: {
-          select: {
-            name: true,
-            image: true,
-            username: true,
-            id: true,
-            email: true,
-          },
-        },
-        likes: {
-          where: {
-            ...(userId ? { userId } : {}),
-          },
-          select: {
-            userId: true,
-          },
-        },
-      };
+      const [commentCount] = await db
+        .select({ count: count() })
+        .from(comment)
+        .where(eq(comment.postId, postId));
 
-      const count = await ctx.prisma.comment.count({
-        where: {
-          postId,
-        },
-      });
+      const response = await db.query.comment.findMany({
+        columns: { id: true, body: true, createdAt: true, updatedAt: true },
 
-      const response = await ctx.prisma.comment.findMany({
-        where: {
-          postId,
-          parentId: null,
-        },
-        // Ugly as hell but this grabs comments up to 6 levels deep
-        select: {
-          ...SELECT_CHILD_CONFIG,
+        with: {
           children: {
-            select: {
-              ...SELECT_CHILD_CONFIG,
+            columns: {
+              id: true,
+              body: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+            with: {
               children: {
-                select: {
-                  ...SELECT_CHILD_CONFIG,
+                columns: {
+                  id: true,
+                  body: true,
+                  createdAt: true,
+                  updatedAt: true,
+                },
+                with: {
                   children: {
-                    select: {
-                      ...SELECT_CHILD_CONFIG,
+                    columns: {
+                      id: true,
+                      body: true,
+                      createdAt: true,
+                      updatedAt: true,
+                    },
+                    with: {
                       children: {
-                        select: {
-                          ...SELECT_CHILD_CONFIG,
+                        columns: {
+                          id: true,
+                          body: true,
+                          createdAt: true,
+                          updatedAt: true,
+                        },
+                        with: {
                           children: {
-                            select: {
-                              ...SELECT_CHILD_CONFIG,
-                              children: {
-                                select: { ...SELECT_CHILD_CONFIG },
+                            columns: {
+                              id: true,
+                              body: true,
+                              createdAt: true,
+                              updatedAt: true,
+                            },
+                            with: {
+                              user: {
+                                columns: {
+                                  name: true,
+                                  image: true,
+                                  username: true,
+                                  id: true,
+                                  email: true,
+                                },
+                              },
+                              likes: {
+                                columns: { userId: true },
                               },
                             },
                           },
+                          user: {
+                            columns: {
+                              name: true,
+                              image: true,
+                              username: true,
+                              id: true,
+                              email: true,
+                            },
+                          },
+                          likes: {
+                            columns: { userId: true },
+                          },
                         },
+                      },
+                      user: {
+                        columns: {
+                          name: true,
+                          image: true,
+                          username: true,
+                          id: true,
+                          email: true,
+                        },
+                      },
+                      likes: {
+                        columns: { userId: true },
                       },
                     },
                   },
+                  user: {
+                    columns: {
+                      name: true,
+                      image: true,
+                      username: true,
+                      id: true,
+                      email: true,
+                    },
+                  },
+                  likes: {
+                    columns: { userId: true },
+                  },
                 },
+              },
+              user: {
+                columns: {
+                  name: true,
+                  image: true,
+                  username: true,
+                  id: true,
+                  email: true,
+                },
+              },
+              likes: {
+                columns: { userId: true, postId: true },
               },
             },
           },
+          user: {
+            columns: {
+              name: true,
+              image: true,
+              username: true,
+              id: true,
+              email: true,
+            },
+          },
+          likes: {
+            columns: { userId: true },
+          },
         },
-        orderBy: {
-          createdAt: "desc",
-        },
+        where: (comment, { isNull }) => isNull(comment.parentId),
+        orderBy: [desc(comment.createdAt)],
       });
+
       interface ShapedResponse {
         user: {
           id: string;
@@ -237,24 +301,19 @@ export const commentRouter = createTRPCRouter({
         likeCount: number;
         id: number;
         body: string;
-        createdAt: Date;
-        updatedAt: Date;
+        createdAt: string;
+        updatedAt: string;
         children?: ShapedResponse[];
       }
       [];
 
       function shapeComments(commentsArr: typeof response): ShapedResponse[] {
         const value = commentsArr.map((comment) => {
-          const {
-            children,
-            likes: youLikeThis,
-            _count: likeCount,
-            ...rest
-          } = comment;
+          const { children, likes, ...rest } = comment;
 
           const shaped = {
-            youLikedThis: youLikeThis.some((obj) => obj.userId === userId),
-            likeCount: likeCount.likes,
+            youLikedThis: likes.some((obj) => obj.userId === userId),
+            likeCount: likes.length,
             ...rest,
           };
           if (children) {
@@ -270,6 +329,6 @@ export const commentRouter = createTRPCRouter({
 
       const comments = shapeComments(response);
 
-      return { data: comments, count };
+      return { data: comments, count: commentCount.count };
     }),
 });
