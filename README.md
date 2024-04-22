@@ -43,7 +43,7 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 
 For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
 
-6. [Make sure your database is running](#database_url) and setup the tables in the database with Prisma by running:
+6. [Make sure your database is running](#database_url) and setup the tables in the database with Drizzle by running:
 
 ```bash
 npm run db:push

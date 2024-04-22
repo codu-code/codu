@@ -339,7 +339,6 @@ const main = async () => {
     "C",
     "React",
     "Drizzle",
-    "Prisma",
     "Angular",
     "Vue",
     "Svelte",

@@ -3,7 +3,6 @@ import { type NextRequest } from "next/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
-import prisma from "@/server/db/client";
 
 import { db } from "@/server/db";
 
@@ -36,8 +35,6 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
     session,
     headers: opts.headers,
     db,
-    // Phase out Prisma
-    prisma,
   };
 };
 

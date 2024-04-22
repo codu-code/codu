@@ -9,7 +9,6 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-COPY prisma ./prisma
 RUN npm ci
 
 # Rebuild the source code only when needed
@@ -25,7 +24,6 @@ ENV NODE_ENV production
 ENV NEXT_PUBLIC_FATHOM_SITE_ID WCUALLLI
 ENV NEXT_PUBLIC_SENTRY_DSN https://a0460f6abac067ae72754b23ccd03aac@o4505895618215936.ingest.sentry.io/4505896707686400
 
-RUN npx prisma generate
 
 RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=DATABASE_URL \
