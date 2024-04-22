@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import prisma from "@/server/db/client";
 import EventPage from "./_EventPage";
+import { db } from "@/server/db";
 
 type Props = { params: { event: string } };
 
@@ -9,26 +9,25 @@ const Page = async ({ params }: Props) => {
     notFound();
   }
 
-  const event = await prisma.event.findUnique({
-    where: {
-      slug: params.event,
-    },
-    include: {
+  const event = await db.query.event.findFirst({
+    with: {
       RSVP: {
-        include: {
+        with: {
           user: true,
         },
       },
       community: {
-        select: {
+        columns: {
           excerpt: true,
           slug: true,
           name: true,
           city: true,
           country: true,
           coverImage: true,
+        },
+        with: {
           members: {
-            select: {
+            columns: {
               id: true,
               isEventOrganiser: true,
               userId: true,
@@ -37,6 +36,7 @@ const Page = async ({ params }: Props) => {
         },
       },
     },
+    where: (event, { eq, and }) => and(eq(event.slug, params.event)),
   });
 
   if (!event) {

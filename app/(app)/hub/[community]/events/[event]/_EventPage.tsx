@@ -13,7 +13,7 @@ import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { PencilIcon } from "@heroicons/react/20/solid";
-import type { Prisma } from "@prisma/client";
+import { r_s_v_p, user } from "@/server/db/schema";
 
 function getDomainFromUrl(url: string) {
   const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
@@ -23,35 +23,34 @@ function getDomainFromUrl(url: string) {
   return domain;
 }
 
-type Event = Prisma.EventGetPayload<{
-  include: {
-    RSVP: {
-      include: {
-        user: true;
-      };
-    };
-    community: {
-      select: {
-        excerpt: true;
-        slug: true;
-        name: true;
-        city: true;
-        country: true;
-        coverImage: true;
-        members: {
-          select: {
-            id: true;
-            isEventOrganiser: true;
-            userId: true;
-          };
-        };
-      };
-    };
+type eventType = {
+  id: string;
+  name: string;
+  description: string;
+  coverImage: string;
+  slug: string;
+  communityId: string;
+  eventDate: string;
+  capacity: number;
+  address: string;
+  RSVP: Array<
+    Pick<typeof r_s_v_p.$inferSelect, "id" | "createdAt"> & {
+      user: typeof user.$inferSelect;
+    }
+  >;
+  community: {
+    excerpt: string;
+    slug: string;
+    name: string;
+    city: string;
+    country: string;
+    coverImage: string;
+    members: Array<{ id: string; isEventOrganiser: boolean; userId: string }>;
   };
-}>;
+};
 
 interface EventPageProps {
-  event: Event;
+  event: eventType;
 }
 
 function EventPage(props: EventPageProps) {
@@ -62,7 +61,7 @@ function EventPage(props: EventPageProps) {
 
   useEffect(() => {
     if (event) {
-      const dateTime = Temporal.Instant.from(event.eventDate.toISOString());
+      const dateTime = Temporal.Instant.from(event.eventDate);
       const readableDate = dateTime.toLocaleString(["en-IE"], {
         weekday: "short",
         month: "short",
@@ -146,11 +145,14 @@ function EventPage(props: EventPageProps) {
 
   const renderList = (filter: (i: number) => boolean) => {
     const list = event.RSVP.filter((_e, i) => filter(i));
+
+    const x = event.RSVP;
+
     return (
       <>
         <div className="grid grid-cols-1 gap-4">
           {list
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .sort((a, b) => parseInt(b.createdAt) - parseInt(a.createdAt))
             .sort((rsvp) => (organisers.includes(rsvp.user.id) ? -1 : 1))
             .map((rsvp) => (
               <div
