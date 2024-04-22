@@ -1,35 +1,36 @@
 import * as Sentry from "@sentry/nextjs";
 import { type MetadataRoute } from "next";
 
-import db from "@/server/db/client";
+import { db } from "@/server/db";
+import { post } from "@/server/db/schema";
+import { lte, and, isNull, isNotNull } from "drizzle-orm";
 
 const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = ["/articles", "/sponsorship", "/code-of-conduct"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = (
-    await db.post.findMany({
-      where: {
-        NOT: {
-          published: null,
-        },
-        canonicalUrl: {
-          equals: null,
-        },
-        published: {
-          lte: new Date(),
-        },
-      },
-    })
-  ).map(({ slug, updatedAt }) => ({
+    await db
+      .select()
+      .from(post)
+      .where(
+        and(
+          isNotNull(post.published),
+          isNull(post.canonicalUrl),
+          lte(post.published, new Date().toISOString()),
+        ),
+      )
+  ).map(({ slug, updatedAt, createdAt }) => ({
     url: `${BASE_URL}/articles/${slug}`,
-    lastModified: updatedAt,
+    lastModified: updatedAt || createdAt,
   }));
 
-  const users = (await db.user.findMany()).map(({ username, updatedAt }) => ({
-    url: `${BASE_URL}/${username}`,
-    lastModified: updatedAt,
-  }));
+  const users = (await db.query.user.findMany()).map(
+    ({ username, updatedAt, createdAt }) => ({
+      url: `${BASE_URL}/${username}`,
+      lastModified: updatedAt || createdAt || new Date(),
+    }),
+  );
 
   const routes = ROUTES_TO_INDEX.map((route) => ({
     url: BASE_URL + route,
