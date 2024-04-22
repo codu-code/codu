@@ -185,9 +185,9 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         const content = Markdoc.transform(ast, config);
         const isCurrentUser = session?.user?.username === username;
         const isAuthor = userId === postOwnerId;
-        const dateTime = Temporal.Instant.from(createdAt.toISOString());
+        const dateTime = Temporal.Instant.from(createdAt);
         const isCurrentYear =
-          new Date().getFullYear() === createdAt.getFullYear();
+          new Date().getFullYear() === new Date(createdAt).getFullYear();
         const readableDate = dateTime.toLocaleString(
           ["en-IE"],
           isCurrentYear
