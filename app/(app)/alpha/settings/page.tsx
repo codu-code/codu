@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import { customAlphabet } from "nanoid";
+import prisma from "@/server/db/client";
 import * as Sentry from "@sentry/nextjs";
 import { isUserSubscribedToNewsletter } from "@/server/lib/newsletter";
 import { db } from "@/server/db";

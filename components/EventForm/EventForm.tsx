@@ -164,7 +164,7 @@ export function EventForm(props: EventFormProps) {
                   <Controller
                     name="eventDate"
                     control={control}
-                    defaultValue={defaultValues?.eventDate}
+                    defaultValue={defaultValues.eventDate}
                     render={() => (
                       <input
                         type="datetime-local"

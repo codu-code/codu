@@ -1,7 +1,7 @@
 import { EventForm } from "@/components/EventForm/EventForm";
+import prisma from "@/server/db/client";
 import { getServerAuthSession } from "@/server/auth";
 import { redirect, notFound } from "next/navigation";
-import { db } from "@/server/db";
 
 async function CreateEventPage({ params }: { params: { community: string } }) {
   const session = await getServerAuthSession();
@@ -14,14 +14,19 @@ async function CreateEventPage({ params }: { params: { community: string } }) {
     notFound();
   }
 
-  const community = await db.query.community.findFirst({
-    with: {
+  const community = await prisma.community.findUnique({
+    where: {
+      slug: params.community,
+    },
+    include: {
       members: {
-        columns: { id: true, isEventOrganiser: true, userId: true },
+        select: {
+          id: true,
+          isEventOrganiser: true,
+          userId: true,
+        },
       },
     },
-    where: (commmunity, { eq, and }) =>
-      and(eq(commmunity.slug, params.community)),
   });
 
   if (!community) {
@@ -45,7 +50,7 @@ async function CreateEventPage({ params }: { params: { community: string } }) {
             description: "",
             name: "",
             capacity: 50,
-            eventDate: new Date().toISOString(),
+            eventDate: new Date(),
             communityId: community.id,
             coverImage: "",
           }}

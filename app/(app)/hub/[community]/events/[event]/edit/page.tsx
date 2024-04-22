@@ -1,8 +1,8 @@
 import { EventForm } from "@/components/EventForm/EventForm";
+import prisma from "@/server/db/client";
 import { getServerAuthSession } from "@/server/auth";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
-import { db } from "@/server/db";
 
 async function EditEventPage({ params }: { params: { event: string } }) {
   const session = await getServerAuthSession();
@@ -15,25 +15,26 @@ async function EditEventPage({ params }: { params: { event: string } }) {
     notFound();
   }
 
-  const event = await db.query.event.findFirst({
-    with: {
+  const event = await prisma.event.findUnique({
+    where: {
+      slug: params.event,
+    },
+    include: {
       RSVP: {
-        with: {
+        include: {
           user: true,
         },
       },
       community: {
-        columns: {
+        select: {
           excerpt: true,
           slug: true,
           name: true,
           city: true,
           country: true,
           coverImage: true,
-        },
-        with: {
           members: {
-            columns: {
+            select: {
               id: true,
               isEventOrganiser: true,
               userId: true,
@@ -42,7 +43,6 @@ async function EditEventPage({ params }: { params: { event: string } }) {
         },
       },
     },
-    where: (event, { eq, and }) => and(eq(event.slug, params.event)),
   });
 
   if (!event) {

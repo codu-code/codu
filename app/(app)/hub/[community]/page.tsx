@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
+import prisma from "@/server/db/client";
 import CommunityPage from "./_CommunityPage";
-import { db } from "@/server/db";
 
 type Props = { params: { community: string } };
 
@@ -9,17 +9,26 @@ const Page = async ({ params }: Props) => {
     notFound();
   }
 
-  const community = await db.query.community.findFirst({
-    with: {
+  const community = await prisma.community.findUnique({
+    where: {
+      slug: params.community,
+    },
+    include: {
       members: {
-        with: { user: true },
+        include: {
+          user: true,
+        },
       },
       events: {
-        with: { RSVP: { columns: { id: true } } },
+        include: {
+          RSVP: {
+            select: {
+              id: true,
+            },
+          },
+        },
       },
     },
-    where: (commmunity, { eq, and }) =>
-      and(eq(commmunity.slug, params.community)),
   });
 
   if (!community) {
