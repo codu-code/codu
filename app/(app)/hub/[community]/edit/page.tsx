@@ -1,7 +1,7 @@
 import { CommunityForm } from "@/components/CommunityForm/CommunityForm";
-import prisma from "@/server/db/client";
 import { getServerAuthSession } from "@/server/auth";
 import { notFound, redirect } from "next/navigation";
+import { db } from "@/server/db";
 
 async function EditCommunityPage({
   params,
@@ -18,26 +18,25 @@ async function EditCommunityPage({
     notFound();
   }
 
-  const community = await prisma.community.findUnique({
-    where: {
-      slug: params.community,
-    },
-    include: {
+  const community = await db.query.community.findFirst({
+    with: {
       members: {
-        include: {
+        with: {
           user: true,
         },
       },
       events: {
-        include: {
+        with: {
           RSVP: {
-            select: {
+            columns: {
               id: true,
             },
           },
         },
       },
     },
+    where: (commmunity, { eq, and }) =>
+      and(eq(commmunity.slug, params.community)),
   });
 
   if (!community) {

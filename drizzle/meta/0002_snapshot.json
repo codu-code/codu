@@ -1404,11 +1404,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "VerificationToken_identifier_unique": {
-          "name": "VerificationToken_identifier_unique",
-          "nullsNotDistinct": false,
-          "columns": ["identifier"]
-        },
         "VerificationToken_identifier_token_unique": {
           "name": "VerificationToken_identifier_token_unique",
           "nullsNotDistinct": false,

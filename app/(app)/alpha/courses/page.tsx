@@ -4,7 +4,7 @@ import CoursePreview from "@/components/Course/CoursePreview";
 
 /**
  * Feel free to update this interface when the Course model
- * has been clearly defined in the Prisma schema.
+ * has been clearly defined in the Drizzle schema.
  */
 
 const Courses = () => {
