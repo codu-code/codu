@@ -66,6 +66,9 @@ const ArticlePage = async ({ params }: Props) => {
   const ast = Markdoc.parse(post.body);
   const content = Markdoc.transform(ast, config);
 
+  // Should be based on `post.showComments` settings but bug causing failure:
+  const showComments = false;
+
   return (
     <>
       <ArticleMenu
@@ -99,7 +102,7 @@ const ArticlePage = async ({ params }: Props) => {
       </div>
       <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
         <BioBar author={post.user} />
-        {post.showComments ? (
+        {showComments ? (
           <CommentsArea postId={post.id} postOwnerId={post.user.id} />
         ) : (
           <h3 className="py-10 text-lg italic">
