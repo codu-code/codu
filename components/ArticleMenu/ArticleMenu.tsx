@@ -58,13 +58,13 @@ const ArticleMenu = ({
     return () => clearTimeout(to);
   }, [copied]);
 
-  const { mutate: like, status: likeStatus } = api.post.like.useMutation({
+  const { mutate: like, isLoading: isPendingLike } = api.post.like.useMutation({
     onSettled() {
       refetch();
     },
   });
 
-  const { mutate: bookmark, status: bookmarkStatus } =
+  const { mutate: bookmark, isLoading: isPendingBookmark } =
     api.post.bookmark.useMutation({
       onSettled() {
         refetch();
@@ -72,7 +72,7 @@ const ArticleMenu = ({
     });
 
   const likePost = async (postId: string, setLiked = true) => {
-    if (likeStatus === "loading") return;
+    if (isPendingLike) return;
     try {
       await like({ postId, setLiked });
     } catch (err) {
@@ -82,7 +82,7 @@ const ArticleMenu = ({
   };
 
   const bookmarkPost = async (postId: string, setBookmarked = true) => {
-    if (bookmarkStatus === "loading") return;
+    if (isPendingBookmark) return;
     try {
       await bookmark({ postId, setBookmarked });
     } catch (err) {
@@ -123,6 +123,7 @@ const ArticleMenu = ({
         <div className="flex h-full justify-evenly lg:flex-col">
           <div className="flex items-center lg:flex-col">
             <button
+              disabled={isPendingLike}
               aria-label="like-trigger"
               className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
               onClick={() => {
@@ -145,6 +146,7 @@ const ArticleMenu = ({
           </div>
 
           <button
+            disabled={isPendingBookmark}
             className="focus-style-rounded rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
             aria-label="bookmark-trigger"
             onClick={() => {
