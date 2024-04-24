@@ -285,7 +285,7 @@ export const commentRouter = createTRPCRouter({
             columns: { userId: true },
           },
         },
-        where: (comment, { isNull }) => isNull(comment.parentId),
+        where: eq(comment.postId, postId),
         orderBy: [desc(comment.createdAt)],
       });
 
