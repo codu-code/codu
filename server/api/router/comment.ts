@@ -11,8 +11,8 @@ import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "@/utils/notifications";
-import { comment, notification, like, user } from "@/server/db/schema";
-import { type DBQueryConfig, and, count, desc, eq, isNull } from "drizzle-orm";
+import { comment, notification, like } from "@/server/db/schema";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/server/db";
 
 export const commentRouter = createTRPCRouter({
