@@ -183,7 +183,8 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
       }) => {
         const ast = Markdoc.parse(body);
         const content = Markdoc.transform(ast, config);
-        const isCurrentUser = session?.user?.username === username;
+        console.log({ session });
+        const isCurrentUser = session?.user?.id === userId;
         const isAuthor = userId === postOwnerId;
         const dateTime = Temporal.Instant.from(
           new Date(createdAt).toISOString(),
@@ -203,6 +204,8 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                 day: "numeric",
               },
         );
+
+        console.log({ isCurrentUser });
 
         const commentUpdated =
           new Date(createdAt).toISOString() !==

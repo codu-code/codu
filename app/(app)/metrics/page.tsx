@@ -7,7 +7,11 @@ import { db } from "@/server/db";
 
 const Metrics = async () => {
   const session = await getServerAuthSession();
-  const isAdmin = session?.user?.role === "ADMIN";
+  const currentUser = await db.query.user.findFirst({
+    where: (user, { eq }) => eq(user.id, session?.user?.id ?? ""),
+  });
+
+  const isAdmin = currentUser?.role === "ADMIN";
 
   if (!isAdmin) {
     notFound();
