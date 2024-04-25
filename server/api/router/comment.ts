@@ -12,7 +12,7 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
 } from "@/utils/notifications";
 import { comment, notification, like } from "@/server/db/schema";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/server/db";
 
 export const commentRouter = createTRPCRouter({
@@ -158,58 +158,42 @@ export const commentRouter = createTRPCRouter({
         .from(comment)
         .where(eq(comment.postId, postId));
 
+      const columns = {
+        id: true,
+        body: true,
+        createdAt: true,
+        updatedAt: true,
+      };
+
+      const userColumns = {
+        name: true,
+        image: true,
+        username: true,
+        id: true,
+        email: true,
+      };
+
       const response = await db.query.comment.findMany({
         columns: { id: true, body: true, createdAt: true, updatedAt: true },
 
         with: {
           children: {
-            columns: {
-              id: true,
-              body: true,
-              createdAt: true,
-              updatedAt: true,
-            },
+            columns,
             with: {
               children: {
-                columns: {
-                  id: true,
-                  body: true,
-                  createdAt: true,
-                  updatedAt: true,
-                },
+                columns,
                 with: {
                   children: {
-                    columns: {
-                      id: true,
-                      body: true,
-                      createdAt: true,
-                      updatedAt: true,
-                    },
+                    columns,
                     with: {
                       children: {
-                        columns: {
-                          id: true,
-                          body: true,
-                          createdAt: true,
-                          updatedAt: true,
-                        },
+                        columns,
                         with: {
                           children: {
-                            columns: {
-                              id: true,
-                              body: true,
-                              createdAt: true,
-                              updatedAt: true,
-                            },
+                            columns,
                             with: {
                               user: {
-                                columns: {
-                                  name: true,
-                                  image: true,
-                                  username: true,
-                                  id: true,
-                                  email: true,
-                                },
+                                columns: userColumns,
                               },
                               likes: {
                                 columns: { userId: true },
@@ -217,13 +201,7 @@ export const commentRouter = createTRPCRouter({
                             },
                           },
                           user: {
-                            columns: {
-                              name: true,
-                              image: true,
-                              username: true,
-                              id: true,
-                              email: true,
-                            },
+                            columns: userColumns,
                           },
                           likes: {
                             columns: { userId: true },
@@ -231,13 +209,7 @@ export const commentRouter = createTRPCRouter({
                         },
                       },
                       user: {
-                        columns: {
-                          name: true,
-                          image: true,
-                          username: true,
-                          id: true,
-                          email: true,
-                        },
+                        columns: userColumns,
                       },
                       likes: {
                         columns: { userId: true },
@@ -245,13 +217,7 @@ export const commentRouter = createTRPCRouter({
                     },
                   },
                   user: {
-                    columns: {
-                      name: true,
-                      image: true,
-                      username: true,
-                      id: true,
-                      email: true,
-                    },
+                    columns: userColumns,
                   },
                   likes: {
                     columns: { userId: true },
@@ -259,13 +225,7 @@ export const commentRouter = createTRPCRouter({
                 },
               },
               user: {
-                columns: {
-                  name: true,
-                  image: true,
-                  username: true,
-                  id: true,
-                  email: true,
-                },
+                columns: userColumns,
               },
               likes: {
                 columns: { userId: true, postId: true },
@@ -273,19 +233,13 @@ export const commentRouter = createTRPCRouter({
             },
           },
           user: {
-            columns: {
-              name: true,
-              image: true,
-              username: true,
-              id: true,
-              email: true,
-            },
+            columns: userColumns,
           },
           likes: {
             columns: { userId: true },
           },
         },
-        where: eq(comment.postId, postId),
+        where: and(eq(comment.postId, postId), isNull(comment.parentId)),
         orderBy: [desc(comment.createdAt)],
       });
 
