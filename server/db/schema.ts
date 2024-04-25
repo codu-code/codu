@@ -186,12 +186,16 @@ export const user = pgTable(
       precision: 3,
       mode: "string",
       withTimezone: true,
-    }).default(sql`CURRENT_TIMESTAMP`),
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
     updatedAt: timestamp("updatedAt", {
       precision: 3,
       mode: "string",
       withTimezone: true,
-    }).$onUpdate(() => new Date().toISOString()),
+    })
+      .$onUpdate(() => new Date().toISOString())
+      .notNull(),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
     location: text("location").default("").notNull(),
     websiteUrl: text("websiteUrl").default("").notNull(),

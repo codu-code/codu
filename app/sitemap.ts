@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const users = (await db.query.user.findMany()).map(
     ({ username, updatedAt, createdAt }) => ({
       url: `${BASE_URL}/${username}`,
-      lastModified: new Date(updatedAt || createdAt || ""),
+      lastModified: new Date(updatedAt || createdAt),
     }),
   );
 
