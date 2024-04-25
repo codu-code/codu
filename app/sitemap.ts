@@ -22,13 +22,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       )
   ).map(({ slug, updatedAt, createdAt }) => ({
     url: `${BASE_URL}/articles/${slug}`,
-    lastModified: updatedAt || createdAt,
+    lastModified: new Date(updatedAt || createdAt),
   }));
 
   const users = (await db.query.user.findMany()).map(
     ({ username, updatedAt, createdAt }) => ({
       url: `${BASE_URL}/${username}`,
-      lastModified: updatedAt || createdAt || new Date(),
+      lastModified: new Date(updatedAt || createdAt || ""),
     }),
   );
 
