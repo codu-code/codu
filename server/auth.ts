@@ -51,8 +51,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error", // (used for any errors which occur during auth
   },
   callbacks: {
-    async session(stuff) {
-      const { session, user } = stuff;
+    async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
       }
