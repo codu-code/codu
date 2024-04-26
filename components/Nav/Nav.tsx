@@ -22,9 +22,11 @@ type AlgoliaConfig = {
 const Nav = ({
   session,
   algoliaSearchConfig,
+  username,
 }: {
   session: Session | null;
   algoliaSearchConfig: AlgoliaConfig;
+  username: string | null;
 }) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: session ? true : false,
@@ -33,7 +35,7 @@ const Nav = ({
   const userNavigation = [
     {
       name: "Your Profile",
-      href: `/${(session && session.user?.username) || "settings"}`,
+      href: `/${username || "settings"}`,
     },
     {
       name: "Saved posts",

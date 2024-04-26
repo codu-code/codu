@@ -113,7 +113,7 @@ export default async function Page({
 
   const accountLocked = !!profile.BannedUsers;
   const session = await getServerAuthSession();
-  const isOwner = session?.user?.username === username;
+  const isOwner = session?.user?.id === profile.id;
 
   type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
     Partial<Type>;

@@ -51,13 +51,10 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error", // (used for any errors which occur during auth
   },
   callbacks: {
-    async session({ session, user }) {
+    async session(stuff) {
+      const { session, user } = stuff;
       if (session.user) {
         session.user.id = user.id;
-        if (user.username) {
-          session.user.username = user.username;
-          session.user.role = user.role;
-        }
       }
       return session;
     },

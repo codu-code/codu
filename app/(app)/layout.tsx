@@ -8,6 +8,9 @@ import AuthProvider from "@/context/AuthProvider";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import React from "react";
 import { PromptProvider } from "@/components/PromptService";
+import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
+import { user } from "@/server/db/schema";
 
 export const metadata = {
   title: "Codú - Join Our Web Developer Community",
@@ -67,6 +70,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerAuthSession();
+  const userData = session?.user?.id
+    ? await db.query.user.findFirst({
+        where: eq(user.id, session.user.id),
+        columns: { username: true },
+      })
+    : null;
 
   return (
     <>
@@ -78,6 +87,7 @@ export default async function RootLayout({
               <Nav
                 session={session}
                 algoliaSearchConfig={algoliaSearchConfig}
+                username={userData?.username || null}
               />
               {children}
               <Footer />
