@@ -2,7 +2,7 @@ import { type UserNavigationItem } from "@/types/types";
 import { Disclosure, Transition } from "@headlessui/react";
 import { type Session } from "next-auth";
 import { PromptLink as Link } from "../PromptService/PromptLink";
-import { MutableRefObject, useRef, type FunctionComponent } from "react";
+import { type MutableRefObject, useRef, type FunctionComponent } from "react";
 import { navigation, subNav, userSubNav } from "../../config/site_settings";
 
 function classNames(...classes: string[]) {
@@ -12,12 +12,7 @@ function classNames(...classes: string[]) {
 interface MobileNavProps {
   session: Session | null;
   userNavigation: UserNavigationItem[];
-  close?: (
-    focusableElement?:
-      | HTMLElement
-      | MutableRefObject<HTMLElement | null>
-      | undefined,
-  ) => void;
+  close?: () => void;
 }
 
 const MobileNav: FunctionComponent<MobileNavProps> = ({

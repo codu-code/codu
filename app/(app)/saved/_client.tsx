@@ -64,7 +64,7 @@ const SavedPosts = () => {
                   excerpt={excerpt}
                   name={name}
                   image={image}
-                  date={updatedAt.toISOString()}
+                  date={new Date(updatedAt).toISOString()}
                   readTime={readTimeMins}
                   showBookmark={false}
                   menuOptions={[
