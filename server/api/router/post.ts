@@ -444,6 +444,7 @@ export const postRouter = createTRPCRouter({
               columns: {
                 name: true,
                 username: true,
+                image: true,
               },
             },
           },
