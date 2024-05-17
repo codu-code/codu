@@ -36,6 +36,13 @@
       "when": 1713555447109,
       "tag": "0004_drizzle-auth-table-renames",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1715928917771,
+      "tag": "0005_fix-user-id",
+      "breakpoints": true
     }
   ]
 }
