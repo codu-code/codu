@@ -21,7 +21,13 @@ const drizzlelogger: Logger = {
   },
 };
 
-const connection = globalForDb.connection ?? postgres(env.DATABASE_URL);
+const connection =
+  globalForDb.connection ??
+  postgres(env.DATABASE_URL, {
+    max: 100,
+    idle_timeout: 20,
+  });
+
 if (env.NODE_ENV !== "production") globalForDb.connection = connection;
 
 // log in dev but not in any other environment
