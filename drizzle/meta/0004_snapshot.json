@@ -1,10 +1,8 @@
 {
-  "id": "066b537b-ac22-46aa-87b1-8d1ba9f84ca2",
-  "prevId": "4dd7f18b-d35d-41e5-ad57-2495819ccf0f",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "account": {
+    "public.account": {
       "name": "account",
       "schema": "",
       "columns": {
@@ -80,17 +78,17 @@
         "account_userId_user_id_fk": {
           "name": "account_userId_user_id_fk",
           "tableFrom": "account",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "BannedUsers": {
+    "public.BannedUsers": {
       "name": "BannedUsers",
       "schema": "",
       "columns": {
@@ -134,41 +132,50 @@
       },
       "indexes": {
         "BannedUsers_userId_key": {
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "BannedUsers_userId_key",
-          "columns": ["userId"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "BannedUsers_userId_user_id_fk": {
           "name": "BannedUsers_userId_user_id_fk",
           "tableFrom": "BannedUsers",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "BannedUsers_bannedById_user_id_fk": {
           "name": "BannedUsers_bannedById_user_id_fk",
           "tableFrom": "BannedUsers",
-          "tableTo": "user",
           "columnsFrom": ["bannedById"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "BannedUsers_id_unique": {
           "name": "BannedUsers_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Bookmark": {
+    "public.Bookmark": {
       "name": "Bookmark",
       "schema": "",
       "columns": {
@@ -193,41 +200,56 @@
       },
       "indexes": {
         "Bookmark_userId_postId_key": {
+          "columns": [
+            {
+              "expression": "postId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Bookmark_userId_postId_key",
-          "columns": ["postId", "userId"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "Bookmark_postId_Post_id_fk": {
           "name": "Bookmark_postId_Post_id_fk",
           "tableFrom": "Bookmark",
-          "tableTo": "Post",
           "columnsFrom": ["postId"],
+          "tableTo": "Post",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Bookmark_userId_user_id_fk": {
           "name": "Bookmark_userId_user_id_fk",
           "tableFrom": "Bookmark",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Bookmark_id_unique": {
           "name": "Bookmark_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Comment": {
+    "public.Comment": {
       "name": "Comment",
       "schema": "",
       "columns": {
@@ -280,41 +302,41 @@
         "Comment_postId_Post_id_fk": {
           "name": "Comment_postId_Post_id_fk",
           "tableFrom": "Comment",
-          "tableTo": "Post",
           "columnsFrom": ["postId"],
+          "tableTo": "Post",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Comment_userId_user_id_fk": {
           "name": "Comment_userId_user_id_fk",
           "tableFrom": "Comment",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Comment_parentId_fkey": {
           "name": "Comment_parentId_fkey",
           "tableFrom": "Comment",
-          "tableTo": "Comment",
           "columnsFrom": ["parentId"],
+          "tableTo": "Comment",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Comment_id_unique": {
           "name": "Comment_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Community": {
+    "public.Community": {
       "name": "Community",
       "schema": "",
       "columns": {
@@ -370,14 +392,32 @@
       },
       "indexes": {
         "Community_id_key": {
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Community_id_key",
-          "columns": ["id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "Community_slug_key": {
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Community_slug_key",
-          "columns": ["slug"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -385,12 +425,12 @@
       "uniqueConstraints": {
         "Community_id_unique": {
           "name": "Community_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Event": {
+    "public.Event": {
       "name": "Event",
       "schema": "",
       "columns": {
@@ -451,37 +491,55 @@
       },
       "indexes": {
         "Event_id_key": {
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Event_id_key",
-          "columns": ["id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "Event_slug_key": {
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Event_slug_key",
-          "columns": ["slug"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "Event_communityId_Community_id_fk": {
           "name": "Event_communityId_Community_id_fk",
           "tableFrom": "Event",
-          "tableTo": "Community",
           "columnsFrom": ["communityId"],
+          "tableTo": "Community",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Event_id_unique": {
           "name": "Event_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Flagged": {
+    "public.Flagged": {
       "name": "Flagged",
       "schema": "",
       "columns": {
@@ -540,50 +598,50 @@
         "Flagged_userId_user_id_fk": {
           "name": "Flagged_userId_user_id_fk",
           "tableFrom": "Flagged",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Flagged_notifierId_user_id_fk": {
           "name": "Flagged_notifierId_user_id_fk",
           "tableFrom": "Flagged",
-          "tableTo": "user",
           "columnsFrom": ["notifierId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Flagged_postId_Post_id_fk": {
           "name": "Flagged_postId_Post_id_fk",
           "tableFrom": "Flagged",
-          "tableTo": "Post",
           "columnsFrom": ["postId"],
+          "tableTo": "Post",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Flagged_commentId_Comment_id_fk": {
           "name": "Flagged_commentId_Comment_id_fk",
           "tableFrom": "Flagged",
-          "tableTo": "Comment",
           "columnsFrom": ["commentId"],
+          "tableTo": "Comment",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Flagged_id_unique": {
           "name": "Flagged_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Like": {
+    "public.Like": {
       "name": "Like",
       "schema": "",
       "columns": {
@@ -621,55 +679,85 @@
       },
       "indexes": {
         "Like_userId_commentId_key": {
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "commentId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Like_userId_commentId_key",
-          "columns": ["userId", "commentId"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "Like_userId_postId_key": {
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "postId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Like_userId_postId_key",
-          "columns": ["userId", "postId"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "Like_userId_user_id_fk": {
           "name": "Like_userId_user_id_fk",
           "tableFrom": "Like",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Like_postId_Post_id_fk": {
           "name": "Like_postId_Post_id_fk",
           "tableFrom": "Like",
-          "tableTo": "Post",
           "columnsFrom": ["postId"],
+          "tableTo": "Post",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Like_commentId_Comment_id_fk": {
           "name": "Like_commentId_Comment_id_fk",
           "tableFrom": "Like",
-          "tableTo": "Comment",
           "columnsFrom": ["commentId"],
+          "tableTo": "Comment",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Like_id_unique": {
           "name": "Like_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Membership": {
+    "public.Membership": {
       "name": "Membership",
       "schema": "",
       "columns": {
@@ -711,32 +799,32 @@
         "Membership_communityId_Community_id_fk": {
           "name": "Membership_communityId_Community_id_fk",
           "tableFrom": "Membership",
-          "tableTo": "Community",
           "columnsFrom": ["communityId"],
+          "tableTo": "Community",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Membership_userId_user_id_fk": {
           "name": "Membership_userId_user_id_fk",
           "tableFrom": "Membership",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Membership_id_unique": {
           "name": "Membership_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Notification": {
+    "public.Notification": {
       "name": "Notification",
       "schema": "",
       "columns": {
@@ -795,50 +883,50 @@
         "Notification_userId_user_id_fk": {
           "name": "Notification_userId_user_id_fk",
           "tableFrom": "Notification",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Notification_postId_Post_id_fk": {
           "name": "Notification_postId_Post_id_fk",
           "tableFrom": "Notification",
-          "tableTo": "Post",
           "columnsFrom": ["postId"],
+          "tableTo": "Post",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Notification_commentId_Comment_id_fk": {
           "name": "Notification_commentId_Comment_id_fk",
           "tableFrom": "Notification",
-          "tableTo": "Comment",
           "columnsFrom": ["commentId"],
+          "tableTo": "Comment",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "Notification_notifierId_user_id_fk": {
           "name": "Notification_notifierId_user_id_fk",
           "tableFrom": "Notification",
-          "tableTo": "user",
           "columnsFrom": ["notifierId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Notification_id_unique": {
           "name": "Notification_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Post": {
+    "public.Post": {
       "name": "Post",
       "schema": "",
       "columns": {
@@ -940,37 +1028,55 @@
       },
       "indexes": {
         "Post_id_key": {
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Post_id_key",
-          "columns": ["id"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "Post_slug_key": {
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Post_slug_key",
-          "columns": ["slug"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "Post_userId_user_id_fk": {
           "name": "Post_userId_user_id_fk",
           "tableFrom": "Post",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "Post_id_unique": {
           "name": "Post_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "PostTag": {
+    "public.PostTag": {
       "name": "PostTag",
       "schema": "",
       "columns": {
@@ -995,35 +1101,50 @@
       },
       "indexes": {
         "PostTag_tagId_postId_key": {
+          "columns": [
+            {
+              "expression": "tagId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "postId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "PostTag_tagId_postId_key",
-          "columns": ["tagId", "postId"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "PostTag_tagId_Tag_id_fk": {
           "name": "PostTag_tagId_Tag_id_fk",
           "tableFrom": "PostTag",
-          "tableTo": "Tag",
           "columnsFrom": ["tagId"],
+          "tableTo": "Tag",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "PostTag_postId_Post_id_fk": {
           "name": "PostTag_postId_Post_id_fk",
           "tableFrom": "PostTag",
-          "tableTo": "Post",
           "columnsFrom": ["postId"],
+          "tableTo": "Post",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "RSVP": {
+    "public.RSVP": {
       "name": "RSVP",
       "schema": "",
       "columns": {
@@ -1058,32 +1179,32 @@
         "RSVP_eventId_Event_id_fk": {
           "name": "RSVP_eventId_Event_id_fk",
           "tableFrom": "RSVP",
-          "tableTo": "Event",
           "columnsFrom": ["eventId"],
+          "tableTo": "Event",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         },
         "RSVP_userId_user_id_fk": {
           "name": "RSVP_userId_user_id_fk",
           "tableFrom": "RSVP",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onUpdate": "cascade",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "RSVP_id_unique": {
           "name": "RSVP_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "session": {
+    "public.session": {
       "name": "session",
       "schema": "",
       "columns": {
@@ -1117,23 +1238,23 @@
         "session_userId_user_id_fk": {
           "name": "session_userId_user_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
           "columnsFrom": ["userId"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "session_id_unique": {
           "name": "session_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "Tag": {
+    "public.Tag": {
       "name": "Tag",
       "schema": "",
       "columns": {
@@ -1159,9 +1280,18 @@
       },
       "indexes": {
         "Tag_title_key": {
+          "columns": [
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "Tag_title_key",
-          "columns": ["title"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -1169,12 +1299,12 @@
       "uniqueConstraints": {
         "Tag_id_unique": {
           "name": "Tag_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["id"]
+          "columns": ["id"],
+          "nullsNotDistinct": false
         }
       }
     },
-    "user": {
+    "public.user": {
       "name": "user",
       "schema": "",
       "columns": {
@@ -1328,26 +1458,59 @@
       },
       "indexes": {
         "User_username_key": {
+          "columns": [
+            {
+              "expression": "username",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "User_username_key",
-          "columns": ["username"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "User_email_key": {
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "User_email_key",
-          "columns": ["email"],
-          "isUnique": true
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "User_username_id_idx": {
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "username",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
           "name": "User_username_id_idx",
-          "columns": ["id", "username"],
-          "isUnique": false
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "verificationToken": {
+    "public.verificationToken": {
       "name": "verificationToken",
       "schema": "",
       "columns": {
@@ -1382,19 +1545,18 @@
     }
   },
   "enums": {
-    "Role": {
+    "public.Role": {
       "name": "Role",
-      "values": {
-        "MODERATOR": "MODERATOR",
-        "ADMIN": "ADMIN",
-        "USER": "USER"
-      }
+      "schema": "public",
+      "values": ["MODERATOR", "ADMIN", "USER"]
     }
   },
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "066b537b-ac22-46aa-87b1-8d1ba9f84ca2",
+  "prevId": "4dd7f18b-d35d-41e5-ad57-2495819ccf0f"
 }

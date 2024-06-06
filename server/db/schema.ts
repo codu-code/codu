@@ -141,7 +141,8 @@ export const post = pgTable(
       withTimezone: true,
     })
       .notNull()
-      .$onUpdate(() => new Date().toISOString()),
+      .$onUpdate(() => new Date().toISOString())
+      .default(sql`CURRENT_TIMESTAMP`),
     slug: text("slug").notNull(),
     userId: text("userId")
       .notNull()
@@ -195,7 +196,8 @@ export const user = pgTable(
       withTimezone: true,
     })
       .$onUpdate(() => new Date().toISOString())
-      .notNull(),
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
     bio: varchar("bio", { length: 200 }).default("").notNull(),
     location: text("location").default("").notNull(),
     websiteUrl: text("websiteUrl").default("").notNull(),
@@ -289,7 +291,9 @@ export const comment = pgTable(
       withTimezone: true,
     })
       .notNull()
-      .$onUpdate(() => new Date().toISOString()),
+      .$onUpdate(() => new Date().toISOString())
+      .default(sql`CURRENT_TIMESTAMP`),
+
     postId: text("postId")
       .notNull()
       .references(() => post.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -385,7 +389,8 @@ export const banned_users = pgTable(
       withTimezone: true,
     })
       .notNull()
-      .$onUpdate(() => new Date().toISOString()),
+      .$onUpdate(() => new Date().toISOString())
+      .default(sql`CURRENT_TIMESTAMP`),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -518,7 +523,8 @@ export const flagged = pgTable("Flagged", {
     withTimezone: true,
   })
     .notNull()
-    .$onUpdate(() => new Date().toISOString()),
+    .$onUpdate(() => new Date().toISOString())
+    .default(sql`CURRENT_TIMESTAMP`),
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -561,7 +567,8 @@ export const notification = pgTable("Notification", {
     withTimezone: true,
   })
     .notNull()
-    .$onUpdate(() => new Date().toISOString()),
+    .$onUpdate(() => new Date().toISOString())
+    .default(sql`CURRENT_TIMESTAMP`),
   type: integer("type").notNull(),
   userId: text("userId")
     .notNull()
