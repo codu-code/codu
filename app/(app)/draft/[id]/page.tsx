@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {};
   const host = headers().get("host") || "";
   return {
-    title: `Previewing ${post.title} | by ${post.user.name} | Codú`,
+    title: `Draft: ${post.title} | by ${post.user.name} | Codú`,
     authors: {
       name: post.user.name,
       url: `https://www.${host}/${post.user.username}`,
@@ -35,7 +35,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const PreviewPage = async ({ params }: Props) => {
-  console.log("xxx", { params });
   const { id } = params;
 
   const post = await getPostPreview({ id });

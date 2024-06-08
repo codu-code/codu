@@ -71,8 +71,6 @@ export async function getPostPreview({ id }: GetPreview) {
   try {
     GetPreviewSchema.parse({ id });
 
-    console.log("ALSDJHKASJHD ASKH");
-
     const response = await db.query.post.findFirst({
       columns: {
         id: true,
