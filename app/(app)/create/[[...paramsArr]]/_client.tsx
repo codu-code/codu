@@ -113,7 +113,7 @@ const Create = () => {
     },
   );
 
-  const PREVIEW_URL = `${process.env.BASE_URL || "http://localhost:3000"}/draft/${postId}`;
+  const PREVIEW_URL = `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.codu.co"}/draft/${postId}`;
 
   const handleCopyToClipboard = () => {
     copy(PREVIEW_URL);
