@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/alpha/",
         "/api/",
+        "/draft/",
         "/settings/",
         "/metrics/",
         "/notifications/",

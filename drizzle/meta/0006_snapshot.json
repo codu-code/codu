@@ -1,17 +1,13 @@
 {
+  "id": "73711620-aa4c-4f03-bfbe-08098e17e1ac",
+  "prevId": "c9aba16c-9fba-47c9-8a1a-f381babfef30",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.Account": {
-      "name": "Account",
+    "public.account": {
+      "name": "account",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "userId": {
           "name": "userId",
           "type": "text",
@@ -79,47 +75,20 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "Account_provider_providerAccountId_key": {
-          "columns": [
-            {
-              "expression": "provider",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "providerAccountId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "name": "Account_provider_providerAccountId_key",
-          "isUnique": true,
-          "method": "btree",
-          "concurrently": false
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "Account_userId_User_id_fk": {
-          "name": "Account_userId_User_id_fk",
-          "tableFrom": "Account",
+        "account_userId_user_id_fk": {
+          "name": "account_userId_user_id_fk",
+          "tableFrom": "account",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onUpdate": "cascade",
+          "onUpdate": "no action",
           "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "Account_id_unique": {
-          "name": "Account_id_unique",
-          "columns": ["id"],
-          "nullsNotDistinct": false
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.BannedUsers": {
       "name": "BannedUsers",
@@ -133,14 +102,14 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -165,6 +134,7 @@
       },
       "indexes": {
         "BannedUsers_userId_key": {
+          "name": "BannedUsers_userId_key",
           "columns": [
             {
               "expression": "userId",
@@ -173,27 +143,26 @@
               "nulls": "last"
             }
           ],
-          "name": "BannedUsers_userId_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         }
       },
       "foreignKeys": {
-        "BannedUsers_userId_User_id_fk": {
-          "name": "BannedUsers_userId_User_id_fk",
+        "BannedUsers_userId_user_id_fk": {
+          "name": "BannedUsers_userId_user_id_fk",
           "tableFrom": "BannedUsers",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "BannedUsers_bannedById_User_id_fk": {
-          "name": "BannedUsers_bannedById_User_id_fk",
+        "BannedUsers_bannedById_user_id_fk": {
+          "name": "BannedUsers_bannedById_user_id_fk",
           "tableFrom": "BannedUsers",
           "columnsFrom": ["bannedById"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -233,6 +202,7 @@
       },
       "indexes": {
         "Bookmark_userId_postId_key": {
+          "name": "Bookmark_userId_postId_key",
           "columns": [
             {
               "expression": "postId",
@@ -247,7 +217,6 @@
               "nulls": "last"
             }
           ],
-          "name": "Bookmark_userId_postId_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
@@ -263,11 +232,11 @@
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "Bookmark_userId_User_id_fk": {
-          "name": "Bookmark_userId_User_id_fk",
+        "Bookmark_userId_user_id_fk": {
+          "name": "Bookmark_userId_user_id_fk",
           "tableFrom": "Bookmark",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -300,14 +269,14 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -341,11 +310,11 @@
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "Comment_userId_User_id_fk": {
-          "name": "Comment_userId_User_id_fk",
+        "Comment_userId_user_id_fk": {
+          "name": "Comment_userId_user_id_fk",
           "tableFrom": "Comment",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -425,6 +394,7 @@
       },
       "indexes": {
         "Community_id_key": {
+          "name": "Community_id_key",
           "columns": [
             {
               "expression": "id",
@@ -433,12 +403,12 @@
               "nulls": "last"
             }
           ],
-          "name": "Community_id_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         },
         "Community_slug_key": {
+          "name": "Community_slug_key",
           "columns": [
             {
               "expression": "slug",
@@ -447,7 +417,6 @@
               "nulls": "last"
             }
           ],
-          "name": "Community_slug_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
@@ -475,7 +444,7 @@
         },
         "eventDate": {
           "name": "eventDate",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -524,6 +493,7 @@
       },
       "indexes": {
         "Event_id_key": {
+          "name": "Event_id_key",
           "columns": [
             {
               "expression": "id",
@@ -532,12 +502,12 @@
               "nulls": "last"
             }
           ],
-          "name": "Event_id_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         },
         "Event_slug_key": {
+          "name": "Event_slug_key",
           "columns": [
             {
               "expression": "slug",
@@ -546,7 +516,6 @@
               "nulls": "last"
             }
           ],
-          "name": "Event_slug_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
@@ -584,14 +553,14 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -628,20 +597,20 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Flagged_userId_User_id_fk": {
-          "name": "Flagged_userId_User_id_fk",
+        "Flagged_userId_user_id_fk": {
+          "name": "Flagged_userId_user_id_fk",
           "tableFrom": "Flagged",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "Flagged_notifierId_User_id_fk": {
-          "name": "Flagged_notifierId_User_id_fk",
+        "Flagged_notifierId_user_id_fk": {
+          "name": "Flagged_notifierId_user_id_fk",
           "tableFrom": "Flagged",
           "columnsFrom": ["notifierId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -686,7 +655,7 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
@@ -712,6 +681,7 @@
       },
       "indexes": {
         "Like_userId_commentId_key": {
+          "name": "Like_userId_commentId_key",
           "columns": [
             {
               "expression": "userId",
@@ -726,12 +696,12 @@
               "nulls": "last"
             }
           ],
-          "name": "Like_userId_commentId_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         },
         "Like_userId_postId_key": {
+          "name": "Like_userId_postId_key",
           "columns": [
             {
               "expression": "userId",
@@ -746,18 +716,17 @@
               "nulls": "last"
             }
           ],
-          "name": "Like_userId_postId_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         }
       },
       "foreignKeys": {
-        "Like_userId_User_id_fk": {
-          "name": "Like_userId_User_id_fk",
+        "Like_userId_user_id_fk": {
+          "name": "Like_userId_user_id_fk",
           "tableFrom": "Like",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -821,7 +790,7 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
@@ -838,11 +807,11 @@
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "Membership_userId_User_id_fk": {
-          "name": "Membership_userId_User_id_fk",
+        "Membership_userId_user_id_fk": {
+          "name": "Membership_userId_user_id_fk",
           "tableFrom": "Membership",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -869,14 +838,14 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -913,11 +882,11 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "Notification_userId_User_id_fk": {
-          "name": "Notification_userId_User_id_fk",
+        "Notification_userId_user_id_fk": {
+          "name": "Notification_userId_user_id_fk",
           "tableFrom": "Notification",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -940,11 +909,11 @@
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "Notification_notifierId_User_id_fk": {
-          "name": "Notification_notifierId_User_id_fk",
+        "Notification_notifierId_user_id_fk": {
+          "name": "Notification_notifierId_user_id_fk",
           "tableFrom": "Notification",
           "columnsFrom": ["notifierId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -1015,20 +984,20 @@
         },
         "published": {
           "name": "published",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -1061,6 +1030,7 @@
       },
       "indexes": {
         "Post_id_key": {
+          "name": "Post_id_key",
           "columns": [
             {
               "expression": "id",
@@ -1069,12 +1039,12 @@
               "nulls": "last"
             }
           ],
-          "name": "Post_id_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         },
         "Post_slug_key": {
+          "name": "Post_slug_key",
           "columns": [
             {
               "expression": "slug",
@@ -1083,18 +1053,17 @@
               "nulls": "last"
             }
           ],
-          "name": "Post_slug_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         }
       },
       "foreignKeys": {
-        "Post_userId_User_id_fk": {
-          "name": "Post_userId_User_id_fk",
+        "Post_userId_user_id_fk": {
+          "name": "Post_userId_user_id_fk",
           "tableFrom": "Post",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -1134,6 +1103,7 @@
       },
       "indexes": {
         "PostTag_tagId_postId_key": {
+          "name": "PostTag_tagId_postId_key",
           "columns": [
             {
               "expression": "tagId",
@@ -1148,7 +1118,6 @@
               "nulls": "last"
             }
           ],
-          "name": "PostTag_tagId_postId_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
@@ -1201,7 +1170,7 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
@@ -1218,11 +1187,11 @@
           "onUpdate": "cascade",
           "onDelete": "cascade"
         },
-        "RSVP_userId_User_id_fk": {
-          "name": "RSVP_userId_User_id_fk",
+        "RSVP_userId_user_id_fk": {
+          "name": "RSVP_userId_user_id_fk",
           "tableFrom": "RSVP",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
           "onUpdate": "cascade",
           "onDelete": "cascade"
@@ -1237,16 +1206,10 @@
         }
       }
     },
-    "public.Session": {
-      "name": "Session",
+    "public.session": {
+      "name": "session",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "sessionToken": {
           "name": "sessionToken",
           "type": "text",
@@ -1261,46 +1224,25 @@
         },
         "expires": {
           "name": "expires",
-          "type": "timestamp(3)",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         }
       },
-      "indexes": {
-        "Session_sessionToken_key": {
-          "columns": [
-            {
-              "expression": "sessionToken",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "name": "Session_sessionToken_key",
-          "isUnique": true,
-          "method": "btree",
-          "concurrently": false
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "Session_userId_User_id_fk": {
-          "name": "Session_userId_User_id_fk",
-          "tableFrom": "Session",
+        "session_userId_user_id_fk": {
+          "name": "session_userId_user_id_fk",
+          "tableFrom": "session",
           "columnsFrom": ["userId"],
-          "tableTo": "User",
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onUpdate": "cascade",
+          "onUpdate": "no action",
           "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "Session_id_unique": {
-          "name": "Session_id_unique",
-          "columns": ["id"],
-          "nullsNotDistinct": false
-        }
-      }
+      "uniqueConstraints": {}
     },
     "public.Tag": {
       "name": "Tag",
@@ -1308,7 +1250,7 @@
       "columns": {
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
@@ -1328,6 +1270,7 @@
       },
       "indexes": {
         "Tag_title_key": {
+          "name": "Tag_title_key",
           "columns": [
             {
               "expression": "title",
@@ -1336,7 +1279,6 @@
               "nulls": "last"
             }
           ],
-          "name": "Tag_title_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
@@ -1352,8 +1294,8 @@
         }
       }
     },
-    "public.User": {
-      "name": "User",
+    "public.user": {
+      "name": "user",
       "schema": "",
       "columns": {
         "id": {
@@ -1383,7 +1325,7 @@
         },
         "emailVerified": {
           "name": "emailVerified",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -1396,14 +1338,14 @@
         },
         "createdAt": {
           "name": "createdAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
         "updatedAt": {
           "name": "updatedAt",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": true
         },
@@ -1462,7 +1404,7 @@
         },
         "dateOfBirth": {
           "name": "dateOfBirth",
-          "type": "timestamp(3)",
+          "type": "timestamp(3) with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -1506,6 +1448,7 @@
       },
       "indexes": {
         "User_username_key": {
+          "name": "User_username_key",
           "columns": [
             {
               "expression": "username",
@@ -1514,12 +1457,12 @@
               "nulls": "last"
             }
           ],
-          "name": "User_username_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         },
         "User_email_key": {
+          "name": "User_email_key",
           "columns": [
             {
               "expression": "email",
@@ -1528,12 +1471,12 @@
               "nulls": "last"
             }
           ],
-          "name": "User_email_key",
           "isUnique": true,
           "method": "btree",
           "concurrently": false
         },
         "User_username_id_idx": {
+          "name": "User_username_id_idx",
           "columns": [
             {
               "expression": "id",
@@ -1548,7 +1491,6 @@
               "nulls": "last"
             }
           ],
-          "name": "User_username_id_idx",
           "isUnique": false,
           "method": "btree",
           "concurrently": false
@@ -1556,16 +1498,10 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "User_id_unique": {
-          "name": "User_id_unique",
-          "columns": ["id"],
-          "nullsNotDistinct": false
-        }
-      }
+      "uniqueConstraints": {}
     },
-    "public.VerificationToken": {
-      "name": "VerificationToken",
+    "public.verificationToken": {
+      "name": "verificationToken",
       "schema": "",
       "columns": {
         "identifier": {
@@ -1582,21 +1518,20 @@
         },
         "expires": {
           "name": "expires",
-          "type": "timestamp(3)",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "VerificationToken_identifier_token_unique": {
-          "name": "VerificationToken_identifier_token_unique",
-          "columns": ["identifier", "token"],
-          "nullsNotDistinct": false
+      "compositePrimaryKeys": {
+        "verificationToken_identifier_token_pk": {
+          "name": "verificationToken_identifier_token_pk",
+          "columns": ["identifier", "token"]
         }
-      }
+      },
+      "uniqueConstraints": {}
     }
   },
   "enums": {
@@ -1608,10 +1543,8 @@
   },
   "schemas": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "a1d25635-327b-4ee1-a740-a348bad2c634",
-  "prevId": "00000000-0000-0000-0000-000000000000"
+    "tables": {}
+  }
 }

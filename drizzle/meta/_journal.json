@@ -43,6 +43,13 @@
       "when": 1715928917771,
       "tag": "0005_fix-user-id",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1717712741800,
+      "tag": "0006_fix-defaults-on-updatedat",
+      "breakpoints": true
     }
   ]
 }

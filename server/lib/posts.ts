@@ -10,11 +10,16 @@ export const GetPostSchema = z.object({
   slug: z.string(),
 });
 
+export const GetPreviewSchema = z.object({
+  id: z.string(),
+});
+
 export const GetTrendingSchema = z.object({
   currentUserId: z.string().optional(),
 });
 
 type GetPost = z.infer<typeof GetPostSchema>;
+type GetPreview = z.infer<typeof GetPreviewSchema>;
 type GetTrending = z.infer<typeof GetTrendingSchema>;
 
 export async function getPost({ slug }: GetPost) {
@@ -36,7 +41,6 @@ export async function getPost({ slug }: GetPost) {
       },
       where: (posts, { eq }) => eq(posts.slug, slug),
       with: {
-        bookmarks: { columns: { userId: true } },
         tags: {
           columns: { id: true },
           with: { tag: { columns: { title: true } } },
@@ -53,12 +57,56 @@ export async function getPost({ slug }: GetPost) {
       },
     });
 
-    if (!response || response.published === null) {
+    if (!response) {
       return null;
     }
-    const currentUserBookmarkedPost = !!response.bookmarks.length;
-    response.bookmarks = [];
-    return { ...response, currentUserBookmarkedPost };
+    return response;
+  } catch (error) {
+    Sentry.captureException(error);
+    throw new Error("Error fetching post");
+  }
+}
+
+export async function getPostPreview({ id }: GetPreview) {
+  try {
+    GetPreviewSchema.parse({ id });
+
+    const response = await db.query.post.findFirst({
+      columns: {
+        id: true,
+        title: true,
+        body: true,
+        published: true,
+        updatedAt: true,
+        readTimeMins: true,
+        slug: true,
+        excerpt: true,
+        canonicalUrl: true,
+        showComments: true,
+      },
+      where: (posts, { eq }) => eq(posts.id, id),
+      with: {
+        tags: {
+          columns: { id: true },
+          with: { tag: { columns: { title: true } } },
+        },
+        user: {
+          columns: {
+            name: true,
+            image: true,
+            username: true,
+            bio: true,
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!response) {
+      return null;
+    }
+
+    return response;
   } catch (error) {
     Sentry.captureException(error);
     throw new Error("Error fetching post");
