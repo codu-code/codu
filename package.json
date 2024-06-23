@@ -103,7 +103,7 @@
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.3.0",
     "tiptap-markdown": "^0.8.10",
-    "zod": "^3.23.6"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@axe-core/react": "^4.9.0",
