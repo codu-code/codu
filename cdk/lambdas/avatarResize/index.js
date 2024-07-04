@@ -14,7 +14,7 @@ exports.handler = async (event) => {
 
   const params = {
     Bucket: bucket,
-    Key: key,
+    Key: `new/${key}`,
   };
 
   try {
