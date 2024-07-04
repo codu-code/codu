@@ -32,7 +32,7 @@ exports.handler = async (event) => {
 
     if (!stream) throw new Error("BodyStream is empty");
 
-    const imageBuffer = Buffer.concat(await stream.toArray());
+    const imageRaw = await stream;
 
     // Function to resize an image
     const resizeImage = async (buffer, size) => {
@@ -49,7 +49,7 @@ exports.handler = async (event) => {
 
     // Loop through sizes and upload each resized image
     for (const size of sizes) {
-      const resizedImage = await resizeImage(imageBuffer, size);
+      const resizedImage = await resizeImage(imageRaw, size);
 
       const newKey = size.suffix
         ? key.replace(/(\.[\w\d_-]+)$/i, `_${size.suffix}$1`)
