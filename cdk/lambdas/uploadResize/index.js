@@ -32,7 +32,7 @@ exports.handler = async (event) => {
 
     if (!stream) throw new Error("BodyStream is empty");
 
-    const imageRaw = await stream;
+    const imageRaw = Buffer.concat(await stream.toArray());
 
     // Function to resize an image
     const resizeImage = async (buffer, size) => {
