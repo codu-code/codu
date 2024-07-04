@@ -63,7 +63,7 @@ export class StorageStack extends cdk.Stack {
     // Lambda for resizing avatar uploads
     const s3AvatarEventHandler = new NodejsFunction(this, "ResizeAvatar", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: path.join(__dirname, "/../lambdas/imageResize/index.js"),
+      entry: path.join(__dirname, "/../lambdas/avatarResize/index.js"),
       timeout: cdk.Duration.seconds(120),
       depsLockFilePath: path.join(
         __dirname,
@@ -75,13 +75,13 @@ export class StorageStack extends cdk.Stack {
     });
 
     // Lambda for resizing uploads
-    const s3UploadEventHandler = new NodejsFunction(this, "ResizeAvatar", {
+    const s3UploadEventHandler = new NodejsFunction(this, "ResizeUploads", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: path.join(__dirname, "/../lambdas/imageResize/index.js"),
+      entry: path.join(__dirname, "/../lambdas/uploadResize/index.js"),
       timeout: cdk.Duration.seconds(120),
       depsLockFilePath: path.join(
         __dirname,
-        "/../lambdas/avatarResize/package-lock.json",
+        "/../lambdas/uploadResize/package-lock.json",
       ),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
