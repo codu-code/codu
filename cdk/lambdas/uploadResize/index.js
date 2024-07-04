@@ -25,6 +25,8 @@ exports.handler = async (event) => {
     Bucket: bucket,
     Key: key,
   };
+  
+  const newKey = key.split("/")[1]
 
   try {
     const response = await s3.send(new GetObjectCommand(params));
@@ -52,8 +54,8 @@ exports.handler = async (event) => {
       const resizedImage = await resizeImage(imageRaw, size);
 
       const newKey = size.suffix
-        ? `resized/${key.replace(/(\.[\w\d_-]+)$/i, `_${size.suffix}$1`)}`
-        : `resized/${key}`;
+        ? `resized/${newKey.replace(/(\.[\w\d_-]+)$/i, `_${size.suffix}$1`)}`
+        : `resized/${newKey}`;
 
       await s3.send(
         new PutObjectCommand({
