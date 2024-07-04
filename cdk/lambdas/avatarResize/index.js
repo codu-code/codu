@@ -21,11 +21,14 @@ exports.handler = async (event) => {
 
     if (!stream) throw new Error("BodyStream is empty");
 
+    console.log({ response, stream });
+
     const resizedImage = await sharp(Buffer.concat(await stream.toArray()))
       .resize({ width: 220, height: 220, fit: "cover" })
       .webp({ quality: 80 })
       .toBuffer();
 
+    console.log("Image resized");
     await s3.send(
       new PutObjectCommand({
         Bucket: bucket,
