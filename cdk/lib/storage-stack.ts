@@ -60,26 +60,48 @@ export class StorageStack extends cdk.Stack {
     this.bucket.grantRead(new iam.AccountRootPrincipal());
     this.bucket.grantRead(this.originAccessIdentity);
 
-    // Lambda for resizing uploads
-    const s3EventHandler = new NodejsFunction(this, "ResizeAvatar", {
+    // Lambda for resizing avatar uploads
+    const s3AvatarEventHandler = new NodejsFunction(this, "ResizeAvatar", {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, "/../lambdas/imageResize/index.js"),
       timeout: cdk.Duration.seconds(120),
       depsLockFilePath: path.join(
         __dirname,
-        "/../lambdas/imageResize/package-lock.json",
+        "/../lambdas/avatarResize/package-lock.json",
       ),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
       },
     });
 
-    this.bucket.grantReadWrite(s3EventHandler);
+    // Lambda for resizing uploads
+    const s3UploadEventHandler = new NodejsFunction(this, "ResizeAvatar", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(__dirname, "/../lambdas/imageResize/index.js"),
+      timeout: cdk.Duration.seconds(120),
+      depsLockFilePath: path.join(
+        __dirname,
+        "/../lambdas/avatarResize/package-lock.json",
+      ),
+      bundling: {
+        nodeModules: ["sharp", "@aws-sdk/client-s3"],
+      },
+    });
 
-    s3EventHandler.addEventSource(
+    this.bucket.grantReadWrite(s3AvatarEventHandler);
+    this.bucket.grantReadWrite(s3UploadEventHandler);
+
+    s3AvatarEventHandler.addEventSource(
       new S3EventSource(this.bucket, {
         events: [s3.EventType.OBJECT_CREATED],
         filters: [{ prefix: "u/" }],
+      }),
+    );
+
+    s3UploadEventHandler.addEventSource(
+      new S3EventSource(this.bucket, {
+        events: [s3.EventType.OBJECT_CREATED],
+        filters: [{ prefix: "public/" }],
       }),
     );
 
