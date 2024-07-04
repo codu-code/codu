@@ -10,6 +10,8 @@ exports.handler = async (event) => {
   const bucket = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
 
+  console.log({ bucket, key });
+
   const params = {
     Bucket: bucket,
     Key: key,
@@ -18,10 +20,8 @@ exports.handler = async (event) => {
   try {
     const response = await s3.send(new GetObjectCommand(params));
     const stream = response.Body;
-
-    if (!stream) throw new Error("BodyStream is empty");
-
     console.log({ response, stream });
+    if (!stream) throw new Error("BodyStream is empty");
 
     const resizedImage = await sharp(Buffer.concat(await stream.toArray()))
       .resize({ width: 220, height: 220, fit: "cover" })
