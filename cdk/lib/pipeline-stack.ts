@@ -78,15 +78,7 @@ export class PipelineStack extends cdk.Stack {
       `/env/prod/accountId`,
     );
 
-    const hostedZoneId = ssm.StringParameter.valueFromLookup(
-      this,
-      `/env/hostedZoneId`,
-    );
-
-    const domainName = ssm.StringParameter.valueFromLookup(
-      this,
-      `/env/domainName`,
-    );
+    const hostedZoneId = "Z09797183E6CQSVU1LFVP";
 
     const crossAccountRole = new Role(this, "CrossAccountDNSRole", {
       assumedBy: new AccountPrincipal(this.account),
@@ -121,16 +113,6 @@ export class PipelineStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CrossAccountRoleArn", {
       value: crossAccountRole.roleArn,
       exportName: "CrossAccountDNSRoleArn",
-    });
-
-    new cdk.CfnOutput(this, "HostedZoneId", {
-      value: hostedZoneId,
-      exportName: "HostedZoneId",
-    });
-
-    new cdk.CfnOutput(this, "DomainName", {
-      value: domainName,
-      exportName: "DomainName",
     });
 
     const defaultRegion = "eu-west-1";
