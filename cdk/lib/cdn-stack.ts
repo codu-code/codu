@@ -39,7 +39,8 @@ export class CdnStack extends cdk.Stack {
     );
 
     try {
-      const certificate = new acm.Certificate(this, "Certificate", {
+      const uniqueId = Math.random().toString(36).substring(2, 15);
+      const certificate = new acm.Certificate(this, `Certificate-${uniqueId}`, {
         domainName: domainName,
         subjectAlternativeNames: [`*.${domainName}`],
         validation: acm.CertificateValidation.fromDns(zone),
