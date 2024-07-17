@@ -74,55 +74,23 @@ export class StorageStack extends cdk.Stack {
       1,
     );
 
-    const dnsAccountId = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/env/dnsAccountId`,
-      1,
-    );
-
     const bucketDomainName = `content.${domainName}`;
 
-    const crossAccountRoleArn = `arn:aws:iam::${dnsAccountId}:role/CrossAccountDNSRole`;
-
-    // Create the IHostedZone object
     const zone = route53.HostedZone.fromHostedZoneAttributes(
       this,
-      "CrossAccountZone",
+      "HostedZone",
       {
         hostedZoneId,
         zoneName: domainName,
       },
     );
 
-    // Create the IAM role from the imported ARN
-    const delegationRole = Role.fromRoleArn(
-      this,
-      "CrossAccountDelegationRole",
-      crossAccountRoleArn,
-    );
-
-    // Use the delegation role to create DNS records
-    new route53.CrossAccountZoneDelegationRecord(
-      this,
-      "DNSValidationDelegate",
-      {
-        delegatedZone: zone,
-        parentHostedZoneName: domainName,
-        delegationRole: delegationRole,
-      },
-    );
-
-    const certificate = new acm.DnsValidatedCertificate(
-      this,
-      "CrossAccountCertificate",
-      {
-        domainName: domainName,
-        subjectAlternativeNames: [`*.${domainName}`],
-        hostedZone: zone,
-        region: "us-east-1",
-        validation: acm.CertificateValidation.fromDns(zone),
-      },
-    );
+    const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
+      domainName,
+      subjectAlternativeNames: [`*.${domainName}`],
+      hostedZone: zone,
+      region: "us-east-1",
+    });
 
     // CloudFront distribution setup
     const cloudFrontOAI = new cloudfront.OriginAccessIdentity(
