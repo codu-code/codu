@@ -97,8 +97,18 @@ export class PipelineStack extends cdk.Stack {
       description: "Role for cross-account DNS management",
     });
 
-    crossAccountRole.grantAssumeRole(new AccountPrincipal(devAccountId));
-    crossAccountRole.grantAssumeRole(new AccountPrincipal(prodAccountId));
+    const assumeRolePolicy =
+      crossAccountRole.assumeRolePolicy as cdk.aws_iam.PolicyDocument;
+    assumeRolePolicy.addStatements(
+      new cdk.aws_iam.PolicyStatement({
+        actions: ["sts:AssumeRole"],
+        effect: cdk.aws_iam.Effect.ALLOW,
+        principals: [
+          new cdk.aws_iam.AccountPrincipal(devAccountId),
+          new cdk.aws_iam.AccountPrincipal(prodAccountId),
+        ],
+      }),
+    );
 
     crossAccountRole.addToPolicy(
       new PolicyStatement({
