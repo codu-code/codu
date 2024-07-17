@@ -81,13 +81,13 @@ export class StorageStack extends cdk.Stack {
       "HostedZone",
       {
         hostedZoneId,
-        zoneName: domainName,
+        zoneName: bucketDomainName,
       },
     );
 
     const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName,
-      subjectAlternativeNames: [`*.${domainName}`],
+      domainName: bucketDomainName,
+      subjectAlternativeNames: [`*.${bucketDomainName}`],
       hostedZone: zone,
       region: "us-east-1",
     });
