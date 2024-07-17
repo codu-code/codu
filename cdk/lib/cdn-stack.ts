@@ -38,46 +38,51 @@ export class CdnStack extends cdk.Stack {
       },
     );
 
-    const certificateArn = new acm.Certificate(this, "Certificate", {
-      domainName: domainName,
-      subjectAlternativeNames: [`*.${domainName}`],
-      validation: acm.CertificateValidation.fromDns(zone),
-    }).certificateArn;
+    try {
+      const certificate = new acm.Certificate(this, "Certificate", {
+        domainName: domainName,
+        subjectAlternativeNames: [`*.${domainName}`],
+        validation: acm.CertificateValidation.fromDns(zone),
+      });
 
-    // Import the certificate
-    const certificate = acm.Certificate.fromCertificateArn(
-      this,
-      "ImportedCertificate",
-      certificateArn,
-    );
-
-    const distribution = new cloudfront.Distribution(
-      this,
-      "UploadDistribution",
-      {
-        defaultBehavior: {
-          origin: new origins.S3Origin(props.bucket, {
-            originAccessIdentity: props.cloudFrontOAI,
-          }),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      const distribution = new cloudfront.Distribution(
+        this,
+        "UploadDistribution",
+        {
+          defaultBehavior: {
+            origin: new origins.S3Origin(props.bucket, {
+              originAccessIdentity: props.cloudFrontOAI,
+            }),
+            viewerProtocolPolicy:
+              cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          },
+          domainNames: [domainName],
+          certificate: certificate,
         },
-        domainNames: [domainName],
-        certificate: certificate,
-      },
-    );
+      );
 
-    new route53.ARecord(this, "SiteAliasRecord", {
-      recordName: domainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(distribution),
-      ),
-      zone,
-    });
+      distribution.node.addDependency(certificate);
 
-    new cdk.CfnOutput(this, "DistributionDomainName", {
-      value: distribution.distributionDomainName,
-      description: "The domain name of the CloudFront distribution",
-    });
+      new route53.ARecord(this, "SiteAliasRecord", {
+        recordName: domainName,
+        target: route53.RecordTarget.fromAlias(
+          new targets.CloudFrontTarget(distribution),
+        ),
+        zone,
+      });
+
+      new cdk.CfnOutput(this, "DistributionDomainName", {
+        value: distribution.distributionDomainName,
+        description: "The domain name of the CloudFront distribution",
+      });
+    } catch (error) {
+      console.error("Error creating certificate:", error);
+      if (error instanceof Error) {
+        new cdk.CfnOutput(this, "CertificateError", {
+          value: `Failed to create certificate: ${error.message}`,
+          description: "Error encountered while creating the certificate",
+        });
+      }
+    }
   }
 }
