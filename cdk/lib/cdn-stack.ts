@@ -38,11 +38,18 @@ export class CdnStack extends cdk.Stack {
       },
     );
 
-    const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName,
-      hostedZone: zone,
-      region: "us-east-1",
-    });
+    const certificateArn = new acm.Certificate(this, "Certificate", {
+      domainName: domainName,
+      subjectAlternativeNames: [`*.${domainName}`],
+      validation: acm.CertificateValidation.fromDns(zone),
+    }).certificateArn;
+
+    // Import the certificate
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      "ImportedCertificate",
+      certificateArn,
+    );
 
     const distribution = new cloudfront.Distribution(
       this,
