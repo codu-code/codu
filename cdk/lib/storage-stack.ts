@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
+import { Role } from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
@@ -73,19 +74,55 @@ export class StorageStack extends cdk.Stack {
       1,
     );
 
-    const fullDomainName = `content.${domainName}`;
+    const dnsAccountId = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/env/dnsAccountId`,
+      1,
+    );
 
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
-      hostedZoneId,
-      zoneName: domainName,
-    });
+    const bucketDomainName = `content.${domainName}`;
 
-    const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName,
-      subjectAlternativeNames: [`*.${domainName}`],
-      hostedZone: zone,
-      region: "us-east-1",
-    });
+    const crossAccountRoleArn = `arn:aws:iam::${dnsAccountId}:role/CrossAccountDNSRole`;
+
+    // Create the IHostedZone object
+    const zone = route53.HostedZone.fromHostedZoneAttributes(
+      this,
+      "CrossAccountZone",
+      {
+        hostedZoneId,
+        zoneName: domainName,
+      },
+    );
+
+    // Create the IAM role from the imported ARN
+    const delegationRole = Role.fromRoleArn(
+      this,
+      "CrossAccountDelegationRole",
+      crossAccountRoleArn,
+    );
+
+    // Use the delegation role to create DNS records
+    new route53.CrossAccountZoneDelegationRecord(
+      this,
+      "DNSValidationDelegate",
+      {
+        delegatedZone: zone,
+        parentHostedZoneName: domainName,
+        delegationRole: delegationRole,
+      },
+    );
+
+    const certificate = new acm.DnsValidatedCertificate(
+      this,
+      "CrossAccountCertificate",
+      {
+        domainName: domainName,
+        subjectAlternativeNames: [`*.${domainName}`],
+        hostedZone: zone,
+        region: "us-east-1",
+        validation: acm.CertificateValidation.fromDns(zone),
+      },
+    );
 
     // CloudFront distribution setup
     const cloudFrontOAI = new cloudfront.OriginAccessIdentity(
@@ -107,7 +144,7 @@ export class StorageStack extends cdk.Stack {
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
-        domainNames: [fullDomainName],
+        domainNames: [bucketDomainName],
         certificate: certificate,
       },
     );
@@ -116,7 +153,7 @@ export class StorageStack extends cdk.Stack {
     this.bucket.grantRead(cloudFrontOAI);
 
     new route53.ARecord(this, "SiteAliasRecord", {
-      recordName: fullDomainName,
+      recordName: bucketDomainName,
       target: route53.RecordTarget.fromAlias(
         new targets.CloudFrontTarget(distribution),
       ),
