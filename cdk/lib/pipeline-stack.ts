@@ -86,11 +86,19 @@ export class PipelineStack extends cdk.Stack {
       `/env/hostedZoneId`,
     );
 
+    const domainName = ssm.StringParameter.valueFromLookup(
+      this,
+      `/env/domainName`,
+    );
+
     const crossAccountRole = new Role(this, "CrossAccountDNSRole", {
-      assumedBy: new AccountPrincipal(devAccountId),
+      assumedBy: new cdk.aws_iam.AccountPrincipal(this.account), // This account
       roleName: "CrossAccountDNSRole",
       description: "Role for cross-account DNS management",
     });
+
+    crossAccountRole.grantAssumeRole(new AccountPrincipal(devAccountId));
+    crossAccountRole.grantAssumeRole(new AccountPrincipal(prodAccountId));
 
     crossAccountRole.addToPolicy(
       new PolicyStatement({
@@ -106,6 +114,16 @@ export class PipelineStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CrossAccountRoleArn", {
       value: crossAccountRole.roleArn,
       exportName: "CrossAccountDNSRoleArn",
+    });
+
+    new cdk.CfnOutput(this, "HostedZoneId", {
+      value: hostedZoneId,
+      exportName: "HostedZoneId",
+    });
+
+    new cdk.CfnOutput(this, "DomainName", {
+      value: domainName,
+      exportName: "DomainName",
     });
 
     const defaultRegion = "eu-west-1";
