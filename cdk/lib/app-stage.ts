@@ -9,28 +9,41 @@ interface Props extends cdk.StageProps {
   production?: boolean;
 }
 
-export class AppStage extends cdk.Stage {
-  constructor(scope: Construct, id: string, props: Props) {
+class SharedResourcesStack extends cdk.Stack {
+  public readonly cloudFrontOAI: cloudfront.OriginAccessIdentity;
+
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const { production } = props;
-
-    const cloudFrontOAI = new cloudfront.OriginAccessIdentity(
+    this.cloudFrontOAI = new cloudfront.OriginAccessIdentity(
       this,
       "CloudFrontOAI",
       {
         comment: "OAI for S3 bucket access",
       },
     );
+  }
+}
+
+export class AppStage extends cdk.Stage {
+  constructor(scope: Construct, id: string, props: Props) {
+    super(scope, id, props);
+
+    const { production } = props;
+
+    const sharedResourcesStack = new SharedResourcesStack(
+      this,
+      "SharedResources",
+    );
 
     const storageStack = new StorageStack(this, "StorageStack", {
-      cloudFrontOAI: cloudFrontOAI,
+      cloudFrontOAI: sharedResourcesStack.cloudFrontOAI,
       production,
     });
 
     new CdnStack(this, "CdnStack", {
       bucket: storageStack.bucket,
-      cloudFrontOAI: cloudFrontOAI,
+      cloudFrontOAI: sharedResourcesStack.cloudFrontOAI,
     });
 
     new CronStack(this, "CronStack");
