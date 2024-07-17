@@ -19,7 +19,7 @@ export class CdnStack extends cdk.Stack {
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
-      `/env/domainName`,
+      `/env/bucketDomainName`,
       1,
     );
 
@@ -28,8 +28,6 @@ export class CdnStack extends cdk.Stack {
       `/env/hostedZoneId`,
       1,
     );
-
-    const bucketDomainName = `content.${domainName}`;
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(
       this,
@@ -41,11 +39,9 @@ export class CdnStack extends cdk.Stack {
     );
 
     const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName: bucketDomainName,
-      subjectAlternativeNames: [`*.${bucketDomainName}`],
+      domainName,
       hostedZone: zone,
       region: "us-east-1",
-      validation: acm.CertificateValidation.fromDns(zone),
     });
 
     const distribution = new cloudfront.Distribution(
@@ -59,13 +55,13 @@ export class CdnStack extends cdk.Stack {
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
-        domainNames: [bucketDomainName],
+        domainNames: [domainName],
         certificate: certificate,
       },
     );
 
     new route53.ARecord(this, "SiteAliasRecord", {
-      recordName: bucketDomainName,
+      recordName: domainName,
       target: route53.RecordTarget.fromAlias(
         new targets.CloudFrontTarget(distribution),
       ),
