@@ -13,12 +13,16 @@ export class AppStage extends cdk.Stage {
     super(scope, id, props);
 
     const { production } = props;
+
+    const cdnStack = new CdnStack(this, "CdnStack", {});
+
     const storageStack = new StorageStack(this, "StorageStack", {
       production,
+      cloudFrontOAI: cdnStack.cloudFrontOAI,
     });
-    new CdnStack(this, "CdnStack", {
-      bucket: storageStack.bucket,
-    });
+
+    cdnStack.addS3Bucket(storageStack.bucket);
+
     new CronStack(this, "CronStack");
   }
 }

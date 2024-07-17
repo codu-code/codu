@@ -8,12 +8,14 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as backup from "aws-cdk-lib/aws-backup";
 import * as events from "aws-cdk-lib/aws-events";
 import * as kms from "aws-cdk-lib/aws-kms";
+import { type IOriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
 import { S3EventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";
 
-interface Props extends cdk.StackProps {
+interface StorageStackProps extends cdk.StackProps {
   production?: boolean;
+  cloudFrontOAI?: IOriginAccessIdentity;
 }
 
 export class StorageStack extends cdk.Stack {
@@ -21,7 +23,7 @@ export class StorageStack extends cdk.Stack {
   public readonly db: rds.DatabaseInstance;
   public readonly vpc: ec2.Vpc;
 
-  constructor(scope: Construct, id: string, props?: Props) {
+  constructor(scope: Construct, id: string, props: StorageStackProps) {
     super(scope, id, props);
 
     this.vpc = new ec2.Vpc(this, "StorageStackVpc", {
@@ -39,7 +41,7 @@ export class StorageStack extends cdk.Stack {
 
     this.bucket = new s3.Bucket(this, "uploadBucket", {
       bucketName,
-      removalPolicy: props?.production
+      removalPolicy: props.production
         ? cdk.RemovalPolicy.RETAIN
         : cdk.RemovalPolicy.DESTROY,
       publicReadAccess: false,
@@ -54,6 +56,10 @@ export class StorageStack extends cdk.Stack {
         },
       ],
     });
+
+    if (props.cloudFrontOAI) {
+      this.bucket.grantRead(props.cloudFrontOAI);
+    }
 
     // Lambda for resizing avatar uploads
     const s3AvatarEventHandler = new NodejsFunction(this, "ResizeAvatar", {
@@ -134,21 +140,21 @@ export class StorageStack extends cdk.Stack {
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
       publiclyAccessible: true,
-      deletionProtection: props?.production ?? false,
+      deletionProtection: props.production ?? false,
       autoMinorVersionUpgrade: true,
-      backupRetention: props?.production
-        ? cdk.Duration.days(7) // 7 days retention for production
-        : cdk.Duration.days(1), // 1 day retention for non-production (minimum allowed)
-      preferredBackupWindow: "03:00-05:00", // UTC time, extended to 2 hours
-      preferredMaintenanceWindow: "Sat:06:00-Sat:07:00", // Saturday 6:00-7:00 UTC
-      deleteAutomatedBackups: props?.production ? false : true,
+      backupRetention: props.production
+        ? cdk.Duration.days(7)
+        : cdk.Duration.days(1),
+      preferredBackupWindow: "03:00-05:00",
+      preferredMaintenanceWindow: "Sat:06:00-Sat:07:00",
+      deleteAutomatedBackups: props.production ? false : true,
     });
 
     // Allow connections on default port from any IPV4
     // TODO: Lock down on prod
     this.db.connections.allowDefaultPortFromAnyIpv4();
 
-    if (props?.production) {
+    if (props.production) {
       // Create a backup vault
       const backupVault = new backup.BackupVault(this, "MyBackupVault", {
         backupVaultName: "MyProductionDatabaseBackupVault",
@@ -167,11 +173,10 @@ export class StorageStack extends cdk.Stack {
           completionWindow: cdk.Duration.hours(2),
           startWindow: cdk.Duration.hours(1),
           scheduleExpression: events.Schedule.cron({
-            // Set to 12:00 AM UTC every day
             minute: "0",
             hour: "0",
           }),
-          deleteAfter: cdk.Duration.days(14), // Retain backups for 14 days
+          deleteAfter: cdk.Duration.days(14),
         }),
       );
 

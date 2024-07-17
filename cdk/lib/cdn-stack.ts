@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
-import { Construct } from "constructs";
-import * as s3 from "aws-cdk-lib/aws-s3";
+import { type Construct } from "constructs";
+import { type IBucket } from "aws-cdk-lib/aws-s3";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as route53 from "aws-cdk-lib/aws-route53";
@@ -8,11 +8,15 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
-interface CdnStackProps extends cdk.StackProps {
-  bucket: s3.IBucket;
-}
+interface CdnStackProps extends cdk.StackProps {}
 
 export class CdnStack extends cdk.Stack {
+  public readonly cloudFrontOAI: cloudfront.OriginAccessIdentity;
+  private distribution: cloudfront.Distribution | undefined;
+  private certificate: acm.ICertificate;
+  private bucketDomainName: string;
+  private zone: route53.IHostedZone;
+
   constructor(scope: Construct, id: string, props: CdnStackProps) {
     super(scope, id, props);
 
@@ -28,63 +32,66 @@ export class CdnStack extends cdk.Stack {
       1,
     );
 
-    const bucketDomainName = `content.${domainName}`;
+    const bucketDomain = `content.${domainName}`;
+    this.bucketDomainName = bucketDomain;
 
-    const zone = route53.HostedZone.fromHostedZoneAttributes(
+    this.zone = route53.HostedZone.fromHostedZoneAttributes(
       this,
       "HostedZone",
       {
         hostedZoneId,
-        zoneName: domainName,
+        zoneName: bucketDomain,
       },
     );
 
-    const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName: bucketDomainName,
-      subjectAlternativeNames: [`*.${bucketDomainName}`],
-      hostedZone: zone,
+    this.certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
+      domainName: bucketDomain,
+      subjectAlternativeNames: [`*.${bucketDomain}`],
+      hostedZone: this.zone,
       region: "us-east-1",
-      validation: acm.CertificateValidation.fromDns(zone),
+      validation: acm.CertificateValidation.fromDns(this.zone),
     });
 
-    const cloudFrontOAI = new cloudfront.OriginAccessIdentity(
+    this.cloudFrontOAI = new cloudfront.OriginAccessIdentity(
       this,
       "CloudFrontOAI",
       {
         comment: `OAI for ${id}`,
       },
     );
+  }
 
-    const distribution = new cloudfront.Distribution(
+  public addS3Bucket(bucket: IBucket) {
+    if (this.distribution) {
+      throw new Error("Distribution already created");
+    }
+
+    this.distribution = new cloudfront.Distribution(
       this,
       "UploadDistribution",
       {
         defaultBehavior: {
-          origin: new origins.S3Origin(props.bucket, {
-            originAccessIdentity: cloudFrontOAI,
+          origin: new origins.S3Origin(bucket, {
+            originAccessIdentity: this.cloudFrontOAI,
           }),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
-        domainNames: [bucketDomainName],
-        certificate: certificate,
+        domainNames: [this.bucketDomainName],
+        certificate: this.certificate,
       },
     );
 
-    // Grant read permissions to CloudFront
-    props.bucket.grantRead(cloudFrontOAI);
-
     new route53.ARecord(this, "SiteAliasRecord", {
-      recordName: bucketDomainName,
+      recordName: this.bucketDomainName,
       target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(distribution),
+        new targets.CloudFrontTarget(this.distribution),
       ),
-      zone,
+      zone: this.zone,
     });
 
-    // Output the distribution domain name
     new cdk.CfnOutput(this, "DistributionDomainName", {
-      value: distribution.distributionDomainName,
+      value: this.distribution.distributionDomainName,
       description: "The domain name of the CloudFront distribution",
     });
   }
