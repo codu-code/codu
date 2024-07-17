@@ -10,9 +10,7 @@ import {
   PolicyStatement,
   Role,
   ServicePrincipal,
-  CompositePrincipal,
   AccountPrincipal,
-  ManagedPolicy,
 } from "aws-cdk-lib/aws-iam";
 import { Cache } from "aws-cdk-lib/aws-codebuild";
 
@@ -83,14 +81,31 @@ export class PipelineStack extends cdk.Stack {
       `/env/prod/accountId`,
     );
 
-    new Role(this, "CrossAccountDNSRole", {
-      assumedBy: new CompositePrincipal(
-        new AccountPrincipal(devAccountId),
-        new AccountPrincipal(prodAccountId),
-      ),
-      managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName("AmazonRoute53FullAccess"),
-      ],
+    const hostedZoneId = ssm.StringParameter.valueFromLookup(
+      this,
+      `/env/hostedZoneId`,
+    );
+
+    const crossAccountRole = new Role(this, "CrossAccountDNSRole", {
+      assumedBy: new AccountPrincipal(devAccountId),
+      roleName: "CrossAccountDNSRole",
+      description: "Role for cross-account DNS management",
+    });
+
+    crossAccountRole.addToPolicy(
+      new PolicyStatement({
+        actions: [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+        ],
+        resources: [`arn:aws:route53:::hostedzone/${hostedZoneId}`],
+      }),
+    );
+
+    new cdk.CfnOutput(this, "CrossAccountRoleArn", {
+      value: crossAccountRole.roleArn,
+      exportName: "CrossAccountDNSRoleArn",
     });
 
     const defaultRegion = "eu-west-1";
