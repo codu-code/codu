@@ -1,16 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
-import { Role } from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
-import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
-import * as route53 from "aws-cdk-lib/aws-route53";
-import * as targets from "aws-cdk-lib/aws-route53-targets";
-import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as backup from "aws-cdk-lib/aws-backup";
 import * as events from "aws-cdk-lib/aws-events";
 import * as kms from "aws-cdk-lib/aws-kms";
@@ -23,9 +17,9 @@ interface Props extends cdk.StackProps {
 }
 
 export class StorageStack extends cdk.Stack {
-  public readonly bucket;
-  public readonly db;
-  public readonly vpc;
+  public readonly bucket: s3.Bucket;
+  public readonly db: rds.DatabaseInstance;
+  public readonly vpc: ec2.Vpc;
 
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
@@ -59,73 +53,6 @@ export class StorageStack extends cdk.Stack {
           allowedHeaders: ["*"],
         },
       ],
-    });
-
-    // Custom domain setup
-    const domainName = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/env/domainName`,
-      1,
-    );
-
-    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
-      this,
-      `/env/hostedZoneId`,
-      1,
-    );
-
-    const bucketDomainName = `content.${domainName}`;
-
-    const zone = route53.HostedZone.fromHostedZoneAttributes(
-      this,
-      "HostedZone",
-      {
-        hostedZoneId,
-        zoneName: bucketDomainName,
-      },
-    );
-
-    const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName: bucketDomainName,
-      subjectAlternativeNames: [`*.${bucketDomainName}`],
-      hostedZone: zone,
-      region: "us-east-1",
-    });
-
-    // CloudFront distribution setup
-    const cloudFrontOAI = new cloudfront.OriginAccessIdentity(
-      this,
-      "CloudFrontOAI",
-      {
-        comment: `OAI for ${id}`,
-      },
-    );
-
-    const distribution = new cloudfront.Distribution(
-      this,
-      "UploadDistribution",
-      {
-        defaultBehavior: {
-          origin: new origins.S3Origin(this.bucket, {
-            originAccessIdentity: cloudFrontOAI,
-          }),
-          viewerProtocolPolicy:
-            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        },
-        domainNames: [bucketDomainName],
-        certificate: certificate,
-      },
-    );
-
-    // Grant read permissions to CloudFront
-    this.bucket.grantRead(cloudFrontOAI);
-
-    new route53.ARecord(this, "SiteAliasRecord", {
-      recordName: bucketDomainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(distribution),
-      ),
-      zone,
     });
 
     // Lambda for resizing avatar uploads

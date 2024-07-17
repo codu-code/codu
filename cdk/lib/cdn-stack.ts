@@ -1,21 +1,20 @@
 import * as cdk from "aws-cdk-lib";
-import type { Construct } from "constructs";
-import * as ssm from "aws-cdk-lib/aws-ssm";
-import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
-import * as route53 from "aws-cdk-lib/aws-route53";
-import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as ssm from "aws-cdk-lib/aws-ssm";
 
-interface Props extends cdk.StackProps {
-  loadbalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer;
+interface CdnStackProps extends cdk.StackProps {
+  bucket: s3.IBucket;
 }
 
 export class CdnStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: Props) {
+  constructor(scope: Construct, id: string, props: CdnStackProps) {
     super(scope, id, props);
-
-    const { loadbalancer } = props;
 
     const domainName = ssm.StringParameter.valueForStringParameter(
       this,
@@ -29,129 +28,64 @@ export class CdnStack extends cdk.Stack {
       1,
     );
 
-    const wwwDomainName = `www.${domainName}`;
+    const bucketDomainName = `content.${domainName}`;
 
-    const zone = route53.HostedZone.fromHostedZoneAttributes(this, "MyZone", {
-      hostedZoneId,
-      zoneName: domainName,
-    });
+    const zone = route53.HostedZone.fromHostedZoneAttributes(
+      this,
+      "HostedZone",
+      {
+        hostedZoneId,
+        zoneName: domainName,
+      },
+    );
 
     const certificate = new acm.DnsValidatedCertificate(this, "Certificate", {
-      domainName,
-      subjectAlternativeNames: [`*.${domainName}`],
+      domainName: bucketDomainName,
+      subjectAlternativeNames: [`*.${bucketDomainName}`],
       hostedZone: zone,
       region: "us-east-1",
+      validation: acm.CertificateValidation.fromDns(zone),
     });
 
-    const redirectBucket = new s3.Bucket(this, "RedirectBucket", {
-      websiteRedirect: {
-        hostName: wwwDomainName,
-        protocol: s3.RedirectProtocol.HTTPS,
+    const cloudFrontOAI = new cloudfront.OriginAccessIdentity(
+      this,
+      "CloudFrontOAI",
+      {
+        comment: `OAI for ${id}`,
       },
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    );
+
+    const distribution = new cloudfront.Distribution(
+      this,
+      "UploadDistribution",
+      {
+        defaultBehavior: {
+          origin: new origins.S3Origin(props.bucket, {
+            originAccessIdentity: cloudFrontOAI,
+          }),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        domainNames: [bucketDomainName],
+        certificate: certificate,
+      },
+    );
+
+    // Grant read permissions to CloudFront
+    props.bucket.grantRead(cloudFrontOAI);
+
+    new route53.ARecord(this, "SiteAliasRecord", {
+      recordName: bucketDomainName,
+      target: route53.RecordTarget.fromAlias(
+        new targets.CloudFrontTarget(distribution),
+      ),
+      zone,
     });
 
-    const redirectDist = new cloudfront.CloudFrontWebDistribution(
-      this,
-      "RedirectDistribution",
-      {
-        defaultRootObject: "",
-        originConfigs: [
-          {
-            behaviors: [{ isDefaultBehavior: true }],
-            customOriginSource: {
-              domainName: redirectBucket.bucketWebsiteDomainName,
-              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-            },
-          },
-        ],
-        viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(
-          certificate,
-          {
-            aliases: [domainName],
-          },
-        ),
-        comment: `Redirect to ${wwwDomainName} from ${domainName}`,
-        priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      },
-    );
-
-    const webDistribution = new cloudfront.CloudFrontWebDistribution(
-      this,
-      "WebDistribution",
-      {
-        defaultRootObject: "",
-        originConfigs: [
-          {
-            behaviors: [
-              {
-                isDefaultBehavior: true,
-                allowedMethods: cloudfront.CloudFrontAllowedMethods.ALL,
-                cachedMethods:
-                  cloudfront.CloudFrontAllowedCachedMethods.GET_HEAD_OPTIONS,
-                forwardedValues: {
-                  queryString: true,
-                  cookies: {
-                    forward: "all",
-                  },
-                  headers: [
-                    "Origin",
-                    "Authorization",
-                    "Content-Type",
-                    "Referer",
-                    "Host",
-                    "CloudFront-Viewer-Country",
-                  ],
-                },
-                defaultTtl: cdk.Duration.seconds(0),
-                maxTtl: cdk.Duration.seconds(0),
-                minTtl: cdk.Duration.seconds(0),
-              },
-            ],
-            customOriginSource: {
-              domainName: loadbalancer.loadBalancerDnsName,
-              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-            },
-          },
-        ],
-        viewerCertificate: cloudfront.ViewerCertificate.fromAcmCertificate(
-          certificate,
-          {
-            aliases: [wwwDomainName],
-          },
-        ),
-        comment: `Web distribution for ${wwwDomainName}`,
-        priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      },
-    );
-
-    const redirectRecordProps = {
-      zone,
-      recordName: domainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(redirectDist),
-      ),
-    };
-
-    new route53.ARecord(this, "ARedirectAliasRecord", redirectRecordProps);
-    new route53.AaaaRecord(
-      this,
-      "AaaaRedirectAliasRecord",
-      redirectRecordProps,
-    );
-
-    const recordProps = {
-      zone,
-      recordName: wwwDomainName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(webDistribution),
-      ),
-    };
-
-    new route53.ARecord(this, "WebAliasRecord", recordProps);
-    new route53.AaaaRecord(this, "AaaaWebAliasRecord", recordProps);
+    // Output the distribution domain name
+    new cdk.CfnOutput(this, "DistributionDomainName", {
+      value: distribution.distributionDomainName,
+      description: "The domain name of the CloudFront distribution",
+    });
   }
 }
