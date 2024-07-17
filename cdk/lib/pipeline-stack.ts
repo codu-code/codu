@@ -68,22 +68,22 @@ export class PipelineStack extends cdk.Stack {
       },
     });
 
-    const devAccountId = ssm.StringParameter.valueForStringParameter(
+    const devAccountId = ssm.StringParameter.valueFromLookup(
       this,
       `/env/dev/accountId`,
     );
 
-    const prodAccountId = ssm.StringParameter.valueForStringParameter(
+    const prodAccountId = ssm.StringParameter.valueFromLookup(
       this,
       `/env/prod/accountId`,
     );
 
-    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
+    const hostedZoneId = ssm.StringParameter.valueFromLookup(
       this,
       `/env/hostedZoneId`,
     );
 
-    const domainName = ssm.StringParameter.valueForStringParameter(
+    const domainName = ssm.StringParameter.valueFromLookup(
       this,
       `/env/domainName`,
     );
