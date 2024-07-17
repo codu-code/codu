@@ -26,18 +26,14 @@ export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
 
-    const codeBuildRole = new Role(this, "CodeBuildRole", {
-      assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
-      description: "Role for CodeBuild to access SSM parameters",
+    const ssmPolicy = new PolicyStatement({
+      effect: Effect.ALLOW,
+      actions: ["ssm:GetParameter", "ssm:GetParameters"],
+      resources: [
+        `arn:aws:ssm:${this.region}:${this.account}:parameter/env/*`,
+        `arn:aws:ssm:${this.region}:${this.account}:parameter/build/*`,
+      ],
     });
-
-    codeBuildRole.addToPolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: ["ssm:GetParameter", "ssm:GetParameters"],
-        resources: ["*"],
-      }),
-    );
 
     const synthAction = new ShellStep("Synth", {
       input: CodePipelineSource.gitHub("codu-code/codu", "develop"),
@@ -50,6 +46,7 @@ export class PipelineStack extends cdk.Stack {
       crossAccountKeys: true,
       synth: synthAction,
       codeBuildDefaults: {
+        rolePolicy: [ssmPolicy],
         cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
         buildEnvironment: {
           computeType: codebuild.ComputeType.MEDIUM,
@@ -71,28 +68,28 @@ export class PipelineStack extends cdk.Stack {
       },
     });
 
-    const devAccountId = ssm.StringParameter.valueFromLookup(
+    const devAccountId = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/dev/accountId`,
     );
 
-    const prodAccountId = ssm.StringParameter.valueFromLookup(
+    const prodAccountId = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/prod/accountId`,
     );
 
-    const hostedZoneId = ssm.StringParameter.valueFromLookup(
+    const hostedZoneId = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/hostedZoneId`,
     );
 
-    const domainName = ssm.StringParameter.valueFromLookup(
+    const domainName = ssm.StringParameter.valueForStringParameter(
       this,
       `/env/domainName`,
     );
 
     const crossAccountRole = new Role(this, "CrossAccountDNSRole", {
-      assumedBy: new cdk.aws_iam.AccountPrincipal(this.account), // This account
+      assumedBy: new AccountPrincipal(this.account),
       roleName: "CrossAccountDNSRole",
       description: "Role for cross-account DNS management",
     });
@@ -100,12 +97,12 @@ export class PipelineStack extends cdk.Stack {
     const assumeRolePolicy =
       crossAccountRole.assumeRolePolicy as cdk.aws_iam.PolicyDocument;
     assumeRolePolicy.addStatements(
-      new cdk.aws_iam.PolicyStatement({
+      new PolicyStatement({
         actions: ["sts:AssumeRole"],
-        effect: cdk.aws_iam.Effect.ALLOW,
+        effect: Effect.ALLOW,
         principals: [
-          new cdk.aws_iam.AccountPrincipal(devAccountId),
-          new cdk.aws_iam.AccountPrincipal(prodAccountId),
+          new AccountPrincipal(devAccountId),
+          new AccountPrincipal(prodAccountId),
         ],
       }),
     );
