@@ -207,7 +207,8 @@ export class StorageStack extends cdk.Stack {
       backupRetention: props?.production
         ? cdk.Duration.days(7) // 7 days retention for production
         : cdk.Duration.days(1), // 1 day retention for non-production (minimum allowed)
-      preferredBackupWindow: "03:00-04:00", // UTC time
+      preferredBackupWindow: "03:00-05:00", // UTC time, extended to 2 hours
+      preferredMaintenanceWindow: "Sat:06:00-Sat:07:00", // Saturday 6:00-7:00 UTC
       deleteAutomatedBackups: props?.production ? false : true,
     });
 
