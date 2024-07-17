@@ -10,6 +10,9 @@ import {
   PolicyStatement,
   Role,
   ServicePrincipal,
+  CompositePrincipal,
+  AccountPrincipal,
+  ManagedPolicy,
 } from "aws-cdk-lib/aws-iam";
 import { Cache } from "aws-cdk-lib/aws-codebuild";
 
@@ -79,6 +82,16 @@ export class PipelineStack extends cdk.Stack {
       this,
       `/env/prod/accountId`,
     );
+
+    new Role(this, "CrossAccountDNSRole", {
+      assumedBy: new CompositePrincipal(
+        new AccountPrincipal(devAccountId),
+        new AccountPrincipal(prodAccountId),
+      ),
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName("AmazonRoute53FullAccess"),
+      ],
+    });
 
     const defaultRegion = "eu-west-1";
 
