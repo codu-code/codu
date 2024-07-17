@@ -10,7 +10,6 @@ import {
   PolicyStatement,
   Role,
   ServicePrincipal,
-  AccountPrincipal,
 } from "aws-cdk-lib/aws-iam";
 import { Cache } from "aws-cdk-lib/aws-codebuild";
 
@@ -26,14 +25,18 @@ export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
     super(scope, id, props);
 
-    const ssmPolicy = new PolicyStatement({
-      effect: Effect.ALLOW,
-      actions: ["ssm:GetParameter", "ssm:GetParameters"],
-      resources: [
-        `arn:aws:ssm:${this.region}:${this.account}:parameter/env/*`,
-        `arn:aws:ssm:${this.region}:${this.account}:parameter/build/*`,
-      ],
+    const codeBuildRole = new Role(this, "CodeBuildRole", {
+      assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
+      description: "Role for CodeBuild to access SSM parameters",
     });
+
+    codeBuildRole.addToPolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ["ssm:GetParameter", "ssm:GetParameters"],
+        resources: ["*"],
+      }),
+    );
 
     const synthAction = new ShellStep("Synth", {
       input: CodePipelineSource.gitHub("codu-code/codu", "develop"),
@@ -46,7 +49,6 @@ export class PipelineStack extends cdk.Stack {
       crossAccountKeys: true,
       synth: synthAction,
       codeBuildDefaults: {
-        rolePolicy: [ssmPolicy],
         cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
         buildEnvironment: {
           computeType: codebuild.ComputeType.MEDIUM,
@@ -77,43 +79,6 @@ export class PipelineStack extends cdk.Stack {
       this,
       `/env/prod/accountId`,
     );
-
-    const hostedZoneId = "Z09797183E6CQSVU1LFVP";
-
-    const crossAccountRole = new Role(this, "CrossAccountDNSRole", {
-      assumedBy: new AccountPrincipal(this.account),
-      roleName: "CrossAccountDNSRole",
-      description: "Role for cross-account DNS management",
-    });
-
-    const assumeRolePolicy =
-      crossAccountRole.assumeRolePolicy as cdk.aws_iam.PolicyDocument;
-    assumeRolePolicy.addStatements(
-      new PolicyStatement({
-        actions: ["sts:AssumeRole"],
-        effect: Effect.ALLOW,
-        principals: [
-          new AccountPrincipal(devAccountId),
-          new AccountPrincipal(prodAccountId),
-        ],
-      }),
-    );
-
-    crossAccountRole.addToPolicy(
-      new PolicyStatement({
-        actions: [
-          "route53:ChangeResourceRecordSets",
-          "route53:ListHostedZones",
-          "route53:ListResourceRecordSets",
-        ],
-        resources: [`arn:aws:route53:::hostedzone/${hostedZoneId}`],
-      }),
-    );
-
-    new cdk.CfnOutput(this, "CrossAccountRoleArn", {
-      value: crossAccountRole.roleArn,
-      exportName: "CrossAccountDNSRoleArn",
-    });
 
     const defaultRegion = "eu-west-1";
 
