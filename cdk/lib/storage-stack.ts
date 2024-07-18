@@ -42,8 +42,8 @@ export class StorageStack extends cdk.Stack {
       removalPolicy: props?.production
         ? cdk.RemovalPolicy.RETAIN
         : cdk.RemovalPolicy.DESTROY,
-      publicReadAccess: false,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      publicReadAccess: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,
       versioned: false,
       encryption: s3.BucketEncryption.S3_MANAGED,
       cors: [
