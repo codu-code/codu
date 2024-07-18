@@ -22,8 +22,11 @@ import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 import copy from "copy-to-clipboard";
 import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
+import { ImageUp, LoaderCircle } from "lucide-react";
+import { uploadFile } from "@/utils/s3helpers";
+import { type Session } from "next-auth";
 
-const Create = () => {
+const Create = ({ session }: { session: Session }) => {
   const params = useParams();
   const router = useRouter();
 
@@ -40,6 +43,10 @@ const Create = () => {
   const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [uploadUrl, setUploadUrl] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<
+    "loading" | "error" | "success" | "default"
+  >("default");
 
   const { unsavedChanges: _unsaved, setUnsavedChanges: _setUnsaved } =
     usePrompt();
@@ -47,6 +54,43 @@ const Create = () => {
   useEffect(() => {
     _setUnsaved();
   }, [unsavedChanges, _setUnsaved]);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (uploadStatus === "loading") {
+      return toast.info("Upload in progress, please wait...");
+    }
+    if (e.target.files && e.target.files.length > 0) {
+      setUploadUrl(null);
+      setUploadStatus("loading");
+
+      const file = e.target.files[0];
+      const { size, type } = file;
+
+      await getUploadUrl(
+        { size, type, config: { kind: "uploads", userId: session.user?.id } },
+        {
+          onError(error) {
+            setUploadStatus("error");
+            if (error) return toast.error(error.message);
+            return toast.error(
+              "Something went wrong uploading the photo, please retry.",
+            );
+          },
+          async onSuccess(signedUrl) {
+            const { fileLocation } = await uploadFile(signedUrl, file);
+            if (!fileLocation) {
+              setUploadStatus("error");
+              return toast.error(
+                "Something went wrong uploading the photo, please retry.",
+              );
+            }
+            setUploadStatus("success");
+            setUploadUrl(fileLocation);
+          },
+        },
+      );
+    }
+  };
 
   const allowUpdate = unsavedChanges;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -113,7 +157,10 @@ const Create = () => {
     },
   );
 
+  const { mutate: getUploadUrl } = api.event.getUploadUrl.useMutation();
+
   const PREVIEW_URL = `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.codu.co"}/draft/${postId}`;
+  const UPLOADED_IMAGE_URL = `![Image description](${uploadUrl})`;
 
   const handleCopyToClipboard = () => {
     copy(PREVIEW_URL);
@@ -608,12 +655,59 @@ const Create = () => {
                         </section>
                       ) : (
                         <div className="px-4 py-6 sm:p-6 lg:pb-8">
+                          <div className="mb-4 ml-2 flex items-center gap-2">
+                            <label
+                              htmlFor="file-input"
+                              className={`inline-flex items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "loading" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500  font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"}  `}
+                            >
+                              {uploadStatus === "loading" ? (
+                                <LoaderCircle
+                                  height={16}
+                                  width={16}
+                                  className="mr-1 animate-spin"
+                                />
+                              ) : (
+                                <ImageUp
+                                  height={16}
+                                  width={16}
+                                  className="mr-1"
+                                />
+                              )}{" "}
+                              Upload image
+                            </label>
+                            <input
+                              id="file-input"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleUpload}
+                              disabled={uploadStatus === "loading"}
+                            />
+
+                            {uploadStatus === "success" && (
+                              <button
+                                onClick={() => {
+                                  copy(UPLOADED_IMAGE_URL);
+                                  setCopied(true);
+                                }}
+                                type="button"
+                                className="relative flex w-full flex-1 overflow-x-hidden rounded-md border border-neutral-500 font-medium text-neutral-500 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"
+                              >
+                                <div className="flex flex-nowrap items-center text-nowrap p-2 text-sm">
+                                  {UPLOADED_IMAGE_URL}
+                                </div>
+                                <div className="absolute bottom-0 right-0 top-0 w-[100px] rounded-r-md border-l border-neutral-500 bg-white px-4 py-2 text-sm font-medium text-neutral-600 dark:border-l-0 dark:bg-neutral-600 dark:text-white">
+                                  {copied ? "Copied" : "Copy Link"}
+                                </div>
+                              </button>
+                            )}
+                          </div>
                           {/* TODO: FOLLOW UP WITH THIS, LABEL SHOULD BE VISIBLE */}
                           <label htmlFor="article-title" className="sr-only">
                             Article title
                           </label>
                           <input
-                            className="border-none bg-white text-2xl leading-5 outline-none focus:bg-neutral-200 dark:bg-neutral-900 focus:dark:bg-black"
+                            className="border-none bg-white text-2xl leading-5 outline-none placeholder:text-neutral-400 focus:bg-neutral-200 dark:bg-neutral-900 placeholder:dark:text-neutral-700 focus:dark:bg-black"
                             placeholder="Article title"
                             type="text"
                             id="article-title"
@@ -626,7 +720,7 @@ const Create = () => {
                           </label>
                           <CustomTextareaAutosize
                             placeholder="Enter your content here 💖"
-                            className="mb-8 border-none bg-white text-lg shadow-none outline-none focus:bg-neutral-200 dark:bg-neutral-900 dark:focus:bg-black"
+                            className="mb-8 border-none bg-white text-lg shadow-none outline-none placeholder:text-neutral-400 focus:bg-neutral-200 dark:bg-neutral-900 placeholder:dark:text-neutral-700 dark:focus:bg-black"
                             minRows={25}
                             id="article-content"
                             {...register("body")}

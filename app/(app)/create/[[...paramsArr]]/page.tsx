@@ -12,5 +12,5 @@ export default async function Page() {
     redirect("/get-started");
   }
 
-  return <Content />;
+  return <Content session={session} />;
 }
