@@ -10,12 +10,10 @@ import * as events from "aws-cdk-lib/aws-events";
 import * as kms from "aws-cdk-lib/aws-kms";
 import { S3EventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { type IOriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
 import * as path from "path";
 
 interface Props extends cdk.StackProps {
   production?: boolean;
-  cloudFrontOAI?: IOriginAccessIdentity;
 }
 
 export class StorageStack extends cdk.Stack {
@@ -56,10 +54,6 @@ export class StorageStack extends cdk.Stack {
         },
       ],
     });
-
-    if (props?.cloudFrontOAI) {
-      this.bucket.grantRead(props.cloudFrontOAI);
-    }
 
     // Lambda for resizing avatar uploads
     const s3AvatarEventHandler = new NodejsFunction(this, "ResizeAvatar", {
@@ -102,7 +96,7 @@ export class StorageStack extends cdk.Stack {
     s3UploadEventHandler.addEventSource(
       new S3EventSource(this.bucket, {
         events: [s3.EventType.OBJECT_CREATED],
-        filters: [{ prefix: "public/" }],
+        filters: [{ prefix: "uploads/" }],
       }),
     );
 
