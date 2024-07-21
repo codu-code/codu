@@ -114,7 +114,7 @@ const ArticlePreview: NextPage<Props> = ({
       </div>
       <header>
         <Link
-          className="cursor-pointer text-2xl font-semibold leading-6 tracking-wide hover:underline"
+          className="cursor-pointer break-words text-2xl font-semibold leading-6 tracking-wide hover:underline"
           href={`/articles/${slug}`}
         >
           {title}
