@@ -151,7 +151,7 @@ export const eventRouter = createTRPCRouter({
   getUploadUrl: protectedProcedure
     .input(uploadPhotoUrlSchema)
     .mutation(async ({ input }) => {
-      const { size, type } = input;
+      const { size, type, config } = input;
       const extension = type.split("/")[1];
 
       const acceptedFormats = ["jpg", "jpeg", "gif", "png", "webp"];
@@ -165,16 +165,20 @@ export const eventRouter = createTRPCRouter({
         });
       }
 
-      if (size > 1048576) {
+      if (size > 1048576 * 10) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Maximum file size 1mb",
+          message: "Maximum file size 10mb",
         });
       }
 
-      const response = await getPresignedUrl(type, size, {
-        kind: "events",
-      });
+      const response = await getPresignedUrl(
+        type,
+        size,
+        config || {
+          kind: "events",
+        },
+      );
 
       return response;
     }),

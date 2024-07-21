@@ -1,12 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { OriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
+import * as backup from "aws-cdk-lib/aws-backup";
+import * as events from "aws-cdk-lib/aws-events";
+import * as kms from "aws-cdk-lib/aws-kms";
 import { S3EventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";
@@ -16,10 +17,9 @@ interface Props extends cdk.StackProps {
 }
 
 export class StorageStack extends cdk.Stack {
-  public readonly bucket;
-  public readonly originAccessIdentity;
-  public readonly db;
-  public readonly vpc;
+  public readonly bucket: s3.Bucket;
+  public readonly db: rds.DatabaseInstance;
+  public readonly vpc: ec2.Vpc;
 
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
@@ -29,16 +29,13 @@ export class StorageStack extends cdk.Stack {
     });
 
     const { vpc } = this;
-    // s3 bucket
+
+    // S3 bucket
     const bucketName = ssm.StringParameter.valueForStringParameter(
       this,
       "/env/bucketname",
       1,
     );
-
-    this.originAccessIdentity = new OriginAccessIdentity(this, "OAI", {
-      comment: "Created by cdk",
-    });
 
     this.bucket = new s3.Bucket(this, "uploadBucket", {
       bucketName,
@@ -57,9 +54,6 @@ export class StorageStack extends cdk.Stack {
         },
       ],
     });
-
-    this.bucket.grantRead(new iam.AccountRootPrincipal());
-    this.bucket.grantRead(this.originAccessIdentity);
 
     // Lambda for resizing avatar uploads
     const s3AvatarEventHandler = new NodejsFunction(this, "ResizeAvatar", {
@@ -102,7 +96,7 @@ export class StorageStack extends cdk.Stack {
     s3UploadEventHandler.addEventSource(
       new S3EventSource(this.bucket, {
         events: [s3.EventType.OBJECT_CREATED],
-        filters: [{ prefix: "public/" }],
+        filters: [{ prefix: "uploads/" }],
       }),
     );
 
@@ -140,12 +134,51 @@ export class StorageStack extends cdk.Stack {
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
       publiclyAccessible: true,
-      deletionProtection: true,
+      deletionProtection: props?.production ?? false,
       autoMinorVersionUpgrade: true,
-      backupRetention: cdk.Duration.days(props?.production ? 3 : 0),
+      backupRetention: props?.production
+        ? cdk.Duration.days(7) // 7 days retention for production
+        : cdk.Duration.days(1), // 1 day retention for non-production (minimum allowed)
+      preferredBackupWindow: "03:00-05:00", // UTC time, extended to 2 hours
+      preferredMaintenanceWindow: "Sat:06:00-Sat:07:00", // Saturday 6:00-7:00 UTC
+      deleteAutomatedBackups: props?.production ? false : true,
     });
+
     // Allow connections on default port from any IPV4
     // TODO: Lock down on prod
     this.db.connections.allowDefaultPortFromAnyIpv4();
+
+    if (props?.production) {
+      // Create a backup vault
+      const backupVault = new backup.BackupVault(this, "MyBackupVault", {
+        backupVaultName: "MyProductionDatabaseBackupVault",
+        encryptionKey: new kms.Key(this, "MyBackupVaultKey"),
+      });
+
+      // Create a backup plan
+      const plan = new backup.BackupPlan(this, "MyBackupPlan", {
+        backupPlanName: "MyProductionDatabaseBackupPlan",
+        backupVault: backupVault,
+      });
+
+      // Add a rule to the backup plan
+      plan.addRule(
+        new backup.BackupPlanRule({
+          completionWindow: cdk.Duration.hours(2),
+          startWindow: cdk.Duration.hours(1),
+          scheduleExpression: events.Schedule.cron({
+            // Set to 12:00 AM UTC every day
+            minute: "0",
+            hour: "0",
+          }),
+          deleteAfter: cdk.Duration.days(14), // Retain backups for 14 days
+        }),
+      );
+
+      // Add the RDS instance as a resource to the backup plan
+      plan.addSelection("MyBackupSelection", {
+        resources: [backup.BackupResource.fromRdsDatabaseInstance(this.db)],
+      });
+    }
   }
 }

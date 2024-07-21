@@ -11,7 +11,7 @@ import type { saveSettingsInput } from "@/schema/profile";
 import { saveSettingsSchema } from "@/schema/profile";
 
 import { uploadFile } from "@/utils/s3helpers";
-import { user } from "@/server/db/schema";
+import type { user } from "@/server/db/schema";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -102,7 +102,7 @@ const Settings = ({ profile }: { profile: User }) => {
       const { size, type } = file;
 
       await getUploadUrl(
-        { size, type },
+        { size, type, config: { kind: "uploads", userId: "me" } },
         {
           onError(error) {
             if (error) return toast.error(error.message);

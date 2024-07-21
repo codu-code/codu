@@ -3,30 +3,24 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "../../utils/s3helpers";
 import { nanoid } from "nanoid";
 
-interface UserFileConfig {
-  kind: "user";
-  userId: string;
-}
-
-interface EventFileConfig {
-  kind: "events";
-}
-
-interface CommunityFileConfig {
-  kind: "communities";
-}
-
 function getKey(
-  config: UserFileConfig | CommunityFileConfig | EventFileConfig,
+  config: {
+    kind: string;
+    userId?: string;
+  },
   extension: string,
 ) {
   switch (config.kind) {
     case "user":
+      if (!config.userId) throw new Error("Invalid userId provided");
       return `u/${config.userId}.${extension}`;
     case "communities":
       return `c/${nanoid(16)}.${extension}`;
     case "events":
       return `e/${nanoid(16)}.${extension}`;
+    case "uploads":
+      if (!config.userId) throw new Error("Invalid userId provided");
+      return `uploads/${config.userId}/${nanoid(16)}.${extension}`;
     default:
       throw new Error("Invalid folder provided");
   }
@@ -35,7 +29,10 @@ function getKey(
 export const getPresignedUrl = async (
   fileType: string,
   fileSize: number,
-  config: UserFileConfig | CommunityFileConfig | EventFileConfig,
+  config: {
+    kind: string;
+    userId?: string;
+  },
 ) => {
   const extension = fileType.split("/")[1];
   if (!extension) throw new Error("Invalid file type provided");
