@@ -31,4 +31,10 @@ export const deleteEventSchema = z.object({
 export const uploadPhotoUrlSchema = z.object({
   type: z.string(),
   size: z.number(),
+  config: z.optional(
+    z.object({
+      kind: z.enum(["user", "communities", "events", "uploads"]),
+      userId: z.string().optional(),
+    }),
+  ),
 });

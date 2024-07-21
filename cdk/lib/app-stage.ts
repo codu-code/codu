@@ -1,8 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
 import { StorageStack } from "./storage-stack";
-import { AppStack } from "./app-stack";
-import { CdnStack } from "./cdn-stack";
 import { CronStack } from "./cron-stack";
 
 interface Props extends cdk.StageProps {
@@ -14,9 +12,11 @@ export class AppStage extends cdk.Stage {
     super(scope, id, props);
 
     const { production } = props;
-    const storageStack = new StorageStack(this, "StorageStack", {
+
+    new StorageStack(this, "StorageStack", {
       production,
     });
+
     new CronStack(this, "CronStack");
   }
 }

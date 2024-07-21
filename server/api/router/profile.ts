@@ -97,10 +97,10 @@ export const profileRouter = createTRPCRouter({
         });
       }
 
-      if (size > 1048576) {
+      if (size > 1048576 * 10) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Maximum file size 1mb",
+          message: "Maximum file size 10mb",
         });
       }
 
