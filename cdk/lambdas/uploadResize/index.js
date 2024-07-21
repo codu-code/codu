@@ -3,6 +3,7 @@ const {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  ListObjectsV2Command,
 } = require("@aws-sdk/client-s3");
 const s3 = new S3Client();
 
@@ -21,14 +22,38 @@ exports.handler = async (event) => {
   const bucket = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
 
-  const params = {
-    Bucket: bucket,
-    Key: key,
-  };
-  
-  const newKey = key.split("/")[1]
+  // Check if the object is already a resized version
+  if (sizes.some((size) => size.suffix && key.includes(`_${size.suffix}`))) {
+    console.log("Object is already a resized version. Skipping.");
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Object is already resized. Skipping." }),
+    };
+  }
 
   try {
+    // Check if the original image has already been processed
+    const prefix = key.substring(0, key.lastIndexOf("."));
+    const listParams = {
+      Bucket: bucket,
+      Prefix: prefix,
+      MaxKeys: 1,
+    };
+
+    const listResponse = await s3.send(new ListObjectsV2Command(listParams));
+    if (listResponse.Contents && listResponse.Contents.length > 1) {
+      console.log("Image has already been processed. Skipping.");
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: "Image already processed. Skipping." }),
+      };
+    }
+
+    const params = {
+      Bucket: bucket,
+      Key: key,
+    };
+
     const response = await s3.send(new GetObjectCommand(params));
     const stream = response.Body;
 
@@ -44,7 +69,7 @@ exports.handler = async (event) => {
           height: size.maxHeight,
           fit: "inside",
           withoutEnlargement: false,
-        }) // Fits within maxWidth and maxHeight
+        })
         .webp({ quality: 80 })
         .toBuffer();
     };
@@ -53,14 +78,14 @@ exports.handler = async (event) => {
     for (const size of sizes) {
       const resizedImage = await resizeImage(imageRaw, size);
 
-      const newKey = size.suffix
-        ? `resized/${newKey.replace(/(\.[\w\d_-]+)$/i, `_${size.suffix}$1`)}`
-        : `resized/${newKey}`;
+      const resizedKey = size.suffix
+        ? key.replace(/(\.[\w\d_-]+)$/i, `_${size.suffix}$1`)
+        : key;
 
       await s3.send(
         new PutObjectCommand({
           Bucket: bucket,
-          Key: newKey,
+          Key: resizedKey,
           Body: resizedImage,
         }),
       );
