@@ -42,6 +42,12 @@ export default async function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
+      <link
+        rel="alternate"
+        type="application/rss+xml"
+        href="/feed.xml"
+        title="RSS Feed"
+      />
       <Fathom />
       <body className="h-full">
         <Toaster />
