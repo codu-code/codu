@@ -102,7 +102,7 @@
     "sharp": "^0.33.3",
     "sonner": "^1.4.41",
     "superjson": "^2.2.1",
-    "tailwind-merge": "^2.3.0",
+    "tailwind-merge": "^2.4.0",
     "tiptap-markdown": "^0.8.10",
     "zod": "^3.23.8"
   },
