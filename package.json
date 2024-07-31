@@ -26,7 +26,7 @@
     "*.{js,jsx,ts,tsx}": "eslint"
   },
   "dependencies": {
-    "@algolia/autocomplete-core": "^1.17.0",
+    "@algolia/autocomplete-core": "^1.17.3",
     "@algolia/autocomplete-preset-algolia": "^1.17.2",
     "@auth/drizzle-adapter": "^1.1.0",
     "@aws-sdk/client-s3": "^3.608.0",
