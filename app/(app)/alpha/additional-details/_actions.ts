@@ -59,7 +59,7 @@ export async function handleFormSlideTwoSubmit(dataInput: TypeSlideTwoSchema) {
     await db
       .update(user)
       .set({
-        dateOfBirth,
+        dateOfBirth: dateOfBirth.toISOString(),
         gender,
       })
       .where(eq(user.id, session.user.id));

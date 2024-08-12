@@ -12,7 +12,7 @@ import {
   slideThreeSchema,
 } from "@/schema/additionalUserDetails";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFormContext } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { toast } from "sonner";
 import {
@@ -236,13 +236,16 @@ function SlideTwo({ details }: { details: UserDetails }) {
     defaultValues: { dateOfBirth, gender },
   });
 
+  const parsedDateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
   const [year, setYear] = useState<number | undefined>(
-    dateOfBirth?.getFullYear(),
+    parsedDateOfBirth?.getFullYear(),
   );
   const [month, setMonth] = useState<number | undefined>(
-    dateOfBirth?.getMonth(),
+    parsedDateOfBirth?.getMonth(),
   );
-  const [day, setDay] = useState<number | undefined>(dateOfBirth?.getDate());
+  const [day, setDay] = useState<number | undefined>(
+    parsedDateOfBirth?.getDate(),
+  );
 
   const [listOfDaysInSelectedMonth, setListOfDaysInSelectedMonth] = useState([
     0,
