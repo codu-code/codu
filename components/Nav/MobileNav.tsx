@@ -1,5 +1,10 @@
 import { type UserNavigationItem } from "@/types/types";
-import { Disclosure, Transition } from "@headlessui/react";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Transition,
+} from "@headlessui/react";
 import { type Session } from "next-auth";
 import { PromptLink as Link } from "../PromptService/PromptLink";
 import { type MutableRefObject, useRef, type FunctionComponent } from "react";
@@ -27,7 +32,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
       enterTo="transform translate-y-0 opacity-100"
       className="absolute z-10 w-screen bg-neutral-100 dark:bg-black"
     >
-      <Disclosure.Panel className="relative border-b border-neutral-400 dark:border-neutral-600 md:hidden">
+      <DisclosurePanel className="relative border-b border-neutral-400 dark:border-neutral-600 md:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
           {navigation.map((item) => (
             <NavItem item={item} key={item.name} />
@@ -69,12 +74,12 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                     </button>
                   ) : (
                     <Link key={item.name} to={item.href}>
-                      <Disclosure.Button
+                      <DisclosureButton
                         as="div"
                         className="nav-button w-full font-medium"
                       >
                         {item.name}
-                      </Disclosure.Button>
+                      </DisclosureButton>
                     </Link>
                   ),
                 )}
@@ -82,7 +87,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
             </div>
           </div>
         )}
-      </Disclosure.Panel>
+      </DisclosurePanel>
     </Transition>
   );
 };
@@ -99,7 +104,7 @@ interface NavItemProps {
 const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
   return item.href.includes("http") ? (
     <Disclosure>
-      <Disclosure.Button
+      <DisclosureButton
         as="a"
         href={item.href}
         target="_blank"
@@ -107,18 +112,18 @@ const NavItem: FunctionComponent<NavItemProps> = ({ item }) => {
         className="nav-button flex w-full items-center text-sm font-medium lg:text-base"
       >
         {item.name}
-      </Disclosure.Button>
+      </DisclosureButton>
     </Disclosure>
   ) : (
     <Disclosure>
-      <Disclosure.Button
+      <DisclosureButton
         as="a"
         href={item.href}
         rel="noopener noreferrer"
         className="nav-button flex w-full items-center text-sm font-medium lg:text-base"
       >
         {item.name}
-      </Disclosure.Button>
+      </DisclosureButton>
     </Disclosure>
   );
 };
@@ -140,7 +145,7 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session, close }) => {
     <>
       {data.map((item) => (
         <Disclosure key={item.name}>
-          <Disclosure.Button
+          <DisclosureButton
             as={Link}
             to={item.href}
             close={close}
@@ -153,7 +158,7 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session, close }) => {
             )}
           >
             {item.name}
-          </Disclosure.Button>
+          </DisclosureButton>
         </Disclosure>
       ))}
     </>
