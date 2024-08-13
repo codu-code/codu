@@ -33,7 +33,7 @@ type UserDetails = {
   firstName: string;
   surname: string;
   gender: string;
-  dateOfBirth: Date | undefined;
+  dateOfBirth: string;
   location: string;
   professionalOrStudent: string;
   course: string;
@@ -274,7 +274,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
       } else {
         selectedDate = new Date(year, month, day);
       }
-      setValue("dateOfBirth", selectedDate);
+      setValue("dateOfBirth", selectedDate.toISOString());
     }
   }, [year, month, day]);
 

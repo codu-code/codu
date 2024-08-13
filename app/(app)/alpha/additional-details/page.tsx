@@ -32,7 +32,7 @@ export default async function Page() {
     firstName: details?.firstName || "",
     surname: details?.surname || "",
     gender: details?.gender || "",
-    dateOfBirth: details?.dateOfBirth || undefined,
+    dateOfBirth: details?.dateOfBirth || "",
     location: details?.location || "",
     professionalOrStudent: details?.professionalOrStudent || "",
     course: details?.course || "",
