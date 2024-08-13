@@ -1,6 +1,14 @@
 "use client";
 import { api } from "@/server/trpc/react";
-import { Disclosure, Menu, Transition } from "@headlessui/react";
+import {
+  Disclosure,
+  DisclosureButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
 import { BellIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { signIn, signOut } from "next-auth/react";
 import { PromptLink as Link } from "../PromptService/PromptLink";
@@ -139,7 +147,7 @@ const Nav = ({
                       </Link>
                       <Menu as="div" className="relative ml-4">
                         <div>
-                          <Menu.Button className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-white">
+                          <MenuButton className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-white">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
@@ -152,7 +160,7 @@ const Nav = ({
                                 {session.user?.name?.[0] || "C"}
                               </div>
                             )}
-                          </Menu.Button>
+                          </MenuButton>
                         </div>
                         <Transition
                           as={Fragment}
@@ -163,9 +171,9 @@ const Nav = ({
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <MenuItems className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             {userNavigation.map((item) => (
-                              <Menu.Item key={item.name}>
+                              <MenuItem key={item.name}>
                                 {item.onClick ? (
                                   <button
                                     className={
@@ -183,9 +191,9 @@ const Nav = ({
                                     {item.name}
                                   </Link>
                                 )}
-                              </Menu.Item>
+                              </MenuItem>
                             ))}
-                          </Menu.Items>
+                          </MenuItems>
                         </Transition>
                       </Menu>
                     </>
@@ -208,10 +216,10 @@ const Nav = ({
                   </Link>
                 )}
                 {/* Mobile menu button */}
-                <Disclosure.Button className="nav-button focus-style group">
+                <DisclosureButton className="nav-button focus-style group">
                   <span className="sr-only">Open main menu</span>
                   <AnimatedHamburger open={open} />
-                </Disclosure.Button>
+                </DisclosureButton>
               </div>
             </div>
           </div>
