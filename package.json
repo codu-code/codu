@@ -32,7 +32,7 @@
     "@aws-sdk/client-s3": "^3.614.0",
     "@aws-sdk/client-ses": "^3.621.0",
     "@aws-sdk/s3-request-presigner": "^3.614.0",
-    "@headlessui/react": "^1.7.19",
+    "@headlessui/react": "^2.1.2",
     "@heroicons/react": "^2.1.5",
     "@hookform/resolvers": "^3.9.0",
     "@js-temporal/polyfill": "^0.4.4",
