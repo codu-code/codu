@@ -11,7 +11,7 @@ import type { saveSettingsInput } from "./profile";
 import { saveSettingsSchema } from "./profile";
 
 import { uploadFile } from "@/utils/s3helpers";
-import { user } from "@/server/db/schema";
+import type { user } from "@/server/db/schema";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");

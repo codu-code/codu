@@ -14,7 +14,7 @@ import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PlusSmallIcon, PencilIcon } from "@heroicons/react/20/solid";
-import { event, r_s_v_p, user } from "@/server/db/schema";
+import type { event, r_s_v_p, user } from "@/server/db/schema";
 
 function getDomainFromUrl(url: string) {
   const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
