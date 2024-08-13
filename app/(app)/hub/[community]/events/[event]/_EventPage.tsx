@@ -13,7 +13,7 @@ import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
 import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { PencilIcon } from "@heroicons/react/20/solid";
-import { r_s_v_p, user } from "@/server/db/schema";
+import type { r_s_v_p, user } from "@/server/db/schema";
 
 function getDomainFromUrl(url: string) {
   const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
