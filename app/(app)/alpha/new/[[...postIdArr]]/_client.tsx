@@ -2,7 +2,12 @@
 import { redirect, useParams } from "next/navigation";
 import React, { useEffect, Fragment } from "react";
 import { Controller } from "react-hook-form";
-import { Disclosure, Transition } from "@headlessui/react";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Transition,
+} from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/20/solid";
 import Editor from "@/components/editor/editor";
 import RenderPost from "@/components/editor/editor/RenderPost";
@@ -57,7 +62,7 @@ const Create = () => {
         Preview
       </button>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Transition.Root show={open} as={Fragment}>
+        <Transition show={open} as={Fragment}>
           <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full bg-black">
             <button
               type="button"
@@ -137,15 +142,15 @@ const Create = () => {
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-pink-300 focus-visible:ring-opacity-75">
+                          <DisclosureButton className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-pink-300 focus-visible:ring-opacity-75">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
                                 open ? "rotate-180 transform" : ""
                               } h-5 w-5 text-neutral-400`}
                             />
-                          </Disclosure.Button>
-                          <Disclosure.Panel className="pb-2 pt-4">
+                          </DisclosureButton>
+                          <DisclosurePanel className="pb-2 pt-4">
                             <label htmlFor="canonicalUrl">Canonical URL</label>
                             <input
                               id="canonicalUrl"
@@ -159,7 +164,7 @@ const Create = () => {
                               elsewhere and you want to link to it as the
                               original source.
                             </p>
-                          </Disclosure.Panel>
+                          </DisclosurePanel>
                         </>
                       )}
                     </Disclosure>
@@ -201,7 +206,7 @@ const Create = () => {
               </div>
             </div>
           </div>
-        </Transition.Root>
+        </Transition>
         {dataStatus === "loading" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
