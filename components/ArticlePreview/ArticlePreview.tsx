@@ -8,7 +8,13 @@ import {
   BookmarkIcon,
   EllipsisHorizontalIcon,
 } from "@heroicons/react/20/solid";
-import { Menu, Transition } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 
@@ -160,10 +166,10 @@ const ArticlePreview: NextPage<Props> = ({
             {menuOptions && (
               <Menu as="div" className="relative">
                 <div>
-                  <Menu.Button className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
+                  <MenuButton className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
                     <span className="sr-only">Open user menu</span>
                     <EllipsisHorizontalIcon className="h-6 w-6" />
-                  </Menu.Button>
+                  </MenuButton>
                 </div>
                 <Transition
                   as={Fragment}
@@ -174,9 +180,9 @@ const ArticlePreview: NextPage<Props> = ({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     {menuOptions.map((item) => (
-                      <Menu.Item key={item.label}>
+                      <MenuItem key={item.label}>
                         {"href" in item ? (
                           <Link
                             className="block w-full rounded px-4 py-2 text-left text-neutral-700 hover:bg-neutral-200"
@@ -193,9 +199,9 @@ const ArticlePreview: NextPage<Props> = ({
                             {item.label}
                           </button>
                         )}
-                      </Menu.Item>
+                      </MenuItem>
                     ))}
-                  </Menu.Items>
+                  </MenuItems>
                 </Transition>
               </Menu>
             )}
