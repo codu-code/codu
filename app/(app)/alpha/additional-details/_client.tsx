@@ -23,9 +23,9 @@ import {
   monthsOptions,
 } from "@/app/(app)/alpha/additional-details/selectOptions";
 import {
-  handleFormSlideOneSubmit,
-  handleFormSlideThreeSubmit,
-  handleFormSlideTwoSubmit,
+  slideOneSubmitAction,
+  slideThreeSubmitAction,
+  slideTwoSubmitAction,
 } from "./_actions";
 
 type UserDetails = {
@@ -103,7 +103,7 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      const isSuccess = await handleFormSlideOneSubmit(data);
+      const isSuccess = await slideOneSubmitAction(data);
       if (isSuccess) {
         toast.success("Saved");
         router.push(`?slide=${2}`, { scroll: false });
@@ -287,7 +287,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideTwoSchema) => {
     try {
-      const isSuccess = await handleFormSlideTwoSubmit(data);
+      const isSuccess = await slideTwoSubmitAction(data);
 
       if (isSuccess) {
         toast.success("Saved");
@@ -472,7 +472,7 @@ function SlideThree({ details }: { details: UserDetails }) {
 
     if (isError) {
       try {
-        const isSuccess = await handleFormSlideThreeSubmit(data);
+        const isSuccess = await slideThreeSubmitAction(data);
         if (isSuccess) {
           toast.success("Saved");
           router.push(`/`, { scroll: false });
