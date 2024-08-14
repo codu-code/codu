@@ -5,7 +5,12 @@ import React, { useState, useEffect, Fragment, useRef } from "react";
 import { useForm } from "react-hook-form";
 import CustomTextareaAutosize from "@/components/CustomTextareAutosize/CustomTextareaAutosize";
 import { toast } from "sonner";
-import { Disclosure, Transition } from "@headlessui/react";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Transition,
+} from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/20/solid";
 import type { SavePostInput } from "@/schema/post";
 import { ConfirmPostSchema } from "@/schema/post";
@@ -363,7 +368,7 @@ const Create = ({ session }: { session: Session }) => {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Transition.Root show={open} as={Fragment}>
+        <Transition show={open} as={Fragment}>
           <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full overflow-y-scroll bg-white dark:bg-black">
             <div className="m-2 max-w-full">
               <button
@@ -484,15 +489,15 @@ const Create = ({ session }: { session: Session }) => {
                       <Disclosure>
                         {({ open }) => (
                           <>
-                            <Disclosure.Button className="flex w-full justify-between py-2 text-left text-sm font-medium text-neutral-800 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75 dark:text-white">
+                            <DisclosureButton className="flex w-full justify-between py-2 text-left text-sm font-medium text-neutral-800 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75 dark:text-white">
                               <span>More Options</span>
                               <ChevronUpIcon
                                 className={`${
                                   open ? "" : "rotate-180 transform"
                                 } h-5 w-5 text-neutral-400`}
                               />
-                            </Disclosure.Button>
-                            <Disclosure.Panel className="pb-2 pt-4">
+                            </DisclosureButton>
+                            <DisclosurePanel className="pb-2 pt-4">
                               <label htmlFor="canonicalUrl">
                                 Canonical URL
                               </label>
@@ -529,7 +534,7 @@ const Create = ({ session }: { session: Session }) => {
                                 Share this link with others to preview your
                                 draft. Anyone with the link can view your draft.
                               </p>
-                            </Disclosure.Panel>
+                            </DisclosurePanel>
                           </>
                         )}
                       </Disclosure>
@@ -581,7 +586,7 @@ const Create = ({ session }: { session: Session }) => {
               </div>
             </div>
           </div>
-        </Transition.Root>
+        </Transition>
         {dataStatus === "loading" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
