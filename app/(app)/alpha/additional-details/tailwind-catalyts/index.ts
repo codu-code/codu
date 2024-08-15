@@ -1,6 +1,14 @@
-export { ErrorMessage, Field, Label } from "./fieldset";
+export {
+  ErrorMessage,
+  Field,
+  Label,
+  Fieldset,
+  Legend,
+  Description,
+  FieldGroup,
+} from "./fieldset";
 export { Heading, Subheading } from "./heading";
 export { Divider } from "./divider";
-export { Input } from "./input";
+export { Input, InputGroup } from "./input";
 export { Select } from "./select";
-export { Button } from "./button";
+export { Button, TouchTarget } from "./button";
