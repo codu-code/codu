@@ -27,6 +27,17 @@ import {
   slideThreeSubmitAction,
   slideTwoSubmitAction,
 } from "./_actions";
+import {
+  Button,
+  Divider,
+  ErrorMessage,
+  Field,
+  Heading,
+  Input,
+  Label,
+  Select,
+  Subheading,
+} from "./tailwind-catalyts";
 
 type UserDetails = {
   username: string;
@@ -116,107 +127,97 @@ function SlideOne({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
-            Profile information
-          </h2>
-          <p>This information will be displayed on your profile</p>
-        </div>
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
-          <div className="space-y-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                First Name
-              </label>
-              <div className="mt-2 ">
-                <input
-                  id="name"
-                  {...register("firstName")}
-                  placeholder="What should we call you?"
-                  type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                />
-                {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
-              </div>
-            </div>
+    <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+      <Heading className="mt-16">Profile information</Heading>
+      <Subheading>
+        This information will be displayed on your profile
+      </Subheading>
+      <Divider className="my-4 mt-4" />
 
-            <div>
-              <label
-                htmlFor="surname"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                Surname
-              </label>
-              <div className="mt-2">
-                <input
-                  id="surname"
-                  {...register("surname")}
-                  type="text"
-                  placeholder="And your surname?"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                />
-                {errors.surname && <p>{`${errors.surname.message}`}</p>}
-              </div>
-            </div>
+      <div className="mx-4 sm:mx-0">
+        <Field>
+          <Label>First Name</Label>
+          <Input
+            placeholder="Enter first name"
+            invalid={!!errors?.firstName}
+            {...register("firstName")}
+          />
+          {errors?.firstName && (
+            <ErrorMessage className="text-red-500">
+              {errors.firstName.message}
+            </ErrorMessage>
+          )}
+        </Field>
+      </div>
 
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                Username
-              </label>
-              <div className="relative flex items-center">
-                <div className="flex h-[36px] w-[7rem] items-center justify-center rounded-l-md bg-black text-white ring-1 ring-inset ring-white dark:bg-white dark:text-black">
-                  <span>codu.co/</span>
-                </div>
-                <input
-                  id="username"
-                  {...register("username")}
-                  placeholder="thehacker"
-                  type="text"
-                  className="ring-white/10... relative top-[-2px] block rounded-r-md border-0 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                />
-              </div>
-              {errors.username && <p>{`${errors.username.message}`}</p>}
-            </div>
-            <div>
-              <label
-                htmlFor="location"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                Location
-              </label>
-              <select
-                id="location"
-                {...register("location")}
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-              >
-                <option value="" disabled>
-                  Select
-                </option>
-                {locationOptions.map((location: string) => (
-                  <option key={location}>{location}</option>
-                ))}
-              </select>
-              {errors.location && <p>{`${errors.location.message}`}</p>}
-            </div>
+      <div className="m mx-4 mt-4 sm:mx-0">
+        <Field>
+          <Label>Surname</Label>
+          <Input
+            placeholder="Enter surname"
+            invalid={!!errors?.surname}
+            {...register("surname")}
+          />
+          {errors?.surname && (
+            <ErrorMessage className="text-red-500">
+              {errors.surname.message}
+            </ErrorMessage>
+          )}
+        </Field>
+      </div>
+
+      <div className="m mx-4 mt-4 sm:mx-0">
+        <Field>
+          <Label>Username</Label>
+          <div className="mt-2 flex rounded-md shadow-sm">
+            <span className=" inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3  font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
+              codu.co/
+            </span>
+            <Input
+              placeholder="Enter username"
+              invalid={!!errors?.username}
+              {...register("username")}
+              className="rounded-l-none focus-within:after:rounded-l-none"
+            />
           </div>
-          <div className="mt-6 flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+          {errors?.username && (
+            <ErrorMessage className="text-red-500">
+              {errors.username.message}
+            </ErrorMessage>
+          )}
+        </Field>
+      </div>
+
+      <div className="m mx-4 mt-4 sm:mx-0">
+        <Field>
+          <Label>Location</Label>
+          <Select {...register("location")} defaultValue="">
+            <option value="" disabled>
+              Select country
+            </option>
+            {locationOptions.map((location: string) => (
+              <option key={location}>{location}</option>
+            ))}
+          </Select>
+          {errors?.location && (
+            <ErrorMessage className="text-red-500">
+              {errors.location.message}
+            </ErrorMessage>
+          )}
+        </Field>
+      </div>
+
+      <Divider className="my-8" soft />
+
+      <div className="mt-6 flex justify-end">
+        <Button
+          color={"dark/white"}
+          className="cursor-pointer"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          Next
+        </Button>
       </div>
     </form>
   );
