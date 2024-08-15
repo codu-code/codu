@@ -32,9 +32,11 @@ import {
   Divider,
   ErrorMessage,
   Field,
+  Fieldset,
   Heading,
   Input,
   Label,
+  Legend,
   Select,
   Subheading,
 } from "./tailwind-catalyts";
@@ -128,86 +130,88 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   return (
     <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
-      <Heading className="mt-16">Profile information</Heading>
-      <Subheading>
-        This information will be displayed on your profile
-      </Subheading>
-      <Divider className="my-4 mt-4" />
+      <div className="min-h-[29rem]">
+        <Heading className="mt-16">Profile information</Heading>
+        <Subheading>
+          This information will be displayed on your profile
+        </Subheading>
+        <Divider className="my-4 mt-4" />
 
-      <div className="mx-4 sm:mx-0">
-        <Field>
-          <Label>First Name</Label>
-          <Input
-            placeholder="Enter first name"
-            invalid={!!errors?.firstName}
-            {...register("firstName")}
-          />
-          {errors?.firstName && (
-            <ErrorMessage className="text-red-500">
-              {errors.firstName.message}
-            </ErrorMessage>
-          )}
-        </Field>
-      </div>
-
-      <div className="m mx-4 mt-4 sm:mx-0">
-        <Field>
-          <Label>Surname</Label>
-          <Input
-            placeholder="Enter surname"
-            invalid={!!errors?.surname}
-            {...register("surname")}
-          />
-          {errors?.surname && (
-            <ErrorMessage className="text-red-500">
-              {errors.surname.message}
-            </ErrorMessage>
-          )}
-        </Field>
-      </div>
-
-      <div className="m mx-4 mt-4 sm:mx-0">
-        <Field>
-          <Label>Username</Label>
-          <div className="mt-2 flex rounded-md shadow-sm">
-            <span className=" inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3  font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
-              codu.co/
-            </span>
+        <div className="mx-4 sm:mx-0">
+          <Field>
+            <Label>First Name</Label>
             <Input
-              placeholder="Enter username"
-              invalid={!!errors?.username}
-              {...register("username")}
-              className="rounded-l-none focus-within:after:rounded-l-none"
+              placeholder="Enter first name"
+              invalid={!!errors?.firstName}
+              {...register("firstName")}
             />
-          </div>
-          {errors?.username && (
-            <ErrorMessage className="text-red-500">
-              {errors.username.message}
-            </ErrorMessage>
-          )}
-        </Field>
-      </div>
+            {errors?.firstName && (
+              <ErrorMessage className="text-red-500">
+                {errors.firstName.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
 
-      <div className="m mx-4 mt-4 sm:mx-0">
-        <Field>
-          <Label>Location</Label>
-          <Select {...register("location")} defaultValue="">
-            <option value="" disabled>
-              Select country
-            </option>
-            {locationOptions.map((location: string) => (
-              <option key={location}>{location}</option>
-            ))}
-          </Select>
-          {errors?.location && (
-            <ErrorMessage className="text-red-500">
-              {errors.location.message}
-            </ErrorMessage>
-          )}
-        </Field>
-      </div>
+        <div className="mx-4 mt-4 sm:mx-0">
+          <Field>
+            <Label>Surname</Label>
+            <Input
+              placeholder="Enter surname"
+              invalid={!!errors?.surname}
+              {...register("surname")}
+            />
+            {errors?.surname && (
+              <ErrorMessage className="text-red-500">
+                {errors.surname.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
 
-      <Divider className="my-8" soft />
+        <div className="mx-4 mt-4 sm:mx-0">
+          <Field>
+            <Label>Username</Label>
+            <div className="mt-2 flex rounded-md shadow-sm">
+              <span className=" inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3  font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
+                codu.co/
+              </span>
+              <Input
+                placeholder="Enter username"
+                invalid={!!errors?.username}
+                {...register("username")}
+                className="rounded-l-none focus-within:after:rounded-l-none"
+              />
+            </div>
+            {errors?.username && (
+              <ErrorMessage className="text-red-500">
+                {errors.username.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
+
+        <div className="mx-4 mt-4 sm:mx-0">
+          <Field>
+            <Label>Location</Label>
+            <Select {...register("location")} defaultValue="">
+              <option value="" disabled>
+                Select country
+              </option>
+              {locationOptions.map((location: string) => (
+                <option key={location}>{location}</option>
+              ))}
+            </Select>
+            {errors?.location && (
+              <ErrorMessage className="text-red-500">
+                {errors.location.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
+
+        <Divider className="my-8" soft />
+      </div>
 
       <div className="mt-6 flex justify-end">
         <Button
@@ -302,132 +306,110 @@ function SlideTwo({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
-            Demographic
-          </h2>
-          <p>This information is private, but helps us improve</p>
+    <form className="mx-auto  max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="min-h-[29rem]">
+        <Heading className="mt-16">Demographic</Heading>
+        <Subheading>
+          This information is private, but helps us improve
+        </Subheading>
+        <Divider className="my-4 mt-4" />
+
+        <div className="mx-4 mt-4 sm:mx-0">
+          <Field>
+            <Label>Gender</Label>
+            <Select {...register("gender")} defaultValue="">
+              <option value="" disabled>
+                Gender
+              </option>
+              {genderOptions.map((gender: string) => (
+                <option key={gender}>{gender}</option>
+              ))}
+            </Select>
+            {errors?.gender && (
+              <ErrorMessage className="text-red-500">
+                {errors.gender.message}
+              </ErrorMessage>
+            )}
+          </Field>
         </div>
 
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
-          <div className="h-[21.75rem] space-y-6">
-            <div>
-              <label
-                htmlFor="gender"
-                className="block text-sm font-medium leading-6 text-neutral-900"
-              >
-                Gender
-              </label>
-              <select
-                id="gender"
-                {...register("gender")}
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset  ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+        <Divider className="my-4 mt-4" />
+
+        <Fieldset>
+          <Legend>Date of Birth</Legend>
+          <div className="mx-4 flex justify-between">
+            <Field>
+              <Select
+                aria-label="Year"
+                value={year ? year : ""}
+                required
+                onChange={(e) => setYear(Number(e.target.value))}
               >
                 <option value="" disabled>
-                  Gender
+                  Year
                 </option>
-                {genderOptions.map((gender: string) => (
-                  <option key={gender}>{gender}</option>
+                {years.map((year) => (
+                  <option key={year}>{year}</option>
                 ))}
-              </select>
+              </Select>
+            </Field>
 
-              {errors.gender && <p>{`${errors.gender.message}`}</p>}
-            </div>
+            <Field>
+              <Select
+                aria-label="month"
+                value={month !== undefined ? monthsOptions[month] : ""}
+                required
+                onChange={(e) =>
+                  setMonth(monthsOptions.indexOf(e.target.value))
+                }
+              >
+                <option value="" disabled>
+                  Month
+                </option>
+                {monthsOptions.map((month) => (
+                  <option key={month}>{month}</option>
+                ))}
+              </Select>
+            </Field>
 
-            <fieldset>
-              <legend>Date of Birth</legend>
-
-              <div className="flex justify-between gap-1 sm:gap-8">
-                <div className="flex-grow">
-                  <label htmlFor="year" className="hidden">
-                    Year
-                  </label>
-                  <select
-                    id="year"
-                    name="year"
-                    value={year ? year : ""}
-                    required
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  >
-                    <option value="" disabled>
-                      Year
-                    </option>
-                    {years.map((year) => (
-                      <option key={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex-grow">
-                  <label htmlFor="month" className="hidden">
-                    Month
-                  </label>
-                  <select
-                    id="month"
-                    name="month"
-                    value={month !== undefined ? monthsOptions[month] : ""}
-                    required
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                    onChange={(e) =>
-                      setMonth(monthsOptions.indexOf(e.target.value))
-                    }
-                  >
-                    <option value="" disabled>
-                      Month
-                    </option>
-                    {monthsOptions.map((month) => (
-                      <option key={month}>{month}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex-grow">
-                  <label htmlFor="day" className="hidden">
-                    day
-                  </label>
-                  <select
-                    id="day"
-                    name="day"
-                    value={day ? day : ""}
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                    disabled={!year || undefined}
-                    required
-                    onChange={(e) => setDay(Number(e.target.value))}
-                  >
-                    <option value="" disabled>
-                      Day
-                    </option>
-
-                    {listOfDaysInSelectedMonth.map((day) => (
-                      <option key={day}>{day}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
-            </fieldset>
+            <Field>
+              <Select
+                aria-label="day"
+                value={day ? day : ""}
+                disabled={!month || undefined}
+                required
+                onChange={(e) => setDay(Number(e.target.value))}
+              >
+                <option value="" disabled>
+                  day
+                </option>
+                {listOfDaysInSelectedMonth.map((day) => (
+                  <option key={day}>{day}</option>
+                ))}
+              </Select>
+            </Field>
           </div>
+          {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
+        </Fieldset>
+      </div>
 
-          <div className="mt-6 flex justify-end">
-            <button
-              type="button"
-              onClick={() => router.push(`?slide=${1}`, { scroll: false })}
-              className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm ring-1 ring-inset hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-            >
-              Go back
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+      <div className="mt-6 flex justify-end gap-4">
+        <Button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => router.push(`?slide=${1}`, { scroll: false })}
+          className="cursor-pointer"
+        >
+          Go back
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          color={"dark/white"}
+          className="cursor-pointer"
+        >
+          Next
+        </Button>
       </div>
     </form>
   );
