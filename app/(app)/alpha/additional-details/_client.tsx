@@ -130,17 +130,19 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   return (
     <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
-      <div className="min-h-[29rem]">
-        <Heading className="mt-16">Profile information</Heading>
-        <Subheading>
-          This information will be displayed on your profile
-        </Subheading>
+      <div className="min-h-[32rem]">
+        <div className="mx-4">
+          <Heading className="mt-16">Profile information</Heading>
+          <Subheading>
+            This information will be displayed on your profile
+          </Subheading>
+        </div>
         <Divider className="my-4 mt-4" />
-
-        <div className="mx-4 sm:mx-0">
+        <div className="mx-4">
           <Field>
             <Label>First Name</Label>
             <Input
+              id="first-name"
               placeholder="Enter first name"
               invalid={!!errors?.firstName}
               {...register("firstName")}
@@ -153,10 +155,11 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Field>
         </div>
 
-        <div className="mx-4 mt-4 sm:mx-0">
+        <div className="mx-4 mt-4 ">
           <Field>
             <Label>Surname</Label>
             <Input
+              id="surname"
               placeholder="Enter surname"
               invalid={!!errors?.surname}
               {...register("surname")}
@@ -169,7 +172,7 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Field>
         </div>
 
-        <div className="mx-4 mt-4 sm:mx-0">
+        <div className="mx-4 mt-4 ">
           <Field>
             <Label>Username</Label>
             <div className="mt-2 flex rounded-md shadow-sm">
@@ -177,6 +180,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                 codu.co/
               </span>
               <Input
+                id="username"
                 placeholder="Enter username"
                 invalid={!!errors?.username}
                 {...register("username")}
@@ -191,10 +195,10 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Field>
         </div>
 
-        <div className="mx-4 mt-4 sm:mx-0">
+        <div className="mx-4 mt-4">
           <Field>
             <Label>Location</Label>
-            <Select {...register("location")} defaultValue="">
+            <Select {...register("location")} defaultValue="" id="location">
               <option value="" disabled>
                 Select country
               </option>
@@ -209,14 +213,12 @@ function SlideOne({ details }: { details: UserDetails }) {
             )}
           </Field>
         </div>
-
-        <Divider className="my-8" soft />
       </div>
 
-      <div className="mt-6 flex justify-end">
+      <div className="mr-4 mt-6 flex justify-end sm:mr-0">
         <Button
           color={"dark/white"}
-          className="cursor-pointer"
+          className="w-24 cursor-pointer"
           type="submit"
           disabled={isSubmitting}
         >
@@ -307,17 +309,19 @@ function SlideTwo({ details }: { details: UserDetails }) {
 
   return (
     <form className="mx-auto  max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
-      <div className="min-h-[29rem]">
-        <Heading className="mt-16">Demographic</Heading>
-        <Subheading>
-          This information is private, but helps us improve
-        </Subheading>
+      <div className="min-h-[32rem]">
+        <div className="mx-4 ">
+          <Heading className="mt-16">Demographic</Heading>
+          <Subheading>
+            This information is private, but helps us improve
+          </Subheading>
+        </div>
         <Divider className="my-4 mt-4" />
 
-        <div className="mx-4 mt-4 sm:mx-0">
+        <div className="mx-4 mt-4 ">
           <Field>
             <Label>Gender</Label>
-            <Select {...register("gender")} defaultValue="">
+            <Select {...register("gender")} defaultValue="" id="gender">
               <option value="" disabled>
                 Gender
               </option>
@@ -336,10 +340,11 @@ function SlideTwo({ details }: { details: UserDetails }) {
         <Divider className="my-4 mt-4" />
 
         <Fieldset>
-          <Legend>Date of Birth</Legend>
-          <div className="mx-4 flex justify-between">
+          <Legend className="mx-4 ">Date of Birth</Legend>
+          <div className="mx-4 flex justify-between ">
             <Field>
               <Select
+                id="year"
                 aria-label="Year"
                 value={year ? year : ""}
                 required
@@ -356,6 +361,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
 
             <Field>
               <Select
+                id="month"
                 aria-label="month"
                 value={month !== undefined ? monthsOptions[month] : ""}
                 required
@@ -374,6 +380,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
 
             <Field>
               <Select
+                id="day"
                 aria-label="day"
                 value={day ? day : ""}
                 disabled={!month || undefined}
@@ -393,12 +400,12 @@ function SlideTwo({ details }: { details: UserDetails }) {
         </Fieldset>
       </div>
 
-      <div className="mt-6 flex justify-end gap-4">
+      <div className="mr-4 mt-6 flex justify-end gap-4 sm:mr-0">
         <Button
           type="button"
           disabled={isSubmitting}
           onClick={() => router.push(`?slide=${1}`, { scroll: false })}
-          className="cursor-pointer"
+          className="w-24 cursor-pointer"
         >
           Go back
         </Button>
@@ -406,7 +413,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
           type="submit"
           disabled={isSubmitting}
           color={"dark/white"}
-          className="cursor-pointer"
+          className="w-24 cursor-pointer"
         >
           Next
         </Button>
@@ -469,33 +476,23 @@ function SlideThree({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onFormSubmit)}
-      className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
-    >
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
-          Work and education
-        </h2>
-        <p>
-          This information is private but helpful to tailor our events and
-          features.
-        </p>
-      </div>
+    <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="min-h-[32rem]">
+        <div className="mx-4 ">
+          <Heading className="mt-16"> Work and education</Heading>
+          <Subheading>
+            This information is private but helpful to tailor our events and
+            features.
+          </Subheading>
+        </div>
+        <Divider className="my-4 mt-4" />
+        <Fieldset>
+          <Field className="mx-4 my-4 ">
+            <Label>Which best describes you?</Label>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="h-[21.75rem] space-y-6">
-          <div>
-            <label
-              htmlFor="professional-or-student"
-              className="block text-sm font-medium leading-6 text-neutral-900"
-            >
-              Which best describes you?
-            </label>
-            <select
+            <Select
               id="professional-or-student"
               {...register("professionalOrStudent")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black  focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
             >
               <option value="" disabled>
                 Select one
@@ -504,69 +501,51 @@ function SlideThree({ details }: { details: UserDetails }) {
               {professionalOrStudentOptions.map((status) => (
                 <option key={status}>{status}</option>
               ))}
-            </select>
-
+            </Select>
             {errors.professionalOrStudent && (
-              <p>{`${errors.professionalOrStudent.message}`}</p>
+              <ErrorMessage className="text-red-500">
+                {errors.professionalOrStudent.message}
+              </ErrorMessage>
             )}
-          </div>
+          </Field>
 
           {getValues("professionalOrStudent") === "Working professional" && (
             <>
-              <div>
-                <label
-                  htmlFor="workplace"
-                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-                >
-                  Where are you working?
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="workplace"
-                    {...register("workplace")}
-                    type="text"
-                    placeholder="Codú corp"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                  />
-                </div>
-                {errors.workplace && <p>{`${errors.workplace.message}`}</p>}
-              </div>
+              <Field className="mx-4 my-4 ">
+                <Label>Where are you working?</Label>
+                <Input
+                  id="workplace"
+                  {...register("workplace")}
+                  placeholder="Codú corp"
+                />
+                {errors.workplace && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.workplace.message}
+                  </ErrorMessage>
+                )}
+              </Field>
 
-              <div>
-                <label
-                  htmlFor="job-title"
-                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-                >
-                  What is your job title?
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="job-title"
-                    {...register("jobTitle")}
-                    type="text"
-                    placeholder="Chief transponster"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                  />
-                </div>
-                {errors.jobTitle && <p>{`${errors.jobTitle.message}`}</p>}
-              </div>
+              <Field className="mx-4 my-4 ">
+                <Label>What is your job title?</Label>
+                <Input
+                  id="job-title"
+                  {...register("jobTitle")}
+                  placeholder="Chief transponster"
+                />
+                {errors.jobTitle && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.jobTitle.message}
+                  </ErrorMessage>
+                )}
+              </Field>
             </>
           )}
 
           {getValues("professionalOrStudent") === "Current student" && (
             <>
-              <div>
-                <label
-                  htmlFor="level-of-study"
-                  className="block text-sm font-medium leading-6 text-neutral-900"
-                >
-                  What is your current level of study?
-                </label>
-                <select
-                  id="level-of-study"
-                  {...register("levelOfStudy")}
-                  className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                >
+              <Field className="mx-4 my-4 ">
+                <Label> What is your current level of study?</Label>
+                <Select id="level-of-study" {...register("levelOfStudy")}>
                   <option value="" disabled>
                     Select level of study
                   </option>
@@ -574,50 +553,50 @@ function SlideThree({ details }: { details: UserDetails }) {
                   {levelOfStudyOptions.map((level) => (
                     <option key={level}>{level}</option>
                   ))}
-                </select>
+                </Select>
                 {errors.levelOfStudy && (
-                  <p>{`${errors.levelOfStudy.message}`}</p>
+                  <ErrorMessage className="text-red-500">
+                    {errors.levelOfStudy.message}
+                  </ErrorMessage>
                 )}
-              </div>
+              </Field>
 
-              <div>
-                <label
-                  htmlFor="course"
-                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-                >
-                  What are you studying?
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="course"
-                    {...register("course")}
-                    type="text"
-                    placeholder="Course name"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                  />
-                </div>
-                {errors.course && <p>{`${errors.course.message}`}</p>}
-              </div>
+              <Field className="mx-4 my-4 ">
+                <Label>What are you studying?</Label>
+                <Input
+                  id="course"
+                  {...register("course")}
+                  placeholder="Course name"
+                />
+                {errors.course && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.course.message}
+                  </ErrorMessage>
+                )}
+              </Field>
             </>
           )}
-        </div>
+        </Fieldset>
+      </div>
 
-        <div className="mt-6 flex justify-end">
-          <button
-            type="button"
-            onClick={() => router.push(`?slide=${2}`, { scroll: false })}
-            className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm ring-1 ring-inset hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-          >
-            Go back
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6  text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
-          >
-            Submit
-          </button>
-        </div>
+      <div className="mr-4 mt-6 flex justify-end gap-4 sm:mr-0">
+        <Button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => router.push(`?slide=${2}`, { scroll: false })}
+          className="w-24 cursor-pointer"
+        >
+          Go back
+        </Button>
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          color={"dark/white"}
+          className="w-24 cursor-pointer"
+        >
+          Submit
+        </Button>
       </div>
     </form>
   );
