@@ -27,19 +27,18 @@ import {
   slideThreeSubmitAction,
   slideTwoSubmitAction,
 } from "./_actions";
+import { Heading, Subheading } from "./components/heading";
+import { Divider } from "./components/divider";
 import {
-  Button,
-  Divider,
   ErrorMessage,
   Field,
   Fieldset,
-  Heading,
-  Input,
   Label,
   Legend,
-  Select,
-  Subheading,
-} from "./tailwind-catalyts";
+} from "./components/fieldset";
+import { Input } from "./components/input";
+import { Select } from "./components/select";
+import { Button } from "./components/button";
 
 type UserDetails = {
   username: string;
