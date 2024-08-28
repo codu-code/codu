@@ -28,7 +28,7 @@ export const adminRouter = createTRPCRouter({
         bannedById: currentUserId,
         userId: userId,
         note: note,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       });
 
       await ctx.db.delete(session).where(eq(session.userId, userId));
