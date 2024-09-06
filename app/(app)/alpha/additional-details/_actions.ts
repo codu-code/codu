@@ -16,7 +16,7 @@ import { db } from "@/server/db";
 import { user } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function handleFormSlideOneSubmit(dataInput: TypeSlideOneSchema) {
+export async function slideOneSubmitAction(dataInput: TypeSlideOneSchema) {
   const session = await getServerAuthSession();
   if (!session || !session.user) {
     redirect("/get-started");
@@ -47,7 +47,7 @@ export async function handleFormSlideOneSubmit(dataInput: TypeSlideOneSchema) {
   }
 }
 
-export async function handleFormSlideTwoSubmit(dataInput: TypeSlideTwoSchema) {
+export async function slideTwoSubmitAction(dataInput: TypeSlideTwoSchema) {
   const session = await getServerAuthSession();
   if (!session || !session.user) {
     redirect("/get-started");
@@ -75,9 +75,7 @@ export async function handleFormSlideTwoSubmit(dataInput: TypeSlideTwoSchema) {
   }
 }
 
-export async function handleFormSlideThreeSubmit(
-  dataInput: TypeSlideThreeSchema,
-) {
+export async function slideThreeSubmitAction(dataInput: TypeSlideThreeSchema) {
   const session = await getServerAuthSession();
   if (!session || !session.user) {
     redirect("/get-started");

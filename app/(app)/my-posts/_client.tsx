@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, Fragment } from "react";
-import { Transition, Menu } from "@headlessui/react";
+import {
+  Transition,
+  Menu,
+  MenuButton,
+  MenuItems,
+  MenuItem,
+} from "@headlessui/react";
 import Link from "next/link";
 import {
   ChevronDownIcon,
@@ -167,13 +173,13 @@ const MyPosts = () => {
                         className="relative inline-block text-left"
                       >
                         <div>
-                          <Menu.Button className="dropdown-button">
+                          <MenuButton className="dropdown-button">
                             Options
                             <ChevronDownIcon
                               className="-mr-1 ml-2 h-5 w-5"
                               aria-hidden="true"
                             />
-                          </Menu.Button>
+                          </MenuButton>
                         </div>
 
                         <Transition
@@ -185,51 +191,35 @@ const MyPosts = () => {
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="dropdown-bg py-1">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <Link
-                                    className={classNames(
-                                      active
-                                        ? "bg-neutral-100 text-black"
-                                        : "text-neutral-700",
-                                      "dropdown-item group flex items-center px-4 py-2 text-sm",
-                                    )}
-                                    href={`/create/${id}`}
-                                  >
-                                    <PencilIcon
-                                      className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
-                                      aria-hidden="true"
-                                    />
-                                    Edit
-                                  </Link>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <Link
+                                  className="dropdown-item group flex items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                                  href={`/create/${id}`}
+                                >
+                                  <PencilIcon
+                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
+                                    aria-hidden="true"
+                                  />
+                                  Edit
+                                </Link>
+                              </MenuItem>
 
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    onClick={() =>
-                                      setSelectedArticleToDelete(id)
-                                    }
-                                    className={classNames(
-                                      active
-                                        ? "bg-neutral-100 text-black"
-                                        : "text-neutral-700",
-                                      "dropdown-item group flex w-full items-center px-4 py-2 text-sm",
-                                    )}
-                                  >
-                                    <TrashIcon
-                                      className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
-                                      aria-hidden="true"
-                                    />
-                                    Delete
-                                  </button>
-                                )}
-                              </Menu.Item>
+                              <MenuItem>
+                                <button
+                                  onClick={() => setSelectedArticleToDelete(id)}
+                                  className="dropdown-item group flex w-full items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                                >
+                                  <TrashIcon
+                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
+                                    aria-hidden="true"
+                                  />
+                                  Delete
+                                </button>
+                              </MenuItem>
                             </div>
-                          </Menu.Items>
+                          </MenuItems>
                         </Transition>
                       </Menu>
                     </div>

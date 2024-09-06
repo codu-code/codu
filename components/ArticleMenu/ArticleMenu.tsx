@@ -1,6 +1,11 @@
 "use client";
 
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import React, { Fragment, useEffect, useState } from "react";
 
 import { api } from "@/server/trpc/react";
@@ -166,14 +171,14 @@ const ArticleMenu = ({
           </button>
 
           <Popover className="relative ml-4">
-            <Popover.Button
+            <PopoverButton
               onClick={openPopoverPanel}
               aria-label="more-options-trigger"
               className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
             >
               <span className="sr-only">Open user menu</span>
               <EllipsisHorizontalIcon className="h-6 w-6 fill-neutral-800 dark:fill-neutral-300" />
-            </Popover.Button>
+            </PopoverButton>
             <Transition
               as={Fragment}
               enter="transition ease-out duration-100"
@@ -183,7 +188,7 @@ const ArticleMenu = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Popover.Panel
+              <PopoverPanel
                 className={`absolute bottom-14 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-white lg:bottom-0 lg:left-16 
                 ${isPopoverPanelOpen ? "" : "hidden"}`}
               >
@@ -223,7 +228,7 @@ const ArticleMenu = ({
                     </li>
                   </ul>
                 </div>
-              </Popover.Panel>
+              </PopoverPanel>
             </Transition>
           </Popover>
         </div>
