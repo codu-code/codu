@@ -33,12 +33,12 @@ import {
   Fieldset,
   Label,
   Legend,
-} from "@/components/Catalyst/fieldset";
-import { Input } from "@/components/Catalyst/input";
-import { Select } from "@/components/Catalyst/select";
-import { Button } from "@/components/Catalyst/button";
-import { Heading, Subheading } from "@/components/Catalyst/heading";
-import { Divider } from "@/components/Catalyst/divider";
+} from "@/components/ui-components/fieldset";
+import { Input } from "@/components/ui-components/input";
+import { Select } from "@/components/ui-components/select";
+import { Button } from "@/components/ui-components/button";
+import { Heading, Subheading } from "@/components/ui-components/heading";
+import { Divider } from "@/components/ui-components/divider";
 
 type UserDetails = {
   username: string;
