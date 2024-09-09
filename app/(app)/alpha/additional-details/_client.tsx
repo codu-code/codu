@@ -27,18 +27,18 @@ import {
   slideThreeSubmitAction,
   slideTwoSubmitAction,
 } from "./_actions";
-import { Heading, Subheading } from "./components/heading";
-import { Divider } from "./components/divider";
+import { Heading, Subheading } from "../../../../components/Catalyst/heading";
+import { Divider } from "../../../../components/Catalyst/divider";
 import {
   ErrorMessage,
   Field,
   Fieldset,
   Label,
   Legend,
-} from "./components/fieldset";
-import { Input } from "./components/input";
-import { Select } from "./components/select";
-import { Button } from "./components/button";
+} from "../../../../components/Catalyst/fieldset";
+import { Input } from "../../../../components/Catalyst/input";
+import { Select } from "../../../../components/Catalyst/select";
+import { Button } from "../../../../components/Catalyst/button";
 
 type UserDetails = {
   username: string;
