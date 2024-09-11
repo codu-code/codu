@@ -2,24 +2,18 @@ import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
 import { AppStage } from "./app-stage";
 import {
-  BuildEnvironmentVariableType,
-  LocalCacheMode,
-} from "aws-cdk-lib/aws-codebuild";
-import {
   Effect,
   PolicyStatement,
   Role,
   ServicePrincipal,
 } from "aws-cdk-lib/aws-iam";
-import { Cache } from "aws-cdk-lib/aws-codebuild";
-
 import {
   CodePipeline,
   CodePipelineSource,
   ShellStep,
 } from "aws-cdk-lib/pipelines";
 import * as ssm from "aws-cdk-lib/aws-ssm";
-import * as codebuild from "aws-cdk-lib/aws-codebuild";
+import { GitHubTrigger } from "aws-cdk-lib/aws-codepipeline-actions";
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: cdk.StackProps) {
@@ -39,7 +33,9 @@ export class PipelineStack extends cdk.Stack {
     );
 
     const synthAction = new ShellStep("Synth", {
-      input: CodePipelineSource.gitHub("codu-code/codu", "develop"),
+      input: CodePipelineSource.gitHub("codu-code/codu", "develop", {
+        trigger: GitHubTrigger.NONE,
+      }),
       commands: ["cd cdk", "npm ci", "npm run build", "npx cdk synth"],
       primaryOutputDirectory: "cdk/cdk.out",
     });
@@ -48,26 +44,6 @@ export class PipelineStack extends cdk.Stack {
       pipelineName: "codu-pipline",
       crossAccountKeys: true,
       synth: synthAction,
-      codeBuildDefaults: {
-        cache: Cache.local(LocalCacheMode.DOCKER_LAYER),
-        buildEnvironment: {
-          computeType: codebuild.ComputeType.MEDIUM,
-          privileged: true,
-          environmentVariables: {
-            DOCKER_BUILDKIT: {
-              value: "1",
-            },
-            SENTRY_AUTH_TOKEN: {
-              type: BuildEnvironmentVariableType.PARAMETER_STORE,
-              value: "sentry",
-            },
-            DATABASE_URL: {
-              type: BuildEnvironmentVariableType.PARAMETER_STORE,
-              value: "/prod/db/url",
-            },
-          },
-        },
-      },
     });
 
     const devAccountId = ssm.StringParameter.valueFromLookup(
