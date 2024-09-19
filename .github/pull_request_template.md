@@ -2,6 +2,7 @@
 
 ![Codu Logo](https://raw.githubusercontent.com/codu-code/codu/develop/public/images/codu-gradient.png)
 
+
 ## Pull Request details
 
 - INFO ABOUT YOUR PULL REQUEST GOES HERE (Please be as descriptive as possible) 🤜
