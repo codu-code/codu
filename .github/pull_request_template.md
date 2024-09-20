@@ -1,5 +1,8 @@
 # ✨ Codu Pull Request 💻
 
+Fixes #(issue)
+<!-- for example `Fixes #1012` -->
+
 ## Pull Request details
 
 - INFO ABOUT YOUR PULL REQUEST GOES HERE (Please be as descriptive as possible) 🤜
