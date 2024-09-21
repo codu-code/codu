@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Switch } from "@headlessui/react";
+import { Description, Field, Label, Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,7 @@ import type { saveSettingsInput } from "./profile";
 import { saveSettingsSchema } from "./profile";
 
 import { uploadFile } from "@/utils/s3helpers";
-import { user } from "@/server/db/schema";
+import type { user } from "@/server/db/schema";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -357,17 +357,17 @@ const Settings = ({ profile }: { profile: User }) => {
                       aria-labelledby="privacy-heading"
                       className="mt-2 divide-y divide-neutral-200"
                     >
-                      <Switch.Group
+                      <Field
                         as="li"
                         className="flex items-center justify-between py-4"
                       >
                         <div className="flex flex-col items-center">
-                          <Switch.Label as="p" className="sr-only" passive>
+                          <Label as="p" className="sr-only" passive>
                             Email notifications
-                          </Switch.Label>
-                          <Switch.Description className="text-sm text-neutral-600 dark:text-neutral-400">
+                          </Label>
+                          <Description className="text-sm text-neutral-600 dark:text-neutral-400">
                             Occasional email notifications from the platform.
-                          </Switch.Description>
+                          </Description>
                         </div>
                         <Switch
                           checked={emailNotifications}
@@ -389,18 +389,18 @@ const Settings = ({ profile }: { profile: User }) => {
                             )}
                           />
                         </Switch>
-                      </Switch.Group>
-                      <Switch.Group
+                      </Field>
+                      <Field
                         as="li"
                         className="mt-2 flex items-center justify-between py-4"
                       >
                         <div className="flex flex-col">
-                          <Switch.Label as="p" className="sr-only" passive>
+                          <Label as="p" className="sr-only" passive>
                             Weekly newsletter
-                          </Switch.Label>
-                          <Switch.Description className="text-sm text-neutral-600 dark:text-neutral-400">
+                          </Label>
+                          <Description className="text-sm text-neutral-600 dark:text-neutral-400">
                             Opt-in to our weekly newsletter.
-                          </Switch.Description>
+                          </Description>
                         </div>
                         <Switch
                           checked={weeklyNewsletter}
@@ -422,7 +422,7 @@ const Settings = ({ profile }: { profile: User }) => {
                             )}
                           />
                         </Switch>
-                      </Switch.Group>
+                      </Field>
                     </ul>
                   </div>
                   <div className="mt-2 flex justify-end py-4">

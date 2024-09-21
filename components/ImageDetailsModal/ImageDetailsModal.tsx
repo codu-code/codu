@@ -6,7 +6,7 @@ import { XIcon } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Dialog } from "@headlessui/react";
+import { Description, DialogTitle } from "@headlessui/react";
 
 const imageDetailsSchema = z.object({
   src: z
@@ -62,14 +62,14 @@ export default function ImageDetailsModal(props: Props) {
       }}
     >
       <>
-        <Dialog.Title className="mb-4 text-center text-lg">
+        <DialogTitle className="mb-4 text-center text-lg">
           Image details
-        </Dialog.Title>
+        </DialogTitle>
 
-        <Dialog.Description className="mb-4">
+        <Description className="mb-4">
           Please enter a URL for the image, along with an alt description and a
           title.
-        </Dialog.Description>
+        </Description>
         <form>
           <div>
             <label htmlFor="src">Image URL:</label>

@@ -11,6 +11,7 @@ import sendEmail, { nodemailerSesTransporter } from "@/utils/sendEmail";
 import { manageNewsletterSubscription } from "./lib/newsletter";
 import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
 import type { Adapter } from "next-auth/adapters";
+import { user } from "@/server/db/schema";
 
 const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
   const { identifier, url } = params;
@@ -33,7 +34,10 @@ const sendPasswordLessEmail = async (params: SendVerificationRequestParams) => {
 };
 
 export const authOptions: NextAuthOptions = {
-  adapter: DrizzleAdapter(db) as Adapter,
+  adapter: DrizzleAdapter(db, {
+    // @ts-ignore-next-line
+    usersTable: user,
+  }) as Adapter,
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
@@ -54,6 +58,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.role = user.role;
       }
       return session;
     },

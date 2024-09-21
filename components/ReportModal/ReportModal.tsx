@@ -3,7 +3,12 @@ import { XMarkIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
 import { api } from "@/server/trpc/react";
-import { Dialog } from "@headlessui/react";
+import {
+  Description,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
 
 type Props = Post | Comment;
 
@@ -109,13 +114,13 @@ export const ReportModal = (props: Props) => {
       >
         <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
         <div className="fixed inset-0 flex w-screen items-center justify-center">
-          <Dialog.Panel className="relative max-w-lg rounded-lg border border-neutral-900 bg-neutral-100 p-0 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-900 dark:text-neutral-50 ">
+          <DialogPanel className="relative max-w-lg rounded-lg border border-neutral-900 bg-neutral-100 p-0 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-900 dark:text-neutral-50 ">
             <div className="m-8">
-              <Dialog.Title className="text-center text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+              <DialogTitle className="text-center text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
                 Submit a report
-              </Dialog.Title>
+              </DialogTitle>
 
-              <Dialog.Description as="div">
+              <Description as="div">
                 <p className="m-4 ml-0">
                   Is {isPost ? "something in this article" : "this comment"}{" "}
                   inappropriate?
@@ -125,7 +130,7 @@ export const ReportModal = (props: Props) => {
                   {isComment && props.comment}
                   {isPost && props.title}
                 </p>
-              </Dialog.Description>
+              </Description>
 
               <p className="m-4 ml-0">
                 Thank you for bringing it to our attention. We take reports very
@@ -170,7 +175,7 @@ export const ReportModal = (props: Props) => {
             >
               <XMarkIcon className="w-8" />
             </button>
-          </Dialog.Panel>
+          </DialogPanel>
         </div>
       </Dialog>
     </>

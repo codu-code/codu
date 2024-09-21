@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Menu, Transition } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
 import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -249,10 +255,10 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                   {isCurrentUser ? (
                     <Menu as="div" className="relative">
                       <div>
-                        <Menu.Button className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
+                        <MenuButton className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
                           <span className="sr-only">Open user menu</span>
                           <EllipsisHorizontalIcon className="h-6 w-6" />
-                        </Menu.Button>
+                        </MenuButton>
                       </div>
                       <Transition
                         as={Fragment}
@@ -263,11 +269,11 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <>
-                            <Menu.Item>
+                            <MenuItem>
                               <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200"
+                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
                                 onClick={() => {
                                   if (id !== editCommentBoxId) {
                                     setValue("edit", body);
@@ -278,19 +284,19 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                               >
                                 Edit comment
                               </button>
-                            </Menu.Item>
-                            <Menu.Item>
+                            </MenuItem>
+                            <MenuItem>
                               <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200"
+                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
                                 onClick={() => {
                                   deleteComment({ id });
                                 }}
                               >
                                 Delete comment
                               </button>
-                            </Menu.Item>
+                            </MenuItem>
                           </>
-                        </Menu.Items>
+                        </MenuItems>
                       </Transition>
                     </Menu>
                   ) : null}

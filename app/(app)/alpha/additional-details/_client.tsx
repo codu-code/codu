@@ -12,7 +12,7 @@ import {
   slideThreeSchema,
 } from "@/schema/additionalUserDetails";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFormContext } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { toast } from "sonner";
 import {
@@ -23,17 +23,29 @@ import {
   monthsOptions,
 } from "@/app/(app)/alpha/additional-details/selectOptions";
 import {
-  handleFormSlideOneSubmit,
-  handleFormSlideThreeSubmit,
-  handleFormSlideTwoSubmit,
+  slideOneSubmitAction,
+  slideThreeSubmitAction,
+  slideTwoSubmitAction,
 } from "./_actions";
+import {
+  ErrorMessage,
+  Field,
+  Fieldset,
+  Label,
+  Legend,
+} from "@/components/ui-components/fieldset";
+import { Input } from "@/components/ui-components/input";
+import { Select } from "@/components/ui-components/select";
+import { Button } from "@/components/ui-components/button";
+import { Heading, Subheading } from "@/components/ui-components/heading";
+import { Divider } from "@/components/ui-components/divider";
 
 type UserDetails = {
   username: string;
   firstName: string;
   surname: string;
   gender: string;
-  dateOfBirth: Date | undefined;
+  dateOfBirth: string;
   location: string;
   professionalOrStudent: string;
   course: string;
@@ -103,7 +115,7 @@ function SlideOne({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
-      const isSuccess = await handleFormSlideOneSubmit(data);
+      const isSuccess = await slideOneSubmitAction(data);
       if (isSuccess) {
         toast.success("Saved");
         router.push(`?slide=${2}`, { scroll: false });
@@ -116,107 +128,101 @@ function SlideOne({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
-            Profile information
-          </h2>
-          <p>This information will be displayed on your profile</p>
+    <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="min-h-[32rem]">
+        <div className="mx-4">
+          <Heading className="mt-16">Profile information</Heading>
+          <Subheading>
+            This information will be displayed on your profile
+          </Subheading>
         </div>
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
-          <div className="space-y-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                First Name
-              </label>
-              <div className="mt-2 ">
-                <input
-                  id="name"
-                  {...register("firstName")}
-                  placeholder="What should we call you?"
-                  type="text"
-                  className="block w-full rounded-md border-0 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                />
-                {errors.firstName && <p>{`${errors.firstName.message}`}</p>}
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="surname"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                Surname
-              </label>
-              <div className="mt-2">
-                <input
-                  id="surname"
-                  {...register("surname")}
-                  type="text"
-                  placeholder="And your surname?"
-                  className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                />
-                {errors.surname && <p>{`${errors.surname.message}`}</p>}
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                Username
-              </label>
-              <div className="relative flex items-center">
-                <div className="flex h-[36px] w-[7rem] items-center justify-center rounded-l-md bg-black text-white ring-1 ring-inset ring-white dark:bg-white dark:text-black">
-                  <span>codu.co/</span>
-                </div>
-                <input
-                  id="username"
-                  {...register("username")}
-                  placeholder="thehacker"
-                  type="text"
-                  className="ring-white/10... relative top-[-2px] block rounded-r-md border-0 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                />
-              </div>
-              {errors.username && <p>{`${errors.username.message}`}</p>}
-            </div>
-            <div>
-              <label
-                htmlFor="location"
-                className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-              >
-                Location
-              </label>
-              <select
-                id="location"
-                {...register("location")}
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-              >
-                <option value="" disabled>
-                  Select
-                </option>
-                {locationOptions.map((location: string) => (
-                  <option key={location}>{location}</option>
-                ))}
-              </select>
-              {errors.location && <p>{`${errors.location.message}`}</p>}
-            </div>
-          </div>
-          <div className="mt-6 flex justify-end">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
-            >
-              Next
-            </button>
-          </div>
+        <Divider className="my-4 mt-4" />
+        <div className="mx-4">
+          <Field>
+            <Label>First Name</Label>
+            <Input
+              id="first-name"
+              placeholder="Enter first name"
+              invalid={!!errors?.firstName}
+              {...register("firstName")}
+            />
+            {errors?.firstName && (
+              <ErrorMessage className="text-red-500">
+                {errors.firstName.message}
+              </ErrorMessage>
+            )}
+          </Field>
         </div>
+
+        <div className="mx-4 mt-4 ">
+          <Field>
+            <Label>Surname</Label>
+            <Input
+              id="surname"
+              placeholder="Enter surname"
+              invalid={!!errors?.surname}
+              {...register("surname")}
+            />
+            {errors?.surname && (
+              <ErrorMessage className="text-red-500">
+                {errors.surname.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
+
+        <div className="mx-4 mt-4 ">
+          <Field>
+            <Label>Username</Label>
+            <div className="mt-2 flex rounded-md shadow-sm">
+              <span className=" inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3  font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
+                codu.co/
+              </span>
+              <Input
+                id="username"
+                placeholder="Enter username"
+                invalid={!!errors?.username}
+                {...register("username")}
+                className="rounded-l-none focus-within:after:rounded-l-none"
+              />
+            </div>
+            {errors?.username && (
+              <ErrorMessage className="text-red-500">
+                {errors.username.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
+
+        <div className="mx-4 mt-4">
+          <Field>
+            <Label>Location</Label>
+            <Select {...register("location")} defaultValue="" id="location">
+              <option value="" disabled>
+                Select country
+              </option>
+              {locationOptions.map((location: string) => (
+                <option key={location}>{location}</option>
+              ))}
+            </Select>
+            {errors?.location && (
+              <ErrorMessage className="text-red-500">
+                {errors.location.message}
+              </ErrorMessage>
+            )}
+          </Field>
+        </div>
+      </div>
+
+      <div className="mr-4 mt-6 flex justify-end sm:mr-0">
+        <Button
+          color={"dark/white"}
+          className="w-24 cursor-pointer"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          Next
+        </Button>
       </div>
     </form>
   );
@@ -236,13 +242,16 @@ function SlideTwo({ details }: { details: UserDetails }) {
     defaultValues: { dateOfBirth, gender },
   });
 
+  const parsedDateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null;
   const [year, setYear] = useState<number | undefined>(
-    dateOfBirth?.getFullYear(),
+    parsedDateOfBirth?.getFullYear(),
   );
   const [month, setMonth] = useState<number | undefined>(
-    dateOfBirth?.getMonth(),
+    parsedDateOfBirth?.getMonth(),
   );
-  const [day, setDay] = useState<number | undefined>(dateOfBirth?.getDate());
+  const [day, setDay] = useState<number | undefined>(
+    parsedDateOfBirth?.getDate(),
+  );
 
   const [listOfDaysInSelectedMonth, setListOfDaysInSelectedMonth] = useState([
     0,
@@ -271,7 +280,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
       } else {
         selectedDate = new Date(year, month, day);
       }
-      setValue("dateOfBirth", selectedDate);
+      setValue("dateOfBirth", selectedDate.toISOString());
     }
   }, [year, month, day]);
 
@@ -284,7 +293,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
 
   const onFormSubmit = async (data: TypeSlideTwoSchema) => {
     try {
-      const isSuccess = await handleFormSlideTwoSubmit(data);
+      const isSuccess = await slideTwoSubmitAction(data);
 
       if (isSuccess) {
         toast.success("Saved");
@@ -298,132 +307,115 @@ function SlideTwo({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
-            Demographic
-          </h2>
-          <p>This information is private, but helps us improve</p>
+    <form className="mx-auto  max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="min-h-[32rem]">
+        <div className="mx-4 ">
+          <Heading className="mt-16">Demographic</Heading>
+          <Subheading>
+            This information is private, but helps us improve
+          </Subheading>
+        </div>
+        <Divider className="my-4 mt-4" />
+
+        <div className="mx-4 mt-4 ">
+          <Field>
+            <Label>Gender</Label>
+            <Select {...register("gender")} defaultValue="" id="gender">
+              <option value="" disabled>
+                Gender
+              </option>
+              {genderOptions.map((gender: string) => (
+                <option key={gender}>{gender}</option>
+              ))}
+            </Select>
+            {errors?.gender && (
+              <ErrorMessage className="text-red-500">
+                {errors.gender.message}
+              </ErrorMessage>
+            )}
+          </Field>
         </div>
 
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm ">
-          <div className="h-[21.75rem] space-y-6">
-            <div>
-              <label
-                htmlFor="gender"
-                className="block text-sm font-medium leading-6 text-neutral-900"
-              >
-                Gender
-              </label>
-              <select
-                id="gender"
-                {...register("gender")}
-                className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset  ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
+        <Divider className="my-4 mt-4" />
+
+        <Fieldset>
+          <Legend className="mx-4 ">Date of Birth</Legend>
+          <div className="mx-4 flex justify-between ">
+            <Field>
+              <Select
+                id="year"
+                aria-label="Year"
+                value={year ? year : ""}
+                required
+                onChange={(e) => setYear(Number(e.target.value))}
               >
                 <option value="" disabled>
-                  Gender
+                  Year
                 </option>
-                {genderOptions.map((gender: string) => (
-                  <option key={gender}>{gender}</option>
+                {years.map((year) => (
+                  <option key={year}>{year}</option>
                 ))}
-              </select>
+              </Select>
+            </Field>
 
-              {errors.gender && <p>{`${errors.gender.message}`}</p>}
-            </div>
+            <Field>
+              <Select
+                id="month"
+                aria-label="month"
+                value={month !== undefined ? monthsOptions[month] : ""}
+                required
+                onChange={(e) =>
+                  setMonth(monthsOptions.indexOf(e.target.value))
+                }
+              >
+                <option value="" disabled>
+                  Month
+                </option>
+                {monthsOptions.map((month) => (
+                  <option key={month}>{month}</option>
+                ))}
+              </Select>
+            </Field>
 
-            <fieldset>
-              <legend>Date of Birth</legend>
-
-              <div className="flex justify-between gap-1 sm:gap-8">
-                <div className="flex-grow">
-                  <label htmlFor="year" className="hidden">
-                    Year
-                  </label>
-                  <select
-                    id="year"
-                    name="year"
-                    value={year ? year : ""}
-                    required
-                    onChange={(e) => setYear(Number(e.target.value))}
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                  >
-                    <option value="" disabled>
-                      Year
-                    </option>
-                    {years.map((year) => (
-                      <option key={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex-grow">
-                  <label htmlFor="month" className="hidden">
-                    Month
-                  </label>
-                  <select
-                    id="month"
-                    name="month"
-                    value={month !== undefined ? monthsOptions[month] : ""}
-                    required
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                    onChange={(e) =>
-                      setMonth(monthsOptions.indexOf(e.target.value))
-                    }
-                  >
-                    <option value="" disabled>
-                      Month
-                    </option>
-                    {monthsOptions.map((month) => (
-                      <option key={month}>{month}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex-grow">
-                  <label htmlFor="day" className="hidden">
-                    day
-                  </label>
-                  <select
-                    id="day"
-                    name="day"
-                    value={day ? day : ""}
-                    className="mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                    disabled={!year || undefined}
-                    required
-                    onChange={(e) => setDay(Number(e.target.value))}
-                  >
-                    <option value="" disabled>
-                      Day
-                    </option>
-
-                    {listOfDaysInSelectedMonth.map((day) => (
-                      <option key={day}>{day}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
-            </fieldset>
+            <Field>
+              <Select
+                id="day"
+                aria-label="day"
+                value={day ? day : ""}
+                disabled={!month || undefined}
+                required
+                onChange={(e) => setDay(Number(e.target.value))}
+              >
+                <option value="" disabled>
+                  day
+                </option>
+                {listOfDaysInSelectedMonth.map((day) => (
+                  <option key={day}>{day}</option>
+                ))}
+              </Select>
+            </Field>
           </div>
+          {errors.dateOfBirth && <p>{`${errors.dateOfBirth.message}`}</p>}
+        </Fieldset>
+      </div>
 
-          <div className="mt-6 flex justify-end">
-            <button
-              type="button"
-              onClick={() => router.push(`?slide=${1}`, { scroll: false })}
-              className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm ring-1 ring-inset hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-            >
-              Go back
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+      <div className="mr-4 mt-6 flex justify-end gap-4 sm:mr-0">
+        <Button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => router.push(`?slide=${1}`, { scroll: false })}
+          className="w-24 cursor-pointer"
+        >
+          Go back
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          color={"dark/white"}
+          className="w-24 cursor-pointer"
+        >
+          Next
+        </Button>
       </div>
     </form>
   );
@@ -469,7 +461,7 @@ function SlideThree({ details }: { details: UserDetails }) {
 
     if (isError) {
       try {
-        const isSuccess = await handleFormSlideThreeSubmit(data);
+        const isSuccess = await slideThreeSubmitAction(data);
         if (isSuccess) {
           toast.success("Saved");
           router.push(`/`, { scroll: false });
@@ -483,33 +475,23 @@ function SlideThree({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onFormSubmit)}
-      className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8"
-    >
-      <div className="h-[9rem] sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 className="mt-10 text-2xl font-bold leading-9 tracking-tight text-neutral-900 dark:text-white">
-          Work and education
-        </h2>
-        <p>
-          This information is private but helpful to tailor our events and
-          features.
-        </p>
-      </div>
+    <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="min-h-[32rem]">
+        <div className="mx-4 ">
+          <Heading className="mt-16"> Work and education</Heading>
+          <Subheading>
+            This information is private but helpful to tailor our events and
+            features.
+          </Subheading>
+        </div>
+        <Divider className="my-4 mt-4" />
+        <Fieldset>
+          <Field className="mx-4 my-4 ">
+            <Label>Which best describes you?</Label>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <div className="h-[21.75rem] space-y-6">
-          <div>
-            <label
-              htmlFor="professional-or-student"
-              className="block text-sm font-medium leading-6 text-neutral-900"
-            >
-              Which best describes you?
-            </label>
-            <select
+            <Select
               id="professional-or-student"
               {...register("professionalOrStudent")}
-              className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black  focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
             >
               <option value="" disabled>
                 Select one
@@ -518,69 +500,51 @@ function SlideThree({ details }: { details: UserDetails }) {
               {professionalOrStudentOptions.map((status) => (
                 <option key={status}>{status}</option>
               ))}
-            </select>
-
+            </Select>
             {errors.professionalOrStudent && (
-              <p>{`${errors.professionalOrStudent.message}`}</p>
+              <ErrorMessage className="text-red-500">
+                {errors.professionalOrStudent.message}
+              </ErrorMessage>
             )}
-          </div>
+          </Field>
 
           {getValues("professionalOrStudent") === "Working professional" && (
             <>
-              <div>
-                <label
-                  htmlFor="workplace"
-                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-                >
-                  Where are you working?
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="workplace"
-                    {...register("workplace")}
-                    type="text"
-                    placeholder="Codú corp"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                  />
-                </div>
-                {errors.workplace && <p>{`${errors.workplace.message}`}</p>}
-              </div>
+              <Field className="mx-4 my-4 ">
+                <Label>Where are you working?</Label>
+                <Input
+                  id="workplace"
+                  {...register("workplace")}
+                  placeholder="Codú corp"
+                />
+                {errors.workplace && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.workplace.message}
+                  </ErrorMessage>
+                )}
+              </Field>
 
-              <div>
-                <label
-                  htmlFor="job-title"
-                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-                >
-                  What is your job title?
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="job-title"
-                    {...register("jobTitle")}
-                    type="text"
-                    placeholder="Chief transponster"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black  focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                  />
-                </div>
-                {errors.jobTitle && <p>{`${errors.jobTitle.message}`}</p>}
-              </div>
+              <Field className="mx-4 my-4 ">
+                <Label>What is your job title?</Label>
+                <Input
+                  id="job-title"
+                  {...register("jobTitle")}
+                  placeholder="Chief transponster"
+                />
+                {errors.jobTitle && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.jobTitle.message}
+                  </ErrorMessage>
+                )}
+              </Field>
             </>
           )}
 
           {getValues("professionalOrStudent") === "Current student" && (
             <>
-              <div>
-                <label
-                  htmlFor="level-of-study"
-                  className="block text-sm font-medium leading-6 text-neutral-900"
-                >
-                  What is your current level of study?
-                </label>
-                <select
-                  id="level-of-study"
-                  {...register("levelOfStudy")}
-                  className="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-neutral-900 ring-1 ring-inset ring-black focus:ring-2 focus:ring-red-600 sm:text-sm sm:leading-6"
-                >
+              <Field className="mx-4 my-4 ">
+                <Label> What is your current level of study?</Label>
+                <Select id="level-of-study" {...register("levelOfStudy")}>
                   <option value="" disabled>
                     Select level of study
                   </option>
@@ -588,50 +552,50 @@ function SlideThree({ details }: { details: UserDetails }) {
                   {levelOfStudyOptions.map((level) => (
                     <option key={level}>{level}</option>
                   ))}
-                </select>
+                </Select>
                 {errors.levelOfStudy && (
-                  <p>{`${errors.levelOfStudy.message}`}</p>
+                  <ErrorMessage className="text-red-500">
+                    {errors.levelOfStudy.message}
+                  </ErrorMessage>
                 )}
-              </div>
+              </Field>
 
-              <div>
-                <label
-                  htmlFor="course"
-                  className="block text-sm font-medium leading-6 text-neutral-900 dark:text-white"
-                >
-                  What are you studying?
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="course"
-                    {...register("course")}
-                    type="text"
-                    placeholder="Course name"
-                    className="block w-full rounded-md border-0 bg-white/5 py-1.5 text-neutral-900 shadow-sm ring-1 ring-inset ring-black focus:ring-2 focus:ring-inset focus:ring-red-500 dark:text-white sm:text-sm sm:leading-6"
-                  />
-                </div>
-                {errors.course && <p>{`${errors.course.message}`}</p>}
-              </div>
+              <Field className="mx-4 my-4 ">
+                <Label>What are you studying?</Label>
+                <Input
+                  id="course"
+                  {...register("course")}
+                  placeholder="Course name"
+                />
+                {errors.course && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.course.message}
+                  </ErrorMessage>
+                )}
+              </Field>
             </>
           )}
-        </div>
+        </Fieldset>
+      </div>
 
-        <div className="mt-6 flex justify-end">
-          <button
-            type="button"
-            onClick={() => router.push(`?slide=${2}`, { scroll: false })}
-            className="mr-4 flex w-[6rem] justify-center rounded-md bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-6 text-black shadow-sm ring-1 ring-inset hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
-          >
-            Go back
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex w-[6rem] justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6  text-neutral-900 shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white dark:text-white"
-          >
-            Submit
-          </button>
-        </div>
+      <div className="mr-4 mt-6 flex justify-end gap-4 sm:mr-0">
+        <Button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => router.push(`?slide=${2}`, { scroll: false })}
+          className="w-24 cursor-pointer"
+        >
+          Go back
+        </Button>
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          color={"dark/white"}
+          className="w-24 cursor-pointer"
+        >
+          Submit
+        </Button>
       </div>
     </form>
   );

@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal } from "../Modal/Modal";
 import { ExclamationCircleIcon, XMarkIcon } from "@heroicons/react/20/solid";
-import { Dialog } from "@headlessui/react";
+import { DialogTitle } from "@headlessui/react";
 
 export interface serviceProps {
   confirm: () => void;
@@ -42,12 +42,12 @@ export const PromptDialog = ({
           />
         </div>
         <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-          <Dialog.Title
+          <DialogTitle
             as="h3"
             className="text-lg font-medium leading-6 text-white"
           >
             {title}
-          </Dialog.Title>
+          </DialogTitle>
           <div className="mt-2">
             <p className="text-sm text-neutral-500">{subTitle}</p>
             {content && (

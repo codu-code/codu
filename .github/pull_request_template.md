@@ -1,6 +1,7 @@
 # ✨ Codu Pull Request 💻
 
-![Codu Logo](https://raw.githubusercontent.com/codu-code/codu/develop/public/images/codu-gradient.png)
+Fixes #(issue)
+<!-- for example `Fixes #1012` -->
 
 ## Pull Request details
 

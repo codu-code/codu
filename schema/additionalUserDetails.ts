@@ -25,7 +25,7 @@ export const slideOneSchema = z.object({
 
 export const slideTwoSchema = z.object({
   gender: z.string().min(1, "Gender is required"),
-  dateOfBirth: z.date(),
+  dateOfBirth: z.string(),
 });
 
 export const slideThreeSchema = z

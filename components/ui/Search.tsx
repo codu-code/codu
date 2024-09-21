@@ -20,7 +20,12 @@ import {
 } from "@algolia/autocomplete-core";
 import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia";
 import algoliasearch from "algoliasearch/lite";
-import { Dialog, Transition } from "@headlessui/react";
+import {
+  Dialog,
+  DialogPanel,
+  Transition,
+  TransitionChild,
+} from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
@@ -383,7 +388,7 @@ function SearchDialog({
   }, [open, setOpen]);
 
   return (
-    <Transition.Root
+    <Transition
       show={open}
       as={Fragment}
       afterLeave={() => autocomplete.setQuery("")}
@@ -392,7 +397,7 @@ function SearchDialog({
         onClose={setOpen}
         className={clsx("fixed inset-0 z-50 opacity-[98%]", className)}
       >
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -402,10 +407,10 @@ function SearchDialog({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-neutral-400/25 backdrop-blur-sm dark:bg-black/40" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh]">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0 scale-95"
@@ -414,7 +419,7 @@ function SearchDialog({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="mx-auto transform-gpu overflow-hidden rounded-lg bg-neutral-100 shadow-xl dark:bg-neutral-900 sm:max-w-xl">
+            <DialogPanel className="mx-auto transform-gpu overflow-hidden rounded-lg bg-neutral-100 shadow-xl dark:bg-neutral-900 sm:max-w-xl">
               <div {...autocomplete.getRootProps({})}>
                 <form
                   ref={formRef}
@@ -443,11 +448,11 @@ function SearchDialog({
                   </div>
                 </form>
               </div>
-            </Dialog.Panel>
-          </Transition.Child>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 }
 
