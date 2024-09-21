@@ -27,18 +27,18 @@ import {
   slideThreeSubmitAction,
   slideTwoSubmitAction,
 } from "./_actions";
-import { Heading, Subheading } from "./components/heading";
-import { Divider } from "./components/divider";
 import {
   ErrorMessage,
   Field,
   Fieldset,
   Label,
   Legend,
-} from "./components/fieldset";
-import { Input } from "./components/input";
-import { Select } from "./components/select";
-import { Button } from "./components/button";
+} from "@/components/ui-components/fieldset";
+import { Input } from "@/components/ui-components/input";
+import { Select } from "@/components/ui-components/select";
+import { Button } from "@/components/ui-components/button";
+import { Heading, Subheading } from "@/components/ui-components/heading";
+import { Divider } from "@/components/ui-components/divider";
 
 type UserDetails = {
   username: string;
