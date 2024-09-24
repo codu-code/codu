@@ -19,8 +19,6 @@ const Create = () => {
   const postId = params?.postIdArr?.[0] || "";
 
   const {
-    viewPreview,
-    setViewPreview,
     tags,
     tagValue,
     savedTime,
@@ -54,13 +52,6 @@ const Create = () => {
 
   return (
     <>
-      <button
-        type="button"
-        className="absolute right-10 top-10 mt-4 inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-        onClick={() => setViewPreview((current) => !current)}
-      >
-        Preview
-      </button>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition show={open} as={Fragment}>
           <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full bg-black">
@@ -232,19 +223,6 @@ const Create = () => {
                   {/* Start main area*/}
                   <div className="relative h-full">
                     <div className="bg-neutral-900 text-white  shadow-xl">
-                      {viewPreview ? (
-                        <section className="mx-auto max-w-xl px-4 py-6 pb-4 sm:p-6 lg:pb-8">
-                          <article
-                            className="prose prose-invert lg:prose-lg"
-                            style={{
-                              whiteSpace: "pre-wrap",
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            <RenderPost json={body} />
-                          </article>
-                        </section>
-                      ) : (
                         <div className="bg-neutral-900 px-4 py-6 sm:p-6 lg:pb-8">
                           {!body && (
                             <Controller
@@ -296,7 +274,6 @@ const Create = () => {
                             </div>
                           </div>
                         </div>
-                      )}
                     </div>
                   </div>
                   {/* End main area */}

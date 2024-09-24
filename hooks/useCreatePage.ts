@@ -16,7 +16,6 @@ import { redirect, useRouter } from "next/navigation";
 
 export type useCreatePageReturnType = {
   viewPreview: boolean;
-  setViewPreview: React.Dispatch<React.SetStateAction<boolean>>;
   tags: string[];
   setTags: React.Dispatch<React.SetStateAction<string[]>>;
   tagValue: string;
@@ -60,7 +59,6 @@ type useCreatepagePropTypes = {
 function useCreatePage({
   postId,
 }: useCreatepagePropTypes): useCreatePageReturnType {
-  const [viewPreview, setViewPreview] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
@@ -276,8 +274,6 @@ function useCreatePage({
   };
 
   return {
-    viewPreview,
-    setViewPreview,
     tags,
     setTags,
     tagValue,
