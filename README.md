@@ -148,6 +148,7 @@ For more information, you can read the documentation [here](https://next-auth.js
 - [Next.js](https://nextjs.org/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Tailwind](https://tailwindcss.com/)
+- [Drizzle](https://orm.drizzle.team/)
 
 ## 📚 Additional Resources
 
