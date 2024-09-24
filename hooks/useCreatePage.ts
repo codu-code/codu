@@ -15,7 +15,6 @@ import { useDebounce } from "./useDebounce";
 import { redirect, useRouter } from "next/navigation";
 
 export type useCreatePageReturnType = {
-  viewPreview: boolean;
   tags: string[];
   setTags: React.Dispatch<React.SetStateAction<string[]>>;
   tagValue: string;
