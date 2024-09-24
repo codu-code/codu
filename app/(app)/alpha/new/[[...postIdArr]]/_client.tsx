@@ -223,57 +223,55 @@ const Create = () => {
                   {/* Start main area*/}
                   <div className="relative h-full">
                     <div className="bg-neutral-900 text-white  shadow-xl">
-                        <div className="bg-neutral-900 px-4 py-6 sm:p-6 lg:pb-8">
-                          {!body && (
-                            <Controller
-                              name="body"
-                              control={control}
-                              render={({ field }) => (
-                                <Editor {...field} initialValue={"{}"} />
-                              )}
-                            />
-                          )}
-                          {body && body.length > 0 && (
-                            <Controller
-                              name="body"
-                              control={control}
-                              render={({ field }) => (
-                                <Editor {...field} initialValue={body} />
-                              )}
-                            />
-                          )}
+                      <div className="bg-neutral-900 px-4 py-6 sm:p-6 lg:pb-8">
+                        {!body && (
+                          <Controller
+                            name="body"
+                            control={control}
+                            render={({ field }) => (
+                              <Editor {...field} initialValue={"{}"} />
+                            )}
+                          />
+                        )}
+                        {body && body.length > 0 && (
+                          <Controller
+                            name="body"
+                            control={control}
+                            render={({ field }) => (
+                              <Editor {...field} initialValue={body} />
+                            )}
+                          />
+                        )}
 
-                          <div className="flex items-center justify-between">
-                            <>
-                              {saveStatus === "loading" && (
-                                <p>Auto-saving...</p>
-                              )}
-                              {saveStatus === "error" && savedTime && (
-                                <p className="text-xs text-red-600 lg:text-sm">
-                                  {`Error saving, last saved: ${savedTime.toString()}`}
-                                </p>
-                              )}
-                              {saveStatus === "success" && savedTime && (
-                                <p className="text-xs text-neutral-400 lg:text-sm">
-                                  {`Saved: ${savedTime.toString()}`}
-                                </p>
-                              )}
-                            </>
-                            <div />
+                        <div className="flex items-center justify-between">
+                          <>
+                            {saveStatus === "loading" && <p>Auto-saving...</p>}
+                            {saveStatus === "error" && savedTime && (
+                              <p className="text-xs text-red-600 lg:text-sm">
+                                {`Error saving, last saved: ${savedTime.toString()}`}
+                              </p>
+                            )}
+                            {saveStatus === "success" && savedTime && (
+                              <p className="text-xs text-neutral-400 lg:text-sm">
+                                {`Saved: ${savedTime.toString()}`}
+                              </p>
+                            )}
+                          </>
+                          <div />
 
-                            <div className="flex">
-                              <button
-                                type="button"
-                                disabled={isDisabled}
-                                className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
-                                onClick={() => setOpen(true)}
-                              >
-                                {!data?.published && "Publish"}
-                                {data?.published && "Save Changes"}
-                              </button>
-                            </div>
+                          <div className="flex">
+                            <button
+                              type="button"
+                              disabled={isDisabled}
+                              className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
+                              onClick={() => setOpen(true)}
+                            >
+                              {!data?.published && "Publish"}
+                              {data?.published && "Save Changes"}
+                            </button>
                           </div>
                         </div>
+                      </div>
                     </div>
                   </div>
                   {/* End main area */}
