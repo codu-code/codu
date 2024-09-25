@@ -3,7 +3,6 @@ import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
-  Transition,
 } from "@headlessui/react";
 import { type Session } from "next-auth";
 import { PromptLink as Link } from "../PromptService/PromptLink";
@@ -26,12 +25,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
   close,
 }) => {
   return (
-    <Transition
-      enter="transition-transform duration-200"
-      enterFrom="transform -translate-y-full opacity-0"
-      enterTo="transform translate-y-0 opacity-100"
-      className="absolute z-10 w-screen bg-neutral-100 dark:bg-black"
-    >
+    <div className="absolute z-10 w-screen bg-neutral-100 dark:bg-black">
       <DisclosurePanel className="relative border-b border-neutral-400 dark:border-neutral-600 md:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
           {navigation.map((item) => (
@@ -88,7 +82,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
           </div>
         )}
       </DisclosurePanel>
-    </Transition>
+    </div>
   );
 };
 
