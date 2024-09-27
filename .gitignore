@@ -65,8 +65,6 @@ ssmSetup.zsh
 /blob-report/
 /playwright/.cache/
 
-# sst
-.sst
 
 # open-next
 .open-next
