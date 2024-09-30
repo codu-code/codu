@@ -369,7 +369,7 @@ const Create = ({ session }: { session: Session }) => {
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition show={open} as={Fragment}>
-          <div className="fixed bottom-0 left-0 top-0 z-50 h-screen w-full overflow-y-scroll bg-white dark:bg-black">
+          <div className="old-input fixed bottom-0 left-0 top-0 z-50 h-screen w-full overflow-y-scroll bg-white dark:bg-black">
             <div className="m-2 max-w-full">
               <button
                 type="button"
@@ -663,7 +663,7 @@ const Create = ({ session }: { session: Session }) => {
                           <div className="mb-4 ml-2 flex items-center gap-2">
                             <label
                               htmlFor="file-input"
-                              className={`inline-flex items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "loading" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500  font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"}  `}
+                              className={`flex flex-row items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "loading" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500  font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"}  `}
                             >
                               {uploadStatus === "loading" ? (
                                 <LoaderCircle
@@ -677,7 +677,7 @@ const Create = ({ session }: { session: Session }) => {
                                   width={16}
                                   className="mr-1"
                                 />
-                              )}{" "}
+                              )}
                               Upload image
                             </label>
                             <input
@@ -707,30 +707,33 @@ const Create = ({ session }: { session: Session }) => {
                               </button>
                             )}
                           </div>
-                          {/* TODO: FOLLOW UP WITH THIS, LABEL SHOULD BE VISIBLE */}
-                          <label htmlFor="article-title" className="sr-only">
-                            Article title
-                          </label>
-                          <input
-                            className="border-none bg-white text-2xl leading-5 outline-none placeholder:text-neutral-400 focus:bg-neutral-200 dark:bg-neutral-900 placeholder:dark:text-neutral-700 focus:dark:bg-black"
-                            placeholder="Article title"
-                            type="text"
-                            id="article-title"
-                            {...register("title")}
-                          />
+                          <div className="flex flex-col">
+                            <label htmlFor="article-title" className="sr-only">
+                              Article title
+                            </label>
+                            <input
+                              className="border-none bg-white text-2xl leading-5 placeholder:text-neutral-400 focus:bg-neutral-200 focus:ring-0 dark:bg-neutral-900 placeholder:dark:text-neutral-700 focus:dark:bg-black"
+                              placeholder="Article title"
+                              type="text"
+                              id="article-title"
+                              {...register("title")}
+                            />
 
-                          {/* TODO: FOLLOW UP WITH THIS, LABEL SHOULD BE VISIBLE */}
-                          <label htmlFor="article-content" className="sr-only">
-                            Enter Article Content
-                          </label>
-                          <CustomTextareaAutosize
-                            placeholder="Enter your content here 💖"
-                            className="mb-8 border-none bg-white text-lg shadow-none outline-none placeholder:text-neutral-400 focus:bg-neutral-200 dark:bg-neutral-900 placeholder:dark:text-neutral-700 dark:focus:bg-black"
-                            minRows={25}
-                            id="article-content"
-                            {...register("body")}
-                            inputRef={textareaRef}
-                          />
+                            <label
+                              htmlFor="article-content"
+                              className="sr-only"
+                            >
+                              Enter Article Content
+                            </label>
+                            <CustomTextareaAutosize
+                              placeholder="Enter your content here 💖"
+                              className="mb-8 border-none bg-white text-lg shadow-none outline-none placeholder:text-neutral-400 focus:bg-neutral-200 focus:ring-0 dark:bg-neutral-900 placeholder:dark:text-neutral-700 dark:focus:bg-black"
+                              minRows={25}
+                              id="article-content"
+                              {...register("body")}
+                              inputRef={textareaRef}
+                            />
+                          </div>
 
                           <div className="flex items-center justify-between">
                             <>

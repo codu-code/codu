@@ -102,7 +102,7 @@ const Settings = ({ profile }: { profile: User }) => {
       const { size, type } = file;
 
       await getUploadUrl(
-        { size, type, config: { kind: "uploads", userId: "me" } },
+        { size, type },
         {
           onError(error) {
             if (error) return toast.error(error.message);
@@ -128,7 +128,7 @@ const Settings = ({ profile }: { profile: User }) => {
   };
 
   return (
-    <div className="py-8">
+    <div className="old-input py-8">
       <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
         <div className="text-neutral-700">
           <form onSubmit={handleSubmit(onSubmit)}>
