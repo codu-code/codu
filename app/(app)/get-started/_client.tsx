@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { LockClosedIcon } from "@heroicons/react/20/solid";
 
 const GetStarted: NextPage = () => {
@@ -115,6 +115,32 @@ const GetStarted: NextPage = () => {
             </svg>
           </span>
           Continue with GitHub
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            await signIn("gitlab", { callbackUrl: redirectTo });
+          }}
+          className="group relative inline-flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+        >
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+            <LockClosedIcon
+              className="h-5 w-5 text-orange-600 group-hover:text-white"
+              aria-hidden="true"
+            />
+          </span>
+          <span className="absolute inset-y-0 right-0 flex items-center pr-3">
+            <span className="sr-only">Sign in with GitLab</span>
+            <svg
+              viewBox="-.1 .5 960.1 923.7"
+              className="h-5 w-5 text-pink-800 group-hover:text-white"
+              aria-hidden="true"
+              fill="currentColor"
+            >
+              <path d="m958.9 442.4c1.1 26.1-2 52.1-9.2 77.2-7.1 25.1-18.3 48.8-33.1 70.3a240.43 240.43 0 0 1 -53.6 56.2l-.5.4-199.9 149.8-98.3 74.5-59.9 45.2c-3.5 2.7-7.4 4.7-11.5 6.1s-8.5 2.1-12.9 2.1c-4.3 0-8.7-.7-12.8-2.1s-8-3.4-11.5-6.1l-59.9-45.2-98.3-74.5-198.7-148.9-1.2-.8-.4-.4c-20.9-15.7-39-34.7-53.8-56.2s-26-45.3-33.2-70.4c-7.2-25.1-10.3-51.2-9.2-77.3 1.2-26.1 6.5-51.8 15.8-76.2l1.3-3.5 130.7-340.5q1-2.5 2.4-4.8 1.3-2.3 3.1-4.3 1.7-2.1 3.7-3.9 2-1.7 4.2-3.2c3.1-1.9 6.3-3.3 9.8-4.1 3.4-.9 7-1.3 10.5-1.1 3.6.2 7.1.9 10.4 2.2 3.3 1.2 6.5 3 9.3 5.2q2 1.7 3.9 3.6 1.8 2 3.2 4.3 1.5 2.2 2.6 4.7 1.1 2.4 1.8 5l88.1 269.7h356.6l88.1-269.7q.7-2.6 1.9-5 1.1-2.4 2.6-4.7 1.4-2.2 3.2-4.2 1.8-2 3.9-3.7c2.8-2.2 5.9-3.9 9.2-5.2 3.4-1.2 6.9-1.9 10.4-2.1 3.6-.2 7.1.1 10.6 1 3.4.9 6.7 2.3 9.7 4.2q2.3 1.4 4.3 3.2 2 1.7 3.7 3.8 1.7 2.1 3.1 4.4 1.3 2.3 2.3 4.8l130.5 340.6 1.3 3.5c9.3 24.3 14.6 50 15.7 76.1z" />
+            </svg>
+          </span>
+          Continue with GitLab
         </button>
       </div>
     </div>
