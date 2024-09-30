@@ -24,9 +24,9 @@ We have a fantastic community growing on Discord. Click [here](https://discord.g
 4. Install dependencies with:
 
 ```bash
-npm install
+npm install && npm audit fix --force
 ```
-
+- The second part of the command should fix any errors you might have. 
 - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
 
 5. Create a `.env` file and add the following variables. You can copy the contents of `sample.env` with `cat sample.env > .env`.
@@ -45,15 +45,18 @@ For a more detailed how to guide on setting them up [go to the Environment Varia
 
 6. [Make sure your database is running](#database_url) and setup the tables in the database with Drizzle by running:
 
+
 ```bash
 npm run db:push
 ```
+The full command can be seen in our [here](/package.json#L16) in our [package.json](/package.json) file
 
 7. Seed the database with some mock data by running:
 
 ```bash
 npm run db:seed
 ```
+The full command can be seen in our [here](/package.json#L19) in our [package.json](/package.json) file
 
 8. Finally, run the development server:
 
