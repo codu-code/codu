@@ -184,7 +184,7 @@ export const TiptapExtensions = [
   Placeholder.configure({
     placeholder: ({ node }) => {
       if (node.type.name === "heading" && node.attrs.level == 1) {
-        return "Add a title to your post here!";
+        return "Title";
       }
 
       return "type / to see a list of formatting features";
