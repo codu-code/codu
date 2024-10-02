@@ -1,5 +1,6 @@
 import { type NextAuthOptions, getServerSession } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
+import GitlabProvider from "next-auth/providers/gitlab";
 import EmailProvider, {
   type SendVerificationRequestParams,
 } from "next-auth/providers/email";
@@ -42,6 +43,10 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
+    }),
+    GitlabProvider({
+      clientId: process.env.GITLAB_ID || "",
+      clientSecret: process.env.GITLAB_SECRET || "",
     }),
     EmailProvider({
       server: {},
