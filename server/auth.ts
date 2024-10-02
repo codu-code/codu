@@ -43,12 +43,10 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
-      allowDangerousEmailAccountLinking: true,
     }),
     GitlabProvider({
       clientId: process.env.GITLAB_ID || "",
       clientSecret: process.env.GITLAB_SECRET || "",
-      allowDangerousEmailAccountLinking: true,
     }),
     EmailProvider({
       server: {},
