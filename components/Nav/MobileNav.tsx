@@ -60,7 +60,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
                 {userNavigation.map((item) =>
                   item.onClick ? (
                     <button
-                      className="nav-button w-full "
+                      className="nav-button w-full"
                       key={item.name}
                       onClick={item.onClick}
                     >

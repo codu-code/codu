@@ -119,7 +119,7 @@ export function EventForm(props: EventFormProps) {
       onSubmit={handleSubmit(onSubmit)}
       className="border border-neutral-900"
     >
-      <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
+      <div className="px-4 py-6 sm:p-6 lg:pb-8">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white">
             Event editor
@@ -215,17 +215,17 @@ export function EventForm(props: EventFormProps) {
               <div className="mt-1 lg:hidden">
                 <div className="flex items-center">
                   <div
-                    className="aspect-[16/9]h-16 relative w-16 w-full flex-shrink-0 overflow-hidden rounded-lg object-cover "
+                    className="aspect-[16/9]h-16 relative w-16 w-full flex-shrink-0 overflow-hidden rounded-lg object-cover"
                     aria-hidden="true"
                   >
                     {coverImage.status === "error" ||
                     coverImage.status === "loading" ? (
-                      <div className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 bg-black object-cover" />
+                      <div className="aspect-[16/9] h-full w-full rounded-lg border-2 bg-black object-cover" />
                     ) : (
                       // TODO Review
                       // eslint-disable-next-line jsx-a11y/img-redundant-alt
                       <img
-                        className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 border-white object-cover object-cover"
+                        className="aspect-[16/9] h-full w-full rounded-lg border-2 border-white object-cover"
                         src={`${coverImage.url}`}
                         alt="Profile photo upload section"
                       />
@@ -256,12 +256,12 @@ export function EventForm(props: EventFormProps) {
               <div className="relative hidden aspect-[16/9] w-full overflow-hidden rounded-lg object-cover lg:block">
                 {coverImage.status === "error" ||
                 coverImage.status === "loading" ? (
-                  <div className="aspect-[16/9] h-full w-full w-full rounded-lg border-2 bg-black object-cover" />
+                  <div className="aspect-[16/9] h-full w-full rounded-lg border-2 bg-black object-cover" />
                 ) : (
                   // TODO Review
                   // eslint-disable-next-line jsx-a11y/img-redundant-alt
                   <img
-                    className="relative aspect-[16/9] w-full rounded-lg border-2 border-white object-cover object-cover"
+                    className="relative aspect-[16/9] w-full rounded-lg border-2 border-white object-cover"
                     src={coverImage.url}
                     alt="Profile photo upload section"
                     sizes="(max-width: 768px) 10vw"
@@ -271,7 +271,7 @@ export function EventForm(props: EventFormProps) {
                   htmlFor="desktop-event-photo"
                   className="absolute inset-0 flex h-full w-full items-center justify-center bg-black bg-opacity-75 text-sm font-medium text-white opacity-0 focus-within:opacity-100 hover:opacity-100"
                 >
-                  <div className=" text-center text-xs">Change Photo</div>
+                  <div className="text-center text-xs">Change Photo</div>
                   <span className="sr-only"> event photo</span>
                   <input
                     type="file"

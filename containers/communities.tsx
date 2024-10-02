@@ -32,7 +32,7 @@ export default function CommunitiesList() {
       <div>
         <section>
           <div className="text-neutral-700 shadow-xl">
-            <div className="border border-neutral-900 px-4 py-6 sm:p-6 lg:pb-8 ">
+            <div className="border border-neutral-900 px-4 py-6 sm:p-6 lg:pb-8">
               <div>
                 <label htmlFor="search">Search</label>
                 <div className="mt-1 flex shadow-sm">

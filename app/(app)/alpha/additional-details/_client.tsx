@@ -154,7 +154,7 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Field>
         </div>
 
-        <div className="mx-4 mt-4 ">
+        <div className="mx-4 mt-4">
           <Field>
             <Label>Surname</Label>
             <Input
@@ -171,11 +171,11 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Field>
         </div>
 
-        <div className="mx-4 mt-4 ">
+        <div className="mx-4 mt-4">
           <Field>
             <Label>Username</Label>
             <div className="mt-2 flex rounded-md shadow-sm">
-              <span className=" inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3  font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
+              <span className="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3 font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
                 codu.co/
               </span>
               <Input
@@ -307,9 +307,9 @@ function SlideTwo({ details }: { details: UserDetails }) {
   };
 
   return (
-    <form className="mx-auto  max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
+    <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
       <div className="min-h-[32rem]">
-        <div className="mx-4 ">
+        <div className="mx-4">
           <Heading className="mt-16">Demographic</Heading>
           <Subheading>
             This information is private, but helps us improve
@@ -317,7 +317,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
         </div>
         <Divider className="my-4 mt-4" />
 
-        <div className="mx-4 mt-4 ">
+        <div className="mx-4 mt-4">
           <Field>
             <Label>Gender</Label>
             <Select {...register("gender")} defaultValue="" id="gender">
@@ -339,8 +339,8 @@ function SlideTwo({ details }: { details: UserDetails }) {
         <Divider className="my-4 mt-4" />
 
         <Fieldset>
-          <Legend className="mx-4 ">Date of Birth</Legend>
-          <div className="mx-4 flex justify-between ">
+          <Legend className="mx-4">Date of Birth</Legend>
+          <div className="mx-4 flex justify-between">
             <Field>
               <Select
                 id="year"
@@ -477,7 +477,7 @@ function SlideThree({ details }: { details: UserDetails }) {
   return (
     <form className="mx-auto max-w-sm" onSubmit={handleSubmit(onFormSubmit)}>
       <div className="min-h-[32rem]">
-        <div className="mx-4 ">
+        <div className="mx-4">
           <Heading className="mt-16"> Work and education</Heading>
           <Subheading>
             This information is private but helpful to tailor our events and
@@ -486,7 +486,7 @@ function SlideThree({ details }: { details: UserDetails }) {
         </div>
         <Divider className="my-4 mt-4" />
         <Fieldset>
-          <Field className="mx-4 my-4 ">
+          <Field className="mx-4 my-4">
             <Label>Which best describes you?</Label>
 
             <Select
@@ -510,7 +510,7 @@ function SlideThree({ details }: { details: UserDetails }) {
 
           {getValues("professionalOrStudent") === "Working professional" && (
             <>
-              <Field className="mx-4 my-4 ">
+              <Field className="mx-4 my-4">
                 <Label>Where are you working?</Label>
                 <Input
                   id="workplace"
@@ -524,7 +524,7 @@ function SlideThree({ details }: { details: UserDetails }) {
                 )}
               </Field>
 
-              <Field className="mx-4 my-4 ">
+              <Field className="mx-4 my-4">
                 <Label>What is your job title?</Label>
                 <Input
                   id="job-title"
@@ -542,7 +542,7 @@ function SlideThree({ details }: { details: UserDetails }) {
 
           {getValues("professionalOrStudent") === "Current student" && (
             <>
-              <Field className="mx-4 my-4 ">
+              <Field className="mx-4 my-4">
                 <Label> What is your current level of study?</Label>
                 <Select id="level-of-study" {...register("levelOfStudy")}>
                   <option value="" disabled>
@@ -560,7 +560,7 @@ function SlideThree({ details }: { details: UserDetails }) {
                 )}
               </Field>
 
-              <Field className="mx-4 my-4 ">
+              <Field className="mx-4 my-4">
                 <Label>What are you studying?</Label>
                 <Input
                   id="course"

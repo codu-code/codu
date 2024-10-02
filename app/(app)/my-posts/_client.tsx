@@ -129,7 +129,7 @@ const MyPosts = () => {
                         </h2>
                       </Link>
                     ) : (
-                      <h2 className=" mb-2 text-2xl font-semibold">{title}</h2>
+                      <h2 className="mb-2 text-2xl font-semibold">{title}</h2>
                     )}
                     <p className="break-words">
                       {excerpt || "No excerpt yet... Write more to see one."}

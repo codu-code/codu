@@ -10,4 +10,7 @@ build/
 # editor because it is breaking things... Needs fixing
 components/editor/editor/
 
+# prettier
+prettier.json
+
 

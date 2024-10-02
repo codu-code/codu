@@ -32,7 +32,7 @@ export default function EventsList() {
       <div>
         <section>
           <div className="bg-white text-neutral-700 shadow-xl dark:bg-neutral-900">
-            <div className="border border-neutral-300 px-4 py-6 dark:border-neutral-900 sm:p-6 lg:pb-8 ">
+            <div className="border border-neutral-300 px-4 py-6 dark:border-neutral-900 sm:p-6 lg:pb-8">
               <div>
                 <label htmlFor="search">Search</label>
                 <div className="mt-1 flex shadow-sm">
