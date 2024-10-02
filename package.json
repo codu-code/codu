@@ -125,7 +125,7 @@
     "chance": "^1.1.11",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.24.2",
-    "eslint": "^9.11.1",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
