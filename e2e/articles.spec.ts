@@ -13,6 +13,7 @@ test.describe("Articles", () => {
       (articles) => articles.length,
     );
 
+    await page.getByText("Code Of Conduct").scrollIntoViewIfNeeded();
     await page.evaluate(() => {
       window.scrollTo(0, document.body.scrollHeight);
     });

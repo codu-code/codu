@@ -21,7 +21,7 @@ test.describe("Confirm homepage content", () => {
     await page.goto("http://localhost:3000/");
 
     const elementVisible = await page
-      .locator('text="Recommended topics"')
+      .locator('text="Popular topics"')
       .isVisible();
 
     if (isMobile) {
