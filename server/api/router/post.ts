@@ -218,13 +218,16 @@ export const postRouter = createTRPCRouter({
                   eq(like.postId, postId),
                   eq(like.userId, ctx.session?.user?.id),
                 ),
-              );
-            await tx
-              .update(post)
-              .set({
-                likes: decrement(post.likes),
-              })
-              .where(eq(post.id, postId));
+              )
+              .returning();
+            if (res.length !== 0) {
+              await tx
+                .update(post)
+                .set({
+                  likes: decrement(post.likes),
+                })
+                .where(eq(post.id, postId));
+            }
           });
 
       return res;
