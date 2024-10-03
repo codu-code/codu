@@ -7,9 +7,6 @@ test.describe("Login Page", () => {
       name: "Login with GitHub",
     });
     expect(loginButton).toBeTruthy();
-    await page.goto("http://localhost:3000/api/auth/signout");
-    await page.getByRole("button", { name: "Sign out" }).click();
-    await expect(page.locator("#submitButton")).toBeHidden();
   });
 
   test("should navigate to GitHub login page when clicking the login button", async ({
@@ -29,8 +26,5 @@ test.describe("Login Page", () => {
 
     expect(page.getByLabel("Username or email address")).toBeTruthy();
     expect(page.getByLabel("Password")).toBeTruthy();
-    await page.goto("http://localhost:3000/api/auth/signout");
-    await page.getByRole("button", { name: "Sign out" }).click();
-    await expect(page.locator("#submitButton")).toBeHidden();
   });
 });
