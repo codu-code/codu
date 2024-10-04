@@ -122,8 +122,19 @@ You shouldn't need to change the default value here. This is a variable used by 
 NEXTAUTH_URL=http://localhost:3000/api/auth
 ```
 
+### E2E_GITHUB_EMAIL
+
+This is the email associated with the account you want to run e2e tests with.
+This account must not use MFA or this test will fail.
+
+### E2E_GITHUB_PASSWORD
+
+This is the password associated with the account you want to run e2e tests with.
+
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
 **Example .env file can be found [here](./sample.env). You can rename this to .env to get started**
+
+## 👨‍💻 E2E Test set up
 
 ## 👨‍💻 Contribution Guidelines
 
