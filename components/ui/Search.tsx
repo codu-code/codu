@@ -19,7 +19,7 @@ import {
   type AutocompleteCollection,
 } from "@algolia/autocomplete-core";
 import { getAlgoliaResults } from "@algolia/autocomplete-preset-algolia";
-import algoliasearch from "algoliasearch/lite";
+import { liteClient as algoliasearch } from "algoliasearch/lite";
 import {
   Dialog,
   DialogPanel,
@@ -113,8 +113,8 @@ function useAutocomplete({
                 queries: [
                   {
                     indexName: ALGOLIA_SOURCE_IDX,
-                    query,
                     params: {
+                      query,
                       hitsPerPage: 6,
                     },
                   },
