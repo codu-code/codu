@@ -1,0 +1,4 @@
+DROP TABLE RSVP;
+DROP TABLE Membership;
+DROP TABLE Community;
+DROP TABLE Event;
