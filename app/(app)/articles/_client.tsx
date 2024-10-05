@@ -79,10 +79,11 @@ const ArticlesPage = () => {
             <select
               id="filter"
               name="filter"
-              className="mt-2 dark:bg-neutral-800 block w-full rounded border-neutral-300 py-1 pl-3 pr-10 text-sm leading-6 focus:ring-2 focus:ring-pink-600 dark:border-neutral-600"
+              className="mt-2 block w-full rounded border-neutral-300 py-1 pl-3 pr-10 text-sm leading-6 focus:ring-2 focus:ring-pink-600 dark:border-neutral-600 dark:bg-neutral-800"
               onChange={(e) => {
                 router.push(
-                  `/articles?filter=${e.target.value}${tag ? `&tag=${tag}` : ""
+                  `/articles?filter=${e.target.value}${
+                    tag ? `&tag=${tag}` : ""
                   }`,
                 );
               }}

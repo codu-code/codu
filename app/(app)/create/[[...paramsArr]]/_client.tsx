@@ -638,7 +638,7 @@ const Create = ({ session }: { session: Session }) => {
                 <div className="h-full px-4 py-0 sm:px-6 lg:px-4 lg:py-6 ">
                   {/* Start main area*/}
                   <div className="relative h-full">
-                    <div className="bg-white text-white shadow dark:bg-neutral-900">
+                    <div className="bg-white text-black shadow dark:bg-neutral-900 dark:text-white">
                       {viewPreview ? (
                         <section className="mx-auto max-w-xl px-4 py-6 pb-4 sm:p-6 lg:pb-8">
                           <article
