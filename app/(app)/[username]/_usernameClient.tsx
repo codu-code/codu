@@ -88,7 +88,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   return (
     <>
-      <div className="text-900 mx-auto max-w-2xl px-4 dark:text-white">
+      <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
         <main className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             {image && (
@@ -124,7 +124,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
             <h1>Account locked 🔒</h1>
           </div>
         ) : (
-          <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
+          <div className="mx-auto mt-4 dark:bg-neutral-900 sm:max-w-2xl lg:max-w-5xl">
             <Tabs tabs={tabs} />
           </div>
         )}
