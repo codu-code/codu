@@ -39,20 +39,18 @@ const config = {
     // Temporary to check pipelines due to weird error I can only get on CodePipeline
     ignoreBuildErrors: true,
   },
+  experimental: {
+    instrumentationHook: true,
+  },
 };
 
 // Injected content via Sentry wizard below
 
 const { withSentryConfig } = require("@sentry/nextjs");
 
-module.exports = withSentryConfig(
-  withMDX(withBundleAnalyzer(config)),
-  {
-    silent: true,
-    org: "codu",
-    project: "codu",
-  },
-  {
-    hideSourceMaps: true,
-  },
-);
+module.exports = withSentryConfig(withMDX(withBundleAnalyzer(config)), {
+  silent: true,
+  org: "codu",
+  project: "codu",
+  hideSourceMaps: true,
+});

@@ -15,20 +15,6 @@ type Props = {
   session: Session | null;
   isOwner: boolean;
   profile: {
-    memberships: {
-      community: {
-        id: string;
-        slug: string;
-        name: string;
-        excerpt: string;
-        coverImage: string;
-        city: string;
-        country: string;
-        members: {
-          id: string;
-        }[];
-      };
-    }[];
     posts: {
       published: string | null;
       title: string;
@@ -90,19 +76,13 @@ const Profile = ({ profile, isOwner, session }: Props) => {
       ? tabFromParams
       : "articles";
 
-  const [ARTICLES, GROUPS] = ["articles", "groups"];
+  const [ARTICLES] = ["articles"];
   const tabs = [
     {
       name: `Articles (${posts.length})`,
       value: ARTICLES,
       href: `?tab=${ARTICLES}`,
       current: selectedTab === ARTICLES,
-    },
-    {
-      name: "Groups",
-      value: GROUPS,
-      href: `?tab=${GROUPS}`,
-      current: selectedTab === GROUPS,
     },
   ];
 

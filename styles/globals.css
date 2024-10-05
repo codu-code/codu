@@ -18,31 +18,29 @@ body {
 @tailwind components;
 @tailwind utilities;
 
-/* Removed search styles because it upset new search bar */
-
 @layer base {
-  [type="text"],
-  [type="email"],
-  [type="url"],
-  [type="password"],
-  [type="number"],
-  [type="date"],
-  [type="datetime-local"],
-  [type="month"],
-  [type="tel"],
-  [type="time"],
-  [type="week"],
-  [multiple],
-  textarea,
-  select {
+  .old-input [type="text"]:not(#article-title),
+  .old-input [type="email"],
+  .old-input [type="url"],
+  .old-input [type="password"],
+  .old-input [type="number"],
+  .old-input [type="date"],
+  .old-input [type="datetime-local"],
+  .old-input [type="month"],
+  .old-input [type="tel"],
+  .old-input [type="time"],
+  .old-input [type="week"],
+  .old-input [multiple],
+  .old-input textarea:not(#article-content),
+  .old-input select {
     @apply mt-1 block w-full border px-2 py-2 text-black shadow-sm ring-offset-1 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:border-white dark:bg-black dark:text-white sm:text-sm;
   }
 
-  a {
+  .old-input a {
     @apply focus-style;
   }
 
-  label {
+  .old-input label {
     @apply block text-sm font-medium text-neutral-900 dark:text-white;
   }
 }
