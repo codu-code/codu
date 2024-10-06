@@ -3,6 +3,15 @@ import Fathom from "@/components/Fathom/Fathom";
 import React from "react";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
 import { Toaster } from "sonner";
+import { CSPostHogProvider } from "./providers";
+import dynamic from "next/dynamic";
+
+const PostHogPageView = dynamic(
+  () => import("@/components/PageViews/PageViews"),
+  {
+    ssr: false,
+  },
+);
 
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
@@ -49,10 +58,13 @@ export default async function RootLayout({
         title="RSS Feed"
       />
       <Fathom />
-      <body className="h-full">
-        <Toaster />
-        <A11yProvider>{children}</A11yProvider>
-      </body>
+      <CSPostHogProvider>
+        <body className="h-full">
+          <PostHogPageView />
+          <Toaster />
+          <A11yProvider>{children}</A11yProvider>
+        </body>
+      </CSPostHogProvider>
     </html>
   );
 }

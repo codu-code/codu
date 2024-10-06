@@ -218,13 +218,16 @@ export const postRouter = createTRPCRouter({
                   eq(like.postId, postId),
                   eq(like.userId, ctx.session?.user?.id),
                 ),
-              );
-            await tx
-              .update(post)
-              .set({
-                likes: decrement(post.likes),
-              })
-              .where(eq(post.id, postId));
+              )
+              .returning();
+            if (res.length !== 0) {
+              await tx
+                .update(post)
+                .set({
+                  likes: decrement(post.likes),
+                })
+                .where(eq(post.id, postId));
+            }
           });
 
       return res;
@@ -348,7 +351,17 @@ export const postRouter = createTRPCRouter({
             cursor ? paginationMapping[sort].cursor : undefined,
           ),
         )
-        .groupBy(post.id, bookmarked.id, user.id)
+        .groupBy(
+          post.id,
+          post.slug,
+          post.title,
+          post.excerpt,
+          post.published,
+          post.readTimeMins,
+          post.likes,
+          bookmarked.id,
+          user.id,
+        )
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 

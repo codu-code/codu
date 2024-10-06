@@ -1,12 +1,15 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import Highlight from '@tiptap/extension-highlight'
+import Typography from '@tiptap/extension-typography'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
 import { TiptapEditorProps } from "./props";
 import { CustomCodeBlockEdit, TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
- 
+
 interface EditorProps {
   initialValue: string;
   onChange: (value: string) => void;
@@ -14,7 +17,10 @@ interface EditorProps {
 
 export default function Editor({ onChange, initialValue }: EditorProps) {
   const editor = useEditor({
-    extensions: [...TiptapExtensions, CustomCodeBlockEdit],
+    extensions: [
+      StarterKit,
+      Highlight,
+      Typography],
     editorProps: TiptapEditorProps,
     content: JSON.parse(initialValue),
     onUpdate: (e) => {

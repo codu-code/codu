@@ -1,14 +1,14 @@
 export const footerNav = [
   { name: "Home", href: "/" },
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "/hub" },
+  { name: "Events", href: "/https://www.meetup.com/codu-community/" },
   { name: "Sponsorship", href: "/sponsorship" },
   { name: "Code Of Conduct", href: "/code-of-conduct" },
 ];
 
 export const navigation = [
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "/hub" },
+  { name: "Events", href: "https://www.meetup.com/codu-community/" },
 ];
 
 export const userSubNav = [
