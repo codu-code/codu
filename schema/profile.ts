@@ -18,6 +18,7 @@ export const saveSettingsSchema = z.object({
   websiteUrl: z.string().url().optional().or(z.literal("")),
   emailNotifications: z.boolean().optional(),
   newsletter: z.boolean().optional(),
+  email: z.string().email().optional().or(z.literal("")),
 });
 
 export const getProfileSchema = z.object({

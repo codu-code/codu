@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Description, Field, Label, Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
 import type { saveSettingsInput } from "@/schema/profile";
@@ -12,6 +12,8 @@ import { saveSettingsSchema } from "@/schema/profile";
 
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
+import { Button } from "@/components/ui-components/button";
+import { CheckCheck, Loader, Loader2 } from "lucide-react";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -27,6 +29,8 @@ type User = Pick<
   | "emailNotifications"
   | "newsletter"
   | "image"
+  | "email"
+  | "id"
 >;
 
 type ProfilePhoto = {
@@ -42,7 +46,11 @@ const Settings = ({ profile }: { profile: User }) => {
     formState: { errors },
   } = useForm<saveSettingsInput>({
     resolver: zodResolver(saveSettingsSchema),
-    defaultValues: { ...profile, username: profile.username || "" },
+    defaultValues: {
+      ...profile,
+      username: profile.username || "",
+      email: profile.email || "",
+    },
   });
 
   const bio = watch("bio");
@@ -52,6 +60,9 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
+  const [newEmail, setNewEmail] = useState("");
+  const [sendForVerification, setSendForVerification] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [profilePhoto, setProfilePhoto] = useState<ProfilePhoto>({
     status: "idle",
@@ -124,6 +135,44 @@ const Settings = ({ profile }: { profile: User }) => {
           },
         },
       );
+    }
+  };
+
+  const handleNewEmailUpdate = async () => {
+    setLoading(true);
+    try {
+      await fetch("/api/update_email", {
+        method: "POST",
+        body: JSON.stringify({ userId: profile.id, newEmail }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          console.log(res);
+          if (res.status === 400) {
+            setLoading(false);
+            toast.error(
+              "Something went wrong while sending the verification link",
+            );
+          } else {
+            toast.success(
+              "Verification link has been sent to your new email address.",
+            );
+            setLoading(false);
+            setSendForVerification(true);
+          }
+        })
+        .catch((error) => {
+          setLoading(false);
+          toast.error(
+            "Something went wrong while sending the verification link.",
+          );
+        });
+    } catch (error) {
+      setLoading(false);
+      toast.error("Something went wrong while sending the verification link.");
     }
   };
 
@@ -336,6 +385,65 @@ const Settings = ({ profile }: { profile: User }) => {
                         </p>
                       )}
                     </div>
+                  </div>
+                </div>
+                <div className="mt-6 text-neutral-600 dark:text-neutral-400">
+                  <h2 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white">
+                    Update email
+                  </h2>
+                  <p className="mt-1 text-sm">Change your email here.</p>
+                  <div className="mt-2 flex flex-col gap-2">
+                    <div className="flex flex-col">
+                      <label htmlFor="currEmail">Current email</label>
+                      <div>
+                        <input
+                          type="email"
+                          id="currEmail"
+                          {...register("email")}
+                          disabled
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <label htmlFor="newEmail">Update email</label>
+                      <div>
+                        <input
+                          type="email"
+                          id="newEmail"
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          value={newEmail}
+                        />
+                      </div>
+                    </div>
+                    {!sendForVerification ? (
+                      <Button
+                        className="w-[200px]"
+                        disabled={newEmail || loading ? false : true}
+                        onClick={handleNewEmailUpdate}
+                      >
+                        {loading && (
+                          <Loader className="text-primary h-4 w-4 animate-spin" />
+                        )}
+                        Send verification link
+                      </Button>
+                    ) : (
+                      <div className="mt-2 flex flex-row gap-2">
+                        <h2 className="flex items-center gap-2 text-sm italic text-green-400">
+                          <CheckCheck />
+                          Verification link sent
+                        </h2>
+                        <Button
+                          className="w-[200px]"
+                          disabled={newEmail || loading ? false : true}
+                          onClick={handleNewEmailUpdate}
+                        >
+                          {loading && (
+                            <Loader className="text-primary h-8 w-8 animate-spin" />
+                          )}
+                          Resend verification link
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="divide-y divide-neutral-200 pt-6">

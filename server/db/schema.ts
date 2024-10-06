@@ -113,6 +113,17 @@ export const verificationToken = pgTable(
   }),
 );
 
+export const emailVerificationToken = pgTable("EmailVerificationToken", {
+  id: serial("id").primaryKey(),
+  token: text("token").unique().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  email: text("email").notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id),
+});
+
 export const post = pgTable(
   "Post",
   {
