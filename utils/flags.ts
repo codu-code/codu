@@ -2,7 +2,7 @@ import { posthog } from "posthog-js";
 
 export const FEATURE_FLAGS = {
   FEATURE_FLAG_TEST: "feature-flag-test",
-  // Add more feature flags as needed
+  COURSES_LANDING: "courses-landing",
 } as const;
 
 export type FeatureFlagName =
@@ -17,11 +17,11 @@ export function isDevEnvironment() {
 
 export const isFlagEnabled = (
   featureFlag: FeatureFlagName,
-  disableDevCheck = false, // Disable dev check to force feature flag to be checked always
+  disableDevCheck = false,
 ) => {
   if (!disableDevCheck && isDevEnvironment()) {
     console.log("Feature flag check skipped in development environment");
-    return true;
+    return true; // Always true in dev environments unless you want to test differently
   }
   return posthog.isFeatureEnabled(featureFlag);
 };
