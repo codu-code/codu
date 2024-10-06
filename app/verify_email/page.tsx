@@ -4,6 +4,10 @@ import React from "react";
 import Content from "./_client";
 import { db } from "@/server/db";
 
+export const metadata = {
+  title: "Verify Email",
+};
+
 export default async function Page() {
   const session = await getServerAuthSession();
   console.log("session", session);
