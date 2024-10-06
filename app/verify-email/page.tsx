@@ -10,7 +10,7 @@ export const metadata = {
 
 export default async function Page() {
   const session = await getServerAuthSession();
-  console.log("session", session);
+
   if (!session || !session.user) {
     redirect("/not-found");
   }
@@ -26,5 +26,5 @@ export default async function Page() {
     redirect("/not-found");
   }
 
-  return <Content userId={existingUser.id} />;
+  return <Content />;
 }

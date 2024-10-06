@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Description, Field, Label, Switch } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
 import type { saveSettingsInput } from "@/schema/profile";
@@ -13,7 +13,7 @@ import { saveSettingsSchema } from "@/schema/profile";
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
-import { CheckCheck, Loader, Loader2 } from "lucide-react";
+import { CheckCheck, Loader } from "lucide-react";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -71,6 +71,10 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const { mutate, isError, isSuccess, isLoading } =
     api.profile.edit.useMutation();
+  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutate: updateUserPhotoUrl } =
+    api.profile.updateProfilePhotoUrl.useMutation();
+  const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
 
   useEffect(() => {
     if (isSuccess) {
@@ -80,10 +84,6 @@ const Settings = ({ profile }: { profile: User }) => {
       toast.error("Something went wrong saving settings.");
     }
   }, [isError, isSuccess]);
-
-  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
-  const { mutate: updateUserPhotoUrl } =
-    api.profile.updateProfilePhotoUrl.useMutation();
 
   const onSubmit: SubmitHandler<saveSettingsInput> = (values) => {
     mutate({ ...values, newsletter: weeklyNewsletter, emailNotifications });
@@ -141,39 +141,21 @@ const Settings = ({ profile }: { profile: User }) => {
   const handleNewEmailUpdate = async () => {
     setLoading(true);
     try {
-      await fetch("/api/update_email", {
-        method: "POST",
-        body: JSON.stringify({ userId: profile.id, newEmail }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((res) => {
-          console.log(res);
-          if (res.status === 400) {
-            setLoading(false);
-            toast.error(
-              "Something went wrong while sending the verification link",
-            );
-          } else {
-            toast.success(
-              "Verification link has been sent to your new email address.",
-            );
-            setLoading(false);
-            setSendForVerification(true);
-          }
-        })
-        .catch((error) => {
-          setLoading(false);
-          toast.error(
-            "Something went wrong while sending the verification link.",
-          );
-        });
-    } catch (error) {
-      setLoading(false);
-      toast.error("Something went wrong while sending the verification link.");
+      await updateEmail({ newEmail });
+
+      toast.success("Verification link sent to your email.");
+      setSendForVerification(true);
+    } catch (error: any) {
+      if (
+        error.data.code === "BAD_REQUEST" ||
+        error.data?.code === "INTERNAL_SERVER_ERROR"
+      ) {
+        toast.error(error.data.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     }
+    setLoading(false);
   };
 
   return (
@@ -418,7 +400,7 @@ const Settings = ({ profile }: { profile: User }) => {
                     {!sendForVerification ? (
                       <Button
                         className="w-[200px]"
-                        disabled={newEmail || loading ? false : true}
+                        disabled={!(newEmail || loading)}
                         onClick={handleNewEmailUpdate}
                       >
                         {loading && (
@@ -434,7 +416,7 @@ const Settings = ({ profile }: { profile: User }) => {
                         </h2>
                         <Button
                           className="w-[200px]"
-                          disabled={newEmail || loading ? false : true}
+                          disabled={!(newEmail || loading)}
                           onClick={handleNewEmailUpdate}
                         >
                           {loading && (

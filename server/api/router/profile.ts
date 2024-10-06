@@ -16,6 +16,13 @@ import {
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
+import { emailTokenReqSchema } from "@/schema/token";
+import {
+  generateEmailToken,
+  sendVerificationEmail,
+  storeTokenInDb,
+} from "@/utils/emailToken";
+import { TOKEN_EXPIRATION_TIME } from "@/config/contants";
 
 export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
@@ -126,4 +133,33 @@ export const profileRouter = createTRPCRouter({
     }
     return profile;
   }),
+  updateEmail: protectedProcedure
+    .input(emailTokenReqSchema)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const { newEmail } = input;
+
+        if (!newEmail) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid request",
+          });
+        }
+
+        const userId = ctx.session.user.id;
+
+        const token = generateEmailToken();
+        const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION_TIME);
+
+        await storeTokenInDb(userId, token, expiresAt, newEmail);
+        await sendVerificationEmail(newEmail, token);
+
+        return { message: "Verification email sent" };
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+        });
+      }
+    }),
 });

@@ -28,7 +28,7 @@ export const storeTokenInDb = async (
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const verificationLink = `${process.env.NEXT_PUBLIC_BACKEND_URL}/verify_email?token=${token}`;
+  const verificationLink = `${process.env.NEXT_PUBLIC_BACKEND_URL}/verify-email?token=${token}`;
   const subject = "Verify Your Email Address";
 
   const htmlMessage = `

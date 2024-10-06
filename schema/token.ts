@@ -1,5 +1,9 @@
 import z from "zod";
 
+export const emailTokenReqSchema = z.object({
+  newEmail: z.string().email(),
+});
+
 export const TokenSchema = z.object({
   id: z.string().uuid(),
   userId: z.string(),

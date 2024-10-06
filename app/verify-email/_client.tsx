@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle, Loader } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-function Content({ userId }: { userId: string }) {
+function Content() {
   const params = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<
@@ -33,15 +33,8 @@ function Content({ userId }: { userId: string }) {
       setStatus("loading");
 
       try {
-        const res = await fetch(`/api/verify_email?token=${token}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userId }),
-        });
+        const res = await fetch(`/api/verify-email?token=${token}`);
         const data = await res.json();
-        console.log("data", data);
         if (res.ok) {
           setStatus("success");
         } else {
