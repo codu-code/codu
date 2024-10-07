@@ -4,7 +4,7 @@ export const slideOneSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Min name length is 1 characters.")
+    .min(2, "Min name length is 2 characters.")
     .max(50, "Max name length is 50 characters."),
   username: z
     .string()
