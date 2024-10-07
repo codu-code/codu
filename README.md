@@ -48,14 +48,14 @@ For a more detailed how to guide on setting them up [go to the Environment Varia
 ```bash
 npm run db:push
 ```
-The full command can be seen in our [here](/package.json#L16) in our [package.json](/package.json) file
+The full command can be seen in our [package.json](/package.json#16) file
 
 7. Seed the database with some mock data by running:
 
 ```bash
 npm run db:seed
 ```
-The full command can be seen in our [here](/package.json#L19) in our [package.json](/package.json) file
+The full command can be seen in our [package.json](/package.json#19) file
 
 8. Finally, run the development server:
 
