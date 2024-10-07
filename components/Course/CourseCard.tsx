@@ -1,8 +1,13 @@
 
 import React from "react";
-import { Course } from "./mock"; 
+import { Course } from "./type"; 
 
-const CourseCard = ({ course }: { course: Course }) => {
+interface CourseCardProps {
+  course: Course;
+  onStartCourse: (courseId: number) => void; // Change to number to match your mock data
+}
+
+const CourseCard: React.FC<CourseCardProps> = ({ course, onStartCourse }) => {
   return (
     <div
       className={`rounded-lg p-6 shadow-md ${course.featured ? "bg-orange-100 dark:bg-orange-900" : "bg-gray-100 dark:bg-gray-800"}`}
@@ -24,7 +29,10 @@ const CourseCard = ({ course }: { course: Course }) => {
       </div>
 
       {/* Start Course Button */}
-      <button className="mt-4 rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600">
+      <button
+        className="mt-4 rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+        onClick={() => onStartCourse(Number(course.id))} // Call the passed function with course ID
+      >
         Start Course
       </button>
     </div>
