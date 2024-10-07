@@ -1,0 +1,57 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+      NEXTAUTH_URL: http://localhost:3000/api/auth
+      GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
+      GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 'lts/*'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run Playwright tests
+      run: npx playwright test --reporter=github
+
+    - name: Upload Playwright artifacts
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: playwright-artifacts
+        path: |
+          playwright-report
+          test-results
+          traces
+
+    - name: Save traces for inspection
+      if: failure()
+      run: |
+        mkdir -p trace-artifacts
+        cp -R playwright-report traces/* trace-artifacts/
+
+    - name: Upload traces
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-traces
+        path: trace-artifacts
