@@ -2,6 +2,7 @@ import { mockCourses } from "./mock";
 import { type Session } from "next-auth";
 
 const CoursesLanding = ({ session }: { session: Session | null }) => {
+  
   return (
     <div className="flex min-h-screen flex-col gap-8 px-4 py-8 dark:bg-gray-900 dark:text-white lg:px-16 lg:py-12">
       {/* Page Title */}
