@@ -90,9 +90,9 @@ export const sendVerificationEmail = async (email: string, token: string) => {
             <a href="${verificationLink}" class="btn">Verify Email</a>
             <p>Please note that this link is valid for 1 hour only. If it expires, you will need to request a new one.</p>
             <p>If you did not create an account, please ignore this email.</p>
-            <p>Best regards, <br>The Codu Team</p>
+            <p>Best regards, <br>The Codú Team</p>
             <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} Codu. All rights reserved.</p>
+                <p>&copy; ${new Date().getFullYear()} Codú. All rights reserved.</p>
             </div>
         </div>
     </body>
