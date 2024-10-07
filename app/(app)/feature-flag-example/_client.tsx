@@ -3,7 +3,7 @@
 import { type Session } from "next-auth";
 import { notFound } from "next/navigation";
 import { isFlagEnabled, FEATURE_FLAGS } from "@/utils/flags";
-import CoursesLanding from "@/components/Course/CourseLanding";
+import CoursesLanding from "@/components/Course";
 
 const Content = ({ session }: { session: Session | null }) => {
   const flagEnabled = isFlagEnabled(FEATURE_FLAGS.COURSES_LANDING); // Adjust to the correct flag
