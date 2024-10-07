@@ -42,8 +42,7 @@ import { Divider } from "@/components/ui-components/divider";
 
 type UserDetails = {
   username: string;
-  firstName: string;
-  surname: string;
+  name: string;
   gender: string;
   dateOfBirth: string;
   location: string;
@@ -63,8 +62,7 @@ export default function AdditionalSignUpDetails({
   const searchParams = useSearchParams();
 
   const {
-    surname,
-    firstName,
+    name,
     username,
     location,
     dateOfBirth,
@@ -75,7 +73,7 @@ export default function AdditionalSignUpDetails({
   let slide: number;
   if (searchParams.get("slide")) {
     slide = Number(searchParams.get("slide"));
-  } else if (!surname || !firstName || !username || !location) {
+  } else if (!name || !username || !location) {
     slide = 1;
   } else if (!dateOfBirth || !gender) {
     slide = 2;
@@ -102,7 +100,7 @@ export default function AdditionalSignUpDetails({
 function SlideOne({ details }: { details: UserDetails }) {
   const router = useRouter();
 
-  const { username, firstName, surname, location } = details;
+  const { username, name, location } = details;
 
   const {
     register,
@@ -110,7 +108,7 @@ function SlideOne({ details }: { details: UserDetails }) {
     formState: { errors, isSubmitting },
   } = useForm<TypeSlideOneSchema>({
     resolver: zodResolver(slideOneSchema),
-    defaultValues: { username, firstName, surname, location },
+    defaultValues: { username, name, location },
   });
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
@@ -139,33 +137,16 @@ function SlideOne({ details }: { details: UserDetails }) {
         <Divider className="my-4 mt-4" />
         <div className="mx-4">
           <Field>
-            <Label>First Name</Label>
+            <Label>Full Name</Label>
             <Input
-              id="first-name"
-              placeholder="Enter first name"
-              invalid={!!errors?.firstName}
-              {...register("firstName")}
+              id="full-name"
+              placeholder="Enter full name"
+              invalid={!!errors?.name}
+              {...register("name")}
             />
-            {errors?.firstName && (
+            {errors?.name && (
               <ErrorMessage className="text-red-500">
-                {errors.firstName.message}
-              </ErrorMessage>
-            )}
-          </Field>
-        </div>
-
-        <div className="mx-4 mt-4 ">
-          <Field>
-            <Label>Surname</Label>
-            <Input
-              id="surname"
-              placeholder="Enter surname"
-              invalid={!!errors?.surname}
-              {...register("surname")}
-            />
-            {errors?.surname && (
-              <ErrorMessage className="text-red-500">
-                {errors.surname.message}
+                {errors.name.message}
               </ErrorMessage>
             )}
           </Field>
