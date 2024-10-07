@@ -1,13 +1,17 @@
 
 import React from "react";
-import { mockCourses, userProgress } from "./mock";
+import { useRouter } from "next/router";
+import { mockCourses } from "./mock"; 
 import CourseCard from "./CourseCard";
 import { type Session } from "next-auth";
 
 const CoursesLanding = ({ session }: { session: Session | null }) => {
+  const router = useRouter(); // Initialize the useRouter hook
+
   const handleStartCourse = (courseId: number) => {
-    console.log(`Starting course with ID: ${courseId}`);
-    // Add logic here to navigate to the course content page or start the course
+    // Navigate to the course content page
+    router.push(`/courses/${courseId}`);
+    
   };
 
   return (
@@ -15,8 +19,11 @@ const CoursesLanding = ({ session }: { session: Session | null }) => {
       {/* Page Title */}
       <h1 className="mb-6 text-3xl font-bold lg:text-4xl">Courses</h1>
 
-      {/* Courses List */}
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      {/* Courses List with aria-label for accessibility */}
+      <div
+        className="grid grid-cols-1 gap-8 lg:grid-cols-2"
+        aria-label="List of available courses"
+      >
         {mockCourses.map((course) => (
           <CourseCard
             key={course.id}

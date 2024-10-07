@@ -1,7 +1,11 @@
+
+
+
+
 export interface Course {
-  id: string;
+  id: number; 
   title: string;
-  description: string;
-  progress: number;
+  description?: string; 
+  progress: number; 
   featured: boolean;
 }

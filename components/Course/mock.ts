@@ -1,54 +1,61 @@
 import { Course } from "./type";
 
+// Define the UserProgress type
+type UserProgress = {
+  coursesProgress: Array<{
+    courseId: number; // Use string for the ID
+    progress: number; // Progress percentage
+    featured: boolean; // Include the featured status if needed
+  }>;
+};
+
+// Mock courses data
 export const mockCourses: Course[] = [
   {
-    id: "1", 
-    title: "Introduction to Web Development",
-    description:
-      "Learn the basics of HTML, CSS, and JavaScript to build responsive websites.",
+    id: 1, // Changed to string
+    title: 'Introduction to Web Development',
+    description: 'Learn the basics of HTML, CSS, and JavaScript to build responsive websites.',
     progress: 90,
-    featured: true, 
+    featured: true,
   },
   {
-    id: "2", 
-    title: "Advanced JavaScript Concepts",
-    description:
-      "Deep dive into JavaScript with advanced concepts and techniques.",
+    id: 2,
+    title: 'Advanced JavaScript Concepts',
+    description: 'Deep dive into JavaScript with a focus on ES6+ features and asynchronous programming.',
     progress: 65,
-    featured: false, 
+    featured: false,
   },
   {
-    id: "3", 
-    title: "React for Beginners",
-    description: "Get started with React and build interactive UIs.",
+    id: 3,
+    title: 'React for Beginners',
+    description: 'Understand the fundamentals of React and how to build interactive UIs.',
     progress: 30,
-    featured: false, 
+    featured: true,
   },
   {
-    id: "4", 
-    title: "Full-Stack Web Development",
-    description:
-      "Become a full-stack developer by learning both front-end and back-end technologies.",
+    id: 4,
+    title: 'Full-Stack Web Development',
+    description: 'Learn to build full-stack applications using modern technologies like Node.js and Express.',
     progress: 45,
-    featured: true, 
+    featured: false,
   },
   {
-    id: "5", 
-    title: "Version Control with Git and GitHub",
-    description:
-      "Learn how to use Git for version control and GitHub for collaboration.",
+    id: 5,
+    title: 'Version Control with Git and GitHub',
+    description: 'Master version control using Git and learn how to collaborate on GitHub.',
     progress: 80,
-    featured: false, 
+    featured: true,
   },
 ];
 
-// Function to generate user progress from courses
-export const generateUserProgress = (courses: Course[]) => ({
-  coursesProgress: courses.map((course) => ({
-    courseId: course.id, 
-    progress: course.progress,
-    featured: course.featured, 
+// Function to generate user progress
+export const generateUserProgress = (courses: Course[]): UserProgress => ({
+  coursesProgress: courses.map(course => ({
+    courseId: course.id, // Use the course ID
+    progress: course.progress, // Use the course progress
+    featured: course.featured, // Include featured status if needed
   })),
 });
 
-export const userProgress = generateUserProgress(mockCourses);
+// Generate the user progress based on mockCourses
+export const userProgress: UserProgress = generateUserProgress(mockCourses);
