@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
     const tokenFromDb = await getTokenFromDb(token, session.user.id);
 
-    if (!tokenFromDb.length)
+    if (!tokenFromDb || !tokenFromDb.length)
       return NextResponse.json({ message: "Invalid token" }, { status: 400 });
 
     const { userId, expiresAt, email } = tokenFromDb[0];

@@ -14,17 +14,22 @@ export const storeTokenInDb = async (
   expiresAt: Date,
   email: string,
 ) => {
-  const newToken = await db
-    .insert(emailVerificationToken)
-    .values({
-      userId,
-      token,
-      expiresAt,
-      email,
-    })
-    .returning();
+  try {
+    const newToken = await db
+      .insert(emailVerificationToken)
+      .values({
+        userId,
+        token,
+        expiresAt,
+        email,
+      })
+      .returning();
 
-  return newToken[0];
+    return newToken[0];
+  } catch (error) {
+    console.error("Error storing token in database:", error);
+    throw new Error("Failed to store email verification token");
+  }
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
@@ -103,24 +108,39 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const getTokenFromDb = async (token: string, userId: string) => {
-  const tokenFromDb = await db
-    .select()
-    .from(emailVerificationToken)
-    .where(
-      and(
-        eq(emailVerificationToken.token, token),
-        eq(emailVerificationToken.userId, userId),
-      ),
-    );
-  return tokenFromDb;
+  try {
+    const tokenFromDb = await db
+      .select()
+      .from(emailVerificationToken)
+      .where(
+        and(
+          eq(emailVerificationToken.token, token),
+          eq(emailVerificationToken.userId, userId),
+        ),
+      );
+    return tokenFromDb;
+  } catch (error) {
+    console.error("Error fetching token from database:", error);
+    throw new Error("Failed to fetch email verification token");
+  }
 };
 
 export const updateEmail = async (userId: string, newEmail: string) => {
-  await db.update(user).set({ email: newEmail }).where(eq(user.id, userId));
+  try {
+    await db.update(user).set({ email: newEmail }).where(eq(user.id, userId));
+  } catch (error) {
+    console.error("Error updating email in database:", error);
+    throw new Error("Failed to update email");
+  }
 };
 
 export const deleteTokenFromDb = async (token: string) => {
-  await db
-    .delete(emailVerificationToken)
-    .where(eq(emailVerificationToken.token, token));
+  try {
+    await db
+      .delete(emailVerificationToken)
+      .where(eq(emailVerificationToken.token, token));
+  } catch (error) {
+    console.error("Error deleting token from database:", error);
+    throw new Error("Failed to delete email verification token");
+  }
 };
