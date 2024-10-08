@@ -40,7 +40,8 @@ import { Button } from "@/components/ui-components/button";
 import { Heading, Subheading } from "@/components/ui-components/heading";
 import { Divider } from "@/components/ui-components/divider";
 
-export type YearsOfExperience = | "0-1" | "1-3" | "3-5" | "5-8" | "8-12" | "12+"
+export const yearsOfExperienceOptions = ["0-1", "1-3", "3-5", "5-8", "8-12", "12+"] as const;
+export type YearsOfExperience = typeof yearsOfExperienceOptions[number];
 type UserDetails = {
   username: string;
   name: string;
@@ -431,7 +432,7 @@ function SlideThree({ details }: { details: UserDetails }) {
     const professionalOrStudent = getValues("professionalOrStudent");
 
     if (isError && professionalOrStudent === "Working professional") {
-      isError = await trigger(["workplace", "jobTitle"]);
+      isError = await trigger(["workplace", "jobTitle","yearsOfExperience"]);
     }
 
     if (isError && professionalOrStudent === "Current student") {
