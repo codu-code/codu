@@ -113,7 +113,7 @@ const MyPosts = () => {
 
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
-              ({ id, title, excerpt, readTimeMins, slug, published }) => {
+              ({ id, title, excerpt, readTimeMins, slug, published, updatedAt }) => {
                 const postStatus = published
                   ? getPostStatus(new Date(published))
                   : PostStatus.DRAFT;
@@ -154,18 +154,44 @@ const MyPosts = () => {
                           </small>
                         ) : published && postStatus === PostStatus.PUBLISHED ? (
                           <small>
-                            Published on{" "}
-                            {new Date(published).toLocaleDateString()} at{" "}
-                            {new Date(published).toLocaleTimeString(
-                              navigator.language,
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
+                            {/*If updatedAt is greater than published by more than on minutes show updated at else show published 
+                              as on updating published updatedAt is automatically updated and is greater than published*/}
+                            {(new Date(updatedAt).getTime() - new Date(published).getTime()) >= 60000 ? (
+                              <>
+                                {"Last updated on "}
+                                {new Date(updatedAt).toLocaleDateString()} at{" "}
+                                {new Date(updatedAt).toLocaleTimeString(navigator.language, {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })}
+                              </>
+                            ) : (
+                              <>
+                                {"Published on "}
+                                {new Date(published).toLocaleDateString()} at{" "}
+                                {new Date(published).toLocaleTimeString(navigator.language, {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })}
+                              </>
                             )}
                           </small>
-                        ) : null}
+                        ): postStatus === PostStatus.DRAFT ? (
+                        <small>
+                          Last Updated on {" "}
+                          {new Date(updatedAt).toLocaleDateString()} at{" "}
+                          {new Date(updatedAt).toLocaleTimeString(
+                            navigator.language,
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            },
+                          )}
+                        </small>
+                      ): null}
                       </div>
 
                       <Menu

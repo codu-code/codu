@@ -395,7 +395,9 @@ export const postRouter = createTRPCRouter({
           lte(posts.published, new Date().toISOString()),
           eq(posts.userId, ctx?.session?.user?.id),
         ),
-      orderBy: (posts, { desc }) => [desc(posts.published)],
+      orderBy: (posts, { desc, sql }) => [
+        desc(sql`GREATEST(${posts.updatedAt}, ${posts.published})`),
+      ],
     });
   }),
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
@@ -413,6 +415,7 @@ export const postRouter = createTRPCRouter({
     return ctx.db.query.post.findMany({
       where: (posts, { eq }) =>
         and(eq(posts.userId, ctx.session.user.id), isNull(posts.published)),
+      orderBy: (posts, { desc }) => [desc(posts.updatedAt)],
     });
   }),
   editDraft: protectedProcedure
