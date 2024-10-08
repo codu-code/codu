@@ -24,6 +24,17 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+const renderDate = (label: string, date: string | Date) => (
+  <small>
+    {label} {new Date(date).toLocaleDateString()} at{" "}
+    {new Date(date).toLocaleTimeString(navigator.language, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })}
+  </small>
+);
+
 const MyPosts = () => {
   const searchParams = useSearchParams();
 
@@ -113,7 +124,15 @@ const MyPosts = () => {
 
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
-              ({ id, title, excerpt, readTimeMins, slug, published }) => {
+              ({
+                id,
+                title,
+                excerpt,
+                readTimeMins,
+                slug,
+                published,
+                updatedAt,
+              }) => {
                 const postStatus = published
                   ? getPostStatus(new Date(published))
                   : PostStatus.DRAFT;
@@ -140,31 +159,23 @@ const MyPosts = () => {
                     <div className="flex items-center">
                       <div className="flex-grow">
                         {published && postStatus === PostStatus.SCHEDULED ? (
-                          <small>
-                            Scheduled to publish on{" "}
-                            {new Date(published).toLocaleDateString()} at{" "}
-                            {new Date(published).toLocaleTimeString(
-                              navigator.language,
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
-                            )}
-                          </small>
+                          <>
+                            {renderDate("Scheduled to publish on ", published)}
+                          </>
                         ) : published && postStatus === PostStatus.PUBLISHED ? (
-                          <small>
-                            Published on{" "}
-                            {new Date(published).toLocaleDateString()} at{" "}
-                            {new Date(published).toLocaleTimeString(
-                              navigator.language,
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
+                          <>
+                            {/*If updatedAt is greater than published by more than on minutes show updated at else show published 
+                              as on updating published updatedAt is automatically updated and is greater than published*/}
+                            {new Date(updatedAt).getTime() -
+                              new Date(published).getTime() >=
+                            60000 ? (
+                              <>{renderDate("Last updated on ", updatedAt)}</>
+                            ) : (
+                              <>{renderDate("Published on ", published)}</>
                             )}
-                          </small>
+                          </>
+                        ) : postStatus === PostStatus.DRAFT ? (
+                          <>{renderDate("Last updated on ", updatedAt)}</>
                         ) : null}
                       </div>
 
