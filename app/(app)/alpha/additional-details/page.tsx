@@ -42,7 +42,7 @@ export default async function Page() {
     workplace: details?.workplace || "",
     yearsOfExperience: details?.yearsOfExperience && 
     ["0-1", "1-3", "3-5", "5-8", "8-12", "12+"].includes(details.yearsOfExperience)
-      ? details.yearsOfExperience as YearsOfExperience // Cast to the union type
+      ? details.yearsOfExperience as YearsOfExperience 
       : "0-1", 
   };
 

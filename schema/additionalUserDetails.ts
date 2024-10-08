@@ -1,4 +1,5 @@
 import z from "zod";
+const yearsOfExperienceOptions = ["0-1", "1-3", "3-5", "5-8", "8-12", "12+"] as const;
 
 export const slideOneSchema = z.object({
   name: z
@@ -30,9 +31,12 @@ export const slideThreeSchema = z
     jobTitle: z.string().max(30, "Max length is 30 characters."),
     levelOfStudy: z.string(),
     course: z.string().max(30, "Max name length is 30 characters."),
-    yearsOfExperience: z.enum(['0-1', '1-3', '3-5', '5-8', '8-12', '12+'], {
-      invalid_type_error: "Select years of experience",
-    }),
+    yearsOfExperience: z
+      .string()
+      .optional()
+      .refine((val) => val === undefined || yearsOfExperienceOptions.includes(val as typeof yearsOfExperienceOptions[number]), {
+        message: "Please select a valid years of experience.",
+      }),
   })
   .superRefine((val, ctx) => {
     if (
