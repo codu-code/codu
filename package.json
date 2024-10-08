@@ -12,6 +12,7 @@
     "prettier": "prettier --check -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
     "prettier:fix": "prettier --write -c '**/*.{ts,tsx,js,jsx,json,json5,scss,css,html,mdx}'",
     "test": "npx playwright install && playwright test",
+    "test:e2e:ui": "ENV=local npx playwright test --ui",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:migrate": "npx tsx -r dotenv/config ./drizzle/migrate.ts",
