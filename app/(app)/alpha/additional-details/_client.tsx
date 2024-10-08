@@ -40,6 +40,7 @@ import { Button } from "@/components/ui-components/button";
 import { Heading, Subheading } from "@/components/ui-components/heading";
 import { Divider } from "@/components/ui-components/divider";
 
+type YearsOfExperience = | "0-1" | "1-3" | "3-5" | "5-8" | "8-12" | "12+"
 type UserDetails = {
   username: string;
   firstName: string;
@@ -52,6 +53,7 @@ type UserDetails = {
   levelOfStudy: string;
   jobTitle: string;
   workplace: string;
+  yearsOfExperience: YearsOfExperience;
 };
 
 export default function AdditionalSignUpDetails({
@@ -70,6 +72,7 @@ export default function AdditionalSignUpDetails({
     dateOfBirth,
     gender,
     professionalOrStudent,
+    yearsOfExperience,
   } = details;
 
   let slide: number;
@@ -424,7 +427,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
 function SlideThree({ details }: { details: UserDetails }) {
   const router = useRouter();
 
-  const { professionalOrStudent, workplace, jobTitle, course, levelOfStudy } =
+  const { professionalOrStudent, workplace, jobTitle, yearsOfExperience, course, levelOfStudy } =
     details;
 
   const {
@@ -442,6 +445,7 @@ function SlideThree({ details }: { details: UserDetails }) {
       jobTitle,
       course,
       levelOfStudy,
+      yearsOfExperience,
     },
   });
 
@@ -534,6 +538,29 @@ function SlideThree({ details }: { details: UserDetails }) {
                 {errors.jobTitle && (
                   <ErrorMessage className="text-red-500">
                     {errors.jobTitle.message}
+                  </ErrorMessage>
+                )}
+              </Field>
+
+              <Field className="mx-4 my-4 ">
+                <Label>Years of experience:</Label>
+                <Select
+                  id="years-of-experience"
+                  {...register('yearsOfExperience')}
+                >
+                  <option value="" disabled>
+                    Select range
+                  </option>
+                  <option value="0-1">0-1 years</option>
+                  <option value="1-3">1-3 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="5-8">5-8 years</option>
+                  <option value="8-12">8-12 years</option>
+                  <option value="12+">12+ years</option>
+                </Select>
+                {errors.yearsOfExperience && (
+                  <ErrorMessage className="text-red-500">
+                    {errors.yearsOfExperience.message}
                   </ErrorMessage>
                 )}
               </Field>

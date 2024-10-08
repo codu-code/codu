@@ -35,6 +35,9 @@ export const slideThreeSchema = z
     jobTitle: z.string().max(30, "Max length is 30 characters."),
     levelOfStudy: z.string(),
     course: z.string().max(30, "Max name length is 30 characters."),
+    yearsOfExperience: z.enum(['0-1', '1-3', '3-5', '5-8', '8-12', '12+'], {
+      invalid_type_error: "Select years of experience",
+    }),
   })
   .superRefine((val, ctx) => {
     if (
