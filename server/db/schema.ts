@@ -242,11 +242,9 @@ export const userRelations = relations(user, ({ one, many }) => ({
   flaggedNotifier: many(flagged),
   Flagged: many(flagged),
   likes: many(like),
-  memberships: many(membership),
   notfier: many(notification),
   notification: many(notification),
   posts: many(post),
-  RSVP: many(r_s_v_p),
   sessions: many(session),
 }));
 
@@ -424,92 +422,6 @@ export const banned_usersRelations = relations(
   }),
 );
 
-export const community = pgTable(
-  "Community",
-  {
-    id: text("id")
-      .$defaultFn(() => crypto.randomUUID())
-      .notNull()
-      .primaryKey()
-      .unique(),
-    name: text("name").notNull(),
-    city: text("city").notNull(),
-    country: text("country").notNull(),
-    coverImage: text("coverImage").notNull(),
-    description: text("description").notNull(),
-    excerpt: varchar("excerpt", { length: 156 }).default("").notNull(),
-    slug: text("slug").notNull(),
-  },
-  (table) => {
-    return {
-      idKey: uniqueIndex("Community_id_key").on(table.id),
-      slugKey: uniqueIndex("Community_slug_key").on(table.slug),
-    };
-  },
-);
-
-export const communityRelations = relations(community, ({ one, many }) => ({
-  events: many(event),
-  members: many(membership),
-}));
-
-export const membership = pgTable("Membership", {
-  id: text("id")
-    .$defaultFn(() => crypto.randomUUID())
-    .notNull()
-    .unique(),
-  communityId: text("communityId")
-    .notNull()
-    .references(() => community.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-    }),
-  userId: text("userId")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  isEventOrganiser: boolean("isEventOrganiser").default(false).notNull(),
-  createdAt: timestamp("createdAt", {
-    precision: 3,
-    mode: "string",
-    withTimezone: true,
-  })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
-
-export const membershipRelations = relations(membership, ({ one, many }) => ({
-  community: one(community, {
-    fields: [membership.communityId],
-    references: [community.id],
-  }),
-  user: one(user, { fields: [membership.userId], references: [user.id] }),
-}));
-
-export const r_s_v_p = pgTable("RSVP", {
-  id: text("id")
-    .$defaultFn(() => crypto.randomUUID())
-    .notNull()
-    .unique(),
-  eventId: text("eventId")
-    .notNull()
-    .references(() => event.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  userId: text("userId")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  createdAt: timestamp("createdAt", {
-    precision: 3,
-    mode: "string",
-    withTimezone: true,
-  })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
-
-export const r_s_v_pRelations = relations(r_s_v_p, ({ one, many }) => ({
-  event: one(event, { fields: [r_s_v_p.eventId], references: [event.id] }),
-  user: one(user, { fields: [r_s_v_p.userId], references: [user.id] }),
-}));
-
 export const flagged = pgTable("Flagged", {
   id: serial("id").primaryKey().notNull().unique(),
   createdAt: timestamp("createdAt", {
@@ -604,45 +516,3 @@ export const notificationRelations = relations(
     user: one(user, { fields: [notification.userId], references: [user.id] }),
   }),
 );
-
-export const event = pgTable(
-  "Event",
-  {
-    id: text("id")
-      .$defaultFn(() => crypto.randomUUID())
-      .notNull()
-      .primaryKey()
-      .unique(),
-    eventDate: timestamp("eventDate", {
-      precision: 3,
-      mode: "string",
-      withTimezone: true,
-    }),
-    name: text("name").notNull(),
-    coverImage: text("coverImage").notNull(),
-    capacity: integer("capacity").notNull(),
-    description: text("description").notNull(),
-    address: text("address").notNull(),
-    slug: text("slug").notNull(),
-    communityId: text("communityId")
-      .notNull()
-      .references(() => community.id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
-      }),
-  },
-  (table) => {
-    return {
-      idKey: uniqueIndex("Event_id_key").on(table.id),
-      slugKey: uniqueIndex("Event_slug_key").on(table.slug),
-    };
-  },
-);
-
-export const eventRelations = relations(event, ({ one, many }) => ({
-  community: one(community, {
-    fields: [event.communityId],
-    references: [community.id],
-  }),
-  RSVP: many(r_s_v_p),
-}));
