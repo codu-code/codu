@@ -40,7 +40,7 @@ import { Button } from "@/components/ui-components/button";
 import { Heading, Subheading } from "@/components/ui-components/heading";
 import { Divider } from "@/components/ui-components/divider";
 
-type YearsOfExperience = | "0-1" | "1-3" | "3-5" | "5-8" | "8-12" | "12+"
+export type YearsOfExperience = | "0-1" | "1-3" | "3-5" | "5-8" | "8-12" | "12+"
 type UserDetails = {
   username: string;
   firstName: string;
