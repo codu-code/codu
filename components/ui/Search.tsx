@@ -368,6 +368,15 @@ function SearchDialog({
     setOpen(false);
   }, [pathname, searchParams, setOpen]);
 
+  // added auto-focus when dialog opened
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  }, [open]);
+
   useEffect(() => {
     if (open) {
       return;
