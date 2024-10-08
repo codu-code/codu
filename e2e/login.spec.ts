@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 test.describe("Login Page", () => {
   test("should display the login button", async ({ page }) => {
     const loginButton = page.getByRole("button", {
-      name: "Login with GitHub",
+      name: "Continue with GitHub",
     });
     expect(loginButton).toBeTruthy();
   });
@@ -23,7 +23,7 @@ test.describe("Login Page", () => {
     page,
   }) => {
     const button = page.getByRole("button", {
-      name: "Login with GitHub",
+      name: "Continue with GitHub",
     });
 
     await button.click();
