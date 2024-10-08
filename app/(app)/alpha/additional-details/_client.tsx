@@ -171,21 +171,15 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Field>
         </div>
 
-        <div className="mx-4 mt-4 ">
+        <div className="mx-4 mt-4">
           <Field>
             <Label>Username</Label>
-            <div className="mt-2 flex rounded-md shadow-sm">
-              <span className=" inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-black px-3  font-semibold text-white dark:bg-white dark:text-black sm:text-sm">
-                codu.co/
-              </span>
-              <Input
-                id="username"
-                placeholder="Enter username"
-                invalid={!!errors?.username}
-                {...register("username")}
-                className="rounded-l-none focus-within:after:rounded-l-none"
-              />
-            </div>
+            <Input
+              id="username"
+              placeholder="Enter username"
+              invalid={!!errors?.username}
+              {...register("username")}
+            />
             {errors?.username && (
               <ErrorMessage className="text-red-500">
                 {errors.username.message}
