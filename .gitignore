@@ -68,3 +68,4 @@ ssmSetup.zsh
 
 # open-next
 .open-next
+playwright/.auth

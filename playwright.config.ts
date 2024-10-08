@@ -32,9 +32,14 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    { name: "setup", testMatch: /auth.setup\.ts/ },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
     },
 
     // Example other browsers
@@ -51,7 +56,11 @@ export default defineConfig({
     /* Test against mobile viewports. */
     {
       name: "Mobile Chrome",
-      use: { ...devices["iPhone 15"] },
+      use: {
+        ...devices["iPhone 15"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
     },
     // {
     //   name: 'Mobile Safari',
@@ -76,3 +85,32 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
   },
 });
+
+// import { defineConfig, devices } from "@playwright/test";
+
+// export default defineConfig({
+//   projects: [
+//     // Setup project
+//     { name: "setup", testMatch: /.*\.setup\.ts/ },
+
+//     {
+//       name: "chromium",
+//       use: {
+//         ...devices["Desktop Chrome"],
+//         // Use prepared auth state.
+//         storageState: "playwright/.auth/user.json",
+//       },
+//       dependencies: ["setup"],
+//     },
+
+//     {
+//       name: "firefox",
+//       use: {
+//         ...devices["Desktop Firefox"],
+//         // Use prepared auth state.
+//         storageState: "playwright/.auth/user.json",
+//       },
+//       dependencies: ["setup"],
+//     },
+//   ],
+// });
