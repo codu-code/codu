@@ -542,7 +542,7 @@ export function MobileSearch({
     <div className="contents lg:hidden">
       <button
         type="button"
-        className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
+        className="focus-style relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
         aria-label="Search the site"
         {...buttonProps}
       >
