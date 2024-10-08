@@ -18,11 +18,12 @@ import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
 import { emailTokenReqSchema } from "@/schema/token";
 import {
+  checkIfEmailExists,
   generateEmailToken,
   sendVerificationEmail,
   storeTokenInDb,
 } from "@/utils/emailToken";
-import { TOKEN_EXPIRATION_TIME } from "@/config/contants";
+import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
 
 export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
@@ -146,6 +147,15 @@ export const profileRouter = createTRPCRouter({
           });
         }
 
+        const ifEmailExists = await checkIfEmailExists(newEmail);
+
+        if (ifEmailExists) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Email already exists",
+          });
+        }
+
         const userId = ctx.session.user.id;
 
         const token = generateEmailToken();
@@ -155,10 +165,10 @@ export const profileRouter = createTRPCRouter({
         await sendVerificationEmail(newEmail, token);
 
         return { message: "Verification email sent" };
-      } catch (error) {
+      } catch (error: any) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Internal server error",
+          code: error.code || "INTERNAL_SERVER_ERROR",
+          message: error.message || "Internal server error",
         });
       }
     }),

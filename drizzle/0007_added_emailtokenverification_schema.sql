@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS "EmailVerificationToken" (
 	"expiresAt" timestamp NOT NULL,
 	"email" text NOT NULL,
 	"userId" text NOT NULL,
-	CONSTRAINT "EmailVerificationToken_token_unique" UNIQUE("token")
+	CONSTRAINT "EmailVerificationToken_token_unique" UNIQUE("token"),
+	CONSTRAINT "EmailVerificationToken_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DROP INDEX IF EXISTS "BannedUsers_userId_key";--> statement-breakpoint

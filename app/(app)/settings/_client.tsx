@@ -13,7 +13,7 @@ import { saveSettingsSchema } from "@/schema/profile";
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
-import { CheckCheck, Loader } from "lucide-react";
+import { CheckCheck, Loader2 } from "lucide-react";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -49,7 +49,6 @@ const Settings = ({ profile }: { profile: User }) => {
     defaultValues: {
       ...profile,
       username: profile.username || "",
-      email: profile.email || "",
     },
   });
 
@@ -140,22 +139,23 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const handleNewEmailUpdate = async () => {
     setLoading(true);
-    try {
-      await updateEmail({ newEmail });
-
-      toast.success("Verification link sent to your email.");
-      setSendForVerification(true);
-    } catch (error: any) {
-      if (
-        error.data.code === "BAD_REQUEST" ||
-        error.data?.code === "INTERNAL_SERVER_ERROR"
-      ) {
-        toast.error(error.data.message);
-      } else {
-        toast.error("Something went wrong");
-      }
-    }
-    setLoading(false);
+    await updateEmail(
+      { newEmail },
+      {
+        onError(error) {
+          setLoading(false);
+          if (error) return toast.error(error.message);
+          return toast.error(
+            "Something went wrong sending the verification link.",
+          );
+        },
+        onSuccess() {
+          setLoading(false);
+          toast.success("Verification link sent to your email.");
+          setSendForVerification(true);
+        },
+      },
+    );
   };
 
   return (
@@ -381,7 +381,7 @@ const Settings = ({ profile }: { profile: User }) => {
                         <input
                           type="email"
                           id="currEmail"
-                          {...register("email")}
+                          value={profile.email!}
                           disabled
                         />
                       </div>
@@ -404,7 +404,7 @@ const Settings = ({ profile }: { profile: User }) => {
                         onClick={handleNewEmailUpdate}
                       >
                         {loading && (
-                          <Loader className="text-primary h-4 w-4 animate-spin" />
+                          <Loader2 className="text-primary h-6 w-6 animate-spin" />
                         )}
                         Send verification link
                       </Button>
@@ -415,12 +415,12 @@ const Settings = ({ profile }: { profile: User }) => {
                           Verification link sent
                         </h2>
                         <Button
-                          className="w-[200px]"
+                          className="w-[250px]"
                           disabled={!(newEmail || loading)}
                           onClick={handleNewEmailUpdate}
                         >
                           {loading && (
-                            <Loader className="text-primary h-8 w-8 animate-spin" />
+                            <Loader2 className="text-primary h-6 w-6 animate-spin" />
                           )}
                           Resend verification link
                         </Button>

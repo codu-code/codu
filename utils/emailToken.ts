@@ -144,3 +144,16 @@ export const deleteTokenFromDb = async (token: string) => {
     throw new Error("Failed to delete email verification token");
   }
 };
+
+export const checkIfEmailExists = async (email: string) => {
+  try {
+    const existingUser = await db.query.user.findFirst({
+      where: (users, { eq }) => eq(users.email, email),
+    });
+
+    return !!existingUser;
+  } catch (error) {
+    console.error("Error checking if email exists:", error);
+    throw new Error("Failed to check if email exists");
+  }
+};

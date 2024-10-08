@@ -118,7 +118,7 @@ export const emailVerificationToken = pgTable("EmailVerificationToken", {
   token: text("token").unique().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   expiresAt: timestamp("expiresAt").notNull(),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
   userId: text("userId")
     .notNull()
     .references(() => user.id),
