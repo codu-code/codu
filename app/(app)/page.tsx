@@ -17,26 +17,28 @@ const Home = async () => {
     <>
       <div>
         <Hero />
-        <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
-          <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
-            <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
-              <span className="font-extrabold">Sign up today</span> to become a
-              writer and get a <span className="font-extrabold">free</span>{" "}
-              invite to our Discord community.
-            </h2>
-            <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
-              <Link href="/get-started" className="primary-button">
-                Get started
-              </Link>
-              <Link
-                href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
-                className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
-              >
-                Learn more <span aria-hidden="true">→</span>
-              </Link>
+        {session == null && (
+          <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
+            <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
+              <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
+                <span className="font-extrabold">Sign up today</span> to become a
+                writer and get a <span className="font-extrabold">free</span>{" "}
+                invite to our Discord community.
+              </h2>
+              <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
+                <Link href="/get-started" className="primary-button">
+                  Get started
+                </Link>
+                <Link
+                  href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
+                  className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
+                >
+                  Learn more <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
 
       <div className="mx-2">
