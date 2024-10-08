@@ -21,8 +21,8 @@ const Home = async () => {
           <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
             <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
               <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
-                <span className="font-extrabold">Sign up today</span> to become a
-                writer and get a <span className="font-extrabold">free</span>{" "}
+                <span className="font-extrabold">Sign up today</span> to become
+                a writer and get a <span className="font-extrabold">free</span>{" "}
                 invite to our Discord community.
               </h2>
               <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
