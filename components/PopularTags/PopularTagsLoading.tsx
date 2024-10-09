@@ -2,7 +2,7 @@
 
 function PopularTagsLoading() {
   return (
-    <div className=" w-full shadow dark:bg-black">
+    <div className="w-full shadow dark:bg-black">
       <div>
         <div className="my-2 flex h-10">
           <div className="h-10 w-1/2 animate-pulse rounded-md bg-neutral-300 dark:bg-neutral-800" />

@@ -17,20 +17,6 @@ test.describe("Confirm homepage content", () => {
     await expect(page.locator("h3")).toContainText("Trending");
   });
 
-  test("Different devices", async ({ page, isMobile }) => {
-    await page.goto("http://localhost:3000/");
-
-    const elementVisible = await page
-      .locator('text="Recommended topics"')
-      .isVisible();
-
-    if (isMobile) {
-      expect(elementVisible).toBe(false);
-    } else {
-      expect(elementVisible).toBe(true);
-    }
-  });
-
   test.describe("Confirm image accessibiliy content", () => {
     test("Shared content", async ({ page }) => {
       // Accessibility

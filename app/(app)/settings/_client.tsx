@@ -164,7 +164,7 @@ const Settings = ({ profile }: { profile: User }) => {
         <div className="text-neutral-700">
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Profile section */}
-            <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
+            <div className="px-4 py-6 sm:p-6 lg:pb-8">
               <div>
                 <h2 className="text-3xl font-extrabold tracking-tight text-neutral-800 dark:text-white">
                   Profile Settings
@@ -197,7 +197,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <div>
                         <label htmlFor="username">Username</label>
                         <div className="mt-1 flex shadow-sm">
-                          <span className="mt-1  flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
+                          <span className="mt-1 flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
                             codu.co/
                           </span>
                           <input
@@ -227,7 +227,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <div className="mt-1 lg:hidden">
                         <div className="flex items-center">
                           <div
-                            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full "
+                            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full"
                             aria-hidden="true"
                           >
                             {profilePhoto.status === "error" ||
@@ -287,7 +287,7 @@ const Settings = ({ profile }: { profile: User }) => {
                           htmlFor="desktop-user-photo"
                           className="absolute inset-0 flex h-full w-full items-center justify-center bg-black bg-opacity-75 text-sm font-medium text-white opacity-0 focus-within:opacity-100 hover:opacity-100"
                         >
-                          <div className=" text-center text-xs">
+                          <div className="text-center text-xs">
                             Change Photo
                           </div>
                           <span className="sr-only"> user photo</span>

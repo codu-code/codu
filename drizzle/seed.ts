@@ -1,16 +1,6 @@
 import { nanoid } from "nanoid";
 import { Chance } from "chance";
-import {
-  post,
-  user,
-  tag,
-  like,
-  post_tag,
-  community,
-  membership,
-  event,
-  r_s_v_p,
-} from "../server/db/schema";
+import { post, user, tag, like, post_tag } from "../server/db/schema";
 import { sql } from "drizzle-orm";
 
 import "dotenv/config";
@@ -290,33 +280,6 @@ const countriesMap = new Map(countries.map((i) => [i.abbreviation, i.name]));
 const main = async () => {
   const chance = new Chance(1);
 
-  const generateEventData = (count: number) => {
-    return Array(count)
-      .fill(null)
-      .map(() => {
-        const id = nanoid(8);
-        const name = `${chance.country({ full: true }) + " " + chance.profession()} Appreciation Day`;
-
-        const slug = `${name
-          .toLowerCase()
-          .replace(/ /g, "-")
-          .replace(/[^\w-]+/g, "")}-${id}`;
-        return {
-          id,
-          eventDate: new Date(chance.date({ year: 2024 })).toISOString(),
-          address: chance.address(),
-          coverImage: `https://picsum.photos/seed/${id}/300/300`,
-          capacity: chance.integer({ min: 1, max: 100 }),
-          name: name,
-          description: chance.sentence({
-            words: chance.integer({ min: 200, max: 1000 }),
-          }),
-          slug,
-          updatedAt: new Date().toISOString(),
-        };
-      });
-  };
-
   const sampleTags = [
     "JAVASCRIPT",
     "WEB DEVELOPMENT",
@@ -520,61 +483,11 @@ ${chance.paragraph()}
     console.log(`Added ${usersResponse.length} users with posts and likes`);
   };
 
-  const addEventData = async () => {
-    const communityResponse = await db
-      .insert(community)
-      .values(communityData)
-      .returning();
-
-    const allUsers = await db.select().from(user);
-
-    for (let i = 0; i < communityResponse.length; i++) {
-      const eventData = generateEventData(
-        chance.integer({
-          min: 1,
-          max: 5,
-        }),
-      ).map((event) => ({
-        ...event,
-        communityId: communityResponse[i].id,
-      }));
-
-      const community = communityResponse[i];
-      const membershipData = allUsers.map((user) => ({
-        id: nanoid(8),
-        userId: user.id,
-        communityId: community.id,
-        isEventOrganiser: user.id === allUsers[0].id,
-      }));
-
-      await db.insert(membership).values(membershipData).returning();
-      const eventsResponse = await db
-        .insert(event)
-        .values(eventData)
-        .returning();
-
-      for (let j = 0; j < eventsResponse.length; j++) {
-        const eventData = eventsResponse[j];
-        for (let k = 0; k < allUsers.length; k++) {
-          const userData = allUsers[j];
-          const id = nanoid(8);
-          await db
-            .insert(r_s_v_p)
-            .values({ eventId: eventData.id, id, userId: userData.id })
-            .onConflictDoNothing();
-        }
-      }
-    }
-
-    console.log(`Added events and members`);
-  };
-
   async function addSeedDataToDb() {
     console.log(`Start seeding, please wait... `);
 
     try {
       await addUserData();
-      await addEventData();
     } catch (error) {
       console.log("Error:", error);
     }
