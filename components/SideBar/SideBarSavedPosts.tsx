@@ -6,14 +6,13 @@ import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
 
 export default React.memo(function SideBarSavedPosts() {
-  let { data: bookmarks } = api.post.myBookmarks.useQuery();
-  const { status: bookmarkStatus } = api.post.myBookmarks.useQuery();
+  const { data: bookmarks, status } = api.post.myBookmarks.useQuery();
 
   const howManySavedToShow = 3;
   const totalNumberSaved = bookmarks?.length;
 
   // @TODO query the backend to get the last 3 instead of slice
-  if (bookmarks) bookmarks = bookmarks.slice(0, howManySavedToShow);
+  const limitedBookmarks = bookmarks?.slice(0, howManySavedToShow) ?? [];
 
   return (
     <div className="w-full">
@@ -21,30 +20,29 @@ export default React.memo(function SideBarSavedPosts() {
         Recent bookmarks
       </h3>
       <div className="w-full">
-        {bookmarkStatus === "loading" &&
+        {status === "loading" &&
           Children.toArray(
             Array.from({ length: howManySavedToShow }, () => {
               return <LoadingSkeleton />;
             }),
           )}
-        {bookmarkStatus === "error" && (
+        {status === "error" && (
           <p className="py-4 font-medium">
             Something went wrong fetching your saved posts... Refresh the page.
           </p>
         )}
 
-        {bookmarks &&
-          bookmarkStatus === "success" &&
-          bookmarks.map(
-            ({
-              id,
-              slug,
-              title,
-              user: { name, username },
-              published,
-              readTimeMins,
-            }) => {
-              return (
+        {status === "success" &&
+          (limitedBookmarks.length ? (
+            limitedBookmarks.map(
+              ({
+                id,
+                slug,
+                title,
+                user: { name, username },
+                published,
+                readTimeMins,
+              }) => (
                 <SideBarSavedArticlePreview
                   key={id}
                   username={username || ""}
@@ -54,15 +52,14 @@ export default React.memo(function SideBarSavedPosts() {
                   date={published}
                   readTime={readTimeMins}
                 />
-              );
-            },
-          )}
-        {bookmarkStatus === "success" && bookmarks?.length === 0 && (
-          <p className="py-4 font-medium">
-            Recently Saved posts will be displayed in this section for easy
-            access.
-          </p>
-        )}
+              ),
+            )
+          ) : (
+            <p className="py-4 font-medium">
+              Recently Saved posts will be displayed in this section for easy
+              access.
+            </p>
+          ))}
       </div>
       {(totalNumberSaved && totalNumberSaved > howManySavedToShow && (
         <Link href="/saved" className="secondary-button w-full">
