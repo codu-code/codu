@@ -13,10 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABASE_URL: ${{ secrets.E2E_DATABASE_URL }}
+      DATABASE_URL: "postgresql://postgres:secret@codu-db:5432/postgres"
       NEXTAUTH_URL: http://localhost:3000/api/auth
       GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
       GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
+
+    services:
+      codu-db:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432
 
     steps:
     - name: Checkout repository
@@ -27,8 +41,16 @@ jobs:
       with:
         node-version: 'lts/*'
 
+    - name: Wait for PostgreSQL to be ready
+      run: docker-compose exec codu-db pg_isready -U postgres
+
     - name: Install dependencies
       run: npm install
+
+    - name: Seed database
+      run: |
+        npm db:push
+        npm db:seed
 
     - name: Run Playwright tests
       run: npx playwright test --reporter=github
