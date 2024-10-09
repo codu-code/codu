@@ -400,7 +400,9 @@ const Settings = ({ profile }: { profile: User }) => {
                     {!sendForVerification ? (
                       <Button
                         className="w-[200px]"
-                        disabled={!(newEmail || loading)}
+                        disabled={
+                          !newEmail || newEmail === profile.email || loading
+                        }
                         onClick={handleNewEmailUpdate}
                       >
                         {loading && (
