@@ -13,8 +13,7 @@ export default async function Page() {
   const details = await db.query.user.findFirst({
     columns: {
       username: true,
-      firstName: true,
-      surname: true,
+      name: true,
       gender: true,
       dateOfBirth: true,
       location: true,
@@ -29,8 +28,7 @@ export default async function Page() {
 
   const detailsWithNullsRemoved = {
     username: details?.username || "",
-    firstName: details?.firstName || "",
-    surname: details?.surname || "",
+    name: details?.name || "",
     gender: details?.gender || "",
     dateOfBirth: details?.dateOfBirth || "",
     location: details?.location || "",
