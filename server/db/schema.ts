@@ -204,8 +204,6 @@ export const user = pgTable(
     websiteUrl: text("websiteUrl").default("").notNull(),
     emailNotifications: boolean("emailNotifications").default(true).notNull(),
     newsletter: boolean("newsletter").default(true).notNull(),
-    firstName: text("firstName"),
-    surname: text("surname"),
     gender: text("gender"),
     dateOfBirth: timestamp("dateOfBirth", {
       precision: 3,
