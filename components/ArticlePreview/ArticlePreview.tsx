@@ -157,8 +157,8 @@ const ArticlePreview: NextPage<Props> = ({
                 <BookmarkIcon
                   className={`w-6 h-6${
                     bookmarked
-                      ? " fill-blue-400"
-                      : " fill-neutral-400 dark:fill-neutral-600"
+                      ? "fill-blue-400"
+                      : "fill-neutral-400 dark:fill-neutral-600"
                   }`}
                 />
               </button>

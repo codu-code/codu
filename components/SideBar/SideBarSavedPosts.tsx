@@ -76,7 +76,7 @@ export default React.memo(function SideBarSavedPosts() {
 
 function LoadingSkeleton() {
   return (
-    <div className="my-4 flex h-32 w-full animate-pulse flex-col bg-white p-4 shadow dark:bg-neutral-900 ">
+    <div className="my-4 flex h-32 w-full animate-pulse flex-col bg-white p-4 shadow dark:bg-neutral-900">
       <div className="flex grow items-center">
         <div className="h-5 w-full rounded bg-neutral-300 dark:bg-neutral-800"></div>
       </div>

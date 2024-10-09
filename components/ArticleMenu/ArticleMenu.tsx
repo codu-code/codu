@@ -141,8 +141,8 @@ const ArticleMenu = ({
               <HeartIcon
                 className={`w-6 h-6${
                   data?.currentUserLiked
-                    ? " fill-red-400"
-                    : " fill-neutral-400 dark:fill-neutral-600"
+                    ? "fill-red-400"
+                    : "fill-neutral-400 dark:fill-neutral-600"
                 }`}
               />
             </button>
@@ -164,8 +164,8 @@ const ArticleMenu = ({
             <BookmarkIcon
               className={`w-6 h-6${
                 data?.currentUserBookmarked
-                  ? " fill-blue-400"
-                  : " fill-neutral-400 dark:fill-neutral-600"
+                  ? "fill-blue-400"
+                  : "fill-neutral-400 dark:fill-neutral-600"
               }`}
             />
           </button>
@@ -189,8 +189,7 @@ const ArticleMenu = ({
               leaveTo="transform opacity-0 scale-95"
             >
               <PopoverPanel
-                className={`absolute bottom-14 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-white lg:bottom-0 lg:left-16 
-                ${isPopoverPanelOpen ? "" : "hidden"}`}
+                className={`absolute bottom-14 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-white lg:bottom-0 lg:left-16 ${isPopoverPanelOpen ? "" : "hidden"}`}
               >
                 <div>
                   <ul>

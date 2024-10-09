@@ -146,7 +146,7 @@ const Notifications = () => {
                             <div className="flex gap-3 sm:gap-5">
                               <div>
                                 {image && (
-                                  <Link className="flex " href={`/${username}`}>
+                                  <Link className="flex" href={`/${username}`}>
                                     <img
                                       className="h-10 w-10 rounded-full"
                                       src={image}
@@ -185,7 +185,7 @@ const Notifications = () => {
                           <div className="ml-2 flex w-10 flex-col justify-center border-l border-neutral-300 pl-3 dark:border-neutral-700">
                             <button
                               title="Mark as read"
-                              className="h-8 w-8 fill-neutral-600  hover:fill-neutral-500 dark:text-white"
+                              className="h-8 w-8 fill-neutral-600 hover:fill-neutral-500 dark:text-white"
                               onClick={() => mutate({ id })}
                             >
                               <CheckCircleIcon
