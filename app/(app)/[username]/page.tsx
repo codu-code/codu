@@ -64,24 +64,6 @@ export default async function Page({
       websiteUrl: true,
     },
     with: {
-      RSVP: {
-        with: {
-          event: {
-            with: {
-              community: true,
-            },
-          },
-        },
-      },
-      memberships: {
-        with: {
-          community: {
-            with: {
-              members: true,
-            },
-          },
-        },
-      },
       posts: {
         columns: {
           title: true,

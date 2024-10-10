@@ -44,7 +44,7 @@ export default function Hero() {
           }}
         />
 
-        <div className="absolute -bottom-28  left-0 right-0 -z-10 mx-auto max-h-[480px] max-w-[480px] sm:-bottom-60 sm:max-h-[800px] sm:max-w-[600px] md:-bottom-96 md:max-h-[800px] md:max-w-[800px]">
+        <div className="absolute -bottom-28 left-0 right-0 -z-10 mx-auto max-h-[480px] max-w-[480px] sm:-bottom-60 sm:max-h-[800px] sm:max-w-[600px] md:-bottom-96 md:max-h-[800px] md:max-w-[800px]">
           <div className="relative mx-auto brightness-75">
             <Image
               src={moon}

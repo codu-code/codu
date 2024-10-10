@@ -1,0 +1,3 @@
+const TOKEN_EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
+
+export { TOKEN_EXPIRATION_TIME };

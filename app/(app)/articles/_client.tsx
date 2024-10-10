@@ -62,7 +62,7 @@ const ArticlesPage = () => {
     <>
       <div className="mx-2">
         <div className="mt-8 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
             {typeof tag === "string" ? (
               <div className="flex items-center justify-center">
                 <TagIcon className="mr-3 h-6 w-6 text-neutral-800 dark:text-neutral-200" />
@@ -79,7 +79,7 @@ const ArticlesPage = () => {
             <select
               id="filter"
               name="filter"
-              className="mt-2 block w-full rounded border-neutral-300 py-1 pl-3 pr-10 text-sm leading-6 focus:ring-2 focus:ring-pink-600 dark:border-neutral-600"
+              className="mt-2 block w-full rounded border-neutral-300 py-1 pl-3 pr-10 text-sm leading-6 focus:ring-2 focus:ring-pink-600 dark:border-neutral-600 dark:bg-neutral-800"
               onChange={(e) => {
                 router.push(
                   `/articles?filter=${e.target.value}${
