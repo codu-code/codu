@@ -14,6 +14,7 @@ const REMOTE_PATTERNS = [
   // Temporary wildcard
   "*.s3.eu-west-1.amazonaws.com",
   "s3.eu-west-1.amazonaws.com",
+  "s3-alpha-sig.figma.com", //Added for Figma
 ].map((hostname) => ({
   hostname,
   protocol: "https",
