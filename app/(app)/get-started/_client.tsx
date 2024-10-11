@@ -118,6 +118,7 @@ const GetStarted: NextPage = () => {
           Continue with GitHub
         </button>
         <button
+          data-testid="gitlab-login-button"
           type="button"
           onClick={async () => {
             await signIn("gitlab", { callbackUrl: redirectTo });

@@ -145,6 +145,35 @@ For more information, you can read the documentation [here](https://next-auth.js
   - Run Tests
   - Also, Style Guide for Commit Messages
 
+## End-to-End Testing with Playwright
+
+To run the end-to-end tests using Playwright, you need to configure your environment and follow these steps:
+
+### Environment Variables
+
+Please ensure you have the following variables set in your `.env` file:
+
+- `E2E_GITHUB_EMAIL`: The email of the GitHub user for testing.
+- `E2E_GITHUB_PASSWORD`: The password for the GitHub user.
+
+**Important:** The GitHub user used for these tests must **not** have Multi-Factor Authentication (MFA) enabled. It's recommended to create a new GitHub account specifically for these tests, separate from your personal account, which should have MFA enabled for security.
+
+### Running the Tests
+
+You can run the end-to-end tests using one of the following commands:
+
+For headless mode:
+
+```zsh
+npx playwright test
+```
+
+For UI mode:
+
+```zsh
+npx playwright test --ui
+```
+
 ## 📙 Prerequisite Skills to Contribute
 
 - [Git](https://git-scm.com/)

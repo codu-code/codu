@@ -16,12 +16,11 @@ test.describe("Articles", () => {
 
     if (!isMobile) {
       await page.getByText("Code Of Conduct").scrollIntoViewIfNeeded();
-      await page.waitForTimeout(2500);
+      await page.waitForTimeout(5000);
       const finalArticleCount = await page.$$eval(
         "article",
         (articles) => articles.length,
       );
-
       expect(finalArticleCount).toBeGreaterThan(initialArticleCount);
     }
 

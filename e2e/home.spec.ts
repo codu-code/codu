@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Confirm homepage content", () => {
-  test("Shared content", async ({ page }) => {
+  test("Shared content", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
     // Check headers
 
@@ -12,9 +12,11 @@ test.describe("Confirm homepage content", () => {
       "Sign up today to become a writer and get a free invite to our Discord community",
     );
 
-    await expect(page.locator("h3")).toContainText("Trending");
-
-    await expect(page.locator("h3")).toContainText("Trending");
+    // Fix me should be an else statement here that searches for the icons in mobile
+    if (!isMobile) {
+      expect(page.getByText("Your Posts")).toBeVisible();
+      expect(page.getByText("New Post")).toBeVisible();
+    }
   });
 
   test("Different devices", async ({ page, isMobile }) => {

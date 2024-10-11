@@ -37,7 +37,7 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        storageState: "playwright/.auth/user.json",
+        storageState: "playwright/.auth/browser.json",
       },
       dependencies: ["setup"],
     },
@@ -58,7 +58,7 @@ export default defineConfig({
       name: "Mobile Chrome",
       use: {
         ...devices["iPhone 15"],
-        storageState: "playwright/.auth/user.json",
+        storageState: "playwright/.auth/browser.json",
       },
       dependencies: ["setup"],
     },
@@ -85,32 +85,3 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
   },
 });
-
-// import { defineConfig, devices } from "@playwright/test";
-
-// export default defineConfig({
-//   projects: [
-//     // Setup project
-//     { name: "setup", testMatch: /.*\.setup\.ts/ },
-
-//     {
-//       name: "chromium",
-//       use: {
-//         ...devices["Desktop Chrome"],
-//         // Use prepared auth state.
-//         storageState: "playwright/.auth/user.json",
-//       },
-//       dependencies: ["setup"],
-//     },
-
-//     {
-//       name: "firefox",
-//       use: {
-//         ...devices["Desktop Firefox"],
-//         // Use prepared auth state.
-//         storageState: "playwright/.auth/user.json",
-//       },
-//       dependencies: ["setup"],
-//     },
-//   ],
-// });

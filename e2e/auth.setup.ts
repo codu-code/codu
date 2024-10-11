@@ -1,57 +1,76 @@
 import { test as setup, expect } from "@playwright/test";
 import path from "path";
+import browserState from "playwright/.auth/browser.json";
+import dotenv from "dotenv";
 
-const authFile = path.join(__dirname, "../playwright/.auth/user.json");
+const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
+
+// defaults to 1 if expires not passed. This will always fail
+const hasFiveMinutes = (expires: number = 1) => {
+  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  return expires - currentTime >= 300; // Check if there's at least 5 minutes until expiry
+};
+
+dotenv.config(); // Load .env file contents into process.env
 
 setup("authenticate", async ({ page }) => {
-  // Perform authentication steps. Replace these actions with your own.
+  // check if theres already an authenticated browser state with atleast 5 mins until expiry
+  if (
+    hasFiveMinutes(
+      browserState.cookies.find(
+        (cookie) => cookie.name === "next-auth.session-token",
+      )?.expires,
+    )
+  ) {
+    console.log(
+      "Skipping auth setup as there is a currently valid authenticated browser state",
+    );
+    return;
+  }
+
   try {
     expect(process.env.E2E_GITHUB_EMAIL).toBeDefined();
     expect(process.env.E2E_GITHUB_PASSWORD).toBeDefined();
-    const email = process.env.E2E_GITHUB_EMAIL;
-    const password = process.env.E2E_GITHUB_PASSWORD;
 
-    if (!email || !password) {
-      throw new Error(
-        email || password
-          ? "Missing both E2E test user credentials from environment"
-          : email
-            ? "Missing E2E_GITHUB_EMAIL from environment"
-            : "Missing E2E_GITHUB_PASSWORD from environment",
-      );
-    }
-
-    // Perform authentication steps. Replace these actions with your own.
     await page.goto("https://github.com/login");
-    await page.getByLabel("Username or email address").fill(email);
-    await page.getByLabel("Password").fill(password);
-    await page.getByRole("button", { name: "Sign in" }).click();
-    // Wait until the page receives the cookies.
-    //
-    // Sometimes login flow sets cookies in the process of several redirects.
-    // Wait for the final URL to ensure that the cookies are actually set.
+    await page
+      .getByLabel("Username or email address")
+      .fill(process.env.E2E_GITHUB_EMAIL as string);
+    await page
+      .getByLabel("Password")
+      .fill(process.env.E2E_GITHUB_PASSWORD as string);
+    await page.getByRole("button", { name: "Sign in" }).first().click();
     await page.waitForURL("https://github.com/");
-
-    // End of authentication steps.
 
     await page.goto("http://localhost:3000/get-started");
     await page.getByTestId("github-login-button").click();
-    //await page.waitForURL("https://github.com/**");
-    await page.waitForLoadState();
-
-    if (await page.getByText("Authorize JohnAllenTech").isVisible()) {
-      //  await page.getByText("Authorize JohnAllenTech").click();
+    // reason for wait is we need to let redirect take place
+    await page.waitForTimeout(5000);
+    // After X number of logins you will be redirected to GH to reauthorise
+    if (page.url().startsWith("https://github.com/")) {
       await page
         .getByRole("button", { name: "Authorize JohnAllenTech" })
         .click();
-
-      await page.waitForLoadState();
+      // reason for wait is we need to let redirect take place
+      await page.waitForTimeout(5000);
     }
 
-    await page.waitForURL("http://localhost:3000");
+    let authCookieFound = false;
+    while (!authCookieFound) {
+      authCookieFound = !!(await page.context().cookies()).find(
+        (cookie) => cookie.name === "next-auth.session-token",
+      );
+      // only checking cookies once per second
+      await page.waitForTimeout(1000);
+    }
 
+    expect(
+      (await page.context().cookies()).find(
+        (cookie) => cookie.name === "next-auth.session-token",
+      ),
+    ).toBeTruthy();
     await page.context().storageState({ path: authFile });
   } catch (err) {
-    console.log(err);
+    console.log("Error while authenticating E2E test user", err);
   }
 });
