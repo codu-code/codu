@@ -12,26 +12,12 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    # services:
-    #   db:
-    #     image: postgres:13
-    #     env:
-    #       POSTGRES_DB: postgres
-    #       POSTGRES_USER: postgres
-    #       POSTGRES_PASSWORD: secret
-    #     ports:
-    #       - 5432:5432
-    #     healthcheck:
-    #     test: ["CMD-SHELL", "pg_isready -U postgres"]
-    #     interval: 5s
-    #     retries: 5
-    #     timeout: 2s
-
     env:
       DATABASE_URL: "postgresql://postgres:secret@localhost:5432/postgres"
       NEXTAUTH_URL: http://localhost:3000/api/auth
       GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
       GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
+      NEXTAUTH_SECRET: "please_keep_this_secret"
 
     steps:
     - name: Checkout repository
@@ -76,18 +62,3 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
-
-
-    - name: Save traces for inspection
-      if: failure()
-      run: |
-        mkdir -p trace-artifacts
-        [ -d playwright-report ] && cp -R playwright-report trace-artifacts/ || echo "No Playwright report to copy."
-        [ -d traces ] && cp -R traces/* trace-artifacts/ || echo "No trace files to copy."
-
-    - name: Upload traces
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-traces
-        path: trace-artifacts
