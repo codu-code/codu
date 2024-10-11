@@ -69,7 +69,7 @@ export default defineConfig({
     // },
   ],
 
-  outputDir: 'playwright-report',
+  outputDir: "playwright-report",
 
   /* Run your local dev server before starting the tests */
   webServer: {
