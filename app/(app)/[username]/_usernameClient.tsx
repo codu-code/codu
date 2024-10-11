@@ -15,20 +15,6 @@ type Props = {
   session: Session | null;
   isOwner: boolean;
   profile: {
-    memberships: {
-      community: {
-        id: string;
-        slug: string;
-        name: string;
-        excerpt: string;
-        coverImage: string;
-        city: string;
-        country: string;
-        members: {
-          id: string;
-        }[];
-      };
-    }[];
     posts: {
       published: string | null;
       title: string;
@@ -90,7 +76,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
       ? tabFromParams
       : "articles";
 
-  const [ARTICLES, GROUPS] = ["articles", "groups"];
+  const [ARTICLES] = ["articles"];
   const tabs = [
     {
       name: `Articles (${posts.length})`,
@@ -98,17 +84,11 @@ const Profile = ({ profile, isOwner, session }: Props) => {
       href: `?tab=${ARTICLES}`,
       current: selectedTab === ARTICLES,
     },
-    {
-      name: "Groups",
-      value: GROUPS,
-      href: `?tab=${GROUPS}`,
-      current: selectedTab === GROUPS,
-    },
   ];
 
   return (
     <>
-      <div className="text-900 mx-auto max-w-2xl px-4 dark:text-white">
+      <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
         <main className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             {image && (
@@ -144,7 +124,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
             <h1>Account locked 🔒</h1>
           </div>
         ) : (
-          <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
+          <div className="mx-auto mt-4 dark:bg-neutral-900 sm:max-w-2xl lg:max-w-5xl">
             <Tabs tabs={tabs} />
           </div>
         )}
@@ -231,7 +211,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   rows={4}
                   name="note"
                   id="note"
-                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-inset dark:ring-gray-300  sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-inset dark:ring-gray-300 sm:text-sm sm:leading-6"
                   defaultValue={""}
                 />
               </div>

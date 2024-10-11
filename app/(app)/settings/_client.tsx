@@ -12,6 +12,8 @@ import { saveSettingsSchema } from "@/schema/profile";
 
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
+import { Button } from "@/components/ui-components/button";
+import { CheckCheck, Loader2 } from "lucide-react";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -27,6 +29,8 @@ type User = Pick<
   | "emailNotifications"
   | "newsletter"
   | "image"
+  | "email"
+  | "id"
 >;
 
 type ProfilePhoto = {
@@ -42,7 +46,10 @@ const Settings = ({ profile }: { profile: User }) => {
     formState: { errors },
   } = useForm<saveSettingsInput>({
     resolver: zodResolver(saveSettingsSchema),
-    defaultValues: { ...profile, username: profile.username || "" },
+    defaultValues: {
+      ...profile,
+      username: profile.username || "",
+    },
   });
 
   const bio = watch("bio");
@@ -52,6 +59,9 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
+  const [newEmail, setNewEmail] = useState("");
+  const [sendForVerification, setSendForVerification] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [profilePhoto, setProfilePhoto] = useState<ProfilePhoto>({
     status: "idle",
@@ -60,6 +70,10 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const { mutate, isError, isSuccess, isLoading } =
     api.profile.edit.useMutation();
+  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutate: updateUserPhotoUrl } =
+    api.profile.updateProfilePhotoUrl.useMutation();
+  const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
 
   useEffect(() => {
     if (isSuccess) {
@@ -69,10 +83,6 @@ const Settings = ({ profile }: { profile: User }) => {
       toast.error("Something went wrong saving settings.");
     }
   }, [isError, isSuccess]);
-
-  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
-  const { mutate: updateUserPhotoUrl } =
-    api.profile.updateProfilePhotoUrl.useMutation();
 
   const onSubmit: SubmitHandler<saveSettingsInput> = (values) => {
     mutate({ ...values, newsletter: weeklyNewsletter, emailNotifications });
@@ -127,13 +137,34 @@ const Settings = ({ profile }: { profile: User }) => {
     }
   };
 
+  const handleNewEmailUpdate = async () => {
+    setLoading(true);
+    await updateEmail(
+      { newEmail },
+      {
+        onError(error) {
+          setLoading(false);
+          if (error) return toast.error(error.message);
+          return toast.error(
+            "Something went wrong sending the verification link.",
+          );
+        },
+        onSuccess() {
+          setLoading(false);
+          toast.success("Verification link sent to your email.");
+          setSendForVerification(true);
+        },
+      },
+    );
+  };
+
   return (
     <div className="old-input py-8">
       <div className="mx-auto flex w-full max-w-2xl flex-grow flex-col justify-center px-4 sm:px-6 lg:col-span-9">
         <div className="text-neutral-700">
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Profile section */}
-            <div className="px-4 py-6 sm:p-6 lg:pb-8 ">
+            <div className="px-4 py-6 sm:p-6 lg:pb-8">
               <div>
                 <h2 className="text-3xl font-extrabold tracking-tight text-neutral-800 dark:text-white">
                   Profile Settings
@@ -166,7 +197,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <div>
                         <label htmlFor="username">Username</label>
                         <div className="mt-1 flex shadow-sm">
-                          <span className="mt-1  flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
+                          <span className="mt-1 flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
                             codu.co/
                           </span>
                           <input
@@ -196,7 +227,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <div className="mt-1 lg:hidden">
                         <div className="flex items-center">
                           <div
-                            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full "
+                            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full"
                             aria-hidden="true"
                           >
                             {profilePhoto.status === "error" ||
@@ -256,7 +287,7 @@ const Settings = ({ profile }: { profile: User }) => {
                           htmlFor="desktop-user-photo"
                           className="absolute inset-0 flex h-full w-full items-center justify-center bg-black bg-opacity-75 text-sm font-medium text-white opacity-0 focus-within:opacity-100 hover:opacity-100"
                         >
-                          <div className=" text-center text-xs">
+                          <div className="text-center text-xs">
                             Change Photo
                           </div>
                           <span className="sr-only"> user photo</span>
@@ -336,6 +367,69 @@ const Settings = ({ profile }: { profile: User }) => {
                         </p>
                       )}
                     </div>
+                  </div>
+                </div>
+                <div className="mt-6 text-neutral-600 dark:text-neutral-400">
+                  <h2 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white">
+                    Update email
+                  </h2>
+                  <p className="mt-1 text-sm">Change your email here.</p>
+                  <div className="mt-2 flex flex-col gap-2">
+                    <div className="flex flex-col">
+                      <label htmlFor="currEmail">Current email</label>
+                      <div>
+                        <input
+                          type="email"
+                          id="currEmail"
+                          value={profile.email!}
+                          disabled
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <label htmlFor="newEmail">Update email</label>
+                      <div>
+                        <input
+                          type="email"
+                          id="newEmail"
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          value={newEmail}
+                        />
+                      </div>
+                    </div>
+                    {!sendForVerification ? (
+                      <Button
+                        className="w-[200px]"
+                        disabled={
+                          !newEmail || newEmail === profile.email || loading
+                        }
+                        onClick={handleNewEmailUpdate}
+                      >
+                        {loading && (
+                          <Loader2 className="text-primary h-6 w-6 animate-spin" />
+                        )}
+                        Send verification link
+                      </Button>
+                    ) : (
+                      <div className="mt-2 flex flex-row gap-2">
+                        <h2 className="flex items-center gap-2 text-sm italic text-green-400">
+                          <CheckCheck />
+                          Verification link sent
+                        </h2>
+                        <Button
+                          className="w-[250px]"
+                          disabled={
+                            !newEmail || newEmail === profile.email || loading
+                          }
+                          onClick={handleNewEmailUpdate}
+                        >
+                          {loading && (
+                            <Loader2 className="text-primary h-6 w-6 animate-spin" />
+                          )}
+                          Resend verification link
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="divide-y divide-neutral-200 pt-6">

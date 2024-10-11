@@ -8,9 +8,9 @@ const CodeOfConduct = () => {
   return (
     <div>
       <main className="relative bg-white p-4 shadow-lg dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
-        <div className="lg:max-w-8xl relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:px-8 ">
+        <div className="lg:max-w-8xl relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:px-8">
           <div className="lg:pl-8">
-            <div className="mx-auto max-w-prose text-base  ">
+            <div className="mx-auto max-w-prose text-base">
               <h1 className="mt-2 border-b-2 pb-8 text-3xl font-extrabold leading-8 tracking-tight text-black dark:text-white sm:text-6xl">
                 Code Of Conduct
               </h1>

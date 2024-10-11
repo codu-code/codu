@@ -41,7 +41,7 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
       <div className="flex grow items-center">
         <span className="sr-only">{name}</span>
 
-        <div className="flex flex-col justify-center text-[12px] text-neutral-500 ">
+        <div className="flex flex-col justify-center text-[12px] text-neutral-500">
           <p className="font-medium text-neutral-500">
             Written by{" "}
             <Link

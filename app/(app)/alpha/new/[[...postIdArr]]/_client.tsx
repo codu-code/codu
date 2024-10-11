@@ -129,7 +129,7 @@ const Create = () => {
                       to find and know what your story is about.
                     </p>
                   </div>
-                  <div className="col-span-12  border-b border-neutral-300 pb-4">
+                  <div className="col-span-12 border-b border-neutral-300 pb-4">
                     <Disclosure>
                       {({ open }) => (
                         <>
@@ -199,7 +199,7 @@ const Create = () => {
           </div>
         </Transition>
         {dataStatus === "loading" && postId && (
-          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
+          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
               <div className="loader-dots relative mt-2 block h-5 w-20">
                 <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
@@ -222,7 +222,7 @@ const Create = () => {
                 <div className="h-full min-h-[40rem] px-4 py-0 sm:px-6 lg:px-4 lg:py-6">
                   {/* Start main area*/}
                   <div className="relative h-full">
-                    <div className="bg-neutral-900 text-white  shadow-xl">
+                    <div className="bg-neutral-900 text-white shadow-xl">
                       <div className="bg-neutral-900 px-4 py-6 sm:p-6 lg:pb-8">
                         {!body && (
                           <Controller

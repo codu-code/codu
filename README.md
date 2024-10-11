@@ -26,7 +26,6 @@ We have a fantastic community growing on Discord. Click [here](https://discord.g
 ```bash
 npm install
 ```
-
 - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
 
 5. Create a `.env` file and add the following variables. You can copy the contents of `sample.env` with `cat sample.env > .env`.
@@ -43,17 +42,22 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 
 For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
 
-6. [Make sure your database is running](#database_url) and setup the tables in the database with Drizzle by running:
+**NOTE:** Before proceeding, [make sure your database is running](#database_url).
+
+6.  Setup the tables in the database with Drizzle by running:
+
 
 ```bash
 npm run db:push
 ```
+The full command can be seen in our [package.json](/package.json#16) file
 
 7. Seed the database with some mock data by running:
 
 ```bash
 npm run db:seed
 ```
+The full command can be seen in our [package.json](/package.json#19) file
 
 8. Finally, run the development server:
 
@@ -90,12 +94,18 @@ Alternatively, if you have PostgreSQL running locally then you can use your loca
 Currently, we only allow authentication via GitHub. To enable this you need to have a `GITHUB_ID` and `GITHUB_SECRET` value.
 
 Setup your GitHub ID & Secret on GitHub:
+- [Click here](https://github.com/settings/applications/new) to setup New OAuth App and fill in the details as shown below.
 
-- [https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps)
 
-**Shortcut** - [Click here](https://github.com/settings/applications/new) to setup New OAuth App.
-
-For development, make sure you setup this with a **Homepage URL** of `http://localhost:3000/` and **Authorization callback URL** of `http://localhost:3000/api/auth`.
+For development, make sure you setup this with a **Homepage URL** of
+```
+http://localhost:3000/
+```
+and **Authorization callback URL** of
+ ```
+http://localhost:3000/api/auth
+```
+as shown in the image below:
 
 ![Screenshot 2022-10-25 at 08 22 03](https://user-images.githubusercontent.com/12615742/197709325-50766dc2-2245-438c-8f71-09064fc3b123.png)
 
@@ -103,6 +113,9 @@ After you click the "Register application" button you should see the `GITHUB_ID`
 ![Screenshot 2022-10-25 at 08 23 22](https://user-images.githubusercontent.com/12615742/197710695-d3ef9cb7-fe66-4a53-8b3e-d66064434068.png)
 After generating the secret, make sure you copy this value to your `.env` file as this value can not be seen again once you refresh the page. 👇
 ![Screenshot 2022-10-25 at 08 26 04](https://user-images.githubusercontent.com/12615742/197710697-ef791d9e-b205-4667-a97c-477148917897.png)
+
+More info on Authorizing OAuth in the GitHub documentation
+[here](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps).
 
 ### Setting up Passwordless auth locally
 

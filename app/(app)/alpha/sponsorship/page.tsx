@@ -72,7 +72,7 @@ const Sponsorship = () => {
             Reach thousands of developers every month!
           </h3>
         </header>
-        <section className="relative bottom-12 flex items-center justify-center gap-8 overflow-hidden sm:bottom-20 sm:gap-20 md:bottom-24  md:gap-36 lg:gap-44">
+        <section className="relative bottom-12 flex items-center justify-center gap-8 overflow-hidden sm:bottom-20 sm:gap-20 md:bottom-24 md:gap-36 lg:gap-44">
           {images.map((image) => (
             <div
               key={image.alt}

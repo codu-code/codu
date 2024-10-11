@@ -23,6 +23,7 @@ export default async function Page() {
 
   const existingUser = await db.query.user.findFirst({
     columns: {
+      id: true,
       name: true,
       username: true,
       bio: true,
@@ -31,6 +32,7 @@ export default async function Page() {
       emailNotifications: true,
       newsletter: true,
       image: true,
+      email: true,
     },
     where: (users, { eq }) => eq(users.id, session.user!.id),
   });
@@ -50,6 +52,7 @@ export default async function Page() {
       .set({ username: initialUsername })
       .where(eq(user.id, session.user.id))
       .returning({
+        id: user.id,
         name: user.name,
         username: user.username,
         bio: user.bio,
@@ -58,6 +61,7 @@ export default async function Page() {
         emailNotifications: user.emailNotifications,
         newsletter: user.newsletter,
         image: user.image,
+        email: user.email,
       });
     return <Content profile={newUser} />;
   }

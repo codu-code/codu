@@ -50,6 +50,27 @@
       "when": 1717712741800,
       "tag": "0006_fix-defaults-on-updatedat",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1727929401418,
+      "tag": "0007_drop_communities_and_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1728368844216,
+      "tag": "0008_remove_firstName_and_surname",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1728461582872,
+      "tag": "0009_email-verification",
+      "breakpoints": true
     }
   ]
 }
