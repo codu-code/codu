@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Description, Field, Label, Switch } from "@headlessui/react";
+import { useEffect, useState, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -14,6 +13,16 @@ import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
 import { CheckCheck, Loader2 } from "lucide-react";
+import { Heading } from "@/components/ui-components/heading";
+import { Avatar } from "@/components/ui-components/avatar";
+import { Input } from "@/components/ui-components/input";
+import {
+  ErrorMessage,
+  Field,
+  Label,
+} from "@/components/ui-components/fieldset";
+import { Textarea } from "@/components/ui-components/textarea";
+import { Switch } from "@/components/ui-components/switch";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -43,6 +52,7 @@ const Settings = ({ profile }: { profile: User }) => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<saveSettingsInput>({
     resolver: zodResolver(saveSettingsSchema),
@@ -52,9 +62,6 @@ const Settings = ({ profile }: { profile: User }) => {
     },
   });
 
-  const bio = watch("bio");
-  const username = watch("username");
-
   const { emailNotifications: eNotifications, newsletter } = profile;
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
@@ -62,6 +69,7 @@ const Settings = ({ profile }: { profile: User }) => {
   const [newEmail, setNewEmail] = useState("");
   const [sendForVerification, setSendForVerification] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const [profilePhoto, setProfilePhoto] = useState<ProfilePhoto>({
     status: "idle",
@@ -74,6 +82,8 @@ const Settings = ({ profile }: { profile: User }) => {
   const { mutate: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
   const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isSuccess) {
@@ -164,242 +174,292 @@ const Settings = ({ profile }: { profile: User }) => {
         <div className="text-neutral-700">
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Profile section */}
-            <div className="px-4 py-6 sm:p-6 lg:pb-8">
-              <div>
-                <h2 className="text-3xl font-extrabold tracking-tight text-neutral-800 dark:text-white">
-                  Profile Settings
-                </h2>
-                <p className="mt-1 text-neutral-600 dark:text-neutral-400">
-                  This information will be displayed publicly so be careful what
-                  you share.
-                </p>
-              </div>
-
+            <div className="flex flex-col px-4 py-6 sm:p-6 lg:pb-8">
               <div>
                 <div>
-                  <div className="mt-6 flex flex-col lg:flex-row">
-                    <div className="flex-grow space-y-6">
-                      <div>
-                        <label htmlFor="name">Full Name</label>
-                        <input
-                          type="text"
-                          {...register("name")}
-                          id="name"
-                          autoComplete="given-name"
+                  <Heading level={1}>Profile Information</Heading>
+                </div>
+
+                {/* Photo upload */}
+
+                <div className="mt-6 flex flex-col lg:flex-row">
+                  <Field className="flex w-full flex-row">
+                    {/* Container for Label and Subheading */}
+                    <div className="flex w-full flex-col">
+                      <Label>Profile picture</Label>
+                      <div className="text-xs text-gray-500">
+                        This will be displayed on your public profile
+                      </div>
+                    </div>
+
+                    <div className="flex-start flex w-full flex-row">
+                      <div className="h-16 w-16 lg:block">
+                        <Avatar
+                          square
+                          src={
+                            profilePhoto.status === "error" ||
+                            profilePhoto.status === "loading"
+                              ? undefined
+                              : `${profilePhoto.url}`
+                          }
+                          alt="Profile photo upload section"
+                          className="relative h-16 w-16 overflow-hidden rounded-lg"
                         />
-                        {errors.name && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {`${errors.name.message || "Required"}`}
-                          </p>
-                        )}
                       </div>
 
-                      <div>
-                        <label htmlFor="username">Username</label>
-                        <div className="mt-1 flex shadow-sm">
-                          <span className="mt-1 flex items-center bg-neutral-800 px-3 text-sm font-semibold text-white dark:bg-white dark:text-black">
-                            codu.co/
-                          </span>
-                          <input
-                            type="text"
-                            {...register("username")}
-                            id="username"
-                            autoComplete="username"
-                          />
-                        </div>
-                        {errors.username && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {`${errors.username.message || "Required"}`}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Photo upload */}
-
-                    <div className="mt-6 flex-grow lg:ml-6 lg:mt-0 lg:flex-shrink-0 lg:flex-grow-0">
-                      <p
-                        className="text-sm font-medium text-white"
-                        aria-hidden="true"
-                      >
-                        Photo{" "}
-                      </p>
-                      <div className="mt-1 lg:hidden">
-                        <div className="flex items-center">
-                          <div
-                            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full"
-                            aria-hidden="true"
-                          >
-                            {profilePhoto.status === "error" ||
-                            profilePhoto.status === "loading" ? (
-                              <div className="h-full w-full rounded-full border-2 bg-black" />
-                            ) : (
-                              // TODO: review this
-                              // eslint-disable-next-line jsx-a11y/img-redundant-alt
-                              <img
-                                className="h-full w-full rounded-full border-2 border-white object-cover"
-                                src={`${
-                                  profilePhoto.url
-                                }?t=${new Date().getTime()}`}
-                                alt="Profile photo upload section"
-                              />
-                            )}
-                          </div>
-                          <div className="ml-5 rounded-md shadow-sm">
-                            <div className="group relative flex items-center justify-center border-2 border-white px-3 py-2 focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:bg-black">
-                              <label
-                                htmlFor="mobile-user-photo"
-                                className="relative text-sm font-medium leading-4 text-white"
-                              >
-                                <span>Change</span>
-                                <span className="sr-only">user photo</span>
-                              </label>
-                              <input
-                                id="mobile-user-photo"
-                                name="user-photo"
-                                type="file"
-                                accept="image/png, image/gif, image/jpeg, image/webp"
-                                onChange={imageChange}
-                                className="absolute h-full w-full cursor-pointer rounded-md border-neutral-300 opacity-0"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="relative hidden h-32 w-32 overflow-hidden rounded-full lg:block">
-                        {profilePhoto.status === "error" ||
-                        profilePhoto.status === "loading" ? (
-                          <div className="h-100 w-100 h-full w-full rounded-full border-2 bg-black" />
-                        ) : (
-                          // TODO: review this
-                          // eslint-disable-next-line jsx-a11y/img-redundant-alt
-                          <img
-                            className="relative h-full w-full rounded-full border-2 border-white object-cover"
-                            src={`${
-                              profilePhoto.url
-                            }?t=${new Date().getTime()}`}
-                            alt="Profile photo upload section"
-                            sizes="(max-width: 768px) 10vw"
-                          />
-                        )}
-                        <label
-                          htmlFor="desktop-user-photo"
-                          className="absolute inset-0 flex h-full w-full items-center justify-center bg-black bg-opacity-75 text-sm font-medium text-white opacity-0 focus-within:opacity-100 hover:opacity-100"
+                      <div className="ml-4 flex flex-col items-start justify-center">
+                        <Button
+                          color={"dark/white"}
+                          type="button"
+                          className="h-[30px] rounded-md text-xs"
+                          onClick={() => {
+                            fileInputRef.current?.click();
+                          }}
+                          aria-label="Change profile picture"
                         >
-                          <div className="text-center text-xs">
-                            Change Photo
-                          </div>
-                          <span className="sr-only"> user photo</span>
-                          <input
-                            type="file"
-                            id="desktop-user-photo"
-                            name="user-photo"
-                            onChange={imageChange}
-                            className="absolute inset-0 h-full w-full cursor-pointer rounded-md border-neutral-300 opacity-0"
-                          />
-                        </label>
-                      </div>
+                          Change avatar
+                        </Button>
 
-                      {/* Photo end  */}
+                        <Input
+                          type="file"
+                          id="file-input"
+                          name="user-photo"
+                          accept="image/png, image/gif, image/jpeg"
+                          onChange={imageChange}
+                          className="hidden"
+                          ref={fileInputRef}
+                        />
+
+                        <div className="mt-1 text-xs text-gray-500">
+                          JPG, GIF or PNG. 1MB max.
+                        </div>
+                      </div>
                     </div>
-                    {/*  */}
-                  </div>
-                  <div className="mt-6">
-                    <label htmlFor="bio">Short bio</label>
-                    <div className="mt-1">
-                      <textarea
+
+                    {/* Input field */}
+                  </Field>
+                </div>
+
+                <div className="mt-6 flex flex-col lg:flex-row">
+                  <Field className="flex w-full flex-row">
+                    {/* Container for Label and Subheading */}
+                    <div className="flex w-full flex-col">
+                      <Label>Full Name</Label>
+                      <div className="text-xs text-gray-500">
+                        This will be displayed on your public profile
+                      </div>
+                    </div>
+
+                    {/* Input field */}
+                    <div className="flex w-full flex-col">
+                      <Input
+                        id="name"
+                        type="text"
+                        autoComplete="given-name"
+                        className="mt-2 w-full"
+                        {...register("name")}
+                      />
+
+                      {/* Error message */}
+                      {errors?.name && (
+                        <ErrorMessage className="mt-1 text-red-500">
+                          {errors.name.message}
+                        </ErrorMessage>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+
+                {/* User name */}
+                <div className="mt-6">
+                  <Field className="flex w-full flex-row">
+                    {/* Container for Label and Subheading */}
+                    <div className="flex w-full flex-col">
+                      <Label>Username</Label>
+                      <div className="text-xs text-gray-500">
+                        This will be how you share your profile
+                      </div>
+                    </div>
+
+                    {/* Input field */}
+                    <div className="flex w-full flex-col">
+                      <Input
+                        id="username"
+                        type="text"
+                        autoComplete="given-name"
+                        className="mt-2 w-full"
+                        {...register("username")}
+                      />
+
+                      {/* Error message */}
+                      {errors?.username && (
+                        <ErrorMessage className="mt-1 text-red-500">
+                          {errors.username.message}
+                        </ErrorMessage>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+
+                {/* Short Bio */}
+                <div className="mt-6">
+                  <Field className="flex w-full flex-row">
+                    {/* Container for Label and Subheading */}
+                    <div className="flex w-full flex-col">
+                      <Label>Bio</Label>
+                      <div className="pr-1 text-xs text-gray-500">
+                        This will be displayed on your public profile. Maximum
+                        200 characters.
+                      </div>
+                    </div>
+
+                    {/* Text Area Field */}
+                    <div className="flex w-full flex-col">
+                      <Textarea
                         {...register("bio")}
                         id="bio"
                         rows={2}
                         defaultValue={""}
                         maxLength={200}
+                        className="rounded-lg"
                       />
-                    </div>
-                    <div className="mt-2 flex justify-between text-sm text-neutral-600 dark:text-neutral-400">
-                      {errors.bio ? (
-                        <p className="mt-1 text-sm text-red-600">
-                          {`${errors.bio.message || "Required"}`}
-                        </p>
-                      ) : (
-                        <>
-                          <p>Brief description for your profile.</p>
-                          <span>{`${bio?.length || 0}/200`}</span>
-                        </>
+
+                      {/* Error message */}
+                      {errors?.bio && (
+                        <ErrorMessage className="mt-1 text-red-500">
+                          {errors.bio.message}
+                        </ErrorMessage>
                       )}
                     </div>
-                  </div>
-                  <div className="mt-6 grid grid-cols-12 gap-6">
-                    <div className="col-span-12 sm:col-span-9">
-                      <label htmlFor="location">Location</label>
-                      <input
-                        type="text"
-                        {...register("location")}
-                        id="location"
-                        placeholder="The moon 🌙"
-                        autoComplete="country-name"
-                      />
-                      {errors.location && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {`${
-                            errors.location.message ||
-                            "Something is wrong with the input"
-                          }`}
-                        </p>
-                      )}
+                  </Field>
+                </div>
+
+                {/* Location */}
+                <div className="mt-6">
+                  <Field className="flex w-full flex-row">
+                    {/* Container for Label and Subheading */}
+                    <div className="flex w-full flex-col">
+                      <Label>Location</Label>
+                      <div className="text-xs text-gray-500">
+                        This is where you live
+                      </div>
                     </div>
 
-                    <div className="col-span-12 sm:col-span-9">
-                      <label htmlFor="websiteUrl">Website URL</label>
-                      <input
+                    {/* Input field */}
+                    <div className="flex w-full flex-col">
+                      <Input
+                        id="location"
                         type="text"
-                        {...register("websiteUrl")}
-                        id="websiteUrl"
-                        autoComplete="url"
-                        placeholder="https://codu.co/"
+                        placeholder="The moon 🌙"
+                        autoComplete="country-name"
+                        className="mt-2 w-full"
+                        {...register("location")}
                       />
-                      {errors.websiteUrl && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {`${
-                            errors.websiteUrl.message ||
-                            "Something is wrong with the input"
-                          }`}
-                        </p>
+
+                      {/* Error message */}
+                      {errors?.location && (
+                        <ErrorMessage className="mt-1 text-red-500">
+                          {errors.location.message}
+                        </ErrorMessage>
                       )}
                     </div>
-                  </div>
+                  </Field>
                 </div>
-                <div className="mt-6 text-neutral-600 dark:text-neutral-400">
-                  <h2 className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white">
-                    Update email
-                  </h2>
-                  <p className="mt-1 text-sm">Change your email here.</p>
-                  <div className="mt-2 flex flex-col gap-2">
-                    <div className="flex flex-col">
-                      <label htmlFor="currEmail">Current email</label>
-                      <div>
-                        <input
-                          type="email"
-                          id="currEmail"
-                          value={profile.email!}
-                          disabled
-                        />
+
+                {/* Website URL */}
+                <div className="mt-6">
+                  <Field className="flex w-full flex-row">
+                    {/* Container for Label and Subheading */}
+                    <div className="flex w-full flex-col">
+                      <Label>Website URL</Label>
+                      <div className="text-xs text-gray-500">
+                        A link to your website (optional)
                       </div>
                     </div>
-                    <div className="flex flex-col">
-                      <label htmlFor="newEmail">Update email</label>
-                      <div>
-                        <input
+
+                    {/* Input field */}
+                    <div className="flex w-full flex-col">
+                      <Input
+                        id="websiteUrl"
+                        type="text"
+                        placeholder="https://codu.co/"
+                        autoComplete="url"
+                        className="mt-2 w-full"
+                        {...register("websiteUrl")}
+                      />
+
+                      {/* Error message */}
+                      {errors?.websiteUrl && (
+                        <ErrorMessage className="mt-1 text-red-500">
+                          {errors.websiteUrl.message}
+                        </ErrorMessage>
+                      )}
+                    </div>
+                  </Field>
+                </div>
+              </div>
+
+              {/* Email Section */}
+              <div className="pt-6">
+                <Heading level={1}>Email Settings</Heading>
+                <div className="mt-6">
+                  <Field className="flex w-full flex-row">
+                    <div className="flex w-full flex-col">
+                      <Label>Current Email</Label>
+                      <div className="text-xs text-gray-500">
+                        This is where we will send all communications
+                      </div>
+                    </div>
+                    <div className="flex w-full flex-col">
+                      <Input
+                        type="text"
+                        className="mt-2 w-full"
+                        value={profile.email || ""}
+                        disabled
+                      />
+                    </div>
+                  </Field>
+                  <div className="mt-6">
+                    <Field className="flex w-full flex-row">
+                      <div className="flex w-full flex-col">
+                        <Label>Update Email</Label>
+                        <div className="text-xs text-gray-500">
+                          You can alter your email by verifying a new email
+                          address.
+                        </div>
+                      </div>
+                      <div className="flex w-full flex-col">
+                        <Input
                           type="email"
                           id="newEmail"
-                          onChange={(e) => setNewEmail(e.target.value)}
+                          onChange={(e) => {
+                            setNewEmail(e.target.value);
+                            if (
+                              e.target.value &&
+                              !/\S+@\S+\.\S+/.test(e.target.value)
+                            ) {
+                              setEmailError(
+                                "Please enter a valid email address",
+                              );
+                            } else {
+                              setEmailError("");
+                            }
+                          }}
                           value={newEmail}
+                          className="mt-2 w-full"
                         />
+                        {emailError && (
+                          <ErrorMessage className="mt-1 text-red-500">
+                            {emailError}
+                          </ErrorMessage>
+                        )}
                       </div>
-                    </div>
+                    </Field>
+                  </div>
+                  <div className="mt-2 flex justify-end py-4">
                     {!sendForVerification ? (
                       <Button
-                        className="w-[200px]"
+                        color="pink"
                         disabled={
                           !newEmail || newEmail === profile.email || loading
                         }
@@ -408,7 +468,7 @@ const Settings = ({ profile }: { profile: User }) => {
                         {loading && (
                           <Loader2 className="text-primary h-6 w-6 animate-spin" />
                         )}
-                        Send verification link
+                        Send Verification Email
                       </Button>
                     ) : (
                       <div className="mt-2 flex flex-row gap-2">
@@ -417,7 +477,7 @@ const Settings = ({ profile }: { profile: User }) => {
                           Verification link sent
                         </h2>
                         <Button
-                          className="w-[250px]"
+                          color="pink"
                           disabled={
                             !newEmail || newEmail === profile.email || loading
                           }
@@ -426,114 +486,74 @@ const Settings = ({ profile }: { profile: User }) => {
                           {loading && (
                             <Loader2 className="text-primary h-6 w-6 animate-spin" />
                           )}
-                          Resend verification link
+                          Resend Verification Email
                         </Button>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="divide-y divide-neutral-200 pt-6">
-                  <div>
-                    <div className="text-neutral-600 dark:text-neutral-400">
-                      <h2
-                        id="privacy-heading"
-                        className="text-xl font-bold tracking-tight text-neutral-800 dark:text-white"
-                      >
-                        Email Notifications
-                      </h2>
-                      <p className="mt-1 text-sm">
-                        Change your notification settings here.
-                      </p>
-                    </div>
-                    {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}
-                    <ul
-                      role="list"
-                      aria-labelledby="privacy-heading"
-                      className="mt-2 divide-y divide-neutral-200"
-                    >
-                      <Field
-                        as="li"
-                        className="flex items-center justify-between py-4"
-                      >
-                        <div className="flex flex-col items-center">
-                          <Label as="p" className="sr-only" passive>
-                            Email notifications
-                          </Label>
-                          <Description className="text-sm text-neutral-600 dark:text-neutral-400">
-                            Occasional email notifications from the platform.
-                          </Description>
-                        </div>
-                        <Switch
-                          checked={emailNotifications}
-                          onChange={setEmailNotifications}
-                          className={classNames(
-                            emailNotifications
-                              ? "bg-green-600"
-                              : "bg-neutral-400",
-                            "relative ml-4 inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              emailNotifications
-                                ? "translate-x-5"
-                                : "translate-x-0",
-                              "inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </Switch>
-                      </Field>
-                      <Field
-                        as="li"
-                        className="mt-2 flex items-center justify-between py-4"
-                      >
-                        <div className="flex flex-col">
-                          <Label as="p" className="sr-only" passive>
-                            Weekly newsletter
-                          </Label>
-                          <Description className="text-sm text-neutral-600 dark:text-neutral-400">
-                            Opt-in to our weekly newsletter.
-                          </Description>
-                        </div>
-                        <Switch
-                          checked={weeklyNewsletter}
-                          onChange={setWeeklyNewsletter}
-                          className={classNames(
-                            weeklyNewsletter
-                              ? "bg-green-600"
-                              : "bg-neutral-400",
-                            "relative ml-4 inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2",
-                          )}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              weeklyNewsletter
-                                ? "translate-x-5"
-                                : "translate-x-0",
-                              "inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                            )}
-                          />
-                        </Switch>
-                      </Field>
-                    </ul>
-                  </div>
-                  <div className="mt-2 flex justify-end py-4">
-                    <button
-                      type="button"
-                      className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      disabled={isLoading}
-                      type="submit"
-                      className="ml-5 inline-flex w-20 justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-20"
-                    >
-                      Save
-                    </button>
-                  </div>
+              </div>
+
+              {/* Notifications Section */}
+              <div className="pt-6">
+                <div className="mt-6">
+                  <Heading level={1}>Notifications</Heading>
+                </div>
+                <div>
+                  <Field className="flex items-center justify-between py-4">
+                    <Label passive className="flex flex-col text-sm">
+                      <span className="block">
+                        Allow notifications from the platform
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Send an email when a user interacts with you on the
+                        platform
+                      </span>
+                    </Label>
+                    <Switch
+                      color="green"
+                      checked={emailNotifications}
+                      onChange={setEmailNotifications}
+                      className={classNames(
+                        emailNotifications ? "bg-green-600" : "bg-neutral-400",
+                      )}
+                      aria-label="Allow notifications from the platform"
+                    />
+                  </Field>
+                  <Field className="mt-2 flex items-center justify-between py-4">
+                    <Label passive className="flex flex-col text-sm">
+                      <span className="block">Weekly Newsletter</span>
+                      <span className="text-xs text-gray-500">
+                        Receive our weekly newsletter
+                      </span>
+                    </Label>
+                    <Switch
+                      color="green"
+                      checked={weeklyNewsletter}
+                      onChange={setWeeklyNewsletter}
+                      className={classNames(
+                        weeklyNewsletter ? "bg-green-600" : "bg-neutral-400",
+                      )}
+                      aria-label="Subscribe for weekly newsletter"
+                    />
+                  </Field>
+                </div>
+                <div className="mt-2 flex justify-end py-4">
+                  <Button
+                    color="dark/white"
+                    className="rounded-md"
+                    onClick={() => reset()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    color="pink"
+                    className="ml-5 rounded-md"
+                    disabled={isLoading}
+                    type="submit"
+                  >
+                    Save Changes
+                  </Button>
                 </div>
               </div>
             </div>
