@@ -28,7 +28,7 @@ jobs:
     #     timeout: 2s
 
     env:
-      DATABASE_URL: "postgresql://postgres:secret@db:5432/postgres"
+      DATABASE_URL: "postgresql://postgres:secret@localhost:5432/postgres"
       NEXTAUTH_URL: http://localhost:3000/api/auth
       GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
       GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
