@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -52,6 +52,7 @@ const Settings = ({ profile }: { profile: User }) => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm<saveSettingsInput>({
     resolver: zodResolver(saveSettingsSchema),
@@ -80,6 +81,8 @@ const Settings = ({ profile }: { profile: User }) => {
   const { mutate: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
   const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isSuccess) {
@@ -209,11 +212,7 @@ const Settings = ({ profile }: { profile: User }) => {
                           type="button"
                           className="h-[30px] rounded-md text-xs"
                           onClick={() => {
-                            const fileInput =
-                              document.getElementById("file-input");
-                            if (fileInput) {
-                              fileInput.click();
-                            }
+                            fileInputRef.current?.click();
                           }}
                         >
                           Change avatar
@@ -226,6 +225,7 @@ const Settings = ({ profile }: { profile: User }) => {
                           accept="image/png, image/gif, image/jpeg"
                           onChange={imageChange}
                           className="hidden"
+                          ref={fileInputRef}
                         />
 
                         <div className="mt-1 text-xs text-gray-500">
@@ -282,7 +282,7 @@ const Settings = ({ profile }: { profile: User }) => {
                     {/* Input field */}
                     <div className="flex w-full flex-col">
                       <Input
-                        id="name"
+                        id="username"
                         type="text"
                         autoComplete="given-name"
                         className="mt-2 w-full"
@@ -412,7 +412,7 @@ const Settings = ({ profile }: { profile: User }) => {
                       <Input
                         type="text"
                         className="mt-2 w-full"
-                        value={profile.email!}
+                        value={profile.email || ""}
                         disabled
                       />
                     </div>
@@ -520,7 +520,11 @@ const Settings = ({ profile }: { profile: User }) => {
                   </Field>
                 </div>
                 <div className="mt-2 flex justify-end py-4">
-                  <Button color="dark/white" className="rounded-md">
+                  <Button
+                    color="dark/white"
+                    className="rounded-md"
+                    onClick={() => reset()}
+                  >
                     Cancel
                   </Button>
                   <Button
