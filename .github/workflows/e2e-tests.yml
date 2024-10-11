@@ -12,8 +12,23 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
+    # services:
+    #   db:
+    #     image: postgres:13
+    #     env:
+    #       POSTGRES_DB: postgres
+    #       POSTGRES_USER: postgres
+    #       POSTGRES_PASSWORD: secret
+    #     ports:
+    #       - 5432:5432
+    #     healthcheck:
+    #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+    #     interval: 5s
+    #     retries: 5
+    #     timeout: 2s
+
     env:
-      DATABASE_URL: "postgresql://postgres:secret@codu-db:5432/postgres"
+      DATABASE_URL: "postgresql://postgres:secret@db:5432/postgres"
       NEXTAUTH_URL: http://localhost:3000/api/auth
       GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
       GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
@@ -33,6 +48,13 @@ jobs:
         compose-file: "./docker-compose.yml"
         services: |
           db
+
+    - name: Wait for DB to be ready
+      run: |
+        until nc -z db 5432; do
+          echo "Waiting for database connection..."
+          sleep 5
+        done
 
     - name: Install dependencies
       run: npm install
