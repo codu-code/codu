@@ -68,7 +68,7 @@ jobs:
         npm run db:seed
 
     - name: Run Playwright tests
-      run: npx playwright test --reporter=github
+      run: npx playwright test --reporter=html
 
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
