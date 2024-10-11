@@ -53,9 +53,6 @@ jobs:
         curl -SL https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VERSION/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
         chmod +x ~/.docker/cli-plugins/docker-compose
 
-    - name: Check Docker Compose version
-      run: docker-compose --version
-
     - name: Wait for PostgreSQL to be ready
       run: docker-compose exec codu-db pg_isready -U postgres
 
