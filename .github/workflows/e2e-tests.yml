@@ -41,6 +41,21 @@ jobs:
       with:
         node-version: 'lts/*'
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set up Docker Compose
+      uses: docker/setup-qemu-action@v2
+    - name: Install Docker Compose
+      run: |
+        DOCKER_COMPOSE_VERSION=2.2.3
+        mkdir -p ~/.docker/cli-plugins/
+        curl -SL https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VERSION/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+        chmod +x ~/.docker/cli-plugins/docker-compose
+
+    - name: Check Docker Compose version
+      run: docker-compose --version
+
     - name: Wait for PostgreSQL to be ready
       run: docker-compose exec codu-db pg_isready -U postgres
 
@@ -69,7 +84,8 @@ jobs:
       if: failure()
       run: |
         mkdir -p trace-artifacts
-        cp -R playwright-report traces/* trace-artifacts/
+        [ -d playwright-report ] && cp -R playwright-report trace-artifacts/ || echo "No Playwright report to copy."
+        [ -d traces ] && cp -R traces/* trace-artifacts/ || echo "No trace files to copy."
 
     - name: Upload traces
       if: failure()
