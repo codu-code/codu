@@ -69,6 +69,7 @@ const Settings = ({ profile }: { profile: User }) => {
   const [newEmail, setNewEmail] = useState("");
   const [sendForVerification, setSendForVerification] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const [profilePhoto, setProfilePhoto] = useState<ProfilePhoto>({
     status: "idle",
@@ -214,6 +215,7 @@ const Settings = ({ profile }: { profile: User }) => {
                           onClick={() => {
                             fileInputRef.current?.click();
                           }}
+                          aria-label="Change profile picture"
                         >
                           Change avatar
                         </Button>
@@ -430,10 +432,27 @@ const Settings = ({ profile }: { profile: User }) => {
                         <Input
                           type="email"
                           id="newEmail"
-                          onChange={(e) => setNewEmail(e.target.value)}
+                          onChange={(e) => {
+                            setNewEmail(e.target.value);
+                            if (
+                              e.target.value &&
+                              !/\S+@\S+\.\S+/.test(e.target.value)
+                            ) {
+                              setEmailError(
+                                "Please enter a valid email address",
+                              );
+                            } else {
+                              setEmailError("");
+                            }
+                          }}
                           value={newEmail}
                           className="mt-2 w-full"
                         />
+                        {emailError && (
+                          <ErrorMessage className="mt-1 text-red-500">
+                            {emailError}
+                          </ErrorMessage>
+                        )}
                       </div>
                     </Field>
                   </div>
@@ -482,15 +501,15 @@ const Settings = ({ profile }: { profile: User }) => {
                 </div>
                 <div>
                   <Field className="flex items-center justify-between py-4">
-                    <div className="flex flex-col">
-                      <Label passive className="text-sm">
+                    <Label passive className="flex flex-col text-sm">
+                      <span className="block">
                         Allow notifications from the platform
-                      </Label>
-                      <div className="text-xs text-gray-500">
+                      </span>
+                      <span className="text-xs text-gray-500">
                         Send an email when a user interacts with you on the
                         platform
-                      </div>
-                    </div>
+                      </span>
+                    </Label>
                     <Switch
                       color="green"
                       checked={emailNotifications}
@@ -498,17 +517,16 @@ const Settings = ({ profile }: { profile: User }) => {
                       className={classNames(
                         emailNotifications ? "bg-green-600" : "bg-neutral-400",
                       )}
-                    ></Switch>
+                      aria-label="Allow notifications from the platform"
+                    />
                   </Field>
                   <Field className="mt-2 flex items-center justify-between py-4">
-                    <div className="flex flex-col">
-                      <Label passive className="text-sm">
-                        Weekly newsletter
-                      </Label>
-                      <div className="text-xs text-gray-500">
+                    <Label passive className="flex flex-col text-sm">
+                      <span className="block">Weekly Newsletter</span>
+                      <span className="text-xs text-gray-500">
                         Receive our weekly newsletter
-                      </div>
-                    </div>
+                      </span>
+                    </Label>
                     <Switch
                       color="green"
                       checked={weeklyNewsletter}
@@ -516,7 +534,8 @@ const Settings = ({ profile }: { profile: User }) => {
                       className={classNames(
                         weeklyNewsletter ? "bg-green-600" : "bg-neutral-400",
                       )}
-                    ></Switch>
+                      aria-label="Subscribe for weekly newsletter"
+                    />
                   </Field>
                 </div>
                 <div className="mt-2 flex justify-end py-4">
