@@ -51,7 +51,7 @@ jobs:
 
     - name: Wait for DB to be ready
       run: |
-        until nc -z db 5432; do
+        until nc -z localhost 5432; do
           echo "Waiting for database connection..."
           sleep 5
         done
