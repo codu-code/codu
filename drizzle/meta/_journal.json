@@ -71,6 +71,13 @@
       "when": 1728461582872,
       "tag": "0009_email-verification",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1728680482423,
+      "tag": "0010_email-tokens-and-indexes",
+      "breakpoints": true
     }
   ]
 }
