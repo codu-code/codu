@@ -39,8 +39,8 @@ jobs:
 
     - name: Seed database
       run: |
-        npm db:push
-        npm db:seed
+        npm run db:push
+        npm run db:seed
 
     - name: Run Playwright tests
       run: npx playwright test --reporter=github
