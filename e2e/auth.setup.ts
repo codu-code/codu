@@ -1,9 +1,20 @@
 import { test as setup, expect } from "@playwright/test";
 import path from "path";
-import browserState from "playwright/.auth/browser.json";
 import dotenv from "dotenv";
+import fs from "fs";
 
 const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
+
+if (!fs.existsSync(authFile)) {
+  // If it doesn't exist, create an example JSON file
+  fs.writeFileSync(authFile, JSON.stringify({ cookies: [] }), "utf8");
+  console.log(
+    "Browser state file was not found. An example file has been created at:",
+    authFile,
+  );
+}
+
+const browserState = require(authFile);
 
 // defaults to 1 if expires not passed. This will always fail
 const hasFiveMinutes = (expires: number = 1) => {
@@ -16,9 +27,10 @@ dotenv.config(); // Load .env file contents into process.env
 setup("authenticate", async ({ page }) => {
   // check if theres already an authenticated browser state with atleast 5 mins until expiry
   if (
+    browserState.cookies.length &&
     hasFiveMinutes(
-      browserState.cookies.find(
-        (cookie) => cookie.name === "next-auth.session-token",
+      (browserState.cookies as Array<{ name: string; expires: number }>).find(
+        (cookie: { name: string }) => cookie.name === "next-auth.session-token",
       )?.expires,
     )
   ) {

@@ -68,3 +68,7 @@ ssmSetup.zsh
 
 # open-next
 .open-next
+
+
+#E2E Testing resources
+/playwright/.auth/
