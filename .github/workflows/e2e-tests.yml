@@ -5,6 +5,7 @@ on:
     branches:
       - develop
   pull_request_target:
+    types: [opened, synchronize, reopened]
     branches:
       - develop
 
