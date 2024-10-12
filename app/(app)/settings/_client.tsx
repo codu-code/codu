@@ -178,7 +178,7 @@ const Settings = ({ profile }: { profile: User }) => {
           setLoading(false);
           toast.success("Verification link sent to your email.");
           setSendForVerification(true);
-          setCooldown(60); // Set a 60-second cooldown
+          setCooldown(120); // Set a 2 minute cooldown
           setEmailError(""); // Clear any existing error
         },
       },

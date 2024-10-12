@@ -152,18 +152,16 @@ export const profileRouter = createTRPCRouter({
       if (existingUser) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Email already in use",
+          message: "Unable to process the request",
         });
       }
 
       // Rate limiting: Check for recent requests
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
       const recentRequest = await ctx.db.query.emailChangeRequest.findFirst({
         where: and(
           eq(emailChangeRequest.userId, userId),
-          gte(
-            emailChangeRequest.createdAt,
-            new Date(Date.now() - 5 * 60 * 1000),
-          ), // 5 minutes
+          gte(emailChangeRequest.createdAt, twoMinutesAgo), // 2 minutes
         ),
       });
 
