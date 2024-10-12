@@ -17,11 +17,20 @@ import {
 } from "@/components/ui-components/radio";
 import { Strong, Text } from "@/components/ui-components/text";
 import { Textarea } from "@/components/ui-components/textarea";
+import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 import Image from "next/image";
-import React, { useRef } from "react";
+import { notFound } from "next/navigation";
+import React, { useRef, useState } from "react";
 
 export default function Content() {
+  const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOB_POST_CREATE);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+
+  if (!flagEnabled) {
+    notFound();
+  }
+
   return (
     <form className="mx-auto max-w-4xl p-3 pt-8 sm:px-4">
       <Heading level={1}>Post a job</Heading>
@@ -33,13 +42,15 @@ export default function Content() {
         </div>
         <Field>
           <div className="flex items-center space-x-4">
-            <Image
-              src="https://s3-alpha-sig.figma.com/img/8a23/cb6a/8d462a922529d9ae7a44772fb9f64b61?Expires=1729468800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=XnJwSdtoT2ZlVsJvhBPWF3AAxyOJ5qVcunVwoDqMLar78R6wuZUJvkxS3VqeOFued9~gWF8biRwIdWhSA4NHF9Fiw5P5S-KFzs68QXDGLYVL7AhoEA2u-GYaEYep52BRmsQWceF8Bd9IDPYceJkF7MyIQCIkJFkuZ6FvXcHa319yBMk0xS4qGux2sNiBqxXOjA9gcraKuBh~mj3bEQ9l4GrqzBeHRt1s6OaBqbIJUSic984Wfizmfyjcu7NDLxJaTVsYVhe8d5p2Sv8QVCrvc0UspSGLYpsmJjybLF41zoEEkIxSb~iX905tpAo2q757TKSTDOinzLdCcUwCJ-VZ8Q__"
-              width={80}
-              height={80}
-              alt="Company Logo"
-              className="rounded-[10px]"
-            />
+            {imgUrl && (
+              <Image
+                src={imgUrl}
+                width={80}
+                height={80}
+                alt="Company Logo"
+                className="rounded-[10px]"
+              />
+            )}
             <div>
               <Button
                 color="dark/white"
