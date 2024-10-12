@@ -1,4 +1,4 @@
-import { user } from "@/server/db/schema";
+import { user, emailChangeHistory } from "@/server/db/schema";
 import {
   saveSettingsSchema,
   getProfileSchema,
@@ -15,15 +15,12 @@ import {
 } from "@/server/lib/newsletter";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import { emailTokenReqSchema } from "@/schema/token";
-import {
-  checkIfEmailExists,
-  generateEmailToken,
-  sendVerificationEmail,
-  storeTokenInDb,
-} from "@/utils/emailToken";
+import { generateEmailToken, sendVerificationEmail } from "@/utils/emailToken";
 import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
+import { emailChangeRequest } from "@/server/db/schema";
+import { z } from "zod";
 
 export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
@@ -137,39 +134,67 @@ export const profileRouter = createTRPCRouter({
   updateEmail: protectedProcedure
     .input(emailTokenReqSchema)
     .mutation(async ({ input, ctx }) => {
-      try {
-        const { newEmail } = input;
+      const { newEmail } = input;
+      const userId = ctx.session.user.id;
 
-        if (!newEmail) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Invalid request",
-          });
-        }
-
-        const ifEmailExists = await checkIfEmailExists(newEmail);
-
-        if (ifEmailExists) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Email already exists",
-          });
-        }
-
-        const userId = ctx.session.user.id;
-
-        const token = generateEmailToken();
-        const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION_TIME);
-
-        await storeTokenInDb(userId, token, expiresAt, newEmail);
-        await sendVerificationEmail(newEmail, token);
-
-        return { message: "Verification email sent" };
-      } catch (error: any) {
+      if (!newEmail) {
         throw new TRPCError({
-          code: error.code || "INTERNAL_SERVER_ERROR",
-          message: error.message || "Internal server error",
+          code: "BAD_REQUEST",
+          message: "Invalid request",
         });
       }
+
+      // Check if the new email is already in use
+      const existingUser = await ctx.db.query.user.findFirst({
+        where: eq(user.email, newEmail),
+      });
+
+      if (existingUser) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Unable to process the request",
+        });
+      }
+
+      // Rate limiting: Check for recent requests
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+      const recentRequest = await ctx.db.query.emailChangeRequest.findFirst({
+        where: and(
+          eq(emailChangeRequest.userId, userId),
+          gte(emailChangeRequest.createdAt, twoMinutesAgo), // 2 minutes
+        ),
+      });
+
+      if (recentRequest) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Please wait before requesting another email change",
+        });
+      }
+
+      // Generate a new token and expiration date
+      const token = generateEmailToken();
+      const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION_TIME);
+
+      // Create a new email change request
+      await ctx.db.insert(emailChangeRequest).values({
+        userId,
+        newEmail,
+        token,
+        expiresAt,
+      });
+
+      // Send verification email
+      try {
+        await sendVerificationEmail(newEmail, token);
+      } catch (error) {
+        console.error("Failed to send verification email:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send verification email",
+        });
+      }
+
+      return { message: "Verification email sent" };
     }),
 });
