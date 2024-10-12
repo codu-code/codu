@@ -1,44 +1,96 @@
 import { getServerAuthSession } from "@/server/auth";
+import { db } from "@/server/db";
 import {
-  deleteTokenFromDb,
-  getTokenFromDb,
-  updateEmail,
-} from "@/utils/emailToken";
-import { NextRequest, NextResponse } from "next/server";
+  emailChangeRequest,
+  user,
+  emailChangeHistory,
+} from "@/server/db/schema";
+import { and, eq, gte } from "drizzle-orm";
+import { type NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
   try {
     const token = req.nextUrl.searchParams.get("token");
 
-    if (!token)
-      return NextResponse.json({ message: "Invalid request" }, { status: 400 });
+    if (!token) {
+      return new Response(JSON.stringify({ message: "Invalid request" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     const session = await getServerAuthSession();
 
-    if (!session || !session.user)
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!session || !session.user) {
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-    const tokenFromDb = await getTokenFromDb(token, session.user.id);
+    const userId = session.user.id;
 
-    if (!tokenFromDb || !tokenFromDb.length)
-      return NextResponse.json({ message: "Invalid token" }, { status: 400 });
+    const request = await db.query.emailChangeRequest.findFirst({
+      where: and(
+        eq(emailChangeRequest.token, token),
+        eq(emailChangeRequest.userId, userId),
+        gte(emailChangeRequest.expiresAt, new Date()),
+      ),
+    });
 
-    const { userId, expiresAt, email } = tokenFromDb[0];
-    if (expiresAt < new Date())
-      return NextResponse.json({ message: "Token expired" }, { status: 400 });
+    if (!request) {
+      return new Response(
+        JSON.stringify({ message: "Invalid or expired token" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
 
-    await updateEmail(userId, email);
+    const currentUser = await db.query.user.findFirst({
+      where: eq(user.id, userId),
+    });
 
-    await deleteTokenFromDb(token);
+    if (!currentUser) {
+      return new Response(JSON.stringify({ message: "User not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-    return NextResponse.json(
-      { message: "Email successfully verified" },
-      { status: 200 },
+    await db
+      .update(user)
+      .set({
+        email: request.newEmail,
+        emailVerified: new Date().toISOString(),
+      })
+      .where(eq(user.id, userId));
+
+    await db.insert(emailChangeHistory).values({
+      userId,
+      oldEmail: currentUser.email ?? "",
+      newEmail: request.newEmail,
+      ipAddress: req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "",
+      userAgent: req.headers.get("user-agent") ?? "",
+    });
+
+    await db
+      .delete(emailChangeRequest)
+      .where(eq(emailChangeRequest.id, request.id));
+
+    return new Response(
+      JSON.stringify({ message: "Email updated successfully" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
     );
   } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
+    console.error("Error verifying email:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
