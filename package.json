@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:e2e": "ENV=E2E next dev",
     "build": "next build",
     "ci-build": "next build",
     "start": "next start",
