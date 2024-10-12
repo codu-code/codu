@@ -6,14 +6,14 @@ import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
 
 export default React.memo(function SideBarSavedPosts() {
-  let { data: bookmarks } = api.post.myBookmarks.useQuery();
-  const { status: bookmarkStatus } = api.post.myBookmarks.useQuery();
+  const { data: bookmarksData } = api.post.myBookmarks.useQuery({
+    limit: 3,
+  });
+  const { status: bookmarkStatus } = api.post.myBookmarks.useQuery({});
 
   const howManySavedToShow = 3;
-  const totalNumberSaved = bookmarks?.length;
-
-  // @TODO query the backend to get the last 3 instead of slice
-  if (bookmarks) bookmarks = bookmarks.slice(0, howManySavedToShow);
+  const totalNumberSaved = bookmarksData?.totalCount || 0;
+  const bookmarks = bookmarksData?.bookmarks || [];
 
   return (
     <div className="w-full">

@@ -55,8 +55,11 @@ const ArticlePreview: NextPage<Props> = ({
   bookmarkedInitialState = false,
 }) => {
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
+  const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery({
+    limit: 3,
+  });
   const { data: session } = useSession();
-
+  const bookmarks = bookmarksData?.bookmarks;
   const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
@@ -68,6 +71,9 @@ const ArticlePreview: NextPage<Props> = ({
     api.post.bookmark.useMutation({
       onSettled() {
         setIsBookmarked((isBookmarked) => !isBookmarked);
+      },
+      onSuccess: () => {
+        refetch();
       },
     });
 
