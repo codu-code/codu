@@ -43,29 +43,17 @@ setup("authenticate", async ({ page }) => {
   try {
     expect(process.env.E2E_GITHUB_EMAIL).toBeDefined();
     expect(process.env.E2E_GITHUB_PASSWORD).toBeDefined();
+    expect(process.env.E2E_GITHUB_SESSION_ID).toBeDefined();
 
-    await page.goto("https://github.com/login");
-    await page
-      .getByLabel("Username or email address")
-      .fill(process.env.E2E_GITHUB_EMAIL as string);
-    await page
-      .getByLabel("Password")
-      .fill(process.env.E2E_GITHUB_PASSWORD as string);
-    await page.getByRole("button", { name: "Sign in" }).first().click();
-    await page.waitForURL("https://github.com/");
-
-    await page.goto("http://localhost:3000/get-started");
-    await page.getByTestId("github-login-button").click();
-    // reason for wait is we need to let redirect take place
-    await page.waitForTimeout(5000);
-    // After X number of logins you will be redirected to GH to reauthorise
-    if (page.url().startsWith("https://github.com/")) {
-      await page
-        .getByRole("button", { name: "Authorize JohnAllenTech" })
-        .click();
-      // reason for wait is we need to let redirect take place
-      await page.waitForTimeout(5000);
-    }
+    await page.context().addCookies([
+      {
+        name: "next-auth.session-token",
+        value: process.env.E2E_GITHUB_SESSION_ID as string,
+        domain: "localhost",
+        path: "/",
+        sameSite: "Lax",
+      },
+    ]);
 
     let authCookieFound = false;
     while (!authCookieFound) {

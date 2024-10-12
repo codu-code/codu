@@ -18,7 +18,8 @@
     "db:migrate": "npx tsx -r dotenv/config ./drizzle/migrate.ts",
     "db:seed": "npx tsx -r dotenv/config ./drizzle/seed.ts",
     "db:nuke": "npx tsx -r dotenv/config ./drizzle/nuke.ts",
-    "drizzle:up": "drizzle-kit up"
+    "drizzle:up": "drizzle-kit up",
+    "e2e:seed": "npx tsx -r dotenv/config ./drizzle/seedE2E.ts"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown",
