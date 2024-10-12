@@ -29,7 +29,7 @@ export function Tabs(props: Props) {
         <select
           id="tabs"
           name="tabs"
-          className="block w-full rounded-md border-neutral-300 bg-white focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-900"
+          className="block w-full rounded-md border-neutral-300 bg-white focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-950"
           defaultValue={tabs.find((tab) => tab.current)?.name || tabs[0].name}
           onChange={(e) => {
             router.push(e.target.value);
