@@ -19,13 +19,8 @@ import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 
-import Table from "@tiptap/extension-table";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import TableRow from "@tiptap/extension-table-row";
 import type { NodeViewProps } from "@tiptap/react";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 
 import { common, createLowlight } from "lowlight";
@@ -46,38 +41,13 @@ const CustomDocument = Document.extend({
   content: "heading block*",
 });
 
-export const CustomTable = Table.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CustomTableNodeView {...props} />
-    ));
-  },
-});
 export const TiptapExtensions = [
   CustomDocument,
-  CustomTable,
   // Table.configure({
   //   HTMLAttributes: {
   //     class: "bg-neutral-100 w-full  overflow-scroll",
   //   },
   // }),
-  TableRow.configure({
-    HTMLAttributes: {
-      class: "bg-neutral-900 border border-neutral-500 bg-red-500 flex-1 flex",
-    },
-  }),
-  TableHeader.configure({
-    HTMLAttributes: {
-      class:
-        "text-neutral-900 bg-neutral-300 border border-neutral-500 flex-1 flex text-center p-1",
-    },
-  }),
-  TableCell.configure({
-    HTMLAttributes: {
-      class:
-        "text-neutral-900 bg-neutral-100 border border-neutral-500 flex-1 flex p-1",
-    },
-  }),
   Paragraph,
   Text,
   StarterKit.configure({
