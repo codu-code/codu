@@ -34,7 +34,6 @@ const lowlight = createLowlight(common);
 // Highlight syntax select your style from here (https://highlightjs.org/examples)
 import "highlight.js/styles/monokai-sublime.css";
 
-import CodeBlock from "../components/CodeBlock/CodeBlock";
 import DisableHeadingTextStyleShortcuts from "./disable-heading-text-style-shortcuts";
 
 // const CustomImage = TiptapImage.extend({
@@ -46,21 +45,6 @@ import DisableHeadingTextStyleShortcuts from "./disable-heading-text-style-short
 const CustomDocument = Document.extend({
   content: "heading block*",
 });
-
-export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer(CodeBlock);
-  },
-}).configure({ lowlight });
-
-// Two CodeBlockNodes need to be created to disable selector menu
-export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CodeBlock {...props} readOnly />
-    ));
-  },
-}).configure({ lowlight });
 
 export const CustomTable = Table.extend({
   addNodeView() {

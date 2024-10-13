@@ -5,7 +5,7 @@ import Typography from '@tiptap/extension-typography'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TiptapEditorProps } from "./props";
-import { CustomCodeBlockEdit, TiptapExtensions } from "./extensions";
+import { TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
 import Toolbar from "./components/Toolbar/Toolbar";
