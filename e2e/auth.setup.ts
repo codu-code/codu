@@ -8,36 +8,30 @@ const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
 
 // checks if the files/folders are present to support an authenticated browser state
 // we needed to add these files to the gitignore to prevent people sharing their GH creds in PRs by accident
-try {
-  if (!fs.existsSync(authFile)) {
-    console.log(
-      "Browser state file was not found. An example file is being created:",
-    );
-    if (!fs.existsSync(authFolder)) {
-      console.log(
-        "Browser state directory was not found. Folder being created:",
-      );
-      fs.mkdir(authFolder, { recursive: true }, (err) => {
-        if (err) throw new Error("Error creating playwright/.auth folder", err);
-      });
-    }
-    if (!fs.existsSync(authFile)) {
-      console.log("Browser.json file was not found. File being created:");
 
-      fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
-        if (err) {
-          throw new Error("Error creating browser.json file", err);
-        }
-        console.log(
-          "Browser state file was not found. An example file has been created at:",
-          authFile,
-        );
-      });
-    }
+if (!fs.existsSync(authFile)) {
+  console.log(
+    "Browser state file was not found. An example file is being created:",
+  );
+  if (!fs.existsSync(authFolder)) {
+    console.log("Browser state directory was not found. Folder being created:");
+    fs.mkdir(authFolder, { recursive: true }, (err) => {
+      if (err) throw new Error("Error creating playwright/.auth folder", err);
+    });
   }
-} catch (err) {
-  console.log(err);
-  throw new Error();
+  if (!fs.existsSync(authFile)) {
+    console.log("Browser.json file was not found. File being created:");
+
+    fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
+      if (err) {
+        throw new Error("Error creating browser.json file", err);
+      }
+      console.log(
+        "Browser state file was not found. An example file has been created at:",
+        authFile,
+      );
+    });
+  }
 }
 
 const browserState = require(authFile);
