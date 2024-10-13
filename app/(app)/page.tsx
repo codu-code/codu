@@ -55,7 +55,7 @@ const Home = async () => {
             <div className="mb-8 mt-2 rounded border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
-                  className="w-full"
+                  className="w-full rounded-t"
                   src={challenge}
                   alt={`"Codú Writing Challenge" text on white background`}
                 />
