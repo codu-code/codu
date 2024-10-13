@@ -60,12 +60,12 @@ setup("authenticate", async ({ page }) => {
   }
 
   try {
-    expect(process.env.E2E_GITHUB_SESSION_ID).toBeDefined();
+    expect(process.env.E2E_USER_SESSION_ID).toBeDefined();
 
     await page.context().addCookies([
       {
         name: "next-auth.session-token",
-        value: process.env.E2E_GITHUB_SESSION_ID as string,
+        value: process.env.E2E_USER_SESSION_ID as string,
         domain: "localhost",
         path: "/",
         sameSite: "Lax",

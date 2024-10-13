@@ -141,20 +141,18 @@ You shouldn't need to change the default value here. This is a variable used by 
 NEXTAUTH_URL=http://localhost:3000/api/auth
 ```
 
-### E2E_GITHUB_SESSION_ID
+### E2E_USER_SESSION_ID
 
 This is the sessionToken uuid that .
 This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
 
-### E2E_GITHUB_USER_ID
+### E2E_USER_ID
 
 This is the userId if the E2E user used for testing .
 This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
 
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
 **Example .env file can be found [here](./sample.env). You can rename this to .env to get started**
-
-## 👨‍💻 E2E Test set up
 
 ## 👨‍💻 Contribution Guidelines
 
@@ -173,10 +171,22 @@ To run the end-to-end tests using Playwright, you need to configure your environ
 
 Please ensure you have the following variables set in your `.env` file:
 
-- `E2E_GITHUB_EMAIL`: The email of the GitHub user for testing.
-- `E2E_GITHUB_PASSWORD`: The password for the GitHub user.
+- `E2E_USER_ID`: The id of the E2E user for testing.
+- `E2E_USER_EMAIL`: The email of the E2E user for testing.
+- `E2E_USER_SESSION_ID`: The session id that the user will use to authenticate.
 
-**Important:** The GitHub user used for these tests must **not** have Multi-Factor Authentication (MFA) enabled. It's recommended to create a new GitHub account specifically for these tests, separate from your personal account, which should have MFA enabled for security.
+
+Note the sample .env [here](./sample.env) is fine to use.
+
+### Session and User setup
+
+First you need to add your E2E test user to your locally running database. Do this by running the following script
+
+```
+npm run e2e:seed
+```
+
+This will create a user and session for your E2E tests. Details of the E2E user created can be seen [here](./drizzle/seedE2E.ts)
 
 ### Running the Tests
 

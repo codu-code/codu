@@ -8,8 +8,9 @@ import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 const DATABASE_URL = process.env.DATABASE_URL || "";
-const E2E_SESSION_ID = process.env.E2E_GITHUB_SESSION_ID || "";
-const E2E_USER_ID = process.env.E2E_GITHUB_USER_ID || "";
+const E2E_SESSION_ID = process.env.E2E_USER_SESSION_ID || "";
+const E2E_USER_ID = process.env.E2E_USER_ID || "";
+const E2E_USER_EMAIL = process.env.E2E_USER_EMAIL || "";
 
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");
@@ -20,6 +21,10 @@ if (!E2E_SESSION_ID) {
 }
 
 if (!E2E_USER_ID) {
+  throw new Error("E2E_USER_ID is not set");
+}
+
+if (!E2E_USER_EMAIL) {
   throw new Error("E2E_USER_ID is not set");
 }
 
@@ -50,7 +55,7 @@ const main = async () => {
         max: 999,
       })}`,
       name,
-      email: chance.email(),
+      email: process.env.E2E_USER_EMAIL,
       image: `https://robohash.org/${encodeURIComponent(name)}?bgset=bg1`,
       location: chance.country({ full: true }),
       bio: chance.sentence({ words: 10 }),
