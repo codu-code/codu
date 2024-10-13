@@ -57,10 +57,12 @@ type UserDetails = {
   workplace: string;
   image: string;
 };
+
 type ProfilePhoto = {
   status: "success" | "error" | "loading" | "idle";
   url: string;
 };
+
 export default function AdditionalSignUpDetails({
   details,
 }: {
@@ -113,8 +115,8 @@ function SlideOne({ details }: { details: UserDetails }) {
     url: details.image,
   });
   const { username, name, location } = details;
-  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
-  const { mutate: updateUserPhotoUrl } =
+  const { mutateAsync: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutateAsync: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
   const {
     register,
@@ -132,14 +134,19 @@ function SlideOne({ details }: { details: UserDetails }) {
       toast.error("Invalid file upload.");
       return;
     }
+    try {
+      const response = await uploadFile(signedUrl, file);
+      const { fileLocation } = response;
+      await updateUserPhotoUrl({
+        url: fileLocation,
+      });
 
-    const response = await uploadFile(signedUrl, file);
-    const { fileLocation } = response;
-    await updateUserPhotoUrl({
-      url: fileLocation,
-    });
-
-    return fileLocation;
+      return fileLocation;
+    } catch (error) {
+      setProfilePhoto({ status: "error", url: "" });
+      toast.error("Failed to upload profile photo. Please try again.");
+      return null;
+    }
   };
   const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -200,7 +207,7 @@ function SlideOne({ details }: { details: UserDetails }) {
         <div className="mx-4 my-4">
           <Field className="flex-grow">
             <Label>Profile Picture</Label>
-            <div className="mt-3 flex items-center justify-between gap-4">
+            <div className="mt-3 flex items-center justify-between gap-4 px-3">
               <Avatar
                 square
                 src={
@@ -212,7 +219,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                 alt="Profile photo upload section"
                 className="h-16 w-16 overflow-hidden rounded-full"
               />
-              <div>
+              <div className=" pt-[30px]">
                 <Button
                   color="dark/white"
                   type="button"
@@ -231,7 +238,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                   ref={fileInputRef}
                 />
                 <Text className="mt-1 text-xs text-gray-500">
-                  JPG, GIF or PNG. 1MB max.
+                  JPG, GIF or PNG. 10MB max.
                 </Text>
               </div>
             </div>
