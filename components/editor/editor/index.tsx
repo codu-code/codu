@@ -8,7 +8,6 @@ import { TiptapEditorProps } from "./props";
 import { TiptapExtensions } from "./extensions";
 import { EditorBubbleMenu } from "./components/bubble-menu";
 import { MediaResizer } from "./components/image-resizer";
-import Toolbar from "./components/Toolbar/Toolbar";
 
 interface EditorProps {
   initialValue: string;
@@ -40,7 +39,6 @@ export default function Editor({ onChange, initialValue }: EditorProps) {
         editor?.chain().focus().run();
       }}
     >
-      {editor && <Toolbar editor={editor} />}
       {editor && <MediaResizer editor={editor} />}
       {editor && (
         <EditorBubbleMenu editor={editor} className="p-1 font-extrabold" />
