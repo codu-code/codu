@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -39,6 +39,10 @@ import { Select } from "@/components/ui-components/select";
 import { Button } from "@/components/ui-components/button";
 import { Heading, Subheading } from "@/components/ui-components/heading";
 import { Divider } from "@/components/ui-components/divider";
+import { Avatar } from "@/components/ui-components/avatar";
+import { Text } from "@/components/ui-components/text";
+import { api } from "@/server/trpc/react";
+import { uploadFile } from "@/utils/s3helpers";
 
 type UserDetails = {
   username: string;
@@ -51,8 +55,12 @@ type UserDetails = {
   levelOfStudy: string;
   jobTitle: string;
   workplace: string;
+  image: string;
 };
-
+type ProfilePhoto = {
+  status: "success" | "error" | "loading" | "idle";
+  url: string;
+};
 export default function AdditionalSignUpDetails({
   details,
 }: {
@@ -99,9 +107,15 @@ export default function AdditionalSignUpDetails({
 
 function SlideOne({ details }: { details: UserDetails }) {
   const router = useRouter();
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [profilePhoto, setProfilePhoto] = useState<ProfilePhoto>({
+    status: "idle",
+    url: details.image,
+  });
   const { username, name, location } = details;
-
+  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutate: updateUserPhotoUrl } =
+    api.profile.updateProfilePhotoUrl.useMutation();
   const {
     register,
     handleSubmit,
@@ -110,6 +124,53 @@ function SlideOne({ details }: { details: UserDetails }) {
     resolver: zodResolver(slideOneSchema),
     defaultValues: { username, name, location },
   });
+  const uploadToUrl = async (signedUrl: string, file: File) => {
+    setProfilePhoto({ status: "loading", url: "" });
+
+    if (!file) {
+      setProfilePhoto({ status: "error", url: "" });
+      toast.error("Invalid file upload.");
+      return;
+    }
+
+    const response = await uploadFile(signedUrl, file);
+    const { fileLocation } = response;
+    await updateUserPhotoUrl({
+      url: fileLocation,
+    });
+
+    return fileLocation;
+  };
+  const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const { size, type } = file;
+
+      await getUploadUrl(
+        { size, type },
+        {
+          onError(error) {
+            if (error) return toast.error(error.message);
+            return toast.error(
+              "Something went wrong uploading the photo, please retry.",
+            );
+          },
+          async onSuccess(signedUrl) {
+            const url = await uploadToUrl(signedUrl, file);
+            if (!url) {
+              return toast.error(
+                "Something went wrong uploading the photo, please retry.",
+              );
+            }
+            setProfilePhoto({ status: "success", url });
+            toast.success(
+              "Profile photo successfully updated. This may take a few minutes to update around the site.",
+            );
+          },
+        },
+      );
+    }
+  };
 
   const onFormSubmit = async (data: TypeSlideOneSchema) => {
     try {
@@ -135,6 +196,47 @@ function SlideOne({ details }: { details: UserDetails }) {
           </Subheading>
         </div>
         <Divider className="my-4 mt-4" />
+
+        <div className="mx-4 my-4">
+          <Field className="flex-grow">
+            <Label>Profile Picture</Label>
+            <div className="mt-3 flex items-center justify-between gap-4">
+              <Avatar
+                square
+                src={
+                  profilePhoto.status === "error" ||
+                  profilePhoto.status === "loading"
+                    ? undefined
+                    : `${profilePhoto.url}`
+                }
+                alt="Profile photo upload section"
+                className="h-16 w-16 overflow-hidden rounded-full"
+              />
+              <div>
+                <Button
+                  color="dark/white"
+                  type="button"
+                  className="h-[30px] rounded-md text-xs"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Change avatar
+                </Button>
+                <Input
+                  type="file"
+                  id="file-input"
+                  name="user-photo"
+                  accept="image/png, image/gif, image/jpeg"
+                  onChange={imageChange}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+                <Text className="mt-1 text-xs text-gray-500">
+                  JPG, GIF or PNG. 1MB max.
+                </Text>
+              </div>
+            </div>
+          </Field>
+        </div>
         <div className="mx-4">
           <Field>
             <Label>Full Name</Label>
