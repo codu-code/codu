@@ -1,39 +1,22 @@
 import { db } from "@/server/db";
-import { emailVerificationToken, user } from "@/server/db/schema";
+import { user } from "@/server/db/schema";
 import crypto from "crypto";
 import sendEmail from "./sendEmail";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+
+function getBaseUrl() {
+  if (typeof window !== "undefined") return "";
+  const env = process.env.DOMAIN_NAME || process.env.VERCEL_URL;
+  if (env) return "https://" + env;
+  return "http://localhost:3000";
+}
 
 export const generateEmailToken = () => {
   return crypto.randomBytes(64).toString("hex");
 };
 
-export const storeTokenInDb = async (
-  userId: string,
-  token: string,
-  expiresAt: Date,
-  email: string,
-) => {
-  try {
-    const newToken = await db
-      .insert(emailVerificationToken)
-      .values({
-        userId,
-        token,
-        expiresAt,
-        email,
-      })
-      .returning();
-
-    return newToken[0];
-  } catch (error) {
-    console.error("Error storing token in database:", error);
-    throw new Error("Failed to store email verification token");
-  }
-};
-
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const verificationLink = `${process.env.NEXT_PUBLIC_BACKEND_URL}/verify-email?token=${token}`;
+  const verificationLink = `${getBaseUrl()}/verify-email?token=${token}`;
   const subject = "Verify Your Email Address";
   const htmlMessage = `
     <!DOCTYPE html>
@@ -111,41 +94,12 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   }
 };
 
-export const getTokenFromDb = async (token: string, userId: string) => {
-  try {
-    const tokenFromDb = await db
-      .select()
-      .from(emailVerificationToken)
-      .where(
-        and(
-          eq(emailVerificationToken.token, token),
-          eq(emailVerificationToken.userId, userId),
-        ),
-      );
-    return tokenFromDb;
-  } catch (error) {
-    console.error("Error fetching token from database:", error);
-    throw new Error("Failed to fetch email verification token");
-  }
-};
-
 export const updateEmail = async (userId: string, newEmail: string) => {
   try {
     await db.update(user).set({ email: newEmail }).where(eq(user.id, userId));
   } catch (error) {
     console.error("Error updating email in database:", error);
     throw new Error("Failed to update email");
-  }
-};
-
-export const deleteTokenFromDb = async (token: string) => {
-  try {
-    await db
-      .delete(emailVerificationToken)
-      .where(eq(emailVerificationToken.token, token));
-  } catch (error) {
-    console.error("Error deleting token from database:", error);
-    throw new Error("Failed to delete email verification token");
   }
 };
 

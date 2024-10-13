@@ -78,9 +78,11 @@ export default defineConfig({
     // },
   ],
 
+  outputDir: "playwright-report",
+
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run dev",
+    command: "npm run dev:e2e",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
   },
