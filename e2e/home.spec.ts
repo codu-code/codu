@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Confirm  homepage content", () => {
-  test("Unauthenticated view", async ({ page }) => {
+test.describe("Testing homepage views", () => {
+  test("Unauthenticated homepage view", async ({ page }) => {
     await page.context().clearCookies();
     await page.goto("http://localhost:3000/");
     // Check headers
@@ -13,7 +13,7 @@ test.describe("Confirm  homepage content", () => {
     );
   });
 
-  test("Authenticated view", async ({ page, isMobile }) => {
+  test("Authenticated homepage view", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
 
     await expect(page.locator("h1")).toContainText("A space for coders");
@@ -22,7 +22,7 @@ test.describe("Confirm  homepage content", () => {
     if (!isMobile) await expect(page.getByText("Your Posts")).toBeVisible();
   });
 
-  test("Different devices", async ({ page, isMobile }) => {
+  test("Authenticated landing page view", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
 
     const elementVisible = await page

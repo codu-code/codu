@@ -7,9 +7,7 @@ test.describe("Login Page", () => {
     const welcomeMessage = page.getByText("Sign in or create your accounttton");
     expect(welcomeMessage).toBeTruthy();
   });
-  test("should display the Github login button and complete Github SSO flow", async ({
-    page,
-  }) => {
+  test("should display the Github login button", async ({ page }) => {
     await page.context().clearCookies();
     await page.goto("http://localhost:3000/get-started");
     await page.waitForTimeout(3000);
