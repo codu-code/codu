@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   BoldIcon,
   ItalicIcon,
-  StrikethroughIcon,
   CodeIcon,
 } from "lucide-react";
 
@@ -35,12 +34,6 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       isActive: () => props.editor.isActive("italic"),
       command: () => props.editor.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
-    },
-    {
-      name: "strike",
-      isActive: () => props.editor.isActive("strike"),
-      command: () => props.editor.chain().focus().toggleStrike().run(),
-      icon: StrikethroughIcon,
     },
     {
       name: "code",
