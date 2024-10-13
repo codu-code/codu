@@ -3,20 +3,14 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TiptapLink from "@tiptap/extension-link";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import TiptapUnderline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
-import { Color } from "@tiptap/extension-color";
 import { Markdown } from "tiptap-markdown";
-import Highlight from "@tiptap/extension-highlight";
 import SlashCommand from "./slash-command";
 import { InputRule } from "@tiptap/core";
 import UpdatedImage from "./updated-image";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
-import TextAlign from "@tiptap/extension-text-align";
-import Subscript from "@tiptap/extension-subscript";
-import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 
 import type { NodeViewProps } from "@tiptap/react";
@@ -145,27 +139,17 @@ export const TiptapExtensions = [
     },
   }),
   SlashCommand,
-  TiptapUnderline,
   TextStyle,
-  Color,
   Link.configure({
     HTMLAttributes: {
       class:
         "text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer",
     },
   }),
-  Highlight.configure({
-    multicolor: true,
-  }),
   Markdown.configure({
     html: false,
     transformCopiedText: true,
   }),
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
-  Subscript,
-  Superscript,
   // margin controlled in global.css
   Youtube.configure({
     width: 480,
