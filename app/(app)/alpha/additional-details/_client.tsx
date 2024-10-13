@@ -219,7 +219,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                 alt="Profile photo upload section"
                 className="h-16 w-16 overflow-hidden rounded-full"
               />
-              <div className=" pt-[30px]">
+              <div className="pt-[30px]">
                 <Button
                   color="dark/white"
                   type="button"
