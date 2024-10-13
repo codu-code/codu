@@ -6,6 +6,8 @@ import fs from "fs";
 const authFolder = path.join(__dirname, "../playwright/.auth");
 const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
 
+// checks if the files/folders are present to support an authenticated browser state
+// we needed to add these files to the gitignore to prevent people sharing their GH creds in PRs by accident
 if (!fs.existsSync(authFile)) {
   console.log(
     "Browser state file was not found. An example file is being created:",
