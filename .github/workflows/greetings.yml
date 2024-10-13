@@ -21,5 +21,5 @@ jobs:
         uses: garg3133/welcome-new-contributors@v1.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: 'Hello @{{ contributor }}, thanks for opening your first issue! Your contribution is valuable to us. The maintainers will review this issue and provide feedback as soon as possible.'
-          pr-message: 'Hello @{{ contributor }}, thanks for opening your first Pull Request. The maintainers will review this Pull Request and provide feedback as soon as possible. Keep up the great work!'
+          issue-message: 'Hello @contributor_name, thanks for opening your first issue! Your contribution is valuable to us. The maintainers will review this issue and provide feedback as soon as possible.'
+          pr-message: 'Hello @contributor_name, thanks for opening your first Pull Request. The maintainers will review this Pull Request and provide feedback as soon as possible. Keep up the great work!'
