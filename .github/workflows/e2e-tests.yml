@@ -89,6 +89,12 @@ jobs:
         run: npx playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
+      - name: Create authenticated browser folder and file
+        run: |
+          echo ${{ github.workspace }}
+          mkdir -p ${{ github.workspace }}/playwright/.auth
+          echo "{"cookies" : []}" > ${{ github.workspace }}/playwright/.auth/browser.json
+
       - name: Seed database
         run: |
           npm run db:push
