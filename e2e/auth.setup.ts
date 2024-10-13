@@ -3,15 +3,32 @@ import path from "path";
 import dotenv from "dotenv";
 import fs from "fs";
 
+const authFolder = path.join(__dirname, "../playwright/.auth");
 const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
 
 if (!fs.existsSync(authFile)) {
-  // If it doesn't exist, create an example JSON file
-  fs.writeFileSync(authFile, JSON.stringify({ cookies: [] }), "utf8");
   console.log(
-    "Browser state file was not found. An example file has been created at:",
-    authFile,
+    "Browser state file was not found. An example file is being created:",
   );
+  if (!fs.existsSync(authFolder)) {
+    console.log("Browser state directory was not found. Folder being created:");
+    fs.mkdir(authFolder, { recursive: true }, (err) => {
+      if (err) throw new Error("Error creating playwright/.auth folder");
+    });
+  }
+  if (!fs.existsSync(authFile)) {
+    console.log("Browser.json file was not found. File being created:");
+
+    fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
+      if (err) {
+        throw new Error("Error creating browser.json file");
+      }
+      console.log(
+        "Browser state file was not found. An example file has been created at:",
+        authFile,
+      );
+    });
+  }
 }
 
 const browserState = require(authFile);
@@ -41,8 +58,6 @@ setup("authenticate", async ({ page }) => {
   }
 
   try {
-    expect(process.env.E2E_GITHUB_EMAIL).toBeDefined();
-    expect(process.env.E2E_GITHUB_PASSWORD).toBeDefined();
     expect(process.env.E2E_GITHUB_SESSION_ID).toBeDefined();
 
     await page.context().addCookies([
@@ -54,15 +69,6 @@ setup("authenticate", async ({ page }) => {
         sameSite: "Lax",
       },
     ]);
-
-    let authCookieFound = false;
-    while (!authCookieFound) {
-      authCookieFound = !!(await page.context().cookies()).find(
-        (cookie) => cookie.name === "next-auth.session-token",
-      );
-      // only checking cookies once per second
-      await page.waitForTimeout(1000);
-    }
 
     expect(
       (await page.context().cookies()).find(

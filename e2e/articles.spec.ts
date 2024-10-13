@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 
-test.skip("Articles", () => {
+test.describe("Articles", () => {
   test("Should load more articles when scrolling to the end of the page", async ({
     page,
     isMobile,
