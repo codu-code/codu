@@ -16,6 +16,7 @@ if (!fs.existsSync(authFile)) {
   if (!fs.existsSync(authFolder)) {
     console.log("Browser state directory was not found. Folder being created:");
     fs.mkdir(authFolder, { recursive: true }, (err) => {
+      console.log(err);
       if (err) throw new Error("Error creating playwright/.auth folder", err);
     });
   }
@@ -24,6 +25,7 @@ if (!fs.existsSync(authFile)) {
 
     fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
       if (err) {
+        console.log(err);
         throw new Error("Error creating browser.json file", err);
       }
       console.log(
