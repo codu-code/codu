@@ -8,44 +8,44 @@ const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
 
 // checks if the files/folders are present to support an authenticated browser state
 // we needed to add these files to the gitignore to prevent people sharing their GH creds in PRs by accident
-if (!fs.existsSync(authFile)) {
-  console.log(
-    "Browser state file was not found. An example file is being created:",
-  );
+// if (!fs.existsSync(authFile)) {
+//   console.log(
+//     "Browser state file was not found. An example file is being created:",
+//   );
 
-  if (!fs.existsSync(authFolder)) {
-    console.log("Browser state directory was not found. Folder being created:");
+//   if (!fs.existsSync(authFolder)) {
+//     console.log("Browser state directory was not found. Folder being created:");
 
-    fs.mkdir(authFolder, { recursive: true }, (err) => {
-      if (err) {
-        console.log("Error creating folder", err);
-        return;
-      }
-      console.log("Browser state directory was created successfully");
-      createAuthFile(); // Now create the file after the directory is created
-    });
-  } else {
-    createAuthFile(); // Create the file if the folder already exists
-  }
-} else {
-  console.log("Browser state file already exists.");
-}
+//     fs.mkdir(authFolder, { recursive: true }, (err) => {
+//       if (err) {
+//         console.log("Error creating folder", err);
+//         return;
+//       }
+//       console.log("Browser state directory was created successfully");
+//       createAuthFile(); // Now create the file after the directory is created
+//     });
+//   } else {
+//     createAuthFile(); // Create the file if the folder already exists
+//   }
+// } else {
+//   console.log("Browser state file already exists.");
+// }
 
-function createAuthFile() {
-  if (!fs.existsSync(authFile)) {
-    console.log("Browser.json file was not found. File being created:");
+// function createAuthFile() {
+//   if (!fs.existsSync(authFile)) {
+//     console.log("Browser.json file was not found. File being created:");
 
-    fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
-      if (err) {
-        console.log("Error creating browser.json file", err);
-        return;
-      }
-      console.log("Browser.json file was created successfully");
-    });
-  } else {
-    console.log("Browser.json file already exists.");
-  }
-}
+//     fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
+//       if (err) {
+//         console.log("Error creating browser.json file", err);
+//         return;
+//       }
+//       console.log("Browser.json file was created successfully");
+//     });
+//   } else {
+//     console.log("Browser.json file already exists.");
+//   }
+// }
 
 console.log("browser.json exists");
 console.log(fs.existsSync(authFile));
