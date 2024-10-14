@@ -80,11 +80,6 @@ export default async function Page({
           ),
         orderBy: (posts, { desc }) => [desc(posts.published)],
       },
-      BannedUsers: {
-        columns: {
-          id: true,
-        },
-      },
     },
     where: (users, { eq }) => eq(users.username, username),
   });
@@ -93,22 +88,16 @@ export default async function Page({
     notFound();
   }
 
-  const accountLocked = !!profile.BannedUsers;
+  const bannedUser = await db.query.banned_users.findFirst({
+    where: (bannedUsers, { eq }) => eq(bannedUsers.userId, profile.id),
+  });
+
+  const accountLocked = !!bannedUser;
   const session = await getServerAuthSession();
   const isOwner = session?.user?.id === profile.id;
 
-  type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
-    Partial<Type>;
-
-  type Profile = typeof profile;
-  const cleanedProfile: MakeOptional<Profile, "BannedUsers"> = {
-    ...profile,
-  };
-
-  delete cleanedProfile.BannedUsers;
-
   const shapedProfile = {
-    ...cleanedProfile,
+    ...profile,
     posts: accountLocked
       ? []
       : profile.posts.map((post) => ({
