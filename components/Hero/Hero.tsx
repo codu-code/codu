@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const CoduLogo = ({ className }: { className?: string }) => {
   return (
@@ -57,22 +57,46 @@ const NightSky = () => {
       50% { transform: translate(4px, -3px); }
     }
     @keyframes shootingStar {
-      0% { transform: translate(0, 0) scale(0); opacity: 0; }
-      10% { opacity: 1; }
-      100% { transform: translate(100px, 100px) scale(1) rotate(45deg); opacity: 0; }
+      0% { transform: translate(0, 0); opacity: 1; }
+      100% { transform: translate(300px, 300px); opacity: 0; }
     }
     .twinkle { animation: twinkle 4s ease-in-out infinite; }
     .gentle-move1 { animation: gentleMove1 25s ease-in-out infinite; }
     .gentle-move2 { animation: gentleMove2 30s ease-in-out infinite; }
     .gentle-move3 { animation: gentleMove3 35s ease-in-out infinite; }
     .shooting-star {
-      animation: shootingStar 2s ease-out;
-      animation-delay: calc(var(--delay) * 1s);
-    }
-    .gradient-mask {
-      mask-image: radial-gradient(circle, black 60%, transparent 80%);
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      top: -4px;
+      left: -4px;
+      animation: shootingStar 1.5s linear;
+      animation-iteration-count: 1;
     }
   `;
+
+  useEffect(() => {
+    const createShootingStar = () => {
+      const star = document.createElement("div");
+      star.className = "shooting-star";
+      document.querySelector(".night-sky-container")!.appendChild(star);
+
+      star.addEventListener("animationend", () => {
+        star.remove();
+      });
+    };
+
+    const interval = setInterval(() => {
+      if (Math.random() < 0.3) {
+        // 30% chance every 3 seconds
+        createShootingStar();
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const starPositions = [
     { x: 10, y: 15 },
@@ -167,44 +191,20 @@ const NightSky = () => {
     ));
   };
 
-  const generateShootingStar = () => {
-    const delay = seededRandom() * 15; // 0 to 15 seconds delay
-    const duration = 1 + seededRandom() * 2; // 1 to 3 seconds duration
-    const angle = seededRandom() * 60 - 30; // -30 to 30 degrees
-    const startX = seededRandom() * 100; // Start anywhere along the width
-    const startY = seededRandom() * 20; // Start near the top
-    return (
-      <circle
-        cx={startX}
-        cy={startY}
-        r="0.5"
-        fill="white"
-        className="shooting-star"
-        style={
-          {
-            "--delay": delay,
-            animationDuration: `${duration}s`,
-            transform: `rotate(${angle}deg)`,
-          } as React.CSSProperties
-        }
-      />
-    );
-  };
-
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="xMidYMid slice"
-      style={{ background: "transparent", width: "100%", height: "100%" }}
-      className="absolute inset-0"
-    >
+    <div className="night-sky-container relative h-full w-full">
       <style>{styles}</style>
-      {generateStars()}
-      {generateAnimatedStars()}
-      {generateShootingStar()}
-      {generateShootingStar()}
-    </svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid slice"
+        style={{ background: "transparent", width: "100%", height: "100%" }}
+        className="absolute inset-0"
+      >
+        {generateStars()}
+        {generateAnimatedStars()}
+      </svg>
+    </div>
   );
 };
 
