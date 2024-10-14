@@ -42,7 +42,7 @@ import { Divider } from "@/components/ui-components/divider";
 import { Avatar } from "@/components/ui-components/avatar";
 import { Text } from "@/components/ui-components/text";
 import { api } from "@/server/trpc/react";
-import { uploadFile } from "@/utils/s3helpers";
+import { uploadToUrl } from "@/utils/fileUpload";
 
 type UserDetails = {
   username: string;
@@ -126,53 +126,36 @@ function SlideOne({ details }: { details: UserDetails }) {
     resolver: zodResolver(slideOneSchema),
     defaultValues: { username, name, location },
   });
-  const uploadToUrl = async (signedUrl: string, file: File) => {
-    setProfilePhoto({ status: "loading", url: "" });
 
-    if (!file) {
-      setProfilePhoto({ status: "error", url: "" });
-      toast.error("Invalid file upload.");
-      return;
-    }
-    try {
-      const response = await uploadFile(signedUrl, file);
-      const { fileLocation } = response;
-      await updateUserPhotoUrl({
-        url: fileLocation,
-      });
-
-      return fileLocation;
-    } catch (error) {
-      setProfilePhoto({ status: "error", url: "" });
-      toast.error("Failed to upload profile photo. Please try again.");
-      return null;
-    }
-  };
   const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       const { size, type } = file;
 
+      setProfilePhoto({ status: "loading", url: "" });
+
       await getUploadUrl(
         { size, type },
         {
           onError(error) {
-            if (error) return toast.error(error.message);
-            return toast.error(
-              "Something went wrong uploading the photo, please retry.",
+            toast.error(
+              error.message ||
+                "Something went wrong uploading the photo, please retry.",
             );
+            setProfilePhoto({ status: "error", url: "" });
           },
           async onSuccess(signedUrl) {
-            const url = await uploadToUrl(signedUrl, file);
-            if (!url) {
-              return toast.error(
-                "Something went wrong uploading the photo, please retry.",
-              );
+            const { status, fileLocation } = await uploadToUrl({
+              signedUrl,
+              file,
+              updateUserPhotoUrl,
+            });
+
+            if (status === "success" && fileLocation) {
+              setProfilePhoto({ status: "success", url: fileLocation });
+            } else {
+              setProfilePhoto({ status: "error", url: "" });
             }
-            setProfilePhoto({ status: "success", url });
-            toast.success(
-              "Profile photo successfully updated. This may take a few minutes to update around the site.",
-            );
           },
         },
       );

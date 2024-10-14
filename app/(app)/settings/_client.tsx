@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import type { saveSettingsInput } from "@/schema/profile";
 import { saveSettingsSchema } from "@/schema/profile";
 
-import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
 import { Loader2 } from "lucide-react";
@@ -25,6 +24,7 @@ import { Textarea } from "@/components/ui-components/textarea";
 import { Switch } from "@/components/ui-components/switch";
 import { Divider } from "@/components/ui-components/divider";
 import { Text } from "@/components/ui-components/text";
+import { uploadToUrl } from "@/utils/fileUpload";
 
 type User = Pick<
   typeof user.$inferSelect,
@@ -75,10 +75,10 @@ const Settings = ({ profile }: { profile: User }) => {
   });
 
   const { mutate, isError, isSuccess } = api.profile.edit.useMutation();
-  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
-  const { mutate: updateUserPhotoUrl } =
+  const { mutateAsync: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutateAsync: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
-  const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
+  const { mutateAsync: updateEmail } = api.profile.updateEmail.useMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,49 +104,35 @@ const Settings = ({ profile }: { profile: User }) => {
     mutate({ ...values, newsletter: weeklyNewsletter, emailNotifications });
   };
 
-  const uploadToUrl = async (signedUrl: string, file: File) => {
-    setProfilePhoto({ status: "loading", url: "" });
-
-    if (!file) {
-      setProfilePhoto({ status: "error", url: "" });
-      toast.error("Invalid file upload.");
-      return;
-    }
-
-    const response = await uploadFile(signedUrl, file);
-    const { fileLocation } = response;
-    await updateUserPhotoUrl({
-      url: fileLocation,
-    });
-
-    return fileLocation;
-  };
-
   const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       const { size, type } = file;
 
+      setProfilePhoto({ status: "loading", url: "" });
+
       await getUploadUrl(
         { size, type },
         {
           onError(error) {
-            if (error) return toast.error(error.message);
-            return toast.error(
-              "Something went wrong uploading the photo, please retry.",
+            toast.error(
+              error.message ||
+                "Something went wrong uploading the photo, please retry.",
             );
+            setProfilePhoto({ status: "error", url: "" });
           },
           async onSuccess(signedUrl) {
-            const url = await uploadToUrl(signedUrl, file);
-            if (!url) {
-              return toast.error(
-                "Something went wrong uploading the photo, please retry.",
-              );
+            const { status, fileLocation } = await uploadToUrl({
+              signedUrl,
+              file,
+              updateUserPhotoUrl,
+            });
+
+            if (status === "success" && fileLocation) {
+              setProfilePhoto({ status: "success", url: fileLocation });
+            } else {
+              setProfilePhoto({ status: "error", url: "" });
             }
-            setProfilePhoto({ status: "success", url });
-            toast.success(
-              "Profile photo successfully updated. This may take a few minutes to update around the site.",
-            );
           },
         },
       );
