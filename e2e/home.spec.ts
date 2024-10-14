@@ -4,7 +4,6 @@ test.describe("Testing homepage views", () => {
   test("Authenticated homepage view", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
 
-    await expect(page.locator("h1")).toContainText("A space for coders");
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
 
     if (!isMobile)
@@ -18,10 +17,12 @@ test.describe("Testing homepage views", () => {
     await page.context().clearCookies();
     await page.goto("http://localhost:3000/");
 
-    await expect(page.locator("h1")).toContainText("A space for coders");
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
     await expect(page.locator("h2")).toContainText(
       "Sign up today to become a writer and get a free invite to our Discord community",
+    );
+    await expect(page.locator("h1")).toContainText(
+      "The free web developer community",
     );
   });
 
