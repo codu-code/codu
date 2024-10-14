@@ -47,6 +47,10 @@ function createAuthFile() {
   }
 }
 
+console.log("browser.json exists");
+console.log(fs.existsSync(authFile));
+console.log(fs.readFileSync(authFile));
+
 const browserState = require(authFile);
 
 // defaults to 1 if expires not passed. This will always fail
