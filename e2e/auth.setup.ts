@@ -1,57 +1,7 @@
 import { test as setup, expect } from "@playwright/test";
 import path from "path";
 import dotenv from "dotenv";
-import fs from "fs";
-
-const authFolder = path.join(__dirname, "../playwright/.auth");
-const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
-
-// checks if the files/folders are present to support an authenticated browser state
-// we needed to add these files to the gitignore to prevent people sharing their GH creds in PRs by accident
-// if (!fs.existsSync(authFile)) {
-//   console.log(
-//     "Browser state file was not found. An example file is being created:",
-//   );
-
-//   if (!fs.existsSync(authFolder)) {
-//     console.log("Browser state directory was not found. Folder being created:");
-
-//     fs.mkdir(authFolder, { recursive: true }, (err) => {
-//       if (err) {
-//         console.log("Error creating folder", err);
-//         return;
-//       }
-//       console.log("Browser state directory was created successfully");
-//       createAuthFile(); // Now create the file after the directory is created
-//     });
-//   } else {
-//     createAuthFile(); // Create the file if the folder already exists
-//   }
-// } else {
-//   console.log("Browser state file already exists.");
-// }
-
-// function createAuthFile() {
-//   if (!fs.existsSync(authFile)) {
-//     console.log("Browser.json file was not found. File being created:");
-
-//     fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
-//       if (err) {
-//         console.log("Error creating browser.json file", err);
-//         return;
-//       }
-//       console.log("Browser.json file was created successfully");
-//     });
-//   } else {
-//     console.log("Browser.json file already exists.");
-//   }
-// }
-
-console.log("browser.json exists");
-console.log(fs.existsSync(authFile));
-console.log(fs.readFileSync(authFile));
-
-const browserState = require(authFile);
+import browserState from "../playwright/.auth/browser.json";
 
 // defaults to 1 if expires not passed. This will always fail
 const hasFiveMinutes = (expires: number = 1) => {
@@ -95,7 +45,9 @@ setup("authenticate", async ({ page }) => {
         (cookie) => cookie.name === "next-auth.session-token",
       ),
     ).toBeTruthy();
-    await page.context().storageState({ path: authFile });
+    await page.context().storageState({
+      path: path.join(__dirname, "../playwright/.auth/browser.json"),
+    });
   } catch (err) {
     console.log("Error while authenticating E2E test user", err);
   }
