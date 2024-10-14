@@ -75,10 +75,10 @@ const Settings = ({ profile }: { profile: User }) => {
   });
 
   const { mutate, isError, isSuccess } = api.profile.edit.useMutation();
-  const { mutateAsync: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
   const { mutateAsync: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
-  const { mutateAsync: updateEmail } = api.profile.updateEmail.useMutation();
+  const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -216,7 +216,7 @@ const Settings = ({ profile }: { profile: User }) => {
                 ref={fileInputRef}
               />
               <Text className="mt-1 text-xs text-gray-500">
-                JPG, GIF or PNG. 1MB max.
+                JPG, GIF or PNG. 10MB max.
               </Text>
             </div>
           </div>

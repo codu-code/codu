@@ -27,7 +27,10 @@ export const uploadToUrl = async ({
   try {
     const response = await uploadFile(signedUrl, file);
     const { fileLocation } = response;
-
+    if (!fileLocation) {
+      toast.error("Failed to retrieve file location after upload.");
+      return { status: "error", fileLocation: null };
+    }
     await updateUserPhotoUrl({ url: fileLocation });
     toast.success("Profile photo successfully updated.");
 

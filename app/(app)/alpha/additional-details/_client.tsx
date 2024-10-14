@@ -115,7 +115,7 @@ function SlideOne({ details }: { details: UserDetails }) {
     url: details.image,
   });
   const { username, name, location } = details;
-  const { mutateAsync: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
   const { mutateAsync: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
   const {
