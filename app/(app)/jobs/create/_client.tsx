@@ -23,7 +23,7 @@ import { notFound } from "next/navigation";
 import React, { useRef, useState } from "react";
 
 export default function Content() {
-  const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOB_POST_CREATE);
+  const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
 
@@ -42,15 +42,13 @@ export default function Content() {
         </div>
         <Field>
           <div className="flex items-center space-x-4">
-            {imgUrl && (
-              <Image
-                src={imgUrl}
-                width={80}
-                height={80}
-                alt="Company Logo"
-                className="rounded-[10px]"
-              />
-            )}
+            <Image
+              src={imgUrl || "/images/company_placeholder.png"}
+              width={80}
+              height={80}
+              alt="Company Logo"
+              className="rounded-[10px]"
+            />
             <div>
               <Button
                 color="dark/white"
