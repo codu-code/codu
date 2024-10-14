@@ -8,26 +8,23 @@ const authFile = path.join(__dirname, "../playwright/.auth/browser.json");
 
 // checks if the files/folders are present to support an authenticated browser state
 // we needed to add these files to the gitignore to prevent people sharing their GH creds in PRs by accident
-
 if (!fs.existsSync(authFile)) {
   console.log(
     "Browser state file was not found. An example file is being created:",
   );
   if (!fs.existsSync(authFolder)) {
     console.log("Browser state directory was not found. Folder being created:");
-    try {
-      await fs.promises.mkdir(authFolder);
-    } catch (err) {
+    fs.mkdir(authFolder, { recursive: true }, (err) => {
       console.log(err);
       if (err) throw new Error("Error creating playwright/.auth folder", err);
-    }
+    });
+    console.log("Browser state directory was created successfully");
   }
   if (!fs.existsSync(authFile)) {
     console.log("Browser.json file was not found. File being created:");
-    try {
-      await fs.promises.writeFile(authFile, JSON.stringify({ cookies: [] }));
-    } catch (err) {
+    fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
       if (err) {
+        console.log("Error creating browser.json file", err);
         console.log(err);
         throw new Error("Error creating browser.json file", err);
       }
@@ -35,7 +32,8 @@ if (!fs.existsSync(authFile)) {
         "Browser state file was not found. An example file has been created at:",
         authFile,
       );
-    }
+    });
+    console.log("Browser.json file was created successfully");
   }
 }
 
