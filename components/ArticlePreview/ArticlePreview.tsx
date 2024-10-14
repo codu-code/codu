@@ -56,8 +56,9 @@ const ArticlePreview: NextPage<Props> = ({
   bookmarkedInitialState = false,
 }) => {
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
+  const howManySavedToShow = 3;
   const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery({
-    limit: 3,
+    limit: howManySavedToShow,
   });
   const { data: session } = useSession();
   const bookmarks = bookmarksData?.bookmarks;
