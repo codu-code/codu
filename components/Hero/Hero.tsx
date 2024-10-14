@@ -219,7 +219,10 @@ export default function Hero() {
       >
         <NightSky />
         <div className="absolute left-1/2 top-1/2 z-10 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 transform space-y-4 px-4 text-center sm:px-6 lg:px-8">
-          <CoduLogo className="mx-auto mb-8 h-16 sm:h-20" aria-hidden="true" />
+          <CoduLogo
+            className="mx-auto mb-8 h-16 max-w-full sm:h-20"
+            aria-hidden="true"
+          />
           <h1
             id="hero-heading"
             className="text-2xl font-semibold text-white sm:text-4xl md:text-4xl"
