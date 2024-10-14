@@ -11,9 +11,7 @@ test.describe("Login Page", () => {
     await page.context().clearCookies();
     await page.goto("http://localhost:3000/get-started");
     await page.waitForTimeout(3000);
-    // const test123 = page.getByTestId("github-login-button");
     await expect(page.getByTestId("github-login-button")).toBeVisible();
-    //  expect(page.getByTestId("github-login-button")).toBeVisible();
   });
 
   test("should display the Gitlab login button", async ({ page }) => {
