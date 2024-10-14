@@ -41,7 +41,7 @@ const Home = async () => {
         )}
       </div>
 
-      <div className="mx-2">
+      <div className="mx-2" id={session ? "cta" : ""}>
         <div className="mt-6 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
           <h3 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
             Trending
