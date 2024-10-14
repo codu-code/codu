@@ -19,7 +19,12 @@ test.describe("Testing homepage views", () => {
     await expect(page.locator("h1")).toContainText("A space for coders");
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
 
-    if (!isMobile) await expect(page.getByText("Your Posts")).toBeVisible();
+    if (!isMobile)
+      await expect(
+        page.getByRole("link", {
+          name: "Your Posts",
+        }),
+      ).toBeVisible();
   });
 
   test("Authenticated landing page view", async ({ page, isMobile }) => {
