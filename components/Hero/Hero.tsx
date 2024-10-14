@@ -227,9 +227,9 @@ export default function Hero() {
             developer community
           </h1>
           <p className="mx-auto max-w-2xl text-sm text-neutral-300 sm:text-base md:text-lg">
-            {`Codú's community offers hundreds of tutorials, an online community, and answers to
-            questions on a wide range of web development topics. Sign up for a free account today
-            and join the fun.`}
+            {`Codú's community offers hundreds of tutorials, an online community, and answers 
+              questions on a wide range of web development topics. Sign up for a free account today
+            and join the community.`}
           </p>
         </div>
       </section>
