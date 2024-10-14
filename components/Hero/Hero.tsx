@@ -77,15 +77,14 @@ const NightSky = () => {
     }
   `;
 
+  const [shootingStars, setShootingStars] = useState<number[]>([]);
   useEffect(() => {
     const createShootingStar = () => {
-      const star = document.createElement("div");
-      star.className = "shooting-star";
-      document.querySelector(".night-sky-container")!.appendChild(star);
-
-      star.addEventListener("animationend", () => {
-        star.remove();
-      });
+      const id = Date.now();
+      setShootingStars((prev) => [...prev, id]);
+      setTimeout(() => {
+        setShootingStars((prev) => prev.filter((starId) => starId !== id));
+      }, 1500); // Match the duration of the shooting star animation
     };
 
     const interval = setInterval(() => {
@@ -141,7 +140,6 @@ const NightSky = () => {
     { x: 7, y: 37 },
   ];
 
-  // Simple pseudo-random number generator
   const seededRandom = (function () {
     const seed = 12345; // You can change this seed to get a different, but consistent, pattern
     let state = seed;
@@ -204,6 +202,9 @@ const NightSky = () => {
         {generateStars()}
         {generateAnimatedStars()}
       </svg>
+      {shootingStars.map((id) => (
+        <div key={id} className="shooting-star" />
+      ))}
     </div>
   );
 };
