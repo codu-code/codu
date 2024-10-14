@@ -17,6 +17,7 @@ import {
 } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 type ButtonOptions = {
   label: string;
@@ -55,8 +56,12 @@ const ArticlePreview: NextPage<Props> = ({
   bookmarkedInitialState = false,
 }) => {
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
+  const howManySavedToShow = 3;
+  const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery({
+    limit: howManySavedToShow,
+  });
   const { data: session } = useSession();
-
+  const bookmarks = bookmarksData?.bookmarks;
   const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
@@ -68,6 +73,13 @@ const ArticlePreview: NextPage<Props> = ({
     api.post.bookmark.useMutation({
       onSettled() {
         setIsBookmarked((isBookmarked) => !isBookmarked);
+      },
+      onSuccess: () => {
+        refetch();
+      },
+      onError: (error) => {
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
       },
     });
 

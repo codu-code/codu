@@ -3,29 +3,18 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TiptapLink from "@tiptap/extension-link";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import TiptapUnderline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
-import { Color } from "@tiptap/extension-color";
 import { Markdown } from "tiptap-markdown";
-import Highlight from "@tiptap/extension-highlight";
 import SlashCommand from "./slash-command";
 import { InputRule } from "@tiptap/core";
 import UpdatedImage from "./updated-image";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
-import TextAlign from "@tiptap/extension-text-align";
-import Subscript from "@tiptap/extension-subscript";
-import Superscript from "@tiptap/extension-superscript";
 import Youtube from "@tiptap/extension-youtube";
 
-import Table from "@tiptap/extension-table";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import TableRow from "@tiptap/extension-table-row";
 import type { NodeViewProps } from "@tiptap/react";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import CustomTableNodeView from "../components/Table/CustomTableNodeView";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 
 import { common, createLowlight } from "lowlight";
@@ -34,7 +23,6 @@ const lowlight = createLowlight(common);
 // Highlight syntax select your style from here (https://highlightjs.org/examples)
 import "highlight.js/styles/monokai-sublime.css";
 
-import CodeBlock from "../components/CodeBlock/CodeBlock";
 import DisableHeadingTextStyleShortcuts from "./disable-heading-text-style-shortcuts";
 
 // const CustomImage = TiptapImage.extend({
@@ -47,53 +35,13 @@ const CustomDocument = Document.extend({
   content: "heading block*",
 });
 
-export const CustomCodeBlockEdit = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer(CodeBlock);
-  },
-}).configure({ lowlight });
-
-// Two CodeBlockNodes need to be created to disable selector menu
-export const CustomCodeBlockReadOnly = CodeBlockLowlight.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CodeBlock {...props} readOnly />
-    ));
-  },
-}).configure({ lowlight });
-
-export const CustomTable = Table.extend({
-  addNodeView() {
-    return ReactNodeViewRenderer((props: NodeViewProps) => (
-      <CustomTableNodeView {...props} />
-    ));
-  },
-});
 export const TiptapExtensions = [
   CustomDocument,
-  CustomTable,
   // Table.configure({
   //   HTMLAttributes: {
   //     class: "bg-neutral-100 w-full  overflow-scroll",
   //   },
   // }),
-  TableRow.configure({
-    HTMLAttributes: {
-      class: "bg-neutral-900 border border-neutral-500 bg-red-500 flex-1 flex",
-    },
-  }),
-  TableHeader.configure({
-    HTMLAttributes: {
-      class:
-        "text-neutral-900 bg-neutral-300 border border-neutral-500 flex-1 flex text-center p-1",
-    },
-  }),
-  TableCell.configure({
-    HTMLAttributes: {
-      class:
-        "text-neutral-900 bg-neutral-100 border border-neutral-500 flex-1 flex p-1",
-    },
-  }),
   Paragraph,
   Text,
   StarterKit.configure({
@@ -191,27 +139,17 @@ export const TiptapExtensions = [
     },
   }),
   SlashCommand,
-  TiptapUnderline,
   TextStyle,
-  Color,
   Link.configure({
     HTMLAttributes: {
       class:
         "text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer",
     },
   }),
-  Highlight.configure({
-    multicolor: true,
-  }),
   Markdown.configure({
     html: false,
     transformCopiedText: true,
   }),
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
-  Subscript,
-  Superscript,
   // margin controlled in global.css
   Youtube.configure({
     width: 480,
