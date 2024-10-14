@@ -15,15 +15,18 @@ if (!fs.existsSync(authFile)) {
   );
   if (!fs.existsSync(authFolder)) {
     console.log("Browser state directory was not found. Folder being created:");
-    fs.mkdir(authFolder, { recursive: true }, (err) => {
+    try {
+      await fs.promises.mkdir(authFolder);
+    } catch (err) {
       console.log(err);
       if (err) throw new Error("Error creating playwright/.auth folder", err);
-    });
+    }
   }
   if (!fs.existsSync(authFile)) {
     console.log("Browser.json file was not found. File being created:");
-
-    fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
+    try {
+      await fs.promises.writeFile(authFile, JSON.stringify({ cookies: [] }));
+    } catch (err) {
       if (err) {
         console.log(err);
         throw new Error("Error creating browser.json file", err);
@@ -32,7 +35,7 @@ if (!fs.existsSync(authFile)) {
         "Browser state file was not found. An example file has been created at:",
         authFile,
       );
-    });
+    }
   }
 }
 
