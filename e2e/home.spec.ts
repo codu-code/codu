@@ -5,14 +5,9 @@ test.describe("Confirm homepage content", () => {
     await page.goto("http://localhost:3000/");
     // Check headers
 
-    await expect(page.locator("h1")).toContainText("A space for coders");
-    await expect(page.locator("h1")).not.toContainText("Unwanted text");
-
-    await expect(page.locator("h2")).toContainText(
-      "Sign up today to become a writer and get a free invite to our Discord community",
+    await expect(page.locator("h1")).toContainText(
+      "The free web developer community",
     );
-
-    await expect(page.locator("h3")).toContainText("Trending");
 
     await expect(page.locator("h3")).toContainText("Trending");
   });
