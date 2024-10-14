@@ -180,10 +180,10 @@ Note the sample .env [here](./sample.env) is fine to use.
 
 ### Session and User setup
 
-First you need to add your E2E test user to your locally running database. Do this by running the following script
+First you need to add your E2E test user to your locally running database. Do this by running the following script if you havent already
 
 ```
-npm run e2e:seed
+npm run db:seed
 ```
 
 This will create a user and session for your E2E tests. Details of the E2E user created can be seen [here](./drizzle/seedE2E.ts)
