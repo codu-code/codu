@@ -12,27 +12,38 @@ if (!fs.existsSync(authFile)) {
   console.log(
     "Browser state file was not found. An example file is being created:",
   );
+
   if (!fs.existsSync(authFolder)) {
     console.log("Browser state directory was not found. Folder being created:");
-    fs.mkdir(authFolder, { recursive: true }, (err) => {
-      console.log("Error creating folder", err);
-      console.log(err);
-    });
-    console.log("Browser state directory was created successfully");
-  }
-  console.log("Waiting for folder to be created");
-  while (!fs.existsSync(authFolder)) {}
-  console.log("Folder found");
 
+    fs.mkdir(authFolder, { recursive: true }, (err) => {
+      if (err) {
+        console.log("Error creating folder", err);
+        return;
+      }
+      console.log("Browser state directory was created successfully");
+      createAuthFile(); // Now create the file after the directory is created
+    });
+  } else {
+    createAuthFile(); // Create the file if the folder already exists
+  }
+} else {
+  console.log("Browser state file already exists.");
+}
+
+function createAuthFile() {
   if (!fs.existsSync(authFile)) {
     console.log("Browser.json file was not found. File being created:");
+
     fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
       if (err) {
         console.log("Error creating browser.json file", err);
-        console.log(err);
+        return;
       }
+      console.log("Browser.json file was created successfully");
     });
-    console.log("Browser.json file was created successfully");
+  } else {
+    console.log("Browser.json file already exists.");
   }
 }
 
