@@ -17,6 +17,7 @@ import {
 } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 type ButtonOptions = {
   label: string;
@@ -74,6 +75,10 @@ const ArticlePreview: NextPage<Props> = ({
       },
       onSuccess: () => {
         refetch();
+      },
+      onError: (error) => {
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
       },
     });
 
