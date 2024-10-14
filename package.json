@@ -73,7 +73,6 @@
     "@trpc/react-query": "^10.45.1",
     "@trpc/server": "^10.45.1",
     "algoliasearch": "^5.7.0",
-    "atropos": "^2.0.2",
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "drizzle-orm": "^0.34.1",
