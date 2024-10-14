@@ -20,6 +20,10 @@ if (!fs.existsSync(authFile)) {
     });
     console.log("Browser state directory was created successfully");
   }
+  console.log("Waiting for folder to be created");
+  while (!fs.existsSync(authFolder)) {}
+  console.log("Folder found");
+
   if (!fs.existsSync(authFile)) {
     console.log("Browser.json file was not found. File being created:");
     fs.writeFile(authFile, JSON.stringify({ cookies: [] }), (err) => {
