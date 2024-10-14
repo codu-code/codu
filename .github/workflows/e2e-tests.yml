@@ -113,6 +113,25 @@ jobs:
 
       - name: Seed database
         run: |
+          AUTH_FOLDER="./playwright/.auth"
+          AUTH_FILE="$AUTH_FOLDER/browser.json"
+
+          # Create the directory if it doesn't exist
+          if [ ! -d "$AUTH_FOLDER" ]; then
+            mkdir -p "$AUTH_FOLDER"
+            echo "Browser state directory was created successfully."
+          else
+            echo "Browser state directory already exists."
+          fi
+
+          # Create the file if it doesn't exist
+          if [ ! -f "$AUTH_FILE" ]; then
+            echo "Browser.json file was not found. Creating file:"
+            echo '{"cookies": []}' > "$AUTH_FILE"
+            echo "Browser.json file was created successfully."
+          else
+            echo "Browser.json file already exists."
+          fi
           npm run db:push
           npm run db:seed
           npm run e2e:seed
