@@ -25,7 +25,7 @@ const MobileNav: FunctionComponent<MobileNavProps> = ({
   close,
 }) => {
   return (
-    <div className="absolute z-10 w-screen bg-neutral-100 dark:bg-black">
+    <div className="absolute z-20 w-screen bg-neutral-100 dark:bg-black">
       <DisclosurePanel className="relative border-b border-neutral-400 dark:border-neutral-600 md:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
           {navigation.map((item) => (
