@@ -73,7 +73,6 @@
     "@trpc/react-query": "^10.45.1",
     "@trpc/server": "^10.45.1",
     "algoliasearch": "^5.7.0",
-    "atropos": "^2.0.2",
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "drizzle-orm": "^0.34.1",
@@ -111,7 +110,7 @@
   },
   "devDependencies": {
     "@axe-core/react": "^4.9.0",
-    "@playwright/test": "^1.43.1",
+    "@playwright/test": "^1.48.0",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/typography": "^0.5.13",
     "@types/chance": "^1.1.6",
