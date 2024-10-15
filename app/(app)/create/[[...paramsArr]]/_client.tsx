@@ -103,6 +103,7 @@ const Create = () => {
             ? error.message
             : "An error occurred while uploading the image.",
         );
+        Sentry.captureException(error);
       }
     }
   };
