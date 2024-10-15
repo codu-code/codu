@@ -1,20 +1,33 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Testing homepage views", () => {
-  test("Authenticated homepage view", async ({ page, isMobile }) => {
+test.describe("Authenticated homepage", () => {
+  test("Homepage view", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
 
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
 
-    if (!isMobile)
+    const elementVisible = await page
+      .locator('text="Popular topics"')
+      .isVisible();
+
+    if (isMobile) {
+      expect(elementVisible).toBe(false);
+    } else {
       await expect(
         page.getByRole("link", {
           name: "Your Posts",
         }),
       ).toBeVisible();
+      expect(elementVisible).toBe(true);
+    }
   });
-  test("Unauthenticated homepage view", async ({ page }) => {
+});
+
+test.describe("Unauthenticated homepage", () => {
+  test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
+  });
+  test("Homepage view", async ({ page }) => {
     await page.goto("http://localhost:3000/");
 
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
@@ -24,30 +37,5 @@ test.describe("Testing homepage views", () => {
     await expect(page.locator("h1")).toContainText(
       "The free web developer community",
     );
-  });
-
-  test("Authenticated landing page view", async ({ page, isMobile }) => {
-    await page.goto("http://localhost:3000/");
-
-    const elementVisible = await page
-      .locator('text="Popular topics"')
-      .isVisible();
-
-    if (isMobile) {
-      expect(elementVisible).toBe(false);
-    } else {
-      expect(elementVisible).toBe(true);
-    }
-  });
-
-  test.describe("Confirm image accessibiliy content", () => {
-    test("Shared content", async ({ page }) => {
-      // Accessibility
-      const imagesWithoutAltText = await page.$$eval(
-        "img:not([alt])",
-        (images) => images.length,
-      );
-      expect(imagesWithoutAltText).toBe(0); // All images should have alt text
-    });
   });
 });
