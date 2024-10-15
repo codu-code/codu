@@ -20,8 +20,7 @@ import { type AdapterAccount } from "next-auth/adapters";
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
 export const session = pgTable("session", {
-  id: text("sessionToken").primaryKey(),
-  sessionToken: text("sessionToken").notNull(),
+  sessionToken: text("sessionToken").notNull().primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
