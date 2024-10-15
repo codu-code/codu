@@ -42,7 +42,7 @@ import { Divider } from "@/components/ui-components/divider";
 import { Avatar } from "@/components/ui-components/avatar";
 import { Text } from "@/components/ui-components/text";
 import { api } from "@/server/trpc/react";
-import { uploadToUrl } from "@/utils/fileUpload";
+import { imageUploadToUrl } from "@/utils/fileUpload";
 
 type UserDetails = {
   username: string;
@@ -115,7 +115,7 @@ function SlideOne({ details }: { details: UserDetails }) {
     url: details.image,
   });
   const { username, name, location } = details;
-  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutateAsync: getUploadUrl } = api.profile.getUploadUrl.useMutation();
   const { mutateAsync: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
   const {
@@ -127,38 +127,23 @@ function SlideOne({ details }: { details: UserDetails }) {
     defaultValues: { username, name, location },
   });
 
-  const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const { size, type } = file;
-
-      setProfilePhoto({ status: "loading", url: "" });
-
-      await getUploadUrl(
-        { size, type },
-        {
-          onError(error) {
-            toast.error(
-              error.message ||
-                "Something went wrong uploading the photo, please retry.",
-            );
-            setProfilePhoto({ status: "error", url: "" });
-          },
-          async onSuccess(signedUrl) {
-            const { status, fileLocation } = await uploadToUrl({
-              signedUrl,
-              file,
-              updateUserPhotoUrl,
-            });
-
-            if (status === "success" && fileLocation) {
-              setProfilePhoto({ status: "success", url: fileLocation });
-            } else {
-              setProfilePhoto({ status: "error", url: "" });
-            }
-          },
-        },
-      );
+      try {
+        setProfilePhoto({ status: "loading", url: "" });
+        const file = e.target.files[0];
+        const { status, fileLocation } = await imageUploadToUrl({
+          file,
+          updateUserPhotoUrl,
+          getUploadUrl,
+        });
+        setProfilePhoto({ status: status, url: fileLocation });
+      } catch (error) {
+        toast.error("Failed to upload profile photo. Please try again.");
+        setProfilePhoto({ status: "error", url: "" });
+      }
+    } else {
+      toast.error("Failed to upload profile photo. Please try again.");
     }
   };
 
@@ -216,7 +201,7 @@ function SlideOne({ details }: { details: UserDetails }) {
                   id="file-input"
                   name="user-photo"
                   accept="image/png, image/gif, image/jpeg"
-                  onChange={imageChange}
+                  onChange={handleImageChange}
                   className="hidden"
                   ref={fileInputRef}
                 />

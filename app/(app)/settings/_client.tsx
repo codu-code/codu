@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui-components/textarea";
 import { Switch } from "@/components/ui-components/switch";
 import { Divider } from "@/components/ui-components/divider";
 import { Text } from "@/components/ui-components/text";
-import { uploadToUrl } from "@/utils/fileUpload";
+import { imageUploadToUrl } from "@/utils/fileUpload";
 
 type User = Pick<
   typeof user.$inferSelect,
@@ -75,7 +75,7 @@ const Settings = ({ profile }: { profile: User }) => {
   });
 
   const { mutate, isError, isSuccess } = api.profile.edit.useMutation();
-  const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
+  const { mutateAsync: getUploadUrl } = api.profile.getUploadUrl.useMutation();
   const { mutateAsync: updateUserPhotoUrl } =
     api.profile.updateProfilePhotoUrl.useMutation();
   const { mutate: updateEmail } = api.profile.updateEmail.useMutation();
@@ -104,38 +104,23 @@ const Settings = ({ profile }: { profile: User }) => {
     mutate({ ...values, newsletter: weeklyNewsletter, emailNotifications });
   };
 
-  const imageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const { size, type } = file;
-
-      setProfilePhoto({ status: "loading", url: "" });
-
-      await getUploadUrl(
-        { size, type },
-        {
-          onError(error) {
-            toast.error(
-              error.message ||
-                "Something went wrong uploading the photo, please retry.",
-            );
-            setProfilePhoto({ status: "error", url: "" });
-          },
-          async onSuccess(signedUrl) {
-            const { status, fileLocation } = await uploadToUrl({
-              signedUrl,
-              file,
-              updateUserPhotoUrl,
-            });
-
-            if (status === "success" && fileLocation) {
-              setProfilePhoto({ status: "success", url: fileLocation });
-            } else {
-              setProfilePhoto({ status: "error", url: "" });
-            }
-          },
-        },
-      );
+      try {
+        setProfilePhoto({ status: "loading", url: "" });
+        const file = e.target.files[0];
+        const { status, fileLocation } = await imageUploadToUrl({
+          file,
+          updateUserPhotoUrl,
+          getUploadUrl,
+        });
+        setProfilePhoto({ status: status, url: fileLocation });
+      } catch (error) {
+        toast.error("Failed to upload profile photo. Please try again.");
+        setProfilePhoto({ status: "error", url: "" });
+      }
+    } else {
+      toast.error("Failed to upload profile photo. Please try again.");
     }
   };
 
@@ -211,7 +196,7 @@ const Settings = ({ profile }: { profile: User }) => {
                 id="file-input"
                 name="user-photo"
                 accept="image/png, image/gif, image/jpeg"
-                onChange={imageChange}
+                onChange={handleImageChange}
                 className="hidden"
                 ref={fileInputRef}
               />
