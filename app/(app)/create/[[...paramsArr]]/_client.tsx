@@ -29,9 +29,9 @@ import copy from "copy-to-clipboard";
 import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
 import { ImageUp, LoaderCircle } from "lucide-react";
 import { uploadFile } from "@/utils/s3helpers";
-import { type Session } from "next-auth";
+import { getUploadUrl } from "@/app/actions/getUploadUrl";
 
-const Create = ({ session }: { session: Session }) => {
+const Create = () => {
   const params = useParams();
   const router = useRouter();
 
@@ -71,29 +71,39 @@ const Create = ({ session }: { session: Session }) => {
       const file = e.target.files[0];
       const { size, type } = file;
 
-      await getUploadUrl(
-        { size, type, config: { kind: "uploads", userId: session.user?.id } },
-        {
-          onError(error) {
-            setUploadStatus("error");
-            if (error) return toast.error(error.message);
-            return toast.error(
-              "Something went wrong uploading the photo, please retry.",
-            );
-          },
-          async onSuccess(signedUrl) {
-            const { fileLocation } = await uploadFile(signedUrl, file);
-            if (!fileLocation) {
-              setUploadStatus("error");
-              return toast.error(
-                "Something went wrong uploading the photo, please retry.",
-              );
-            }
-            setUploadStatus("success");
-            setUploadUrl(fileLocation);
-          },
-        },
-      );
+      try {
+        const res = await getUploadUrl({
+          size,
+          type,
+          uploadType: "uploads",
+        });
+
+        const signedUrl = res?.data;
+
+        if (!signedUrl) {
+          setUploadStatus("error");
+          return toast.error(
+            "Something went wrong uploading the photo, please retry.",
+          );
+        }
+
+        const { fileLocation } = await uploadFile(signedUrl, file);
+        if (!fileLocation) {
+          setUploadStatus("error");
+          return toast.error(
+            "Something went wrong uploading the photo, please retry.",
+          );
+        }
+        setUploadStatus("success");
+        setUploadUrl(fileLocation);
+      } catch (error) {
+        setUploadStatus("error");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while uploading the image.",
+        );
+      }
     }
   };
 
@@ -161,8 +171,6 @@ const Create = ({ session }: { session: Session }) => {
       enabled: !!postId && shouldRefetch,
     },
   );
-
-  const { mutate: getUploadUrl } = api.event.getUploadUrl.useMutation();
 
   const PREVIEW_URL = `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.codu.co"}/draft/${postId}`;
   const UPLOADED_IMAGE_URL = `![Image description](${uploadUrl})`;
