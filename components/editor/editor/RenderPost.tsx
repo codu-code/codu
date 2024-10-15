@@ -1,5 +1,5 @@
 import React from "react";
-import { CustomCodeBlockReadOnly, TiptapExtensions } from "./extensions";
+import { TiptapExtensions } from "./extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
 
 interface RenderPostProps {
@@ -11,7 +11,7 @@ const RenderPost = ({ json }: RenderPostProps) => {
 
   const editor = useEditor({
     editable: false,
-    extensions: [...TiptapExtensions, CustomCodeBlockReadOnly],
+    extensions: [...TiptapExtensions],
     content,
   });
 

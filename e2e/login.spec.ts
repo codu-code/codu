@@ -1,38 +1,59 @@
 import { test, expect } from "playwright/test";
+import "dotenv/config";
 
-test.afterEach(async ({ page }) => {
-  // Sign out the user after all tests are done
-  await page.goto("http://localhost:3000/api/auth/signout");
-  await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page.locator("#submitButton")).toBeHidden();
-});
-
-test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000/get-started");
-});
-
-test.describe("Login Page", () => {
-  test("should display the login button", async ({ page }) => {
-    const loginButton = page.getByRole("button", {
-      name: "Continue with GitHub",
-    });
-    expect(loginButton).toBeTruthy();
+test.describe("Unauthenticated Login Page", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.context().clearCookies();
+    await page.goto("http://localhost:3000/get-started");
+  });
+  test("Sign up page contains sign up links", async ({ page, isMobile }) => {
+    await expect(page.getByText("CodúBetaSign in or create")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Sign in or create your account" }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "return home" })).toBeVisible();
+    if (!isMobile) {
+      await expect(
+        page.getByRole("button", { name: "Sign up for free" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Sign in", exact: true }),
+      ).toBeVisible();
+    }
+  });
+  test("Login page contains GitHub button", async ({ page }) => {
+    await expect(page.getByTestId("github-login-button")).toBeVisible();
   });
 
-  test("should navigate to GitHub login page when clicking the login button", async ({
-    page,
-  }) => {
-    const button = page.getByRole("button", {
-      name: "Continue with GitHub",
-    });
+  test("Login page contains GitLab button", async ({ page }) => {
+    await expect(page.getByTestId("gitlab-login-button")).toBeVisible();
+  });
+});
 
-    await button.click();
-    await page.waitForURL("https://github.com/**");
+test.describe("Authenticated Login Page", () => {
+  test("Sign up page contains sign up links", async ({ page, isMobile }) => {
+    // authenticated users are kicked back to the homepage if they try to go to /get-started
+    await page.goto("http://localhost:3000/get-started");
+    expect(page.url()).toEqual("http://localhost:3000/");
+    await expect(page.getByText("CodúBetaSign in or create")).toBeHidden();
+    await expect(
+      page.getByRole("heading", { name: "Sign in or create your account" }),
+    ).toBeHidden();
+    await expect(page.getByRole("link", { name: "return home" })).toBeHidden();
+    if (!isMobile) {
+      await expect(
+        page.getByRole("button", { name: "Sign up for free" }),
+      ).toBeHidden();
+      await expect(
+        page.getByRole("button", { name: "Sign in", exact: true }),
+      ).toBeHidden();
+    }
+  });
+  test("Login page contains GitHub button", async ({ page }) => {
+    await expect(page.getByTestId("github-login-button")).toBeHidden();
+  });
 
-    const loginField = page.locator("#login_field");
-    await loginField.isVisible();
-
-    expect(page.getByLabel("Username or email address")).toBeTruthy();
-    expect(page.getByLabel("Password")).toBeTruthy();
+  test("Login page contains GitLab button", async ({ page }) => {
+    await expect(page.getByTestId("gitlab-login-button")).toBeHidden();
   });
 });
