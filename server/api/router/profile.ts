@@ -1,4 +1,4 @@
-import { user, emailChangeHistory } from "@/server/db/schema";
+import { user } from "@/server/db/schema";
 import {
   saveSettingsSchema,
   getProfileSchema,
@@ -20,7 +20,6 @@ import { emailTokenReqSchema } from "@/schema/token";
 import { generateEmailToken, sendVerificationEmail } from "@/utils/emailToken";
 import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
 import { emailChangeRequest } from "@/server/db/schema";
-import { z } from "zod";
 
 export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
