@@ -21,7 +21,7 @@ export default async function PopularTags() {
           // only reason this is toLowerCase is to make url look nicer. Not needed for functionality
           href={`/articles?tag=${tag.title.toLowerCase()}`}
           key={tag.title}
-          className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
+          className="rounded border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
         >
           {getCamelCaseFromLower(tag.title)}
         </Link>
