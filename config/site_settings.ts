@@ -1,9 +1,10 @@
 export const footerNav = [
   { name: "Home", href: "/" },
   { name: "Articles", href: "/articles" },
-  { name: "Events", href: "/https://www.meetup.com/codu-community/" },
+  { name: "Events", href: "https://www.meetup.com/codu-community/" },
   { name: "Sponsorship", href: "/sponsorship" },
   { name: "Code Of Conduct", href: "/code-of-conduct" },
+  { name: "Privacy Policy", href: "/privacy" },
 ];
 
 export const navigation = [
