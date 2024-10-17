@@ -67,17 +67,22 @@ exports.handler = async (event) => {
 
     // Function to resize an image
     const resizeImage = async (buffer, size) => {
-      const resizedImage = sharp(buffer).resize({
-        width: size.maxWidth,
-        height: size.maxHeight,
-        fit: "inside",
-        withoutEnlargement: false,
-      });
+      try {
+        const resizedImage = sharp(buffer).resize({
+          width: size.maxWidth,
+          height: size.maxHeight,
+          fit: "inside",
+          withoutEnlargement: false,
+        });
 
-      if (isGif) {
-        return resizedImage.gif().toBuffer();
-      } else {
-        return resizedImage.webp({ quality: 80 }).toBuffer();
+        if (isGif) {
+          return resizedImage.gif().toBuffer();
+        } else {
+          return resizedImage.webp({ quality: 80 }).toBuffer();
+        }
+      } catch (error) {
+        console.error(`Error resizing image to ${size.maxWidth}x${size.maxHeight}:`, error);
+        throw error;
       }
     };
 
