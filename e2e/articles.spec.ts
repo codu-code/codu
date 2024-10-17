@@ -12,7 +12,7 @@ test.describe("Unauthenticated Articles Page", () => {
     ).toBeVisible({ visible: !isMobile });
 
     await expect(
-      page.getByRole("link", { name: '"Codú Writing Challenge" text' }),
+      page.getByRole("link", { name: '"Find out more" text' }),
     ).toBeVisible({ visible: !isMobile });
   });
 
@@ -67,7 +67,7 @@ test.describe("Authenticated Articles Page", () => {
     ).toBeVisible({ visible: !isMobile });
 
     await expect(
-      page.getByRole("link", { name: '"Codú Writing Challenge" text' }),
+      page.getByRole("link", { name: '"Find out more" text' }),
     ).toBeVisible({ visible: !isMobile });
 
     await expect(
@@ -82,7 +82,7 @@ test.describe("Authenticated Articles Page", () => {
     ).toBeVisible({ visible: !isMobile });
 
     await expect(
-      page.getByRole("link", { name: '"Codú Writing Challenge" text' }),
+      page.getByRole("link", { name: '"Find out more" text' }),
     ).toBeVisible({ visible: !isMobile });
 
     await expect(
