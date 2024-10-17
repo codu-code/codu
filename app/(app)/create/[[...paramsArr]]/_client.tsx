@@ -160,6 +160,15 @@ const Create = () => {
     isSuccess,
   } = api.post.create.useMutation();
 
+  const { mutate: seriesUpdate, status: seriesStatus } = api.series.update.useMutation({
+    onError(error) {
+      // TODO: Add error messages from field validations
+      console.log("Error updating settings: ", error);
+      toast.error("Error auto-saving");
+      Sentry.captureException(error);
+    }
+  });
+
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
   const {
@@ -215,6 +224,7 @@ const Create = () => {
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
       excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
+      seriesName: data.seriesName || undefined
     };
     return formData;
   };
@@ -226,7 +236,10 @@ const Create = () => {
     if (!formData.id) {
       await create({ ...formData });
     } else {
-      await save({ ...formData, id: postId });
+      await Promise.all([
+        save({ ...formData, id: postId }),
+        seriesUpdate({postId, seriesName: formData.seriesName})
+      ]);
       toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
@@ -539,9 +552,23 @@ const Create = () => {
                                   {copied ? "Copied" : "Copy Link"}
                                 </div>
                               </button>
-                              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                              <p className="mt-2 mb-2 text-sm text-neutral-600 dark:text-neutral-400">
                                 Share this link with others to preview your
                                 draft. Anyone with the link can view your draft.
+                              </p>
+                              
+                              <label htmlFor="seriesName">
+                                Series Name
+                              </label>
+                              <input
+                                id="seriesName"
+                                type="text"
+                                placeholder="The name of my series"
+                                defaultValue={data?.series?.title || ""}
+                                {...register("seriesName")}
+                              />
+                              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                              This text is case-sensitive so make sure you type it exactly as you did in previous articles to ensure they are connected
                               </p>
                             </DisclosurePanel>
                           </>
