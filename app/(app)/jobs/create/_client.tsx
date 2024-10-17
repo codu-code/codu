@@ -48,9 +48,6 @@ export default function Content() {
   const onSubmit = (data: saveJobsInput) => {
     console.log(data);
   };
-  if (errors) {
-    console.log(errors);
-  }
   if (!flagEnabled) {
     notFound();
   }
