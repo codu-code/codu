@@ -7,7 +7,12 @@ import {
   CheckboxGroup,
 } from "@/components/ui-components/checkbox";
 import { Divider } from "@/components/ui-components/divider";
-import { Description, Field, Label } from "@/components/ui-components/fieldset";
+import {
+  Description,
+  ErrorMessage,
+  Field,
+  Label,
+} from "@/components/ui-components/fieldset";
 import { Heading, Subheading } from "@/components/ui-components/heading";
 import { Input } from "@/components/ui-components/input";
 import {
@@ -17,22 +22,44 @@ import {
 } from "@/components/ui-components/radio";
 import { Strong, Text } from "@/components/ui-components/text";
 import { Textarea } from "@/components/ui-components/textarea";
+import { saveJobsInput, saveJobsSchema } from "@/schema/job";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import React, { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function Content() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<saveJobsInput>({
+    resolver: zodResolver(saveJobsSchema),
+    defaultValues: {
+      applicationUrl: "",
+    },
+  });
   const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
-
+  const onSubmit = (data: saveJobsInput) => {
+    console.log(data);
+  };
+  if (errors) {
+    console.log(errors);
+  }
   if (!flagEnabled) {
     notFound();
   }
 
   return (
-    <form className="mx-auto max-w-4xl p-3 pt-8 sm:px-4">
+    <form
+      className="mx-auto max-w-4xl p-3 pt-8 sm:px-4"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Heading level={1}>Post a job</Heading>
       <Divider className="my-10 mt-6" />
       <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
@@ -89,9 +116,12 @@ export default function Content() {
             type="text"
             placeholder="Pixel Pulse Studios"
             autoComplete="given-company-name"
+            {...register("companyName")}
           />
+          {errors?.companyName && (
+            <ErrorMessage>{errors.companyName.message}</ErrorMessage>
+          )}
         </Field>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
@@ -107,9 +137,12 @@ export default function Content() {
             type="text"
             placeholder="Reality Architect"
             autoComplete="given-job-title"
+            {...register("jobTitle")}
           />
+          {errors?.jobTitle && (
+            <ErrorMessage>{errors.jobTitle.message}</ErrorMessage>
+          )}
         </Field>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
@@ -123,11 +156,13 @@ export default function Content() {
           <Textarea
             id="job-description"
             placeholder="As a Reality Architect, you'll be at the forefront of creating immersive mixed reality experiences that blur the line between the digital and physical..."
-            resizable={false}
             rows={3}
+            {...register("jobDescription")}
           />
+          {errors?.jobDescription && (
+            <ErrorMessage>{errors.jobDescription.message}</ErrorMessage>
+          )}
         </Field>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
@@ -140,7 +175,10 @@ export default function Content() {
           </Text>
         </div>
         <Field>
-          <Input placeholder="Dublin (2 days in the office per week)" />
+          <Input
+            placeholder="Dublin (2 days in the office per week)"
+            {...register("jobLocation")}
+          />
           <CheckboxGroup className="mt-3">
             <CheckboxField>
               <Checkbox name="remote" value="is_remote" />
@@ -155,8 +193,10 @@ export default function Content() {
               <Label>Visa sponsorship provided</Label>
             </CheckboxField>
           </CheckboxGroup>
+          {errors?.jobLocation && (
+            <ErrorMessage>{errors.jobLocation.message}</ErrorMessage>
+          )}
         </Field>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
@@ -172,9 +212,12 @@ export default function Content() {
             type="text"
             autoComplete="url"
             placeholder="https://example.com"
+            {...register("applicationUrl")}
           />
+          {errors?.applicationUrl && (
+            <ErrorMessage>{errors.applicationUrl.message}</ErrorMessage>
+          )}
         </Field>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
@@ -185,14 +228,14 @@ export default function Content() {
           <Text>Full-time, part-time or freelancer</Text>
         </div>
         <Field>
-          <RadioGroup defaultValue="full_time">
+          <RadioGroup defaultValue="full-time">
             <RadioField>
-              <Radio value="full_time" />
+              <Radio value="full-time" />
               <Label>Full-time (€150)</Label>
               <Description>Salaried Position</Description>
             </RadioField>
             <RadioField>
-              <Radio value="part_time" />
+              <Radio value="part-time" />
               <Label>Part-time (€100)</Label>
               <Description>
                 Salaried position but less than 4 days per week
@@ -204,7 +247,7 @@ export default function Content() {
               <Description>Shorter-term usually or fixed term/job</Description>
             </RadioField>
             <RadioField>
-              <Radio value="other_role_type" />
+              <Radio value="other" />
               <Label>Other (€100)</Label>
               <Description>
                 Looking for a co-founder or something else we haven’t thought of
@@ -212,7 +255,6 @@ export default function Content() {
             </RadioField>
           </RadioGroup>
         </Field>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
@@ -252,13 +294,17 @@ export default function Content() {
             practices.
           </Text>
         </div>
-        {/* Add error part after validation here */}
       </section>
 
       <Divider className="my-10" soft />
 
       <div className="flex justify-end">
-        <Button className="rounded-md" color="pink">
+        <Button
+          className="rounded-md"
+          color="pink"
+          type="submit"
+          disabled={isSubmitting}
+        >
           Submit and checkout
         </Button>
       </div>
