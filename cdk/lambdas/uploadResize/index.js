@@ -81,7 +81,10 @@ exports.handler = async (event) => {
           return resizedImage.webp({ quality: 80 }).toBuffer();
         }
       } catch (error) {
-        console.error(`Error resizing image to ${size.maxWidth}x${size.maxHeight}:`, error);
+        console.error(
+          `Error resizing image to ${size.maxWidth}x${size.maxHeight}:`,
+          error,
+        );
         throw error;
       }
     };
