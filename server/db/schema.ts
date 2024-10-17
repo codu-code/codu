@@ -39,7 +39,7 @@ export const series = pgTable("Series", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  userId: text("userId"),
+  userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   createdAt: timestamp("createdAt", {
     precision: 3,
     mode: "string",
@@ -51,6 +51,8 @@ export const series = pgTable("Series", {
     precision: 3,
     withTimezone: true
   }).notNull()
+  .$onUpdate(() => new Date())
+  .default(sql`CURRENT_TIMESTAMP`),
 })
 
 export const account = pgTable(
@@ -167,7 +169,7 @@ export const post = pgTable(
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     showComments: boolean("showComments").default(true).notNull(),
     likes: integer("likes").default(0).notNull(),
-    seriesId: integer("seriesId")
+    seriesId: integer("seriesId").references(() => series.id, { onDelete: "set null", onUpdate: "cascade" }),
   },
   (table) => {
     return {
@@ -292,6 +294,14 @@ export const bookmark = pgTable(
     };
   },
 );
+
+export const seriesRelations = relations(series, ({ one, many }) => ({
+  posts: many(post),
+  user: one(user, {
+    fields: [series.userId],
+    references: [user.id],
+  }),
+}));
 
 export const bookmarkRelations = relations(bookmark, ({ one, many }) => ({
   post: one(post, { fields: [bookmark.postId], references: [post.id] }),

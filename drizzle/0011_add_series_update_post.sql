@@ -10,3 +10,7 @@ CREATE TABLE IF NOT EXISTS "Series" (
 -- Update Post table to add seriesId column
 ALTER TABLE "Post"
 ADD COLUMN "seriesId" INTEGER
+ADD CONSTRAINT fk_post_series
+    FOREIGN KEY ("seriesId")
+    REFERENCES "Series" ("id")
+    ON DELETE SET NULL;

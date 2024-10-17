@@ -162,8 +162,6 @@ const Create = () => {
 
   const { mutate: seriesUpdate, status: seriesStatus } = api.series.update.useMutation({
     onError(error) {
-      // TODO: Add error messages from field validations
-      console.log("Error updating settings: ", error);
       toast.error("Error auto-saving");
       Sentry.captureException(error);
     }
@@ -236,11 +234,19 @@ const Create = () => {
     if (!formData.id) {
       await create({ ...formData });
     } else {
-      await Promise.all([
-        save({ ...formData, id: postId }),
-        seriesUpdate({postId, seriesName: formData.seriesName})
-      ]);
-      toast.success("Saved");
+      try {
+        await save({ ...formData, id: postId });
+      } catch (error) {
+        toast.error("Error saving post.");
+        Sentry.captureException(error);
+      }
+      try {
+        await seriesUpdate({ postId, seriesName: formData.seriesName });
+        toast.success("Saved");
+      } catch (error) {
+        toast.error("Error updating series.");
+        Sentry.captureException(error);
+      }
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -556,7 +562,7 @@ const Create = () => {
                                 Share this link with others to preview your
                                 draft. Anyone with the link can view your draft.
                               </p>
-                              
+
                               <label htmlFor="seriesName">
                                 Series Name
                               </label>
