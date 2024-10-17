@@ -124,4 +124,55 @@ test.describe("Authenticated Articles Page", () => {
     await expect(page.getByText("Sponsorship")).toBeVisible();
     await expect(page.getByText("Code Of Conduct")).toBeVisible();
   });
+
+  test("Should write and publish an article", async ({ page, isMobile }) => {
+    const articleContent =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae ipsum id metus vestibulum rutrum eget a diam. Integer eget vulputate risus, ac convallis nulla. Mauris sed augue nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam congue posuere tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut ac augue non libero ullamcorper ornare. Ut commodo ligula vitae malesuada maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam sagittis justo non justo placerat, a dapibus sapien volutpat. Nullam ullamcorper sodales justo sed.";
+    const articleTitle = "Lorem Ipsum";
+    await page.goto("http://localhost:3000");
+    // Waits for articles to be loaded
+    await page.waitForSelector("article");
+
+    // Mobile and Desktop have different ways to start writing an article
+    if (isMobile) {
+      await expect(
+        page.getByRole("button", { name: "Open main menu" }),
+      ).toBeVisible();
+      page.getByRole("button", { name: "Open main menu" }).tap();
+      await expect(page.getByRole("link", { name: "New Post" })).toBeVisible();
+      await page.getByRole("link", { name: "New Post" }).tap();
+    } else {
+      await expect(page.getByRole("link", { name: "New Post" })).toBeVisible();
+      await page.getByRole("link", { name: "New Post" }).click();
+    }
+    await page.waitForTimeout(1000);
+
+    await page.getByPlaceholder("Article title").fill(articleTitle);
+
+    await page
+      .getByPlaceholder("Enter your content here 💖")
+      .fill(articleContent);
+
+    await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.waitForTimeout(1000);
+    await page.getByRole("button", { name: "Publish now" }).click();
+    await page.waitForTimeout(1000);
+    await page.waitForURL(
+      /^http:\/\/localhost:3000\/articles\/lorem-ipsum-.*$/,
+    );
+
+    await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Lorem Ipsum" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Written by E2E Test User" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Discussion (0)" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("like-trigger")).toBeVisible();
+    await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
+  });
 });
