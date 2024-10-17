@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.excerpt,
       type: "article",
       images: [
-        `/og?type=article&title=${encodeURIComponent(
+        `/og?title=${encodeURIComponent(
           post.title,
         )}&readTime=${post.readTimeMins}&author=${encodeURIComponent(
           post.user.name,

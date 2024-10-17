@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import * as Sentry from "@sentry/nextjs";
 import { Stars, Waves } from "@/components/background/background";
 
 export const runtime = "edge";
@@ -6,25 +7,18 @@ export const runtime = "edge";
 const height = 630;
 const width = 1200;
 
-const allowedTypes = ["article", "profile"];
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const origin = `${request.headers.get("x-forwarded-proto") || "http"}://${request.headers.get("host")}`;
 
-    const type = searchParams.get("type") || "article"; // Default to "article" if not provided
     const title = searchParams.get("title");
+    const author = searchParams.get("author");
+    const readTime = searchParams.get("readTime");
+    const date = searchParams.get("date");
 
-    if (!title || !allowedTypes.includes(type)) {
-      throw new Error("Invalid or missing title or type");
-    }
-
-    let author, readTime, date;
-    if (type === "article") {
-      author = searchParams.get("author") || "Anonymous";
-      readTime = searchParams.get("readTime") || "5";
-      date = searchParams.get("date");
+    if (!title || !author || !readTime || !date) {
+      throw new Error("Missing required parameters");
     }
 
     const regularFontData = await fetch(
@@ -140,26 +134,22 @@ export async function GET(request: Request) {
               >
                 {title}
               </div>
-              {type === "article" && (
-                <div tw="flex items-center justify-between">
-                  <div tw="flex flex-col">
-                    <div
-                      tw="flex text-2xl text-neutral-100"
-                      style={{ paddingBottom: "0.1em" }}
-                    >
-                      {author}
-                    </div>
-                    {date && readTime && (
-                      <div
-                        tw="text-xl text-neutral-400"
-                        style={{ paddingBottom: "0.1em" }}
-                      >
-                        {`${formatDate(date)} · ${readTime} min read`}
-                      </div>
-                    )}
+              <div tw="flex items-center justify-between">
+                <div tw="flex flex-col">
+                  <div
+                    tw="flex text-2xl text-neutral-100"
+                    style={{ paddingBottom: "0.1em" }}
+                  >
+                    {author}
+                  </div>
+                  <div
+                    tw="text-xl text-neutral-400"
+                    style={{ paddingBottom: "0.1em" }}
+                  >
+                    {`${formatDate(date)} · ${readTime} min read`}
                   </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -184,6 +174,7 @@ export async function GET(request: Request) {
       },
     );
   } catch (err) {
+    Sentry.captureException(err);
     return new Response(`Failed to generate the image`, {
       status: 500,
     });
