@@ -145,7 +145,7 @@ test.describe("Authenticated Articles Page", () => {
       await expect(page.getByRole("link", { name: "New Post" })).toBeVisible();
       await page.getByRole("link", { name: "New Post" }).click();
     }
-    await page.waitForTimeout(1000);
+    await page.waitForURL("http:/localhost:3000/create");
 
     await page.getByPlaceholder("Article title").fill(articleTitle);
 
@@ -155,9 +155,10 @@ test.describe("Authenticated Articles Page", () => {
 
     await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
-    await page.waitForTimeout(1000);
+    await expect(
+      page.getByRole("button", { name: "Publish now" }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Publish now" }).click();
-    await page.waitForTimeout(1000);
     await page.waitForURL(
       /^http:\/\/localhost:3000\/articles\/lorem-ipsum-.*$/,
     );
