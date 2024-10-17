@@ -11,8 +11,6 @@ exports.handler = async (event) => {
   const bucket = event.Records[0].s3.bucket.name;
   const key = event.Records[0].s3.object.key;
 
-  console.log({ bucket, key });
-
   try {
     // Check if the image has already been resized
     const headParams = {
@@ -21,10 +19,10 @@ exports.handler = async (event) => {
     };
 
     const headResponse = await s3.send(new HeadObjectCommand(headParams));
-    const metadata = headResponse.Metadata || {};
+    const s3Metadata = headResponse.Metadata || {};
     const contentType = headResponse.ContentType;
 
-    if (metadata.resized === "true") {
+    if (s3Metadata.resized === "true") {
       return {
         statusCode: 200,
         body: JSON.stringify({ message: "Image already resized. Skipping." }),
@@ -39,14 +37,13 @@ exports.handler = async (event) => {
 
     const response = await s3.send(new GetObjectCommand(getParams));
     const stream = response.Body;
-    console.log({ response, stream });
+
     if (!stream) throw new Error("BodyStream is empty");
 
     const imageBuffer = Buffer.concat(await stream.toArray());
-    const sharpImage = sharp(imageBuffer);
 
     // Resize the image
-    const resizedImageBuffer = await sharpImage
+    const resizedImageBuffer = await sharp(imageBuffer)
       .resize({ width: 220, height: 220, fit: "cover" })
       .toBuffer();
 
@@ -56,7 +53,7 @@ exports.handler = async (event) => {
         Bucket: bucket,
         Key: key,
         Body: resizedImageBuffer,
-        Metadata: { ...metadata, resized: "true" },
+        Metadata: { ...s3Metadata, resized: "true" },
         ContentType: contentType,
       }),
     );
