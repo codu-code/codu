@@ -16,6 +16,7 @@ import { getPost } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import { generateHTML } from "@tiptap/html";
 import { TiptapExtensions } from "@/components/editor/editor/extensions";
+import DOMPurify from 'isomorphic-dompurify';
 
 type Props = { params: { slug: string } };
 
@@ -68,10 +69,10 @@ const parseJSON = (str: string): any | null => {
   }
 };
 
-const renderTiptapContent = (jsonContent: JSON) => {
-  return generateHTML(jsonContent, [
-    ...TiptapExtensions,
-  ]);
+const renderSanitizedTiptapContent = (jsonContent: JSON) => {
+  const rawHtml = generateHTML(jsonContent, [...TiptapExtensions]);
+  // Sanitize the HTML
+  return DOMPurify.sanitize(rawHtml);
 };
 
 const ArticlePage = async ({ params }: Props) => {
@@ -83,7 +84,7 @@ const ArticlePage = async ({ params }: Props) => {
   const post = await getPost({ slug });
 
   if (!post) {
-    notFound();
+    return notFound();
   }
 
   const parsedBody = parseJSON(post.body);
@@ -93,7 +94,7 @@ const ArticlePage = async ({ params }: Props) => {
 
   if (isTiptapContent && parsedBody) {
     const jsonContent = parsedBody;
-    renderedContent = renderTiptapContent(jsonContent);
+    renderedContent = renderSanitizedTiptapContent(jsonContent);
   } else {
     const ast = Markdoc.parse(post.body);
     const transformedContent = Markdoc.transform(ast, config);
