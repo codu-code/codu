@@ -11,7 +11,8 @@ export const saveJobsSchema = z.object({
     .max(50, "Job title should contain atmost 50 characters"),
   jobDescription: z
     .string()
-    .max(200, "Job Description should contain atmost 200 characters")
+    .min(100, "Job Description should contain atleast 10 characters")
+    .max(2000, "Job Description should contain atmost 200 characters")
     .optional(),
   jobLocation: z
     .string()
