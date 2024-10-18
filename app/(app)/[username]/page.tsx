@@ -23,22 +23,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const { bio, name } = profile;
-  const title = `@${username} ${name ? `(${name}) -` : " -"} Codú`;
-
-  const description = `Read writing from ${name}. ${bio}`;
+  const title = `${name || username} - Codú Profile | Codú - The Web Developer Community`;
+  const description = `${name || username}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
 
   return {
     title,
     description,
     openGraph: {
+      title,
       description,
-      type: "article",
-      images: [`/api/og?title=${encodeURIComponent(`${name} on Codú`)}`],
+      type: "profile",
+      images: [
+        {
+          url: "/images/og/home-og.png",
+          width: 1200,
+          height: 630,
+          alt: `${name || username}'s profile on Codú`,
+        },
+      ],
       siteName: "Codú",
     },
     twitter: {
+      card: "summary_large_image",
+      title,
       description,
-      images: [`/api/og?title=${encodeURIComponent(`${name} on Codú`)}`],
+      images: ["/images/og/home-og.png"],
     },
   };
 }
@@ -80,11 +89,6 @@ export default async function Page({
           ),
         orderBy: (posts, { desc }) => [desc(posts.published)],
       },
-      BannedUsers: {
-        columns: {
-          id: true,
-        },
-      },
     },
     where: (users, { eq }) => eq(users.username, username),
   });
@@ -93,22 +97,16 @@ export default async function Page({
     notFound();
   }
 
-  const accountLocked = !!profile.BannedUsers;
+  const bannedUser = await db.query.banned_users.findFirst({
+    where: (bannedUsers, { eq }) => eq(bannedUsers.userId, profile.id),
+  });
+
+  const accountLocked = !!bannedUser;
   const session = await getServerAuthSession();
   const isOwner = session?.user?.id === profile.id;
 
-  type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
-    Partial<Type>;
-
-  type Profile = typeof profile;
-  const cleanedProfile: MakeOptional<Profile, "BannedUsers"> = {
-    ...profile,
-  };
-
-  delete cleanedProfile.BannedUsers;
-
   const shapedProfile = {
-    ...cleanedProfile,
+    ...profile,
     posts: accountLocked
       ? []
       : profile.posts.map((post) => ({
@@ -119,6 +117,9 @@ export default async function Page({
   };
 
   return (
-    <Content profile={shapedProfile} isOwner={isOwner} session={session} />
+    <>
+      <h1 className="sr-only">{`${shapedProfile.name || shapedProfile.username}'s Coding Profile`}</h1>
+      <Content profile={shapedProfile} isOwner={isOwner} session={session} />
+    </>
   );
 }

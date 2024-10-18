@@ -43,17 +43,23 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 
 For a more detailed how to guide on setting them up [go to the Environment Variables section](#environment-variables).
 
-6. [Make sure your database is running](#database_url) and setup the tables in the database with Drizzle by running:
+**NOTE:** Before proceeding, [make sure your database is running](#database_url).
+
+6.  Setup the tables in the database with Drizzle by running:
 
 ```bash
 npm run db:push
 ```
+
+The full command can be seen in our [package.json](/package.json#16) file
 
 7. Seed the database with some mock data by running:
 
 ```bash
 npm run db:seed
 ```
+
+The full command can be seen in our [package.json](/package.json#19) file
 
 8. Finally, run the development server:
 
@@ -91,11 +97,21 @@ Currently, we only allow authentication via GitHub. To enable this you need to h
 
 Setup your GitHub ID & Secret on GitHub:
 
-- [https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps)
+- [Click here](https://github.com/settings/applications/new) to setup New OAuth App and fill in the details as shown below.
 
-**Shortcut** - [Click here](https://github.com/settings/applications/new) to setup New OAuth App.
+For development, make sure you setup this with a **Homepage URL** of
 
-For development, make sure you setup this with a **Homepage URL** of `http://localhost:3000/` and **Authorization callback URL** of `http://localhost:3000/api/auth`.
+```
+http://localhost:3000/
+```
+
+and **Authorization callback URL** of
+
+```
+http://localhost:3000/api/auth
+```
+
+as shown in the image below:
 
 ![Screenshot 2022-10-25 at 08 22 03](https://user-images.githubusercontent.com/12615742/197709325-50766dc2-2245-438c-8f71-09064fc3b123.png)
 
@@ -103,6 +119,9 @@ After you click the "Register application" button you should see the `GITHUB_ID`
 ![Screenshot 2022-10-25 at 08 23 22](https://user-images.githubusercontent.com/12615742/197710695-d3ef9cb7-fe66-4a53-8b3e-d66064434068.png)
 After generating the secret, make sure you copy this value to your `.env` file as this value can not be seen again once you refresh the page. 👇
 ![Screenshot 2022-10-25 at 08 26 04](https://user-images.githubusercontent.com/12615742/197710697-ef791d9e-b205-4667-a97c-477148917897.png)
+
+More info on Authorizing OAuth in the GitHub documentation
+[here](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps).
 
 ### Setting up Passwordless auth locally
 
@@ -122,6 +141,16 @@ You shouldn't need to change the default value here. This is a variable used by 
 NEXTAUTH_URL=http://localhost:3000/api/auth
 ```
 
+### E2E_USER_SESSION_ID
+
+This is the sessionToken uuid that .
+This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
+
+### E2E_USER_ID
+
+This is the userId if the E2E user used for testing .
+This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
+
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
 **Example .env file can be found [here](./sample.env). You can rename this to .env to get started**
 
@@ -133,6 +162,47 @@ For more information, you can read the documentation [here](https://next-auth.js
   - How to create a Pull Request
   - Run Tests
   - Also, Style Guide for Commit Messages
+
+## End-to-End Testing with Playwright
+
+To run the end-to-end tests using Playwright, you need to configure your environment and follow these steps:
+
+### Environment Variables
+
+Please ensure you have the following variables set in your `.env` file:
+
+- `E2E_USER_ID`: The id of the E2E user for testing.
+- `E2E_USER_EMAIL`: The email of the E2E user for testing.
+- `E2E_USER_SESSION_ID`: The session id that the user will use to authenticate.
+
+
+Note the sample .env [here](./sample.env) is fine to use.
+
+### Session and User setup
+
+First you need to add your E2E test user to your locally running database. Do this by running the following script if you havent already
+
+```
+npm run db:seed
+```
+
+This will create a user and session for your E2E tests. Details of the E2E user created can be seen [here](./drizzle/seedE2E.ts)
+
+### Running the Tests
+
+You can run the end-to-end tests using one of the following commands:
+
+For headless mode:
+
+```zsh
+npx playwright test
+```
+
+For UI mode:
+
+```zsh
+npx playwright test --ui
+```
 
 ## 📙 Prerequisite Skills to Contribute
 

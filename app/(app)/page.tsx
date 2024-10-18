@@ -17,31 +17,33 @@ const Home = async () => {
     <>
       <div>
         <Hero />
-        <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
-          <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
-            <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
-              <span className="font-extrabold">Sign up today</span> to become a
-              writer and get a <span className="font-extrabold">free</span>{" "}
-              invite to our Discord community.
-            </h2>
-            <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
-              <Link href="/get-started" className="primary-button">
-                Get started
-              </Link>
-              <Link
-                href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
-                className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
-              >
-                Learn more <span aria-hidden="true">→</span>
-              </Link>
+        {session == null && (
+          <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
+            <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
+              <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
+                <span className="font-extrabold">Sign up today</span> to become
+                a writer and get a <span className="font-extrabold">free</span>{" "}
+                invite to our Discord community.
+              </h2>
+              <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
+                <Link href="/get-started" className="primary-button">
+                  Get started
+                </Link>
+                <Link
+                  href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
+                  className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
+                >
+                  Learn more <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
 
-      <div className="mx-2">
+      <div className="mx-2" id={session ? "cta" : ""}>
         <div className="mt-6 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h3 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
+          <h3 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
             Trending
           </h3>
         </div>
@@ -50,10 +52,10 @@ const Home = async () => {
             <TrendingPosts session={session} />
           </Suspense>
           <section className="col-span-5 hidden lg:block">
-            <div className="mb-8 mt-2 border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
+            <div className="mb-8 mt-2 rounded border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
-                  className="w-full"
+                  className="w-full rounded-t"
                   src={challenge}
                   alt={`"Codú Writing Challenge" text on white background`}
                 />

@@ -29,9 +29,9 @@ import copy from "copy-to-clipboard";
 import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
 import { ImageUp, LoaderCircle } from "lucide-react";
 import { uploadFile } from "@/utils/s3helpers";
-import { type Session } from "next-auth";
+import { getUploadUrl } from "@/app/actions/getUploadUrl";
 
-const Create = ({ session }: { session: Session }) => {
+const Create = () => {
   const params = useParams();
   const router = useRouter();
 
@@ -71,29 +71,40 @@ const Create = ({ session }: { session: Session }) => {
       const file = e.target.files[0];
       const { size, type } = file;
 
-      await getUploadUrl(
-        { size, type, config: { kind: "uploads", userId: session.user?.id } },
-        {
-          onError(error) {
-            setUploadStatus("error");
-            if (error) return toast.error(error.message);
-            return toast.error(
-              "Something went wrong uploading the photo, please retry.",
-            );
-          },
-          async onSuccess(signedUrl) {
-            const { fileLocation } = await uploadFile(signedUrl, file);
-            if (!fileLocation) {
-              setUploadStatus("error");
-              return toast.error(
-                "Something went wrong uploading the photo, please retry.",
-              );
-            }
-            setUploadStatus("success");
-            setUploadUrl(fileLocation);
-          },
-        },
-      );
+      try {
+        const res = await getUploadUrl({
+          size,
+          type,
+          uploadType: "uploads",
+        });
+
+        const signedUrl = res?.data;
+
+        if (!signedUrl) {
+          setUploadStatus("error");
+          return toast.error(
+            "Something went wrong uploading the photo, please retry.",
+          );
+        }
+
+        const { fileLocation } = await uploadFile(signedUrl, file);
+        if (!fileLocation) {
+          setUploadStatus("error");
+          return toast.error(
+            "Something went wrong uploading the photo, please retry.",
+          );
+        }
+        setUploadStatus("success");
+        setUploadUrl(fileLocation);
+      } catch (error) {
+        setUploadStatus("error");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while uploading the image.",
+        );
+        Sentry.captureException(error);
+      }
     }
   };
 
@@ -161,8 +172,6 @@ const Create = ({ session }: { session: Session }) => {
       enabled: !!postId && shouldRefetch,
     },
   );
-
-  const { mutate: getUploadUrl } = api.event.getUploadUrl.useMutation();
 
   const PREVIEW_URL = `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.codu.co"}/draft/${postId}`;
   const UPLOADED_IMAGE_URL = `![Image description](${uploadUrl})`;
@@ -485,7 +494,7 @@ const Create = ({ session }: { session: Session }) => {
                         </div>
                       )}
 
-                    <div className="col-span-12  border-b border-neutral-300 pb-4">
+                    <div className="col-span-12 border-b border-neutral-300 pb-4">
                       <Disclosure>
                         {({ open }) => (
                           <>
@@ -588,7 +597,7 @@ const Create = ({ session }: { session: Session }) => {
           </div>
         </Transition>
         {dataStatus === "loading" && postId && (
-          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center ">
+          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
               <div className="loader-dots relative mt-2 block h-5 w-20">
                 <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
@@ -607,7 +616,7 @@ const Create = ({ session }: { session: Session }) => {
           <div className="mx-auto w-full max-w-7xl flex-grow lg:flex xl:px-8">
             {/* Left sidebar & main wrapper */}
             <div className="min-w-0 flex-1 xl:flex">
-              <div className="xl:w-64 xl:flex-shrink-0 ">
+              <div className="xl:w-64 xl:flex-shrink-0">
                 <div className="h-full py-6 pl-4 pr-6 sm:pl-6 lg:px-4 xl:pl-0">
                   {/* Start left column area */}
                   <div className="relative h-full">
@@ -635,7 +644,7 @@ const Create = ({ session }: { session: Session }) => {
                 </div>
               </div>
               <div className="lg:min-w-0 lg:flex-1">
-                <div className="h-full px-4 py-0 sm:px-6 lg:px-4 lg:py-6 ">
+                <div className="h-full px-4 py-0 sm:px-6 lg:px-4 lg:py-6">
                   {/* Start main area*/}
                   <div className="relative h-full">
                     <div className="bg-white text-black shadow dark:bg-neutral-900 dark:text-white">
@@ -663,7 +672,7 @@ const Create = ({ session }: { session: Session }) => {
                           <div className="mb-4 ml-2 flex items-center gap-2">
                             <label
                               htmlFor="file-input"
-                              className={`flex flex-row items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "loading" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500  font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"}  `}
+                              className={`flex flex-row items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "loading" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500 font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"} `}
                             >
                               {uploadStatus === "loading" ? (
                                 <LoaderCircle

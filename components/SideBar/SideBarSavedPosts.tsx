@@ -6,14 +6,14 @@ import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
 
 export default React.memo(function SideBarSavedPosts() {
-  let { data: bookmarks } = api.post.myBookmarks.useQuery();
-  const { status: bookmarkStatus } = api.post.myBookmarks.useQuery();
-
   const howManySavedToShow = 3;
-  const totalNumberSaved = bookmarks?.length;
+  const { data: bookmarksData, status: bookmarkStatus } =
+    api.post.myBookmarks.useQuery({
+      limit: howManySavedToShow,
+    });
 
-  // @TODO query the backend to get the last 3 instead of slice
-  if (bookmarks) bookmarks = bookmarks.slice(0, howManySavedToShow);
+  const totalNumberSaved = bookmarksData?.totalCount || 0;
+  const bookmarks = bookmarksData?.bookmarks || [];
 
   return (
     <div className="w-full">
@@ -76,7 +76,7 @@ export default React.memo(function SideBarSavedPosts() {
 
 function LoadingSkeleton() {
   return (
-    <div className="my-4 flex h-32 w-full animate-pulse flex-col bg-white p-4 shadow dark:bg-neutral-900 ">
+    <div className="my-4 flex h-32 w-full animate-pulse flex-col bg-white p-4 shadow dark:bg-neutral-900">
       <div className="flex grow items-center">
         <div className="h-5 w-full rounded bg-neutral-300 dark:bg-neutral-800"></div>
       </div>

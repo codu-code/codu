@@ -62,7 +62,7 @@ const ArticlesPage = () => {
     <>
       <div className="mx-2">
         <div className="mt-8 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl ">
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
             {typeof tag === "string" ? (
               <div className="flex items-center justify-center">
                 <TagIcon className="mr-3 h-6 w-6 text-neutral-800 dark:text-neutral-200" />
@@ -158,10 +158,10 @@ const ArticlesPage = () => {
             </section>
           </div>
           <section className="col-span-4 hidden lg:block">
-            <div className="mb-8 mt-2 border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
+            <div className="mb-8 mt-2 rounded border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
               <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
                 <Image
-                  className="w-full"
+                  className="w-full rounded-t"
                   src={challenge}
                   alt={`"Codú Writing Challenge" text on white background`}
                 />
@@ -191,7 +191,7 @@ const ArticlesPage = () => {
                     key={title}
                     // only reason this is toLowerCase is to make url look nicer. Not needed for functionality
                     href={`/articles?tag=${title.toLowerCase()}`}
-                    className="border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
+                    className="rounded border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
                   >
                     {getCamelCaseFromLower(title)}
                   </Link>

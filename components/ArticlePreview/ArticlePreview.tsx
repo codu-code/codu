@@ -17,6 +17,7 @@ import {
 } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 type ButtonOptions = {
   label: string;
@@ -55,8 +56,12 @@ const ArticlePreview: NextPage<Props> = ({
   bookmarkedInitialState = false,
 }) => {
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
+  const howManySavedToShow = 3;
+  const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery({
+    limit: howManySavedToShow,
+  });
   const { data: session } = useSession();
-
+  const bookmarks = bookmarksData?.bookmarks;
   const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
@@ -68,6 +73,13 @@ const ArticlePreview: NextPage<Props> = ({
     api.post.bookmark.useMutation({
       onSettled() {
         setIsBookmarked((isBookmarked) => !isBookmarked);
+      },
+      onSuccess: () => {
+        refetch();
+      },
+      onError: (error) => {
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
       },
     });
 
@@ -84,7 +96,8 @@ const ArticlePreview: NextPage<Props> = ({
   };
 
   return (
-    <article className="my-2 rounded-r border border-l-4 border-neutral-300 border-l-pink-600 bg-white p-4 dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
+    <article className="relative my-2 rounded-r border border-l-0 border-neutral-300 bg-white p-4 pl-6 dark:border-neutral-600 dark:bg-neutral-900">
+      <div className="absolute bottom-[-1px] left-0 top-[-1px] flex w-2 justify-between bg-pink-600" />
       <div className="flex justify-between">
         <div className="mb-4 flex items-center">
           <span className="sr-only">{name}</span>
@@ -157,8 +170,8 @@ const ArticlePreview: NextPage<Props> = ({
                 <BookmarkIcon
                   className={`w-6 h-6${
                     bookmarked
-                      ? " fill-blue-400"
-                      : " fill-neutral-400 dark:fill-neutral-600"
+                      ? "fill-blue-400"
+                      : "fill-neutral-400 dark:fill-neutral-600"
                   }`}
                 />
               </button>

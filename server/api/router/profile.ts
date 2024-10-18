@@ -15,7 +15,11 @@ import {
 } from "@/server/lib/newsletter";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
+import { emailTokenReqSchema } from "@/schema/token";
+import { generateEmailToken, sendVerificationEmail } from "@/utils/emailToken";
+import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
+import { emailChangeRequest } from "@/server/db/schema";
 
 export const profileRouter = createTRPCRouter({
   edit: protectedProcedure
@@ -126,4 +130,70 @@ export const profileRouter = createTRPCRouter({
     }
     return profile;
   }),
+  updateEmail: protectedProcedure
+    .input(emailTokenReqSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { newEmail } = input;
+      const userId = ctx.session.user.id;
+
+      if (!newEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid request",
+        });
+      }
+
+      // Check if the new email is already in use
+      const existingUser = await ctx.db.query.user.findFirst({
+        where: eq(user.email, newEmail),
+      });
+
+      if (existingUser) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Unable to process the request",
+        });
+      }
+
+      // Rate limiting: Check for recent requests
+      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+      const recentRequest = await ctx.db.query.emailChangeRequest.findFirst({
+        where: and(
+          eq(emailChangeRequest.userId, userId),
+          gte(emailChangeRequest.createdAt, twoMinutesAgo), // 2 minutes
+        ),
+      });
+
+      if (recentRequest) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Please wait before requesting another email change",
+        });
+      }
+
+      // Generate a new token and expiration date
+      const token = generateEmailToken();
+      const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION_TIME);
+
+      // Create a new email change request
+      await ctx.db.insert(emailChangeRequest).values({
+        userId,
+        newEmail,
+        token,
+        expiresAt,
+      });
+
+      // Send verification email
+      try {
+        await sendVerificationEmail(newEmail, token);
+      } catch (error) {
+        console.error("Failed to send verification email:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send verification email",
+        });
+      }
+
+      return { message: "Verification email sent" };
+    }),
 });

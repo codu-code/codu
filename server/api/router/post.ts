@@ -11,6 +11,7 @@ import {
   LikePostSchema,
   BookmarkPostSchema,
   GetByIdSchema,
+  GetLimitSidePosts,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
 import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
@@ -395,7 +396,9 @@ export const postRouter = createTRPCRouter({
           lte(posts.published, new Date().toISOString()),
           eq(posts.userId, ctx?.session?.user?.id),
         ),
-      orderBy: (posts, { desc }) => [desc(posts.published)],
+      orderBy: (posts, { desc, sql }) => [
+        desc(sql`GREATEST(${posts.updatedAt}, ${posts.published})`),
+      ],
     });
   }),
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
@@ -413,6 +416,7 @@ export const postRouter = createTRPCRouter({
     return ctx.db.query.post.findMany({
       where: (posts, { eq }) =>
         and(eq(posts.userId, ctx.session.user.id), isNull(posts.published)),
+      orderBy: (posts, { desc }) => [desc(posts.updatedAt)],
     });
   }),
   editDraft: protectedProcedure
@@ -435,37 +439,51 @@ export const postRouter = createTRPCRouter({
 
       return currentPost;
     }),
-  myBookmarks: protectedProcedure.query(async ({ ctx }) => {
-    const response = await ctx.db.query.bookmark.findMany({
-      columns: {
-        id: true,
-      },
-      where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
-      with: {
-        post: {
-          columns: {
-            id: true,
-            title: true,
-            excerpt: true,
-            updatedAt: true,
-            published: true,
-            readTimeMins: true,
-            slug: true,
-          },
-          with: {
-            user: {
-              columns: {
-                name: true,
-                username: true,
-                image: true,
+  myBookmarks: protectedProcedure
+    .input(GetLimitSidePosts)
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? undefined;
+
+      const response = await ctx.db.query.bookmark.findMany({
+        columns: {
+          id: true,
+        },
+        where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
+        with: {
+          post: {
+            columns: {
+              id: true,
+              title: true,
+              excerpt: true,
+              updatedAt: true,
+              published: true,
+              readTimeMins: true,
+              slug: true,
+            },
+            with: {
+              user: {
+                columns: {
+                  name: true,
+                  username: true,
+                  image: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
-    });
+        orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
+      });
 
-    return response.map(({ id, post }) => ({ bookmarkId: id, ...post }));
-  }),
+      const totalCount = response.length;
+
+      const bookmarksResponse = response.slice(0, limit || response.length);
+
+      return {
+        totalCount,
+        bookmarks: bookmarksResponse.map(({ id, post }) => ({
+          bookmarkId: id,
+          ...post,
+        })),
+      };
+    }),
 });
