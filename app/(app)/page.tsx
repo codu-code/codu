@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import challenge from "public/images/announcements/challenge.png";
 import Hero from "@/components/Hero/Hero";
 import TrendingPosts from "@/components/TrendingPosts/TrendingPosts";
 import TrendingLoading from "@/components/TrendingPosts/TrendingPostsLoading";
@@ -9,6 +7,7 @@ import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { getServerAuthSession } from "@/server/auth";
 import PopularTags from "@/components/PopularTags/PopularTags";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
+import CoduChallenge from "@/components/CoduChallenge/CoduChallenge";
 
 const Home = async () => {
   const session = await getServerAuthSession();
@@ -47,33 +46,12 @@ const Home = async () => {
             Trending
           </h3>
         </div>
-        <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
+        <div className="mx-auto grid-cols-12 gap-6 sm:max-w-2xl lg:grid lg:max-w-5xl">
           <Suspense fallback={<TrendingLoading />}>
             <TrendingPosts session={session} />
           </Suspense>
           <section className="col-span-5 hidden lg:block">
-            <div className="mb-8 mt-2 rounded border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
-              <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
-                <Image
-                  className="w-full rounded-t"
-                  src={challenge}
-                  alt={`"Codú Writing Challenge" text on white background`}
-                />
-              </Link>
-              <div className="my-3 break-words px-4 py-2 text-sm tracking-wide">
-                <Link
-                  className="block text-lg font-semibold leading-6 underline"
-                  href="/articles/join-our-6-week-writing-challenge-quohtgqb"
-                >
-                  Join the Codú writing challenge!
-                </Link>
-                <p className="my-3">
-                  Join our first Codú challenge! Write 6 articles in 6 weeks and
-                  earn a swag bag.
-                </p>
-                <p>Click the link to find out more.</p>
-              </div>
-            </div>
+            <CoduChallenge />
             <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Popular topics
             </h4>

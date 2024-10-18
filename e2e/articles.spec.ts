@@ -11,9 +11,9 @@ test.describe("Unauthenticated Articles Page", () => {
       page.getByRole("heading", { name: "Popular topics" }),
     ).toBeVisible({ visible: !isMobile });
 
-    await expect(
-      page.getByRole("link", { name: '"Codú Writing Challenge" text' }),
-    ).toBeVisible({ visible: !isMobile });
+    await expect(page.getByRole("link", { name: "Find out more" })).toBeVisible(
+      { visible: !isMobile },
+    );
   });
 
   test("Should not show bookmark article icon", async ({ page }) => {
@@ -66,9 +66,9 @@ test.describe("Authenticated Articles Page", () => {
       page.getByRole("heading", { name: "Popular topics" }),
     ).toBeVisible({ visible: !isMobile });
 
-    await expect(
-      page.getByRole("link", { name: '"Codú Writing Challenge" text' }),
-    ).toBeVisible({ visible: !isMobile });
+    await expect(page.getByRole("link", { name: "Find out more" })).toBeVisible(
+      { visible: !isMobile },
+    );
 
     await expect(
       page.getByRole("heading", { name: "Recent bookmarks" }),
@@ -81,9 +81,9 @@ test.describe("Authenticated Articles Page", () => {
       page.getByRole("heading", { name: "Popular topics" }),
     ).toBeVisible({ visible: !isMobile });
 
-    await expect(
-      page.getByRole("link", { name: '"Codú Writing Challenge" text' }),
-    ).toBeVisible({ visible: !isMobile });
+    await expect(page.getByRole("link", { name: "Find out more" })).toBeVisible(
+      { visible: !isMobile },
+    );
 
     await expect(
       page.getByRole("heading", { name: "Recent bookmarks" }),
