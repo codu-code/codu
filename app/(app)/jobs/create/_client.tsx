@@ -47,7 +47,7 @@ export default function Content() {
       applicationUrl: "",
       remote: false,
       relocation: false,
-      visa_sponsership: false,
+      visa_sponsorship: false,
       jobType: "full-time",
     },
   });
@@ -208,7 +208,7 @@ export default function Content() {
             </CheckboxField>
             <CheckboxField>
               <Controller
-                name="visa_sponsership"
+                name="visa_sponsorship"
                 control={control}
                 render={({ field }) => (
                   <Checkbox checked={field.value} onChange={field.onChange} />

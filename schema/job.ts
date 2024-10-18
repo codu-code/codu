@@ -25,7 +25,7 @@ export const saveJobsSchema = z.object({
     .or(z.literal("")),
   remote: z.boolean().optional().default(false),
   relocation: z.boolean().optional().default(false),
-  visa_sponsership: z.boolean().optional().default(false),
+  visa_sponsorship: z.boolean().optional().default(false),
   jobType: z.enum(["full-time", "part-time", "freelancer", "other"]),
 });
 
