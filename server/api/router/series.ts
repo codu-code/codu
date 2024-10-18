@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { series, post } from "@/server/db/schema";
 import { UpdateSeriesSchema } from "@/schema/series";
-import {eq} from "drizzle-orm";
+import {eq, and} from "drizzle-orm";
 export const seriesRouter = createTRPCRouter({
     update: protectedProcedure
         .input(UpdateSeriesSchema)
@@ -47,7 +47,10 @@ export const seriesRouter = createTRPCRouter({
                     columns: {
                     id: true
                     },
-                    where: (series, { eq }) => eq(series.title, seriesTitle),
+                    where: (series, { eq, and }) => and(
+                        eq(series.title, seriesTitle),
+                        eq(series.userId, ctx.session.user.id)
+                    ),
                 })
                 
                 if(!currSeries){
@@ -80,13 +83,18 @@ export const seriesRouter = createTRPCRouter({
                         where: (post, { eq, and, ne }) => 
                             and (
                             ne(post.id, currentPost.id),
-                            eq(post.seriesId, currentPost.seriesId!)
+                            eq(post.seriesId, seriesId)
                             )
                     })
                     // if another post with the same seriesId is present, then do nothing
                     // else remove the series from the series table
                     if(!anotherPostInThisSeries){
-                        await tx.delete(series).where(eq(series.id, seriesId));
+                        await tx.delete(series).where(
+                            and(
+                                eq(series.id, seriesId),
+                                    eq(series.userId, ctx.session.user.id)
+                                )
+                            );
                     }
                     // update that series id in the current post
                     await tx
