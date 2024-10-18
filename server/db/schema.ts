@@ -217,6 +217,7 @@ export const user = pgTable(
     levelOfStudy: text("levelOfStudy"),
     course: text("course"),
     role: role("role").default("USER").notNull(),
+    yearsOfExperience: varchar("yearsOfExperience").default("0-1").notNull(),
   },
   (table) => {
     return {

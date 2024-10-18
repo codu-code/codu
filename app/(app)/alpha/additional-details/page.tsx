@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
+import {YearsOfExperience} from "./_client";
+ 
 
 export default async function Page() {
   const session = await getServerAuthSession();
@@ -22,6 +24,7 @@ export default async function Page() {
       levelOfStudy: true,
       jobTitle: true,
       workplace: true,
+      yearsOfExperience: true,
     },
     where: (user, { eq }) => eq(user.id, userId),
   });
@@ -37,6 +40,10 @@ export default async function Page() {
     levelOfStudy: details?.levelOfStudy || "",
     jobTitle: details?.jobTitle || "",
     workplace: details?.workplace || "",
+    yearsOfExperience: details?.yearsOfExperience && 
+    ["0-1", "1-3", "3-5", "5-8", "8-12", "12+"].includes(details.yearsOfExperience)
+      ? details.yearsOfExperience as YearsOfExperience 
+      : "0-1", 
   };
 
   return <Content details={detailsWithNullsRemoved} />;
