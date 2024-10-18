@@ -11,8 +11,8 @@ export const saveJobsSchema = z.object({
     .max(50, "Job title should contain atmost 50 characters"),
   jobDescription: z
     .string()
-    .min(100, "Job Description should contain atleast 10 characters")
-    .max(2000, "Job Description should contain atmost 200 characters")
+    .min(100, "Job Description should contain atleast 100 characters")
+    .max(2000, "Job Description should contain atmost 2000 characters")
     .optional(),
   jobLocation: z
     .string()
@@ -25,7 +25,7 @@ export const saveJobsSchema = z.object({
     .or(z.literal("")),
   remote: z.boolean().optional().default(false),
   relocation: z.boolean().optional().default(false),
-  visa: z.boolean().optional().default(false),
+  visa_sponsership: z.boolean().optional().default(false),
   jobType: z.enum(["full-time", "part-time", "freelancer", "other"]),
 });
 

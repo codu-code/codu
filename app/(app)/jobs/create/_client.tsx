@@ -28,25 +28,34 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
 export default function Content() {
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<saveJobsInput>({
     resolver: zodResolver(saveJobsSchema),
     defaultValues: {
+      companyName: "",
+      jobTitle: "",
+      jobDescription: "",
+      jobLocation: "",
       applicationUrl: "",
+      remote: false,
+      relocation: false,
+      visa_sponsership: false,
+      jobType: "full-time",
     },
   });
   const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
-  const onSubmit = (data: saveJobsInput) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<saveJobsInput> = (values) => {
+    console.log(values);
   };
   if (!flagEnabled) {
     notFound();
@@ -178,15 +187,33 @@ export default function Content() {
           />
           <CheckboxGroup className="mt-3">
             <CheckboxField>
-              <Checkbox name="remote" value="is_remote" />
+              <Controller
+                name="remote"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox checked={field.value} onChange={field.onChange} />
+                )}
+              />
               <Label>Work is remote</Label>
             </CheckboxField>
             <CheckboxField>
-              <Checkbox name="relocation" value="is_relocation_package" />
+              <Controller
+                name="relocation"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox checked={field.value} onChange={field.onChange} />
+                )}
+              />
               <Label>Relocation package given</Label>
             </CheckboxField>
             <CheckboxField>
-              <Checkbox name="visa" value="is_visa_sponsored" />
+              <Controller
+                name="visa_sponsership"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox checked={field.value} onChange={field.onChange} />
+                )}
+              />
               <Label>Visa sponsorship provided</Label>
             </CheckboxField>
           </CheckboxGroup>
@@ -225,32 +252,41 @@ export default function Content() {
           <Text>Full-time, part-time or freelancer</Text>
         </div>
         <Field>
-          <RadioGroup defaultValue="full-time">
-            <RadioField>
-              <Radio value="full-time" />
-              <Label>Full-time (€150)</Label>
-              <Description>Salaried Position</Description>
-            </RadioField>
-            <RadioField>
-              <Radio value="part-time" />
-              <Label>Part-time (€100)</Label>
-              <Description>
-                Salaried position but less than 4 days per week
-              </Description>
-            </RadioField>
-            <RadioField>
-              <Radio value="freelancer" />
-              <Label>Freelancer (€100)</Label>
-              <Description>Shorter-term usually or fixed term/job</Description>
-            </RadioField>
-            <RadioField>
-              <Radio value="other" />
-              <Label>Other (€100)</Label>
-              <Description>
-                Looking for a co-founder or something else we haven’t thought of
-              </Description>
-            </RadioField>
-          </RadioGroup>
+          <Controller
+            name="jobType"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup value={field.value} onChange={field.onChange}>
+                <RadioField>
+                  <Radio value="full-time" />
+                  <Label>Full-time (€150)</Label>
+                  <Description>Salaried Position</Description>
+                </RadioField>
+                <RadioField>
+                  <Radio value="part-time" />
+                  <Label>Part-time (€100)</Label>
+                  <Description>
+                    Salaried position but less than 4 days per week
+                  </Description>
+                </RadioField>
+                <RadioField>
+                  <Radio value="freelancer" />
+                  <Label>Freelancer (€100)</Label>
+                  <Description>
+                    Shorter-term usually or fixed term/job
+                  </Description>
+                </RadioField>
+                <RadioField>
+                  <Radio value="other" />
+                  <Label>Other (€100)</Label>
+                  <Description>
+                    Looking for a co-founder or something else we haven’t
+                    thought of
+                  </Description>
+                </RadioField>
+              </RadioGroup>
+            )}
+          />
         </Field>
       </section>
 
