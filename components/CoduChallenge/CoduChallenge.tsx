@@ -11,7 +11,7 @@ const CoduChallenge = () => {
         </p>
         <Link
           href="/articles/join-our-6-week-writing-challenge-quohtgqb"
-          className="inline-block rounded bg-white px-6 py-2 text-sm font-semibold text-pink-600 transition-colors hover:bg-pink-100"
+          className="flex items-center justify-center rounded bg-white px-6 py-2 text-sm font-semibold text-pink-600 transition-colors hover:bg-pink-100"
         >
           Find out more
         </Link>
