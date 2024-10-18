@@ -60,12 +60,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const isValidJSON = (str: string): boolean => {
+const parseJSON = (str: string): any | null => {
   try {
-    JSON.parse(str);
-    return true;
+    return JSON.parse(str);
   } catch (e) {
-    return false;
+    return null;
   }
 };
 
@@ -87,13 +86,13 @@ const ArticlePage = async ({ params }: Props) => {
     notFound();
   }
 
-  const isTiptapContent = isValidJSON(post.body) &&
-    JSON.parse(post.body).type === "doc";
+  const parsedBody = parseJSON(post.body);
+  const isTiptapContent = parsedBody?.type === "doc";
 
   let renderedContent: string | RenderableTreeNode;
 
-  if (isTiptapContent) {
-    const jsonContent = JSON.parse(post.body);
+  if (isTiptapContent && parsedBody) {
+    const jsonContent = parsedBody;
     renderedContent = renderTiptapContent(jsonContent);
   } else {
     const ast = Markdoc.parse(post.body);
