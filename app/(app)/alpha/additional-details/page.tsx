@@ -22,6 +22,7 @@ export default async function Page() {
       levelOfStudy: true,
       jobTitle: true,
       workplace: true,
+      image: true,
     },
     where: (user, { eq }) => eq(user.id, userId),
   });
@@ -37,6 +38,7 @@ export default async function Page() {
     levelOfStudy: details?.levelOfStudy || "",
     jobTitle: details?.jobTitle || "",
     workplace: details?.workplace || "",
+    image: details?.image || "",
   };
 
   return <Content details={detailsWithNullsRemoved} />;
