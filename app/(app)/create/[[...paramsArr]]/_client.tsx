@@ -162,7 +162,7 @@ const Create = () => {
 
   const { mutate: seriesUpdate, status: seriesStatus } = api.series.update.useMutation({
     onError(error) {
-      toast.error("Error auto-saving");
+      toast.error("Error updating series");
       Sentry.captureException(error);
     }
   });
@@ -234,19 +234,30 @@ const Create = () => {
     if (!formData.id) {
       await create({ ...formData });
     } else {
+      let saveSuccess = false;
       try {
         await save({ ...formData, id: postId });
+        saveSuccess = true;
       } catch (error) {
         toast.error("Error saving post.");
         Sentry.captureException(error);
       }
+
+      let seriesUpdateSuccess = false;
       try {
-        await seriesUpdate({ postId, seriesName: formData.seriesName });
-        toast.success("Saved");
+        if(formData?.seriesName){
+          await seriesUpdate({ postId, seriesName: formData.seriesName });
+        }
+        seriesUpdateSuccess = true;
       } catch (error) {
         toast.error("Error updating series.");
         Sentry.captureException(error);
       }
+
+      if(saveSuccess && seriesUpdateSuccess){
+        toast.success("Saved");
+      }
+
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
