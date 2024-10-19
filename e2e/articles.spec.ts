@@ -185,4 +185,28 @@ test.describe("Authenticated Articles Page", () => {
     await expect(page.getByLabel("like-trigger")).toBeVisible();
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
   });
+
+  test("Should post a comment on an article", async ({ page, isMobile }) => {
+    await page.goto("http://localhost:3000");
+    // Waits for articles to be loaded
+    await expect(page.getByText("Read Full Article").first()).toBeVisible();
+    page.getByText("Read Full Article").first().click();
+    await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
+
+    await expect(page.getByPlaceholder("What do you think?")).toBeVisible();
+    await page
+      .getByPlaceholder("What do you think?")
+      .fill("This is a great article. Thanks for posting it!");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect(
+      page.getByRole("link", { name: "E2E Test User", exact: true }),
+    ).toBeVisible();
+
+    await expect(
+      page.locator("div").filter({
+        hasText: /^This is a great article\. Thanks for posting it!$/,
+      }),
+    ).toBeVisible();
+  });
 });
