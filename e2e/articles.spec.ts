@@ -165,11 +165,6 @@ test.describe("Authenticated Articles Page", () => {
     await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
-    await page.route("**/*", async (route) => {
-      await new Promise((f) => setTimeout(f, 500));
-      await route.continue();
-    });
-
     await expect(
       page.getByRole("button", { name: "Publish now" }),
     ).toBeVisible();
