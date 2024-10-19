@@ -7,13 +7,12 @@ import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import challenge from "@/public/images/announcements/challenge.png";
 import { api } from "@/server/trpc/react";
 import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { useSession } from "next-auth/react";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
+import CoduChallenge from "@/components/CoduChallenge/CoduChallenge";
 
 const ArticlesPage = () => {
   const searchParams = useSearchParams();
@@ -97,8 +96,8 @@ const ArticlesPage = () => {
             </select>
           </div>
         </div>
-        <div className="mx-auto grid-cols-12 gap-8 sm:max-w-2xl lg:grid lg:max-w-5xl">
-          <div className="relative md:col-span-8">
+        <div className="mx-auto grid-cols-12 gap-6 sm:max-w-2xl lg:grid lg:max-w-5xl">
+          <div className="relative md:col-span-7">
             <section>
               {status === "error" && (
                 <div className="mt-8">
@@ -157,29 +156,8 @@ const ArticlesPage = () => {
               </span>
             </section>
           </div>
-          <section className="col-span-4 hidden lg:block">
-            <div className="mb-8 mt-2 rounded border border-neutral-300 bg-white text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
-              <Link href="/articles/join-our-6-week-writing-challenge-quohtgqb">
-                <Image
-                  className="w-full rounded-t"
-                  src={challenge}
-                  alt={`"Codú Writing Challenge" text on white background`}
-                />
-              </Link>
-              <div className="my-3 break-words px-4 py-2 text-sm tracking-wide">
-                <Link
-                  className="block text-lg font-semibold leading-6 underline"
-                  href="/articles/join-our-6-week-writing-challenge-quohtgqb"
-                >
-                  Join the Codú writing challenge!
-                </Link>
-                <p className="my-3">
-                  Join our first Codú challenge! Write 6 articles in 6 weeks and
-                  earn a swag bag.
-                </p>
-                <p>Click the link to find out more.</p>
-              </div>
-            </div>
+          <section className="col-span-5 hidden lg:block">
+            <CoduChallenge />
             <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Popular topics
             </h3>
@@ -189,7 +167,6 @@ const ArticlesPage = () => {
                 tagsData.data.map(({ title }) => (
                   <Link
                     key={title}
-                    // only reason this is toLowerCase is to make url look nicer. Not needed for functionality
                     href={`/articles?tag=${title.toLowerCase()}`}
                     className="rounded border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
                   >

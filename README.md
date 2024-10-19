@@ -48,7 +48,7 @@ For a more detailed how to guide on setting them up [go to the Environment Varia
 6.  Setup the tables in the database with Drizzle by running:
 
 ```bash
-npm run db:push
+npm run db:migrate
 ```
 
 The full command can be seen in our [package.json](/package.json#16) file
