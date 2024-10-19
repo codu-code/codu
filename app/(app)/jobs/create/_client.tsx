@@ -163,7 +163,11 @@ export default function Content() {
                 className="hidden"
                 ref={fileInputRef}
               />
-              <Input type="hidden" {...register("companyLogoUrl")} />
+              <Input
+                type="url"
+                className="hidden"
+                {...register("companyLogoUrl")}
+              />
               <Text className="mt-1 text-xs text-gray-500">
                 JPG, GIF or PNG. 1MB max.
               </Text>
