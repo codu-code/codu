@@ -771,12 +771,6 @@ const Create = ({ session }: { session: Session | null }) => {
                               inputRef={textareaRef}
                             />
                           </div>
-
-                          <div className="flex items-center justify-between">
-                            {/* Remove the save status messages */}
-                            <div />
-                            {/* Next button already removed */}
-                          </div>
                         </div>
                       )}
                     </div>
