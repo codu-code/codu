@@ -249,7 +249,7 @@ test.describe("Authenticated Articles Page", () => {
     const isSortedOldest = articles.every((article, index, arr) => {
       if (index === arr.length - 1) return true;
       if (!article.date || !arr[index + 1].date) return false;
-      return new Date(article.date) >= new Date(arr[index + 1].date!);
+      return new Date(article.date) <= new Date(arr[index + 1].date!);
     });
     expect(isSortedOldest).toBeTruthy();
   });
@@ -272,5 +272,6 @@ test.describe("Authenticated Articles Page", () => {
       if (index === arr.length - 1) return true;
       return article.likes >= arr[index + 1].likes;
     });
+    expect(isSortedTop).toBeTruthy();
   });
 });
