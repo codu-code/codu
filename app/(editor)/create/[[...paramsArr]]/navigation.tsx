@@ -4,7 +4,7 @@ import { api } from "@/server/trpc/react";
 import { Menu, Transition } from "@headlessui/react";
 import { BellIcon } from "@heroicons/react/20/solid";
 import { signOut } from "next-auth/react";
-import { PromptLink as Link } from "@/components/PromptService/PromptLink";
+import Link from "next/link";
 import { Fragment } from "react";
 import { type Session } from "next-auth";
 import Logo from "@/icons/logo.svg";
@@ -61,7 +61,7 @@ const EditorNav = ({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <Logo className="h-6 w-auto" />
             </Link>
 
@@ -84,7 +84,7 @@ const EditorNav = ({
             {session && (
               <>
                 <Link
-                  to="/notifications"
+                  href="/notifications"
                   className="focus-style relative rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
                 >
                   <span className="sr-only">View notifications</span>
@@ -134,7 +134,7 @@ const EditorNav = ({
                               </button>
                             ) : (
                               <Link
-                                to={item.href}
+                                href={item.href}
                                 className={`${
                                   active ? "bg-neutral-100" : ""
                                 } block px-4 py-2 text-sm text-neutral-700`}
