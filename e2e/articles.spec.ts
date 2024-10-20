@@ -221,51 +221,56 @@ test.describe("Authenticated Articles Page", () => {
     await expect(page.getByText(commentContent)).toBeVisible();
   });
 
-  test.describe("Article sort order on article page", () => {
-    const sortOptions = ["newest", "oldest", "top"];
+  test("Should sort articles by Newest", async ({ page }) => {
+    await page.goto("http://localhost:3000/articles");
+    await page.waitForSelector("article");
 
-    for (const sortOption of sortOptions) {
-      test(`Should sort articles by ${sortOption}`, async ({ page }) => {
-        const baseUrl = "http://localhost:3000/articles";
-        const url =
-          sortOption === "newest" ? baseUrl : `${baseUrl}?filter=${sortOption}`;
+    const articles = await page.$$eval("article", (articles) => {
+      return articles.map((article) => ({
+        date: article.querySelector("time")?.dateTime,
+      }));
+    });
+    const isSortedNewest = articles.every((article, index, arr) => {
+      if (index === arr.length - 1) return true;
+      if (!article.date || !arr[index + 1].date) return false;
+      return new Date(article.date) >= new Date(arr[index + 1].date!);
+    });
+    expect(isSortedNewest).toBeTruthy();
+  });
 
-        await page.goto(url);
-        await page.waitForSelector("article");
+  test("Should sort articles by Oldest", async ({ page }) => {
+    await page.goto("http://localhost:3000/articles?filter=oldest");
+    await page.waitForSelector("article");
+    const articles = await page.$$eval("article", (articles) => {
+      return articles.map((article) => ({
+        date: article.querySelector("time")?.dateTime,
+      }));
+    });
+    const isSortedOldest = articles.every((article, index, arr) => {
+      if (index === arr.length - 1) return true;
+      if (!article.date || !arr[index + 1].date) return false;
+      return new Date(article.date) >= new Date(arr[index + 1].date!);
+    });
+    expect(isSortedOldest).toBeTruthy();
+  });
 
-        const articles = await page.$$eval("article", (articles) => {
-          return articles.map((article) => ({
-            date: article.querySelector("time")?.dateTime,
-            likes: parseInt(
-              article
-                .querySelector("[data-likes]")
-                ?.getAttribute("data-likes") || "0",
-            ),
-          }));
-        });
+  test("Should sort articles by Top - likes", async ({ page }) => {
+    await page.goto("http://localhost:3000/articles?filter=top");
+    await page.waitForSelector("article");
 
-        if (sortOption === "newest") {
-          const isSortedNewest = articles.every((article, index, arr) => {
-            if (index === arr.length - 1) return true;
-            if (!article.date) return false;
-            return new Date(article.date) >= new Date(arr[index + 1].date!);
-          });
-          expect(isSortedNewest).toBeTruthy();
-        } else if (sortOption === "oldest") {
-          const isSortedOldest = articles.every((article, index, arr) => {
-            if (index === arr.length - 1) return true;
-            if (!article.date) return false;
-            return new Date(article.date) <= new Date(arr[index + 1].date!);
-          });
-          expect(isSortedOldest).toBeTruthy();
-        } else if (sortOption === "top") {
-          const isSortedTop = articles.every((article, index, arr) => {
-            if (index === arr.length - 1) return true;
-            return article.likes >= arr[index + 1].likes;
-          });
-          expect(isSortedTop).toBeTruthy();
-        }
-      });
-    }
+    const articles = await page.$$eval("article", (articles) => {
+      return articles.map((article) => ({
+        likes: parseInt(
+          article.querySelector("[data-likes]")?.getAttribute("data-likes") ||
+            "0",
+          10,
+        ),
+      }));
+    });
+
+    const isSortedTop = articles.every((article, index, arr) => {
+      if (index === arr.length - 1) return true;
+      return article.likes >= arr[index + 1].likes;
+    });
   });
 });
