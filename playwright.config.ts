@@ -29,14 +29,16 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
   },
+  expect: {
+    timeout: 10000,
+  },
 
   /* Configure projects for major browsers */
   projects: [
     { name: "setup", testMatch: /auth.setup\.ts/ },
     {
-      name: "chromium",
+      name: "Desktop Chrome",
       use: {
-        ...devices["Desktop Chrome"],
         storageState: "playwright/.auth/browser.json",
       },
       dependencies: ["setup"],
@@ -44,7 +46,7 @@ export default defineConfig({
 
     // Example other browsers
     {
-      name: "firefox",
+      name: "Desktop Firefox",
       use: {
         ...devices["Desktop Firefox"],
         storageState: "playwright/.auth/browser.json",

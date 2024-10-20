@@ -1,4 +1,5 @@
 import { test, expect } from "playwright/test";
+import { randomUUID } from "crypto";
 
 test.describe("Unauthenticated Articles Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -16,7 +17,7 @@ test.describe("Unauthenticated Articles Page", () => {
     );
   });
 
-  test("Should not show bookmark article icon", async ({ page }) => {
+  test("Should show bookmark article icon", async ({ page }) => {
     await page.goto("http://localhost:3000/articles");
 
     await expect(
@@ -25,7 +26,7 @@ test.describe("Unauthenticated Articles Page", () => {
 
     await expect(
       page.locator("article").first().getByLabel("Bookmark this post"),
-    ).toBeHidden();
+    ).toBeVisible();
   });
   test("Should load more articles when scrolling to the end of the page", async ({
     page,
@@ -56,6 +57,24 @@ test.describe("Unauthenticated Articles Page", () => {
     ).toBeVisible();
     await expect(page.getByText("Sponsorship")).toBeVisible();
     await expect(page.getByText("Code Of Conduct")).toBeVisible();
+  });
+
+  test("Should not be able to post a comment on an article", async ({
+    page,
+  }) => {
+    await page.goto("http://localhost:3000");
+    // Waits for articles to be loaded
+    await expect(page.getByText("Read Full Article").first()).toBeVisible();
+    await page.getByText("Read Full Article").first().click();
+    await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
+
+    await expect(page.getByPlaceholder("What do you think?")).toBeHidden();
+
+    await expect(page.getByText("Hey! 👋")).toBeVisible();
+    await expect(page.getByText("Got something to say?")).toBeVisible();
+    await expect(
+      page.getByText("Sign in or sign up to leave a comment"),
+    ).toBeVisible();
   });
 });
 
@@ -102,27 +121,36 @@ test.describe("Authenticated Articles Page", () => {
     // Waits for articles to be loaded
     await page.waitForSelector("article");
 
-    const initialArticleCount = await page.$$eval(
-      "article",
-      (articles) => articles.length,
-    );
+    // This delays the requests by 100ms.
+    // This is needed as the load more article request was resolving too fast
+    await page.route("**/*", async (route) => {
+      await new Promise((f) => setTimeout(f, 100));
+      await route.continue();
+    });
 
     if (!isMobile) {
-      await page.getByText("Code Of Conduct").scrollIntoViewIfNeeded();
-      await page.waitForTimeout(5000);
-      const finalArticleCount = await page.$$eval(
-        "article",
-        (articles) => articles.length,
-      );
-      expect(finalArticleCount).toBeGreaterThan(initialArticleCount);
+      const articleLocator = page.locator("article");
+      const initialArticleCount = await articleLocator.count();
+
+      await page
+        .getByRole("link", { name: "Code Of Conduct" })
+        .scrollIntoViewIfNeeded();
+
+      // We expect to see the loading indicator become visible why loading and then hidden when more articles are loaded
+      await expect(page.getByTestId("article-loading-indicator")).toBeVisible();
+      await expect(page.getByTestId("article-loading-indicator")).toBeHidden();
+
+      expect(await articleLocator.count()).toBeGreaterThan(initialArticleCount);
     }
 
-    await expect(page.getByText("Home")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
     await expect(
       page.getByLabel("Footer").getByRole("link", { name: "Events" }),
     ).toBeVisible();
-    await expect(page.getByText("Sponsorship")).toBeVisible();
-    await expect(page.getByText("Code Of Conduct")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sponsorship" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Code Of Conduct" }),
+    ).toBeVisible();
   });
 
   test("Should write and publish an article", async ({ page, isMobile }) => {
@@ -155,6 +183,7 @@ test.describe("Authenticated Articles Page", () => {
 
     await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
+
     await expect(
       page.getByRole("button", { name: "Publish now" }),
     ).toBeVisible();
@@ -175,5 +204,20 @@ test.describe("Authenticated Articles Page", () => {
     ).toBeVisible();
     await expect(page.getByLabel("like-trigger")).toBeVisible();
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
+  });
+
+  test("Should post a comment on an article", async ({ page }, workerInfo) => {
+    const commentContent = `This is a great read. Thanks for posting! Sent from ${workerInfo.project.name} + ${randomUUID()}`;
+    await page.goto("http://localhost:3000");
+    // Waits for articles to be loaded
+    await expect(page.getByText("Read Full Article").first()).toBeVisible();
+    await page.getByText("Read Full Article").first().click();
+    await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
+
+    await expect(page.getByPlaceholder("What do you think?")).toBeVisible();
+    await page.getByPlaceholder("What do you think?").fill(commentContent);
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect(page.getByText(commentContent)).toBeVisible();
   });
 });

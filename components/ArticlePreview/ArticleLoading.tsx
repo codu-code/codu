@@ -1,5 +1,8 @@
 const ArticleLoading = () => (
-  <div className="my-4 w-full border-l-4 border-l-pink-600 bg-white p-4 shadow dark:bg-neutral-900">
+  <div
+    className="my-4 w-full border-l-4 border-l-pink-600 bg-white p-4 shadow dark:bg-neutral-900"
+    data-testid="article-loading-indicator"
+  >
     <div className="animate-pulse">
       <div className="flex space-x-4">
         <div className="h-10 w-10 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
