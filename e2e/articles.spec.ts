@@ -1,4 +1,5 @@
 import { test, expect } from "playwright/test";
+import { randomUUID } from "crypto";
 
 test.describe("Unauthenticated Articles Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -56,6 +57,24 @@ test.describe("Unauthenticated Articles Page", () => {
     ).toBeVisible();
     await expect(page.getByText("Sponsorship")).toBeVisible();
     await expect(page.getByText("Code Of Conduct")).toBeVisible();
+  });
+
+  test("Should not be able to post a comment on an article", async ({
+    page,
+  }) => {
+    await page.goto("http://localhost:3000");
+    // Waits for articles to be loaded
+    await expect(page.getByText("Read Full Article").first()).toBeVisible();
+    page.getByText("Read Full Article").first().click();
+    await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
+
+    await expect(page.getByPlaceholder("What do you think?")).toBeHidden();
+
+    await expect(page.getByText("Hey! 👋")).toBeVisible();
+    await expect(page.getByText("Got something to say?")).toBeVisible();
+    await expect(
+      page.getByText("Sign in or sign up to leave a comment"),
+    ).toBeVisible();
   });
 });
 
@@ -186,7 +205,11 @@ test.describe("Authenticated Articles Page", () => {
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
   });
 
-  test("Should post a comment on an article", async ({ page, isMobile }) => {
+  test("Should post a comment on an article", async ({
+    page,
+    browserName,
+  }, workerInfo) => {
+    const commentContent = `This is a great read. Thanks for posting! Sent from ${workerInfo.project.name} + ${randomUUID()}`;
     await page.goto("http://localhost:3000");
     // Waits for articles to be loaded
     await expect(page.getByText("Read Full Article").first()).toBeVisible();
@@ -194,19 +217,9 @@ test.describe("Authenticated Articles Page", () => {
     await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
 
     await expect(page.getByPlaceholder("What do you think?")).toBeVisible();
-    await page
-      .getByPlaceholder("What do you think?")
-      .fill("This is a great article. Thanks for posting it!");
+    await page.getByPlaceholder("What do you think?").fill(commentContent);
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(
-      page.getByRole("link", { name: "E2E Test User", exact: true }),
-    ).toBeVisible();
-
-    await expect(
-      page.locator("div").filter({
-        hasText: /^This is a great article\. Thanks for posting it!$/,
-      }),
-    ).toBeVisible();
+    await expect(page.getByText(commentContent)).toBeVisible();
   });
 });
