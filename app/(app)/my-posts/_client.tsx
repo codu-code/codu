@@ -18,7 +18,7 @@ import { useSearchParams } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { Tabs } from "@/components/Tabs";
 import { PromptDialog } from "@/components/PromptService";
-import { PostStatus, getPostStatus } from "@/utils/post";
+import { status, getPostStatus } from "@/utils/post";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -135,7 +135,7 @@ const MyPosts = () => {
               }) => {
                 const postStatus = published
                   ? getPostStatus(new Date(published))
-                  : PostStatus.DRAFT;
+                  : status.DRAFT;
                 return (
                   <article
                     className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
@@ -158,11 +158,11 @@ const MyPosts = () => {
                     </p>
                     <div className="flex items-center">
                       <div className="flex-grow">
-                        {published && postStatus === PostStatus.SCHEDULED ? (
+                        {published && postStatus === status.SCHEDULED ? (
                           <>
                             {renderDate("Scheduled to publish on ", published)}
                           </>
-                        ) : published && postStatus === PostStatus.PUBLISHED ? (
+                        ) : published && postStatus === status.PUBLISHED ? (
                           <>
                             {/*If updatedAt is greater than published by more than on minutes show updated at else show published 
                               as on updating published updatedAt is automatically updated and is greater than published*/}
@@ -174,7 +174,7 @@ const MyPosts = () => {
                               <>{renderDate("Published on ", published)}</>
                             )}
                           </>
-                        ) : postStatus === PostStatus.DRAFT ? (
+                        ) : postStatus === status.DRAFT ? (
                           <>{renderDate("Last updated on ", updatedAt)}</>
                         ) : null}
                       </div>

@@ -1,10 +1,16 @@
-import "../styles/globals.css";
+import { headers } from "next/headers";
+import "@/styles/globals.css";
 import Fathom from "@/components/Fathom/Fathom";
-import React from "react";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
 import { Toaster } from "sonner";
 import { CSPostHogProvider } from "./providers";
 import dynamic from "next/dynamic";
+
+import ThemeProvider from "@/components/Theme/ThemeProvider";
+import { TRPCReactProvider } from "@/server/trpc/react";
+import AuthProvider from "@/context/AuthProvider";
+import ProgressBar from "@/components/ProgressBar/ProgressBar";
+import { PromptProvider } from "@/components/PromptService";
 
 const PostHogPageView = dynamic(
   () => import("@/components/PageViews/PageViews"),
@@ -62,7 +68,16 @@ export default async function RootLayout({
         <body className="h-full">
           <PostHogPageView />
           <Toaster />
-          <A11yProvider>{children}</A11yProvider>
+          <A11yProvider>
+            <ProgressBar />
+            <AuthProvider>
+              <ThemeProvider>
+                <TRPCReactProvider headers={headers()}>
+                  <PromptProvider>{children}</PromptProvider>
+                </TRPCReactProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </A11yProvider>
         </body>
       </CSPostHogProvider>
     </html>

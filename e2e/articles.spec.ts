@@ -181,8 +181,8 @@ test.describe("Authenticated Articles Page", () => {
       .getByPlaceholder("Enter your content here 💖")
       .fill(articleContent);
 
-    await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
-    await page.getByRole("button", { name: "Next" }).click();
+    await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
+    await page.getByRole("button", { name: "Publish" }).click();
 
     await expect(
       page.getByRole("button", { name: "Publish now" }),
