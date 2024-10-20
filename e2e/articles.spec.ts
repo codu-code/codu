@@ -65,7 +65,7 @@ test.describe("Unauthenticated Articles Page", () => {
     await page.goto("http://localhost:3000");
     // Waits for articles to be loaded
     await expect(page.getByText("Read Full Article").first()).toBeVisible();
-    page.getByText("Read Full Article").first().click();
+    await page.getByText("Read Full Article").first().click();
     await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
 
     await expect(page.getByPlaceholder("What do you think?")).toBeHidden();
@@ -205,15 +205,12 @@ test.describe("Authenticated Articles Page", () => {
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
   });
 
-  test("Should post a comment on an article", async ({
-    page,
-    browserName,
-  }, workerInfo) => {
+  test("Should post a comment on an article", async ({ page }, workerInfo) => {
     const commentContent = `This is a great read. Thanks for posting! Sent from ${workerInfo.project.name} + ${randomUUID()}`;
     await page.goto("http://localhost:3000");
     // Waits for articles to be loaded
     await expect(page.getByText("Read Full Article").first()).toBeVisible();
-    page.getByText("Read Full Article").first().click();
+    await page.getByText("Read Full Article").first().click();
     await page.waitForURL(/^http:\/\/localhost:3000\/articles\/.*$/);
 
     await expect(page.getByPlaceholder("What do you think?")).toBeVisible();
