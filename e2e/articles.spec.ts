@@ -220,4 +220,52 @@ test.describe("Authenticated Articles Page", () => {
 
     await expect(page.getByText(commentContent)).toBeVisible();
   });
+
+  test.describe("Article sort order on article page", () => {
+    const sortOptions = ["newest", "oldest", "top"];
+
+    for (const sortOption of sortOptions) {
+      test(`Should sort articles by ${sortOption}`, async ({ page }) => {
+        const baseUrl = "http://localhost:3000/articles";
+        const url =
+          sortOption === "newest" ? baseUrl : `${baseUrl}?filter=${sortOption}`;
+
+        await page.goto(url);
+        await page.waitForSelector("article");
+
+        const articles = await page.$$eval("article", (articles) => {
+          return articles.map((article) => ({
+            date: article.querySelector("time")?.dateTime,
+            likes: parseInt(
+              article
+                .querySelector("[data-likes]")
+                ?.getAttribute("data-likes") || "0",
+            ),
+          }));
+        });
+
+        if (sortOption === "newest") {
+          const isSortedNewest = articles.every((article, index, arr) => {
+            if (index === arr.length - 1) return true;
+            if (!article.date) return false;
+            return new Date(article.date) >= new Date(arr[index + 1].date!);
+          });
+          expect(isSortedNewest).toBeTruthy();
+        } else if (sortOption === "oldest") {
+          const isSortedOldest = articles.every((article, index, arr) => {
+            if (index === arr.length - 1) return true;
+            if (!article.date) return false;
+            return new Date(article.date) <= new Date(arr[index + 1].date!);
+          });
+          expect(isSortedOldest).toBeTruthy();
+        } else if (sortOption === "top") {
+          const isSortedTop = articles.every((article, index, arr) => {
+            if (index === arr.length - 1) return true;
+            return article.likes >= arr[index + 1].likes;
+          });
+          expect(isSortedTop).toBeTruthy();
+        }
+      });
+    }
+  });
 });
