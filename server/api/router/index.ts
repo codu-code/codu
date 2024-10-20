@@ -7,6 +7,7 @@ import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
 import { reportRouter } from "./report";
 import { tagRouter } from "./tag";
+import { jobsRouter } from "./jobs";
 
 export const appRouter = createTRPCRouter({
   post: postRouter,
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   admin: adminRouter,
   report: reportRouter,
   tag: tagRouter,
+  jobs: jobsRouter,
 });
 
 // export type definition of API
