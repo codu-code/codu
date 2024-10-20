@@ -14,7 +14,7 @@ import {
   GetLimitSidePosts,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
-import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
+import { bookmark, like, post, post_tag, tag, user, series } from "@/server/db/schema";
 import {
   and,
   eq,
@@ -187,12 +187,29 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      const [deletedPost] = await ctx.db
-        .delete(post)
-        .where(eq(post.id, id))
-        .returning();
+      const deletedPost = await ctx.db.transaction(async (tx) => {
+        const [deletedPost] = await tx
+          .delete(post)
+          .where(eq(post.id, id))
+          .returning();
 
-      return deletedPost;
+          if(deletedPost.seriesId){
+            // check is there is any other post with the current seriesId
+            const anotherPostInThisSeries = await tx.query.post.findFirst({
+              where: (post, { eq }) => 
+                    eq(post.seriesId, deletedPost.seriesId!)
+            })
+            // if another post with the same seriesId is present, then do nothing
+            // else remove the series from the series table
+            if(!anotherPostInThisSeries){
+                await tx.delete(series).where(eq(series.id, deletedPost.seriesId));
+            }
+          }
+
+        return deletedPost;
+      });
+
+    return deletedPost;
     }),
   like: protectedProcedure
     .input(LikePostSchema)
@@ -428,6 +445,7 @@ export const postRouter = createTRPCRouter({
         where: (posts, { eq }) => eq(posts.id, id),
         with: {
           tags: { with: { tag: true } },
+          series: true
         },
       });
 

@@ -25,6 +25,7 @@ export const SavePostSchema = z.object({
   canonicalUrl: z.optional(z.string().trim().url()),
   tags: z.string().array().max(5).optional(),
   published: z.string().datetime().optional(),
+  seriesName: z.string().trim().optional()
 });
 
 export const PublishPostSchema = z.object({
@@ -50,6 +51,7 @@ export const ConfirmPostSchema = z.object({
     .optional(),
   canonicalUrl: z.string().trim().url().optional(),
   tags: z.string().array().max(5).optional(),
+  seriesName: z.string().trim().optional()
 });
 
 export const DeletePostSchema = z.object({
