@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "yearsOfExperience" varchar DEFAULT '0-1' NOT NULL;
