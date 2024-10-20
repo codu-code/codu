@@ -17,7 +17,7 @@ test.describe("Unauthenticated Articles Page", () => {
     );
   });
 
-  test("Should not show bookmark article icon", async ({ page }) => {
+  test("Should show bookmark article icon", async ({ page }) => {
     await page.goto("http://localhost:3000/articles");
 
     await expect(
@@ -26,7 +26,7 @@ test.describe("Unauthenticated Articles Page", () => {
 
     await expect(
       page.locator("article").first().getByLabel("Bookmark this post"),
-    ).toBeHidden();
+    ).toBeVisible();
   });
   test("Should load more articles when scrolling to the end of the page", async ({
     page,
@@ -183,6 +183,7 @@ test.describe("Authenticated Articles Page", () => {
 
     await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
+
     await expect(
       page.getByRole("button", { name: "Publish now" }),
     ).toBeVisible();
