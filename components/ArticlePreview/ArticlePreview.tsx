@@ -60,7 +60,7 @@ const ArticlePreview: NextPage<Props> = ({
   const howManySavedToShow = 3;
   const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery(
     { limit: howManySavedToShow },
-    { enabled: !!session }
+    { enabled: !!session },
   );
   const bookmarks = bookmarksData?.bookmarks;
   const dateTime = Temporal.Instant.from(new Date(date).toISOString());
