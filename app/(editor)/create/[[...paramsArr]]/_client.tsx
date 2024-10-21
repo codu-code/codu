@@ -22,16 +22,23 @@ import { useMarkdownHotkeys } from "@/markdoc/editor/hotkeys/hotkeys.markdoc";
 import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 import copy from "copy-to-clipboard";
-import { PostStatus, getPostStatus, isValidScheduleTime } from "@/utils/post";
+import {
+  type PostStatus,
+  getPostStatus,
+  isValidScheduleTime,
+  status,
+} from "@/utils/post";
 import { ImageUp, LoaderCircle } from "lucide-react";
 import { uploadFile } from "@/utils/s3helpers";
 import { getUploadUrl } from "@/app/actions/getUploadUrl";
+import EditorNav from "./navigation";
+import { type Session } from "next-auth";
 
-const Create = () => {
+const Create = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
 
@@ -52,6 +59,7 @@ const Create = () => {
   const [uploadStatus, setUploadStatus] = useState<
     "loading" | "error" | "success" | "default"
   >("default");
+  const [postStatus, setPostStatus] = useState<PostStatus | null>(null);
 
   const { unsavedChanges: _unsaved, setUnsavedChanges: _setUnsaved } =
     usePrompt();
@@ -186,16 +194,10 @@ const Create = () => {
       toast.error("Error saving");
     }
 
-    if (isSuccess) {
-      toast.success("Saved");
-    }
-
     if (draftFetchError) {
-      toast.error(
-        "Something went wrong fetching your draft, refresh your page or you may lose data",
-      );
+      notFound();
     }
-  }, [draftFetchError, isError, isSuccess]);
+  }, [draftFetchError, isError]);
 
   useEffect(() => {
     if (shouldRefetch) {
@@ -227,7 +229,6 @@ const Create = () => {
       await create({ ...formData });
     } else {
       await save({ ...formData, id: postId });
-      toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -243,9 +244,9 @@ const Create = () => {
     saveStatus === "loading" ||
     dataStatus === "loading";
 
-  const postStatus = data?.published
+  const currentPostStatus = data?.published
     ? getPostStatus(new Date(data.published))
-    : PostStatus.DRAFT;
+    : status.DRAFT;
 
   const onSubmit = async (inputData: SavePostInput) => {
     // validate markdoc syntax
@@ -264,7 +265,7 @@ const Create = () => {
 
     await savePost();
 
-    if (postStatus === PostStatus.PUBLISHED) {
+    if (currentPostStatus === status.PUBLISHED) {
       if (data) {
         router.push(`/articles/${data.slug}`);
       }
@@ -341,10 +342,21 @@ const Create = () => {
       published: published ? published : undefined,
     });
     setIsPostScheduled(published ? new Date(published) > new Date() : false);
+    setPostStatus(
+      published ? getPostStatus(new Date(published)) : status.DRAFT,
+    );
   }, [data]);
 
   useEffect(() => {
-    if (postStatus !== PostStatus.DRAFT) return;
+    if ((title + body).length < 5) {
+      setPostStatus(null);
+    } else if (postStatus === null) {
+      setPostStatus(status.DRAFT);
+    }
+  }, [title, body]);
+
+  useEffect(() => {
+    if (currentPostStatus !== status.DRAFT) return;
     if ((title + body).length < 5) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     if (allowUpdate) savePost();
@@ -374,8 +386,21 @@ const Create = () => {
     }
   }, [publishStatus, publishData, isPostScheduled, router]);
 
+  const handlePublish = () => {
+    if (isDisabled) return;
+    setOpen(true);
+  };
+
   return (
     <>
+      <EditorNav
+        session={session}
+        username={session?.user?.name || null}
+        postStatus={postStatus}
+        unsavedChanges={unsavedChanges}
+        onPublish={handlePublish}
+        isDisabled={isDisabled}
+      />
       <form onSubmit={handleSubmit(onSubmit)}>
         <Transition show={open} as={Fragment}>
           <div className="old-input fixed bottom-0 left-0 top-0 z-50 h-screen w-full overflow-y-scroll bg-white dark:bg-black">
@@ -549,7 +574,7 @@ const Create = () => {
                       </Disclosure>
                     </div>
                     <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
-                      {postStatus === PostStatus.DRAFT && (
+                      {currentPostStatus === status.DRAFT && (
                         <button
                           type="button"
                           disabled={isDisabled}
@@ -578,14 +603,17 @@ const Create = () => {
                           </>
                         ) : (
                           <>
-                            {postStatus === PostStatus.DRAFT &&
-                              (isPostScheduled ? "Schedule" : "Publish now")}
-                            {postStatus === PostStatus.SCHEDULED &&
-                              (isPostScheduled
-                                ? "Save changes"
-                                : "Publish now")}
-                            {postStatus === PostStatus.PUBLISHED &&
-                              "Save changes"}
+                            {currentPostStatus === status.PUBLISHED
+                              ? "Save changes"
+                              : currentPostStatus === status.DRAFT
+                                ? isPostScheduled
+                                  ? "Schedule"
+                                  : "Publish now"
+                                : currentPostStatus === status.SCHEDULED
+                                  ? isPostScheduled
+                                    ? "Update schedule"
+                                    : "Publish now"
+                                  : "Publish"}
                           </>
                         )}
                       </button>
@@ -742,36 +770,6 @@ const Create = () => {
                               {...register("body")}
                               inputRef={textareaRef}
                             />
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <>
-                              {saveStatus === "loading" && (
-                                <p>Auto-saving...</p>
-                              )}
-                              {saveStatus === "error" && savedTime && (
-                                <p className="text-xs text-red-600 lg:text-sm">
-                                  {`Error saving, last saved: ${savedTime.toString()}`}
-                                </p>
-                              )}
-                              {saveStatus === "success" && savedTime && (
-                                <p className="text-xs text-neutral-400 lg:text-sm">
-                                  {`Saved: ${savedTime.toString()}`}
-                                </p>
-                              )}
-                            </>
-                            <div />
-
-                            <div className="flex">
-                              <button
-                                type="button"
-                                disabled={isDisabled}
-                                className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
-                                onClick={() => setOpen(true)}
-                              >
-                                Next
-                              </button>
-                            </div>
                           </div>
                         </div>
                       )}

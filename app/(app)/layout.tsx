@@ -79,22 +79,13 @@ export default async function RootLayout({
 
   return (
     <>
-      <ProgressBar />
-      <AuthProvider>
-        <ThemeProvider>
-          <TRPCReactProvider headers={headers()}>
-            <PromptProvider>
-              <Nav
-                session={session}
-                algoliaSearchConfig={algoliaSearchConfig}
-                username={userData?.username || null}
-              />
-              {children}
-              <Footer />
-            </PromptProvider>
-          </TRPCReactProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <Nav
+        session={session}
+        algoliaSearchConfig={algoliaSearchConfig}
+        username={userData?.username || null}
+      />
+      {children}
+      <Footer />
     </>
   );
 }

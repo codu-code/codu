@@ -58,12 +58,13 @@ const ArticlePreview: NextPage<Props> = ({
   bookmarkedInitialState = false,
   likes,
 }) => {
+  const { data: session } = useSession();
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
   const howManySavedToShow = 3;
-  const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery({
-    limit: howManySavedToShow,
-  });
-  const { data: session } = useSession();
+  const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery(
+    { limit: howManySavedToShow },
+    { enabled: !!session },
+  );
   const bookmarks = bookmarksData?.bookmarks;
   const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
