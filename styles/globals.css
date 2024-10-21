@@ -81,14 +81,6 @@ body {
   @apply bg-white bg-gradient-to-r text-neutral-800 dark:bg-neutral-900 dark:text-white;
 }
 
-.fancy-link {
-  @apply cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent;
-}
-
-.fancy-link:hover {
-  @apply from-orange-300 to-pink-500;
-}
-
 .prose {
   @apply prose-neutral dark:prose-invert lg:prose-lg;
 
