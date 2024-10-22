@@ -17,6 +17,7 @@ import { getCamelCaseFromLower } from "@/utils/utils";
 import { generateHTML } from "@tiptap/html";
 import { TiptapExtensions } from "@/components/editor/editor/extensions";
 import DOMPurify from 'isomorphic-dompurify';
+import type { JSONContent } from '@tiptap/core';
 
 type Props = { params: { slug: string } };
 
@@ -61,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const parseJSON = (str: string): any | null => {
+const parseJSON = (str: string): JSONContent | null => {
   try {
     return JSON.parse(str);
   } catch (e) {
@@ -69,7 +70,7 @@ const parseJSON = (str: string): any | null => {
   }
 };
 
-const renderSanitizedTiptapContent = (jsonContent: JSON) => {
+const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
   const rawHtml = generateHTML(jsonContent, [...TiptapExtensions]);
   // Sanitize the HTML
   return DOMPurify.sanitize(rawHtml);
