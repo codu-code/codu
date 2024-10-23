@@ -16,8 +16,8 @@ import { getPost } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import { generateHTML } from "@tiptap/html";
 import { TiptapExtensions } from "@/components/editor/editor/extensions";
-import DOMPurify from 'isomorphic-dompurify';
-import type { JSONContent } from '@tiptap/core';
+import DOMPurify from "isomorphic-dompurify";
+import type { JSONContent } from "@tiptap/core";
 
 type Props = { params: { slug: string } };
 
@@ -104,7 +104,6 @@ const ArticlePage = async ({ params }: Props) => {
     }) as unknown as string;
   }
 
-
   return (
     <>
       <ArticleMenu
@@ -116,7 +115,7 @@ const ArticlePage = async ({ params }: Props) => {
       />
       <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">
         <article className="prose mx-auto max-w-3xl dark:prose-invert lg:prose-lg">
-          {!isTiptapContent && (<h1>{post.title}</h1>)}
+          {!isTiptapContent && <h1>{post.title}</h1>}
 
           {isTiptapContent ? (
             <div

@@ -236,7 +236,9 @@ const Create = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                {saveStatus === "loading" && (<p className="text-xs lg:text-sm">Auto-saving...</p>)}
+                {saveStatus === "loading" && (
+                  <p className="text-xs lg:text-sm">Auto-saving...</p>
+                )}
                 {saveStatus === "error" && savedTime && (
                   <p className="text-xs text-red-600 lg:text-sm">
                     Error saving, last saved: {savedTime.toString()}
@@ -254,7 +256,11 @@ const Create = () => {
                 disabled={isDisabled}
                 className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
                 onClick={() => setOpen(true)}
-                aria-label={data?.published ? "Save changes to document" : "Publish document"}
+                aria-label={
+                  data?.published
+                    ? "Save changes to document"
+                    : "Publish document"
+                }
               >
                 {data?.published ? "Save Changes" : "Publish"}
               </button>
