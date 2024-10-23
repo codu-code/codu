@@ -39,7 +39,7 @@ const GetStarted: NextPage = () => {
           </h2>
           <p className="mt-2 text-center text-base text-neutral-500">
             Or{" "}
-            <Link className="fancy-link font-medium" href="/">
+            <Link className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent font-medium hover:from-orange-300 hover:to-pink-500" href="/">
               return home
             </Link>
           </p>

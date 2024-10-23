@@ -505,11 +505,11 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
             <p className="mb-2">Hey! 👋</p>
             <p className="mb-2">Got something to say?</p>
             <p>
-              <button onClick={() => signIn()} className="fancy-link">
+              <button onClick={() => signIn()} className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500">
                 Sign in
               </button>{" "}
               or{" "}
-              <button onClick={() => signIn()} className="fancy-link">
+              <button onClick={() => signIn()} className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500">
                 sign up
               </button>{" "}
               to leave a comment.

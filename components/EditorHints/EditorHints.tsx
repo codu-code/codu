@@ -29,7 +29,7 @@ const EditorHints = () => {
                 href="https://www.markdownguide.org/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fancy-link"
+                className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
               >
                 this
               </a>{" "}
@@ -38,7 +38,7 @@ const EditorHints = () => {
                 href="https://www.markdownguide.org/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fancy-link"
+                className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
               >
                 markdownguide
               </a>
