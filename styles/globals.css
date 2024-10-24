@@ -1,12 +1,5 @@
 @tailwind base;
 
-:root {
-  --discord-clr: linear-gradient(to bottom, #4b83fb, #734df8);
-  --youtube-clr: linear-gradient(to top, #6d0202 22%, #c90000 61%);
-  --github-clr: #f17f06;
-  --twitter-clr: #282828;
-}
-
 body {
   @apply bg-neutral-100 text-neutral-900 dark:bg-black dark:text-white;
 }
@@ -326,21 +319,6 @@ table div {
 .loader-dots div:nth-child(4) {
   left: 56px;
   animation: loader-dots3 0.6s infinite;
-}
-
-/* Footer social hover effects */
-
-.twitter {
-  @apply hover:bg-twitter focus:bg-twitter;
-}
-.github {
-  @apply hover:bg-github focus:bg-github;
-}
-.discord {
-  @apply hover:bg-discord focus:bg-discord;
-}
-.youtube {
-  @apply hover:bg-youtube focus:bg-youtube;
 }
 
 /* end of plate editor styles  */

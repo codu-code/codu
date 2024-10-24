@@ -8,12 +8,12 @@ module.exports = {
     extend: {
       colors: {
         black: "#040404",
-        twitter: "var(--twitter-clr)",
-        github: "var(--github-clr)",
+        twitter: "#282828",
+        github: "#f17f06",
       },
       backgroundImage: {
-        discord: "var(--discord-clr)",
-        youtube: "var(--youtube-clr)",
+        discord: "linear-gradient(to bottom, #4b83fb, #734df8)",
+        youtube: "linear-gradient(to top, #6d0202 22%, #c90000 61%)",
       },
     },
   },
