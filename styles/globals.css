@@ -45,10 +45,6 @@ body {
   }
 }
 
-.input-base {
-  @apply block w-full border px-2 py-2 text-black shadow-sm ring-offset-1 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:border-white dark:bg-black dark:text-white sm:text-sm;
-}
-
 .nav-button {
   @apply focus-style rounded-md px-2 py-2 text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white dark:focus:text-white;
 }
