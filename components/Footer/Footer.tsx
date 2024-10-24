@@ -13,6 +13,7 @@ import {
   twitterUrl,
   youtubeUrl,
 } from "../../config/site_settings";
+import Focusable from "../Focusable/Focusable";
 
 const navigation = {
   main: footerNav,
@@ -55,37 +56,43 @@ const Footer = () => {
           {navigation.main.map((item) => (
             <div key={item.name} className="px-5 py-2">
               {item.href.includes("http") ? (
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="focus-style p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
-                >
-                  {item.name}
-                </a>
+                <Focusable>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
+                  >
+                    {item.name}
+                  </a>
+                </Focusable>
               ) : (
-                <Link
-                  className="focus-style p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
-                  href={item.href}
-                >
-                  {item.name}
-                </Link>
+                <Focusable>
+                  <Link
+                    className="p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
+                    href={item.href}
+                  >
+                    {item.name}
+                  </Link>
+                </Focusable>
               )}
             </div>
           ))}
         </nav>
         <div className="mt-8 flex justify-center space-x-8">
           {navigation.social.map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`focus-style rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.customStyle.toLowerCase()}`}
-            >
-              <span className="sr-only">{item.name}</span>
-              <item.icon className="h-6 w-6" aria-hidden="true" />
-            </a>
+            <Focusable>
+              <a
+                key={item.name}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.customStyle.toLowerCase()}`}
+              >
+                <span className="sr-only">{item.name}</span>
+                <item.icon className="h-6 w-6" aria-hidden="true" />
+              </a>
+            </Focusable>
           ))}
         </div>
         <p className="mt-8 text-center text-xs text-neutral-600 dark:text-neutral-500">
