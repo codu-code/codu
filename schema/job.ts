@@ -5,6 +5,7 @@ export const saveJobsSchema = z.object({
     .string()
     .min(1, "Company name should contain atleast 1 character")
     .max(50, "Company name should contain atmost 50 characters"),
+  companyLogoUrl: z.string().url().or(z.literal("")),
   jobTitle: z
     .string()
     .min(3, "Job title should contain atleast 3 character")
@@ -27,6 +28,15 @@ export const saveJobsSchema = z.object({
   relocation: z.boolean().optional().default(false),
   visa_sponsorship: z.boolean().optional().default(false),
   jobType: z.enum(["full-time", "part-time", "freelancer", "other"]),
+});
+
+export const uploadCompanyLogoUrlSchema = z.object({
+  type: z.string(),
+  size: z.number(),
+});
+
+export const updateCompanyLogoUrlSchema = z.object({
+  url: z.string().url(),
 });
 
 export type saveJobsInput = z.TypeOf<typeof saveJobsSchema>;

@@ -21,6 +21,9 @@ function getKey(
     case "uploads":
       if (!config.userId) throw new Error("Invalid userId provided");
       return `uploads/${config.userId}/${nanoid(16)}.${extension}`;
+    case "companyLogo":
+      if (!config.userId) throw new Error("Invalid userId provided");
+      return `cl/${config.userId}/${nanoid(16)}.${extension}`;
     default:
       throw new Error("Invalid folder provided");
   }

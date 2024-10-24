@@ -23,12 +23,20 @@ import {
 import { Strong, Text } from "@/components/ui-components/text";
 import { Textarea } from "@/components/ui-components/textarea";
 import { saveJobsInput, saveJobsSchema } from "@/schema/job";
+import { api } from "@/server/trpc/react";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
+import { uploadFile } from "@/utils/s3helpers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+type CompanyLogo = {
+  status: "success" | "error" | "loading" | "idle";
+  url: string | null;
+};
 
 export default function Content() {
   const {
@@ -49,11 +57,65 @@ export default function Content() {
       relocation: false,
       visa_sponsorship: false,
       jobType: "full-time",
+      companyLogoUrl: "",
     },
   });
   const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<CompanyLogo>({
+    status: "idle",
+    url: "",
+  });
+  const { mutate: getUploadUrl } = api.jobs.getUploadUrl.useMutation();
+
+  const uploadToUrl = async (signedUrl: string, file: File) => {
+    setLogoUrl({ status: "loading", url: "" });
+
+    if (!file) {
+      setLogoUrl({ status: "error", url: "" });
+      toast.error("Invalid file upload.");
+      return;
+    }
+
+    const response = await uploadFile(signedUrl, file);
+    const { fileLocation } = response;
+
+    //TODO: Add url to Company logo in the database
+
+    return fileLocation;
+  };
+
+  const logoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const { size, type } = file;
+
+      await getUploadUrl(
+        { size, type },
+        {
+          onError(error) {
+            if (error) return toast.error(error.message);
+            return toast.error(
+              "Something went wrong uploading the logo, please retry.",
+            );
+          },
+          async onSuccess(signedUrl) {
+            const url = await uploadToUrl(signedUrl, file);
+            if (!url) {
+              return toast.error(
+                "Something went wrong uploading the logo, please retry.",
+              );
+            }
+            setLogoUrl({ status: "success", url });
+            toast.success(
+              "Company Logo successfully set. This may take a few minutes to update around the site.",
+            );
+          },
+        },
+      );
+    }
+  };
+
   const onSubmit: SubmitHandler<saveJobsInput> = (values) => {
     console.log(values);
   };
@@ -76,7 +138,7 @@ export default function Content() {
         <Field>
           <div className="flex items-center space-x-4">
             <Image
-              src={imgUrl || "/images/company_placeholder.png"}
+              src={logoUrl.url || "/images/company_placeholder.png"}
               width={80}
               height={80}
               alt="Company Logo"
@@ -97,9 +159,14 @@ export default function Content() {
                 id="file-input"
                 name="company-logo"
                 accept="image/png, image/gif, image/jpeg"
-                onChange={() => {}}
+                onChange={logoChange}
                 className="hidden"
                 ref={fileInputRef}
+              />
+              <Input
+                type="url"
+                className="hidden"
+                {...register("companyLogoUrl")}
               />
               <Text className="mt-1 text-xs text-gray-500">
                 JPG, GIF or PNG. 1MB max.
