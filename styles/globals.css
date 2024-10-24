@@ -250,7 +250,7 @@ pre {
   scrollbar-width: none; /* Firefox */
 }
 
-.rehype-code-title {
+/* .rehype-code-title {
   @apply rounded-t-lg border border-b-0 border-neutral-200 bg-neutral-200 px-5 py-3 font-mono text-sm font-bold text-neutral-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200;
 }
 
@@ -260,7 +260,7 @@ pre {
 
 .highlight-line {
   @apply -mx-4 block border-l-4 border-blue-500 bg-neutral-100 px-4 dark:bg-neutral-800;
-}
+} */
 
 /* Remove Safari input shadow on mobile */
 input[type="text"],
