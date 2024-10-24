@@ -138,7 +138,6 @@ export const TiptapExtensions = [
       return "type / to see a list of formatting features";
     },
   }),
-  SlashCommand,
   TextStyle,
   Link.configure({
     HTMLAttributes: {
