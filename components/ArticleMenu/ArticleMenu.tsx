@@ -19,6 +19,7 @@ import copy from "copy-to-clipboard";
 import { type Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import { ReportModal } from "../ReportModal/ReportModal";
+import Focusable from "../Focusable/Focusable";
 
 interface CopyToClipboardOption {
   label: string;
@@ -148,27 +149,28 @@ const ArticleMenu = ({
             </button>
             <span>{data?.likes || 0}</span>
           </div>
-
-          <button
-            className="focus-style-rounded rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
-            aria-label="bookmark-trigger"
-            onClick={() => {
-              if (!session) {
-                signIn();
-              }
-              if (data?.currentUserBookmarked)
-                return bookmarkPost(postId, false);
-              bookmarkPost(postId);
-            }}
-          >
-            <BookmarkIcon
-              className={`w-6 h-6${
-                data?.currentUserBookmarked
-                  ? "fill-blue-400"
-                  : "fill-neutral-400 dark:fill-neutral-600"
-              }`}
-            />
-          </button>
+          <Focusable rounded={true}>
+            <button
+              className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
+              aria-label="bookmark-trigger"
+              onClick={() => {
+                if (!session) {
+                  signIn();
+                }
+                if (data?.currentUserBookmarked)
+                  return bookmarkPost(postId, false);
+                bookmarkPost(postId);
+              }}
+            >
+              <BookmarkIcon
+                className={`w-6 h-6${
+                  data?.currentUserBookmarked
+                    ? "fill-blue-400"
+                    : "fill-neutral-400 dark:fill-neutral-600"
+                }`}
+              />
+            </button>
+          </Focusable>
 
           <Popover className="relative ml-4">
             <PopoverButton

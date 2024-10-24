@@ -20,6 +20,7 @@ import AnimatedHamburger from "./AnimatedHamburger";
 import Logo from "@/icons/logo.svg";
 import MobileNav from "./MobileNav";
 import { MobileSearch, Search } from "@/components/ui/Search";
+import Focusable from "../Focusable/Focusable";
 
 type AlgoliaConfig = {
   ALGOLIA_APP_ID: string;
@@ -83,7 +84,7 @@ const Nav = ({
                           href={item.href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="nav-button focus-style p-4"
+                          className="nav-button p-4"
                         >
                           {item.name}
                         </a>
@@ -135,16 +136,18 @@ const Nav = ({
 
                   {session && (
                     <>
-                      <Link
-                        to="/notifications"
-                        className="focus-style relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
-                      >
-                        <span className="sr-only">View notifications</span>
-                        {hasNotifications && (
-                          <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-pink-600" />
-                        )}
-                        <BellIcon className="h-6 w-6" aria-hidden="true" />
-                      </Link>
+                      <Focusable>
+                        <Link
+                          to="/notifications"
+                          className="relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
+                        >
+                          <span className="sr-only">View notifications</span>
+                          {hasNotifications && (
+                            <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-pink-600" />
+                          )}
+                          <BellIcon className="h-6 w-6" aria-hidden="true" />
+                        </Link>
+                      </Focusable>
                       <Menu as="div" className="relative ml-4">
                         <div>
                           <MenuButton className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-white">
@@ -204,22 +207,26 @@ const Nav = ({
                 <MobileSearch algoliaSearchConfig={algoliaSearchConfig} />
                 <ThemeToggle />
                 {session && (
-                  <Link
-                    to="/notifications"
-                    className="focus-style relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    {hasNotifications && (
-                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500" />
-                    )}
-                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </Link>
+                  <Focusable>
+                    <Link
+                      to="/notifications"
+                      className="relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
+                    >
+                      <span className="sr-only">View notifications</span>
+                      {hasNotifications && (
+                        <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500" />
+                      )}
+                      <BellIcon className="h-6 w-6" aria-hidden="true" />
+                    </Link>
+                  </Focusable>
                 )}
                 {/* Mobile menu button */}
-                <DisclosureButton className="nav-button focus-style group">
-                  <span className="sr-only">Open main menu</span>
-                  <AnimatedHamburger open={open} />
-                </DisclosureButton>
+                <Focusable>
+                  <DisclosureButton className="nav-button group">
+                    <span className="sr-only">Open main menu</span>
+                    <AnimatedHamburger open={open} />
+                  </DisclosureButton>
+                </Focusable>
               </div>
             </div>
           </div>

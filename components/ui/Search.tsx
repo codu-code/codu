@@ -29,6 +29,7 @@ import {
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
+import Focusable from "../Focusable/Focusable";
 
 type Result = {
   title: string;
@@ -540,14 +541,16 @@ export function MobileSearch({
 
   return (
     <div className="contents lg:hidden">
-      <button
-        type="button"
-        className="focus-style relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
-        aria-label="Search the site"
-        {...buttonProps}
-      >
-        <MagnifyingGlassIcon className="h-6 w-6 stroke-current" />
-      </button>
+      <Focusable>
+        <button
+          type="button"
+          className="relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
+          aria-label="Search the site"
+          {...buttonProps}
+        >
+          <MagnifyingGlassIcon className="h-6 w-6 stroke-current" />
+        </button>
+      </Focusable>
       <Suspense fallback={null}>
         <SearchDialog
           algoliaSearchConfig={algoliaSearchConfig}

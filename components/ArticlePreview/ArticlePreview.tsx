@@ -19,6 +19,7 @@ import {
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
+import Focusable from "../Focusable/Focusable";
 
 type ButtonOptions = {
   label: string;
@@ -165,29 +166,31 @@ const ArticlePreview: NextPage<Props> = ({
           </Link>
           <div className="flex gap-x-2">
             {showBookmark && (
-              <button
-                className="focus-style-rounded rounded-full p-2 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
-                onClick={() => {
-                  if (!session) {
-                    return signIn();
+              <Focusable rounded={true}>
+                <button
+                  className="rounded-full p-2 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
+                  onClick={() => {
+                    if (!session) {
+                      return signIn();
+                    }
+                    if (bookmarked) {
+                      return bookmarkPost(id, false);
+                    }
+                    bookmarkPost(id);
+                  }}
+                  aria-label={
+                    bookmarked ? "Remove bookmark" : "Bookmark this post"
                   }
-                  if (bookmarked) {
-                    return bookmarkPost(id, false);
-                  }
-                  bookmarkPost(id);
-                }}
-                aria-label={
-                  bookmarked ? "Remove bookmark" : "Bookmark this post"
-                }
-              >
-                <BookmarkIcon
-                  className={`w-6 h-6${
-                    bookmarked
-                      ? "fill-blue-400"
-                      : "fill-neutral-400 dark:fill-neutral-600"
-                  }`}
-                />
-              </button>
+                >
+                  <BookmarkIcon
+                    className={`w-6 h-6${
+                      bookmarked
+                        ? "fill-blue-400"
+                        : "fill-neutral-400 dark:fill-neutral-600"
+                    }`}
+                  />
+                </button>
+              </Focusable>
             )}
             {menuOptions && (
               <Menu as="div" className="relative">

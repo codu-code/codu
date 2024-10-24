@@ -9,6 +9,7 @@ import { Fragment } from "react";
 import { type Session } from "next-auth";
 import Logo from "@/icons/logo.svg";
 import { type PostStatus, status } from "@/utils/post";
+import Focusable from "@/components/Focusable/Focusable";
 
 type EditorNavProps = {
   session: Session | null;
@@ -83,16 +84,18 @@ const EditorNav = ({
 
             {session && (
               <>
-                <Link
-                  href="/notifications"
-                  className="focus-style relative rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
-                >
-                  <span className="sr-only">View notifications</span>
-                  {hasNotifications && (
-                    <div className="absolute right-0 top-0 h-2 w-2 rounded-full bg-pink-500" />
-                  )}
-                  <BellIcon className="h-5 w-5" aria-hidden="true" />
-                </Link>
+                <Focusable>
+                  <Link
+                    href="/notifications"
+                    className="relative rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                  >
+                    <span className="sr-only">View notifications</span>
+                    {hasNotifications && (
+                      <div className="absolute right-0 top-0 h-2 w-2 rounded-full bg-pink-500" />
+                    )}
+                    <BellIcon className="h-5 w-5" aria-hidden="true" />
+                  </Link>
+                </Focusable>
                 <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
