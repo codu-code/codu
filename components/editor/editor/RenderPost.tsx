@@ -1,6 +1,7 @@
 import React from "react";
 import { TiptapExtensions } from "./extensions";
 import { EditorContent, useEditor } from "@tiptap/react";
+import SlashCommand from "./extensions/slash-command";
 
 interface RenderPostProps {
   json: string;
@@ -11,7 +12,7 @@ const RenderPost = ({ json }: RenderPostProps) => {
 
   const editor = useEditor({
     editable: false,
-    extensions: [...TiptapExtensions],
+    extensions: [...TiptapExtensions, SlashCommand],
     content,
   });
 
