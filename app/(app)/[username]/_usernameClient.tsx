@@ -8,7 +8,7 @@ import { LinkIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
-import { Tabs } from "@/components/Tabs";
+import { Heading } from "@/components/ui-components/heading";
 import { toast } from "sonner";
 
 type Props = {
@@ -71,20 +71,8 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     }
   };
 
-  const selectedTab =
-    tabFromParams && ["groups", "articles"].includes(tabFromParams)
-      ? tabFromParams
-      : "articles";
-
-  const [ARTICLES] = ["articles"];
-  const tabs = [
-    {
-      name: `Articles (${posts.length})`,
-      value: ARTICLES,
-      href: `?tab=${ARTICLES}`,
-      current: selectedTab === ARTICLES,
-    },
-  ];
+  const ARTICLES = "articles";
+  const selectedTab = tabFromParams === ARTICLES ? ARTICLES : ARTICLES;
 
   return (
     <>
@@ -121,11 +109,11 @@ const Profile = ({ profile, isOwner, session }: Props) => {
         </main>
         {accountLocked ? (
           <div className="mt-8 flex items-center justify-between border-b pb-4 text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-4xl">
-            <h1>Account locked 🔒</h1>
+            <Heading level={1}>Account locked 🔒</Heading>
           </div>
         ) : (
-          <div className="mx-auto mt-4 dark:bg-neutral-900 sm:max-w-2xl lg:max-w-5xl">
-            <Tabs tabs={tabs} />
+          <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
+            <Heading level={1}>{`Articles (${posts.length})`}</Heading>
           </div>
         )}
         {(() => {
@@ -179,10 +167,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   )}
                 </div>
               );
-            case GROUPS:
-              return (
-                <p className="py-4 font-medium">Groups are coming soon!</p>
-              );
             default:
               return null;
           }
@@ -211,7 +195,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   rows={4}
                   name="note"
                   id="note"
-                  className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-inset dark:ring-gray-300  sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-inset dark:ring-gray-300 sm:text-sm sm:leading-6"
                   defaultValue={""}
                 />
               </div>

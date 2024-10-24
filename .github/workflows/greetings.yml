@@ -6,13 +6,20 @@ on:
   pull_request_target:
     types: [opened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   welcome-new-contributor:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: 'Greet the contributor'
         uses: garg3133/welcome-new-contributors@v1.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: 'Hello @contributor_name, thanks for opening your first issue! your contribution is valuable to us. The maintainers will review this issue and provide feedback as soon as possible.'
+          issue-message: 'Hello @contributor_name, thanks for opening your first issue! Your contribution is valuable to us. The maintainers will review this issue and provide feedback as soon as possible.'
           pr-message: 'Hello @contributor_name, thanks for opening your first Pull Request. The maintainers will review this Pull Request and provide feedback as soon as possible. Keep up the great work!'

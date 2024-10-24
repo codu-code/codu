@@ -4,7 +4,7 @@ export const CircularProgressBar = ({ progress }: { progress: number }) => {
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="flex items-center justify-center overflow-hidden ">
+    <div className="flex items-center justify-center overflow-hidden">
       <svg
         className="h-32 w-32 translate-x-1 translate-y-1 transform"
         aria-hidden="true"

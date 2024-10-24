@@ -114,7 +114,7 @@ export const ReportModal = (props: Props) => {
       >
         <div className="fixed inset-0 bg-gray-700/90" aria-hidden="true" />
         <div className="fixed inset-0 flex w-screen items-center justify-center">
-          <DialogPanel className="relative max-w-lg rounded-lg border border-neutral-900 bg-neutral-100 p-0 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-900 dark:text-neutral-50 ">
+          <DialogPanel className="relative max-w-lg rounded-lg border border-neutral-900 bg-neutral-100 p-0 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-900 dark:text-neutral-50">
             <div className="m-8">
               <DialogTitle className="text-center text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
                 Submit a report

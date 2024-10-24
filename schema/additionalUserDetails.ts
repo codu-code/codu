@@ -1,12 +1,7 @@
 import z from "zod";
 
 export const slideOneSchema = z.object({
-  firstName: z
-    .string()
-    .trim()
-    .min(2, "Min name length is 2 characters.")
-    .max(50, "Max name length is 50 characters."),
-  surname: z
+  name: z
     .string()
     .trim()
     .min(2, "Min name length is 2 characters.")

@@ -37,9 +37,8 @@ export default function NotFound() {
             </Link>
           </div>
           <div className="mt-6 text-base text-neutral-500">
-            Or{" "}
-            <span className=" font-semibold">if you are feeling helpful</span>,
-            send us more details by opening an issue{" "}
+            Or <span className="font-semibold">if you are feeling helpful</span>
+            , send us more details by opening an issue{" "}
             <a
               className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-base font-semibold tracking-wide text-transparent"
               target="_blank"

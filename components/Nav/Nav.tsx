@@ -137,7 +137,7 @@ const Nav = ({
                     <>
                       <Link
                         to="/notifications"
-                        className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
+                        className="focus-style relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
@@ -206,11 +206,11 @@ const Nav = ({
                 {session && (
                   <Link
                     to="/notifications"
-                    className="focus-style relative flex-shrink-0 rounded-md  p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
+                    className="focus-style relative flex-shrink-0 rounded-md p-2 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-white"
                   >
                     <span className="sr-only">View notifications</span>
                     {hasNotifications && (
-                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500 " />
+                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500" />
                     )}
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </Link>

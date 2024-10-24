@@ -38,12 +38,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       description: post.excerpt,
       type: "article",
-      images: [`/api/og?title=${encodeURIComponent(post.title)}`],
+      images: [
+        `/og?title=${encodeURIComponent(
+          post.title,
+        )}&readTime=${post.readTimeMins}&author=${encodeURIComponent(
+          post.user.name,
+        )}&date=${post.updatedAt}`,
+      ],
       siteName: "Codú",
     },
     twitter: {
       description: post.excerpt,
-      images: [`/api/og?title=${encodeURIComponent(post.title)}`],
+      images: [`/og?title=${encodeURIComponent(post.title)}`],
     },
     alternates: {
       canonical: post.canonicalUrl,

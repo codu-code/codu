@@ -1,4 +1,5 @@
-name: Accessibility-alt-text-bot
+name: Accessibility Alt Text Bot
+
 on:
   issues:
     types: [opened, edited]
@@ -11,6 +12,10 @@ on:
   discussion_comment:
     types: [created, edited]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.event.discussion.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   issues: write
   pull-requests: write
@@ -18,8 +23,8 @@ permissions:
 
 jobs:
   accessibility_alt_text_bot:
-    name: Check alt text is set on issue or pull requests
+    name: Check alt text on issues and pull requests
     runs-on: ubuntu-latest
     steps:
-      - name: Get action 'github/accessibility-alt-text-bot'
-        uses: github/accessibility-alt-text-bot@v1.4.0 # Set to latest
+      - name: Run Alt Text Bot
+        uses: github/accessibility-alt-text-bot@v1.4.0

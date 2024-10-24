@@ -61,17 +61,32 @@ exports.handler = async (event) => {
 
     const imageRaw = Buffer.concat(await stream.toArray());
 
+    // Determine the image format
+    const imageMetadata = await sharp(imageRaw).metadata();
+    const isGif = imageMetadata.format === "gif";
+
     // Function to resize an image
     const resizeImage = async (buffer, size) => {
-      return sharp(buffer)
-        .resize({
+      try {
+        const resizedImage = sharp(buffer).resize({
           width: size.maxWidth,
           height: size.maxHeight,
           fit: "inside",
           withoutEnlargement: false,
-        })
-        .webp({ quality: 80 })
-        .toBuffer();
+        });
+
+        if (isGif) {
+          return resizedImage.gif().toBuffer();
+        } else {
+          return resizedImage.webp({ quality: 80 }).toBuffer();
+        }
+      } catch (error) {
+        console.error(
+          `Error resizing image to ${size.maxWidth}x${size.maxHeight}:`,
+          error,
+        );
+        throw error;
+      }
     };
 
     // Loop through sizes and upload each resized image
@@ -79,7 +94,10 @@ exports.handler = async (event) => {
       const resizedImage = await resizeImage(imageRaw, size);
 
       const resizedKey = size.suffix
-        ? key.replace(/(\.[\w\d_-]+)$/i, `_${size.suffix}$1`)
+        ? key.replace(
+            /(\.[\w\d_-]+)$/i,
+            `_${size.suffix}${isGif ? ".gif" : ".webp"}`,
+          )
         : key;
 
       await s3.send(
@@ -87,6 +105,7 @@ exports.handler = async (event) => {
           Bucket: bucket,
           Key: resizedKey,
           Body: resizedImage,
+          ContentType: isGif ? "image/gif" : "image/webp",
         }),
       );
     }

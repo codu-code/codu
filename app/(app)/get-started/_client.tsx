@@ -48,7 +48,7 @@ const GetStarted: NextPage = () => {
           <>
             <div>
               <input
-                className="w-full flex-auto appearance-none rounded-md border-neutral-200 bg-white pl-6 text-base font-medium text-neutral-950 ring-offset-0 placeholder:text-base placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-transparent focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white  [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
+                className="w-full flex-auto appearance-none rounded-md border-neutral-200 bg-white pl-6 text-base font-medium text-neutral-950 ring-offset-0 placeholder:text-base placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-transparent focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden"
                 placeholder="Enter your email"
                 type="email"
                 onChange={(event) => {
@@ -77,8 +77,8 @@ const GetStarted: NextPage = () => {
               >
                 <div className="w-full border-t border-neutral-400 dark:border-gray-600" />
               </div>
-              <div className="relative flex justify-center text-sm font-medium ">
-                <span className="bg-neutral-100 px-6 text-base uppercase text-neutral-600 dark:bg-black  dark:text-neutral-400">
+              <div className="relative flex justify-center text-sm font-medium">
+                <span className="bg-neutral-100 px-6 text-base uppercase text-neutral-600 dark:bg-black dark:text-neutral-400">
                   Or
                 </span>
               </div>
@@ -87,6 +87,7 @@ const GetStarted: NextPage = () => {
         )}
 
         <button
+          data-testid="github-login-button"
           type="button"
           onClick={async () => {
             await signIn("github", { callbackUrl: redirectTo });
@@ -117,6 +118,7 @@ const GetStarted: NextPage = () => {
           Continue with GitHub
         </button>
         <button
+          data-testid="gitlab-login-button"
           type="button"
           onClick={async () => {
             await signIn("gitlab", { callbackUrl: redirectTo });

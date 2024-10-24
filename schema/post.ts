@@ -76,3 +76,7 @@ export const GetSinglePostSchema = z.object({
 export const GetByIdSchema = z.object({
   id: z.string(),
 });
+
+export const GetLimitSidePosts = z.object({
+  limit: z.number().optional(),
+});

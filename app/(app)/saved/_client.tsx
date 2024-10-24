@@ -8,10 +8,11 @@ import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
 
 const SavedPosts = () => {
   const {
-    data: bookmarks,
+    data: bookmarksData,
     refetch,
     status: bookmarkStatus,
-  } = api.post.myBookmarks.useQuery();
+  } = api.post.myBookmarks.useQuery({});
+  const bookmarks = bookmarksData?.bookmarks || [];
 
   const { mutate: bookmark } = api.post.bookmark.useMutation({
     onSettled() {

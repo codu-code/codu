@@ -8,7 +8,7 @@ const Sponsorship = () => {
   return (
     <>
       <main className="relative bg-white lg:bg-transparent">
-        <div className="relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-2 lg:px-8 ">
+        <div className="relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-2 lg:px-8">
           <div className="lg:pl-8">
             <div className="mx-auto max-w-prose text-base lg:ml-0 lg:mr-16 lg:max-w-lg">
               <h2 className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">

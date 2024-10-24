@@ -23,14 +23,12 @@ export async function slideOneSubmitAction(dataInput: TypeSlideOneSchema) {
   }
 
   try {
-    const { firstName, surname, username, location } =
-      slideOneSchema.parse(dataInput);
+    const { name, username, location } = slideOneSchema.parse(dataInput);
 
     await db
       .update(user)
       .set({
-        firstName,
-        surname,
+        name,
         username,
         location,
       })

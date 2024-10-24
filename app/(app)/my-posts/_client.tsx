@@ -18,11 +18,22 @@ import { useSearchParams } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { Tabs } from "@/components/Tabs";
 import { PromptDialog } from "@/components/PromptService";
-import { PostStatus, getPostStatus } from "@/utils/post";
+import { status, getPostStatus } from "@/utils/post";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
+
+const renderDate = (label: string, date: string | Date) => (
+  <small>
+    {label} {new Date(date).toLocaleDateString()} at{" "}
+    {new Date(date).toLocaleTimeString(navigator.language, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })}
+  </small>
+);
 
 const MyPosts = () => {
   const searchParams = useSearchParams();
@@ -113,10 +124,18 @@ const MyPosts = () => {
 
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
-              ({ id, title, excerpt, readTimeMins, slug, published }) => {
+              ({
+                id,
+                title,
+                excerpt,
+                readTimeMins,
+                slug,
+                published,
+                updatedAt,
+              }) => {
                 const postStatus = published
                   ? getPostStatus(new Date(published))
-                  : PostStatus.DRAFT;
+                  : status.DRAFT;
                 return (
                   <article
                     className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
@@ -129,7 +148,7 @@ const MyPosts = () => {
                         </h2>
                       </Link>
                     ) : (
-                      <h2 className=" mb-2 text-2xl font-semibold">{title}</h2>
+                      <h2 className="mb-2 text-2xl font-semibold">{title}</h2>
                     )}
                     <p className="break-words">
                       {excerpt || "No excerpt yet... Write more to see one."}
@@ -139,32 +158,24 @@ const MyPosts = () => {
                     </p>
                     <div className="flex items-center">
                       <div className="flex-grow">
-                        {published && postStatus === PostStatus.SCHEDULED ? (
-                          <small>
-                            Scheduled to publish on{" "}
-                            {new Date(published).toLocaleDateString()} at{" "}
-                            {new Date(published).toLocaleTimeString(
-                              navigator.language,
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
+                        {published && postStatus === status.SCHEDULED ? (
+                          <>
+                            {renderDate("Scheduled to publish on ", published)}
+                          </>
+                        ) : published && postStatus === status.PUBLISHED ? (
+                          <>
+                            {/*If updatedAt is greater than published by more than on minutes show updated at else show published 
+                              as on updating published updatedAt is automatically updated and is greater than published*/}
+                            {new Date(updatedAt).getTime() -
+                              new Date(published).getTime() >=
+                            60000 ? (
+                              <>{renderDate("Last updated on ", updatedAt)}</>
+                            ) : (
+                              <>{renderDate("Published on ", published)}</>
                             )}
-                          </small>
-                        ) : published && postStatus === PostStatus.PUBLISHED ? (
-                          <small>
-                            Published on{" "}
-                            {new Date(published).toLocaleDateString()} at{" "}
-                            {new Date(published).toLocaleTimeString(
-                              navigator.language,
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
-                            )}
-                          </small>
+                          </>
+                        ) : postStatus === status.DRAFT ? (
+                          <>{renderDate("Last updated on ", updatedAt)}</>
                         ) : null}
                       </div>
 

@@ -317,8 +317,8 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                       <HeartIcon
                         className={`w-6 h-6${
                           youLikedThis
-                            ? " fill-red-400"
-                            : " fill-neutral-400 dark:fill-neutral-600"
+                            ? "fill-red-400"
+                            : "fill-neutral-400 dark:fill-neutral-600"
                         }`}
                       />
                     </button>

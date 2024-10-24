@@ -1,6 +1,10 @@
-const [SCHEDULED, PUBLISHED, DRAFT] = ["scheduled", "published", "draft"];
+const SCHEDULED = "scheduled" as const;
+const PUBLISHED = "published" as const;
+const DRAFT = "draft" as const;
 
-export const PostStatus = {
+export type PostStatus = typeof SCHEDULED | typeof PUBLISHED | typeof DRAFT;
+
+export const status = {
   SCHEDULED,
   PUBLISHED,
   DRAFT,

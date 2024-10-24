@@ -20,13 +20,20 @@ import { type AdapterAccount } from "next-auth/adapters";
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
 export const session = pgTable("session", {
-  id: text("sessionToken").primaryKey(),
-  sessionToken: text("sessionToken").notNull(),
+  sessionToken: text("sessionToken").notNull().primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
 });
+
+// Add this new relation definition for the session table
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+  }),
+}));
 
 export const account = pgTable(
   "account",
@@ -51,6 +58,10 @@ export const account = pgTable(
     }),
   }),
 );
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, { fields: [account.userId], references: [user.id] }),
+}));
 
 export const post_tag = pgTable(
   "PostTag",
@@ -101,18 +112,6 @@ export const tagRelations = relations(tag, ({ one, many }) => ({
   PostTag: many(post_tag),
 }));
 
-export const verificationToken = pgTable(
-  "verificationToken",
-  {
-    identifier: text("identifier").notNull(),
-    token: text("token").notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  }),
-);
-
 export const post = pgTable(
   "Post",
   {
@@ -155,6 +154,8 @@ export const post = pgTable(
     return {
       idKey: uniqueIndex("Post_id_key").on(table.id),
       slugKey: uniqueIndex("Post_slug_key").on(table.slug),
+      slugIndex: index("Post_slug_index").on(table.slug),
+      userIdIndex: index("Post_userId_index").on(table.userId), // Add this line
     };
   },
 );
@@ -204,8 +205,6 @@ export const user = pgTable(
     websiteUrl: text("websiteUrl").default("").notNull(),
     emailNotifications: boolean("emailNotifications").default(true).notNull(),
     newsletter: boolean("newsletter").default(true).notNull(),
-    firstName: text("firstName"),
-    surname: text("surname"),
     gender: text("gender"),
     dateOfBirth: timestamp("dateOfBirth", {
       precision: 3,
@@ -224,27 +223,33 @@ export const user = pgTable(
       usernameKey: uniqueIndex("User_username_key").on(table.username),
       emailKey: uniqueIndex("User_email_key").on(table.email),
       usernameIdIdx: index("User_username_id_idx").on(table.id, table.username),
+      usernameIndex: index("User_username_index").on(table.username), // Add this line
     };
   },
 );
 
 export const userRelations = relations(user, ({ one, many }) => ({
-  accounts: many(account, { relationName: "account" }),
+  accounts: many(account),
   bans: many(banned_users, { relationName: "bans" }),
-  BannedUsers: one(banned_users, {
+  bannedUsers: one(banned_users, {
     fields: [user.id],
     references: [banned_users.userId],
-    relationName: "BannedUsers",
   }),
   bookmarks: many(bookmark),
   comments: many(comment),
-  flaggedNotifier: many(flagged),
-  Flagged: many(flagged),
+  flaggedByUser: many(flagged, { relationName: "flaggedByUser" }),
+  flaggedContent: many(flagged, { relationName: "flaggedContent" }),
   likes: many(like),
-  notfier: many(notification),
-  notification: many(notification),
+  notificationsCreated: many(notification, {
+    relationName: "notificationsCreated",
+  }),
+  notificationsReceived: many(notification, {
+    relationName: "notificationsReceived",
+  }),
   posts: many(post),
-  sessions: many(session),
+  sessions: many(session), // This should now be correctly inferred
+  emailChangeRequests: many(emailChangeRequest),
+  emailChangeHistory: many(emailChangeHistory),
 }));
 
 export const bookmark = pgTable(
@@ -310,6 +315,7 @@ export const comment = pgTable(
       })
         .onUpdate("cascade")
         .onDelete("cascade"),
+      postIdIndex: index("Comment_postId_index").on(table.postId), // Add this line
     };
   },
 );
@@ -405,21 +411,17 @@ export const banned_users = pgTable(
   },
 );
 
-export const banned_usersRelations = relations(
-  banned_users,
-  ({ one, many }) => ({
-    bannedBy: one(user, {
-      fields: [banned_users.bannedById],
-      references: [user.id],
-      relationName: "bannedBy",
-    }),
-    user: one(user, {
-      fields: [banned_users.userId],
-      references: [user.id],
-      relationName: "user",
-    }),
+export const banned_usersRelations = relations(banned_users, ({ one }) => ({
+  bannedBy: one(user, {
+    fields: [banned_users.bannedById],
+    references: [user.id],
+    relationName: "bans",
   }),
-);
+  user: one(user, {
+    fields: [banned_users.userId],
+    references: [user.id],
+  }),
+}));
 
 export const flagged = pgTable("Flagged", {
   id: serial("id").primaryKey().notNull().unique(),
@@ -455,63 +457,124 @@ export const flagged = pgTable("Flagged", {
   }),
 });
 
-export const flaggedRelations = relations(flagged, ({ one, many }) => ({
+export const flaggedRelations = relations(flagged, ({ one }) => ({
   comment: one(comment, {
     fields: [flagged.commentId],
     references: [comment.id],
   }),
-  notifier: one(user, { fields: [flagged.notifierId], references: [user.id] }),
+  notifier: one(user, {
+    fields: [flagged.notifierId],
+    references: [user.id],
+    relationName: "flaggedByUser",
+  }),
   post: one(post, { fields: [flagged.postId], references: [post.id] }),
-  user: one(user, { fields: [flagged.userId], references: [user.id] }),
+  user: one(user, {
+    fields: [flagged.userId],
+    references: [user.id],
+    relationName: "flaggedContent",
+  }),
 }));
 
-export const notification = pgTable("Notification", {
-  id: serial("id").primaryKey().notNull().unique(),
-  createdAt: timestamp("createdAt", {
-    precision: 3,
-    mode: "string",
-    withTimezone: true,
-  })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp("updatedAt", {
-    precision: 3,
-    mode: "string",
-    withTimezone: true,
-  })
-    .notNull()
-    .$onUpdate(() => new Date().toISOString())
-    .default(sql`CURRENT_TIMESTAMP`),
-  type: integer("type").notNull(),
+export const notification = pgTable(
+  "Notification",
+  {
+    id: serial("id").primaryKey().notNull().unique(),
+    createdAt: timestamp("createdAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .notNull()
+      .$onUpdate(() => new Date().toISOString())
+      .default(sql`CURRENT_TIMESTAMP`),
+    type: integer("type").notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    postId: text("postId").references(() => post.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    commentId: integer("commentId").references(() => comment.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    notifierId: text("notifierId").references(() => user.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  },
+  (table) => {
+    return {
+      userIdIndex: index("Notification_userId_index").on(table.userId),
+    };
+  },
+);
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+  comment: one(comment, {
+    fields: [notification.commentId],
+    references: [comment.id],
+  }),
+  notifier: one(user, {
+    fields: [notification.notifierId],
+    references: [user.id],
+    relationName: "notificationsCreated",
+  }),
+  post: one(post, { fields: [notification.postId], references: [post.id] }),
+  user: one(user, {
+    fields: [notification.userId],
+    references: [user.id],
+    relationName: "notificationsReceived",
+  }),
+}));
+
+export const emailChangeRequest = pgTable("EmailChangeRequest", {
+  id: serial("id").primaryKey(),
   userId: text("userId")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  postId: text("postId").references(() => post.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }),
-  commentId: integer("commentId").references(() => comment.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }),
-  notifierId: text("notifierId").references(() => user.id, {
-    onDelete: "cascade",
-    onUpdate: "cascade",
-  }),
+    .references(() => user.id, { onDelete: "cascade" }),
+  newEmail: text("newEmail").notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
 });
 
-export const notificationRelations = relations(
-  notification,
-  ({ one, many }) => ({
-    comment: one(comment, {
-      fields: [notification.commentId],
-      references: [comment.id],
-    }),
-    notifier: one(user, {
-      fields: [notification.notifierId],
+export const emailChangeRequestRelations = relations(
+  emailChangeRequest,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [emailChangeRequest.userId],
       references: [user.id],
     }),
-    post: one(post, { fields: [notification.postId], references: [post.id] }),
-    user: one(user, { fields: [notification.userId], references: [user.id] }),
+  }),
+);
+
+export const emailChangeHistory = pgTable("EmailChangeHistory", {
+  id: serial("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  oldEmail: text("oldEmail").notNull(),
+  newEmail: text("newEmail").notNull(),
+  changedAt: timestamp("changedAt").defaultNow().notNull(),
+  ipAddress: text("ipAddress"),
+  userAgent: text("userAgent"),
+});
+
+export const emailChangeHistoryRelations = relations(
+  emailChangeHistory,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [emailChangeHistory.userId],
+      references: [user.id],
+    }),
   }),
 );
