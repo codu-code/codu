@@ -209,53 +209,19 @@ const NightSky = () => {
   );
 };
 
-        <div className="absolute -bottom-28 left-0 right-0 -z-10 mx-auto max-h-[480px] max-w-[480px] sm:-bottom-60 sm:max-h-[800px] sm:max-w-[600px] md:-bottom-96 md:max-h-[800px] md:max-w-[800px]">
-          <div className="relative mx-auto brightness-75">
-            <Image
-              src={moon}
-              data-atropos-offset="1"
-              alt="Photograph of the moon"
-              sizes="100vw"
-              style={{
-                width: "100%",
-                height: "auto",
-              }}
-              onLoad={() => {
-                setMoonLoaded(true);
-              }}
-            />
-          </div>
-          <div className="absolute right-0 top-10 h-[240px] w-[240px] md:-right-28 md:h-[350px] md:w-[350px]">
-            <Image
-              height={350}
-              width={350}
-              src={rocketman}
-              data-atropos-offset="8"
-              alt="3D claymation style model of a astronaut on a rocket"
-              sizes="100vw"
-              style={{
-                width: "100%",
-                height: "auto",
-              }}
-              onLoad={() => {
-                setRocketLoaded(true);
-              }}
-            />
-          </div>
-        </div>
-
-        <div
-          data-atropos-offset="0"
-          className="flex h-full flex-col justify-center"
-        >
-          <Image
-            width={340}
-            height={200}
-            src="/images/codu.svg"
-            alt="Codú logo"
-            className={`mx-auto w-[240px] object-contain transition duration-500 sm:w-[340px] ${
-              isReady ? "opacity-100" : "opacity-0"
-            }`}
+export default function Hero() {
+  return (
+    <div className="relative w-full bg-neutral-950">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black"></div>
+      <section
+        className="relative mx-auto h-[500px] max-w-5xl overflow-hidden rounded sm:h-[600px]"
+        aria-labelledby="hero-heading"
+      >
+        <NightSky />
+        <div className="absolute left-1/2 top-1/2 z-10 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 transform space-y-4 px-4 text-center sm:px-6 lg:px-8">
+          <CoduLogo
+            className="mx-auto mb-8 h-16 max-w-full sm:h-20"
+            aria-hidden="true"
           />
           <h1
             id="hero-heading"
