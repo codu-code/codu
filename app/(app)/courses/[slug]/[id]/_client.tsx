@@ -73,9 +73,9 @@ const SidebarItem = ({ item }: SidebarItemProps) => (
       <p>{item.title}</p>
     </div>
     <CircleCheck
-      className={
+      className={`h-6 w-6 ${
         item.watched ? "mr-2 h-5 w-5 text-pink-600" : "mr-2 h-5 w-5 text-white"
-      }
+      }`}
       aria-hidden="true"
     />
   </li>
