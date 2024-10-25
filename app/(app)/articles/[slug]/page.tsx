@@ -1,4 +1,5 @@
 import React from "react";
+import type { RenderableTreeNode } from "@markdoc/markdoc";
 import Markdoc from "@markdoc/markdoc";
 import Link from "next/link";
 import BioBar from "@/components/BioBar/BioBar";
@@ -13,6 +14,10 @@ import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel"
 import { type Metadata } from "next";
 import { getPost } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
+import { generateHTML } from "@tiptap/html";
+import { TiptapExtensions } from "@/components/editor/editor/extensions";
+import DOMPurify from "isomorphic-dompurify";
+import type { JSONContent } from "@tiptap/core";
 
 type Props = { params: { slug: string } };
 
@@ -57,6 +62,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const parseJSON = (str: string): JSONContent | null => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
+};
+
+const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
+  const rawHtml = generateHTML(jsonContent, [...TiptapExtensions]);
+  // Sanitize the HTML
+  return DOMPurify.sanitize(rawHtml);
+};
+
 const ArticlePage = async ({ params }: Props) => {
   const session = await getServerAuthSession();
   const { slug } = params;
@@ -66,11 +85,24 @@ const ArticlePage = async ({ params }: Props) => {
   const post = await getPost({ slug });
 
   if (!post) {
-    notFound();
+    return notFound();
   }
 
-  const ast = Markdoc.parse(post.body);
-  const content = Markdoc.transform(ast, config);
+  const parsedBody = parseJSON(post.body);
+  const isTiptapContent = parsedBody?.type === "doc";
+
+  let renderedContent: string | RenderableTreeNode;
+
+  if (isTiptapContent && parsedBody) {
+    const jsonContent = parsedBody;
+    renderedContent = renderSanitizedTiptapContent(jsonContent);
+  } else {
+    const ast = Markdoc.parse(post.body);
+    const transformedContent = Markdoc.transform(ast, config);
+    renderedContent = Markdoc.renderers.react(transformedContent, React, {
+      components: markdocComponents,
+    }) as unknown as string;
+  }
 
   return (
     <>
@@ -83,10 +115,16 @@ const ArticlePage = async ({ params }: Props) => {
       />
       <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">
         <article className="prose mx-auto max-w-3xl dark:prose-invert lg:prose-lg">
-          <h1>{post.title}</h1>
-          {Markdoc.renderers.react(content, React, {
-            components: markdocComponents,
-          })}
+          {!isTiptapContent && <h1>{post.title}</h1>}
+
+          {isTiptapContent ? (
+            <div
+              dangerouslySetInnerHTML={{ __html: renderedContent }}
+              className="tiptap-content"
+            />
+          ) : (
+            <div>{renderedContent}</div>
+          )}
         </article>
         {post.tags.length > 0 && (
           <section className="flex flex-wrap gap-3">

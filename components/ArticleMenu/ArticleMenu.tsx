@@ -139,7 +139,7 @@ const ArticleMenu = ({
               }}
             >
               <HeartIcon
-                className={`w-6 h-6${
+                className={`h-6 w-6 ${
                   data?.currentUserLiked
                     ? "fill-red-400"
                     : "fill-neutral-400 dark:fill-neutral-600"
@@ -162,7 +162,7 @@ const ArticleMenu = ({
             }}
           >
             <BookmarkIcon
-              className={`w-6 h-6${
+              className={`h-6 w-6 ${
                 data?.currentUserBookmarked
                   ? "fill-blue-400"
                   : "fill-neutral-400 dark:fill-neutral-600"

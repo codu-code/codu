@@ -158,7 +158,7 @@ const ArticlePreview: NextPage<Props> = ({
       <div className="flex w-full content-center justify-between">
         <div className="flex w-full items-center justify-between">
           <Link
-            className="fancy-link semibold text-lg"
+            className="semibold cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-lg tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
             href={`/articles/${slug}`}
           >
             Read full article
@@ -181,7 +181,7 @@ const ArticlePreview: NextPage<Props> = ({
                 }
               >
                 <BookmarkIcon
-                  className={`w-6 h-6${
+                  className={`h-6 w-6 ${
                     bookmarked
                       ? "fill-blue-400"
                       : "fill-neutral-400 dark:fill-neutral-600"
