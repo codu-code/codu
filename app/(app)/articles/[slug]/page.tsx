@@ -14,7 +14,7 @@ import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel"
 import { type Metadata } from "next";
 import { getPost } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
-import { generateHTML } from "@tiptap/html";
+import { generateHTML } from "@tiptap/core";
 import { TiptapExtensions } from "@/components/editor/editor/extensions";
 import DOMPurify from "isomorphic-dompurify";
 import type { JSONContent } from "@tiptap/core";
@@ -119,11 +119,15 @@ const ArticlePage = async ({ params }: Props) => {
 
           {isTiptapContent ? (
             <div
-              dangerouslySetInnerHTML={{ __html: renderedContent }}
+              dangerouslySetInnerHTML={{ __html: renderedContent ?? "" }}
               className="tiptap-content"
             />
           ) : (
-            <div>{renderedContent}</div>
+            <div>
+              {Markdoc.renderers.react(renderedContent, React, {
+                components: markdocComponents,
+              })}
+            </div>
           )}
         </article>
         {post.tags.length > 0 && (
