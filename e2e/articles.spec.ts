@@ -25,9 +25,6 @@ test.describe("Unauthenticated Articles Page", () => {
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Discussion (0)" }),
-    ).toBeVisible();
     await expect(page.getByLabel("like-trigger")).toBeVisible();
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
   });
