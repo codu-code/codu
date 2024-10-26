@@ -144,12 +144,29 @@ NEXTAUTH_URL=http://localhost:3000/api/auth
 ### E2E_USER_ONE_SESSION_ID
 
 This is the sessionToken uuid that is used to identify a users current active session.
-This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
+This is currently hardcoded and their is no reason to change this value.
+**Note: This value must be different to E2E_USER_TWO_SESSION_ID**
 
-### E2E_USER_ID
 
-This is the userId if the E2E user used for testing .
-This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
+### E2E_USER_TWO_SESSION_ID
+
+This is the sessionToken uuid that is used to identify a users current active session.
+This is currently hardcoded and their is no reason to change this value.
+**Note: This value must be different to E2E_USER_ONE_SESSION_ID**
+
+
+### E2E_USER_ONE_ID
+
+This is the userId of one of our E2E users and is used for testing .
+This is currently hardcoded and their is no reason to change this value.
+**Note: This value must be different to E2E_USER_TWO_ID**
+
+
+### E2E_USER_TWO_ID
+
+This is the userId of one of our E2E users and is used for testing .
+This is currently hardcoded and their is no reason to change this value.
+**Note: This value must be different to E2E_USER_ONE_ID**
 
 For more information, you can read the documentation [here](https://next-auth.js.org/configuration/options).
 **Example .env file can be found [here](./sample.env). You can rename this to .env to get started**

@@ -251,7 +251,7 @@ test.describe("Authenticated Articles Page", () => {
       page.getByRole("heading", { name: "Lorem Ipsum" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Written by E2E Test User" }),
+      page.getByRole("heading", { name: "Written by E2E Test User One" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Discussion (0)" }),
