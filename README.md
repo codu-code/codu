@@ -141,9 +141,9 @@ You shouldn't need to change the default value here. This is a variable used by 
 NEXTAUTH_URL=http://localhost:3000/api/auth
 ```
 
-### E2E_USER_SESSION_ID
+### E2E_USER_ONE_SESSION_ID
 
-This is the sessionToken uuid that .
+This is the sessionToken uuid that is used to identify a users current active session.
 This is currently hardcoded and there is no reason to change this until we require multiple E2E test users within the same test suite
 
 ### E2E_USER_ID
@@ -173,7 +173,7 @@ Please ensure you have the following variables set in your `.env` file:
 
 - `E2E_USER_ID`: The id of the E2E user for testing.
 - `E2E_USER_EMAIL`: The email of the E2E user for testing.
-- `E2E_USER_SESSION_ID`: The session id that the user will use to authenticate.
+- `E2E_USER_ONE_SESSION_ID`: The session id that the user will use to authenticate.
 
 
 Note the sample .env [here](./sample.env) is fine to use.
