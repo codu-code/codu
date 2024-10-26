@@ -14,6 +14,24 @@ test.describe("Unauthenticated Articles Page", () => {
     );
   });
 
+  test("Should be able to navigate directly to an article", async ({
+    page,
+  }) => {
+    await page.goto("http://localhost:3000/articles/e2e-test-slug-eqj0ozor");
+    await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Test Article" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Written by E2E Test User One" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Discussion (0)" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("like-trigger")).toBeVisible();
+    await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
+  });
+
   test("Should show bookmark article icon", async ({ page }) => {
     await page.goto("http://localhost:3000/articles");
 
@@ -273,5 +291,47 @@ test.describe("Authenticated Articles Page", () => {
     await page.getByRole("button", { name: "Submit" }).click();
 
     await expect(page.getByText(commentContent)).toBeVisible();
+  });
+
+  test("Should be able reply to a comment", async ({ page }) => {
+    await page.goto("http://localhost:3000/articles/e2e-test-slug-eqj0ozor");
+    const numberOfCommentsIntially = await page
+      .locator("div")
+      .filter({ hasText: /^Thanks for the positive feedback!$/ })
+      .count();
+    await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Test Article" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Written by E2E Test User One" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Discussion (0)" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("like-trigger")).toBeVisible();
+    await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
+
+    await page.getByRole("button", { name: "Reply" }).first().click();
+
+    await page.locator("#reply").fill("Thanks for the positive feedback!");
+    await page.getByRole("button", { name: "Submit" }).nth(1).click();
+    await page.waitForTimeout(250);
+
+    await expect(
+      page.getByText("AUTHOR", { exact: true }).first(),
+    ).toBeVisible();
+    const numberOfCommentsAfteringCommenting = await page
+      .locator("div")
+      .filter({ hasText: /^Thanks for the positive feedback!$/ })
+      .count();
+    expect(numberOfCommentsAfteringCommenting).toBeGreaterThan(
+      numberOfCommentsIntially,
+    );
+    await expect(
+      page
+        .getByRole("link", { name: "E2E Test User One", exact: true })
+        .nth(numberOfCommentsIntially + 1),
+    ).toBeVisible();
   });
 });
