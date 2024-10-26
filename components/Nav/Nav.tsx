@@ -1,5 +1,6 @@
 "use client";
 import { api } from "@/server/trpc/react";
+import { usePathname } from "next/navigation";
 import {
   Disclosure,
   DisclosureButton,
@@ -40,6 +41,8 @@ const Nav = ({
     enabled: session ? true : false,
   });
 
+  const pathname = usePathname();
+
   const userNavigation = [
     {
       name: "Your Profile",
@@ -54,6 +57,18 @@ const Nav = ({
   ];
 
   const hasNotifications = !!count && count > 0;
+
+  const handleSignInPageNavigation = () => {
+    /**
+     * * NextAuth.js automatically adds current url to the callbackurl prop in the singin() method.
+     * * As Navbar is always present, spamming SignIn button causes login page url getting appended in the url bar.
+     */
+    if (pathname === "/get-started") {
+      return;
+    }
+
+    signIn();
+  };
 
   return (
     <Disclosure as="nav" className="bg-neutral-100 dark:bg-black">
@@ -117,12 +132,15 @@ const Nav = ({
                     </>
                   ) : (
                     <>
-                      <button className="nav-button" onClick={() => signIn()}>
+                      <button
+                        className="nav-button"
+                        onClick={handleSignInPageNavigation}
+                      >
                         Sign in
                       </button>
                       <button
                         className="primary-button"
-                        onClick={() => signIn()}
+                        onClick={handleSignInPageNavigation}
                       >
                         Sign up for free
                       </button>
