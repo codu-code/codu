@@ -11,7 +11,7 @@ import postgres from "postgres";
 const DATABASE_URL = process.env.DATABASE_URL || "";
 // These can be removed in a follow on PR. Until this hits main we cant add E2E_USER_* stuff to the env.
 const E2E_SESSION_ID =
-  process.env.E2E_USER_SESSION_ID || "df8a11f2-f20a-43d6-80a0-a213f1efedc1";
+  process.env.E2E_USER_ONE_SESSION_ID || "df8a11f2-f20a-43d6-80a0-a213f1efedc1";
 const E2E_USER_ID =
   process.env.E2E_USER_ID || "8e3179ce-f32b-4d0a-ba3b-234d66b836ad";
 const E2E_USER_EMAIL = process.env.E2E_USER_EMAIL || "e2e@codu.co";

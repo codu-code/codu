@@ -1,5 +1,6 @@
 import { test, expect } from "playwright/test";
 import "dotenv/config";
+import { loggedInAsUserOne } from "./utils";
 
 test.describe("Unauthenticated Login Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -31,6 +32,9 @@ test.describe("Unauthenticated Login Page", () => {
 });
 
 test.describe("Authenticated Login Page", () => {
+  test.beforeEach(async ({ page }) => {
+    await loggedInAsUserOne(page);
+  });
   test("Sign up page contains sign up links", async ({ page, isMobile }) => {
     // authenticated users are kicked back to the homepage if they try to go to /get-started
     await page.goto("http://localhost:3000/get-started");
