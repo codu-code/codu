@@ -18,6 +18,7 @@ import { generateHTML } from "@tiptap/core";
 import { TiptapExtensions } from "@/components/editor/editor/extensions";
 import DOMPurify from "isomorphic-dompurify";
 import type { JSONContent } from "@tiptap/core";
+import NotFound from "@/components/NotFound/NotFound";
 
 type Props = { params: { slug: string } };
 
@@ -119,7 +120,9 @@ const ArticlePage = async ({ params }: Props) => {
 
           {isTiptapContent ? (
             <div
-              dangerouslySetInnerHTML={{ __html: renderedContent ?? "" }}
+              dangerouslySetInnerHTML={{
+                __html: renderedContent ?? <NotFound />,
+              }}
               className="tiptap-content"
             />
           ) : (
