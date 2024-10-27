@@ -20,8 +20,6 @@ export const loggedInAsUserOne = async (page: Page) => {
       ),
     ).toBeTruthy();
   } catch (err) {
-    console.log("Error while authenticating E2E test user one");
-    console.log(err);
     throw Error("Error while authenticating E2E test user one");
   }
 };
