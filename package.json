@@ -117,6 +117,7 @@
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/typography": "^0.5.13",
     "@types/chance": "^1.1.6",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^22.7.5",
     "@types/nodemailer": "^6.4.15",
     "@types/pg": "^8.11.5",

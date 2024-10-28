@@ -1,11 +1,8 @@
 import { test, expect } from "playwright/test";
 import { randomUUID } from "crypto";
+import { loggedInAsUserOne } from "./utils";
 
 test.describe("Unauthenticated Articles Page", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.context().clearCookies();
-  });
-
   test("Should show popular tags", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/articles");
     await expect(
@@ -133,6 +130,9 @@ test.describe("Unauthenticated Articles Page", () => {
 });
 
 test.describe("Authenticated Articles Page", () => {
+  test.beforeEach(async ({ page }) => {
+    await loggedInAsUserOne(page);
+  });
   test("Should show recent bookmarks", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/articles");
     await expect(

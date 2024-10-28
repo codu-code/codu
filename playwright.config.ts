@@ -39,10 +39,6 @@ export default defineConfig({
     { name: "setup", testMatch: /auth.setup\.ts/ },
     {
       name: "Desktop Chrome",
-      use: {
-        storageState: "playwright/.auth/browser.json",
-      },
-      dependencies: ["setup"],
     },
 
     // Example other browsers
@@ -50,25 +46,19 @@ export default defineConfig({
       name: "Desktop Firefox",
       use: {
         ...devices["Desktop Firefox"],
-        storageState: "playwright/.auth/browser.json",
       },
-      dependencies: ["setup"],
     },
     {
       name: "Mobile Chrome",
       use: {
         ...devices["Pixel 9"],
-        storageState: "playwright/.auth/browser.json",
       },
-      dependencies: ["setup"],
     },
     {
       name: "Mobile Safari",
       use: {
         ...devices["iPhone 16"],
-        storageState: "playwright/.auth/browser.json",
       },
-      dependencies: ["setup"],
     },
   ],
 
