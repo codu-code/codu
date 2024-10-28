@@ -23,60 +23,64 @@ export const setup = async () => {
     const scheduledPostId = "1nFnMmN2";
     const draftPostId = "1nFnMmN3";
     const now = new Date().toISOString();
+    const articleContent =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae ipsum id metus vestibulum rutrum eget a diam. Integer eget vulputate risus, ac convallis nulla. Mauris sed augue nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam congue posuere tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut ac augue non libero ullamcorper ornare. Ut commodo ligula vitae malesuada maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam sagittis justo non justo placerat, a dapibus sapien volutpat. Nullam ullamcorper sodales justo sed.";
 
     const oneYearFromToday = new Date(now);
     oneYearFromToday.setFullYear(oneYearFromToday.getFullYear() + 1);
 
-    await db
-      .insert(post)
-      .values({
-        id: publishedPostId,
-        published: now,
-        excerpt: "Lorem ipsum dolor sit amet",
-        updatedAt: now,
-        slug: "e2e-test-slug-published",
-        likes: 10,
-        readTimeMins: 3,
-        title: "Published Article",
-        body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae ipsum id metus vestibulum rutrum eget a diam. Integer eget vulputate risus, ac convallis nulla. Mauris sed augue nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam congue posuere tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut ac augue non libero ullamcorper ornare. Ut commodo ligula vitae malesuada maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam sagittis justo non justo placerat, a dapibus sapien volutpat. Nullam ullamcorper sodales justo sed.",
-        userId: authorId,
-      })
-      .onConflictDoNothing()
-      .returning();
+    await Promise.all([
+      await db
+        .insert(post)
+        .values({
+          id: publishedPostId,
+          published: now,
+          excerpt: "Lorem ipsum dolor sit amet",
+          updatedAt: now,
+          slug: "e2e-test-slug-published",
+          likes: 10,
+          readTimeMins: 3,
+          title: "Published Article",
+          body: articleContent,
+          userId: authorId,
+        })
+        .onConflictDoNothing()
+        .returning(),
 
-    await db
-      .insert(post)
-      .values({
-        id: scheduledPostId,
-        published: null,
-        excerpt: "Lorem ipsum dolor sit amet",
-        updatedAt: now,
-        slug: "e2e-test-slug-draft",
-        likes: 10,
-        readTimeMins: 3,
-        title: "Draft Article",
-        body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae ipsum id metus vestibulum rutrum eget a diam. Integer eget vulputate risus, ac convallis nulla. Mauris sed augue nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam congue posuere tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut ac augue non libero ullamcorper ornare. Ut commodo ligula vitae malesuada maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam sagittis justo non justo placerat, a dapibus sapien volutpat. Nullam ullamcorper sodales justo sed.",
-        userId: authorId,
-      })
-      .onConflictDoNothing()
-      .returning();
+      await db
+        .insert(post)
+        .values({
+          id: scheduledPostId,
+          published: null,
+          excerpt: "Lorem ipsum dolor sit amet",
+          updatedAt: now,
+          slug: "e2e-test-slug-draft",
+          likes: 10,
+          readTimeMins: 3,
+          title: "Draft Article",
+          body: articleContent,
+          userId: authorId,
+        })
+        .onConflictDoNothing()
+        .returning(),
 
-    await db
-      .insert(post)
-      .values({
-        id: draftPostId,
-        published: oneYearFromToday.toISOString(),
-        excerpt: "Lorem ipsum dolor sit amet",
-        updatedAt: now,
-        slug: "e2e-test-slug-scheduled",
-        likes: 10,
-        readTimeMins: 3,
-        title: "Scheduled Article",
-        body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae ipsum id metus vestibulum rutrum eget a diam. Integer eget vulputate risus, ac convallis nulla. Mauris sed augue nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam congue posuere tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut ac augue non libero ullamcorper ornare. Ut commodo ligula vitae malesuada maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam sagittis justo non justo placerat, a dapibus sapien volutpat. Nullam ullamcorper sodales justo sed.",
-        userId: authorId,
-      })
-      .onConflictDoNothing()
-      .returning();
+      await db
+        .insert(post)
+        .values({
+          id: draftPostId,
+          published: oneYearFromToday.toISOString(),
+          excerpt: "Lorem ipsum dolor sit amet",
+          updatedAt: now,
+          slug: "e2e-test-slug-scheduled",
+          likes: 10,
+          readTimeMins: 3,
+          title: "Scheduled Article",
+          body: articleContent,
+          userId: authorId,
+        })
+        .onConflictDoNothing()
+        .returning(),
+    ]);
 
     await db
       .insert(comment)
