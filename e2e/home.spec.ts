@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { loggedInAsUserOne } from "./utils";
 
 test.describe("Authenticated homepage", () => {
+  test.beforeEach(async ({ page }) => {
+    await loggedInAsUserOne(page);
+  });
   test("Homepage view", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
 
@@ -24,9 +28,6 @@ test.describe("Authenticated homepage", () => {
 });
 
 test.describe("Unauthenticated homepage", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.context().clearCookies();
-  });
   test("Homepage view", async ({ page }) => {
     await page.goto("http://localhost:3000/");
 
