@@ -17,10 +17,10 @@ test.describe("Unauthenticated Articles Page", () => {
   test("Should be able to navigate directly to an article", async ({
     page,
   }) => {
-    await page.goto("http://localhost:3000/articles/e2e-test-slug-eqj0ozor");
+    await page.goto("http://localhost:3000/articles/e2e-test-slug-published");
     await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Test Article" }),
+      page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
@@ -291,14 +291,14 @@ test.describe("Authenticated Articles Page", () => {
   });
 
   test("Should be able reply to a comment", async ({ page }) => {
-    await page.goto("http://localhost:3000/articles/e2e-test-slug-eqj0ozor");
+    await page.goto("http://localhost:3000/articles/e2e-test-slug-published");
     const numberOfCommentsIntially = await page
       .locator("div")
       .filter({ hasText: /^Thanks for the positive feedback!$/ })
       .count();
     await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Test Article" }),
+      page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
