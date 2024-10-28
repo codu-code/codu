@@ -7,7 +7,6 @@ import { Temporal } from "@js-temporal/polyfill";
 import {
   BookmarkIcon,
   EllipsisHorizontalIcon,
-  HeartIcon,
 } from "@heroicons/react/20/solid";
 import {
   Menu,
@@ -56,16 +55,15 @@ const ArticlePreview: NextPage<Props> = ({
   menuOptions,
   showBookmark = true,
   bookmarkedInitialState = false,
-  likes,
 }) => {
   const { data: session } = useSession();
   const [bookmarked, setIsBookmarked] = useState(bookmarkedInitialState);
   const howManySavedToShow = 3;
-  const { data: bookmarksData, refetch } = api.post.myBookmarks.useQuery(
+
+  const { refetch } = api.post.myBookmarks.useQuery(
     { limit: howManySavedToShow },
     { enabled: !!session },
   );
-  const bookmarks = bookmarksData?.bookmarks;
   const dateTime = Temporal.Instant.from(new Date(date).toISOString());
   const readableDate = dateTime.toLocaleString(["en-IE"], {
     year: "numeric",
@@ -128,15 +126,6 @@ const ArticlePreview: NextPage<Props> = ({
                 <>
                   <span aria-hidden="true">&middot;</span>
                   <span>{readTime} min read</span>
-                  {likes && (
-                    <>
-                      <span aria-hidden="true">&middot;</span>
-                      <span data-likes={likes}>{likes}</span>
-                      <HeartIcon
-                        className={`relative top-[1px] h-3.5 w-3.5 fill-red-400`}
-                      />
-                    </>
-                  )}
                 </>
               )}
               <div className="flex items-center justify-start"></div>
