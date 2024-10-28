@@ -1,6 +1,6 @@
 import { test, expect } from "playwright/test";
 import { randomUUID } from "crypto";
-import { loggedInAsUserOne } from "./utils";
+import { articleContent, articleExcerpt, loggedInAsUserOne } from "./utils";
 
 test.describe("Unauthenticated Articles Page", () => {
   test("Should show popular tags", async ({ page, isMobile }) => {
@@ -18,7 +18,7 @@ test.describe("Unauthenticated Articles Page", () => {
     page,
   }) => {
     await page.goto("http://localhost:3000/articles/e2e-test-slug-published");
-    await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
+    await expect(page.getByText(articleExcerpt)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();
@@ -223,8 +223,6 @@ test.describe("Authenticated Articles Page", () => {
   });
 
   test("Should write and publish an article", async ({ page, isMobile }) => {
-    const articleContent =
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vitae ipsum id metus vestibulum rutrum eget a diam. Integer eget vulputate risus, ac convallis nulla. Mauris sed augue nunc. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam congue posuere tempor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut ac augue non libero ullamcorper ornare. Ut commodo ligula vitae malesuada maximus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam sagittis justo non justo placerat, a dapibus sapien volutpat. Nullam ullamcorper sodales justo sed.";
     const articleTitle = "Lorem Ipsum";
     await page.goto("http://localhost:3000");
     // Waits for articles to be loaded
@@ -261,7 +259,7 @@ test.describe("Authenticated Articles Page", () => {
       /^http:\/\/localhost:3000\/articles\/lorem-ipsum-.*$/,
     );
 
-    await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
+    await expect(page.getByText(articleExcerpt)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Lorem Ipsum" }),
     ).toBeVisible();
@@ -296,7 +294,7 @@ test.describe("Authenticated Articles Page", () => {
       .locator("div")
       .filter({ hasText: /^Thanks for the positive feedback!$/ })
       .count();
-    await expect(page.getByText("Lorem ipsum dolor sit amet,")).toBeVisible();
+    await expect(page.getByText(articleExcerpt)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();

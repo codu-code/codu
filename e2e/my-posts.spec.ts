@@ -1,5 +1,5 @@
 import test, { expect } from "@playwright/test";
-import { loggedInAsUserOne } from "./utils";
+import { articleExcerpt, loggedInAsUserOne } from "./utils";
 
 test.describe("Unauthenticated my-posts Page", () => {
   test("Unauthenticed users should be redirected to get-started page if they access my-posts directly", async ({
@@ -39,20 +39,18 @@ test.describe("Authenticated my-posts Page", () => {
     await expect(
       page.getByRole("heading", { name: "Draft Article" }),
     ).toBeVisible();
-    await expect(page.getByText("Lorem ipsum dolor sit amet")).toBeVisible();
+    await expect(page.getByText(articleExcerpt)).toBeVisible();
 
     await page.getByRole("link", { name: "Scheduled" }).click();
     await expect(
       page.getByRole("heading", { name: "Scheduled Article" }),
     ).toBeVisible();
-    await expect(page.getByText("Lorem ipsum dolor sit amet")).toBeVisible();
+    await expect(page.getByText(articleExcerpt)).toBeVisible();
 
     await page.getByRole("link", { name: "Published" }).click();
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();
-    await expect(
-      page.getByText("Lorem ipsum dolor sit amet", { exact: true }),
-    ).toBeVisible();
+    await expect(page.getByText(articleExcerpt, { exact: true })).toBeVisible();
   });
 });
