@@ -24,7 +24,7 @@ We have a fantastic community growing on Discord. Click [here](https://discord.g
 4. Install dependencies with:
 
 ```bash
-npm install
+pnpm install
 ```
 
 - If you have any issues installing dependencies, check your node version against that defined in the `.nvmrc`. If you're using `nvm`, you can run `nvm use` before installing dependencies.
@@ -48,7 +48,7 @@ For a more detailed guide on setting them up [go to the Environment Variables se
 6. Setup the tables in the database with Drizzle by running:
 
 ```bash
-npm run db:migrate
+pnpm db:migrate
 ```
 
 The full command can be seen in our [package.json](/package.json#16) file.
@@ -56,7 +56,7 @@ The full command can be seen in our [package.json](/package.json#16) file.
 7. Seed the database with some mock data by running:
 
 ```bash
-npm run db:seed
+pnpm db:seed
 ```
 
 The full command can be seen in our [package.json](/package.json#19) file.
@@ -64,7 +64,7 @@ The full command can be seen in our [package.json](/package.json#19) file.
 8. Finally, run the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 After completion of the above commands, navigate to [http://localhost:3000](http://localhost:3000) in your browser to see the result.

@@ -24,14 +24,20 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          cache: "npm"
+          cache: "pnpm"
+
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
   e2e:
     needs: initial-checks
@@ -62,13 +68,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Cache Playwright browsers
         uses: actions/cache@v3
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-playwright-
 
@@ -86,7 +92,7 @@ jobs:
         shell: bash
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -94,8 +100,8 @@ jobs:
 
       - name: Seed database
         run: |
-          npm run db:migrate
-          npm run db:seed
+          pnpm db:migrate
+          pnpm db:seed
 
       - name: Run Playwright tests
         id: playwright-tests

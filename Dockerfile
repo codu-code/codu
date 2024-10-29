@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN pnpm i --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -29,7 +29,7 @@ RUN --mount=type=secret,id=SENTRY_AUTH_TOKEN \
     --mount=type=secret,id=DATABASE_URL \
     export SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
     export DATABASE_URL=$(cat /run/secrets/DATABASE_URL) && \
-    npm run build
+    pnpm build
 
 # Production image, copy all the files and run next
 FROM base AS runner

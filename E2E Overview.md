@@ -17,7 +17,7 @@ Note: The sample `.env` file is fine to use.
 First, you need to add your E2E test user to your locally running database. Do this by running the following script if you haven't already:
 
 ```bash
-npm run db:seed
+pnpm db:seed
 ```
 
 This will create a user and session for your E2E tests. Details of the E2E user created can be seen in `drizzle/seedE2E.ts`.
