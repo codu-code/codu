@@ -2,7 +2,7 @@ import test, { expect } from "@playwright/test";
 import { articleExcerpt, loggedInAsUserOne } from "./utils";
 
 test.describe("Unauthenticated my-posts Page", () => {
-  test("Unauthenticed users should be redirected to get-started page if they access my-posts directly", async ({
+  test("Unauthenticated users should be redirected to get-started page if they access my-posts directly", async ({
     page,
   }) => {
     await page.goto("http://localhost:3000/my-posts");

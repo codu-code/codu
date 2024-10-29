@@ -7,6 +7,9 @@ import { articleContent, articleExcerpt } from "./utils";
 dotenv.config(); // Load .env file contents into process.env
 
 export const setup = async () => {
+  // Dynamically import nanoid
+  const { nanoid } = await import("nanoid");
+
   if (
     !process.env.DATABASE_URL ||
     !process.env.E2E_USER_ONE_ID ||
@@ -14,22 +17,23 @@ export const setup = async () => {
   ) {
     throw new Error("Missing env variables for DB clean up script");
   }
+
   const db = drizzle(postgres(process.env.DATABASE_URL as string));
 
   const addE2EArticleAndComment = async (
     authorId: string,
     commenterId: string,
   ) => {
-    const publishedPostId = "1nFnMmN1";
-    const scheduledPostId = "1nFnMmN2";
-    const draftPostId = "1nFnMmN3";
+    const publishedPostId = nanoid(8);
+    const scheduledPostId = nanoid(8);
+    const draftPostId = nanoid(8);
     const now = new Date().toISOString();
 
     const oneYearFromToday = new Date(now);
     oneYearFromToday.setFullYear(oneYearFromToday.getFullYear() + 1);
 
     await Promise.all([
-      await db
+      db
         .insert(post)
         .values({
           id: publishedPostId,
@@ -46,10 +50,10 @@ export const setup = async () => {
         .onConflictDoNothing()
         .returning(),
 
-      await db
+      db
         .insert(post)
         .values({
-          id: scheduledPostId,
+          id: draftPostId,
           published: null,
           excerpt: articleExcerpt,
           updatedAt: now,
@@ -63,10 +67,10 @@ export const setup = async () => {
         .onConflictDoNothing()
         .returning(),
 
-      await db
+      db
         .insert(post)
         .values({
-          id: draftPostId,
+          id: scheduledPostId,
           published: oneYearFromToday.toISOString(),
           excerpt: articleExcerpt,
           updatedAt: now,
