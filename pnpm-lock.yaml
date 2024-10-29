@@ -6,354 +6,354 @@ settings:
 
 dependencies:
   '@algolia/autocomplete-core':
-    specifier: 1.17.4
+    specifier: ^1.17.4
     version: 1.17.4(@algolia/client-search@5.10.2)(algoliasearch@5.7.0)(search-insights@2.17.2)
   '@algolia/autocomplete-preset-algolia':
-    specifier: 1.17.4
+    specifier: ^1.17.4
     version: 1.17.4(@algolia/client-search@5.10.2)(algoliasearch@5.7.0)
   '@auth/drizzle-adapter':
-    specifier: 1.4.2
+    specifier: ^1.4.2
     version: 1.4.2(nodemailer@6.9.14)
   '@aws-sdk/client-s3':
-    specifier: 3.667.0
+    specifier: ^3.667.0
     version: 3.667.0
   '@aws-sdk/client-ses':
-    specifier: 3.667.0
+    specifier: ^3.667.0
     version: 3.667.0
   '@aws-sdk/s3-request-presigner':
-    specifier: 3.667.0
+    specifier: ^3.667.0
     version: 3.667.0
   '@headlessui/react':
-    specifier: 2.1.8
+    specifier: ^2.1.8
     version: 2.1.8(react-dom@18.3.1)(react@18.3.1)
   '@heroicons/react':
-    specifier: 2.1.5
+    specifier: ^2.1.5
     version: 2.1.5(react@18.3.1)
   '@hookform/resolvers':
-    specifier: 3.9.0
+    specifier: ^3.9.0
     version: 3.9.0(react-hook-form@7.53.0)
   '@js-temporal/polyfill':
-    specifier: 0.4.4
+    specifier: ^0.4.4
     version: 0.4.4
   '@markdoc/markdoc':
-    specifier: 0.4.0
+    specifier: ^0.4.0
     version: 0.4.0(@types/react@18.3.1)(react@18.3.1)
   '@mdx-js/loader':
-    specifier: 3.0.1
+    specifier: ^3.0.1
     version: 3.0.1(acorn@8.14.0)(webpack@5.95.0)
   '@mdx-js/react':
-    specifier: 3.0.1
+    specifier: ^3.0.1
     version: 3.0.1(@types/react@18.3.1)(react@18.3.1)
   '@next/bundle-analyzer':
-    specifier: 14.2.7
+    specifier: ^14.2.7
     version: 14.2.7
   '@next/mdx':
-    specifier: 14.2.7
+    specifier: ^14.2.7
     version: 14.2.7(@mdx-js/loader@3.0.1)(@mdx-js/react@3.0.1)
   '@radix-ui/react-popover':
-    specifier: 1.1.1
+    specifier: ^1.1.1
     version: 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
   '@radix-ui/react-switch':
-    specifier: 1.1.0
+    specifier: ^1.1.0
     version: 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
   '@sentry/nextjs':
-    specifier: 8.33.0
+    specifier: ^8.33.0
     version: 8.33.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@1.27.0)(@opentelemetry/instrumentation@0.53.0)(@opentelemetry/sdk-trace-base@1.27.0)(next@14.2.10)(react@18.3.1)(webpack@5.95.0)
   '@t3-oss/env-nextjs':
-    specifier: 0.11.1
+    specifier: ^0.11.1
     version: 0.11.1(typescript@5.4.5)(zod@3.23.8)
   '@tailwindcss/forms':
-    specifier: 0.5.8
+    specifier: ^0.5.8
     version: 0.5.8(tailwindcss@3.4.3)
   '@tanstack/react-query':
-    specifier: 4.36.1
+    specifier: ^4.36.1
     version: 4.36.1(react-dom@18.3.1)(react@18.3.1)
   '@tiptap/extension-code-block-lowlight':
-    specifier: 2.6.6
-    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/extension-code-block@2.9.1)(@tiptap/pm@2.5.1)(highlight.js@11.10.0)(lowlight@3.1.0)
+    specifier: ^2.6.6
+    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/extension-code-block@2.9.1)(@tiptap/pm@2.9.1)(highlight.js@11.10.0)(lowlight@3.1.0)
   '@tiptap/extension-color':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/extension-text-style@2.3.1)
   '@tiptap/extension-highlight':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-image':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-link':
-    specifier: 2.6.6
-    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
+    specifier: ^2.6.6
+    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
   '@tiptap/extension-placeholder':
-    specifier: 2.6.6
-    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
+    specifier: ^2.6.6
+    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
   '@tiptap/extension-subscript':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-superscript':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-table':
-    specifier: 2.6.6
-    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
+    specifier: ^2.6.6
+    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
   '@tiptap/extension-table-cell':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-table-header':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-table-row':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-text-align':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-text-style':
-    specifier: 2.3.1
+    specifier: ^2.3.1
     version: 2.3.1(@tiptap/core@2.9.1)
   '@tiptap/extension-typography':
-    specifier: 2.8.0
+    specifier: ^2.8.0
     version: 2.8.0(@tiptap/core@2.9.1)
   '@tiptap/extension-underline':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/extension-youtube':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6(@tiptap/core@2.9.1)
   '@tiptap/html':
-    specifier: 2.8.0
-    version: 2.8.0(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
+    specifier: ^2.8.0
+    version: 2.8.0(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
   '@tiptap/pm':
-    specifier: 2.5.1
-    version: 2.5.1
+    specifier: ^2.5.1
+    version: 2.9.1
   '@tiptap/react':
-    specifier: 2.6.6
-    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)(react-dom@18.3.1)(react@18.3.1)
+    specifier: ^2.6.6
+    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)(react-dom@18.3.1)(react@18.3.1)
   '@tiptap/starter-kit':
-    specifier: 2.6.6
+    specifier: ^2.6.6
     version: 2.6.6
   '@tiptap/suggestion':
-    specifier: 2.6.6
-    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
+    specifier: ^2.6.6
+    version: 2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
   '@trpc/client':
-    specifier: 10.45.1
+    specifier: ^10.45.1
     version: 10.45.1(@trpc/server@10.45.1)
   '@trpc/next':
-    specifier: 10.45.2
+    specifier: ^10.45.2
     version: 10.45.2(@tanstack/react-query@4.36.1)(@trpc/client@10.45.1)(@trpc/react-query@10.45.1)(@trpc/server@10.45.1)(next@14.2.10)(react-dom@18.3.1)(react@18.3.1)
   '@trpc/react-query':
-    specifier: 10.45.1
+    specifier: ^10.45.1
     version: 10.45.1(@tanstack/react-query@4.36.1)(@trpc/client@10.45.1)(@trpc/server@10.45.1)(react-dom@18.3.1)(react@18.3.1)
   '@trpc/server':
-    specifier: 10.45.1
+    specifier: ^10.45.1
     version: 10.45.1
   algoliasearch:
-    specifier: 5.7.0
+    specifier: ^5.7.0
     version: 5.7.0
   clsx:
-    specifier: 2.1.1
+    specifier: ^2.1.1
     version: 2.1.1
   copy-to-clipboard:
-    specifier: 3.3.3
+    specifier: ^3.3.3
     version: 3.3.3
   drizzle-orm:
-    specifier: 0.34.1
+    specifier: ^0.34.1
     version: 0.34.1(@opentelemetry/api@1.9.0)(@types/pg@8.11.5)(@types/react@18.3.1)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1)
   fathom-client:
-    specifier: 3.7.2
+    specifier: ^3.7.2
     version: 3.7.2
   framer-motion:
-    specifier: 11.11.4
+    specifier: ^11.11.4
     version: 11.11.4(react-dom@18.3.1)(react@18.3.1)
   highlight.js:
-    specifier: 11.10.0
+    specifier: ^11.10.0
     version: 11.10.0
   holy-loader:
-    specifier: 2.3.1
+    specifier: ^2.3.1
     version: 2.3.1(react@18.3.1)
   isomorphic-dompurify:
-    specifier: 2.16.0
+    specifier: ^2.16.0
     version: 2.16.0
   lowlight:
-    specifier: 3.1.0
+    specifier: ^3.1.0
     version: 3.1.0
   lucide-react:
-    specifier: 0.451.0
+    specifier: ^0.451.0
     version: 0.451.0(react@18.3.1)
   nanoid:
-    specifier: 5.0.7
+    specifier: ^5.0.7
     version: 5.0.7
   next:
-    specifier: 14.2.10
+    specifier: ^14.2.10
     version: 14.2.10(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.48.0)(react-dom@18.3.1)(react@18.3.1)
   next-auth:
-    specifier: 4.24.7
+    specifier: ^4.24.7
     version: 4.24.7(next@14.2.10)(nodemailer@6.9.14)(react-dom@18.3.1)(react@18.3.1)
   next-safe-action:
-    specifier: 7.9.4
+    specifier: ^7.9.4
     version: 7.9.4(next@14.2.10)(react-dom@18.3.1)(react@18.3.1)(zod@3.23.8)
   next-themes:
-    specifier: 0.3.0
+    specifier: ^0.3.0
     version: 0.3.0(react-dom@18.3.1)(react@18.3.1)
   nodemailer:
-    specifier: 6.9.14
+    specifier: ^6.9.14
     version: 6.9.14
   pg:
-    specifier: 8.12.0
+    specifier: ^8.12.0
     version: 8.12.0
   postgres:
-    specifier: 3.4.4
+    specifier: ^3.4.4
     version: 3.4.4
   posthog-js:
-    specifier: 1.166.1
+    specifier: ^1.166.1
     version: 1.166.1
   prismjs:
-    specifier: 1.29.0
+    specifier: ^1.29.0
     version: 1.29.0
   react:
-    specifier: 18.3.1
+    specifier: ^18.3.1
     version: 18.3.1
   react-dom:
-    specifier: 18.3.1
+    specifier: ^18.3.1
     version: 18.3.1(react@18.3.1)
   react-highlight-words:
-    specifier: 0.20.0
+    specifier: ^0.20.0
     version: 0.20.0(react@18.3.1)
   react-hook-form:
-    specifier: 7.53.0
+    specifier: ^7.53.0
     version: 7.53.0(react@18.3.1)
   react-hotkeys-hook:
-    specifier: 4.5.1
+    specifier: ^4.5.1
     version: 4.5.1(react-dom@18.3.1)(react@18.3.1)
   react-intersection-observer:
-    specifier: 9.13.0
+    specifier: ^9.13.0
     version: 9.13.0(react-dom@18.3.1)(react@18.3.1)
   react-moveable:
-    specifier: 0.56.0
+    specifier: ^0.56.0
     version: 0.56.0
   react-textarea-autosize:
-    specifier: 8.5.3
+    specifier: ^8.5.3
     version: 8.5.3(@types/react@18.3.1)(react@18.3.1)
   rss:
-    specifier: 1.2.2
+    specifier: ^1.2.2
     version: 1.2.2
   server-only:
-    specifier: 0.0.1
+    specifier: ^0.0.1
     version: 0.0.1
   sharp:
-    specifier: 0.33.5
+    specifier: ^0.33.5
     version: 0.33.5
   sonner:
-    specifier: 1.5.0
+    specifier: ^1.5.0
     version: 1.5.0(react-dom@18.3.1)(react@18.3.1)
   superjson:
-    specifier: 2.2.1
+    specifier: ^2.2.1
     version: 2.2.1
   tailwind-merge:
-    specifier: 2.5.2
+    specifier: ^2.5.2
     version: 2.5.2
   tiptap-markdown:
-    specifier: 0.8.10
+    specifier: ^0.8.10
     version: 0.8.10(@tiptap/core@2.9.1)
   zod:
-    specifier: 3.23.8
+    specifier: ^3.23.8
     version: 3.23.8
 
 devDependencies:
   '@axe-core/react':
-    specifier: 4.9.0
+    specifier: ^4.9.0
     version: 4.9.0
   '@playwright/test':
-    specifier: 1.48.0
+    specifier: ^1.48.0
     version: 1.48.0
   '@svgr/webpack':
-    specifier: 8.1.0
+    specifier: ^8.1.0
     version: 8.1.0(typescript@5.4.5)
   '@tailwindcss/typography':
-    specifier: 0.5.13
+    specifier: ^0.5.13
     version: 0.5.13(tailwindcss@3.4.3)
   '@types/chance':
-    specifier: 1.1.6
+    specifier: ^1.1.6
     version: 1.1.6
   '@types/dompurify':
-    specifier: 3.0.5
+    specifier: ^3.0.5
     version: 3.0.5
   '@types/node':
-    specifier: 22.7.5
+    specifier: ^22.7.5
     version: 22.7.5
   '@types/nodemailer':
-    specifier: 6.4.15
+    specifier: ^6.4.15
     version: 6.4.15
   '@types/pg':
-    specifier: 8.11.5
+    specifier: ^8.11.5
     version: 8.11.5
   '@types/prismjs':
-    specifier: 1.26.3
+    specifier: ^1.26.3
     version: 1.26.3
   '@types/react':
-    specifier: 18.3.1
+    specifier: ^18.3.1
     version: 18.3.1
   '@types/react-dom':
-    specifier: 18.3.0
+    specifier: ^18.3.0
     version: 18.3.0
   '@types/react-highlight-words':
-    specifier: 0.20.0
+    specifier: ^0.20.0
     version: 0.20.0
   '@types/rss':
-    specifier: 0.0.32
+    specifier: ^0.0.32
     version: 0.0.32
   '@typescript-eslint/eslint-plugin':
-    specifier: 6.21.0
+    specifier: ^6.21.0
     version: 6.21.0(@typescript-eslint/parser@6.21.0)(eslint@8.57.0)(typescript@5.4.5)
   '@typescript-eslint/parser':
-    specifier: 6.21.0
+    specifier: ^6.21.0
     version: 6.21.0(eslint@8.57.0)(typescript@5.4.5)
   autoprefixer:
-    specifier: 10.4.19
+    specifier: ^10.4.19
     version: 10.4.19(postcss@8.4.38)
   aws-cdk-lib:
-    specifier: 2.140.0
+    specifier: ^2.140.0
     version: 2.140.0(constructs@10.3.0)
   chance:
-    specifier: 1.1.11
+    specifier: ^1.1.11
     version: 1.1.11
   constructs:
     specifier: 10.3.0
     version: 10.3.0
   drizzle-kit:
-    specifier: 0.25.0
+    specifier: ^0.25.0
     version: 0.25.0
   eslint:
-    specifier: 8.57.0
+    specifier: ^8.57.0
     version: 8.57.0
   eslint-config-next:
-    specifier: 14.2.3
+    specifier: ^14.2.3
     version: 14.2.3(eslint@8.57.0)(typescript@5.4.5)
   eslint-config-prettier:
-    specifier: 9.1.0
+    specifier: ^9.1.0
     version: 9.1.0(eslint@8.57.0)
   eslint-plugin-jsx-a11y:
-    specifier: 6.8.0
+    specifier: ^6.8.0
     version: 6.8.0(eslint@8.57.0)
   eslint-plugin-playwright:
-    specifier: 1.6.0
+    specifier: ^1.6.0
     version: 1.6.0(eslint@8.57.0)
   lint-staged:
-    specifier: 15.2.2
+    specifier: ^15.2.2
     version: 15.2.2
   postcss:
-    specifier: 8.4.38
+    specifier: ^8.4.38
     version: 8.4.38
   prettier:
-    specifier: 3.2.5
+    specifier: ^3.2.5
     version: 3.2.5
   prettier-plugin-tailwindcss:
-    specifier: 0.6.8
+    specifier: ^0.6.8
     version: 0.6.8(prettier@3.2.5)
   tailwindcss:
-    specifier: 3.4.3
+    specifier: ^3.4.3
     version: 3.4.3
   typescript:
-    specifier: 5.4.5
+    specifier: ^5.4.5
     version: 5.4.5
 
 packages:
@@ -4395,10 +4395,6 @@ packages:
       react: 18.3.1
     dev: false
 
-  /@remirror/core-constants@2.0.2:
-    resolution: {integrity: sha512-dyHY+sMF0ihPus3O27ODd4+agdHMEmuRdyiZJ2CCWjPV5UFmn17ZbElvk6WOGVE4rdCJKZQCrPV2BcikOMLUGQ==}
-    dev: false
-
   /@remirror/core-constants@3.0.0:
     resolution: {integrity: sha512-42aWfPrimMfDKDi4YegyS7x+/0tlzaqwPQCULLanv3DMIlu96KTJR0fM5isWX2UViOqlGnX6YFgqWepcX+XMNg==}
     dev: false
@@ -5531,14 +5527,6 @@ packages:
     resolution: {integrity: sha512-PBu00mtt95jbKFi6Llk9aik8bnR3tR/oQP1o3TSi+iG//+Q2RTIzCEgKkHG8BB86kxMNW6O8wku+Lmi+QFR6jA==}
     dev: false
 
-  /@tiptap/core@2.9.1(@tiptap/pm@2.5.1):
-    resolution: {integrity: sha512-tifnLL/ARzQ6/FGEJjVwj9UT3v+pENdWHdk9x6F3X0mB1y0SeCjV21wpFLYESzwNdBPAj8NMp8Behv7dBnhIfw==}
-    peerDependencies:
-      '@tiptap/pm': ^2.7.0
-    dependencies:
-      '@tiptap/pm': 2.5.1
-    dev: false
-
   /@tiptap/core@2.9.1(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-tifnLL/ARzQ6/FGEJjVwj9UT3v+pENdWHdk9x6F3X0mB1y0SeCjV21wpFLYESzwNdBPAj8NMp8Behv7dBnhIfw==}
     peerDependencies:
@@ -5563,14 +5551,14 @@ packages:
       '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
-  /@tiptap/extension-bubble-menu@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/extension-bubble-menu@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-DWUF6NG08/bZDWw0jCeotSTvpkyqZTi4meJPomG9Wzs/Ol7mEwlNCsCViD999g0+IjyXFatBk4DfUq1YDDu++Q==}
     peerDependencies:
       '@tiptap/core': ^2.7.0
       '@tiptap/pm': ^2.7.0
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
       tippy.js: 6.3.7
     dev: false
 
@@ -5582,7 +5570,7 @@ packages:
       '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
-  /@tiptap/extension-code-block-lowlight@2.6.6(@tiptap/core@2.9.1)(@tiptap/extension-code-block@2.9.1)(@tiptap/pm@2.5.1)(highlight.js@11.10.0)(lowlight@3.1.0):
+  /@tiptap/extension-code-block-lowlight@2.6.6(@tiptap/core@2.9.1)(@tiptap/extension-code-block@2.9.1)(@tiptap/pm@2.9.1)(highlight.js@11.10.0)(lowlight@3.1.0):
     resolution: {integrity: sha512-GXzuQGKxxOmozzvwBEKdEnX1fv9R8qt9Q4Q+j3Itc+um7nYNKHDT1xNIk1BQUeu8Mr6fQVFgCu3FDybsRp9Ncw==}
     peerDependencies:
       '@tiptap/core': ^2.6.6
@@ -5591,21 +5579,11 @@ packages:
       highlight.js: ^11
       lowlight: ^2 || ^3
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/extension-code-block': 2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/extension-code-block': 2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
       highlight.js: 11.10.0
       lowlight: 3.1.0
-    dev: false
-
-  /@tiptap/extension-code-block@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
-    resolution: {integrity: sha512-A/50wPWDqEUUUPhrwRKILP5gXMO5UlQ0F6uBRGYB9CEVOREam9yIgvONOnZVJtszHqOayjIVMXbH/JMBeq11/g==}
-    peerDependencies:
-      '@tiptap/core': ^2.7.0
-      '@tiptap/pm': ^2.7.0
-    dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
     dev: false
 
   /@tiptap/extension-code-block@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
@@ -5632,7 +5610,7 @@ packages:
       '@tiptap/core': ^2.6.6
       '@tiptap/extension-text-style': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
       '@tiptap/extension-text-style': 2.3.1(@tiptap/core@2.9.1)
     dev: false
 
@@ -5654,14 +5632,14 @@ packages:
       '@tiptap/pm': 2.9.1
     dev: false
 
-  /@tiptap/extension-floating-menu@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/extension-floating-menu@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-MxZ7acNNsoNaKpetxfwi3Z11Bgrh0T2EJlCV77v9N1vWK38+st3H1WJanmLbPNtc2ocvhHJrz+DjDz3CWxQ9rQ==}
     peerDependencies:
       '@tiptap/core': ^2.7.0
       '@tiptap/pm': ^2.7.0
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
       tippy.js: 6.3.7
     dev: false
 
@@ -5696,7 +5674,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-history@2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
@@ -5724,7 +5702,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-italic@2.9.1(@tiptap/core@2.9.1):
@@ -5735,14 +5713,14 @@ packages:
       '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
-  /@tiptap/extension-link@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/extension-link@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-NJSR5Yf/dI3do0+Mr6e6nkbxRQcqbL7NOPxo5Xw8VaKs2Oe8PX+c7hyqN3GZgn6uEbZdbVi1xjAniUokouwpFg==}
     peerDependencies:
       '@tiptap/core': ^2.6.6
       '@tiptap/pm': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
       linkifyjs: 4.1.3
     dev: false
 
@@ -5770,14 +5748,14 @@ packages:
       '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
-  /@tiptap/extension-placeholder@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/extension-placeholder@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-J0ZMvF93NsRrt+R7IQ3GhxNq32vq+88g25oV/YFJiwvC48HMu1tQB6kG1I3LJpu5b8lN+LnfANNqDOEhiBfjaA==}
     peerDependencies:
       '@tiptap/core': ^2.6.6
       '@tiptap/pm': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
     dev: false
 
   /@tiptap/extension-strike@2.9.1(@tiptap/core@2.9.1):
@@ -5793,7 +5771,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-superscript@2.6.6(@tiptap/core@2.9.1):
@@ -5801,7 +5779,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-table-cell@2.6.6(@tiptap/core@2.9.1):
@@ -5809,7 +5787,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-table-header@2.6.6(@tiptap/core@2.9.1):
@@ -5817,7 +5795,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-table-row@2.6.6(@tiptap/core@2.9.1):
@@ -5825,17 +5803,17 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
-  /@tiptap/extension-table@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/extension-table@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-Ay/IClmB9R8MjnLobGnA9tI0+7ev4GUwvNf/JA2razI8CeaMCJ7CcAzG6pnIp4d7I6ELWYmAt3vwxoRlsAZcEw==}
     peerDependencies:
       '@tiptap/core': ^2.6.6
       '@tiptap/pm': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
     dev: false
 
   /@tiptap/extension-text-align@2.6.6(@tiptap/core@2.9.1):
@@ -5843,7 +5821,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-text-style@2.3.1(@tiptap/core@2.9.1):
@@ -5851,7 +5829,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.0.0
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-text@2.9.1(@tiptap/core@2.9.1):
@@ -5867,7 +5845,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.7.0
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-underline@2.6.6(@tiptap/core@2.9.1):
@@ -5875,7 +5853,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
   /@tiptap/extension-youtube@2.6.6(@tiptap/core@2.9.1):
@@ -5883,41 +5861,18 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
     dev: false
 
-  /@tiptap/html@2.8.0(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/html@2.8.0(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-eOmceeQmJoYk0T6TvmaoPhVLV3yseyb8O/MewoviP1lImcdrYNw/HOifYLG1Ni/g1TzeOvbVyzF1hTJTRzyXYQ==}
     peerDependencies:
       '@tiptap/core': ^2.7.0
       '@tiptap/pm': ^2.7.0
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
       zeed-dom: 0.15.1
-    dev: false
-
-  /@tiptap/pm@2.5.1:
-    resolution: {integrity: sha512-ZugyzyKV30QLHg+BPZs4+Bq8x2phk9Ncd9odumGkVeyxVbX/wV5ittqg2kDniwo+w4DsVkVFcgLyUH/Yxh67IQ==}
-    dependencies:
-      prosemirror-changeset: 2.2.1
-      prosemirror-collab: 1.3.1
-      prosemirror-commands: 1.6.2
-      prosemirror-dropcursor: 1.8.1
-      prosemirror-gapcursor: 1.3.2
-      prosemirror-history: 1.4.1
-      prosemirror-inputrules: 1.4.0
-      prosemirror-keymap: 1.2.2
-      prosemirror-markdown: 1.13.1
-      prosemirror-menu: 1.2.4
-      prosemirror-model: 1.23.0
-      prosemirror-schema-basic: 1.2.3
-      prosemirror-schema-list: 1.4.1
-      prosemirror-state: 1.4.3
-      prosemirror-tables: 1.6.0
-      prosemirror-trailing-node: 2.0.9(prosemirror-model@1.23.0)(prosemirror-state@1.4.3)(prosemirror-view@1.34.3)
-      prosemirror-transform: 1.10.2
-      prosemirror-view: 1.34.3
     dev: false
 
   /@tiptap/pm@2.9.1:
@@ -5943,7 +5898,7 @@ packages:
       prosemirror-view: 1.34.3
     dev: false
 
-  /@tiptap/react@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)(react-dom@18.3.1)(react@18.3.1):
+  /@tiptap/react@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-AUmdb/J1O/vCO2b8LL68ctcZr9a3931BwX4fUUZ1kCrCA5lTj2xz0rjeAtpxEdzLnR+Z7q96vB7vf7bPYOUAew==}
     peerDependencies:
       '@tiptap/core': ^2.6.6
@@ -5951,10 +5906,10 @@ packages:
       react: ^17.0.0 || ^18.0.0
       react-dom: ^17.0.0 || ^18.0.0
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/extension-bubble-menu': 2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
-      '@tiptap/extension-floating-menu': 2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/extension-bubble-menu': 2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
+      '@tiptap/extension-floating-menu': 2.9.1(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
       '@types/use-sync-external-store': 0.0.6
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -5986,14 +5941,14 @@ packages:
       '@tiptap/pm': 2.9.1
     dev: false
 
-  /@tiptap/suggestion@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.5.1):
+  /@tiptap/suggestion@2.6.6(@tiptap/core@2.9.1)(@tiptap/pm@2.9.1):
     resolution: {integrity: sha512-jogG0QgGit9UtTznVnhQfNImZfQM89NR0is20yRQzC0HmD8B8f3jmGrotG63Why2oKbeoe3CpM5/5eDE/paqCA==}
     peerDependencies:
       '@tiptap/core': ^2.6.6
       '@tiptap/pm': ^2.6.6
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
-      '@tiptap/pm': 2.5.1
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
+      '@tiptap/pm': 2.9.1
     dev: false
 
   /@trpc/client@10.45.1(@trpc/server@10.45.1):
@@ -8025,6 +7980,7 @@ packages:
   /eslint@8.57.0:
     resolution: {integrity: sha512-dZ6+mexnaTIbSBZWgou51U6OmzIhYM2VcNdtiTtI7qPNZm35Akpr0f6vtw3w1Kmn5PYo+tZVfh13WrhpS6oLqQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     dependencies:
       '@eslint-community/eslint-utils': 4.4.1(eslint@8.57.0)
@@ -10773,20 +10729,6 @@ packages:
       prosemirror-view: 1.34.3
     dev: false
 
-  /prosemirror-trailing-node@2.0.9(prosemirror-model@1.23.0)(prosemirror-state@1.4.3)(prosemirror-view@1.34.3):
-    resolution: {integrity: sha512-YvyIn3/UaLFlFKrlJB6cObvUhmwFNZVhy1Q8OpW/avoTbD/Y7H5EcjK4AZFKhmuS6/N6WkGgt7gWtBWDnmFvHg==}
-    peerDependencies:
-      prosemirror-model: ^1.22.1
-      prosemirror-state: ^1.4.2
-      prosemirror-view: ^1.33.8
-    dependencies:
-      '@remirror/core-constants': 2.0.2
-      escape-string-regexp: 4.0.0
-      prosemirror-model: 1.23.0
-      prosemirror-state: 1.4.3
-      prosemirror-view: 1.34.3
-    dev: false
-
   /prosemirror-trailing-node@3.0.0(prosemirror-model@1.23.0)(prosemirror-state@1.4.3)(prosemirror-view@1.34.3):
     resolution: {integrity: sha512-xiun5/3q0w5eRnGYfNlW1uU9W6x5MoFKWwq/0TIRgt09lv7Hcser2QYV8t4muXbEr+Fwo0geYn79Xs4GKywrRQ==}
     peerDependencies:
@@ -11818,7 +11760,7 @@ packages:
     peerDependencies:
       '@tiptap/core': ^2.0.3
     dependencies:
-      '@tiptap/core': 2.9.1(@tiptap/pm@2.5.1)
+      '@tiptap/core': 2.9.1(@tiptap/pm@2.9.1)
       '@types/markdown-it': 13.0.9
       markdown-it: 14.1.0
       markdown-it-task-lists: 2.1.1
