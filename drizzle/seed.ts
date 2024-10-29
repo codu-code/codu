@@ -7,22 +7,16 @@ import "dotenv/config";
 
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import {
+  E2E_USER_ONE_EMAIL,
+  E2E_USER_ONE_ID,
+  E2E_USER_TWO_EMAIL,
+  E2E_USER_TWO_ID,
+  E2E_USER_ONE_SESSION_ID,
+  E2E_USER_TWO_SESSION_ID,
+} from "../e2e/constants";
 
 const DATABASE_URL = process.env.DATABASE_URL || "";
-// These can be removed in a follow on PR. Until this hits main we cant add E2E_USER_* stuff to the env.
-const E2E_USER_ONE_SESSION_ID =
-  process.env.E2E_USER_ONE_SESSION_ID || "df8a11f2-f20a-43d6-80a0-a213f1efedc1";
-const E2E_USER_ONE_ID =
-  process.env.E2E_USER_ONE_ID || "8e3179ce-f32b-4d0a-ba3b-234d66b836ad";
-const E2E_USER_ONE_EMAIL =
-  process.env.E2E_USER_ONE_EMAIL || "e2e-user-one@codu.co";
-
-const E2E_USER_TWO_SESSION_ID =
-  process.env.E2E_USER_TWO_SESSION_ID || "10134766-bc6c-4b52-83d7-46ec0a4cb95d";
-const E2E_USER_TWO_ID =
-  process.env.E2E_USER_TWO_ID || "a15a104a-0e34-4101-8800-ed25c9231345";
-const E2E_USER_TWO_EMAIL =
-  process.env.E2E_USER_TWO_EMAIL || "e2e-user-two@codu.co";
 
 if (!DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");

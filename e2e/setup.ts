@@ -1,19 +1,12 @@
-import dotenv from "dotenv";
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { post, comment } from "@/server/db/schema";
-
-dotenv.config(); // Load .env file contents into process.env
+import { E2E_USER_ONE_ID, E2E_USER_TWO_ID } from "./constants";
 
 export const setup = async () => {
-  if (
-    !process.env.DATABASE_URL ||
-    !process.env.E2E_USER_ONE_ID ||
-    !process.env.E2E_USER_TWO_ID
-  ) {
-    throw new Error("Missing env variables for DB clean up script");
-  }
-  const db = drizzle(postgres(process.env.DATABASE_URL as string));
+  const db = drizzle(
+    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
+  );
 
   const addE2EArticleAndComment = async (
     authorId: string,
@@ -52,10 +45,7 @@ export const setup = async () => {
   try {
     console.log("creating articles");
 
-    await addE2EArticleAndComment(
-      process.env.E2E_USER_ONE_ID as string,
-      process.env.E2E_USER_TWO_ID as string,
-    );
+    await addE2EArticleAndComment(E2E_USER_ONE_ID, E2E_USER_TWO_ID);
     console.log("DB setup successful");
   } catch (err) {
     console.log("Error while setting up DB before E2E test run", err);
