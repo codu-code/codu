@@ -6,9 +6,11 @@ import {
   BoldIcon,
   ItalicIcon,
   CodeIcon,
+  QuoteIcon,
+  MinusSquareIcon,
+  Type as TextIcon,
+  Heading,
 } from "lucide-react";
-
-import { NodeSelector } from "./node-selector";
 import { LinkSelector } from "./link-selector";
 import { cn } from "@/utils/utils";
 
@@ -24,33 +26,55 @@ type EditorBubbleMenuProps = Omit<Required<Pick<BubbleMenuProps, "editor">> & Bu
 export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const items: BubbleMenuItem[] = [
     {
+      name: "heading",
+      isActive: () => props.editor?.isActive("heading", { level: 2 }) ?? false,
+      command: () => props.editor?.chain().focus().toggleHeading({ level: 2 }).run(),
+      icon: Heading,
+    },
+    {
+      name: "text",
+      isActive: () => props.editor?.isActive("paragraph") ?? false,
+      command: () => props.editor?.chain().focus().setParagraph().run(),
+      icon: TextIcon,
+    },
+    {
       name: "bold",
-      isActive: () => props.editor.isActive("bold"),
-      command: () => props.editor.chain().focus().toggleBold().run(),
+      isActive: () => props.editor?.isActive("bold") ?? false,
+      command: () => props.editor?.chain().focus().toggleBold().run(),
       icon: BoldIcon,
     },
     {
       name: "italic",
-      isActive: () => props.editor.isActive("italic"),
-      command: () => props.editor.chain().focus().toggleItalic().run(),
+      isActive: () => props.editor?.isActive("italic") ?? false,
+      command: () => props.editor?.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
     },
     {
       name: "code",
-      isActive: () => props.editor.isActive("code"),
-      command: () => props.editor.chain().focus().toggleCode().run(),
+      isActive: () => props.editor?.isActive("code") ?? false,
+      command: () => props.editor?.chain().focus().toggleCode().run(),
       icon: CodeIcon,
+    },
+    {
+      name: "quote",
+      isActive: () => props.editor?.isActive("blockquote") ?? false,
+      command: () => props.editor?.chain().focus().toggleBlockquote().run(),
+      icon: QuoteIcon,
+    },
+    {
+      name: "horizontalRule",
+      isActive: () => false,
+      command: () => props.editor?.chain().focus().setHorizontalRule().run(),
+      icon: MinusSquareIcon,
     },
   ];
 
   const bubbleMenuProps: EditorBubbleMenuProps = {
     ...props,
     shouldShow: ({ editor }) => {
-      // don't show if image is selected or a heading
-      if (editor.isActive("image") || editor.isActive("heading")) {
+      if (editor.isActive("image")) {
         return false;
       }
-
       try {
         if (editor.view.state.selection.$from.before() === 0) {
           return false;
@@ -65,13 +89,11 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     tippyOptions: {
       moveTransition: "transform 0.15s ease-out",
       onHidden: () => {
-        setIsNodeSelectorOpen(false);
         setIsLinkSelectorOpen(false);
       },
     },
   };
 
-  const [isNodeSelectorOpen, setIsNodeSelectorOpen] = useState(false);
   const [isLinkSelectorOpen, setIsLinkSelectorOpen] = useState(false);
 
   return (
@@ -79,22 +101,6 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       {...bubbleMenuProps}
       className="flex w-fit divide-x divide-stone-200 rounded border border-stone-200 bg-white shadow-xl"
     >
-      <NodeSelector
-        editor={props.editor}
-        isOpen={isNodeSelectorOpen}
-        setIsOpen={() => {
-          setIsNodeSelectorOpen(!isNodeSelectorOpen);
-          setIsLinkSelectorOpen(false);
-        }}
-      />
-      <LinkSelector
-        editor={props.editor}
-        isOpen={isLinkSelectorOpen}
-        setIsOpen={() => {
-          setIsLinkSelectorOpen(!isLinkSelectorOpen);
-          setIsNodeSelectorOpen(false);
-        }}
-      />
       <div className="flex">
         {items.map((item, index) => (
           <button
@@ -111,6 +117,13 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           </button>
         ))}
       </div>
+      <LinkSelector
+        editor={props.editor!}
+        isOpen={isLinkSelectorOpen}
+        setIsOpen={() => {
+          setIsLinkSelectorOpen(!isLinkSelectorOpen);
+        }}
+      />
     </BubbleMenu>
   );
 };
