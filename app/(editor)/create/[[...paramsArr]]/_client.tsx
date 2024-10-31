@@ -38,8 +38,6 @@ import { getUploadUrl } from "@/app/actions/getUploadUrl";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
 
-import { TRPCClientErrorLike } from '@trpc/client';
-
 const Create = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
@@ -244,7 +242,7 @@ const Create = ({ session }: { session: Session | null }) => {
 
       setSavedTime(
         new Date().toLocaleString(undefined, {
-          dateStyle: "medium",git 
+          dateStyle: "medium",
           timeStyle: "short",
         }),
       );
