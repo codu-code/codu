@@ -9,7 +9,7 @@ export const seriesRouter = createTRPCRouter({
         .mutation(async ({input, ctx}) => {
             const {postId, seriesName} = input;
 
-            if (seriesName && seriesName.trim() === "") {
+            if (seriesName?.trim() === "") {
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'Series name cannot be empty' });
             }
 

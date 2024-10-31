@@ -35,9 +35,9 @@ export const sessionRelations = relations(session, ({ one }) => ({
   }),
 }));
 
-export const series = pgTable("Series", {
+export const series = pgTable("series", {
   id: serial("id").primaryKey(),
-  name: text("title").notNull(),
+  name: text("name").notNull(),
   description: text("description"),
   userId: text("userId").notNull().references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   createdAt: timestamp("createdAt", {
