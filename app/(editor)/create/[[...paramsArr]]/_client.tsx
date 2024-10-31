@@ -244,7 +244,7 @@ const Create = ({ session }: { session: Session | null }) => {
 
       setSavedTime(
         new Date().toLocaleString(undefined, {
-          dateStyle: "medium",
+          dateStyle: "medium",git 
           timeStyle: "short",
         }),
       );
