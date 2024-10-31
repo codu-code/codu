@@ -38,6 +38,8 @@ import { getUploadUrl } from "@/app/actions/getUploadUrl";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
 
+import { TRPCClientErrorLike } from '@trpc/client';
+
 const Create = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
@@ -161,6 +163,14 @@ const Create = ({ session }: { session: Session | null }) => {
       Sentry.captureException(error);
     },
   });
+
+  const { mutate: seriesUpdate, status: seriesStatus } = api.series.update.useMutation({
+    onError(error) {
+      toast.error("Error updating series");
+      Sentry.captureException(error);
+    }
+  });
+
   const {
     mutate: create,
     data: createData,
@@ -217,6 +227,7 @@ const Create = ({ session }: { session: Session | null }) => {
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
       excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
+      seriesName: data.seriesName || undefined
     };
     return formData;
   };
@@ -229,6 +240,8 @@ const Create = ({ session }: { session: Session | null }) => {
       await create({ ...formData });
     } else {
       await save({ ...formData, id: postId });
+      await seriesUpdate({ postId, seriesName: formData.seriesName });
+
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -564,9 +577,23 @@ const Create = ({ session }: { session: Session | null }) => {
                                   {copied ? "Copied" : "Copy Link"}
                                 </div>
                               </button>
-                              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                              <p className="mt-2 mb-2 text-sm text-neutral-600 dark:text-neutral-400">
                                 Share this link with others to preview your
                                 draft. Anyone with the link can view your draft.
+                              </p>
+
+                              <label htmlFor="seriesName">
+                                Series Name
+                              </label>
+                              <input
+                                id="seriesName"
+                                type="text"
+                                placeholder="The name of my series"
+                                defaultValue={data?.series?.name || ""}
+                                {...register("seriesName")}
+                              />
+                              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                              This text is case-sensitive so make sure you type it exactly as you did in previous articles to ensure they are connected
                               </p>
                             </DisclosurePanel>
                           </>
