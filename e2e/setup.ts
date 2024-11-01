@@ -12,13 +12,14 @@ import {
   E2E_USER_TWO_SESSION_ID,
 } from "./constants";
 import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 
 export const setup = async () => {
+  // Dynamically import nanoid
+  const { nanoid } = await import("nanoid");
+
   const db = drizzle(
     postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
   );
-
   const addE2EArticleAndComment = async (
     authorId: string,
     commenterId: string,
