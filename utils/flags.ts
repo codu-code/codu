@@ -2,6 +2,7 @@ import { posthog } from "posthog-js";
 
 export const FEATURE_FLAGS = {
   FEATURE_FLAG_TEST: "feature-flag-test",
+  COURSE_VIDEO: "course-video",
   JOBS: "jobs",
   // Add more feature flags as needed
 } as const;

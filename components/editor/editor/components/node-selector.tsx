@@ -2,14 +2,8 @@ import type { Editor } from "@tiptap/core";
 import {
   Check,
   ChevronDown,
-  Heading1,
-  Heading2,
-  Heading3,
   TextQuote,
-  ListOrdered,
   TextIcon,
-  Code,
-  CheckSquare,
   Heading,
 } from "lucide-react";
 import type { Dispatch, FC, SetStateAction } from "react";
@@ -29,17 +23,6 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
 }) => {
   const items: BubbleMenuItem[] = [
     {
-      name: "Text",
-      icon: TextIcon,
-      command: () =>
-        editor.chain().focus().toggleNode("paragraph", "paragraph").run(),
-      // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
-      isActive: () =>
-        editor.isActive("paragraph") &&
-        !editor.isActive("bulletList") &&
-        !editor.isActive("orderedList"),
-    },
-    {
       name: "Heading",
       icon: Heading,
       command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
@@ -50,6 +33,13 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
       icon: Heading,
       command: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       isActive: () => editor.isActive("heading", { level: 3 }),
+    },
+    {
+      name: "Text",
+      icon: TextIcon,
+      command: () =>
+        editor.chain().focus().toggleNode("paragraph", "paragraph").run(),
+      isActive: () => editor.isActive("paragraph"),
     },
     {
       name: "Quote",
@@ -63,24 +53,6 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
           .run(),
       isActive: () => editor.isActive("blockquote"),
     },
-    {
-      name: "Code",
-      icon: Code,
-      command: () => editor.chain().focus().toggleCodeBlock().run(),
-      isActive: () => editor.isActive("codeBlock"),
-    },
-    {
-      name: "Bullet List",
-      icon: ListOrdered,
-      command: () => editor.chain().focus().toggleBulletList().run(),
-      isActive: () => editor.isActive("bulletList"),
-    },
-    {
-      name: "Numbered List",
-      icon: ListOrdered,
-      command: () => editor.chain().focus().toggleOrderedList().run(),
-      isActive: () => editor.isActive("orderedList"),
-    },
   ];
 
   const activeItem = items.filter((item) => item.isActive()).pop() ?? {
@@ -93,6 +65,7 @@ export const NodeSelector: FC<NodeSelectorProps> = ({
         type="button"
         className="flex h-full items-center gap-1 whitespace-nowrap p-2 text-sm font-medium text-stone-600 hover:bg-stone-100 active:bg-stone-200"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
       >
         <span>{activeItem?.name}</span>
         <ChevronDown className="h-4 w-4" />

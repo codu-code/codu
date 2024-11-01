@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   BoldIcon,
   ItalicIcon,
-  CodeIcon,
 } from "lucide-react";
 
 import { NodeSelector } from "./node-selector";
@@ -25,21 +24,15 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const items: BubbleMenuItem[] = [
     {
       name: "bold",
-      isActive: () => props.editor.isActive("bold"),
-      command: () => props.editor.chain().focus().toggleBold().run(),
+      isActive: () => props.editor?.isActive("bold") ?? false,
+      command: () => props.editor?.chain().focus().toggleBold().run(),
       icon: BoldIcon,
     },
     {
       name: "italic",
-      isActive: () => props.editor.isActive("italic"),
-      command: () => props.editor.chain().focus().toggleItalic().run(),
+      isActive: () => props.editor?.isActive("italic") ?? false,
+      command: () => props.editor?.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
-    },
-    {
-      name: "code",
-      isActive: () => props.editor.isActive("code"),
-      command: () => props.editor.chain().focus().toggleCode().run(),
-      icon: CodeIcon,
     },
   ];
 
@@ -79,22 +72,16 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       {...bubbleMenuProps}
       className="flex w-fit divide-x divide-stone-200 rounded border border-stone-200 bg-white shadow-xl"
     >
-      <NodeSelector
-        editor={props.editor}
-        isOpen={isNodeSelectorOpen}
-        setIsOpen={() => {
-          setIsNodeSelectorOpen(!isNodeSelectorOpen);
-          setIsLinkSelectorOpen(false);
-        }}
-      />
-      <LinkSelector
-        editor={props.editor}
-        isOpen={isLinkSelectorOpen}
-        setIsOpen={() => {
-          setIsLinkSelectorOpen(!isLinkSelectorOpen);
-          setIsNodeSelectorOpen(false);
-        }}
-      />
+      {props.editor && (
+        <NodeSelector
+          editor={props.editor}
+          isOpen={isNodeSelectorOpen}
+          setIsOpen={() => {
+            setIsNodeSelectorOpen(!isNodeSelectorOpen);
+            setIsLinkSelectorOpen(false);
+          }}
+        />
+      )}
       <div className="flex">
         {items.map((item, index) => (
           <button
@@ -110,6 +97,15 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
             />
           </button>
         ))}
+        {props.editor && (
+          <LinkSelector
+            editor={props.editor}
+            isOpen={isLinkSelectorOpen}
+            setIsOpen={() => {
+              setIsLinkSelectorOpen(!isLinkSelectorOpen);
+            }}
+          />
+        )}
       </div>
     </BubbleMenu>
   );
