@@ -38,4 +38,27 @@ test.describe("Authenticated settings Page", () => {
     await page.locator('button[type="submit"]').click(); 
     await expect(inputField).toHaveValue('codu-rules');
   });
+
+  // Tests location input, autocomplete, and saved values 
+  test('location input is visible', async ({page}) => {
+    // Test to see if input is visible
+    await page.locator('#location').isVisible();
+
+    // Test to fill if value can be changed
+    await page.locator('#location').fill('New York');
+    await expect(page.locator('#location')).toHaveValue('New York');
+
+    // Test to see if autocomplete is working
+    await expect(page.locator('#location')).toHaveAttribute('autocomplete', 'country-name');
+    
+    // Test to see if change in location persits 
+    await page.locator('#location').fill('A fun place to visit.');
+    await page.locator('button[type="submit"]').click();
+    await expect(page.locator('#location')).toHaveValue('A fun place to visit.');
+  });
+  
+  
+ 
+  
+  
 });
