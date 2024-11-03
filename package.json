@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "setup":"./quick-start.sh",
     "dev": "next dev",
     "dev:e2e": "ENV=E2E next dev",
     "build": "next build",
