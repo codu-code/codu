@@ -26,8 +26,11 @@ export const SavePostSchema = z.object({
   tags: z.string().array().max(5).optional(),
   published: z.string().datetime().optional(),
   seriesName: z.string()
-    .trim()
-    .optional()
+  .trim()
+  .min(1, "Series name cannot be empty")
+  .max(50, "Series name is too long")
+  .regex(/^[\w\s-]+$/, "Series name can only contain letters, numbers, spaces, and hyphens")
+  .optional()
 });
 
 export const PublishPostSchema = z.object({
