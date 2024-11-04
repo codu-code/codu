@@ -35,7 +35,7 @@ export const sessionRelations = relations(session, ({ one }) => ({
   }),
 }));
 
-export const series = pgTable("series", {
+export const series = pgTable("Series", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),

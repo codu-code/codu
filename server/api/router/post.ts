@@ -52,10 +52,13 @@ export const postRouter = createTRPCRouter({
   update: protectedProcedure
     .input(SavePostSchema)
     .mutation(async ({ input, ctx }) => {
-      const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
+      const { id, body, title, excerpt, canonicalUrl, tags = [], seriesName } = input;
 
       const currentPost = await ctx.db.query.post.findFirst({
         where: (posts, { eq }) => eq(posts.id, id),
+        with: {
+          series: true
+        },
       });
 
       if (currentPost?.userId !== ctx.session.user.id) {
@@ -63,6 +66,94 @@ export const postRouter = createTRPCRouter({
           code: "FORBIDDEN",
         });
       }
+
+      // series 
+      const postId = currentPost.id;
+
+      if (seriesName?.trim() === "") {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Series name cannot be empty' });
+      }
+
+      const createNewSeries = async (seriesTitle: string) => {
+        return await ctx.db.transaction(async (tx) => {
+          let seriesId: number;
+          const currSeries = await tx.query.series.findFirst({
+            columns: {
+              id: true
+            },
+            where: (series, { eq, and }) => and(
+              eq(series.name, seriesTitle),
+              eq(series.userId, ctx.session.user.id)
+            ),
+          })
+
+          if (!currSeries) {
+            const [newSeries] = await tx.insert(series).values({
+              name: seriesTitle,
+              userId: ctx.session.user.id,
+              updatedAt: new Date()
+            }).returning();
+
+            seriesId = newSeries.id;
+          }
+          else {
+            seriesId = currSeries.id;
+          }
+          await tx
+            .update(post)
+            .set({
+              seriesId: seriesId
+            })
+            .where(eq(post.id, currentPost.id));
+        })
+
+      }
+
+      const unlinkSeries = async (seriesId: number) => {
+        return await ctx.db.transaction(async (tx) => {
+          const anotherPostInThisSeries = await tx.query.post.findFirst({
+            where: (post, { eq, and, ne }) =>
+              and(
+                ne(post.id, currentPost.id),
+                eq(post.seriesId, seriesId)
+              )
+          })
+          if (!anotherPostInThisSeries) {
+            await tx.delete(series).where(
+              and(
+                eq(series.id, seriesId),
+                eq(series.userId, ctx.session.user.id)
+              )
+            );
+          }
+          // update that series id in the current post
+          await tx
+            .update(post)
+            .set({
+              seriesId: null
+            })
+            .where(eq(post.id, currentPost.id));
+        })
+      }
+
+      if (seriesName) {
+        if (currentPost?.seriesId) {
+          if (currentPost?.series?.name !== seriesName) {
+            await unlinkSeries(currentPost.seriesId);
+            await createNewSeries(seriesName);
+          }
+        }
+        else {
+          await createNewSeries(seriesName);
+        }
+      }
+      else {
+        if (currentPost.seriesId !== null) {
+          await unlinkSeries(currentPost.seriesId);
+        }
+      }
+
+
 
       // if user doesnt link any tags to the article no point in doing the tag operations
       // This also makes autosave during writing faster
@@ -105,7 +196,7 @@ export const postRouter = createTRPCRouter({
           return excerpt && excerpt.length > 0
             ? excerpt
             : // @Todo why is body string | null ?
-              removeMarkdown(currentPost.body as string, {}).substring(0, 156);
+            removeMarkdown(currentPost.body as string, {}).substring(0, 156);
         }
         return excerpt;
       };
@@ -193,18 +284,18 @@ export const postRouter = createTRPCRouter({
           .where(eq(post.id, id))
           .returning();
 
-          if(deletedPost.seriesId){
-            // check is there is any other post with the current seriesId
-            const anotherPostInThisSeries = await tx.query.post.findFirst({
-              where: (post, { eq }) => 
-                    eq(post.seriesId, deletedPost.seriesId!)
-            })
-            // if another post with the same seriesId is present, then do nothing
-            // else remove the series from the series table
-            if(!anotherPostInThisSeries){
-                await tx.delete(series).where(eq(series.id, deletedPost.seriesId));
-            }
+        if (deletedPost.seriesId) {
+          // check is there is any other post with the current seriesId
+          const anotherPostInThisSeries = await tx.query.post.findFirst({
+            where: (post, { eq }) =>
+              eq(post.seriesId, deletedPost.seriesId!)
+          })
+          // if another post with the same seriesId is present, then do nothing
+          // else remove the series from the series table
+          if (!anotherPostInThisSeries) {
+            await tx.delete(series).where(eq(series.id, deletedPost.seriesId));
           }
+        }
 
         return deletedPost;
       });
@@ -220,33 +311,33 @@ export const postRouter = createTRPCRouter({
 
       setLiked
         ? await ctx.db.transaction(async (tx) => {
-            res = await tx.insert(like).values({ postId, userId }).returning();
+          res = await tx.insert(like).values({ postId, userId }).returning();
+          await tx
+            .update(post)
+            .set({
+              likes: increment(post.likes),
+            })
+            .where(eq(post.id, postId));
+        })
+        : await ctx.db.transaction(async (tx) => {
+          res = await tx
+            .delete(like)
+            .where(
+              and(
+                eq(like.postId, postId),
+                eq(like.userId, ctx.session?.user?.id),
+              ),
+            )
+            .returning();
+          if (res.length !== 0) {
             await tx
               .update(post)
               .set({
-                likes: increment(post.likes),
+                likes: decrement(post.likes),
               })
               .where(eq(post.id, postId));
-          })
-        : await ctx.db.transaction(async (tx) => {
-            res = await tx
-              .delete(like)
-              .where(
-                and(
-                  eq(like.postId, postId),
-                  eq(like.userId, ctx.session?.user?.id),
-                ),
-              )
-              .returning();
-            if (res.length !== 0) {
-              await tx
-                .update(post)
-                .set({
-                  likes: decrement(post.likes),
-                })
-                .where(eq(post.id, postId));
-            }
-          });
+          }
+        });
 
       return res;
     }),
@@ -258,16 +349,16 @@ export const postRouter = createTRPCRouter({
 
       setBookmarked
         ? await ctx.db
-            .insert(bookmark)
-            .values({ postId, userId: ctx.session?.user?.id })
+          .insert(bookmark)
+          .values({ postId, userId: ctx.session?.user?.id })
         : await ctx.db
-            .delete(bookmark)
-            .where(
-              and(
-                eq(bookmark.postId, postId),
-                eq(bookmark.userId, ctx.session?.user?.id),
-              ),
-            );
+          .delete(bookmark)
+          .where(
+            and(
+              eq(bookmark.postId, postId),
+              eq(bookmark.userId, ctx.session?.user?.id),
+            ),
+          );
       return res;
     }),
   sidebarData: publicProcedure
@@ -284,26 +375,26 @@ export const postRouter = createTRPCRouter({
           // if user not logged in and they wont have any liked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
-                .selectDistinct()
-                .from(like)
-                .where(
-                  and(
-                    eq(like.postId, id),
-                    eq(like.userId, ctx.session.user.id),
-                  ),
-                )
+              .selectDistinct()
+              .from(like)
+              .where(
+                and(
+                  eq(like.postId, id),
+                  eq(like.userId, ctx.session.user.id),
+                ),
+              )
             : [false],
           // if user not logged in and they wont have any bookmarked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
-                .selectDistinct()
-                .from(bookmark)
-                .where(
-                  and(
-                    eq(bookmark.postId, id),
-                    eq(bookmark.userId, ctx.session.user.id),
-                  ),
-                )
+              .selectDistinct()
+              .from(bookmark)
+              .where(
+                and(
+                  eq(bookmark.postId, id),
+                  eq(bookmark.userId, ctx.session.user.id),
+                ),
+              )
             : [false],
         ]);
       return {

@@ -162,13 +162,6 @@ const Create = ({ session }: { session: Session | null }) => {
     },
   });
 
-  const { mutate: seriesUpdate, status: seriesStatus } = api.series.update.useMutation({
-    onError(error) {
-      toast.error("Error updating series");
-      Sentry.captureException(error);
-    }
-  });
-
   const {
     mutate: create,
     data: createData,
@@ -238,7 +231,6 @@ const Create = ({ session }: { session: Session | null }) => {
       await create({ ...formData });
     } else {
       await save({ ...formData, id: postId });
-      await seriesUpdate({ postId, seriesName: formData.seriesName });
 
       setSavedTime(
         new Date().toLocaleString(undefined, {
