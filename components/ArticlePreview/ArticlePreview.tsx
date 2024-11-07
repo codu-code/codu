@@ -155,7 +155,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
-                className="focus-style-rounded rounded-full p-2 hover:bg-neutral-300 dark:hover:bg-neutral-800 lg:mx-auto"
+                className="rounded-full p-2 hover:bg-neutral-300 focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600 dark:hover:bg-neutral-800 lg:mx-auto"
                 onClick={() => {
                   if (!session) {
                     return signIn();

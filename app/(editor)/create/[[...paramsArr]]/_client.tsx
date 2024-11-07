@@ -557,7 +557,7 @@ const Create = ({ session }: { session: Session | null }) => {
                                 type="button"
                                 className="relative flex w-full focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50"
                               >
-                                <div className="input-base flex max-w-full flex-1 overflow-hidden border text-left">
+                                <div className="flex w-full max-w-full flex-1 overflow-hidden border px-2 py-2 text-left text-black shadow-sm ring-offset-1 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:border-white dark:bg-black dark:text-white sm:text-sm">
                                   {PREVIEW_URL}
                                 </div>
                                 <div className="absolute bottom-0 right-0 top-0 w-[120px] border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-600 shadow-sm">

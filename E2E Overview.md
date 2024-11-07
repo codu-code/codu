@@ -2,8 +2,6 @@
 
 To run the end-to-end tests using Playwright, you need to configure your environment and follow these steps:
 
-
-
 ### Session and User Setup
 
 First, you need to add your E2E test user to your locally running database. Do this by running the following script if you haven't already:
