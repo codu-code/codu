@@ -120,7 +120,7 @@ export const setup = async () => {
       image: `https://robohash.org/${encodeURIComponent(name)}?bgset=bg1`,
       location: "Ireland",
       bio: "Hi I am an robot",
-      websiteUrl: "codu.co",
+      websiteUrl: "https://codu.co",
     };
     const [createdUser] = await db.insert(user).values(userData).returning();
     return createdUser;
