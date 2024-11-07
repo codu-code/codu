@@ -1,0 +1,76 @@
+Tuesday, November 5th, 2024 • Niall Maher
+
+# ⚡️ Better Image Loading + React Native's New Architecture
+
+[Read online](https://www.codu.co/letters/is-your-domain-haunted)
+
+My tip of the week is something I just learned about. A property called `fetchpriority` that drastically improved our Core Web Vitals. While most developers know about lazy loading, combining a few loading properties can make a big difference. You can further boost the priority of fetching an image using the `fetchpriority` property.
+
+Here's what it looks like in action:​​​​​​​
+
+```html
+rel="preload" as="image" href="hero.webp" fetchpriority="high" > src="hero.webp"
+loading="eager" fetchpriority="high" decoding="async" >
+```
+
+Let's break down why this works so well:
+
+- The `<link rel="preload">` tells browsers to start downloading the image immediately, even before they discover the tag while parsing HTML
+- `fetchpriority="high"` bumps the image to the top of the browser's resource queue, making it download before less critical resources
+- `loading="eager"` disables lazy loading for this specific image (crucial for above-the-fold content)
+- `decoding="async"` lets the browser optimize image decode timing without blocking other tasks
+
+**Just remember:** use this pattern sparingly for critical above-the-fold images directly impacting LCP. For everything else, stick with regular lazy loading.
+
+And a **Pro tip:** Combine this with the `srcset` attribute to handle responsive images, and you've got a bulletproof image-loading strategy. I wrote a little article on it this week. [Read it here](https://www.codu.co/articles/responsive-images-in-html-using-srcset-lyb6r6r0).
+
+## 📚 This Week's Picks
+
+**[Creating Custom VS Code Snippets for Faster Development](https://www.codu.co/articles/creating-custom-vs-code-snippets-for-faster-development-kgjv1ct)** (4 min)\
+Let's explore how to create custom snippets that will boost your productivity.
+
+**[Introduction to C# and .NET](https://www.codu.co/articles/introduction-to-c-and-net-w0hc8gz3)** (4 min)\
+What is C#, and what is .NET? The first article in a series Adrián is writing to teach you C#.
+
+**[Enhanced local IDE experience for AWS Lambda developers](https://aws.amazon.com/blogs/compute/introducing-an-enhanced-local-ide-experience-for-aws-lambda-developers/)** (8 min)\
+AWS Lambda is introducing an improved local IDE experience to simplify Lambda-based application development. The new features help developers to author, build, debug, test, and deploy Lambda applications more efficiently in their local IDE.
+
+**[25 crazy software bugs explained](https://www.youtube.com/watch?v=Iq_r7IcNmUk)** (video)\
+Fireship dives into 25 crazy software bugs that changed the world.
+
+**[React Native - New Architecture is here](https://reactnative.dev/blog/2024/10/23/the-new-architecture-is-here)** (22 min)\
+The 0.76 release blog post shared a list of significant changes in this version. It provides an overview of the New Architecture and how it shapes the future of React Native.
+
+**[Lessons learned from a successful Rust rewrite](https://gaultier.github.io/blog/lessons_learned_from_a_successful_rust_rewrite.html)** (12 min)\
+A great deep dive into some important lessons when migrating a C++ codebase to Rust.
+
+## 📖 Book of the Week
+
+**[The Engineering Executive's Primer: Impactful Technical Leadership](https://amzn.to/4fj5bWf)**
+
+This book is essential for technical leaders navigating the complexities of engineering management. Drawing from his extensive experience at companies like Stripe and Uber, Larson offers practical frameworks for scaling engineering organizations, developing talent, and driving technical strategy. What sets this book apart is its focused approach to the unique challenges faced by senior engineering leaders, from managing organizational design to balancing technical debt with business growth. Particularly valuable are the actionable insights on building effective engineering processes and fostering a culture of technical excellence.
+
+Whether you're an engineering executive or aspiring to become one, this book provides the strategic toolkit needed for impactful technical leadership.
+
+## 🛠️ Something Cool
+
+**[Posthog](https://posthog.com/)**
+
+This is not a sponsored post (I am mentioning it because I do see Posthog sponsors a lot of content). I've been using this tool again recently for a couple of projects, and it's just fantastic.
+
+PostHog offers the full package---session recordings, feature flags, A/B testing, and product analytics. Whether you're running early experiments or want to systemize your product decisions, PostHog provides the data and tools needed to make data-driven choices. It has a very generous free tier (which I haven't been lucky enough to hit just yet with any of my side projects).
+
+## 🔗 Quick Links
+
+- [Codú TikTok](https://www.tiktok.com/@codu.co)
+- [Hacktoberfest GitHub Issues](https://github.com/codu-code/codu/issues)
+- [Our YouTube channel](https://www.youtube.com/@codu)
+- [Find us on Twitch](https://www.twitch.tv/codudotco)
+
+**If you have any ideas or feedback, reply to this email.**
+
+Thanks, and stay awesome,
+
+Niall
+
+Founder @ [Codú](https://www.codu.co/?ref=newsletter)
