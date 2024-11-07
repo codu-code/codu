@@ -86,10 +86,12 @@ const Settings = ({ profile }: { profile: User }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Saved");
+      toast.success("Saved", { className: "toast-success" });
     }
     if (isError) {
-      toast.error("Something went wrong saving settings.");
+      toast.error("Something went wrong saving settings.", {
+        className: "toast-error",
+      });
     }
   }, [isError, isSuccess]);
 
