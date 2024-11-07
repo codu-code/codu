@@ -36,6 +36,12 @@ test.describe("Authenticated settings Page", () => {
     // Test that the input field can be filled with a valid value and saves it
     await inputField.fill('codu-rules');
     await page.locator('button[type="submit"]').click(); 
+    const toastError = page.locator('.toast-success');
+    await expect(toastError).toBeVisible();
+    await expect(toastError).toBeHidden();
+
+    // Reload the page and check that the input field has the correct value
+    await page.reload();
     await expect(inputField).toHaveValue('codu-rules');
   });
 });
