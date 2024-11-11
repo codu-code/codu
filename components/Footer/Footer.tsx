@@ -19,21 +19,25 @@ const navigation = {
   social: [
     {
       name: "Twitter",
+      customStyle: "hover:bg-twitter focus:bg-twitter",
       href: twitterUrl,
       icon: Twitter,
     },
     {
       name: "GitHub",
+      customStyle: "hover:bg-github focus:bg-github",
       href: githubUrl,
       icon: Github,
     },
     {
       name: "Discord",
+      customStyle: "hover:bg-discord focus:bg-discord",
       href: discordInviteUrl,
       icon: Discord,
     },
     {
       name: "Youtube",
+      customStyle: "hover:bg-youtube focus:bg-youtube",
       href: youtubeUrl,
       icon: Youtube,
     },
@@ -77,7 +81,7 @@ const Footer = () => {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`focus-style rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.name.toLowerCase()}`}
+              className={`focus-style rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.customStyle.toLowerCase()}`}
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
