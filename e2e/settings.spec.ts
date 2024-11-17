@@ -48,7 +48,7 @@ test.describe("Authenticated settings Page", () => {
     await page.goto("http://localhost:3000/settings");
 
     // Test to see if input is visible
-    await page.locator('input[id="location"]').isVisible();
+    await expect(page.locator('input[id="location"]')).toBeVisible();
 
     // Test to fill if value can be changed
     await page.fill('input[id="location"]', "New York");
@@ -70,6 +70,12 @@ test.describe("Authenticated settings Page", () => {
     // Test to see if change in location persists after submit and page reload
     await page.fill('input[id="location"]', "A fun place to visit.");
     await page.locator('button[type="submit"]').click();
+    await expect(page.locator('input[id="location"]')).toHaveValue(
+      "A fun place to visit.",
+    );
+
+    // Verify persistence after reload
+    await page.reload();
     await expect(page.locator('input[id="location"]')).toHaveValue(
       "A fun place to visit.",
     );
