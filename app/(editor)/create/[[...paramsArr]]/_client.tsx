@@ -37,6 +37,7 @@ import { uploadFile } from "@/utils/s3helpers";
 import { getUploadUrl } from "@/app/actions/getUploadUrl";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
+import { FormDataSchema } from "@/schema/post";
 
 const Create = ({ session }: { session: Session | null }) => {
   const params = useParams();
@@ -213,12 +214,17 @@ const Create = ({ session }: { session: Session | null }) => {
 
   const getFormData = () => {
     const data = getValues();
+
+    const sanitizedSeriesName = FormDataSchema.parse({
+      seriesName: data.seriesName,
+    });
+
     const formData = {
       ...data,
       tags,
       canonicalUrl: data.canonicalUrl || undefined,
       excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
-      seriesName: data.seriesName || undefined
+      ...sanitizedSeriesName
     };
     return formData;
   };

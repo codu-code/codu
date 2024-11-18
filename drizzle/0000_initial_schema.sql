@@ -21,8 +21,7 @@ CREATE TABLE IF NOT EXISTS "Post" (
 	"updatedAt" timestamp(3) with time zone NOT NULL,
 	"slug" text NOT NULL,
 	"userId" text NOT NULL,
-	"showComments" boolean DEFAULT true NOT NULL,
-	"seriesId" INTEGER
+	"showComments" boolean DEFAULT true NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "PostTag" (
@@ -184,14 +183,6 @@ CREATE TABLE IF NOT EXISTS "Membership" (
 	"createdAt" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "Series" (
-  "id" SERIAL PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "userId" text NOT NULL,
-  "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL
-);
---> statement-breakpoint
 
 CREATE UNIQUE INDEX IF NOT EXISTS "Post_id_key" ON "Post" ("id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "Post_slug_key" ON "Post" ("slug");--> statement-breakpoint
@@ -217,12 +208,6 @@ DO $$ BEGIN
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "Post" ADD CONSTRAINT "Post_seriesId_fkey" FOREIGN KEY ("seriesId") REFERENCES "public"."Series" ("id") ON DELETE SET NULL;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_User_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE cascade ON UPDATE cascade;

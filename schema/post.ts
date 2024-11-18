@@ -72,6 +72,10 @@ export const GetPostsSchema = z.object({
   tag: z.string().nullish(),
 });
 
+export const FormDataSchema = z.object({
+  seriesName: z.string().trim().optional()
+})
+
 export type SavePostInput = z.TypeOf<typeof SavePostSchema>;
 export type ConfirmPostInput = z.TypeOf<typeof ConfirmPostSchema>;
 
