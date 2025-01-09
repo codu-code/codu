@@ -46,7 +46,21 @@ export const metadata = {
   ],
   metadataBase: new URL("https://www.codu.co"),
   openGraph: {
-    images: "/images/og/home-og.png",
+    title: "Codú - The Web Developer Community",
+    description:
+      "A free network and community for web developers. Learn and grow together.",
+    url: "https://www.codu.co",
+    siteName: "Codú",
+    images: [
+      {
+        url: "https://www.codu.co/images/og/home-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Codú Community",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
   },
 };
 
