@@ -81,11 +81,11 @@ export default async function RootLayout({
       <CSPostHogProvider>
         <body className="h-full">
           <PostHogPageView />
-          <Toaster />
           <A11yProvider>
             <ProgressBar />
             <AuthProvider>
               <ThemeProvider>
+                <Toaster />
                 <TRPCReactProvider headers={headers()}>
                   <PromptProvider>{children}</PromptProvider>
                 </TRPCReactProvider>
