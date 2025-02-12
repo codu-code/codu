@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Shape and connect all the data
-  const data = [
+  const allRoutes = [
     {
       url: BASE_URL,
       lastModified: new Date(),
@@ -46,14 +46,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...routes,
     ...articles,
     ...users,
-  ];
+  ].filter((route) => !route.url.includes("/api/og")); // Filter out OG routes
 
   // Capture data as sitemap has been inconsistent and want to test on dev
   Sentry.captureMessage(
-    `${JSON.stringify(data)}; Routes Count = ${
+    `${JSON.stringify(allRoutes)}; Routes Count = ${
       routes.length
     }, Articles Count = ${articles.length}, Users Count = ${users.length}`,
   );
 
-  return data;
+  return allRoutes;
 }
