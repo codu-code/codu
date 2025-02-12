@@ -15,7 +15,8 @@ export default function robots(): MetadataRoute.Robots {
         "/notifications/",
         "/create/",
         "/my-posts/",
-        "/hub/", // This should be crawled when completed
+        "/hub/",
+        "/api/og",
       ],
     },
     sitemap: "https://www.codu.co/sitemap.xml",
