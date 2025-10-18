@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Sponsor Codú - And Reach More Developers!",
   description:
@@ -60,11 +62,13 @@ const Sponsorship = () => {
           <div className="mt-8 flow-root lg:mt-10">
             <div className="-ml-8 -mt-4 flex flex-wrap justify-between lg:-ml-4">
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <img
-                  className="my-auto h-16"
-                  src="/images/sponsors/harveynash.png"
-                  alt="StaticKit"
-                />
+                <Link href="/company/ninedots">
+                  <img
+                    className="my-auto h-16"
+                    src="/images/sponsors/ninedots.png"
+                    alt="StaticKit"
+                  />
+                </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
                 <img
