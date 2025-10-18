@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export interface Hotkey {
@@ -50,6 +50,9 @@ export const hotkeys: Record<string, Hotkey> = {
 export const useMarkdownHotkeys = (
   textareaRef: React.RefObject<HTMLTextAreaElement>,
 ) => {
+  const currentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const handlerRef = useRef<(e: KeyboardEvent) => void>();
+
   // Create a single callback for all hotkeys
   const handleHotkey = useCallback(
     (hotkey: Hotkey) => (e: KeyboardEvent) => {
@@ -150,12 +153,8 @@ export const useMarkdownHotkeys = (
     [textareaRef],
   );
 
-  // Use useEffect to bind event listeners directly to the textarea
   useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const keydownHandler = (e: KeyboardEvent) => {
+    handlerRef.current = (e: KeyboardEvent) => {
       // Check if it's a meta/ctrl key combination
       if (!e.metaKey && !e.ctrlKey) return;
 
@@ -170,11 +169,31 @@ export const useMarkdownHotkeys = (
         handleHotkey(matchingHotkey)(e);
       }
     };
+  }, [handleHotkey]);
 
-    textarea.addEventListener('keydown', keydownHandler);
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    
+    if (textarea === currentTextareaRef.current) return;
+    
+    // Clean up previous event listener
+    if (currentTextareaRef.current && handlerRef.current) {
+      currentTextareaRef.current.removeEventListener('keydown', handlerRef.current);
+    }
+    
+    // Set up new event listener if textarea exists
+    if (textarea && handlerRef.current) {
+      textarea.addEventListener('keydown', handlerRef.current);
+      currentTextareaRef.current = textarea;
+    } else {
+      currentTextareaRef.current = null;
+    }
 
     return () => {
-      textarea.removeEventListener('keydown', keydownHandler);
+      if (currentTextareaRef.current && handlerRef.current) {
+        currentTextareaRef.current.removeEventListener('keydown', handlerRef.current);
+        currentTextareaRef.current = null;
+      }
     };
-  }, [textareaRef, handleHotkey]);
+  });
 };
