@@ -24,11 +24,15 @@ import { Strong, Text } from "@/components/ui-components/text";
 import { Textarea } from "@/components/ui-components/textarea";
 import { saveJobsInput, saveJobsSchema } from "@/schema/job";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
+import { uploadFile } from "@/utils/s3helpers";
+import { getUploadUrl } from "@/app/actions/getUploadUrl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import * as Sentry from "@sentry/nextjs";
+import { toast } from "sonner";
 
 export default function Content() {
   const {
@@ -54,8 +58,70 @@ export default function Content() {
   const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const onSubmit: SubmitHandler<saveJobsInput> = (values) => {
-    console.log(values);
+    const formData = {
+      ...values,
+      companyLogo: imgUrl || undefined,
+    };
+    console.log(formData);
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (uploadStatus === "loading") {
+      return toast.info("Upload in progress, please wait...");
+    }
+
+    if (e.target.files && e.target.files.length > 0) {
+      setUploadStatus("loading");
+
+      const file = e.target.files[0];
+      const { size, type } = file;
+
+      if (size > 1048576) {
+        setUploadStatus("error");
+        return toast.error("File size too big (max 1MB).");
+      }
+
+      try {
+        const res = await getUploadUrl({
+          size,
+          type,
+          uploadType: "uploads",
+        });
+
+        const signedUrl = res?.data;
+
+        if (!signedUrl) {
+          setUploadStatus("error");
+          return toast.error(
+            "Something went wrong uploading the logo, please retry.",
+          );
+        }
+
+        const { fileLocation } = await uploadFile(signedUrl, file);
+        if (!fileLocation) {
+          setUploadStatus("error");
+          return toast.error(
+            "Something went wrong uploading the logo, please retry.",
+          );
+        }
+
+        setUploadStatus("success");
+        setImgUrl(fileLocation);
+        toast.success("Company logo uploaded successfully!");
+      } catch (error) {
+        setUploadStatus("error");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while uploading the logo.",
+        );
+        Sentry.captureException(error);
+      }
+    }
   };
   if (!flagEnabled) {
     notFound();
@@ -89,15 +155,16 @@ export default function Content() {
                 onClick={() => {
                   fileInputRef.current?.click();
                 }}
+                disabled={uploadStatus === "loading"}
               >
-                Change Logo
+                {uploadStatus === "loading" ? "Uploading..." : "Change Logo"}
               </Button>
               <Input
                 type="file"
                 id="file-input"
                 name="company-logo"
                 accept="image/png, image/gif, image/jpeg"
-                onChange={() => {}}
+                onChange={handleLogoUpload}
                 className="hidden"
                 ref={fileInputRef}
               />

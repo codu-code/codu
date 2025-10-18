@@ -23,6 +23,7 @@ export const saveJobsSchema = z.object({
     .url("Provide a valid url")
     .optional()
     .or(z.literal("")),
+  companyLogo: z.string().optional(),
   remote: z.boolean().optional().default(false),
   relocation: z.boolean().optional().default(false),
   visa_sponsorship: z.boolean().optional().default(false),
