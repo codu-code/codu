@@ -71,33 +71,40 @@ const Sponsorship = () => {
                 </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <img
-                  className="my-auto h-16"
-                  src="/images/sponsors/version1.png"
-                  alt="Version 1"
-                />
+                <Link href="https://www.version1.com/" target="_blank" rel = "noopener noreferrer" >
+                  <img
+                    className="my-auto h-16"
+                    src="/images/sponsors/version1.png"
+                    alt="Version 1"
+                  />
+                </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <img
-                  className="my-auto h-12"
-                  src="/images/sponsors/offerzen.png"
-                  alt="Mirage"
-                />
-              </div>
-
-              <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <img
-                  className="my-auto h-12"
-                  src="/images/sponsors/learnupon.png"
-                  alt="Transistor"
-                />
+                <Link href="https://www.offerzen.com/" target="_blank" rel="noopener noreferrer">
+                  <img
+                    className="my-auto h-12"
+                    src="/images/sponsors/offerzen.png"
+                    alt="Mirage"
+                  />
+                </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <img
-                  className="my-auto h-12"
-                  src="/images/sponsors/wework.png"
-                  alt="Workcation"
-                />
+                <Link href="https://www.learnupon.com/" target="_blank" rel="noopener noreferrer">
+                  <img
+                    className="my-auto h-12"
+                    src="/images/sponsors/learnupon.png"
+                    alt="Transistor"
+                  />
+                </Link>
+              </div>
+              <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
+                <Link rel="noopener noreferrer" href="https://www.wework.com/" target="_blank">
+                  <img
+                    className="my-auto h-12"
+                    src="/images/sponsors/wework.png"
+                    alt="Workcation"
+                  />
+                </Link>
               </div>
             </div>
           </div>
