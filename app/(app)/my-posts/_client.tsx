@@ -206,11 +206,11 @@ const MyPosts = () => {
                             <div className="dropdown-bg py-1">
                               <MenuItem>
                                 <Link
-                                  className="dropdown-item group flex items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                                  className="dropdown-item group flex items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:text-neutral-500"
                                   href={`/create/${id}`}
                                 >
                                   <PencilIcon
-                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
+                                    className="mr-3 h-5 w-5 text-neutral-500 group-hover:text-neutral-400"
                                     aria-hidden="true"
                                   />
                                   Edit
@@ -220,10 +220,10 @@ const MyPosts = () => {
                               <MenuItem>
                                 <button
                                   onClick={() => setSelectedArticleToDelete(id)}
-                                  className="dropdown-item group flex w-full items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                                  className="dropdown-item group flex w-full items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:text-neutral-500"
                                 >
                                   <TrashIcon
-                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-500"
+                                    className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-400"
                                     aria-hidden="true"
                                   />
                                   Delete
