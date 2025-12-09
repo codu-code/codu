@@ -5,19 +5,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { THEME_MODES } from "@/components/Theme/ThemeToggle/ThemeToggle";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+// Subscribe to nothing - this is just to detect client-side rendering
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export const PostAuthPage = (content: {
   heading: string;
   subHeading: string;
 }) => {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
   const { resolvedTheme } = useTheme();
-
-  // useEffect only happens on client not server
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // if on server dont render. needed to prevent a hydration mismatch error
   if (!mounted) return null;

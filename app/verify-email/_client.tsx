@@ -3,7 +3,7 @@
 import { Button } from "@headlessui/react";
 import { AlertCircle, CheckCircle, Loader } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 function Content() {
   const params = useSearchParams();
@@ -12,16 +12,14 @@ function Content() {
     "idle" | "pending" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
-  const [token, setToken] = useState<string | null>(null);
+  // Get token directly from params (no need for separate state)
+  const token = params.get("token");
+  const hasVerified = useRef(false);
 
   useEffect(() => {
-    const tokenParam = params.get("token");
-    if (tokenParam && !token) {
-      setToken(tokenParam);
-    }
-  }, [params, token]);
+    // Prevent double verification in strict mode
+    if (hasVerified.current) return;
 
-  useEffect(() => {
     const verifyEmail = async () => {
       if (!token) {
         setStatus("error");
@@ -30,6 +28,7 @@ function Content() {
         );
         return;
       }
+      hasVerified.current = true;
       setStatus("pending");
 
       try {
@@ -41,7 +40,7 @@ function Content() {
           setStatus("error");
         }
         setMessage(data.message);
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage(
           "An error occurred during verification. Please try again later.",

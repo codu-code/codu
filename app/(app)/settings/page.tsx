@@ -70,15 +70,18 @@ export default async function Page() {
     return notFound();
   }
 
+  // Fetch newsletter status with error handling
+  let newsletterStatus = existingUser.newsletter;
   try {
-    const newsletter = await isUserSubscribedToNewsletter(session.user.email);
-    const cleanedUser = {
-      ...existingUser,
-      newsletter,
-    };
-    return <Content profile={cleanedUser} />;
+    newsletterStatus = await isUserSubscribedToNewsletter(session.user.email);
   } catch (error) {
     Sentry.captureException(error);
-    return <Content profile={existingUser} />;
+    // Fall back to existing newsletter status
   }
+
+  const cleanedUser = {
+    ...existingUser,
+    newsletter: newsletterStatus,
+  };
+  return <Content profile={cleanedUser} />;
 }

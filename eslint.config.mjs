@@ -17,7 +17,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ["next.config.js", "**/lambdas/**/*.js", ".next/**", "node_modules/**"],
+    ignores: ["next.config.js", "**/lambdas/**/*.js", ".next/**", "node_modules/**", "cdk/**"],
   },
   ...nextConfig,
   ...compat.extends("prettier"),

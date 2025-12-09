@@ -1,40 +1,26 @@
-import type { Ref, ForwardRefRenderFunction } from "react";
-import React, { forwardRef } from "react";
+import type { ForwardRefRenderFunction } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import type { TextareaAutosizeProps } from "react-textarea-autosize";
 import TextareaAutosize from "react-textarea-autosize";
 
-interface TextareaAutosizeWrapperProps extends TextareaAutosizeProps {
-  inputRef?: Ref<HTMLTextAreaElement>;
-}
-
+// Simplified wrapper that only uses forwarded ref
 const TextareaAutosizeWrapper: ForwardRefRenderFunction<
   HTMLTextAreaElement,
-  TextareaAutosizeWrapperProps
+  TextareaAutosizeProps
 > = (props, ref) => {
-  const { inputRef, ...rest } = props;
+  const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
 
-  const combinedRef = (node: HTMLTextAreaElement | null) => {
-    if (ref) {
-      if (typeof ref === "function") {
-        ref(node);
-      } else {
-        (ref as React.MutableRefObject<HTMLTextAreaElement | null>).current =
-          node;
-      }
-    }
+  // Use useImperativeHandle to safely expose the ref
+  useImperativeHandle(ref, () => internalRef.current as HTMLTextAreaElement, []);
 
-    if (inputRef) {
-      if (typeof inputRef === "function") {
-        inputRef(node);
-      } else {
-        (
-          inputRef as React.MutableRefObject<HTMLTextAreaElement | null>
-        ).current = node;
-      }
-    }
-  };
-
-  return <TextareaAutosize ref={combinedRef} {...rest} />;
+  return (
+    <TextareaAutosize
+      ref={(node) => {
+        internalRef.current = node;
+      }}
+      {...props}
+    />
+  );
 };
 
 export default forwardRef(TextareaAutosizeWrapper);

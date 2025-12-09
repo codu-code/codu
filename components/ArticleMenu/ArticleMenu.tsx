@@ -6,7 +6,7 @@ import {
   PopoverPanel,
   Transition,
 } from "@headlessui/react";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 
 import { api } from "@/server/trpc/react";
 
@@ -19,11 +19,6 @@ import copy from "copy-to-clipboard";
 import { type Session } from "next-auth";
 import { signIn } from "next-auth/react";
 import { ReportModal } from "../ReportModal/ReportModal";
-
-interface CopyToClipboardOption {
-  label: string;
-  href: string;
-}
 
 interface Props {
   session: Session | null;
@@ -41,25 +36,23 @@ const ArticleMenu = ({
   postUrl,
 }: Props) => {
   const [copied, setCopied] = useState<boolean>(false);
-  const [copyToClipboard, setCopyToClipboard] = useState<CopyToClipboardOption>(
-    {
-      label: "",
-      href: "",
-    },
+
+  // Compute label from copied state (no side effect needed)
+  const label = useMemo(
+    () => (copied ? "Copied!" : "Copy to clipboard"),
+    [copied],
   );
 
-  const { label, href } = copyToClipboard;
+  // Get href on client side only
+  const href = typeof window !== "undefined" ? window.location.href : "";
 
   const { data, refetch } = api.post.sidebarData.useQuery({
     id: postId,
   });
 
   useEffect(() => {
-    setCopyToClipboard({
-      label: copied ? "Copied!" : "Copy to clipboard",
-      href: location.href,
-    });
-    const to = setTimeout(setCopied, 1000, false);
+    if (!copied) return;
+    const to = setTimeout(() => setCopied(false), 1000);
     return () => clearTimeout(to);
   }, [copied]);
 

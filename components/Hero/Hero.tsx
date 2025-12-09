@@ -140,14 +140,15 @@ const NightSky = () => {
     { x: 7, y: 37 },
   ];
 
-  const seededRandom = (function () {
-    const seed = 12345; // You can change this seed to get a different, but consistent, pattern
+  // Create a seeded random function (pure - based on index)
+  const seededRandom = (index: number) => {
+    const seed = 12345;
     let state = seed;
-    return function () {
+    for (let i = 0; i <= index; i++) {
       state = (state * 1664525 + 1013904223) % 4294967296;
-      return state / 4294967296;
-    };
-  })();
+    }
+    return state / 4294967296;
+  };
 
   const generateStars = () => {
     return starPositions.map((pos, i) => (
@@ -155,10 +156,10 @@ const NightSky = () => {
         key={i}
         cx={pos.x}
         cy={pos.y}
-        r={seededRandom() * 0.15 + 0.05}
+        r={seededRandom(i * 3) * 0.15 + 0.05}
         fill="white"
-        opacity={seededRandom() * 0.5 + 0.3}
-        className={seededRandom() > 0.7 ? "twinkle" : ""}
+        opacity={seededRandom(i * 3 + 1) * 0.5 + 0.3}
+        className={seededRandom(i * 3 + 2) > 0.7 ? "twinkle" : ""}
       />
     ));
   };
@@ -176,14 +177,16 @@ const NightSky = () => {
       { x: 10, y: 40 },
       { x: 90, y: 10 },
     ];
+    // Start index after regular stars (40 stars * 3 properties each = 120)
+    const baseIndex = 120;
     return animatedStarPositions.map((pos, i) => (
       <circle
         key={`animated-${i}`}
         cx={pos.x}
         cy={pos.y}
-        r={seededRandom() * 0.2 + 0.1}
+        r={seededRandom(baseIndex + i * 2) * 0.2 + 0.1}
         fill="white"
-        opacity={seededRandom() * 0.5 + 0.5}
+        opacity={seededRandom(baseIndex + i * 2 + 1) * 0.5 + 0.5}
         className={`gentle-move${(i % 3) + 1}`}
       />
     ));
