@@ -40,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error("ADMIN_EMAIL not set");
           }
           await nodemailerSesTransporter.sendMail({
-            to: `Niall (Codú) ${identifier}`,
+            to: identifier,
             from: process.env.ADMIN_EMAIL,
             subject: `Sign in to Codú 🚀`,
             text: `Sign in to Codú 🚀\n\n`,
@@ -68,10 +68,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async signIn({ user }) {
-      const userIsBanned = await db.query.banned_users.findFirst({
-        where: (banned_users, { eq }) => eq(banned_users.userId, user.id),
-      });
-      return !userIsBanned;
+      try {
+        const userIsBanned = await db.query.banned_users.findFirst({
+          where: (banned_users, { eq }) => eq(banned_users.userId, user.id),
+        });
+        return !userIsBanned;
+      } catch (error) {
+        console.error("Error checking banned users:", error);
+        Sentry.captureException(error);
+        // Fail closed: reject sign-in on error to maintain security
+        return false;
+      }
     },
   },
   events: {
@@ -99,7 +106,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           recipient: email,
           htmlMessage,
           subject:
-            "Thanks for Joining Codú 🎉 + Your Excluisve Community Invite.",
+            "Thanks for Joining Codú 🎉 + Your Exclusive Community Invite.",
         });
       } catch (error) {
         console.error("Failed to send welcome email:", error);
