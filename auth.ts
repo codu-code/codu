@@ -84,8 +84,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return;
       }
       const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
+
+      // Subscribe to newsletter (separate try/catch so it doesn't block welcome email)
       try {
         await manageNewsletterSubscription(email, "subscribe");
+      } catch (error) {
+        console.error("Failed to subscribe user to newsletter:", error);
+        Sentry.captureException(error);
+      }
+
+      // Send welcome email
+      try {
         await sendEmail({
           recipient: email,
           htmlMessage,
@@ -93,7 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             "Thanks for Joining Codú 🎉 + Your Excluisve Community Invite.",
         });
       } catch (error) {
-        console.log("Error in createUser event:", error);
+        console.error("Failed to send welcome email:", error);
         Sentry.captureException(error);
       }
     },
