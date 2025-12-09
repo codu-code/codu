@@ -1,14 +1,15 @@
 import Moveable from "react-moveable";
 import { useEffect, useState } from "react";
+import type { Editor } from "@tiptap/react";
 
-export const MediaResizer = ({ editor }) => {
-  const [moveableTarget, setMoveableTarget] = useState(null);
+export const MediaResizer = ({ editor }: { editor: Editor }) => {
+  const [moveableTarget, setMoveableTarget] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const handleSelection = () => {
       const selectedNode = document.querySelector(".ProseMirror-selectednode");
       if (selectedNode && selectedNode.tagName === "IMG") {
-        setMoveableTarget(selectedNode);
+        setMoveableTarget(selectedNode as HTMLImageElement);
       } else {
         setMoveableTarget(null);
       }
@@ -25,7 +26,7 @@ export const MediaResizer = ({ editor }) => {
     const selectedNode = moveableTarget;
     const selection = editor.state.selection;
     if (selectedNode) {
-      editor.commands.setImage({
+      (editor.commands as { setImage: (options: { src: string; width: number; height: number }) => boolean }).setImage({
         src: selectedNode.src,
         width: Number(selectedNode.style.width.replace("px", "")),
         height: Number(selectedNode.style.height.replace("px", "")),

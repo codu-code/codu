@@ -1,6 +1,8 @@
 import * as React from "react";
 
-export function CodeSandbox(props: React.ReactPropTypes) {
+type CodeSandboxProps = React.IframeHTMLAttributes<HTMLIFrameElement>;
+
+export function CodeSandbox(props: CodeSandboxProps) {
   return (
     <div style={{ marginInline: "16px 0px" }}>
       <iframe

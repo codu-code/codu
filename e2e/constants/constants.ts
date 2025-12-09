@@ -10,3 +10,8 @@ export const E2E_USER_ONE_SESSION_ID = "df8a11f2-f20a-43d6-80a0-a213f1efedc1";
 export const E2E_USER_TWO_EMAIL = "e2e-user-two@codu.co";
 export const E2E_USER_TWO_ID = "a15a104a-0e34-4101-8800-ed25c9231345";
 export const E2E_USER_TWO_SESSION_ID = "10134766-bc6c-4b52-83d7-46ec0a4cb95d";
+
+// Fixed post IDs to ensure consistent references for comments
+export const E2E_PUBLISHED_POST_ID = "e2epubl1";
+export const E2E_SCHEDULED_POST_ID = "e2esched";
+export const E2E_DRAFT_POST_ID = "e2edraft";

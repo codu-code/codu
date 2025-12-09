@@ -7,9 +7,10 @@ export const metadata = {
     "Explore our community sponsors. Ninedots Recruitment connects top talent with leading companies in the tech industry.",
 };
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   const { slug } = params;
 
   const company = companies.find((item) => item.slug === slug.toLowerCase());

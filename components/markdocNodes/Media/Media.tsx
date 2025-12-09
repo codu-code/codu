@@ -12,7 +12,7 @@ type MediaProps = {
   width?: number | string;
   height?: number | string;
   alt?: string;
-} & React.ReactPropTypes;
+} & React.IframeHTMLAttributes<HTMLIFrameElement>;
 
 const getYoutubeRegex = () =>
   /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?=.*v=\w+)|embed\/)|youtu\.be\/)/i;

@@ -48,10 +48,10 @@ export const hotkeys: Record<string, Hotkey> = {
 };
 
 export const useMarkdownHotkeys = (
-  textareaRef: React.RefObject<HTMLTextAreaElement>,
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>,
 ) => {
   const currentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const handlerRef = useRef<(e: KeyboardEvent) => void>();
+  const handlerRef = useRef<((e: KeyboardEvent) => void) | undefined>(undefined);
 
   // Create a single callback for all hotkeys
   const handleHotkey = useCallback(

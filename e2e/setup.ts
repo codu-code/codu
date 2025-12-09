@@ -10,6 +10,9 @@ import {
   E2E_USER_TWO_EMAIL,
   E2E_USER_TWO_ID,
   E2E_USER_TWO_SESSION_ID,
+  E2E_PUBLISHED_POST_ID,
+  E2E_SCHEDULED_POST_ID,
+  E2E_DRAFT_POST_ID,
 } from "./constants";
 import { eq } from "drizzle-orm";
 import type { Article } from "@/types/types";
@@ -26,9 +29,38 @@ export const setup = async () => {
     authorId: string,
     commenterId: string,
   ) => {
-    const publishedPostId = nanoid(8);
-    const scheduledPostId = nanoid(8);
-    const draftPostId = nanoid(8);
+    // Use fixed IDs for posts that need to be referenced (e.g., by comments)
+    const publishedPostId = E2E_PUBLISHED_POST_ID;
+    const scheduledPostId = E2E_SCHEDULED_POST_ID;
+    const draftPostId = E2E_DRAFT_POST_ID;
+
+    // Clean up any old E2E test posts by slug (in case they have different IDs)
+    const e2eSlugs = [
+      "e2e-test-slug-published",
+      "e2e-test-slug-scheduled",
+      "e2e-test-slug-draft",
+      "e2e-nextjs-best-practices",
+      "e2e-understanding-html5-semantics",
+      "e2e-javascript-es6-features",
+      "e2e-css-grid-vs-flexbox",
+      "e2e-react-hooks-explained",
+      "e2e-web-accessibility-fundamentals",
+    ];
+
+    for (const slug of e2eSlugs) {
+      // First delete comments for posts with this slug
+      const postsToDelete = await db
+        .select({ id: post.id })
+        .from(post)
+        .where(eq(post.slug, slug));
+
+      for (const p of postsToDelete) {
+        await db.delete(comment).where(eq(comment.postId, p.id));
+      }
+
+      // Then delete the posts
+      await db.delete(post).where(eq(post.slug, slug));
+    }
 
     const now = new Date().toISOString();
     const scheduled = new Date(

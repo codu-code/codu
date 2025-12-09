@@ -47,7 +47,8 @@ const Create = () => {
 
   useEffect(() => {
     _setUnsaved(hasUnsavedChanges);
-  }, [hasUnsavedChanges, _setUnsaved]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasUnsavedChanges]);
 
   return (
     <>
@@ -197,7 +198,7 @@ const Create = () => {
             </div>
           </div>
         </Transition>
-        {dataStatus === "loading" && postId && (
+        {dataStatus === "pending" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
               <div className="loader-dots relative mt-2 block h-5 w-20">
@@ -236,7 +237,7 @@ const Create = () => {
 
             <div className="flex items-center justify-between">
               <div>
-                {saveStatus === "loading" && (
+                {saveStatus === "pending" && (
                   <p className="text-xs lg:text-sm">Auto-saving...</p>
                 )}
                 {saveStatus === "error" && savedTime && (

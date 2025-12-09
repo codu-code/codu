@@ -20,28 +20,22 @@ const REMOTE_PATTERNS = [
 }));
 
 const config = {
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ["@svgr/webpack"],
-    });
-    return config;
+  // Turbopack configuration for SVGR (replaces webpack config)
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
   },
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   images: {
     remotePatterns: REMOTE_PATTERNS,
   },
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
-  typescript: {
-    // Temporary to check pipelines due to weird error I can only get on CodePipeline
-    ignoreBuildErrors: true,
-  },
-  experimental: {
-    instrumentationHook: true,
-  },
+  // Note: i18n is not supported in App Router - use middleware for i18n instead
+  // Note: experimental.instrumentationHook is now auto-detected in Next.js 16
+  // Note: typescript.ignoreBuildErrors removed - fixing TS errors as part of upgrade
 };
 
 // Injected content via Sentry wizard below

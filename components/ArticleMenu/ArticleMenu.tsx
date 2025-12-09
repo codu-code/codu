@@ -77,7 +77,7 @@ const ArticleMenu = ({
     });
 
   const likePost = async (postId: string, setLiked = true) => {
-    if (likeStatus === "loading") return;
+    if (likeStatus === "pending") return;
     try {
       await like({ postId, setLiked });
     } catch (err) {
@@ -87,7 +87,7 @@ const ArticleMenu = ({
   };
 
   const bookmarkPost = async (postId: string, setBookmarked = true) => {
-    if (bookmarkStatus === "loading") return;
+    if (bookmarkStatus === "pending") return;
     try {
       await bookmark({ postId, setBookmarked });
     } catch (err) {

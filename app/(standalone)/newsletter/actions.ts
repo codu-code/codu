@@ -4,11 +4,8 @@ import { z } from "zod";
 
 const FormDataSchema = z.object({
   email: z
-    .string({
-      required_error: "Email is required",
-      invalid_type_error: "Must be a valid email address",
-    })
-    .email(),
+    .string({ error: "Email is required" })
+    .email({ error: "Must be a valid email address" }),
 });
 
 //@TODO - Add sentry to eat errors

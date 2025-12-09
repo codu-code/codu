@@ -9,7 +9,7 @@ function Content() {
   const params = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
+    "idle" | "pending" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
   const [token, setToken] = useState<string | null>(null);
@@ -30,7 +30,7 @@ function Content() {
         );
         return;
       }
-      setStatus("loading");
+      setStatus("pending");
 
       try {
         const res = await fetch(`/api/verify-email?token=${token}`);
@@ -60,7 +60,7 @@ function Content() {
           <div className="text-gray-400">Verifying your email address</div>
         </div>
         <div className="min-h-12 p-6 pt-0">
-          {status === "loading" && (
+          {status === "pending" && (
             <div className="flex flex-col items-center justify-center py-4">
               <Loader className="text-primary h-4 w-4 animate-spin" />
               <p className="text-muted-foreground mt-2 text-sm">

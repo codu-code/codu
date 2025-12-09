@@ -104,7 +104,7 @@ const ArticlesPage = () => {
                   Something went wrong... Please refresh your page.
                 </div>
               )}
-              {status === "loading" &&
+              {status === "pending" &&
                 Children.toArray(
                   Array.from({ length: 7 }, () => {
                     return <ArticleLoading />;
@@ -164,7 +164,7 @@ const ArticlesPage = () => {
               Popular topics
             </h3>
             <div className="flex flex-wrap gap-2">
-              {tagsStatus === "loading" && <PopularTagsLoading />}
+              {tagsStatus === "pending" && <PopularTagsLoading />}
               {tagsStatus === "success" &&
                 tagsData.data.map(({ title }) => (
                   <Link

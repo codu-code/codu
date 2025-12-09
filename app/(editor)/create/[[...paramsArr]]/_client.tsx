@@ -57,7 +57,7 @@ const Create = ({ session }: { session: Session | null }) => {
   const [copied, setCopied] = useState<boolean>(false);
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<
-    "loading" | "error" | "success" | "default"
+    "pending" | "error" | "success" | "default"
   >("default");
   const [postStatus, setPostStatus] = useState<PostStatus | null>(null);
 
@@ -65,16 +65,16 @@ const Create = ({ session }: { session: Session | null }) => {
     usePrompt();
 
   useEffect(() => {
-    _setUnsaved();
+    _setUnsaved(unsavedChanges);
   }, [unsavedChanges, _setUnsaved]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (uploadStatus === "loading") {
+    if (uploadStatus === "pending") {
       return toast.info("Upload in progress, please wait...");
     }
     if (e.target.files && e.target.files.length > 0) {
       setUploadUrl(null);
-      setUploadStatus("loading");
+      setUploadStatus("pending");
 
       const file = e.target.files[0];
       const { size, type } = file;
@@ -240,9 +240,9 @@ const Create = ({ session }: { session: Session | null }) => {
   };
 
   const hasLoadingState =
-    publishStatus === "loading" ||
-    saveStatus === "loading" ||
-    dataStatus === "loading";
+    publishStatus === "pending" ||
+    saveStatus === "pending" ||
+    dataStatus === "pending";
 
   const currentPostStatus = data?.published
     ? getPostStatus(new Date(data.published))
@@ -624,7 +624,7 @@ const Create = ({ session }: { session: Session | null }) => {
             </div>
           </div>
         </Transition>
-        {dataStatus === "loading" && postId && (
+        {dataStatus === "pending" && postId && (
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
               <div className="loader-dots relative mt-2 block h-5 w-20">
@@ -700,9 +700,9 @@ const Create = ({ session }: { session: Session | null }) => {
                           <div className="mb-4 ml-2 flex items-center gap-2">
                             <label
                               htmlFor="file-input"
-                              className={`flex flex-row items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "loading" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500 font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"} `}
+                              className={`flex flex-row items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "pending" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500 font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"} `}
                             >
-                              {uploadStatus === "loading" ? (
+                              {uploadStatus === "pending" ? (
                                 <LoaderCircle
                                   height={16}
                                   width={16}
@@ -723,7 +723,7 @@ const Create = ({ session }: { session: Session | null }) => {
                               accept="image/*"
                               className="hidden"
                               onChange={handleUpload}
-                              disabled={uploadStatus === "loading"}
+                              disabled={uploadStatus === "pending"}
                             />
 
                             {uploadStatus === "success" && (

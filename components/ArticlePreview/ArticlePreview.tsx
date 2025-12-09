@@ -39,7 +39,7 @@ type Props = {
   menuOptions?: Array<ButtonOptions | LinkOptions>;
   showBookmark?: boolean;
   bookmarkedInitialState?: boolean;
-  likes: number;
+  likes?: number;
 };
 
 const ArticlePreview: NextPage<Props> = ({
@@ -86,7 +86,7 @@ const ArticlePreview: NextPage<Props> = ({
     });
 
   const bookmarkPost = async (postId: string, setBookmarked = true) => {
-    if (bookmarkStatus === "loading") return;
+    if (bookmarkStatus === "pending") return;
     try {
       if (!session) {
         signIn();

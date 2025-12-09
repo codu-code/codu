@@ -41,7 +41,7 @@ type User = Pick<
 >;
 
 type ProfilePhoto = {
-  status: "success" | "error" | "loading" | "idle";
+  status: "pending" | "error" | "success" | "idle";
   url: string;
 };
 
@@ -105,7 +105,7 @@ const Settings = ({ profile }: { profile: User }) => {
   };
 
   const uploadToUrl = async (signedUrl: string, file: File) => {
-    setProfilePhoto({ status: "loading", url: "" });
+    setProfilePhoto({ status: "pending", url: "" });
 
     if (!file) {
       setProfilePhoto({ status: "error", url: "" });
@@ -204,7 +204,7 @@ const Settings = ({ profile }: { profile: User }) => {
               square
               src={
                 profilePhoto.status === "error" ||
-                profilePhoto.status === "loading"
+                profilePhoto.status === "pending"
                   ? undefined
                   : `${profilePhoto.url}`
               }

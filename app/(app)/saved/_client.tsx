@@ -32,7 +32,7 @@ const SavedPosts = () => {
     <div className="relative mx-4 max-w-2xl sm:mx-auto">
       <PageHeading>Saved items</PageHeading>
       <div>
-        {bookmarkStatus === "loading" &&
+        {bookmarkStatus === "pending" &&
           Children.toArray(
             Array.from({ length: 7 }, () => {
               return <ArticleLoading />;

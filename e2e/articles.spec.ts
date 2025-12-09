@@ -301,8 +301,9 @@ test.describe("Authenticated Articles Page", () => {
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
     ).toBeVisible();
+    // There's 1 comment created by the test setup
     await expect(
-      page.getByRole("heading", { name: "Discussion (0)" }),
+      page.getByRole("heading", { name: "Discussion (1)" }),
     ).toBeVisible();
     await expect(page.getByLabel("like-trigger")).toBeVisible();
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();

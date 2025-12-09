@@ -38,14 +38,14 @@ export type useCreatePageReturnType = {
   debouncedValue: string;
   hasContent: boolean;
   isDisabled: boolean;
-  onSubmit: (data: SavePostInput) => Promise<string | void>;
+  onSubmit: (data: SavePostInput) => Promise<string | number | void>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDelete: (tag: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   handleOpenDialog: (res: string) => void;
   data: any;
   hasLoadingState: boolean;
-  dataStatus: "error" | "loading" | "success";
+  dataStatus: "pending" | "error" | "success";
   title: string;
   body: string;
   saveStatus: string;
@@ -123,20 +123,24 @@ function useCreatePage({
 
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
-  const { data, status: dataStatus } = api.post.editDraft.useQuery(
+  const { data, status: dataStatus, error: dataError } = api.post.editDraft.useQuery(
     { id: postId },
     {
-      onError() {
-        toast.error(
-          "Something went wrong fetching your draft, refresh your page or you may lose data",
-          {
-            duration: 5000,
-          },
-        );
-      },
       enabled: !!postId && shouldRefetch,
     },
   );
+
+  // Handle query error with useEffect (onError removed in React Query v5)
+  useEffect(() => {
+    if (dataError) {
+      toast.error(
+        "Something went wrong fetching your draft, refresh your page or you may lose data",
+        {
+          duration: 5000,
+        },
+      );
+    }
+  }, [dataError]);
 
   useEffect(() => {
     if (shouldRefetch) {
@@ -170,9 +174,9 @@ function useCreatePage({
   };
 
   const hasLoadingState =
-    publishStatus === "loading" ||
-    saveStatus === "loading" ||
-    dataStatus === "loading";
+    publishStatus === "pending" ||
+    saveStatus === "pending" ||
+    dataStatus === "pending";
 
   const published = !!data?.published || false;
 

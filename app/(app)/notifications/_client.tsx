@@ -89,13 +89,13 @@ const Notifications = () => {
           {status === "error" && (
             <div>Something went wrong... Please refresh your page.</div>
           )}
-          {status === "loading" &&
+          {status === "pending" &&
             Children.toArray(
               Array.from({ length: 7 }, () => {
                 return <Placeholder />;
               }),
             )}
-          {status !== "loading" && noNotifications && (
+          {status !== "pending" && noNotifications && (
             <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               No new notifications. ✅{" "}
             </p>

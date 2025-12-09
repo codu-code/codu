@@ -34,11 +34,12 @@ const insertCustomTag = (shortcut: string, textarea: HTMLTextAreaElement) => {
 };
 
 export const useMarkdownShortcuts = (
-  textareaRef: RefObject<HTMLTextAreaElement>,
+  textareaRef: RefObject<HTMLTextAreaElement | null>,
 ) => {
   const handleShortcut = useCallback(
     (e: KeyboardEvent) => {
       const textarea = textareaRef.current;
+      if (!textarea) return;
       const value = textarea.value;
       const startPos = textarea.selectionStart;
 
