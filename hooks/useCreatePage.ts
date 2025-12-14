@@ -123,7 +123,11 @@ function useCreatePage({
 
   // TODO get rid of this for standard get post
   // Should be allowed get draft post through regular mechanism if you own it
-  const { data, status: dataStatus, error: dataError } = api.post.editDraft.useQuery(
+  const {
+    data,
+    status: dataStatus,
+    error: dataError,
+  } = api.post.editDraft.useQuery(
     { id: postId },
     {
       enabled: !!postId && shouldRefetch,

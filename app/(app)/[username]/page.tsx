@@ -53,11 +53,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page(
-  props: {
-    params: Promise<{ username: string }>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{ username: string }>;
+}) {
   const params = await props.params;
   const username = params?.username;
 

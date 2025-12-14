@@ -439,10 +439,14 @@ function SearchDialog({
                     inputElement: null,
                   })}
                   onSubmit={(e) => {
-                    autocomplete.getFormProps({ inputElement: inputRef.current }).onSubmit?.(e);
+                    autocomplete
+                      .getFormProps({ inputElement: inputRef.current })
+                      .onSubmit?.(e);
                   }}
                   onReset={(e) => {
-                    autocomplete.getFormProps({ inputElement: inputRef.current }).onReset?.(e);
+                    autocomplete
+                      .getFormProps({ inputElement: inputRef.current })
+                      .onReset?.(e);
                   }}
                 >
                   <SearchInput

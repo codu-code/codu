@@ -30,130 +30,124 @@ export async function GET(request: Request) {
     ).then((res) => res.arrayBuffer());
 
     return new ImageResponse(
-      (
-        <div
-          tw="flex flex-col h-full w-full"
-          style={{
-            fontFamily: "'Lato'",
-            backgroundColor: "#1d1b36",
-            backgroundImage: `
+      <div
+        tw="flex flex-col h-full w-full"
+        style={{
+          fontFamily: "'Lato'",
+          backgroundColor: "#1d1b36",
+          backgroundImage: `
               url('${origin}/images/og/noise.png'),
               radial-gradient(circle at top left, rgba(255, 255, 255, 0.15), transparent 40%),
               radial-gradient(circle at top right, rgba(255, 255, 255, 0.15), transparent 40%)
             `,
-            backgroundRepeat: "repeat, no-repeat, no-repeat",
-            backgroundSize: "100px 100px, 100% 100%, 100% 100%",
+          backgroundRepeat: "repeat, no-repeat, no-repeat",
+          backgroundSize: "100px 100px, 100% 100%, 100% 100%",
+        }}
+      >
+        <Waves
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width,
+            height,
           }}
-        >
-          <Waves
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width,
-              height,
-            }}
-          />
-          <Stars
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width,
-              height,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              top: "50px",
-              left: 0,
-              right: 0,
-              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "50px",
-              left: 0,
-              right: 0,
-              borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: "50px",
-              top: 0,
-              bottom: 0,
-              width: "40px",
-              borderLeft: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              right: "50px",
-              top: 0,
-              bottom: 0,
-              width: "40px",
-              borderRight: "1px solid rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <img
-            alt="planet"
-            tw="h-[528px] w-[528px] absolute right-[-170px] top-[-170px]"
-            src={`${origin}/images/og/planet.png`}
-          />
-          {/* Main content */}
-          <div tw="flex flex-col h-full w-full px-28 py-28">
-            <div tw="flex flex-grow">
-              <img
-                alt="Codu Logo"
-                tw="h-10"
-                src={`${origin}/images/codu.png`}
-              />
+        />
+        <Stars
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width,
+            height,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: "50px",
+            left: 0,
+            right: 0,
+            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: "50px",
+            left: 0,
+            right: 0,
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: "50px",
+            top: 0,
+            bottom: 0,
+            width: "40px",
+            borderLeft: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: "50px",
+            top: 0,
+            bottom: 0,
+            width: "40px",
+            borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        />
+        <img
+          alt="planet"
+          tw="h-[528px] w-[528px] absolute right-[-170px] top-[-170px]"
+          src={`${origin}/images/og/planet.png`}
+        />
+        {/* Main content */}
+        <div tw="flex flex-col h-full w-full px-28 py-28">
+          <div tw="flex flex-grow">
+            <img alt="Codu Logo" tw="h-10" src={`${origin}/images/codu.png`} />
+          </div>
+          <div tw="flex flex-col">
+            <div
+              tw="mb-8 font-bold"
+              style={{
+                color: "white",
+                fontSize: "46px",
+                lineHeight: "1.2",
+                letterSpacing: "-0.025em",
+                fontFamily: "Lato-Bold",
+                display: "-webkit-box",
+                WebkitLineClamp: "3",
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                paddingBottom: "0.1em",
+              }}
+            >
+              {title}
             </div>
-            <div tw="flex flex-col">
-              <div
-                tw="mb-8 font-bold"
-                style={{
-                  color: "white",
-                  fontSize: "46px",
-                  lineHeight: "1.2",
-                  letterSpacing: "-0.025em",
-                  fontFamily: "Lato-Bold",
-                  display: "-webkit-box",
-                  WebkitLineClamp: "3",
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  paddingBottom: "0.1em",
-                }}
-              >
-                {title}
-              </div>
-              <div tw="flex items-center justify-between">
-                <div tw="flex flex-col">
-                  <div
-                    tw="flex text-2xl text-neutral-100"
-                    style={{ paddingBottom: "0.1em" }}
-                  >
-                    {author}
-                  </div>
-                  <div
-                    tw="text-xl text-neutral-400"
-                    style={{ paddingBottom: "0.1em" }}
-                  >
-                    {`${formatDate(date)} · ${readTime} min read`}
-                  </div>
+            <div tw="flex items-center justify-between">
+              <div tw="flex flex-col">
+                <div
+                  tw="flex text-2xl text-neutral-100"
+                  style={{ paddingBottom: "0.1em" }}
+                >
+                  {author}
+                </div>
+                <div
+                  tw="text-xl text-neutral-400"
+                  style={{ paddingBottom: "0.1em" }}
+                >
+                  {`${formatDate(date)} · ${readTime} min read`}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      ),
+      </div>,
       {
         fonts: [
           {

@@ -71,7 +71,11 @@ const Sponsorship = () => {
                 </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <Link href="https://www.version1.com/" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://www.version1.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <img
                     className="my-auto h-16"
                     src="/images/sponsors/version1.png"
@@ -80,7 +84,11 @@ const Sponsorship = () => {
                 </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <Link href="https://www.offerzen.com/" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://www.offerzen.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <img
                     className="my-auto h-12"
                     src="/images/sponsors/offerzen.png"
@@ -89,7 +97,11 @@ const Sponsorship = () => {
                 </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <Link href="https://www.learnupon.com/" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://www.learnupon.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <img
                     className="my-auto h-12"
                     src="/images/sponsors/learnupon.png"
@@ -98,7 +110,11 @@ const Sponsorship = () => {
                 </Link>
               </div>
               <div className="ml-8 mt-4 flex flex-shrink-0 flex-grow lg:ml-4 lg:flex-grow-0">
-                <Link rel="noopener noreferrer" href="https://www.wework.com/" target="_blank">
+                <Link
+                  rel="noopener noreferrer"
+                  href="https://www.wework.com/"
+                  target="_blank"
+                >
                   <img
                     className="my-auto h-12"
                     src="/images/sponsors/wework.png"

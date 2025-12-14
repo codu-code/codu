@@ -11,7 +11,11 @@ const TextareaAutosizeWrapper: ForwardRefRenderFunction<
   const internalRef = React.useRef<HTMLTextAreaElement | null>(null);
 
   // Use useImperativeHandle to safely expose the ref
-  useImperativeHandle(ref, () => internalRef.current as HTMLTextAreaElement, []);
+  useImperativeHandle(
+    ref,
+    () => internalRef.current as HTMLTextAreaElement,
+    [],
+  );
 
   return (
     <TextareaAutosize
