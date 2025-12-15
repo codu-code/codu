@@ -768,7 +768,12 @@ const Create = ({ session }: { session: Session | null }) => {
                               minRows={25}
                               id="article-content"
                               {...register("body")}
-                              inputRef={textareaRef}
+                              ref={(node: HTMLTextAreaElement | null) => {
+                                // Merge refs: update textareaRef for hotkeys/shortcuts
+                                textareaRef.current = node;
+                                // Also call the register ref
+                                register("body").ref(node);
+                              }}
                             />
                           </div>
                         </div>
