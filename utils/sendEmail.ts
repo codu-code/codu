@@ -1,11 +1,10 @@
 import nodemailer from "nodemailer";
-import * as aws from "@aws-sdk/client-ses";
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { z } from "zod";
 
 const hasAccessKeys = process.env.ACCESS_KEY && process.env.SECRET_KEY;
 
-const ses = new aws.SES({
-  apiVersion: "2010-12-01",
+const sesClient = new SESv2Client({
   region: "eu-west-1",
   ...(hasAccessKeys
     ? {
@@ -19,7 +18,7 @@ const ses = new aws.SES({
 
 // create Nodemailer SES transporter
 export const nodemailerSesTransporter = nodemailer.createTransport({
-  SES: { ses, aws },
+  SES: { sesClient, SendEmailCommand },
 });
 
 interface MailConfig {

@@ -6,11 +6,11 @@ import type { EditorView } from "@tiptap/pm/view";
 
 // @TODO fix red squigly bois
 
-const uploadKey = new PluginKey("upload-image");
+const uploadKey = new PluginKey<DecorationSet>("upload-image");
 
 const UploadImagesPlugin = () =>
   new Plugin({
-    key: uploadKey,
+    key: uploadKey as unknown as PluginKey,
     state: {
       init() {
         return DecorationSet.empty;
@@ -18,7 +18,8 @@ const UploadImagesPlugin = () =>
       apply(tr, set) {
         set = set.map(tr.mapping, tr.doc);
         // See if the transaction adds or removes any placeholders
-        const action = tr.getMeta(this);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const action = tr.getMeta(uploadKey as any);
         if (action && action.add) {
           const { id, pos, src } = action.add;
 
@@ -37,7 +38,7 @@ const UploadImagesPlugin = () =>
           set = set.add(tr.doc, [deco]);
         } else if (action && action.remove) {
           set = set.remove(
-            set.find(null, null, (spec) => spec.id == action.remove.id),
+            set.find(undefined, undefined, (spec) => spec.id == action.remove.id),
           );
         }
         return set;
@@ -52,10 +53,11 @@ const UploadImagesPlugin = () =>
 
 export default UploadImagesPlugin;
 
-function findPlaceholder(state: EditorState, id = {}) {
+function findPlaceholder(state: EditorState, id: object = {}) {
   const decos = uploadKey.getState(state);
+  if (!decos) return null;
   // Type might be wrong here
-  const found = decos.find(null, null, (spec: { id: string }) => spec.id == id);
+  const found = decos.find(undefined, undefined, (spec: { id: object }) => spec.id == id);
   return found.length ? found[0].from : null;
 }
 

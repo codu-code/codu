@@ -59,7 +59,7 @@ export default function Content() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<
-    "idle" | "loading" | "success" | "error"
+    "idle" | "pending" | "success" | "error"
   >("idle");
   const onSubmit: SubmitHandler<saveJobsInput> = (values) => {
     const formData = {
@@ -70,12 +70,12 @@ export default function Content() {
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (uploadStatus === "loading") {
+    if (uploadStatus === "pending") {
       return toast.info("Upload in progress, please wait...");
     }
 
     if (e.target.files && e.target.files.length > 0) {
-      setUploadStatus("loading");
+      setUploadStatus("pending");
 
       const file = e.target.files[0];
       const { size, type } = file;
@@ -155,9 +155,9 @@ export default function Content() {
                 onClick={() => {
                   fileInputRef.current?.click();
                 }}
-                disabled={uploadStatus === "loading"}
+                disabled={uploadStatus === "pending"}
               >
-                {uploadStatus === "loading" ? "Uploading..." : "Change Logo"}
+                {uploadStatus === "pending" ? "Uploading..." : "Change Logo"}
               </Button>
               <Input
                 type="file"

@@ -1,3 +1,4 @@
+import React from "react";
 import { notFound } from "next/navigation";
 
 export const metadata = {
@@ -8,7 +9,7 @@ export const metadata = {
   },
 };
 
-export default function Alpha({ children }: { children: ChildNode }) {
+export default function Alpha({ children }: { children: React.ReactNode }) {
   if (process.env.ALPHA || process.env.NODE_ENV === "development") {
     return <>{children}</>;
   }

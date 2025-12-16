@@ -14,7 +14,7 @@ export const loggedInAsUserOne = async (page: Page) => {
   try {
     await page.context().addCookies([
       {
-        name: "next-auth.session-token",
+        name: "authjs.session-token",
         value: E2E_USER_ONE_SESSION_ID,
         domain: "localhost",
         path: "/",
@@ -24,7 +24,7 @@ export const loggedInAsUserOne = async (page: Page) => {
 
     expect(
       (await page.context().cookies()).find(
-        (cookie) => cookie.name === "next-auth.session-token",
+        (cookie) => cookie.name === "authjs.session-token",
       ),
     ).toBeTruthy();
   } catch (err) {
@@ -38,7 +38,7 @@ export const loggedInAsUserTwo = async (page: Page) => {
 
     await page.context().addCookies([
       {
-        name: "next-auth.session-token",
+        name: "authjs.session-token",
         value: E2E_USER_TWO_SESSION_ID,
         domain: "localhost",
         path: "/",
@@ -48,7 +48,7 @@ export const loggedInAsUserTwo = async (page: Page) => {
 
     expect(
       (await page.context().cookies()).find(
-        (cookie) => cookie.name === "next-auth.session-token",
+        (cookie) => cookie.name === "authjs.session-token",
       ),
     ).toBeTruthy();
   } catch (err) {

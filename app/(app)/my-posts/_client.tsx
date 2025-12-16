@@ -104,7 +104,7 @@ const MyPosts = () => {
           title="Delete article"
           subTitle="Are you sure you want to delete this article?"
           content="All of the data will be permanently removed from our servers forever. This action cannot be undone."
-          confirmText={deleteStatus === "loading" ? "Deleting..." : "Delete"}
+          confirmText={deleteStatus === "pending" ? "Deleting..." : "Delete"}
           cancelText="Cancel"
         />
       )}
@@ -113,7 +113,7 @@ const MyPosts = () => {
           <Tabs tabs={tabs} />
         </div>
         <div>
-          {selectedTabData.status === "loading" && (
+          {selectedTabData.status === "pending" && (
             <p className="py-4 font-medium">Fetching your posts...</p>
           )}
           {selectedTabData.status === "error" && (

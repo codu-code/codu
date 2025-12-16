@@ -9,6 +9,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import Highlighter from "react-highlight-words";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -364,6 +365,8 @@ function SearchDialog({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Close dialog when pathname or searchParams change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setOpen(false);
   }, [pathname, searchParams, setOpen]);
@@ -433,8 +436,18 @@ function SearchDialog({
                 <form
                   ref={formRef}
                   {...autocomplete.getFormProps({
-                    inputElement: inputRef.current,
+                    inputElement: null,
                   })}
+                  onSubmit={(e) => {
+                    autocomplete
+                      .getFormProps({ inputElement: inputRef.current })
+                      .onSubmit?.(e);
+                  }}
+                  onReset={(e) => {
+                    autocomplete
+                      .getFormProps({ inputElement: inputRef.current })
+                      .onReset?.(e);
+                  }}
                 >
                   <SearchInput
                     ref={inputRef}
@@ -492,19 +505,26 @@ function useSearchProps() {
   };
 }
 
+// Subscribe to nothing - this is just to detect client-side rendering
+const emptySubscribe = () => () => {};
+const getClientModifierKey = () =>
+  typeof navigator !== "undefined" &&
+  /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)
+    ? "⌘"
+    : "Ctrl ";
+const getServerModifierKey = () => "";
+
 export function Search({
   algoliaSearchConfig,
 }: {
   algoliaSearchConfig: AlgoliaConfig;
 }) {
-  const [modifierKey, setModifierKey] = useState<string>();
+  const modifierKey = useSyncExternalStore(
+    emptySubscribe,
+    getClientModifierKey,
+    getServerModifierKey,
+  );
   const { buttonProps, dialogProps } = useSearchProps();
-
-  useEffect(() => {
-    setModifierKey(
-      /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? "⌘" : "Ctrl ",
-    );
-  }, []);
 
   return (
     <div className="hidden md:block md:max-w-52 md:flex-auto lg:max-w-md">

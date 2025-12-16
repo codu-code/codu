@@ -7,7 +7,7 @@ export type UserNavigationItem =
     }
   | {
       name: string;
-      onClick: () => Promise<undefined>;
+      onClick: () => Promise<void>;
       href?: undefined;
       fancy?: boolean;
     };

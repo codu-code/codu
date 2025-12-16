@@ -5,9 +5,10 @@ import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
 
-type Props = { params: { username: string } };
+type Props = { params: Promise<{ username: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const username = params.username;
 
   const profile = await db.query.user.findFirst({
@@ -52,11 +53,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({
-  params,
-}: {
-  params: { username: string };
+export default async function Page(props: {
+  params: Promise<{ username: string }>;
 }) {
+  const params = await props.params;
   const username = params?.username;
 
   if (!username) {

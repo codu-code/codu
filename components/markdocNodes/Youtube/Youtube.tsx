@@ -1,6 +1,8 @@
 import * as React from "react";
 
-export function YouTube(props: React.ReactPropTypes) {
+type YouTubeProps = React.IframeHTMLAttributes<HTMLIFrameElement>;
+
+export function YouTube(props: YouTubeProps) {
   return (
     <div>
       <iframe

@@ -1,4 +1,4 @@
-import { Tag } from "@markdoc/markdoc";
+import { Tag, type Node, type Config } from "@markdoc/markdoc";
 
 // creates a custom link node to add _blank and rel noopener to <a> tags
 // https://markdoc.dev/docs/nodes#customizing-markdoc-nodes
@@ -13,11 +13,10 @@ const link = {
   },
   // now add custom attributes
   // The transform method is used to customize the transformation of the link node.
-  // TODO: add types
-  transform(node, config) {
+  transform(node: Node, config: Config) {
     const attributes = node.transformAttributes(config);
     const children = node.transformChildren(config);
-    const href = attributes.href;
+    const href = attributes.href as string;
 
     // Check if href has a protocol, if not add 'http://' by default
     if (!/^(f|ht)tps?:\/\//i.test(href)) {

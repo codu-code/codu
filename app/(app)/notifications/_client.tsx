@@ -12,6 +12,23 @@ import {
 import PageHeading from "@/components/PageHeading/PageHeading";
 import { api } from "@/server/trpc/react";
 
+// Moved outside to avoid "cannot create components during render" error
+const Placeholder = () => (
+  <div className="my-4 w-full border border-neutral-100 bg-neutral-100 p-4 shadow dark:border-white dark:bg-black">
+    <div className="animate-pulse">
+      <div className="flex space-x-4">
+        <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-neutral-800"></div>
+        <div className="flex-1 space-y-2 py-1">
+          <div className="grid grid-cols-8 gap-4">
+            <div className="col-span-6 h-4 rounded bg-gray-300 dark:bg-neutral-800"></div>
+            <div className="col-span-3 h-2 rounded bg-gray-300 dark:bg-neutral-800"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const Notifications = () => {
   const {
     status,
@@ -50,25 +67,9 @@ const Notifications = () => {
     if (inView && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage, fetchNextPage]);
 
   const noNotifications = !data?.pages[0].data.length;
-
-  const Placeholder = () => (
-    <div className="my-4 w-full border border-neutral-100 bg-neutral-100 p-4 shadow dark:border-white dark:bg-black">
-      <div className="animate-pulse">
-        <div className="flex space-x-4">
-          <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-neutral-800"></div>
-          <div className="flex-1 space-y-2 py-1">
-            <div className="grid grid-cols-8 gap-4">
-              <div className="col-span-6 h-4 rounded bg-gray-300 dark:bg-neutral-800"></div>
-              <div className="col-span-3 h-2 rounded bg-gray-300 dark:bg-neutral-800"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <>
@@ -89,13 +90,13 @@ const Notifications = () => {
           {status === "error" && (
             <div>Something went wrong... Please refresh your page.</div>
           )}
-          {status === "loading" &&
+          {status === "pending" &&
             Children.toArray(
               Array.from({ length: 7 }, () => {
                 return <Placeholder />;
               }),
             )}
-          {status !== "loading" && noNotifications && (
+          {status !== "pending" && noNotifications && (
             <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               No new notifications. ✅{" "}
             </p>

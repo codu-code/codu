@@ -6,7 +6,8 @@ const DisableHeadingTextStyleShortcuts = Extension.create({
     return {
       'Mod-b': () => this.editor.isActive("heading") ?? this.editor.commands.toggleBold(),
       'Mod-i': () => this.editor.isActive("heading") ?? this.editor.commands.toggleItalic(),
-      'Mod-u': () => this.editor.isActive("heading") ?? this.editor.commands.toggleUnderline(),
+      // @ts-expect-error - toggleUnderline may not be available depending on extensions loaded
+      'Mod-u': () => this.editor.isActive("heading") ?? this.editor.commands.toggleUnderline?.(),
       'Mod-e': () => this.editor.isActive("heading") ?? this.editor.commands.toggleCode(),
       'Mod-shift-s': () => this.editor.isActive("heading") ?? this.editor.commands.toggleStrike(),
       'Mod-shift-h': () => this.editor.isActive("heading") ?? this.editor.commands.toggleHighlight(),

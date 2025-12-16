@@ -11,15 +11,16 @@ import { type Metadata } from "next";
 import { getPostPreview } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
 
-type Props = { params: { id: string } };
+type Props = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const { id } = params;
 
   const post = await getPostPreview({ id });
 
   if (!post) return {};
-  const host = headers().get("host") || "";
+  const host = (await headers()).get("host") || "";
   return {
     title: `Draft: ${post.title} | by ${post.user.name} | Codú`,
     authors: {
@@ -34,7 +35,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-const PreviewPage = async ({ params }: Props) => {
+const PreviewPage = async (props: Props) => {
+  const params = await props.params;
   const { id } = params;
 
   const post = await getPostPreview({ id });

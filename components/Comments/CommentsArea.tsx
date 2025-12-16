@@ -86,7 +86,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
 
   const likeComment = async (commentId: number) => {
     if (!session) return signIn();
-    if (likeStatus === "loading") return;
+    if (likeStatus === "pending") return;
     try {
       await like({ commentId });
     } catch (err) {
@@ -357,7 +357,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                             resetField("reply");
                             setShowCommentBoxId(null);
                           }}
-                          loading={createCommentStatus === "loading"}
+                          loading={createCommentStatus === "pending"}
                         />
                       </div>
                     )}
@@ -370,7 +370,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                 name="edit"
                 id={id}
                 editMode
-                loading={editStatus === "loading"}
+                loading={editStatus === "pending"}
                 onCancel={() => setEditCommentBoxId(null)}
               />
             )}
@@ -449,14 +449,14 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
         )}
         <div className="flex">
           <button
-            disabled={createCommentStatus === "loading"}
+            disabled={createCommentStatus === "pending"}
             type="submit"
             className="primary-button border-2 text-sm text-neutral-300 hover:text-white"
           >
             {editMode ? "Update" : "Submit"}
           </button>
           <button
-            disabled={createCommentStatus === "loading"}
+            disabled={createCommentStatus === "pending"}
             type="submit"
             className="secondary-button ml-2 text-sm"
             onClick={() =>

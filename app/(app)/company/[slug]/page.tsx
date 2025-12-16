@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { companies } from "./config";
 
 export const metadata = {
@@ -7,9 +8,10 @@ export const metadata = {
     "Explore our community sponsors. Ninedots Recruitment connects top talent with leading companies in the tech industry.",
 };
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   const { slug } = params;
 
   const company = companies.find((item) => item.slug === slug.toLowerCase());
@@ -63,12 +65,12 @@ export default async function Page({ params }: Props) {
           </div>
         </div>
         <div className="border-neutral-200 bg-neutral-100 p-4 dark:border-neutral-700 dark:bg-neutral-800">
-          <a
+          <Link
             href="/sponsorship"
             className="text-sm font-medium text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
           >
             ← Back to all sponsors
-          </a>
+          </Link>
         </div>
       </div>
     </div>

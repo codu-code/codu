@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -228,23 +228,21 @@ function SlideTwo({ details }: { details: UserDetails }) {
     parsedDateOfBirth?.getDate(),
   );
 
-  const [listOfDaysInSelectedMonth, setListOfDaysInSelectedMonth] = useState([
-    0,
-  ]);
-
-  useEffect(() => {
-    // If year or month change, recalculate how many days are in the specified month
+  // Compute days in month directly from year/month (no state needed)
+  const listOfDaysInSelectedMonth = useMemo(() => {
     if (year && month !== undefined) {
       // Returns the last day of the month, by creating a date with day 0 of the following month.
-      const nummberOfDaysInMonth = new Date(year, month + 1, 0).getDate();
-      const daysArray = Array.from(
-        { length: nummberOfDaysInMonth },
+      const numberOfDaysInMonth = new Date(year, month + 1, 0).getDate();
+      return Array.from(
+        { length: numberOfDaysInMonth },
         (_, index) => index + 1,
       );
-      setListOfDaysInSelectedMonth(daysArray);
     }
+    return [0];
+  }, [year, month]);
 
-    // Update the date object when year, month or date change
+  // Update the date object when year, month or day change
+  useEffect(() => {
     if (year && month !== undefined && day) {
       let selectedDate: Date;
 
@@ -257,7 +255,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
       }
       setValue("dateOfBirth", selectedDate.toISOString());
     }
-  }, [year, month, day]);
+  }, [year, month, day, setValue]);
 
   const startYearAgeDropdown = 1950;
   const endYearAgeDropdown = 2010;

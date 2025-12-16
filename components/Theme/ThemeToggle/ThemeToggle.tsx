@@ -2,20 +2,25 @@
 
 import { MoonIcon, SunIcon } from "@heroicons/react/20/solid";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 export const THEME_MODES = {
   DARK: "dark",
   LIGHT: "light",
 };
 
-const ThemeToggle = () => {
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme, setTheme } = useTheme();
+// Subscribe to nothing - this is just to detect client-side rendering
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+const ThemeToggle = () => {
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
+  const { resolvedTheme, setTheme } = useTheme();
 
   if (!mounted) return null;
 

@@ -48,20 +48,22 @@ export const hotkeys: Record<string, Hotkey> = {
 };
 
 export const useMarkdownHotkeys = (
-  textareaRef: React.RefObject<HTMLTextAreaElement>,
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>,
 ) => {
   const currentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const handlerRef = useRef<(e: KeyboardEvent) => void>();
+  const handlerRef = useRef<((e: KeyboardEvent) => void) | undefined>(
+    undefined,
+  );
 
   // Create a single callback for all hotkeys
   const handleHotkey = useCallback(
     (hotkey: Hotkey) => (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       const textarea = textareaRef.current;
       if (!textarea) return;
-      
+
       const startPos = textarea.selectionStart;
       const endPos = textarea.selectionEnd;
       const currentValue = textarea.value;
@@ -102,9 +104,7 @@ export const useMarkdownHotkeys = (
           const url = prompt("Enter the URL:");
           if (!url) return;
 
-          const tag = markup
-            .replace("text", selectedText)
-            .replace("url", url);
+          const tag = markup.replace("text", selectedText).replace("url", url);
           textarea.value = `${currentValue.slice(
             0,
             startPos,
@@ -173,17 +173,20 @@ export const useMarkdownHotkeys = (
 
   useEffect(() => {
     const textarea = textareaRef.current;
-    
+
     if (textarea === currentTextareaRef.current) return;
-    
+
     // Clean up previous event listener
     if (currentTextareaRef.current && handlerRef.current) {
-      currentTextareaRef.current.removeEventListener('keydown', handlerRef.current);
+      currentTextareaRef.current.removeEventListener(
+        "keydown",
+        handlerRef.current,
+      );
     }
-    
+
     // Set up new event listener if textarea exists
     if (textarea && handlerRef.current) {
-      textarea.addEventListener('keydown', handlerRef.current);
+      textarea.addEventListener("keydown", handlerRef.current);
       currentTextareaRef.current = textarea;
     } else {
       currentTextareaRef.current = null;
@@ -191,7 +194,10 @@ export const useMarkdownHotkeys = (
 
     return () => {
       if (currentTextareaRef.current && handlerRef.current) {
-        currentTextareaRef.current.removeEventListener('keydown', handlerRef.current);
+        currentTextareaRef.current.removeEventListener(
+          "keydown",
+          handlerRef.current,
+        );
         currentTextareaRef.current = null;
       }
     };

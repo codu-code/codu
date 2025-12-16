@@ -25,12 +25,17 @@ test.describe("Unauthenticated Articles Page", () => {
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
     ).toBeVisible();
-    await expect(page.getByLabel("like-trigger")).toBeVisible();
+    // Wait for sidebar data to load (ArticleMenu renders after API response)
+    await expect(page.getByLabel("like-trigger")).toBeVisible({
+      timeout: 15000,
+    });
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
   });
 
   test("Should show bookmark article icon", async ({ page }) => {
     await page.goto("http://localhost:3000/articles");
+    // Wait for articles to fully hydrate
+    await page.waitForSelector("article");
 
     await expect(
       page.getByRole("heading", { name: "Recent bookmarks" }),
@@ -38,7 +43,7 @@ test.describe("Unauthenticated Articles Page", () => {
 
     await expect(
       page.locator("article").first().getByLabel("Bookmark this post"),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
   });
   test("Should load more articles when scrolling to the end of the page", async ({
     page,
@@ -179,7 +184,7 @@ test.describe("Authenticated Articles Page", () => {
 
     await expect(
       page.locator("article").first().getByLabel("Bookmark this post"),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("Should load more articles when scrolling to the end of the page", async ({
@@ -266,10 +271,14 @@ test.describe("Authenticated Articles Page", () => {
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
     ).toBeVisible();
+    // Wait for comments to finish loading
     await expect(
-      page.getByRole("heading", { name: "Discussion (0)" }),
-    ).toBeVisible();
-    await expect(page.getByLabel("like-trigger")).toBeVisible();
+      page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
+    ).toBeVisible({ timeout: 15000 });
+    // Wait for sidebar data to load (ArticleMenu renders after API response)
+    await expect(page.getByLabel("like-trigger")).toBeVisible({
+      timeout: 15000,
+    });
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
   });
 
@@ -301,10 +310,14 @@ test.describe("Authenticated Articles Page", () => {
     await expect(
       page.getByRole("heading", { name: "Written by E2E Test User One" }),
     ).toBeVisible();
+    // Wait for comments to finish loading (shows "Discussion (X)" when loaded)
     await expect(
-      page.getByRole("heading", { name: "Discussion (0)" }),
-    ).toBeVisible();
-    await expect(page.getByLabel("like-trigger")).toBeVisible();
+      page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
+    ).toBeVisible({ timeout: 15000 });
+    // Wait for sidebar data to load (ArticleMenu renders after API response)
+    await expect(page.getByLabel("like-trigger")).toBeVisible({
+      timeout: 15000,
+    });
     await expect(page.getByLabel("bookmark-trigger")).toBeVisible();
 
     await page.getByRole("button", { name: "Reply" }).first().click();

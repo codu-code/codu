@@ -3,25 +3,23 @@
 import { Button } from "@headlessui/react";
 import { AlertCircle, CheckCircle, Loader } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 function Content() {
   const params = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
+    "idle" | "pending" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
-  const [token, setToken] = useState<string | null>(null);
+  // Get token directly from params (no need for separate state)
+  const token = params.get("token");
+  const hasVerified = useRef(false);
 
   useEffect(() => {
-    const tokenParam = params.get("token");
-    if (tokenParam && !token) {
-      setToken(tokenParam);
-    }
-  }, [params, token]);
+    // Prevent double verification in strict mode
+    if (hasVerified.current) return;
 
-  useEffect(() => {
     const verifyEmail = async () => {
       if (!token) {
         setStatus("error");
@@ -30,7 +28,8 @@ function Content() {
         );
         return;
       }
-      setStatus("loading");
+      hasVerified.current = true;
+      setStatus("pending");
 
       try {
         const res = await fetch(`/api/verify-email?token=${token}`);
@@ -41,7 +40,7 @@ function Content() {
           setStatus("error");
         }
         setMessage(data.message);
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage(
           "An error occurred during verification. Please try again later.",
@@ -60,7 +59,7 @@ function Content() {
           <div className="text-gray-400">Verifying your email address</div>
         </div>
         <div className="min-h-12 p-6 pt-0">
-          {status === "loading" && (
+          {status === "pending" && (
             <div className="flex flex-col items-center justify-center py-4">
               <Loader className="text-primary h-4 w-4 animate-spin" />
               <p className="text-muted-foreground mt-2 text-sm">

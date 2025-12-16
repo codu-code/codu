@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService/PromptContext";
 import type { MutableRefObject, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { PromptDialog } from "./PromptDialog";
 import React from "react";
@@ -25,7 +25,6 @@ const PromptLink = React.forwardRef(
   ) => {
     const router = useRouter();
     const { unsavedChanges } = usePrompt();
-    const [hasPrompt, setHasPrompt] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     const handleNavigation = (
@@ -34,7 +33,6 @@ const PromptLink = React.forwardRef(
       event.preventDefault();
 
       if (unsavedChanges) {
-        setHasPrompt(true);
         setShowModal(true);
         return false;
       } else {
@@ -45,7 +43,6 @@ const PromptLink = React.forwardRef(
 
     const confirmNavigation = () => {
       setShowModal(false);
-      setHasPrompt(false);
       if (close !== undefined) close();
       router.push(to);
     };
@@ -54,12 +51,6 @@ const PromptLink = React.forwardRef(
       setShowModal(false);
       return false;
     };
-
-    useEffect(() => {
-      if (hasPrompt === true) {
-        setHasPrompt(false);
-      }
-    }, [hasPrompt]);
 
     return (
       <>

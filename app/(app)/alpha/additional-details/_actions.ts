@@ -37,7 +37,7 @@ export async function slideOneSubmitAction(dataInput: TypeSlideOneSchema) {
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.errors);
+      console.error("Validation error:", error.issues);
     } else {
       console.error("Error updating the User model:", error);
     }
@@ -65,7 +65,7 @@ export async function slideTwoSubmitAction(dataInput: TypeSlideTwoSchema) {
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.errors);
+      console.error("Validation error:", error.issues);
     } else {
       console.error("Error updating the User model:", error);
     }
@@ -97,7 +97,7 @@ export async function slideThreeSubmitAction(dataInput: TypeSlideThreeSchema) {
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.errors);
+      console.error("Validation error:", error.issues);
     } else {
       console.error("Error updating the User model:", error);
     }

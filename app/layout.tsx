@@ -4,20 +4,13 @@ import Fathom from "@/components/Fathom/Fathom";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
 import { Toaster } from "sonner";
 import { CSPostHogProvider } from "./providers";
-import dynamic from "next/dynamic";
+import PostHogPageView from "@/components/PageViews/PageViews";
 
 import ThemeProvider from "@/components/Theme/ThemeProvider";
 import { TRPCReactProvider } from "@/server/trpc/react";
 import AuthProvider from "@/context/AuthProvider";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { PromptProvider } from "@/components/PromptService";
-
-const PostHogPageView = dynamic(
-  () => import("@/components/PageViews/PageViews"),
-  {
-    ssr: false,
-  },
-);
 
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
@@ -69,6 +62,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Serialize headers for client component
+  const headersList = await headers();
+  const headersObject: Record<string, string> = {};
+  headersList.forEach((value, key) => {
+    headersObject[key] = value;
+  });
+
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <link
@@ -86,7 +86,7 @@ export default async function RootLayout({
             <AuthProvider>
               <ThemeProvider>
                 <Toaster />
-                <TRPCReactProvider headers={headers()}>
+                <TRPCReactProvider headers={headersObject}>
                   <PromptProvider>{children}</PromptProvider>
                 </TRPCReactProvider>
               </ThemeProvider>

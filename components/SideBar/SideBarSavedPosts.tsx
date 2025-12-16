@@ -21,7 +21,7 @@ export default React.memo(function SideBarSavedPosts() {
         Recent bookmarks
       </h3>
       <div className="w-full">
-        {bookmarkStatus === "loading" &&
+        {bookmarkStatus === "pending" &&
           Children.toArray(
             Array.from({ length: howManySavedToShow }, () => {
               return <LoadingSkeleton />;

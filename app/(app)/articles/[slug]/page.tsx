@@ -20,9 +20,10 @@ import DOMPurify from "isomorphic-dompurify";
 import type { JSONContent } from "@tiptap/core";
 import NotFound from "@/components/NotFound/NotFound";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const slug = params.slug;
 
   const post = await getPost({ slug });
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tags = post?.tags.map((tag) => tag.tag.title);
 
   if (!post) return {};
-  const host = headers().get("host") || "";
+  const host = (await headers()).get("host") || "";
   return {
     title: `${post.title} | by ${post.user.name} | Codú`,
     authors: {
@@ -77,11 +78,12 @@ const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
   return DOMPurify.sanitize(rawHtml);
 };
 
-const ArticlePage = async ({ params }: Props) => {
+const ArticlePage = async (props: Props) => {
+  const params = await props.params;
   const session = await getServerAuthSession();
   const { slug } = params;
 
-  const host = headers().get("host") || "";
+  const host = (await headers()).get("host") || "";
 
   const post = await getPost({ slug });
 
