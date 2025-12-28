@@ -32,9 +32,7 @@ const SavedPosts = () => {
       <PageHeading>Saved items</PageHeading>
       <div>
         {bookmarkStatus === "pending" &&
-          Array.from({ length: 7 }, (_, i) => (
-            <ArticleLoading key={i} />
-          ))}
+          Array.from({ length: 7 }, (_, i) => <ArticleLoading key={i} />)}
         {bookmarkStatus === "error" && (
           <p className="py-4 font-medium">
             Something went wrong fetching your saved posts... Refresh the page.

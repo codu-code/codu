@@ -91,9 +91,7 @@ const Notifications = () => {
             <div>Something went wrong... Please refresh your page.</div>
           )}
           {status === "pending" &&
-            Array.from({ length: 7 }, (_, i) => (
-              <Placeholder key={i} />
-            ))}
+            Array.from({ length: 7 }, (_, i) => <Placeholder key={i} />)}
           {status !== "pending" && noNotifications && (
             <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               No new notifications. ✅{" "}

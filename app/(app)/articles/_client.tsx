@@ -105,9 +105,7 @@ const ArticlesPage = () => {
                 </div>
               )}
               {status === "pending" &&
-                Array.from({ length: 7 }, (_, i) => (
-                  <ArticleLoading key={i} />
-                ))}
+                Array.from({ length: 7 }, (_, i) => <ArticleLoading key={i} />)}
               {status === "success" &&
                 data.pages.map((page) => {
                   return (
