@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { TagIcon } from "@heroicons/react/20/solid";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
@@ -105,11 +105,9 @@ const ArticlesPage = () => {
                 </div>
               )}
               {status === "pending" &&
-                Children.toArray(
-                  Array.from({ length: 7 }, () => {
-                    return <ArticleLoading />;
-                  }),
-                )}
+                Array.from({ length: 7 }, (_, i) => (
+                  <ArticleLoading key={i} />
+                ))}
               {status === "success" &&
                 data.pages.map((page) => {
                   return (

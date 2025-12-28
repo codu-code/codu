@@ -1,6 +1,5 @@
 "use client";
 
-import { Children } from "react";
 import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
 import { api } from "@/server/trpc/react";
 import PageHeading from "@/components/PageHeading/PageHeading";
@@ -33,11 +32,9 @@ const SavedPosts = () => {
       <PageHeading>Saved items</PageHeading>
       <div>
         {bookmarkStatus === "pending" &&
-          Children.toArray(
-            Array.from({ length: 7 }, () => {
-              return <ArticleLoading />;
-            }),
-          )}
+          Array.from({ length: 7 }, (_, i) => (
+            <ArticleLoading key={i} />
+          ))}
         {bookmarkStatus === "error" && (
           <p className="py-4 font-medium">
             Something went wrong fetching your saved posts... Refresh the page.

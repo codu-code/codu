@@ -1,6 +1,6 @@
 "use client";
 import { api } from "@/server/trpc/react";
-import React, { Children } from "react";
+import React from "react";
 
 import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
@@ -22,11 +22,9 @@ export default React.memo(function SideBarSavedPosts() {
       </h3>
       <div className="w-full">
         {bookmarkStatus === "pending" &&
-          Children.toArray(
-            Array.from({ length: howManySavedToShow }, () => {
-              return <LoadingSkeleton />;
-            }),
-          )}
+          Array.from({ length: howManySavedToShow }, (_, i) => (
+            <LoadingSkeleton key={i} />
+          ))}
         {bookmarkStatus === "error" && (
           <p className="py-4 font-medium">
             Something went wrong fetching your saved posts... Refresh the page.
