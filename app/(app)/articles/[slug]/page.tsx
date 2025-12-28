@@ -15,7 +15,7 @@ import { type Metadata } from "next";
 import { getPost } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import { generateHTML } from "@tiptap/core";
-import { TiptapExtensions } from "@/components/editor/editor/extensions";
+import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
 import sanitizeHtml from "sanitize-html";
 import type { JSONContent } from "@tiptap/core";
 import NotFound from "@/components/NotFound/NotFound";
@@ -73,7 +73,7 @@ const parseJSON = (str: string): JSONContent | null => {
 };
 
 const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
-  const rawHtml = generateHTML(jsonContent, [...TiptapExtensions]);
+  const rawHtml = generateHTML(jsonContent, [...RenderExtensions]);
   // Sanitize the HTML using sanitize-html (server-safe, no jsdom dependency)
   return sanitizeHtml(rawHtml, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat([
