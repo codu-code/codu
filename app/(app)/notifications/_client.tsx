@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, Fragment, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { Temporal } from "@js-temporal/polyfill";
@@ -91,11 +91,7 @@ const Notifications = () => {
             <div>Something went wrong... Please refresh your page.</div>
           )}
           {status === "pending" &&
-            Children.toArray(
-              Array.from({ length: 7 }, () => {
-                return <Placeholder />;
-              }),
-            )}
+            Array.from({ length: 7 }, (_, i) => <Placeholder key={i} />)}
           {status !== "pending" && noNotifications && (
             <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
               No new notifications. ✅{" "}
