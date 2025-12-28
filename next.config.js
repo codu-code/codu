@@ -20,8 +20,6 @@ const REMOTE_PATTERNS = [
 }));
 
 const config = {
-  // Exclude jsdom and isomorphic-dompurify from bundling to fix ESM/CJS compatibility
-  serverExternalPackages: ["jsdom", "isomorphic-dompurify"],
   // Turbopack configuration for SVGR (replaces webpack config)
   turbopack: {
     rules: {

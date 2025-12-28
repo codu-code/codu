@@ -15,8 +15,8 @@ import { type Metadata } from "next";
 import { getPost } from "@/server/lib/posts";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import { generateHTML } from "@tiptap/core";
-import { TiptapExtensions } from "@/components/editor/editor/extensions";
-import DOMPurify from "isomorphic-dompurify";
+import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
+import sanitizeHtml from "sanitize-html";
 import type { JSONContent } from "@tiptap/core";
 import NotFound from "@/components/NotFound/NotFound";
 
@@ -73,9 +73,27 @@ const parseJSON = (str: string): JSONContent | null => {
 };
 
 const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
-  const rawHtml = generateHTML(jsonContent, [...TiptapExtensions]);
-  // Sanitize the HTML
-  return DOMPurify.sanitize(rawHtml);
+  const rawHtml = generateHTML(jsonContent, [...RenderExtensions]);
+  // Sanitize the HTML using sanitize-html (server-safe, no jsdom dependency)
+  return sanitizeHtml(rawHtml, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      "img",
+      "iframe",
+      "h1",
+      "h2",
+    ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ["src", "alt", "title", "width", "height", "class"],
+      iframe: ["src", "width", "height", "frameborder", "allowfullscreen"],
+      "*": ["class", "id", "style"],
+    },
+    allowedIframeHostnames: [
+      "www.youtube.com",
+      "youtube.com",
+      "www.youtube-nocookie.com",
+    ],
+  });
 };
 
 const ArticlePage = async (props: Props) => {
