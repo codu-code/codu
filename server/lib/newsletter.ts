@@ -1,69 +1,126 @@
 import * as Sentry from "@sentry/nextjs";
 
+const BEEHIIV_API_BASE = "https://api.beehiiv.com/v2";
+
+interface BeehiivSubscription {
+  id: string;
+  email: string;
+  status: "validating" | "active" | "inactive" | "pending";
+  created_at: number;
+}
+
+interface BeehiivResponse {
+  data: BeehiivSubscription;
+}
+
+function getBeehiivConfig() {
+  const BEEHIIV_API_KEY = process.env.BEEHIIV_API_KEY;
+  const BEEHIIV_PUBLICATION_ID = process.env.BEEHIIV_PUBLICATION_ID;
+
+  if (!BEEHIIV_API_KEY || !BEEHIIV_PUBLICATION_ID) {
+    throw new Error("Beehiiv API not configured");
+  }
+
+  return { BEEHIIV_API_KEY, BEEHIIV_PUBLICATION_ID };
+}
+
 export async function manageNewsletterSubscription(
   email: string,
   action: "subscribe" | "unsubscribe",
 ): Promise<{ message: string } | undefined> {
-  const EMAIL_API_ENDPOINT = process.env.EMAIL_API_ENDPOINT;
-  const EMAIL_API_KEY = process.env.EMAIL_API_KEY;
-  const EMAIL_NEWSLETTER_ID = process.env.EMAIL_NEWSLETTER_ID;
+  const { BEEHIIV_API_KEY, BEEHIIV_PUBLICATION_ID } = getBeehiivConfig();
 
-  if (!EMAIL_API_ENDPOINT || !EMAIL_API_KEY || !EMAIL_NEWSLETTER_ID) {
-    throw new Error("Email API not configured");
-  }
+  if (action === "subscribe") {
+    const response = await fetch(
+      `${BEEHIIV_API_BASE}/publications/${BEEHIIV_PUBLICATION_ID}/subscriptions`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${BEEHIIV_API_KEY}`,
+        },
+        body: JSON.stringify({
+          email,
+          reactivate_existing: true,
+          send_welcome_email: false,
+        }),
+      },
+    );
 
-  const payload = new URLSearchParams({
-    email,
-    api_key: EMAIL_API_KEY,
-    list: EMAIL_NEWSLETTER_ID,
-    boolean: "true",
-    silent: "true", // Don't send a confirmation email (using this option for users signed up to platform, not newsletter only option)
-  }).toString();
-
-  const response = await fetch(`${EMAIL_API_ENDPOINT}/${action}`, {
-    method: "POST",
-    headers: {
-      "Content-type": "application/x-www-form-urlencoded",
-    },
-    body: payload,
-  });
-
-  if (response.ok) {
-    return { message: `Successfully ${action}d to the newsletter.` };
+    if (response.ok) {
+      return { message: "Successfully subscribed to the newsletter." };
+    } else {
+      const errorData = await response.text();
+      Sentry.captureMessage(`Beehiiv subscribe failed: ${errorData}`);
+      throw new Error("Failed to subscribe to the newsletter");
+    }
   } else {
-    throw new Error(`Failed to ${action} to the newsletter`);
+    // Unsubscribe: First get subscription by email, then update it
+    const encodedEmail = encodeURIComponent(email);
+    const getResponse = await fetch(
+      `${BEEHIIV_API_BASE}/publications/${BEEHIIV_PUBLICATION_ID}/subscriptions/by_email/${encodedEmail}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${BEEHIIV_API_KEY}`,
+        },
+      },
+    );
+
+    if (!getResponse.ok) {
+      if (getResponse.status === 404) {
+        return { message: "Successfully unsubscribed from the newsletter." };
+      }
+      throw new Error("Failed to find subscription");
+    }
+
+    const subscriptionData: BeehiivResponse = await getResponse.json();
+    const subscriptionId = subscriptionData.data.id;
+
+    const updateResponse = await fetch(
+      `${BEEHIIV_API_BASE}/publications/${BEEHIIV_PUBLICATION_ID}/subscriptions/${subscriptionId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${BEEHIIV_API_KEY}`,
+        },
+        body: JSON.stringify({
+          unsubscribe: true,
+        }),
+      },
+    );
+
+    if (updateResponse.ok) {
+      return { message: "Successfully unsubscribed from the newsletter." };
+    } else {
+      throw new Error("Failed to unsubscribe from the newsletter");
+    }
   }
 }
 
-export async function isUserSubscribedToNewsletter(email: string) {
-  const EMAIL_API_ENDPOINT = process.env.EMAIL_API_ENDPOINT;
-  const EMAIL_API_KEY = process.env.EMAIL_API_KEY;
-  const EMAIL_NEWSLETTER_ID = process.env.EMAIL_NEWSLETTER_ID;
+export async function isUserSubscribedToNewsletter(
+  email: string,
+): Promise<boolean> {
+  const { BEEHIIV_API_KEY, BEEHIIV_PUBLICATION_ID } = getBeehiivConfig();
 
-  if (!EMAIL_API_ENDPOINT || !EMAIL_API_KEY || !EMAIL_NEWSLETTER_ID) {
-    throw new Error("Email API not configured");
-  }
-
-  const payload = new URLSearchParams({
-    email,
-    api_key: EMAIL_API_KEY,
-    list_id: EMAIL_NEWSLETTER_ID,
-  }).toString();
+  const encodedEmail = encodeURIComponent(email);
 
   const response = await fetch(
-    `${EMAIL_API_ENDPOINT}/api/subscribers/subscription-status.php`,
+    `${BEEHIIV_API_BASE}/publications/${BEEHIIV_PUBLICATION_ID}/subscriptions/by_email/${encodedEmail}`,
     {
-      method: "POST",
+      method: "GET",
       headers: {
-        "Content-type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${BEEHIIV_API_KEY}`,
       },
-      body: payload,
     },
   );
 
   if (response.ok) {
-    const status = await response.text();
-    return status === "Subscribed";
+    const data: BeehiivResponse = await response.json();
+    return data.data.status === "active";
+  } else if (response.status === 404) {
+    return false;
   } else {
     throw new Error("Failed to check newsletter subscription");
   }
