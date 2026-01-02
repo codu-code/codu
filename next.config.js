@@ -20,6 +20,20 @@ const REMOTE_PATTERNS = [
 }));
 
 const config = {
+  async redirects() {
+    return [
+      {
+        source: "/newsletter",
+        destination: "https://newsletter.codu.co",
+        permanent: true,
+      },
+      {
+        source: "/newsletter/:path*",
+        destination: "https://newsletter.codu.co",
+        permanent: true,
+      },
+    ];
+  },
   // Turbopack configuration for SVGR (replaces webpack config)
   turbopack: {
     rules: {
