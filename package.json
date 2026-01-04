@@ -19,7 +19,9 @@
     "db:migrate": "npx tsx -r dotenv/config ./drizzle/migrate.ts",
     "db:seed": "npx tsx -r dotenv/config ./drizzle/seed.ts",
     "db:nuke": "npx tsx -r dotenv/config ./drizzle/nuke.ts",
-    "drizzle:up": "drizzle-kit up"
+    "drizzle:up": "drizzle-kit up",
+    "feed:fetch": "npx tsx -r dotenv/config ./scripts/fetch-rss.ts",
+    "algolia:test": "npx tsx -r dotenv/config ./scripts/test-algolia-index.ts"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown",
@@ -103,6 +105,7 @@
     "react-moveable": "^0.56.0",
     "react-textarea-autosize": "^8.5.3",
     "rss": "^1.2.2",
+    "rss-parser": "^3.13.0",
     "sanitize-html": "^2.17.0",
     "server-only": "^0.0.1",
     "sharp": "^0.33.5",
