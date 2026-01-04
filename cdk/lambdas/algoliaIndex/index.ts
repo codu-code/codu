@@ -1,6 +1,6 @@
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import { Client } from "pg";
-import algoliasearch from "algoliasearch";
+import { algoliasearch } from "algoliasearch";
 const ssmClient = new SSMClient({ region: "eu-west-1" });
 
 const [ARTICLE, PAGE, USER] = ["Article", "Page", "User"];
@@ -54,7 +54,7 @@ exports.handler = async function () {
     );
 
     const { rows: users } = await client.query(
-      `SELECT username, name, image, bio FROM "User";`,
+      `SELECT username, name, image, bio FROM "user";`,
     );
 
     const postIdx = posts.map(({ title, excerpt, slug }) => ({
@@ -74,7 +74,6 @@ exports.handler = async function () {
     }));
 
     const algoliaClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
-    const index = algoliaClient.initIndex(ALGOLIA_SOURCE_IDX);
 
     const PAGES = [
       {
@@ -100,9 +99,11 @@ exports.handler = async function () {
       },
     ];
 
-    await index.clearObjects();
-    await index.saveObjects([...postIdx, ...userIdx, ...PAGES], {
-      autoGenerateObjectIDIfNotExist: true,
+    // v5 API: methods called directly on client with indexName parameter
+    await algoliaClient.clearObjects({ indexName: ALGOLIA_SOURCE_IDX });
+    await algoliaClient.saveObjects({
+      indexName: ALGOLIA_SOURCE_IDX,
+      objects: [...postIdx, ...userIdx, ...PAGES],
     });
 
     console.log("Algolia index updated");

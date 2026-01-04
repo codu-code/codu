@@ -1,0 +1,14 @@
+{
+  "name": "rss-fetcher",
+  "version": "1.0.0",
+  "description": "RSS Feed Fetcher Lambda for Codu Content Aggregator",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.509.0",
+    "pg": "^8.11.3",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0"
+  }
+}

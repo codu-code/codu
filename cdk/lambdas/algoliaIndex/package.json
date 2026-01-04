@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.509.0",
-    "algoliasearch": "^4.22.1",
+    "algoliasearch": "5.12.0",
     "pg": "^8.11.3"
   },
   "devDependencies": {

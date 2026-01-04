@@ -46,10 +46,32 @@ export class CronStack extends cdk.Stack {
 
     // 6:00 (am) every day
     // See https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html
-    const rule = new events.Rule(this, "Rule", {
+    const algoliaRule = new events.Rule(this, "AlgoliaRule", {
       schedule: events.Schedule.expression("cron(0 6 * * ? *)"),
     });
 
-    rule.addTarget(new targets.LambdaFunction(lambdaFn));
+    algoliaRule.addTarget(new targets.LambdaFunction(lambdaFn));
+
+    // RSS Feed Fetcher Lambda
+    const rssFetcherFn = new NodejsFunction(this, "RSSFetcherLambda", {
+      timeout: cdk.Duration.seconds(300), // 5 minutes for processing multiple feeds
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(__dirname, "/../lambdas/rssFetcher/index.ts"),
+      depsLockFilePath: path.join(
+        __dirname,
+        "/../lambdas/rssFetcher/package-lock.json",
+      ),
+      role: lambdaRole,
+      bundling: {
+        nodeModules: ["@aws-sdk/client-ssm", "pg", "rss-parser"],
+      },
+    });
+
+    // Run every 3 hours to fetch new articles
+    const rssFetcherRule = new events.Rule(this, "RSSFetcherRule", {
+      schedule: events.Schedule.expression("rate(3 hours)"),
+    });
+
+    rssFetcherRule.addTarget(new targets.LambdaFunction(rssFetcherFn));
   }
 }
