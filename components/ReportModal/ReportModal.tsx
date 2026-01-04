@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 
-type Props = Post | Comment;
+type Props = Post | Comment | Discussion;
 
 type Post = {
   type: "post";
@@ -20,6 +20,12 @@ type Post = {
 
 type Comment = {
   type: "comment";
+  comment: string;
+  id: number;
+};
+
+type Discussion = {
+  type: "discussion";
   comment: string;
   id: number;
 };
@@ -45,7 +51,9 @@ export const ReportModal = (props: Props) => {
   const { type, id } = props;
 
   const isComment = type === "comment" && typeof id === "number";
+  const isDiscussion = type === "discussion" && typeof id === "number";
   const isPost = type === "post" && typeof id === "string";
+  const isCommentLike = isComment || isDiscussion;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +63,9 @@ export const ReportModal = (props: Props) => {
     try {
       if (!session) return signIn();
 
-      if (isComment) {
+      if (isCommentLike) {
         await sendEmail({
-          type,
+          type: "comment", // Treat discussions same as comments for reporting
           body: reportBody,
           id,
         });
@@ -75,7 +83,7 @@ export const ReportModal = (props: Props) => {
       setReportBody("");
       setLoading(false);
 
-      if (!isComment && !isPost) {
+      if (!isCommentLike && !isPost) {
         throw new Error("Invalid report");
       }
     } catch (error) {
@@ -85,7 +93,7 @@ export const ReportModal = (props: Props) => {
 
   return (
     <>
-      {isComment && (
+      {isCommentLike && (
         <button
           aria-label="flag-comment"
           onClick={() => {
@@ -97,7 +105,7 @@ export const ReportModal = (props: Props) => {
         </button>
       )}
 
-      {!isComment && (
+      {!isCommentLike && (
         <button
           onClick={() => (session ? setIsModalOpen(true) : signIn())}
           className="w-full rounded text-neutral-900 hover:bg-neutral-200 dark:text-neutral-700"
@@ -127,8 +135,8 @@ export const ReportModal = (props: Props) => {
                 </p>
                 <p className="rounded border border-neutral-800 bg-neutral-300 p-4 text-neutral-900 dark:border-neutral-50 dark:bg-neutral-400 dark:text-neutral-800">
                   <span>{isPost ? "Article : " : "Comment : "}</span>
-                  {isComment && props.comment}
-                  {isPost && props.title}
+                  {isCommentLike && (props as Comment | Discussion).comment}
+                  {isPost && (props as Post).title}
                 </p>
               </Description>
 
