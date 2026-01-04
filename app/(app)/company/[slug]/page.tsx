@@ -3,7 +3,7 @@ import Link from "next/link";
 import { companies } from "./config";
 
 export const metadata = {
-  title: "Ninedots Recruitment | Codu",
+  title: "Ninedots Recruitment | Codú",
   description:
     "Explore our community sponsors. Ninedots Recruitment connects top talent with leading companies in the tech industry.",
 };
