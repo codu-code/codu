@@ -6,7 +6,7 @@ import BioBar from "@/components/BioBar/BioBar";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import CommentsArea from "@/components/Comments/CommentsArea";
-import ArticleMenu from "@/components/ArticleMenu/ArticleMenu";
+import { ArticleActionBarWrapper } from "@/components/ArticleActionBar";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
@@ -127,13 +127,6 @@ const ArticlePage = async (props: Props) => {
 
   return (
     <>
-      <ArticleMenu
-        session={session}
-        postId={post.id}
-        postTitle={post.title}
-        postUsername={post?.user.username || ""}
-        postUrl={`https://${host}/articles/${post.slug}`}
-      />
       <div className="mx-auto break-words px-2 pb-4 sm:px-4 md:max-w-3xl">
         <article className="prose mx-auto max-w-3xl dark:prose-invert lg:prose-lg">
           {!isTiptapContent && <h1>{post.title}</h1>}
@@ -167,16 +160,26 @@ const ArticlePage = async (props: Props) => {
             ))}
           </section>
         )}
+        <ArticleActionBarWrapper
+          postId={post.id}
+          postTitle={post.title}
+          postUrl={`https://${host}/articles/${post.slug}`}
+          postUsername={post?.user.username || ""}
+          initialUpvotes={post.upvotes ?? 0}
+          initialDownvotes={post.downvotes ?? 0}
+        />
       </div>
       <div className="mx-auto max-w-3xl px-2 pb-4 sm:px-4">
         <BioBar author={post.user} />
-        {post.showComments ? (
-          <CommentsArea postId={post.id} postOwnerId={post.user.id} />
-        ) : (
-          <h3 className="py-10 text-lg italic">
-            Comments are disabled for this post
-          </h3>
-        )}
+        <div id="comments">
+          {post.showComments ? (
+            <CommentsArea postId={post.id} postOwnerId={post.user.id} />
+          ) : (
+            <h3 className="py-10 text-lg italic">
+              Comments are disabled for this post
+            </h3>
+          )}
+        </div>
       </div>
       {session && session?.user?.role === "ADMIN" && (
         <ArticleAdminPanel session={session} postId={post.id} />
