@@ -9,12 +9,13 @@ import {
   DeletePostSchema,
   GetPostsSchema,
   LikePostSchema,
+  VotePostSchema,
   BookmarkPostSchema,
   GetByIdSchema,
   GetLimitSidePosts,
 } from "../../../schema/post";
 import { removeMarkdown } from "../../../utils/removeMarkdown";
-import { bookmark, like, post, post_tag, tag, user } from "@/server/db/schema";
+import { bookmark, like, post, post_tag, post_vote, tag, user } from "@/server/db/schema";
 import {
   and,
   eq,
@@ -27,6 +28,7 @@ import {
   lt,
   asc,
   gte,
+  sql,
 } from "drizzle-orm";
 import { decrement, increment } from "./utils";
 
@@ -233,6 +235,97 @@ export const postRouter = createTRPCRouter({
 
       return res;
     }),
+  vote: protectedProcedure
+    .input(VotePostSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { postId, voteType } = input;
+      const userId = ctx.session.user.id;
+
+      return await ctx.db.transaction(async (tx) => {
+        // Get existing vote
+        const [existingVote] = await tx
+          .select()
+          .from(post_vote)
+          .where(
+            and(eq(post_vote.postId, postId), eq(post_vote.userId, userId)),
+          );
+
+        // If removing vote (voteType is null)
+        if (voteType === null) {
+          if (existingVote) {
+            await tx
+              .delete(post_vote)
+              .where(
+                and(eq(post_vote.postId, postId), eq(post_vote.userId, userId)),
+              );
+
+            // Update counts
+            if (existingVote.voteType === "UP") {
+              await tx
+                .update(post)
+                .set({ upvotes: decrement(post.upvotes) })
+                .where(eq(post.id, postId));
+            } else {
+              await tx
+                .update(post)
+                .set({ downvotes: decrement(post.downvotes) })
+                .where(eq(post.id, postId));
+            }
+          }
+          return { voteType: null };
+        }
+
+        // If changing vote
+        if (existingVote) {
+          if (existingVote.voteType !== voteType) {
+            // Update vote type
+            await tx
+              .update(post_vote)
+              .set({ voteType })
+              .where(
+                and(eq(post_vote.postId, postId), eq(post_vote.userId, userId)),
+              );
+
+            // Update counts (swap)
+            if (voteType === "UP") {
+              await tx
+                .update(post)
+                .set({
+                  upvotes: increment(post.upvotes),
+                  downvotes: decrement(post.downvotes),
+                })
+                .where(eq(post.id, postId));
+            } else {
+              await tx
+                .update(post)
+                .set({
+                  upvotes: decrement(post.upvotes),
+                  downvotes: increment(post.downvotes),
+                })
+                .where(eq(post.id, postId));
+            }
+          }
+        } else {
+          // New vote
+          await tx.insert(post_vote).values({ postId, userId, voteType });
+
+          // Update counts
+          if (voteType === "UP") {
+            await tx
+              .update(post)
+              .set({ upvotes: increment(post.upvotes) })
+              .where(eq(post.id, postId));
+          } else {
+            await tx
+              .update(post)
+              .set({ downvotes: increment(post.downvotes) })
+              .where(eq(post.id, postId));
+          }
+        }
+
+        return { voteType };
+      });
+    }),
   bookmark: protectedProcedure
     .input(BookmarkPostSchema)
     .mutation(async ({ input, ctx }) => {
@@ -258,24 +351,28 @@ export const postRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { id } = input;
 
-      const [[likes], [userLikesPost], [userBookedmarkedPost]] =
+      const [[postData], [userVoteData], [userBookedmarkedPost]] =
         await Promise.all([
           ctx.db
-            .selectDistinct({ count: post.likes })
+            .select({
+              upvotes: post.upvotes,
+              downvotes: post.downvotes,
+              likes: post.likes,
+            })
             .from(post)
             .where(eq(post.id, id)),
-          // if user not logged in and they wont have any liked posts so default to a count of 0
+          // Get user's vote on this post
           ctx.session?.user?.id
             ? ctx.db
-                .selectDistinct()
-                .from(like)
+                .select({ voteType: post_vote.voteType })
+                .from(post_vote)
                 .where(
                   and(
-                    eq(like.postId, id),
-                    eq(like.userId, ctx.session.user.id),
+                    eq(post_vote.postId, id),
+                    eq(post_vote.userId, ctx.session.user.id),
                   ),
                 )
-            : [false],
+            : [null],
           // if user not logged in and they wont have any bookmarked posts so default to a count of 0
           ctx.session?.user?.id
             ? ctx.db
@@ -290,8 +387,11 @@ export const postRouter = createTRPCRouter({
             : [false],
         ]);
       return {
-        likes: likes.count,
-        currentUserLiked: !!userLikesPost,
+        upvotes: postData?.upvotes ?? 0,
+        downvotes: postData?.downvotes ?? 0,
+        likes: postData?.likes ?? 0,
+        userVote: (userVoteData as { voteType: "UP" | "DOWN" } | null)?.voteType ?? null,
+        currentUserLiked: false, // Deprecated, kept for backwards compatibility
         currentUserBookmarked: !!userBookedmarkedPost,
       };
     }),
@@ -301,6 +401,15 @@ export const postRouter = createTRPCRouter({
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 50;
       const { cursor, sort, tag: tagFilter } = input;
+
+      // Reddit-style hot score calculation
+      // Formula: log10(max(|score|, 1)) + sign(score) * seconds / 45000
+      // This makes recent content with votes rank higher than old content with many votes
+      const hotScoreExpr = sql<number>`
+        LOG(GREATEST(ABS(${post.upvotes} - ${post.downvotes}), 1)) +
+        SIGN(${post.upvotes} - ${post.downvotes}) *
+        EXTRACT(EPOCH FROM (${post.published}::timestamp - '2024-01-01'::timestamp)) / 45000
+      `;
 
       const paginationMapping = {
         newest: {
@@ -312,8 +421,14 @@ export const postRouter = createTRPCRouter({
           cursor: gte(post.published, cursor?.published as string),
         },
         top: {
-          orderBy: desc(post.likes),
-          cursor: lt(post.likes, cursor?.likes as number),
+          orderBy: desc(sql`${post.upvotes} - ${post.downvotes}`),
+          cursor: lt(sql`${post.upvotes} - ${post.downvotes}`, cursor?.likes as number),
+        },
+        trending: {
+          orderBy: desc(hotScoreExpr),
+          cursor: cursor?.hotScore
+            ? lt(hotScoreExpr, cursor.hotScore)
+            : undefined,
         },
       };
 
@@ -325,6 +440,12 @@ export const postRouter = createTRPCRouter({
         .where(eq(bookmark.userId, userId || ""))
         .as("bookmarked");
 
+      const userVoteSubquery = ctx.db
+        .select()
+        .from(post_vote)
+        .where(eq(post_vote.userId, userId || ""))
+        .as("userVote");
+
       const response = await ctx.db
         .select({
           post: {
@@ -335,13 +456,17 @@ export const postRouter = createTRPCRouter({
             published: post.published,
             readTimeMins: post.readTimeMins,
             likes: post.likes,
+            upvotes: post.upvotes,
+            downvotes: post.downvotes,
           },
           bookmarked: { id: bookmarked.id },
+          userVote: { voteType: userVoteSubquery.voteType },
           user: { name: user.name, username: user.username, image: user.image },
         })
         .from(post)
         .leftJoin(user, eq(post.userId, user.id))
         .leftJoin(bookmarked, eq(bookmarked.postId, post.id))
+        .leftJoin(userVoteSubquery, eq(userVoteSubquery.postId, post.id))
         .leftJoin(post_tag, eq(post.id, post_tag.postId))
         .leftJoin(tag, eq(post_tag.tagId, tag.id))
         .where(
@@ -360,18 +485,42 @@ export const postRouter = createTRPCRouter({
           post.published,
           post.readTimeMins,
           post.likes,
+          post.upvotes,
+          post.downvotes,
           bookmarked.id,
+          userVoteSubquery.voteType,
           user.id,
         )
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 
+      // Calculate hotScore for each post (for pagination)
+      const calculateHotScore = (
+        upvotes: number,
+        downvotes: number,
+        publishedAt: string,
+      ): number => {
+        const score = upvotes - downvotes;
+        const sign = score > 0 ? 1 : score < 0 ? -1 : 0;
+        const epoch2024 = new Date("2024-01-01").getTime() / 1000;
+        const publishedEpoch = new Date(publishedAt).getTime() / 1000;
+        const seconds = publishedEpoch - epoch2024;
+        return Math.log10(Math.max(Math.abs(score), 1)) + (sign * seconds) / 45000;
+      };
+
       const cleaned = response.map((elem) => {
         const currentUserBookmarkedPost = userId ? !!elem.bookmarked : false;
+        const hotScore = calculateHotScore(
+          elem.post.upvotes,
+          elem.post.downvotes,
+          elem.post.published as string,
+        );
         return {
           ...elem.post,
           user: elem.user,
           currentUserBookmarkedPost,
+          userVote: elem.userVote?.voteType ?? null,
+          hotScore,
         };
       });
 
@@ -383,6 +532,7 @@ export const postRouter = createTRPCRouter({
             id: nextItem?.id,
             published: nextItem.published as string,
             likes: nextItem.likes,
+            hotScore: sort === "trending" ? nextItem.hotScore : undefined,
           };
       }
 

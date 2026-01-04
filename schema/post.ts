@@ -10,6 +10,11 @@ export const LikePostSchema = z.object({
   setLiked: z.boolean(),
 });
 
+export const VotePostSchema = z.object({
+  postId: z.string(),
+  voteType: z.enum(["UP", "DOWN"]).nullable(),
+});
+
 export const BookmarkPostSchema = z.object({
   postId: z.string(),
   setBookmarked: z.boolean(),
@@ -60,9 +65,14 @@ export const GetPostsSchema = z.object({
   userId: z.string().optional(),
   limit: z.number().min(1).max(100).nullish(),
   cursor: z
-    .object({ id: z.string(), published: z.string(), likes: z.number() })
+    .object({
+      id: z.string(),
+      published: z.string(),
+      likes: z.number(),
+      hotScore: z.number().optional(),
+    })
     .nullish(),
-  sort: z.enum(["newest", "oldest", "top"]),
+  sort: z.enum(["newest", "oldest", "top", "trending"]),
   tag: z.string().nullish(),
 });
 

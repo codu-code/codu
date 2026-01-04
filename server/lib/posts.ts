@@ -38,6 +38,8 @@ export async function getPost({ slug }: GetPost) {
         excerpt: true,
         canonicalUrl: true,
         showComments: true,
+        upvotes: true,
+        downvotes: true,
       },
       where: (posts, { eq }) => eq(posts.slug, slug),
       with: {
