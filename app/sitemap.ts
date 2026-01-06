@@ -48,39 +48,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // Feed sources (pseudo-user profiles): /[sourceSlug]
-  const sources = (
-    await db.query.feed_sources.findMany({
-      where: eq(feed_sources.status, "active"),
-    })
-  ).map(({ slug, updatedAt, createdAt }) => ({
-    url: `${BASE_URL}/${slug}`,
-    lastModified: new Date(updatedAt || createdAt),
-    priority: 0.6,
-  }));
+  // Wrapped in try/catch to handle case where migrations haven't been run yet
+  let sources: { url: string; lastModified: Date; priority: number }[] = [];
+  let feedArticles: { url: string; lastModified: Date; priority: number }[] =
+    [];
 
-  // Feed articles from posts table (type=link): /[sourceSlug]/[slug]
-  const feedArticles = (
-    await db
-      .select({
-        articleSlug: posts.slug,
-        sourceSlug: feed_sources.slug,
-        publishedAt: posts.publishedAt,
-        updatedAt: posts.updatedAt,
+  try {
+    sources = (
+      await db.query.feed_sources.findMany({
+        where: eq(feed_sources.status, "active"),
       })
-      .from(posts)
-      .innerJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
-      .where(
-        and(
-          eq(posts.type, "link"),
-          eq(posts.status, "published"),
-          eq(feed_sources.status, "active"),
-        ),
-      )
-  ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
-    url: `${BASE_URL}/${sourceSlug}/${articleSlug}`,
-    lastModified: new Date(updatedAt || publishedAt || new Date()),
-    priority: 0.5,
-  }));
+    ).map(({ slug, updatedAt, createdAt }) => ({
+      url: `${BASE_URL}/${slug}`,
+      lastModified: new Date(updatedAt || createdAt),
+      priority: 0.6,
+    }));
+
+    // Feed articles from posts table (type=link): /[sourceSlug]/[slug]
+    feedArticles = (
+      await db
+        .select({
+          articleSlug: posts.slug,
+          sourceSlug: feed_sources.slug,
+          publishedAt: posts.publishedAt,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .innerJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+        .where(
+          and(
+            eq(posts.type, "link"),
+            eq(posts.status, "published"),
+            eq(feed_sources.status, "active"),
+          ),
+        )
+    ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
+      url: `${BASE_URL}/${sourceSlug}/${articleSlug}`,
+      lastModified: new Date(updatedAt || publishedAt || new Date()),
+      priority: 0.5,
+    }));
+  } catch {
+    // Tables may not exist yet if migrations haven't been run
+    // Continue with empty arrays for sources and feedArticles
+  }
 
   const routes = ROUTES_TO_INDEX.map((route) => ({
     url: BASE_URL + route,
