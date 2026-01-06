@@ -11,6 +11,8 @@ import { TRPCReactProvider } from "@/server/trpc/react";
 import AuthProvider from "@/context/AuthProvider";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { PromptProvider } from "@/components/PromptService";
+import { ReportModalProvider } from "@/components/ReportModal/ReportModal";
+import { Suspense } from "react";
 
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
@@ -87,7 +89,12 @@ export default async function RootLayout({
               <ThemeProvider>
                 <Toaster />
                 <TRPCReactProvider headers={headersObject}>
-                  <PromptProvider>{children}</PromptProvider>
+                  <PromptProvider>
+                    {children}
+                    <Suspense fallback={null}>
+                      <ReportModalProvider />
+                    </Suspense>
+                  </PromptProvider>
                 </TRPCReactProvider>
               </ThemeProvider>
             </AuthProvider>

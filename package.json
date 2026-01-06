@@ -21,7 +21,8 @@
     "db:nuke": "npx tsx -r dotenv/config ./drizzle/nuke.ts",
     "drizzle:up": "drizzle-kit up",
     "feed:fetch": "npx tsx -r dotenv/config ./scripts/fetch-rss.ts",
-    "algolia:test": "npx tsx -r dotenv/config ./scripts/test-algolia-index.ts"
+    "algolia:test": "npx tsx -r dotenv/config ./scripts/test-algolia-index.ts",
+    "content:sync": "npx tsx -r dotenv/config ./scripts/sync-content-table.ts"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown",

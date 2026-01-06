@@ -27,7 +27,7 @@ export async function GET() {
         feed.item({
           title: post.title,
           description: post.excerpt,
-          url: `https://www.codu.co/articles/${post.slug}`,
+          url: `https://www.codu.co/${post.user.username}/${post.slug}`,
           categories: post.tags.map(({ tag }) => tag.title.toLowerCase()),
           author: post.user.name,
           date: post.updatedAt || post.published,
