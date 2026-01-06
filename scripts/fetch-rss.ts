@@ -1,12 +1,12 @@
 /**
- * Local script to fetch RSS feeds and populate the aggregated_article table.
+ * Local script to fetch RSS feeds and populate the Content table directly.
  * Use this for testing without running the Lambda cron.
  *
  * Usage: npx tsx scripts/fetch-rss.ts
  */
 
 import { db } from "../server/db";
-import { feed_source, aggregated_article } from "../server/db/schema";
+import { feed_source, content } from "../server/db/schema";
 import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import Parser from "rss-parser";
@@ -18,12 +18,47 @@ const parser = new Parser({
   },
 });
 
+// Generate SEO-friendly slug from title + shortId
+function generateSlug(title: string, shortId: string): string {
+  const slugifiedTitle = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single
+    .substring(0, 280) // Limit length
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+
+  return `${slugifiedTitle}-${shortId}`;
+}
+
 // Simple excerpt extraction
 function extractExcerpt(content: string, maxLength = 200): string {
   // Remove HTML tags
   const text = content.replace(/<[^>]*>/g, "").trim();
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + "...";
+}
+
+// Calculate read time from word count
+function calculateReadTime(wordCount: number): number {
+  // Reading speed: ~225 words per minute
+  const readTimeMinutes = Math.ceil(wordCount / 225);
+  // Clamp between 1 and 30 minutes
+  return Math.max(1, Math.min(30, readTimeMinutes));
+}
+
+// Extract text content from HTML and count words
+function extractTextAndWordCount(html: string): { text: string; wordCount: number } {
+  // Remove scripts and styles
+  const cleaned = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const wordCount = cleaned.split(/\s+/).filter(w => w.length > 0).length;
+  return { text: cleaned, wordCount };
 }
 
 // Extract image from content or enclosure
@@ -40,8 +75,8 @@ function extractImage(item: Parser.Item): string | null {
   }
 
   // Try to extract from content
-  const content = item.content || item["content:encoded"] || "";
-  const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
+  const itemContent = item.content || (item as Record<string, unknown>)["content:encoded"] || "";
+  const imgMatch = (itemContent as string).match(/<img[^>]+src=["']([^"']+)["']/i);
   if (imgMatch) {
     return imgMatch[1];
   }
@@ -49,12 +84,61 @@ function extractImage(item: Parser.Item): string | null {
   return null;
 }
 
+// Fetch article metadata: OG image and read time (combined to avoid double requests)
+async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | null; readTimeMins: number }> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)" },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) return { ogImage: null, readTimeMins: 3 };
+    const html = await response.text();
+
+    // Extract OG image
+    let ogImage: string | null = null;
+    const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    if (ogMatch?.[1]) {
+      ogImage = ogMatch[1];
+    } else {
+      // Fall back to twitter:image
+      const twitterMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
+        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+      if (twitterMatch?.[1]) ogImage = twitterMatch[1];
+    }
+
+    // Calculate read time from word count
+    const { wordCount } = extractTextAndWordCount(html);
+    const readTimeMins = calculateReadTime(wordCount);
+
+    return { ogImage, readTimeMins };
+  } catch {
+    return { ogImage: null, readTimeMins: 3 };
+  }
+}
+
+// Small delay helper for rate limiting
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
-  console.log(`\nFetching: ${source.name} (${source.feedUrl})`);
+  console.log(`\nFetching: ${source.name} (${source.url})`);
 
   try {
-    const feed = await parser.parseURL(source.feedUrl);
+    const feed = await parser.parseURL(source.url);
     console.log(`  Found ${feed.items.length} items`);
+
+    // Batch fetch existing URLs for this source (O(1) lookup instead of O(n) queries)
+    const existingUrls = await db
+      .select({ url: content.externalUrl })
+      .from(content)
+      .where(eq(content.sourceId, source.id));
+    const existingUrlSet = new Set(existingUrls.map(r => r.url));
+    console.log(`  Already have ${existingUrlSet.size} items from this source`);
 
     let newCount = 0;
     let skippedCount = 0;
@@ -65,39 +149,73 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
         continue;
       }
 
-      // Check if article already exists
-      const existing = await db.query.aggregated_article.findFirst({
-        where: and(
-          eq(aggregated_article.url, item.link),
-          eq(aggregated_article.sourceId, source.id)
-        ),
-      });
-
-      if (existing) {
+      // Skip articles without a publish date (poor quality RSS feeds)
+      if (!item.pubDate) {
         skippedCount++;
         continue;
       }
 
-      // Extract data
+      // Skip articles older than 30 days
+      const publishedDate = new Date(item.pubDate);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      if (publishedDate < thirtyDaysAgo) {
+        skippedCount++;
+        continue;
+      }
+
+      // Fast duplicate check using Set (O(1) lookup)
+      if (existingUrlSet.has(item.link)) {
+        skippedCount++;
+        continue;
+      }
+
+      // Extract excerpt from RSS content
       const excerpt = extractExcerpt(
         item.contentSnippet || item.content || item.summary || ""
       );
-      const imageUrl = extractImage(item);
-      const publishedAt = item.pubDate
-        ? new Date(item.pubDate)
-        : new Date();
+      let imageUrl = extractImage(item);
 
-      // Insert new article
-      await db.insert(aggregated_article).values({
-        shortId: nanoid(8),
-        sourceId: source.id,
+      // Fetch article metadata (OG image + accurate read time from actual content)
+      let ogImageUrl: string | null = null;
+      let readTimeMins = 3; // Default fallback
+
+      console.log(`    Fetching: ${item.title.substring(0, 50)}...`);
+      const metadata = await fetchArticleMetadata(item.link);
+      readTimeMins = metadata.readTimeMins;
+
+      if (!imageUrl && metadata.ogImage) {
+        ogImageUrl = metadata.ogImage;
+        imageUrl = ogImageUrl;
+        console.log(`    ✓ Found OG image, ${readTimeMins} min read`);
+      } else {
+        console.log(`    ✓ ${readTimeMins} min read`);
+      }
+
+      // Rate limit: small delay between fetches
+      await delay(200);
+
+      // Generate shortId for unique content ID
+      const shortId = nanoid(7);
+      const contentId = `link-${source.id}-${shortId}`;
+      const slug = generateSlug(item.title, shortId);
+
+      // Insert directly into Content table
+      await db.insert(content).values({
+        id: contentId,
+        type: "LINK",
         title: item.title.substring(0, 500),
-        url: item.link,
         excerpt: excerpt || null,
-        author: item.creator || item.author || null,
+        externalUrl: item.link,
         imageUrl: imageUrl,
-        publishedAt: publishedAt.toISOString(),
-        fetchedAt: new Date().toISOString(),
+        ogImageUrl: ogImageUrl,
+        sourceId: source.id,
+        sourceAuthor: item.creator || item.author || null,
+        slug,
+        published: true,
+        publishedAt: publishedDate.toISOString(),
+        readTimeMins,
+        showComments: true,
       });
 
       newCount++;
@@ -112,11 +230,11 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
 }
 
 async function main() {
-  console.log("=== RSS Feed Fetcher ===\n");
+  console.log("=== RSS Feed Fetcher (Direct to Content) ===\n");
 
   // Get all active sources
   const sources = await db.query.feed_source.findMany({
-    where: eq(feed_source.isActive, true),
+    where: eq(feed_source.status, "ACTIVE"),
   });
 
   console.log(`Found ${sources.length} active feed sources`);

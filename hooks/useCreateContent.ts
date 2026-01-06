@@ -1,21 +1,27 @@
 "use client";
-// @TODO make sure post is saved before publishing (should be fine but let's disable the button if it's not up to date)
 
 import { ZodError } from "zod";
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { SavePostInput } from "../schema/post";
-import { ConfirmPostSchema } from "../schema/post";
+import { ConfirmContentSchema } from "../schema/content";
+import type { UpdateContentInput } from "../schema/content";
 
 import { api } from "@/server/trpc/react";
 import { useDebounce } from "./useDebounce";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-export type useCreatePageReturnType = {
+export type SaveContentInput = {
+  id?: string;
+  title: string;
+  body: string;
+  excerpt?: string;
+  canonicalUrl?: string;
+};
+
+export type useCreateContentReturnType = {
   tags: string[];
   setTags: React.Dispatch<React.SetStateAction<string[]>>;
   tagValue: string;
@@ -27,24 +33,24 @@ export type useCreatePageReturnType = {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
   allowUpdate: boolean;
-  handleSubmit: any;
-  register: any;
-  watch: any;
-  reset: any;
-  getValues: any;
-  control: any;
-  trigger: any;
+  handleSubmit: ReturnType<typeof useForm<SaveContentInput>>["handleSubmit"];
+  register: ReturnType<typeof useForm<SaveContentInput>>["register"];
+  watch: ReturnType<typeof useForm<SaveContentInput>>["watch"];
+  reset: ReturnType<typeof useForm<SaveContentInput>>["reset"];
+  getValues: ReturnType<typeof useForm<SaveContentInput>>["getValues"];
+  control: ReturnType<typeof useForm<SaveContentInput>>["control"];
+  trigger: ReturnType<typeof useForm<SaveContentInput>>["trigger"];
   isDirty: boolean;
-  savePost: () => Promise<void>;
+  saveContent: () => Promise<void>;
   debouncedValue: string;
   hasContent: boolean;
   isDisabled: boolean;
-  onSubmit: (data: SavePostInput) => Promise<string | number | void>;
+  onSubmit: (data: SaveContentInput) => Promise<string | number | void>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDelete: (tag: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   handleOpenDialog: (res: string) => void;
-  data: any;
+  data: ReturnType<typeof api.content.editDraft.useQuery>["data"];
   hasLoadingState: boolean;
   dataStatus: "pending" | "error" | "success";
   title: string;
@@ -52,13 +58,13 @@ export type useCreatePageReturnType = {
   saveStatus: string;
 };
 
-type useCreatepagePropTypes = {
-  postId: string;
+type useCreateContentPropTypes = {
+  contentId: string;
 };
 
-function useCreatePage({
-  postId,
-}: useCreatepagePropTypes): useCreatePageReturnType {
+function useCreateContent({
+  contentId,
+}: useCreateContentPropTypes): useCreateContentReturnType {
   const { data: session } = useSession();
   const [tags, setTags] = useState<string[]>([]);
   const [tagValue, setTagValue] = useState<string>("");
@@ -79,7 +85,7 @@ function useCreatePage({
     control,
     trigger,
     formState: { isDirty },
-  } = useForm<SavePostInput>({
+  } = useForm<SaveContentInput>({
     mode: "onSubmit",
     defaultValues: {
       title: "",
@@ -94,17 +100,14 @@ function useCreatePage({
     mutate: publish,
     status: publishStatus,
     data: publishData,
-  } = api.post.publish.useMutation();
+  } = api.content.publish.useMutation();
 
-  const { mutate: save, status: saveStatus } = api.post.update.useMutation({
+  const { mutate: save, status: saveStatus } = api.content.update.useMutation({
     onError() {
-      // TODO: Add error messages from field validations
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
       console.log("saved");
-
-      // toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -113,30 +116,28 @@ function useCreatePage({
       );
     },
   });
-  const { mutate: create, data: createData } = api.post.create.useMutation({
+
+  const { mutate: create, data: createData } = api.content.create.useMutation({
     onError() {
       toast.error("Something went wrong creating draft");
     },
     onSuccess() {
       console.log("saved");
-      // toast.success("Saved draft");
     },
   });
 
-  // TODO get rid of this for standard get post
-  // Should be allowed get draft post through regular mechanism if you own it
   const {
     data,
     status: dataStatus,
     error: dataError,
-  } = api.post.editDraft.useQuery(
-    { id: postId },
+  } = api.content.editDraft.useQuery(
+    { id: contentId },
     {
-      enabled: !!postId && shouldRefetch,
+      enabled: !!contentId && shouldRefetch,
     },
   );
 
-  // Handle query error with useEffect (onError removed in React Query v5)
+  // Handle query error with useEffect
   useEffect(() => {
     if (dataError) {
       toast.error(
@@ -165,17 +166,33 @@ function useCreatePage({
     return formData;
   };
 
-  const savePost = async () => {
+  const saveContent = async () => {
     const formData = getFormData();
     const json = JSON.parse(formData.body);
-    const titleText = json?.content?.[0]?.content?.[0]?.text || "My post";
+    const titleText = json?.content?.[0]?.content?.[0]?.text || "My article";
     const updatedFormData = { ...formData, title: titleText };
 
     if (!formData.id) {
-      // New posts default to article type
-      create({ ...updatedFormData, type: "article" as const });
+      // Create new content as ARTICLE type
+      create({
+        type: "POST",
+        title: updatedFormData.title,
+        body: updatedFormData.body,
+        excerpt: updatedFormData.excerpt,
+        canonicalUrl: updatedFormData.canonicalUrl,
+        tags: updatedFormData.tags,
+        published: false,
+      });
     } else {
-      save({ ...updatedFormData, id: postId });
+      // Update existing content
+      save({
+        id: contentId,
+        title: updatedFormData.title,
+        body: updatedFormData.body,
+        excerpt: updatedFormData.excerpt,
+        canonicalUrl: updatedFormData.canonicalUrl,
+        tags: updatedFormData.tags,
+      });
     }
     setHasUnsavedChanges(false);
   };
@@ -185,23 +202,23 @@ function useCreatePage({
     saveStatus === "pending" ||
     dataStatus === "pending";
 
-  const published = !!data?.publishedAt || false;
+  const published = !!data?.published || false;
 
-  const onSubmit = async (data: SavePostInput) => {
+  const onSubmit = async (formInput: SaveContentInput) => {
     if (!published) {
       try {
         const formData = getFormData();
-        ConfirmPostSchema.parse(formData);
-        return publish({ id: postId, published: !published });
+        ConfirmContentSchema.parse(formData);
+        return publish({ id: contentId, published: true });
       } catch (err) {
         if (err instanceof ZodError) {
           return toast.error(err.issues[0].message);
         } else {
-          return toast.error("Something went when trying to publish.");
+          return toast.error("Something went wrong when trying to publish.");
         }
       }
     }
-    await savePost();
+    await saveContent();
   };
 
   if (publishStatus === "success" && publishData?.slug && session?.user?.username) {
@@ -237,22 +254,21 @@ function useCreatePage({
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags } = data;
-    setTags(tags.map(({ tag }) => tag.title));
-    // Convert null to undefined for form compatibility
-    reset({ body: body ?? undefined, excerpt: excerpt ?? undefined, title, id });
-  }, [data]);
+    const { body, excerpt, title, id, tags: contentTags } = data;
+    setTags(contentTags.map(({ tag }) => tag.title.toUpperCase()));
+    reset({ body: body || "", excerpt: excerpt || "", title: title || "", id });
+  }, [data, reset]);
 
   useEffect(() => {
     if (published) return;
     if ((title + body).length < 5) return;
-    if (debouncedValue === (data?.title || "") + data?.body) return;
-    if (allowUpdate) savePost();
+    if (debouncedValue === (data?.title || "") + (data?.body || "")) return;
+    if (allowUpdate) saveContent();
   }, [debouncedValue]);
 
   useEffect(() => {
     if (!createData?.id) return;
-    router.push(`/alpha/new/${createData.id}`);
+    router.push(`/create/${createData.id}`);
   }, [createData, router]);
 
   const hasContent = title.length >= 5 && body.length >= 10;
@@ -262,7 +278,7 @@ function useCreatePage({
   useEffect(() => {
     if ((title + body).length < 5) return;
     if (isDirty) setHasUnsavedChanges(true);
-  }, [title, body]);
+  }, [title, body, isDirty]);
 
   const handleOpenDialog = (res: string) => {
     switch (res) {
@@ -275,10 +291,9 @@ function useCreatePage({
         break;
       case "cancel":
         setDelayDebounce(false);
-        !published && savePost();
+        !published && saveContent();
         break;
       default:
-        // setting allowUpdate in this case
         setDelayDebounce(false);
         setHasUnsavedChanges(true);
     }
@@ -304,7 +319,7 @@ function useCreatePage({
     control,
     trigger,
     isDirty,
-    savePost,
+    saveContent,
     debouncedValue,
     hasContent,
     isDisabled,
@@ -322,4 +337,4 @@ function useCreatePage({
   };
 }
 
-export default useCreatePage;
+export default useCreateContent;
