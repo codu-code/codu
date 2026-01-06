@@ -176,7 +176,7 @@ const FeedItemAggregated = ({
       signIn();
       return;
     }
-    openReport("article", id);
+    openReport("post", id);
   };
 
   const dateTime = publishedAt

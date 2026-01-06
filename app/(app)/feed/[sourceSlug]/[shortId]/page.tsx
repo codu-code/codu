@@ -21,9 +21,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Post Not Found" };
   }
 
-  // Find the post by slug (shortId is part of the slug) and sourceId
+  // Find the post by slug (shortId is used as slug in new schema) and sourceId
   const post = await db.query.posts.findFirst({
-    where: and(eq(posts.sourceId, source.id), eq(posts.type, "link")),
+    where: and(
+      eq(posts.sourceId, source.id),
+      eq(posts.type, "link"),
+      eq(posts.slug, shortId),
+    ),
     with: {
       source: true,
     },
@@ -56,9 +60,13 @@ export default async function Page({ params }: Props) {
     notFound();
   }
 
-  // Verify post exists - the shortId is part of the slug
+  // Verify post exists by slug (shortId is used as slug in new schema)
   const post = await db.query.posts.findFirst({
-    where: and(eq(posts.sourceId, source.id), eq(posts.type, "link")),
+    where: and(
+      eq(posts.sourceId, source.id),
+      eq(posts.type, "link"),
+      eq(posts.slug, shortId),
+    ),
   });
 
   if (!post) {
