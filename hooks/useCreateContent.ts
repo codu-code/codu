@@ -107,7 +107,6 @@ function useCreateContent({
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
-      console.log("saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -120,9 +119,6 @@ function useCreateContent({
   const { mutate: create, data: createData } = api.content.create.useMutation({
     onError() {
       toast.error("Something went wrong creating draft");
-    },
-    onSuccess() {
-      console.log("saved");
     },
   });
 
