@@ -47,167 +47,169 @@ import { db } from "@/server/db";
 
 export const feedRouter = createTRPCRouter({
   // Get feed of link posts (external/RSS content)
-  getFeed: publicProcedure.input(GetFeedSchema).query(async ({ ctx, input }) => {
-    const userId = ctx.session?.user?.id;
-    const limit = input?.limit ?? 20;
-    const { cursor, sort, category } = input;
+  getFeed: publicProcedure
+    .input(GetFeedSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+      const limit = input?.limit ?? 20;
+      const { cursor, sort, category } = input;
 
-    // Build the vote subquery for current user
-    const userVotes = userId
-      ? ctx.db
-          .select({
-            postId: post_votes.postId,
-            voteType: post_votes.voteType,
-          })
-          .from(post_votes)
-          .where(eq(post_votes.userId, userId))
-          .as("userVotes")
-      : null;
+      // Build the vote subquery for current user
+      const userVotes = userId
+        ? ctx.db
+            .select({
+              postId: post_votes.postId,
+              voteType: post_votes.voteType,
+            })
+            .from(post_votes)
+            .where(eq(post_votes.userId, userId))
+            .as("userVotes")
+        : null;
 
-    // Build the bookmark subquery for current user
-    const userBookmarks = userId
-      ? ctx.db
-          .select({
-            postId: bookmarks.postId,
-          })
-          .from(bookmarks)
-          .where(eq(bookmarks.userId, userId))
-          .as("userBookmarks")
-      : null;
+      // Build the bookmark subquery for current user
+      const userBookmarks = userId
+        ? ctx.db
+            .select({
+              postId: bookmarks.postId,
+            })
+            .from(bookmarks)
+            .where(eq(bookmarks.userId, userId))
+            .as("userBookmarks")
+        : null;
 
-    // Calculate score for trending
-    const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
+      // Calculate score for trending
+      const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
-    // Build order by and cursor conditions based on sort type
-    const getOrderAndCursor = () => {
-      switch (sort) {
-        case "recent":
-          return {
-            orderBy: desc(posts.publishedAt),
-            cursorCondition: cursor
-              ? lte(posts.publishedAt, cursor.publishedAt as string)
-              : undefined,
-          };
-        case "trending":
-          // Trending: recent articles with high engagement
-          return {
-            orderBy: desc(scoreExpr),
-            cursorCondition: cursor
-              ? lt(scoreExpr, cursor.score as number)
-              : undefined,
-          };
-        case "popular":
-          return {
-            orderBy: desc(posts.upvotesCount),
-            cursorCondition: cursor
-              ? lt(posts.upvotesCount, cursor.score as number)
-              : undefined,
-          };
-        default:
-          return {
-            orderBy: desc(posts.publishedAt),
-            cursorCondition: undefined,
-          };
+      // Build order by and cursor conditions based on sort type
+      const getOrderAndCursor = () => {
+        switch (sort) {
+          case "recent":
+            return {
+              orderBy: desc(posts.publishedAt),
+              cursorCondition: cursor
+                ? lte(posts.publishedAt, cursor.publishedAt as string)
+                : undefined,
+            };
+          case "trending":
+            // Trending: recent articles with high engagement
+            return {
+              orderBy: desc(scoreExpr),
+              cursorCondition: cursor
+                ? lt(scoreExpr, cursor.score as number)
+                : undefined,
+            };
+          case "popular":
+            return {
+              orderBy: desc(posts.upvotesCount),
+              cursorCondition: cursor
+                ? lt(posts.upvotesCount, cursor.score as number)
+                : undefined,
+            };
+          default:
+            return {
+              orderBy: desc(posts.publishedAt),
+              cursorCondition: undefined,
+            };
+        }
+      };
+
+      const { orderBy, cursorCondition } = getOrderAndCursor();
+
+      // Base query for link posts (external content)
+      let query = ctx.db
+        .select({
+          id: posts.id,
+          slug: posts.slug,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          url: posts.externalUrl,
+          imageUrl: posts.coverImage,
+          author: posts.sourceAuthor,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          viewsCount: posts.viewsCount,
+          sourceName: feed_sources.name,
+          sourceSlug: feed_sources.slug,
+          sourceLogo: feed_sources.logoUrl,
+          sourceWebsite: feed_sources.websiteUrl,
+          sourceCategory: feed_sources.category,
+          userVote: userVotes ? userVotes.voteType : sql<string | null>`NULL`,
+          isBookmarked: userBookmarks
+            ? sql<boolean>`CASE WHEN ${userBookmarks.postId} IS NOT NULL THEN TRUE ELSE FALSE END`
+            : sql<boolean>`FALSE`,
+        })
+        .from(posts)
+        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id));
+
+      // Add user joins if logged in
+      if (userVotes) {
+        query = query.leftJoin(
+          userVotes,
+          eq(posts.id, userVotes.postId),
+        ) as typeof query;
       }
-    };
-
-    const { orderBy, cursorCondition } = getOrderAndCursor();
-
-    // Base query for link posts (external content)
-    let query = ctx.db
-      .select({
-        id: posts.id,
-        slug: posts.slug,
-        title: posts.title,
-        excerpt: posts.excerpt,
-        url: posts.externalUrl,
-        imageUrl: posts.coverImage,
-        author: posts.sourceAuthor,
-        publishedAt: posts.publishedAt,
-        upvotes: posts.upvotesCount,
-        downvotes: posts.downvotesCount,
-        viewsCount: posts.viewsCount,
-        sourceName: feed_sources.name,
-        sourceSlug: feed_sources.slug,
-        sourceLogo: feed_sources.logoUrl,
-        sourceWebsite: feed_sources.websiteUrl,
-        sourceCategory: feed_sources.category,
-        userVote: userVotes ? userVotes.voteType : sql<string | null>`NULL`,
-        isBookmarked: userBookmarks
-          ? sql<boolean>`CASE WHEN ${userBookmarks.postId} IS NOT NULL THEN TRUE ELSE FALSE END`
-          : sql<boolean>`FALSE`,
-      })
-      .from(posts)
-      .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id));
-
-    // Add user joins if logged in
-    if (userVotes) {
-      query = query.leftJoin(
-        userVotes,
-        eq(posts.id, userVotes.postId),
-      ) as typeof query;
-    }
-    if (userBookmarks) {
-      query = query.leftJoin(
-        userBookmarks,
-        eq(posts.id, userBookmarks.postId),
-      ) as typeof query;
-    }
-
-    // Build where conditions - only link type posts with sources
-    const whereConditions = [
-      eq(posts.type, "link"),
-      eq(posts.status, "published"),
-      isNotNull(posts.sourceId),
-      category ? eq(feed_sources.category, category) : undefined,
-      cursorCondition,
-    ].filter(Boolean);
-
-    const response = await query
-      .where(and(...whereConditions))
-      .limit(limit + 1)
-      .orderBy(orderBy);
-
-    // Transform results
-    const articles = response.map((item) => ({
-      type: "aggregated" as const,
-      id: item.id,
-      shortId: null, // Not used in new schema
-      slug: item.slug,
-      title: item.title,
-      excerpt: item.excerpt,
-      url: item.url,
-      imageUrl: item.imageUrl,
-      author: item.author,
-      publishedAt: item.publishedAt,
-      upvotes: item.upvotes,
-      downvotes: item.downvotes,
-      score: item.upvotes - item.downvotes,
-      clickCount: item.viewsCount,
-      sourceName: item.sourceName,
-      sourceSlug: item.sourceSlug,
-      sourceLogo: item.sourceLogo,
-      sourceWebsite: item.sourceWebsite,
-      sourceCategory: item.sourceCategory,
-      userVote: item.userVote as "up" | "down" | null,
-      isBookmarked: Boolean(item.isBookmarked),
-    }));
-
-    // Calculate next cursor
-    let nextCursor: typeof cursor | undefined = undefined;
-    if (articles.length > limit) {
-      const nextItem = articles.pop();
-      if (nextItem) {
-        nextCursor = {
-          id: nextItem.id,
-          publishedAt: nextItem.publishedAt || undefined,
-          score: nextItem.score,
-        };
+      if (userBookmarks) {
+        query = query.leftJoin(
+          userBookmarks,
+          eq(posts.id, userBookmarks.postId),
+        ) as typeof query;
       }
-    }
 
-    return { articles, nextCursor };
-  }),
+      // Build where conditions - only link type posts with sources
+      const whereConditions = [
+        eq(posts.type, "link"),
+        eq(posts.status, "published"),
+        isNotNull(posts.sourceId),
+        category ? eq(feed_sources.category, category) : undefined,
+        cursorCondition,
+      ].filter(Boolean);
+
+      const response = await query
+        .where(and(...whereConditions))
+        .limit(limit + 1)
+        .orderBy(orderBy);
+
+      // Transform results
+      const articles = response.map((item) => ({
+        type: "aggregated" as const,
+        id: item.id,
+        shortId: null, // Not used in new schema
+        slug: item.slug,
+        title: item.title,
+        excerpt: item.excerpt,
+        url: item.url,
+        imageUrl: item.imageUrl,
+        author: item.author,
+        publishedAt: item.publishedAt,
+        upvotes: item.upvotes,
+        downvotes: item.downvotes,
+        score: item.upvotes - item.downvotes,
+        clickCount: item.viewsCount,
+        sourceName: item.sourceName,
+        sourceSlug: item.sourceSlug,
+        sourceLogo: item.sourceLogo,
+        sourceWebsite: item.sourceWebsite,
+        sourceCategory: item.sourceCategory,
+        userVote: item.userVote as "up" | "down" | null,
+        isBookmarked: Boolean(item.isBookmarked),
+      }));
+
+      // Calculate next cursor
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (articles.length > limit) {
+        const nextItem = articles.pop();
+        if (nextItem) {
+          nextCursor = {
+            id: nextItem.id,
+            publishedAt: nextItem.publishedAt || undefined,
+            score: nextItem.score,
+          };
+        }
+      }
+
+      return { articles, nextCursor };
+    }),
 
   // Vote on a post
   vote: protectedProcedure
@@ -261,7 +263,11 @@ export const feedRouter = createTRPCRouter({
         // Insert new vote
         await ctx.db
           .insert(post_votes)
-          .values({ postId: articleId, userId, voteType: voteType as "up" | "down" });
+          .values({
+            postId: articleId,
+            userId,
+            voteType: voteType as "up" | "down",
+          });
       }
 
       return { success: true, voteType };
@@ -295,10 +301,7 @@ export const feedRouter = createTRPCRouter({
         await ctx.db
           .delete(bookmarks)
           .where(
-            and(
-              eq(bookmarks.postId, articleId),
-              eq(bookmarks.userId, userId),
-            ),
+            and(eq(bookmarks.postId, articleId), eq(bookmarks.userId, userId)),
           );
       }
 
@@ -322,7 +325,12 @@ export const feedRouter = createTRPCRouter({
     const userId = ctx.session.user.id;
 
     // Import from new schema
-    const { posts, bookmarks, feed_sources, user: userTable } = await import("@/server/db/schema");
+    const {
+      posts,
+      bookmarks,
+      feed_sources,
+      user: userTable,
+    } = await import("@/server/db/schema");
 
     const saved = await ctx.db
       .select({
@@ -401,20 +409,18 @@ export const feedRouter = createTRPCRouter({
         const voteResults = await ctx.db
           .select({ voteType: post_votes.voteType })
           .from(post_votes)
-          .where(and(
-            eq(post_votes.postId, input.id),
-            eq(post_votes.userId, userId),
-          ))
+          .where(
+            and(eq(post_votes.postId, input.id), eq(post_votes.userId, userId)),
+          )
           .limit(1);
         userVote = voteResults[0]?.voteType || null;
 
         const bookmarkResults = await ctx.db
           .select({ id: bookmarks.id })
           .from(bookmarks)
-          .where(and(
-            eq(bookmarks.postId, input.id),
-            eq(bookmarks.userId, userId),
-          ))
+          .where(
+            and(eq(bookmarks.postId, input.id), eq(bookmarks.userId, userId)),
+          )
           .limit(1);
         isBookmarked = bookmarkResults.length > 0;
       }
@@ -431,15 +437,17 @@ export const feedRouter = createTRPCRouter({
         publishedAt: postRecord.publishedAt,
         upvotes: postRecord.upvotesCount,
         downvotes: postRecord.downvotesCount,
-        source: postRecord.sourceId ? {
-          id: postRecord.sourceId,
-          name: postRecord.sourceName,
-          slug: postRecord.sourceSlug,
-          logoUrl: postRecord.sourceLogo,
-          websiteUrl: postRecord.sourceWebsite,
-          category: postRecord.sourceCategory,
-          description: postRecord.sourceDescription,
-        } : null,
+        source: postRecord.sourceId
+          ? {
+              id: postRecord.sourceId,
+              name: postRecord.sourceName,
+              slug: postRecord.sourceSlug,
+              logoUrl: postRecord.sourceLogo,
+              websiteUrl: postRecord.sourceWebsite,
+              category: postRecord.sourceCategory,
+              description: postRecord.sourceDescription,
+            }
+          : null,
         userVote,
         isBookmarked,
       };
@@ -468,10 +476,7 @@ export const feedRouter = createTRPCRouter({
       const postResults = await ctx.db
         .select()
         .from(posts)
-        .where(and(
-          eq(posts.slug, shortId),
-          eq(posts.sourceId, source.id),
-        ))
+        .where(and(eq(posts.slug, shortId), eq(posts.sourceId, source.id)))
         .limit(1);
 
       const postRecord = postResults[0];
@@ -491,20 +496,24 @@ export const feedRouter = createTRPCRouter({
         const voteResults = await ctx.db
           .select({ voteType: post_votes.voteType })
           .from(post_votes)
-          .where(and(
-            eq(post_votes.postId, postRecord.id),
-            eq(post_votes.userId, userId),
-          ))
+          .where(
+            and(
+              eq(post_votes.postId, postRecord.id),
+              eq(post_votes.userId, userId),
+            ),
+          )
           .limit(1);
         userVote = voteResults[0]?.voteType || null;
 
         const bookmarkResults = await ctx.db
           .select({ id: bookmarks.id })
           .from(bookmarks)
-          .where(and(
-            eq(bookmarks.postId, postRecord.id),
-            eq(bookmarks.userId, userId),
-          ))
+          .where(
+            and(
+              eq(bookmarks.postId, postRecord.id),
+              eq(bookmarks.userId, userId),
+            ),
+          )
           .limit(1);
         isBookmarked = bookmarkResults.length > 0;
       }
@@ -520,7 +529,7 @@ export const feedRouter = createTRPCRouter({
         publishedAt: postRecord.publishedAt,
         upvotes: postRecord.upvotesCount,
         downvotes: postRecord.downvotesCount,
-        source: source,  // Use the source we already fetched
+        source: source, // Use the source we already fetched
         userVote,
         isBookmarked,
       };
@@ -549,10 +558,7 @@ export const feedRouter = createTRPCRouter({
       const postResults = await ctx.db
         .select()
         .from(posts)
-        .where(and(
-          eq(posts.slug, articleSlug),
-          eq(posts.sourceId, source.id),
-        ))
+        .where(and(eq(posts.slug, articleSlug), eq(posts.sourceId, source.id)))
         .limit(1);
 
       const postRecord = postResults[0];
@@ -571,7 +577,9 @@ export const feedRouter = createTRPCRouter({
         .innerJoin(tag, eq(post_tags.tagId, tag.id))
         .where(eq(post_tags.postId, postRecord.id));
 
-      const postTags = tagsResult.map(t => ({ tag: { id: t.id, title: t.title } }));
+      const postTags = tagsResult.map((t) => ({
+        tag: { id: t.id, title: t.title },
+      }));
 
       // Get user's vote and bookmark status
       let userVote: "up" | "down" | null = null;
@@ -581,20 +589,24 @@ export const feedRouter = createTRPCRouter({
         const voteResults = await ctx.db
           .select({ voteType: post_votes.voteType })
           .from(post_votes)
-          .where(and(
-            eq(post_votes.postId, postRecord.id),
-            eq(post_votes.userId, userId),
-          ))
+          .where(
+            and(
+              eq(post_votes.postId, postRecord.id),
+              eq(post_votes.userId, userId),
+            ),
+          )
           .limit(1);
         userVote = voteResults[0]?.voteType || null;
 
         const bookmarkResults = await ctx.db
           .select({ id: bookmarks.id })
           .from(bookmarks)
-          .where(and(
-            eq(bookmarks.postId, postRecord.id),
-            eq(bookmarks.userId, userId),
-          ))
+          .where(
+            and(
+              eq(bookmarks.postId, postRecord.id),
+              eq(bookmarks.userId, userId),
+            ),
+          )
           .limit(1);
         isBookmarked = bookmarkResults.length > 0;
       }
@@ -610,7 +622,7 @@ export const feedRouter = createTRPCRouter({
         publishedAt: postRecord.publishedAt,
         upvotes: postRecord.upvotesCount,
         downvotes: postRecord.downvotesCount,
-        source: source,  // Use the source we already fetched
+        source: source, // Use the source we already fetched
         tags: postTags,
         userVote,
         isBookmarked,
@@ -638,10 +650,9 @@ export const feedRouter = createTRPCRouter({
       const [articleCountResult] = await db
         .select({ count: count() })
         .from(posts)
-        .where(and(
-          eq(posts.sourceId, source.id),
-          eq(posts.status, "published"),
-        ));
+        .where(
+          and(eq(posts.sourceId, source.id), eq(posts.status, "published")),
+        );
 
       // Get total upvotes across all posts from this source
       const [totalVotesResult] = await db
@@ -650,10 +661,9 @@ export const feedRouter = createTRPCRouter({
           totalDownvotes: sql<number>`COALESCE(SUM(${posts.downvotesCount}), 0)`,
         })
         .from(posts)
-        .where(and(
-          eq(posts.sourceId, source.id),
-          eq(posts.status, "published"),
-        ));
+        .where(
+          and(eq(posts.sourceId, source.id), eq(posts.status, "published")),
+        );
 
       return {
         ...source,
@@ -716,10 +726,7 @@ export const feedRouter = createTRPCRouter({
             return {
               orderBy: desc(posts.publishedAt),
               cursorCondition: cursor
-                ? lte(
-                    posts.publishedAt,
-                    cursor.publishedAt as string,
-                  )
+                ? lte(posts.publishedAt, cursor.publishedAt as string)
                 : undefined,
             };
           case "trending":
@@ -843,7 +850,10 @@ export const feedRouter = createTRPCRouter({
 
       if (input?.status) {
         // Convert uppercase status to lowercase for new schema
-        const statusLower = input.status.toLowerCase() as "active" | "paused" | "error";
+        const statusLower = input.status.toLowerCase() as
+          | "active"
+          | "paused"
+          | "error";
         whereConditions.push(eq(feed_sources.status, statusLower));
       }
       if (input?.category) {
@@ -862,7 +872,10 @@ export const feedRouter = createTRPCRouter({
       .selectDistinct({ category: feed_sources.category })
       .from(feed_sources)
       .where(
-        and(eq(feed_sources.status, "active"), isNotNull(feed_sources.category)),
+        and(
+          eq(feed_sources.status, "active"),
+          isNotNull(feed_sources.category),
+        ),
       );
 
     return categories
@@ -882,10 +895,7 @@ export const feedRouter = createTRPCRouter({
         errorCount: feed_sources.errorCount,
       })
       .from(feed_sources)
-      .leftJoin(
-        posts,
-        eq(feed_sources.id, posts.sourceId),
-      )
+      .leftJoin(posts, eq(feed_sources.id, posts.sourceId))
       .groupBy(feed_sources.id)
       .orderBy(desc(feed_sources.createdAt));
 
@@ -939,7 +949,10 @@ export const feedRouter = createTRPCRouter({
       // Build update data, converting status to lowercase if provided
       const updateData: Record<string, unknown> = { ...data };
       if (data.status) {
-        updateData.status = data.status.toLowerCase() as "active" | "paused" | "error";
+        updateData.status = data.status.toLowerCase() as
+          | "active"
+          | "paused"
+          | "error";
       }
 
       const [updated] = await ctx.db
@@ -994,12 +1007,14 @@ export const feedRouter = createTRPCRouter({
       const postResults = await ctx.db
         .select()
         .from(posts)
-        .where(and(
-          eq(posts.slug, contentSlug),
-          eq(posts.sourceId, source.id),
-          eq(posts.type, "link"),
-          eq(posts.status, "published"),
-        ))
+        .where(
+          and(
+            eq(posts.slug, contentSlug),
+            eq(posts.sourceId, source.id),
+            eq(posts.type, "link"),
+            eq(posts.status, "published"),
+          ),
+        )
         .limit(1);
 
       const postRecord = postResults[0];
@@ -1019,20 +1034,24 @@ export const feedRouter = createTRPCRouter({
         const voteResults = await ctx.db
           .select({ voteType: post_votes.voteType })
           .from(post_votes)
-          .where(and(
-            eq(post_votes.postId, postRecord.id),
-            eq(post_votes.userId, userId),
-          ))
+          .where(
+            and(
+              eq(post_votes.postId, postRecord.id),
+              eq(post_votes.userId, userId),
+            ),
+          )
           .limit(1);
         userVote = voteResults[0]?.voteType || null;
 
         const bookmarkResults = await ctx.db
           .select({ id: bookmarks.id })
           .from(bookmarks)
-          .where(and(
-            eq(bookmarks.postId, postRecord.id),
-            eq(bookmarks.userId, userId),
-          ))
+          .where(
+            and(
+              eq(bookmarks.postId, postRecord.id),
+              eq(bookmarks.userId, userId),
+            ),
+          )
           .limit(1);
         isBookmarked = bookmarkResults.length > 0;
       }
@@ -1048,7 +1067,7 @@ export const feedRouter = createTRPCRouter({
         publishedAt: postRecord.publishedAt,
         upvotes: postRecord.upvotesCount,
         downvotes: postRecord.downvotesCount,
-        source: source,  // Use the source we already fetched
+        source: source, // Use the source we already fetched
         userVote,
         isBookmarked,
       };

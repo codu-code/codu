@@ -21,7 +21,10 @@ import { api } from "@/server/trpc/react";
 import { useSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
-import { ReportModal, useReportModal } from "@/components/ReportModal/ReportModal";
+import {
+  ReportModal,
+  useReportModal,
+} from "@/components/ReportModal/ReportModal";
 
 interface UnifiedActionBarProps {
   contentType: "post" | "article";
@@ -59,89 +62,95 @@ const UnifiedActionBar = ({
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
 
   // Post voting mutation
-  const { mutate: votePost, status: votePostStatus } = api.post.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
-      });
-    },
-    onError: (error) => {
-      setUserVote(initialUserVote);
-      setVotes({ upvotes: initialUpvotes, downvotes: initialDownvotes });
-      toast.error("Failed to update vote");
-      Sentry.captureException(error);
-    },
-    onSettled: () => {
-      utils.post.sidebarData.invalidate();
-    },
-  });
+  const { mutate: votePost, status: votePostStatus } =
+    api.post.vote.useMutation({
+      onMutate: async ({ voteType }) => {
+        const oldVote = userVote;
+        setUserVote(voteType);
+        setVotes((prev) => {
+          let newUpvotes = prev.upvotes;
+          let newDownvotes = prev.downvotes;
+          if (oldVote === "up") newUpvotes--;
+          if (oldVote === "down") newDownvotes--;
+          if (voteType === "up") newUpvotes++;
+          if (voteType === "down") newDownvotes++;
+          return { upvotes: newUpvotes, downvotes: newDownvotes };
+        });
+      },
+      onError: (error) => {
+        setUserVote(initialUserVote);
+        setVotes({ upvotes: initialUpvotes, downvotes: initialDownvotes });
+        toast.error("Failed to update vote");
+        Sentry.captureException(error);
+      },
+      onSettled: () => {
+        utils.post.sidebarData.invalidate();
+      },
+    });
 
   // Article voting mutation
-  const { mutate: voteArticle, status: voteArticleStatus } = api.content.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
-      });
-    },
-    onError: (error) => {
-      setUserVote(initialUserVote);
-      setVotes({ upvotes: initialUpvotes, downvotes: initialDownvotes });
-      toast.error("Failed to update vote");
-      Sentry.captureException(error);
-    },
-    onSettled: () => {
-      utils.content.getFeed.invalidate();
-    },
-  });
+  const { mutate: voteArticle, status: voteArticleStatus } =
+    api.content.vote.useMutation({
+      onMutate: async ({ voteType }) => {
+        const oldVote = userVote;
+        setUserVote(voteType);
+        setVotes((prev) => {
+          let newUpvotes = prev.upvotes;
+          let newDownvotes = prev.downvotes;
+          if (oldVote === "up") newUpvotes--;
+          if (oldVote === "down") newDownvotes--;
+          if (voteType === "up") newUpvotes++;
+          if (voteType === "down") newDownvotes++;
+          return { upvotes: newUpvotes, downvotes: newDownvotes };
+        });
+      },
+      onError: (error) => {
+        setUserVote(initialUserVote);
+        setVotes({ upvotes: initialUpvotes, downvotes: initialDownvotes });
+        toast.error("Failed to update vote");
+        Sentry.captureException(error);
+      },
+      onSettled: () => {
+        utils.content.getFeed.invalidate();
+      },
+    });
 
   // Post bookmark mutation
-  const { mutate: bookmarkPost, status: bookmarkPostStatus } = api.post.bookmark.useMutation({
-    onMutate: async ({ setBookmarked }) => {
-      setIsBookmarked(setBookmarked);
-    },
-    onError: (error) => {
-      setIsBookmarked(initialBookmarked);
-      toast.error("Failed to update bookmark");
-      Sentry.captureException(error);
-    },
-    onSettled: () => {
-      utils.post.myBookmarks.invalidate();
-    },
-  });
+  const { mutate: bookmarkPost, status: bookmarkPostStatus } =
+    api.post.bookmark.useMutation({
+      onMutate: async ({ setBookmarked }) => {
+        setIsBookmarked(setBookmarked);
+      },
+      onError: (error) => {
+        setIsBookmarked(initialBookmarked);
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
+      },
+      onSettled: () => {
+        utils.post.myBookmarks.invalidate();
+      },
+    });
 
   // Article bookmark mutation
-  const { mutate: bookmarkArticle, status: bookmarkArticleStatus } = api.feed.bookmark.useMutation({
-    onMutate: async ({ setBookmarked }) => {
-      setIsBookmarked(setBookmarked);
-    },
-    onError: (error) => {
-      setIsBookmarked(initialBookmarked);
-      toast.error("Failed to update bookmark");
-      Sentry.captureException(error);
-    },
-    onSettled: () => {
-      utils.feed.mySavedArticles.invalidate();
-    },
-  });
+  const { mutate: bookmarkArticle, status: bookmarkArticleStatus } =
+    api.feed.bookmark.useMutation({
+      onMutate: async ({ setBookmarked }) => {
+        setIsBookmarked(setBookmarked);
+      },
+      onError: (error) => {
+        setIsBookmarked(initialBookmarked);
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
+      },
+      onSettled: () => {
+        utils.feed.mySavedArticles.invalidate();
+      },
+    });
 
-  const voteStatus = contentType === "post" ? votePostStatus : voteArticleStatus;
-  const bookmarkStatus = contentType === "post" ? bookmarkPostStatus : bookmarkArticleStatus;
+  const voteStatus =
+    contentType === "post" ? votePostStatus : voteArticleStatus;
+  const bookmarkStatus =
+    contentType === "post" ? bookmarkPostStatus : bookmarkArticleStatus;
 
   const handleVote = (voteType: "up" | "down" | null) => {
     if (!session) {
@@ -161,9 +170,15 @@ const UnifiedActionBar = ({
       return;
     }
     if (contentType === "post") {
-      bookmarkPost({ postId: contentId as string, setBookmarked: !isBookmarked });
+      bookmarkPost({
+        postId: contentId as string,
+        setBookmarked: !isBookmarked,
+      });
     } else {
-      bookmarkArticle({ articleId: String(contentId), setBookmarked: !isBookmarked });
+      bookmarkArticle({
+        articleId: String(contentId),
+        setBookmarked: !isBookmarked,
+      });
     }
   };
 

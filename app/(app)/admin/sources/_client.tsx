@@ -15,7 +15,8 @@ import {
 
 const statusColors = {
   ACTIVE: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  PAUSED: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  PAUSED:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
   ERROR: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
 };
 
@@ -51,7 +52,7 @@ const AdminSourcesPage = () => {
 
       if (data.success) {
         toast.success(
-          `Synced ${data.stats.sourcesProcessed} sources. Added ${data.stats.articlesAdded} articles.`
+          `Synced ${data.stats.sourcesProcessed} sources. Added ${data.stats.articlesAdded} articles.`,
         );
         if (data.stats.errors.length > 0) {
           toast.error(`${data.stats.errors.length} sources had errors`);
@@ -80,7 +81,7 @@ const AdminSourcesPage = () => {
 
       if (data.success) {
         toast.success(
-          `${sourceName}: Added ${data.stats.articlesAdded} articles`
+          `${sourceName}: Added ${data.stats.articlesAdded} articles`,
         );
         refetch();
       } else {
@@ -101,7 +102,13 @@ const AdminSourcesPage = () => {
     onSuccess: () => {
       toast.success("Feed source added successfully");
       setShowAddForm(false);
-      setFormData({ name: "", url: "", websiteUrl: "", logoUrl: "", category: "" });
+      setFormData({
+        name: "",
+        url: "",
+        websiteUrl: "",
+        logoUrl: "",
+        category: "",
+      });
       refetch();
     },
     onError: (error) => {
@@ -143,11 +150,18 @@ const AdminSourcesPage = () => {
   const handleStatusToggle = (id: number, currentStatus: string) => {
     // Status is now lowercase in the new schema, but UpdateFeedSourceSchema still expects uppercase
     const newStatus = currentStatus === "active" ? "PAUSED" : "ACTIVE";
-    updateSource.mutate({ id, status: newStatus as "ACTIVE" | "PAUSED" | "ERROR" });
+    updateSource.mutate({
+      id,
+      status: newStatus as "ACTIVE" | "PAUSED" | "ERROR",
+    });
   };
 
   const handleDelete = (id: number, name: string) => {
-    if (confirm(`Are you sure you want to delete "${name}"? This will also delete all associated articles.`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete "${name}"? This will also delete all associated articles.`,
+      )
+    ) {
       deleteSource.mutate({ id });
     }
   };
@@ -169,7 +183,9 @@ const AdminSourcesPage = () => {
             disabled={syncingAll}
             className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
           >
-            <CloudArrowDownIcon className={`h-5 w-5 ${syncingAll ? "animate-pulse" : ""}`} />
+            <CloudArrowDownIcon
+              className={`h-5 w-5 ${syncingAll ? "animate-pulse" : ""}`}
+            />
             {syncingAll ? "Syncing..." : "Sync All"}
           </button>
           <button
@@ -196,7 +212,9 @@ const AdminSourcesPage = () => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
                 placeholder="e.g., Josh Comeau's Blog"
@@ -209,7 +227,9 @@ const AdminSourcesPage = () => {
               <input
                 type="url"
                 value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, url: e.target.value })
+                }
                 required
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
                 placeholder="https://example.com/rss.xml"
@@ -222,7 +242,9 @@ const AdminSourcesPage = () => {
               <input
                 type="url"
                 value={formData.websiteUrl}
-                onChange={(e) => setFormData({ ...formData, websiteUrl: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, websiteUrl: e.target.value })
+                }
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
                 placeholder="https://example.com"
               />
@@ -234,7 +256,9 @@ const AdminSourcesPage = () => {
               <input
                 type="url"
                 value={formData.logoUrl}
-                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, logoUrl: e.target.value })
+                }
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
                 placeholder="https://example.com/logo.png"
               />
@@ -246,7 +270,9 @@ const AdminSourcesPage = () => {
               <input
                 type="text"
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
                 placeholder="e.g., frontend, react, career"
               />
@@ -314,7 +340,8 @@ const AdminSourcesPage = () => {
             </thead>
             <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-900">
               {sources?.map((source) => {
-                const StatusIcon = statusIcons[source.status as keyof typeof statusIcons];
+                const StatusIcon =
+                  statusIcons[source.status as keyof typeof statusIcons];
                 return (
                   <tr key={source.sourceId}>
                     <td className="whitespace-nowrap px-6 py-4">
@@ -329,7 +356,9 @@ const AdminSourcesPage = () => {
                     <td className="whitespace-nowrap px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          statusColors[source.status as keyof typeof statusColors]
+                          statusColors[
+                            source.status as keyof typeof statusColors
+                          ]
                         }`}
                       >
                         <StatusIcon className="h-4 w-4" />
@@ -350,17 +379,25 @@ const AdminSourcesPage = () => {
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleSyncSource(source.sourceId, source.sourceName)}
+                          onClick={() =>
+                            handleSyncSource(source.sourceId, source.sourceName)
+                          }
                           disabled={syncingSourceId === source.sourceId}
                           className="rounded p-1 text-blue-500 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 dark:hover:bg-blue-950"
                           title="Sync now"
                         >
-                          <ArrowPathIcon className={`h-5 w-5 ${syncingSourceId === source.sourceId ? "animate-spin" : ""}`} />
+                          <ArrowPathIcon
+                            className={`h-5 w-5 ${syncingSourceId === source.sourceId ? "animate-spin" : ""}`}
+                          />
                         </button>
                         <button
-                          onClick={() => handleStatusToggle(source.sourceId, source.status)}
+                          onClick={() =>
+                            handleStatusToggle(source.sourceId, source.status)
+                          }
                           className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-                          title={source.status === "active" ? "Pause" : "Activate"}
+                          title={
+                            source.status === "active" ? "Pause" : "Activate"
+                          }
                         >
                           {source.status === "active" ? (
                             <PauseCircleIcon className="h-5 w-5" />
@@ -369,7 +406,9 @@ const AdminSourcesPage = () => {
                           )}
                         </button>
                         <button
-                          onClick={() => handleDelete(source.sourceId, source.sourceName)}
+                          onClick={() =>
+                            handleDelete(source.sourceId, source.sourceName)
+                          }
                           className="rounded p-1 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
                           title="Delete"
                         >

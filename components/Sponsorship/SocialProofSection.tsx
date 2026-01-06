@@ -71,8 +71,8 @@ export function SocialProofSection() {
         <blockquote className="mt-12 text-center">
           <p className="text-lg italic text-white/90">
             &ldquo;Partnering with Codú gave us direct access to a thriving
-            developer community. The engagement is genuine and the
-            team is fantastic to work with.&rdquo;
+            developer community. The engagement is genuine and the team is
+            fantastic to work with.&rdquo;
           </p>
           <footer className="mt-4 text-sm font-medium text-white/80">
             - Previous Sponsor Partner

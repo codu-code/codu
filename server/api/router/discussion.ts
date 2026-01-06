@@ -111,7 +111,11 @@ export const discussionRouter = createTRPCRouter({
       }
 
       // Send notification for new top-level comment on user's post
-      if (!parentId && postData[0].authorId && postData[0].authorId !== userId) {
+      if (
+        !parentId &&
+        postData[0].authorId &&
+        postData[0].authorId !== userId
+      ) {
         await ctx.db.insert(notification).values({
           notifierId: userId,
           type: NEW_COMMENT_ON_YOUR_POST,
@@ -133,7 +137,10 @@ export const discussionRouter = createTRPCRouter({
         .where(eq(comments.id, id))
         .limit(1);
 
-      if (currentComment.length === 0 || currentComment[0].authorId !== ctx.session.user.id) {
+      if (
+        currentComment.length === 0 ||
+        currentComment[0].authorId !== ctx.session.user.id
+      ) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -161,7 +168,10 @@ export const discussionRouter = createTRPCRouter({
         .where(eq(comments.id, id))
         .limit(1);
 
-      if (currentComment.length === 0 || currentComment[0].authorId !== ctx.session.user.id) {
+      if (
+        currentComment.length === 0 ||
+        currentComment[0].authorId !== ctx.session.user.id
+      ) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
@@ -189,7 +199,11 @@ export const discussionRouter = createTRPCRouter({
 
       // Check if comment exists
       const commentItem = await ctx.db
-        .select({ id: comments.id, upvotesCount: comments.upvotesCount, downvotesCount: comments.downvotesCount })
+        .select({
+          id: comments.id,
+          upvotesCount: comments.upvotesCount,
+          downvotesCount: comments.downvotesCount,
+        })
         .from(comments)
         .where(eq(comments.id, commentId))
         .limit(1);
@@ -208,8 +222,8 @@ export const discussionRouter = createTRPCRouter({
         .where(
           and(
             eq(comment_votes.commentId, commentId),
-            eq(comment_votes.userId, userId)
-          )
+            eq(comment_votes.userId, userId),
+          ),
         )
         .limit(1);
 
@@ -253,10 +267,7 @@ export const discussionRouter = createTRPCRouter({
       const [commentCount] = await db
         .select({ count: count() })
         .from(comments)
-        .where(and(
-          eq(comments.postId, contentId),
-          isNull(comments.deletedAt)
-        ));
+        .where(and(eq(comments.postId, contentId), isNull(comments.deletedAt)));
 
       // Fetch all comments for this post (flat list, we'll build tree in JS)
       const allComments = await db
@@ -286,11 +297,14 @@ export const discussionRouter = createTRPCRouter({
       let userVotes: Map<string, string> = new Map();
       if (userId) {
         const votes = await db
-          .select({ commentId: comment_votes.commentId, voteType: comment_votes.voteType })
+          .select({
+            commentId: comment_votes.commentId,
+            voteType: comment_votes.voteType,
+          })
           .from(comment_votes)
           .where(eq(comment_votes.userId, userId));
 
-        userVotes = new Map(votes.map(v => [v.commentId, v.voteType]));
+        userVotes = new Map(votes.map((v) => [v.commentId, v.voteType]));
       }
 
       // Build tree structure
@@ -309,13 +323,15 @@ export const discussionRouter = createTRPCRouter({
           downvotes: comment.downvotesCount,
           score: comment.upvotesCount - comment.downvotesCount,
           userVote: userVotes.get(comment.id) || null,
-          user: comment.deletedAt ? null : {
-            id: comment.authorId,
-            name: comment.authorName,
-            image: comment.authorImage,
-            username: comment.authorUsername,
-            email: comment.authorEmail,
-          },
+          user: comment.deletedAt
+            ? null
+            : {
+                id: comment.authorId,
+                name: comment.authorName,
+                image: comment.authorImage,
+                username: comment.authorUsername,
+                email: comment.authorEmail,
+              },
           children: [],
         };
         commentMap.set(comment.id, shaped);
@@ -341,10 +357,9 @@ export const discussionRouter = createTRPCRouter({
       const [result] = await db
         .select({ count: count() })
         .from(comments)
-        .where(and(
-          eq(comments.postId, input.contentId),
-          isNull(comments.deletedAt)
-        ));
+        .where(
+          and(eq(comments.postId, input.contentId), isNull(comments.deletedAt)),
+        );
 
       return result.count;
     }),

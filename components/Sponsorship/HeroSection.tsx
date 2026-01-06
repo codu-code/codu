@@ -24,17 +24,14 @@ export function HeroSection() {
 
         {/* Subheadline */}
         <p className="mx-auto mt-6 max-w-2xl text-lg text-neutral-300 sm:text-xl">
-          Connect your brand with one of the most engaged web
-          developer communities online. From newsletter ads to event sponsorships,
-          we help you hire and grow.
+          Connect your brand with one of the most engaged web developer
+          communities online. From newsletter ads to event sponsorships, we help
+          you hire and grow.
         </p>
 
         {/* Single CTA - research shows single CTA converts 266% better */}
         <div className="mt-10 flex justify-center">
-          <Link
-            href="#contact"
-            className="primary-button px-10 py-4 text-lg"
-          >
+          <Link href="#contact" className="primary-button px-10 py-4 text-lg">
             Let&apos;s Talk
           </Link>
         </div>

@@ -54,10 +54,11 @@ const ensureHttps = (url: string | null | undefined): string | null => {
 
 const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
   const { data: session } = useSession();
-  const { data: linkContent, status } = api.feed.getLinkContentBySourceAndSlug.useQuery({
-    sourceSlug,
-    contentSlug,
-  });
+  const { data: linkContent, status } =
+    api.feed.getLinkContentBySourceAndSlug.useQuery({
+      sourceSlug,
+      contentSlug,
+    });
 
   const { data: discussionCount } =
     api.discussion.getContentDiscussionCount.useQuery(
@@ -73,7 +74,10 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
   useEffect(() => {
     if (linkContent) {
       setUserVote(linkContent.userVote ?? null);
-      setVotes({ upvotes: linkContent.upvotes, downvotes: linkContent.downvotes });
+      setVotes({
+        upvotes: linkContent.upvotes,
+        downvotes: linkContent.downvotes,
+      });
     }
   }, [linkContent]);
 
@@ -93,7 +97,10 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
     },
     onError: () => {
       setUserVote(linkContent?.userVote ?? null);
-      setVotes({ upvotes: linkContent?.upvotes ?? 0, downvotes: linkContent?.downvotes ?? 0 });
+      setVotes({
+        upvotes: linkContent?.upvotes ?? 0,
+        downvotes: linkContent?.downvotes ?? 0,
+      });
       toast.error("Failed to update vote");
     },
   });
@@ -165,7 +172,9 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
       })
     : null;
 
-  const faviconUrl = getFaviconUrl(linkContent.source?.websiteUrl || externalUrl);
+  const faviconUrl = getFaviconUrl(
+    linkContent.source?.websiteUrl || externalUrl,
+  );
   const hostname = externalUrl ? getHostname(externalUrl) : null;
   const score = votes.upvotes - votes.downvotes;
 
@@ -173,7 +182,10 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-        <Link href="/feed" className="hover:text-neutral-700 dark:hover:text-neutral-200">
+        <Link
+          href="/feed"
+          className="hover:text-neutral-700 dark:hover:text-neutral-200"
+        >
           Feed
         </Link>
         <span aria-hidden="true">/</span>

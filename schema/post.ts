@@ -1,11 +1,21 @@
 import z from "zod";
 
 // Post type enum matching the database (lowercase)
-export const PostTypeSchema = z.enum(["article", "discussion", "link", "resource"]);
+export const PostTypeSchema = z.enum([
+  "article",
+  "discussion",
+  "link",
+  "resource",
+]);
 export type PostType = z.TypeOf<typeof PostTypeSchema>;
 
 // Post status enum matching the database
-export const PostStatusSchema = z.enum(["draft", "published", "scheduled", "unlisted"]);
+export const PostStatusSchema = z.enum([
+  "draft",
+  "published",
+  "scheduled",
+  "unlisted",
+]);
 export type PostStatus = z.TypeOf<typeof PostStatusSchema>;
 
 // Vote type enum (lowercase)
@@ -67,7 +77,9 @@ export const SavePostSchema = z.object({
   id: z.string(),
   title: z.string().trim().max(500, "Max title length is 500 characters."),
   body: z.string().trim(),
-  excerpt: z.optional(z.string().trim().max(300, "Max length is 300 characters.")),
+  excerpt: z.optional(
+    z.string().trim().max(300, "Max length is 300 characters."),
+  ),
   canonicalUrl: z.optional(z.string().trim().url()),
   tags: z.string().array().max(5).optional(),
   status: PostStatusSchema.optional(),
@@ -152,8 +164,15 @@ export type PublishPostInput = z.TypeOf<typeof PublishPostSchema>;
 
 // Confirm Post Schema - validation before publishing
 export const ConfirmPostSchema = z.object({
-  body: z.string().trim().min(50, "Content is too short. Minimum of 50 characters."),
-  title: z.string().trim().max(500).min(10, "Title is too short. Minimum of 10 characters."),
+  body: z
+    .string()
+    .trim()
+    .min(50, "Content is too short. Minimum of 50 characters."),
+  title: z
+    .string()
+    .trim()
+    .max(500)
+    .min(10, "Title is too short. Minimum of 10 characters."),
   excerpt: z.string().trim().max(300).optional(),
   canonicalUrl: z.string().trim().url().optional().or(z.literal("")),
   tags: z.string().array().max(5).optional(),

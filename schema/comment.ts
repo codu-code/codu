@@ -38,7 +38,10 @@ export type DeleteCommentInput = z.TypeOf<typeof DeleteCommentSchema>;
 // Get Comments for a Post Schema
 export const GetCommentsSchema = z.object({
   postId: z.string(),
-  sort: z.enum(["best", "top", "new", "old", "controversial"]).default("best").optional(),
+  sort: z
+    .enum(["best", "top", "new", "old", "controversial"])
+    .default("best")
+    .optional(),
   limit: z.number().min(1).max(100).default(50).optional(),
   cursor: z
     .object({

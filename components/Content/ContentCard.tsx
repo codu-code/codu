@@ -58,7 +58,9 @@ type Props = {
 };
 
 // Get favicon URL from a website
-const getFaviconUrl = (websiteUrl: string | null | undefined): string | null => {
+const getFaviconUrl = (
+  websiteUrl: string | null | undefined,
+): string | null => {
   if (!websiteUrl) return null;
   try {
     const url = new URL(websiteUrl);
@@ -107,11 +109,26 @@ const ensureHttps = (url: string | null | undefined): string | null => {
 
 // Content type badge colors
 const typeColors: Record<ContentType, { bg: string; text: string }> = {
-  POST: { bg: "bg-blue-100 dark:bg-blue-900", text: "text-blue-700 dark:text-blue-300" },
-  LINK: { bg: "bg-green-100 dark:bg-green-900", text: "text-green-700 dark:text-green-300" },
-  QUESTION: { bg: "bg-purple-100 dark:bg-purple-900", text: "text-purple-700 dark:text-purple-300" },
-  VIDEO: { bg: "bg-red-100 dark:bg-red-900", text: "text-red-700 dark:text-red-300" },
-  DISCUSSION: { bg: "bg-yellow-100 dark:bg-yellow-900", text: "text-yellow-700 dark:text-yellow-300" },
+  POST: {
+    bg: "bg-blue-100 dark:bg-blue-900",
+    text: "text-blue-700 dark:text-blue-300",
+  },
+  LINK: {
+    bg: "bg-green-100 dark:bg-green-900",
+    text: "text-green-700 dark:text-green-300",
+  },
+  QUESTION: {
+    bg: "bg-purple-100 dark:bg-purple-900",
+    text: "text-purple-700 dark:text-purple-300",
+  },
+  VIDEO: {
+    bg: "bg-red-100 dark:bg-red-900",
+    text: "text-red-700 dark:text-red-300",
+  },
+  DISCUSSION: {
+    bg: "bg-yellow-100 dark:bg-yellow-900",
+    text: "text-yellow-700 dark:text-yellow-300",
+  },
 };
 
 const typeLabels: Record<ContentType, string> = {
@@ -221,8 +238,13 @@ const ContentCard = ({
 
   // Determine author info
   const authorName = userName || sourceAuthor;
-  const authorImage = userImage || sourceLogo || (faviconUrl ? faviconUrl : null);
-  const authorLink = username ? `/${username}` : sourceSlug ? `/feed/${sourceSlug}` : null;
+  const authorImage =
+    userImage || sourceLogo || (faviconUrl ? faviconUrl : null);
+  const authorLink = username
+    ? `/${username}`
+    : sourceSlug
+      ? `/feed/${sourceSlug}`
+      : null;
   const displayName = sourceName || authorName || "Unknown";
 
   return (
@@ -376,7 +398,9 @@ const ContentCard = ({
               <button
                 onClick={handleBookmark}
                 disabled={bookmarkStatus === "pending"}
-                aria-label={initialBookmarked ? "Remove from saved" : "Save article"}
+                aria-label={
+                  initialBookmarked ? "Remove from saved" : "Save article"
+                }
                 className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   initialBookmarked
                     ? "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
@@ -401,7 +425,9 @@ const ContentCard = ({
               className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
               <ShareIcon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline" aria-hidden="true">Share</span>
+              <span className="hidden sm:inline" aria-hidden="true">
+                Share
+              </span>
             </button>
 
             {/* Triple-dot menu */}

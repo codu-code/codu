@@ -146,7 +146,10 @@ export const reportRouter = createTRPCRouter({
               sourceName: feed_source.name,
             })
             .from(aggregated_article)
-            .leftJoin(feed_source, eq(aggregated_article.sourceId, feed_source.id))
+            .leftJoin(
+              feed_source,
+              eq(aggregated_article.sourceId, feed_source.id),
+            )
             .where(eq(aggregated_article.id, id));
 
           if (!articleDetails) {
@@ -165,7 +168,10 @@ export const reportRouter = createTRPCRouter({
             email: "", // Feed articles don't have a user email
             title: articleDetails.title,
             userId: "", // Feed articles don't have a userId
-            username: articleDetails.sourceName || articleDetails.sourceSlug || "Unknown Source",
+            username:
+              articleDetails.sourceName ||
+              articleDetails.sourceSlug ||
+              "Unknown Source",
             reportedBy: {
               username: reportingUser.username,
               id: reportingUser.id,
@@ -242,7 +248,9 @@ export const reportRouter = createTRPCRouter({
         where: (r, { eq, and }) =>
           and(
             eq(r.reporterId, reporterId),
-            contentId ? eq(r.contentId, contentId) : eq(r.discussionId, discussionId!),
+            contentId
+              ? eq(r.contentId, contentId)
+              : eq(r.discussionId, discussionId!),
           ),
       });
 
@@ -291,7 +299,8 @@ export const reportRouter = createTRPCRouter({
         conditions.push(lt(content_report.id, cursor.id));
       }
 
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       const reports = await db.query.content_report.findMany({
         where: whereClause,

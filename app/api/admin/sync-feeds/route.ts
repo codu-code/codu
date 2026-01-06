@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
-import { feed_source, aggregated_article, aggregated_article_tag, tag } from "@/server/db/schema";
+import {
+  feed_source,
+  aggregated_article,
+  aggregated_article_tag,
+  tag,
+} from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import Parser from "rss-parser";
 import { customAlphabet } from "nanoid";
@@ -15,18 +20,68 @@ const generateShortId = customAlphabet(
 
 // Keyword to tag mapping for auto-tagging
 const TAG_KEYWORDS: Record<string, string[]> = {
-  JAVASCRIPT: ["javascript", "js", "node", "nodejs", "deno", "bun", "npm", "yarn"],
+  JAVASCRIPT: [
+    "javascript",
+    "js",
+    "node",
+    "nodejs",
+    "deno",
+    "bun",
+    "npm",
+    "yarn",
+  ],
   REACT: ["react", "nextjs", "next.js", "remix", "gatsby"],
   VUE: ["vue", "nuxt", "vuejs"],
   TYPESCRIPT: ["typescript", "ts"],
   PYTHON: ["python", "django", "flask", "fastapi"],
   CSS: ["css", "tailwind", "sass", "scss", "styling", "styled-components"],
-  "WEB DEV": ["web", "frontend", "backend", "fullstack", "api", "rest", "graphql"],
-  DEVOPS: ["docker", "kubernetes", "k8s", "ci/cd", "aws", "azure", "gcp", "cloud"],
+  "WEB DEV": [
+    "web",
+    "frontend",
+    "backend",
+    "fullstack",
+    "api",
+    "rest",
+    "graphql",
+  ],
+  DEVOPS: [
+    "docker",
+    "kubernetes",
+    "k8s",
+    "ci/cd",
+    "aws",
+    "azure",
+    "gcp",
+    "cloud",
+  ],
   CAREER: ["career", "job", "interview", "resume", "hiring", "salary"],
-  TUTORIAL: ["tutorial", "guide", "how to", "learn", "beginner", "getting started"],
-  AI: ["ai", "machine learning", "ml", "gpt", "llm", "openai", "claude", "chatgpt"],
-  DATABASE: ["database", "sql", "postgres", "mongodb", "redis", "prisma", "drizzle"],
+  TUTORIAL: [
+    "tutorial",
+    "guide",
+    "how to",
+    "learn",
+    "beginner",
+    "getting started",
+  ],
+  AI: [
+    "ai",
+    "machine learning",
+    "ml",
+    "gpt",
+    "llm",
+    "openai",
+    "claude",
+    "chatgpt",
+  ],
+  DATABASE: [
+    "database",
+    "sql",
+    "postgres",
+    "mongodb",
+    "redis",
+    "prisma",
+    "drizzle",
+  ],
 };
 
 const parser = new Parser({
@@ -54,7 +109,10 @@ function extractTags(title: string, content: string): string[] {
 
 function extractExcerpt(content: string | undefined, maxLength = 500): string {
   if (!content) return "";
-  const text = content.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+  const text = content
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + "...";
 }
@@ -66,11 +124,14 @@ function extractImageUrl(item: Parser.Item): string | null {
   const mediaThumbnail = (item as Record<string, unknown>).mediaThumbnail as
     | { $?: { url?: string } }
     | undefined;
-  const enclosure = item.enclosure as { url?: string; type?: string } | undefined;
+  const enclosure = item.enclosure as
+    | { url?: string; type?: string }
+    | undefined;
 
   if (mediaContent?.$?.url) return mediaContent.$.url;
   if (mediaThumbnail?.$?.url) return mediaThumbnail.$.url;
-  if (enclosure?.url && enclosure.type?.startsWith("image/")) return enclosure.url;
+  if (enclosure?.url && enclosure.type?.startsWith("image/"))
+    return enclosure.url;
 
   return null;
 }
@@ -129,7 +190,8 @@ export async function POST(request: Request) {
             continue;
           }
 
-          const contentSnippet = item.contentSnippet || item.content || item.summary || "";
+          const contentSnippet =
+            item.contentSnippet || item.content || item.summary || "";
           const excerpt = extractExcerpt(contentSnippet);
           const imageUrl = extractImageUrl(item);
 
@@ -151,7 +213,9 @@ export async function POST(request: Request) {
               externalUrl: item.link,
               imageUrl,
               sourceAuthor: item.creator || null,
-              publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : null,
+              publishedAt: item.pubDate
+                ? new Date(item.pubDate).toISOString()
+                : null,
             })
             .returning();
 
@@ -164,7 +228,10 @@ export async function POST(request: Request) {
               });
 
               if (!existingTag) {
-                const [newTag] = await db.insert(tag).values({ title: tagTitle }).returning();
+                const [newTag] = await db
+                  .insert(tag)
+                  .values({ title: tagTitle })
+                  .returning();
                 existingTag = newTag;
               }
 

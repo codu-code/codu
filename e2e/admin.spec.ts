@@ -52,7 +52,9 @@ test.describe("Admin Dashboard", () => {
 
   test("Should show moderation section", async ({ page }) => {
     await page.goto("http://localhost:3000/admin");
-    await expect(page.getByRole("heading", { name: "Moderation" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Moderation" }),
+    ).toBeVisible();
 
     // Should show moderation stats
     await expect(page.getByText("Pending Reports")).toBeVisible();
@@ -63,13 +65,17 @@ test.describe("Admin Dashboard", () => {
 
   test("Should show quick actions section", async ({ page }) => {
     await page.goto("http://localhost:3000/admin");
-    await expect(page.getByRole("heading", { name: "Quick Actions" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Quick Actions" }),
+    ).toBeVisible();
 
     // Should show quick action links
     await expect(page.getByText("Moderation Queue")).toBeVisible();
     await expect(page.getByText("User Management")).toBeVisible();
     // Use role link to be more specific since "Feed Sources" appears multiple times
-    await expect(page.getByRole("link", { name: /Feed Sources.*Manage RSS feed/i })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Feed Sources.*Manage RSS feed/i }),
+    ).toBeVisible();
   });
 
   test("Should navigate to user management", async ({ page }) => {
@@ -87,7 +93,9 @@ test.describe("Admin Dashboard", () => {
   test("Should navigate to feed sources", async ({ page }) => {
     await page.goto("http://localhost:3000/admin");
     // Use role link to be more specific since "Feed Sources" appears multiple times
-    await page.getByRole("link", { name: /Feed Sources.*Manage RSS feed/i }).click();
+    await page
+      .getByRole("link", { name: /Feed Sources.*Manage RSS feed/i })
+      .click();
     await expect(page).toHaveURL("http://localhost:3000/admin/sources");
   });
 });

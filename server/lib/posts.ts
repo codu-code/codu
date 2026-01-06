@@ -3,7 +3,15 @@ import { db } from "@/server/db/index";
 import * as Sentry from "@sentry/nextjs";
 import "server-only";
 import { z } from "zod";
-import { bookmark, post, posts, user, aggregated_article, feed_source, feed_sources } from "../db/schema";
+import {
+  bookmark,
+  post,
+  posts,
+  user,
+  aggregated_article,
+  feed_source,
+  feed_sources,
+} from "../db/schema";
 import { eq, and, isNotNull, lte, desc, sql } from "drizzle-orm";
 
 export const GetPostSchema = z.object({
@@ -208,7 +216,10 @@ export const GetUnifiedTrendingSchema = z.object({
 
 type GetUnifiedTrending = z.infer<typeof GetUnifiedTrendingSchema>;
 
-export async function getUnifiedTrending({ currentUserId, limit = 8 }: GetUnifiedTrending): Promise<TrendingItem[] | null> {
+export async function getUnifiedTrending({
+  currentUserId,
+  limit = 8,
+}: GetUnifiedTrending): Promise<TrendingItem[] | null> {
   try {
     GetUnifiedTrendingSchema.parse({ currentUserId, limit });
 
@@ -268,7 +279,10 @@ export async function getUnifiedTrending({ currentUserId, limit = 8 }: GetUnifie
       .orderBy(desc(sql`(${posts.upvotesCount} - ${posts.downvotesCount})`))
       .limit(limit);
 
-    const [userPosts, feedArticles] = await Promise.all([userPostsQuery, feedQuery]);
+    const [userPosts, feedArticles] = await Promise.all([
+      userPostsQuery,
+      feedQuery,
+    ]);
 
     // Transform posts to unified format
     const transformedPosts: TrendingItem[] = userPosts.map((p) => ({

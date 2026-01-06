@@ -23,10 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // Find the post by slug (shortId is part of the slug) and sourceId
   const post = await db.query.posts.findFirst({
-    where: and(
-      eq(posts.sourceId, source.id),
-      eq(posts.type, "link"),
-    ),
+    where: and(eq(posts.sourceId, source.id), eq(posts.type, "link")),
     with: {
       source: true,
     },
@@ -61,10 +58,7 @@ export default async function Page({ params }: Props) {
 
   // Verify post exists - the shortId is part of the slug
   const post = await db.query.posts.findFirst({
-    where: and(
-      eq(posts.sourceId, source.id),
-      eq(posts.type, "link"),
-    ),
+    where: and(eq(posts.sourceId, source.id), eq(posts.type, "link")),
   });
 
   if (!post) {

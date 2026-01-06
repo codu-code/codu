@@ -56,7 +56,7 @@ const AdminDashboard = () => {
               {isLoading ? (
                 <span className="inline-block h-8 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
               ) : (
-                value ?? 0
+                (value ?? 0)
               )}
             </p>
           </div>

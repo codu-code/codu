@@ -92,16 +92,22 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
     );
   }
 
-  const hostname = article.externalUrl ? getHostname(article.externalUrl) : null;
-  const shareUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/feed/${sourceSlug}/${shortId}`
-    : `/feed/${sourceSlug}/${shortId}`;
+  const hostname = article.externalUrl
+    ? getHostname(article.externalUrl)
+    : null;
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/feed/${sourceSlug}/${shortId}`
+      : `/feed/${sourceSlug}/${shortId}`;
 
   return (
     <ContentDetailLayout
       breadcrumbs={[
         { label: "Feed", href: "/feed" },
-        { label: article.source?.name || sourceSlug, href: `/feed/${sourceSlug}` },
+        {
+          label: article.source?.name || sourceSlug,
+          href: `/feed/${sourceSlug}`,
+        },
       ]}
       actionBar={
         <UnifiedActionBar
@@ -127,9 +133,7 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
           />
         )
       }
-      discussion={
-        <DiscussionArea contentId={article.id} />
-      }
+      discussion={<DiscussionArea contentId={article.id} />}
     >
       {/* Content type badge */}
       <div className="mb-3">

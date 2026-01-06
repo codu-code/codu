@@ -36,7 +36,12 @@ test.describe("Authenticated Saved Page", () => {
     await page.waitForSelector("article");
 
     // Get the title of the first article before bookmarking
-    const articleTitle = await page.locator("article").first().locator("a").first().textContent();
+    const articleTitle = await page
+      .locator("article")
+      .first()
+      .locator("a")
+      .first()
+      .textContent();
 
     // Click bookmark on first item
     const bookmarkButton = page.getByTestId("bookmark-button").first();
@@ -48,7 +53,9 @@ test.describe("Authenticated Saved Page", () => {
 
     // The bookmarked article should appear
     if (articleTitle) {
-      await expect(page.getByText(articleTitle.trim())).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText(articleTitle.trim())).toBeVisible({
+        timeout: 10000,
+      });
     }
   });
 

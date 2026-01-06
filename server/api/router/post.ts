@@ -72,7 +72,15 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 25;
-      const { cursor, sort, type, category, sourceId, tag: tagFilter, authorId } = input;
+      const {
+        cursor,
+        sort,
+        type,
+        category,
+        sourceId,
+        tag: tagFilter,
+        authorId,
+      } = input;
 
       // Build the vote subquery for current user
       const userVotesSubquery = userId
@@ -128,16 +136,18 @@ export const postRouter = createTRPCRouter({
           case "trending":
             return {
               orderBy: desc(scoreExpr),
-              cursorCondition: cursor?.score !== undefined
-                ? lt(scoreExpr, cursor.score)
-                : undefined,
+              cursorCondition:
+                cursor?.score !== undefined
+                  ? lt(scoreExpr, cursor.score)
+                  : undefined,
             };
           case "popular":
             return {
               orderBy: desc(posts.upvotesCount),
-              cursorCondition: cursor?.score !== undefined
-                ? lt(posts.upvotesCount, cursor.score)
-                : undefined,
+              cursorCondition:
+                cursor?.score !== undefined
+                  ? lt(posts.upvotesCount, cursor.score)
+                  : undefined,
             };
           default:
             return {
@@ -196,7 +206,10 @@ export const postRouter = createTRPCRouter({
           .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
           .leftJoin(user, eq(posts.authorId, user.id))
           .leftJoin(userVotesSubquery, eq(posts.id, userVotesSubquery.postId))
-          .leftJoin(userBookmarksSubquery, eq(posts.id, userBookmarksSubquery.postId))
+          .leftJoin(
+            userBookmarksSubquery,
+            eq(posts.id, userBookmarksSubquery.postId),
+          )
           .where(and(...conditions))
           .orderBy(orderBy)
           .limit(limit + 1);
@@ -248,7 +261,9 @@ export const postRouter = createTRPCRouter({
       const results = await query;
 
       // Check if there's a next page
-      let nextCursor: { id: string; publishedAt?: string; score?: number } | undefined;
+      let nextCursor:
+        | { id: string; publishedAt?: string; score?: number }
+        | undefined;
       if (results.length > limit) {
         const lastItem = results.pop()!;
         const score = lastItem.upvotesCount - lastItem.downvotesCount;
@@ -280,7 +295,7 @@ export const postRouter = createTRPCRouter({
           excerpt: posts.excerpt,
           externalUrl: posts.externalUrl,
           coverImage: posts.coverImage,
-                    slug: posts.slug,
+          slug: posts.slug,
           canonicalUrl: posts.canonicalUrl,
           publishedAt: posts.publishedAt,
           upvotesCount: posts.upvotesCount,
@@ -333,20 +348,14 @@ export const postRouter = createTRPCRouter({
             .select({ voteType: postVotes.voteType })
             .from(postVotes)
             .where(
-              and(
-                eq(postVotes.postId, input.id),
-                eq(postVotes.userId, userId)
-              )
+              and(eq(postVotes.postId, input.id), eq(postVotes.userId, userId)),
             )
             .limit(1),
           ctx.db
             .select({ id: bookmarks.id })
             .from(bookmarks)
             .where(
-              and(
-                eq(bookmarks.postId, input.id),
-                eq(bookmarks.userId, userId)
-              )
+              and(eq(bookmarks.postId, input.id), eq(bookmarks.userId, userId)),
             )
             .limit(1),
         ]);
@@ -377,7 +386,7 @@ export const postRouter = createTRPCRouter({
           excerpt: posts.excerpt,
           externalUrl: posts.externalUrl,
           coverImage: posts.coverImage,
-                    slug: posts.slug,
+          slug: posts.slug,
           canonicalUrl: posts.canonicalUrl,
           publishedAt: posts.publishedAt,
           upvotesCount: posts.upvotesCount,
@@ -430,20 +439,14 @@ export const postRouter = createTRPCRouter({
             .select({ voteType: postVotes.voteType })
             .from(postVotes)
             .where(
-              and(
-                eq(postVotes.postId, item.id),
-                eq(postVotes.userId, userId)
-              )
+              and(eq(postVotes.postId, item.id), eq(postVotes.userId, userId)),
             )
             .limit(1),
           ctx.db
             .select({ id: bookmarks.id })
             .from(bookmarks)
             .where(
-              and(
-                eq(bookmarks.postId, item.id),
-                eq(bookmarks.userId, userId)
-              )
+              and(eq(bookmarks.postId, item.id), eq(bookmarks.userId, userId)),
             )
             .limit(1),
         ]);
@@ -473,7 +476,10 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      if ((input.type === "link" || input.type === "resource") && !input.externalUrl) {
+      if (
+        (input.type === "link" || input.type === "resource") &&
+        !input.externalUrl
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "External URL is required for links and resources",
@@ -497,7 +503,8 @@ export const postRouter = createTRPCRouter({
           slug,
           readingTime,
           status: input.status,
-          publishedAt: input.status === "published" ? new Date().toISOString() : null,
+          publishedAt:
+            input.status === "published" ? new Date().toISOString() : null,
           showComments: input.showComments,
         })
         .returning();
@@ -571,7 +578,8 @@ export const postRouter = createTRPCRouter({
         updateData.readingTime = calculateReadTime(input.body);
       }
       if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
-      if (input.canonicalUrl !== undefined) updateData.canonicalUrl = input.canonicalUrl || null;
+      if (input.canonicalUrl !== undefined)
+        updateData.canonicalUrl = input.canonicalUrl || null;
       if (input.status !== undefined) {
         updateData.status = input.status;
         if (input.status === "published" && input.publishedAt) {
@@ -590,9 +598,7 @@ export const postRouter = createTRPCRouter({
       // Update tags if provided
       if (input.tags !== undefined) {
         // Remove existing tags
-        await ctx.db
-          .delete(postTags)
-          .where(eq(postTags.postId, input.id));
+        await ctx.db.delete(postTags).where(eq(postTags.postId, input.id));
 
         // Add new tags
         for (const tagName of input.tags) {
@@ -681,12 +687,7 @@ export const postRouter = createTRPCRouter({
       const existingVote = await ctx.db
         .select({ id: postVotes.id, voteType: postVotes.voteType })
         .from(postVotes)
-        .where(
-          and(
-            eq(postVotes.postId, postId),
-            eq(postVotes.userId, userId)
-          )
-        )
+        .where(and(eq(postVotes.postId, postId), eq(postVotes.userId, userId)))
         .limit(1);
 
       // Database triggers handle vote count updates automatically (tr_post_vote_counts)
@@ -749,10 +750,7 @@ export const postRouter = createTRPCRouter({
         await ctx.db
           .delete(bookmarks)
           .where(
-            and(
-              eq(bookmarks.postId, postId),
-              eq(bookmarks.userId, userId)
-            )
+            and(eq(bookmarks.postId, postId), eq(bookmarks.userId, userId)),
           );
       }
 
@@ -779,10 +777,7 @@ export const postRouter = createTRPCRouter({
               .select({ voteType: postVotes.voteType })
               .from(postVotes)
               .where(
-                and(
-                  eq(postVotes.postId, id),
-                  eq(postVotes.userId, userId)
-                )
+                and(eq(postVotes.postId, id), eq(postVotes.userId, userId)),
               )
           : [null],
         userId
@@ -790,10 +785,7 @@ export const postRouter = createTRPCRouter({
               .select({ id: bookmarks.id })
               .from(bookmarks)
               .where(
-                and(
-                  eq(bookmarks.postId, id),
-                  eq(bookmarks.userId, userId)
-                )
+                and(eq(bookmarks.postId, id), eq(bookmarks.userId, userId)),
               )
           : [null],
       ]);
@@ -801,7 +793,9 @@ export const postRouter = createTRPCRouter({
       return {
         upvotes: postData?.upvotesCount ?? 0,
         downvotes: postData?.downvotesCount ?? 0,
-        userVote: (userVoteData as { voteType: "up" | "down" } | null)?.voteType ?? null,
+        userVote:
+          (userVoteData as { voteType: "up" | "down" } | null)?.voteType ??
+          null,
         currentUserBookmarked: !!userBookmark,
       };
     }),
@@ -942,12 +936,7 @@ export const postRouter = createTRPCRouter({
           updatedAt: posts.updatedAt,
         })
         .from(posts)
-        .where(
-          and(
-            eq(posts.id, input.id),
-            eq(posts.authorId, authorId)
-          )
-        )
+        .where(and(eq(posts.id, input.id), eq(posts.authorId, authorId)))
         .limit(1);
 
       if (results.length === 0) {
@@ -996,8 +985,8 @@ export const postRouter = createTRPCRouter({
         and(
           eq(posts.authorId, authorId),
           eq(posts.type, "article"),
-          eq(posts.status, "draft")
-        )
+          eq(posts.status, "draft"),
+        ),
       )
       .orderBy(desc(posts.updatedAt));
   }),
@@ -1028,8 +1017,8 @@ export const postRouter = createTRPCRouter({
           eq(posts.authorId, authorId),
           eq(posts.type, "article"),
           eq(posts.status, "published"),
-          lte(posts.publishedAt, now)
-        )
+          lte(posts.publishedAt, now),
+        ),
       )
       .orderBy(desc(posts.publishedAt));
   }),
@@ -1057,8 +1046,8 @@ export const postRouter = createTRPCRouter({
           eq(posts.authorId, authorId),
           eq(posts.type, "article"),
           eq(posts.status, "scheduled"),
-          gt(posts.publishedAt, now)
-        )
+          gt(posts.publishedAt, now),
+        ),
       )
       .orderBy(asc(posts.publishedAt));
   }),
@@ -1233,12 +1222,7 @@ export const postRouter = createTRPCRouter({
         })
         .from(posts)
         .leftJoin(user, eq(posts.authorId, user.id))
-        .where(
-          and(
-            eq(posts.status, "published"),
-            eq(posts.featured, true)
-          )
-        )
+        .where(and(eq(posts.status, "published"), eq(posts.featured, true)))
         .orderBy(desc(posts.publishedAt))
         .limit(limit);
     }),
@@ -1250,12 +1234,7 @@ export const postRouter = createTRPCRouter({
       const [result] = await ctx.db
         .select({ count: count() })
         .from(comments)
-        .where(
-          and(
-            eq(comments.postId, input.id),
-            isNull(comments.deletedAt)
-          )
-        );
+        .where(and(eq(comments.postId, input.id), isNull(comments.deletedAt)));
 
       return result.count;
     }),
@@ -1278,23 +1257,32 @@ export const postRouter = createTRPCRouter({
       const paginationMapping = {
         newest: {
           orderBy: desc(posts.publishedAt),
-          cursor: cursor?.published ? lte(posts.publishedAt, cursor.published) : undefined,
+          cursor: cursor?.published
+            ? lte(posts.publishedAt, cursor.published)
+            : undefined,
         },
         oldest: {
           orderBy: asc(posts.publishedAt),
-          cursor: cursor?.published ? gte(posts.publishedAt, cursor.published) : undefined,
+          cursor: cursor?.published
+            ? gte(posts.publishedAt, cursor.published)
+            : undefined,
         },
         top: {
           orderBy: desc(sql`${posts.upvotesCount} - ${posts.downvotesCount}`),
-          cursor: cursor?.likes !== undefined
-            ? lt(sql`${posts.upvotesCount} - ${posts.downvotesCount}`, cursor.likes)
-            : undefined,
+          cursor:
+            cursor?.likes !== undefined
+              ? lt(
+                  sql`${posts.upvotesCount} - ${posts.downvotesCount}`,
+                  cursor.likes,
+                )
+              : undefined,
         },
         trending: {
           orderBy: desc(hotScoreExpr),
-          cursor: cursor?.hotScore !== undefined
-            ? lt(hotScoreExpr, cursor.hotScore)
-            : undefined,
+          cursor:
+            cursor?.hotScore !== undefined
+              ? lt(hotScoreExpr, cursor.hotScore)
+              : undefined,
         },
       };
 
@@ -1328,7 +1316,10 @@ export const postRouter = createTRPCRouter({
         })
         .from(posts)
         .leftJoin(user, eq(posts.authorId, user.id))
-        .leftJoin(userBookmarksSubquery, eq(userBookmarksSubquery.postId, posts.id))
+        .leftJoin(
+          userBookmarksSubquery,
+          eq(userBookmarksSubquery.postId, posts.id),
+        )
         .leftJoin(userVotesSubquery, eq(userVotesSubquery.postId, posts.id))
         .leftJoin(postTags, eq(posts.id, postTags.postId))
         .leftJoin(tag, eq(postTags.tagId, tag.id))
@@ -1337,8 +1328,8 @@ export const postRouter = createTRPCRouter({
             eq(posts.status, "published"),
             lte(posts.publishedAt, new Date().toISOString()),
             tagFilter ? eq(tag.title, tagFilter.toUpperCase()) : undefined,
-            cursor ? paginationMapping[sort].cursor : undefined
-          )
+            cursor ? paginationMapping[sort].cursor : undefined,
+          ),
         )
         .groupBy(
           posts.id,
@@ -1351,7 +1342,7 @@ export const postRouter = createTRPCRouter({
           posts.downvotesCount,
           userBookmarksSubquery.id,
           userVotesSubquery.voteType,
-          user.id
+          user.id,
         )
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
@@ -1360,14 +1351,16 @@ export const postRouter = createTRPCRouter({
       const calculateHotScore = (
         upvotes: number,
         downvotes: number,
-        publishedAt: string
+        publishedAt: string,
       ): number => {
         const score = upvotes - downvotes;
         const sign = score > 0 ? 1 : score < 0 ? -1 : 0;
         const epoch2024 = new Date("2024-01-01").getTime() / 1000;
         const publishedEpoch = new Date(publishedAt).getTime() / 1000;
         const seconds = publishedEpoch - epoch2024;
-        return Math.log10(Math.max(Math.abs(score), 1)) + (sign * seconds) / 45000;
+        return (
+          Math.log10(Math.max(Math.abs(score), 1)) + (sign * seconds) / 45000
+        );
       };
 
       const cleaned = response.map((elem) => {
@@ -1375,7 +1368,7 @@ export const postRouter = createTRPCRouter({
         const hotScore = calculateHotScore(
           elem.post.upvotes,
           elem.post.downvotes,
-          elem.post.published as string
+          elem.post.published as string,
         );
         return {
           ...elem.post,

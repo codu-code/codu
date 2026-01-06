@@ -26,12 +26,40 @@ import { type AdapterAccount } from "next-auth/adapters";
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
 // New lowercase enums for posts/comments system
-export const postType = pgEnum("post_type", ["article", "discussion", "link", "resource"]);
-export const postStatus = pgEnum("post_status", ["draft", "published", "scheduled", "unlisted"]);
+export const postType = pgEnum("post_type", [
+  "article",
+  "discussion",
+  "link",
+  "resource",
+]);
+export const postStatus = pgEnum("post_status", [
+  "draft",
+  "published",
+  "scheduled",
+  "unlisted",
+]);
 export const voteType = pgEnum("vote_type", ["up", "down"]);
-export const feedSourceStatus = pgEnum("feed_source_status", ["active", "paused", "error"]);
-export const reportReason = pgEnum("report_reason", ["spam", "harassment", "hate_speech", "misinformation", "copyright", "nsfw", "off_topic", "other"]);
-export const reportStatus = pgEnum("report_status", ["pending", "reviewed", "dismissed", "actioned"]);
+export const feedSourceStatus = pgEnum("feed_source_status", [
+  "active",
+  "paused",
+  "error",
+]);
+export const reportReason = pgEnum("report_reason", [
+  "spam",
+  "harassment",
+  "hate_speech",
+  "misinformation",
+  "copyright",
+  "nsfw",
+  "off_topic",
+  "other",
+]);
+export const reportStatus = pgEnum("report_status", [
+  "pending",
+  "reviewed",
+  "dismissed",
+  "actioned",
+]);
 
 // Legacy enums (kept for backward compatibility during migration)
 export const legacyVoteType = pgEnum("VoteType", ["UP", "DOWN"]);
@@ -169,8 +197,12 @@ export const userRelations = relations(user, ({ one, many }) => ({
   legacyPostVotes: many(post_vote),
   flaggedByUser: many(flagged, { relationName: "flaggedByUser" }),
   flaggedContent: many(flagged, { relationName: "flaggedContent" }),
-  notificationsCreated: many(notification, { relationName: "notificationsCreated" }),
-  notificationsReceived: many(notification, { relationName: "notificationsReceived" }),
+  notificationsCreated: many(notification, {
+    relationName: "notificationsCreated",
+  }),
+  notificationsReceived: many(notification, {
+    relationName: "notificationsReceived",
+  }),
 }));
 
 // ============================================
@@ -226,10 +258,13 @@ export const feed_sources = pgTable(
   }),
 );
 
-export const feedSourcesRelations = relations(feed_sources, ({ one, many }) => ({
-  user: one(user, { fields: [feed_sources.userId], references: [user.id] }),
-  posts: many(posts),
-}));
+export const feedSourcesRelations = relations(
+  feed_sources,
+  ({ one, many }) => ({
+    user: one(user, { fields: [feed_sources.userId], references: [user.id] }),
+    posts: many(posts),
+  }),
+);
 
 // ============================================
 // POSTS TABLE
@@ -309,7 +344,9 @@ export const posts = pgTable(
   (table) => ({
     authorIdIdx: index("posts_author_id_idx").on(table.authorId),
     slugKey: uniqueIndex("posts_slug_idx").on(table.slug),
-    legacyPostIdIdx: uniqueIndex("posts_legacy_post_id_idx").on(table.legacyPostId),
+    legacyPostIdIdx: uniqueIndex("posts_legacy_post_id_idx").on(
+      table.legacyPostId,
+    ),
     statusIdx: index("posts_status_idx").on(table.status),
     publishedAtIdx: index("posts_published_at_idx").on(table.publishedAt),
     typeIdx: index("posts_type_idx").on(table.type),
@@ -320,7 +357,10 @@ export const posts = pgTable(
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   author: one(user, { fields: [posts.authorId], references: [user.id] }),
-  source: one(feed_sources, { fields: [posts.sourceId], references: [feed_sources.id] }),
+  source: one(feed_sources, {
+    fields: [posts.sourceId],
+    references: [feed_sources.id],
+  }),
   comments: many(comments),
   votes: many(post_votes),
   bookmarks: many(bookmarks),
@@ -385,7 +425,9 @@ export const comments = pgTable(
     authorIdIdx: index("comments_author_id_idx").on(table.authorId),
     parentIdIdx: index("comments_parent_id_idx").on(table.parentId),
     createdAtIdx: index("comments_created_at_idx").on(table.createdAt),
-    legacyCommentIdIdx: uniqueIndex("comments_legacy_comment_id_idx").on(table.legacyCommentId),
+    legacyCommentIdIdx: uniqueIndex("comments_legacy_comment_id_idx").on(
+      table.legacyCommentId,
+    ),
     commentParentIdFkey: foreignKey({
       columns: [table.parentId],
       foreignColumns: [table.id],
@@ -433,7 +475,10 @@ export const post_votes = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueVote: unique("post_votes_post_id_user_id_key").on(table.postId, table.userId),
+    uniqueVote: unique("post_votes_post_id_user_id_key").on(
+      table.postId,
+      table.userId,
+    ),
     postIdIdx: index("post_votes_post_id_idx").on(table.postId),
   }),
 );
@@ -467,13 +512,19 @@ export const comment_votes = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueVote: unique("comment_votes_comment_id_user_id_key").on(table.commentId, table.userId),
+    uniqueVote: unique("comment_votes_comment_id_user_id_key").on(
+      table.commentId,
+      table.userId,
+    ),
     commentIdIdx: index("comment_votes_comment_id_idx").on(table.commentId),
   }),
 );
 
 export const commentVotesRelations = relations(comment_votes, ({ one }) => ({
-  comment: one(comments, { fields: [comment_votes.commentId], references: [comments.id] }),
+  comment: one(comments, {
+    fields: [comment_votes.commentId],
+    references: [comments.id],
+  }),
   user: one(user, { fields: [comment_votes.userId], references: [user.id] }),
 }));
 
@@ -500,7 +551,10 @@ export const bookmarks = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueBookmark: unique("bookmarks_post_id_user_id_key").on(table.postId, table.userId),
+    uniqueBookmark: unique("bookmarks_post_id_user_id_key").on(
+      table.postId,
+      table.userId,
+    ),
     userIdIdx: index("bookmarks_user_id_idx").on(table.userId),
     postIdIdx: index("bookmarks_post_id_idx").on(table.postId),
   }),
@@ -527,7 +581,10 @@ export const post_tags = pgTable(
       .references(() => tag.id, { onDelete: "cascade" }),
   },
   (table) => ({
-    uniquePostTag: unique("post_tags_post_id_tag_id_key").on(table.postId, table.tagId),
+    uniquePostTag: unique("post_tags_post_id_tag_id_key").on(
+      table.postId,
+      table.tagId,
+    ),
     postIdIdx: index("post_tags_post_id_idx").on(table.postId),
     tagIdIdx: index("post_tags_tag_id_idx").on(table.tagId),
   }),
@@ -547,14 +604,18 @@ export const reports = pgTable(
   {
     id: serial("id").primaryKey().notNull(),
     postId: uuid("post_id").references(() => posts.id, { onDelete: "cascade" }),
-    commentId: uuid("comment_id").references(() => comments.id, { onDelete: "cascade" }),
+    commentId: uuid("comment_id").references(() => comments.id, {
+      onDelete: "cascade",
+    }),
     reporterId: text("reporter_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     reason: reportReason("reason").notNull(),
     details: text("details"),
     status: reportStatus("status").default("pending").notNull(),
-    reviewedById: text("reviewed_by_id").references(() => user.id, { onDelete: "set null" }),
+    reviewedById: text("reviewed_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
     reviewedAt: timestamp("reviewed_at", {
       precision: 3,
       mode: "string",
@@ -579,7 +640,10 @@ export const reports = pgTable(
 
 export const reportsRelations = relations(reports, ({ one }) => ({
   post: one(posts, { fields: [reports.postId], references: [posts.id] }),
-  comment: one(comments, { fields: [reports.commentId], references: [comments.id] }),
+  comment: one(comments, {
+    fields: [reports.commentId],
+    references: [comments.id],
+  }),
   reporter: one(user, {
     fields: [reports.reporterId],
     references: [user.id],
@@ -683,12 +747,15 @@ export const emailChangeRequest = pgTable("EmailChangeRequest", {
   expiresAt: timestamp("expiresAt").notNull(),
 });
 
-export const emailChangeRequestRelations = relations(emailChangeRequest, ({ one }) => ({
-  user: one(user, {
-    fields: [emailChangeRequest.userId],
-    references: [user.id],
+export const emailChangeRequestRelations = relations(
+  emailChangeRequest,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [emailChangeRequest.userId],
+      references: [user.id],
+    }),
   }),
-}));
+);
 
 export const emailChangeHistory = pgTable("EmailChangeHistory", {
   id: serial("id").primaryKey(),
@@ -702,12 +769,15 @@ export const emailChangeHistory = pgTable("EmailChangeHistory", {
   userAgent: text("userAgent"),
 });
 
-export const emailChangeHistoryRelations = relations(emailChangeHistory, ({ one }) => ({
-  user: one(user, {
-    fields: [emailChangeHistory.userId],
-    references: [user.id],
+export const emailChangeHistoryRelations = relations(
+  emailChangeHistory,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [emailChangeHistory.userId],
+      references: [user.id],
+    }),
   }),
-}));
+);
 
 // ============================================
 // BANNED USERS
@@ -843,7 +913,10 @@ export const post_tag = pgTable(
   },
   (table) => {
     return {
-      tagIdPostIdKey: uniqueIndex("PostTag_tagId_postId_key").on(table.tagId, table.postId),
+      tagIdPostIdKey: uniqueIndex("PostTag_tagId_postId_key").on(
+        table.tagId,
+        table.postId,
+      ),
     };
   },
 );
@@ -934,7 +1007,10 @@ export const post_vote = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueVote: unique("PostVote_postId_userId_key").on(table.postId, table.userId),
+    uniqueVote: unique("PostVote_postId_userId_key").on(
+      table.postId,
+      table.userId,
+    ),
     postIdIndex: index("PostVote_postId_index").on(table.postId),
   }),
 );
@@ -957,7 +1033,10 @@ export const bookmark = pgTable(
   },
   (table) => {
     return {
-      userIdPostIdKey: uniqueIndex("Bookmark_userId_postId_key").on(table.postId, table.userId),
+      userIdPostIdKey: uniqueIndex("Bookmark_userId_postId_key").on(
+        table.postId,
+        table.userId,
+      ),
     };
   },
 );
@@ -1048,8 +1127,14 @@ export const like = pgTable(
   },
   (table) => {
     return {
-      userIdCommentIdKey: uniqueIndex("Like_userId_commentId_key").on(table.userId, table.commentId),
-      userIdPostIdKey: uniqueIndex("Like_userId_postId_key").on(table.userId, table.postId),
+      userIdCommentIdKey: uniqueIndex("Like_userId_commentId_key").on(
+        table.userId,
+        table.commentId,
+      ),
+      userIdPostIdKey: uniqueIndex("Like_userId_postId_key").on(
+        table.userId,
+        table.postId,
+      ),
     };
   },
 );
@@ -1113,7 +1198,11 @@ export const flaggedRelations = relations(flagged, ({ one }) => ({
 }));
 
 // Legacy FeedSource (for backward compatibility)
-export const legacyFeedSourceStatus = pgEnum("FeedSourceStatus", ["ACTIVE", "PAUSED", "ERROR"]);
+export const legacyFeedSourceStatus = pgEnum("FeedSourceStatus", [
+  "ACTIVE",
+  "PAUSED",
+  "ERROR",
+]);
 
 export const feed_source = pgTable(
   "FeedSource",
@@ -1169,7 +1258,13 @@ export const feedSourceRelations = relations(feed_source, ({ many }) => ({
 }));
 
 // Legacy Content table
-export const legacyContentType = pgEnum("ContentType", ["POST", "LINK", "QUESTION", "VIDEO", "DISCUSSION"]);
+export const legacyContentType = pgEnum("ContentType", [
+  "POST",
+  "LINK",
+  "QUESTION",
+  "VIDEO",
+  "DISCUSSION",
+]);
 
 export const content = pgTable(
   "Content",
@@ -1252,7 +1347,10 @@ export const content_vote = pgTable(
     id: serial("id").primaryKey().notNull(),
     contentId: text("contentId")
       .notNull()
-      .references(() => content.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => content.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -1266,7 +1364,10 @@ export const content_vote = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueVote: unique("ContentVote_contentId_userId_key").on(table.contentId, table.userId),
+    uniqueVote: unique("ContentVote_contentId_userId_key").on(
+      table.contentId,
+      table.userId,
+    ),
     contentIdIndex: index("ContentVote_contentId_index").on(table.contentId),
   }),
 );
@@ -1285,7 +1386,10 @@ export const content_bookmark = pgTable(
     id: serial("id").primaryKey().notNull(),
     contentId: text("contentId")
       .notNull()
-      .references(() => content.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => content.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -1298,17 +1402,26 @@ export const content_bookmark = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueBookmark: unique("ContentBookmark_contentId_userId_key").on(table.contentId, table.userId),
+    uniqueBookmark: unique("ContentBookmark_contentId_userId_key").on(
+      table.contentId,
+      table.userId,
+    ),
   }),
 );
 
-export const contentBookmarkRelations = relations(content_bookmark, ({ one }) => ({
-  content: one(content, {
-    fields: [content_bookmark.contentId],
-    references: [content.id],
+export const contentBookmarkRelations = relations(
+  content_bookmark,
+  ({ one }) => ({
+    content: one(content, {
+      fields: [content_bookmark.contentId],
+      references: [content.id],
+    }),
+    user: one(user, {
+      fields: [content_bookmark.userId],
+      references: [user.id],
+    }),
   }),
-  user: one(user, { fields: [content_bookmark.userId], references: [user.id] }),
-}));
+);
 
 export const content_tag = pgTable(
   "ContentTag",
@@ -1316,13 +1429,19 @@ export const content_tag = pgTable(
     id: serial("id").primaryKey().notNull(),
     contentId: text("contentId")
       .notNull()
-      .references(() => content.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => content.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     tagId: integer("tagId")
       .notNull()
       .references(() => tag.id, { onDelete: "cascade", onUpdate: "cascade" }),
   },
   (table) => ({
-    uniqueContentTag: unique("ContentTag_contentId_tagId_key").on(table.contentId, table.tagId),
+    uniqueContentTag: unique("ContentTag_contentId_tagId_key").on(
+      table.contentId,
+      table.tagId,
+    ),
   }),
 );
 
@@ -1420,18 +1539,29 @@ export const discussion_vote = pgTable(
       .notNull(),
   },
   (table) => ({
-    uniqueVote: unique("DiscussionVote_discussionId_userId_key").on(table.discussionId, table.userId),
-    discussionIdIndex: index("DiscussionVote_discussionId_index").on(table.discussionId),
+    uniqueVote: unique("DiscussionVote_discussionId_userId_key").on(
+      table.discussionId,
+      table.userId,
+    ),
+    discussionIdIndex: index("DiscussionVote_discussionId_index").on(
+      table.discussionId,
+    ),
   }),
 );
 
-export const discussionVoteRelations = relations(discussion_vote, ({ one }) => ({
-  discussion: one(discussion, {
-    fields: [discussion_vote.discussionId],
-    references: [discussion.id],
+export const discussionVoteRelations = relations(
+  discussion_vote,
+  ({ one }) => ({
+    discussion: one(discussion, {
+      fields: [discussion_vote.discussionId],
+      references: [discussion.id],
+    }),
+    user: one(user, {
+      fields: [discussion_vote.userId],
+      references: [user.id],
+    }),
   }),
-  user: one(user, { fields: [discussion_vote.userId], references: [user.id] }),
-}));
+);
 
 // Legacy Content Report
 export const legacyReportReason = pgEnum("ReportReason", [
@@ -1490,9 +1620,13 @@ export const content_report = pgTable(
   },
   (table) => ({
     statusIndex: index("ContentReport_status_index").on(table.status),
-    reporterIdIndex: index("ContentReport_reporterId_index").on(table.reporterId),
+    reporterIdIndex: index("ContentReport_reporterId_index").on(
+      table.reporterId,
+    ),
     contentIdIndex: index("ContentReport_contentId_index").on(table.contentId),
-    discussionIdIndex: index("ContentReport_discussionId_index").on(table.discussionId),
+    discussionIdIndex: index("ContentReport_discussionId_index").on(
+      table.discussionId,
+    ),
   }),
 );
 
@@ -1547,7 +1681,10 @@ export const aggregated_article = pgTable(
     imageUrl: text("imageUrl"),
     ogImageUrl: text("ogImageUrl"),
     sourceAuthor: varchar("sourceAuthor", { length: 200 }),
-    publishedAt: timestamp("publishedAt", { withTimezone: true, mode: "string" }),
+    publishedAt: timestamp("publishedAt", {
+      withTimezone: true,
+      mode: "string",
+    }),
     fetchedAt: timestamp("fetchedAt", { withTimezone: true, mode: "string" }),
     upvotes: integer("upvotes").default(0).notNull(),
     downvotes: integer("downvotes").default(0).notNull(),
@@ -1564,7 +1701,7 @@ export const aggregated_article = pgTable(
     index("aggregated_article_slug_idx").on(table.slug),
     index("aggregated_article_published_idx").on(table.publishedAt),
     uniqueIndex("aggregated_article_url_idx").on(table.externalUrl),
-  ]
+  ],
 );
 
 export const aggregatedArticleRelations = relations(
@@ -1577,7 +1714,7 @@ export const aggregatedArticleRelations = relations(
     votes: many(aggregated_article_vote),
     bookmarks: many(aggregated_article_bookmark),
     tags: many(aggregated_article_tag),
-  })
+  }),
 );
 
 export const aggregated_article_vote = pgTable(
@@ -1599,7 +1736,7 @@ export const aggregated_article_vote = pgTable(
     uniqueIndex("article_vote_unique").on(table.articleId, table.userId),
     index("article_vote_article_idx").on(table.articleId),
     index("article_vote_user_idx").on(table.userId),
-  ]
+  ],
 );
 
 export const aggregatedArticleVoteRelations = relations(
@@ -1613,7 +1750,7 @@ export const aggregatedArticleVoteRelations = relations(
       fields: [aggregated_article_vote.userId],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const aggregated_article_bookmark = pgTable(
@@ -1633,7 +1770,7 @@ export const aggregated_article_bookmark = pgTable(
   (table) => [
     uniqueIndex("article_bookmark_unique").on(table.articleId, table.userId),
     index("article_bookmark_user_idx").on(table.userId),
-  ]
+  ],
 );
 
 export const aggregatedArticleBookmarkRelations = relations(
@@ -1647,7 +1784,7 @@ export const aggregatedArticleBookmarkRelations = relations(
       fields: [aggregated_article_bookmark.userId],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const aggregated_article_tag = pgTable(
@@ -1664,7 +1801,7 @@ export const aggregated_article_tag = pgTable(
   (table) => [
     uniqueIndex("article_tag_unique").on(table.articleId, table.tagId),
     index("article_tag_article_idx").on(table.articleId),
-  ]
+  ],
 );
 
 export const aggregatedArticleTagRelations = relations(
@@ -1678,5 +1815,5 @@ export const aggregatedArticleTagRelations = relations(
       fields: [aggregated_article_tag.tagId],
       references: [tag.id],
     }),
-  })
+  }),
 );

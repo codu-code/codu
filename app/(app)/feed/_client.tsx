@@ -10,11 +10,23 @@ import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
 
 type SortOption = "recent" | "trending" | "popular";
-type ContentType = "ARTICLE" | "LINK" | "QUESTION" | "VIDEO" | "DISCUSSION" | null;
+type ContentType =
+  | "ARTICLE"
+  | "LINK"
+  | "QUESTION"
+  | "VIDEO"
+  | "DISCUSSION"
+  | null;
 
 const validSorts: SortOption[] = ["recent", "trending", "popular"];
 // Lowercase type values for URL params (converted to uppercase for API)
-const validTypesLower: string[] = ["article", "link", "question", "video", "discussion"];
+const validTypesLower: string[] = [
+  "article",
+  "link",
+  "question",
+  "video",
+  "discussion",
+];
 
 const FeedPage = () => {
   const searchParams = useSearchParams();

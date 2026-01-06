@@ -36,9 +36,7 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return (
-    <div className="mx-1 h-5 w-px bg-neutral-300 dark:bg-neutral-600" />
-  );
+  return <div className="mx-1 h-5 w-px bg-neutral-300 dark:bg-neutral-600" />;
 }
 
 interface LinkInputProps {

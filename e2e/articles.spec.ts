@@ -44,7 +44,10 @@ test.describe("Unauthenticated Feed Page (Articles)", () => {
 
     // Feed items should have bookmark buttons
     await expect(
-      page.locator("article").first().getByRole("button", { name: /bookmark/i }),
+      page
+        .locator("article")
+        .first()
+        .getByRole("button", { name: /bookmark/i }),
     ).toBeVisible({ timeout: 15000 });
   });
 
@@ -164,7 +167,10 @@ test.describe("Authenticated Feed Page (Articles)", () => {
 
     // Feed items should have bookmark buttons
     await expect(
-      page.locator("article").first().getByRole("button", { name: /bookmark/i }),
+      page
+        .locator("article")
+        .first()
+        .getByRole("button", { name: /bookmark/i }),
     ).toBeVisible({ timeout: 15000 });
   });
 
@@ -238,7 +244,9 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await expect(
       page.getByRole("button", { name: "Join the conversation..." }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Join the conversation..." }).click();
+    await page
+      .getByRole("button", { name: "Join the conversation..." })
+      .click();
 
     // Now the editor is expanded - fill in the content
     // The expanded editor uses a tiptap editor, we need to click into it first
@@ -277,7 +285,10 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await page.keyboard.type(replyText);
 
     // Submit the reply
-    await page.getByRole("button", { name: "Reply", exact: true }).nth(1).click();
+    await page
+      .getByRole("button", { name: "Reply", exact: true })
+      .nth(1)
+      .click();
 
     // Wait for the reply text to appear (this indicates the reply was successful)
     await expect(page.getByText(replyText)).toBeVisible({ timeout: 15000 });

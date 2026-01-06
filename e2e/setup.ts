@@ -13,16 +13,10 @@ import {
   E2E_ADMIN_EMAIL,
   E2E_ADMIN_ID,
   E2E_ADMIN_SESSION_ID,
-  E2E_PUBLISHED_POST_ID,
-  E2E_SCHEDULED_POST_ID,
-  E2E_DRAFT_POST_ID,
 } from "./constants";
 import { eq } from "drizzle-orm";
 
 export const setup = async () => {
-  // Dynamically import nanoid
-  const { nanoid } = await import("nanoid");
-
   const db = drizzle(
     postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
   );
@@ -122,7 +116,8 @@ export const setup = async () => {
         type: "article" as const,
         title: "Next.js Best Practices",
         slug: "e2e-nextjs-best-practices",
-        excerpt: "Optimize your Next.js applications with these best practices.",
+        excerpt:
+          "Optimize your Next.js applications with these best practices.",
         body: "This guide explores how to structure your Next.js projects effectively, utilize Server-Side Rendering (SSR) and Static Site Generation (SSG) to enhance performance, and make the most of API routes to handle server-side logic.",
         upvotesCount: 20,
         downvotesCount: 2,

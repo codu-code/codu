@@ -44,13 +44,20 @@ async function createSourceUsers(): Promise<{
     .from(feed_sources)
     .where(isNull(feed_sources.userId));
 
-  console.log(`Found ${sourcesWithoutUsers.length} sources without user profiles`);
+  console.log(
+    `Found ${sourcesWithoutUsers.length} sources without user profiles`,
+  );
 
   let created = 0;
 
   for (const source of sourcesWithoutUsers) {
     // Generate a unique username from slug or name
-    const baseUsername = source.slug || source.name.toLowerCase().replace(/[^a-z0-9]/g, "-").substring(0, 30);
+    const baseUsername =
+      source.slug ||
+      source.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .substring(0, 30);
     const username = `source-${baseUsername}`;
 
     // Generate a unique email (not used for login, just for uniqueness)
@@ -69,7 +76,9 @@ async function createSourceUsers(): Promise<{
           name: source.name,
           email: email,
           image: source.logoUrl || "/images/person.png",
-          bio: source.description?.substring(0, 200) || `Content from ${source.name}`,
+          bio:
+            source.description?.substring(0, 200) ||
+            `Content from ${source.name}`,
           websiteUrl: source.websiteUrl || "",
           // Feed source users don't need email notifications
           emailNotifications: false,
@@ -102,7 +111,9 @@ async function createSourceUsers(): Promise<{
 async function main() {
   console.log("=".repeat(60));
   console.log("Feed Source User Creation Script");
-  console.log(isDryRun ? "[DRY RUN MODE - No changes will be made]" : "[LIVE MODE]");
+  console.log(
+    isDryRun ? "[DRY RUN MODE - No changes will be made]" : "[LIVE MODE]",
+  );
   console.log("=".repeat(60));
   console.log();
 

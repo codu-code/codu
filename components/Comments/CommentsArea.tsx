@@ -85,7 +85,10 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   });
 
   // Toggle upvote for a comment
-  const likeComment = async (commentId: string, currentVote: "up" | "down" | null) => {
+  const likeComment = async (
+    commentId: string,
+    currentVote: "up" | "down" | null,
+  ) => {
     if (!session) return signIn();
     if (voteStatus === "pending") return;
     try {
@@ -178,216 +181,204 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
     depth = 0,
   ) => {
     if (!commentsArr) return null;
-    return commentsArr.map(
-      (comment) => {
-        const {
-          body,
-          createdAt,
-          updatedAt,
-          id,
-          userVote,
-          score,
-          author,
-        } = comment;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const children = (comment as any).children;
-        // Handle deleted comments (author is null)
-        const name = author?.name || "[deleted]";
-        const image = author?.image || "";
-        const username = author?.username || "";
-        const userId = author?.id || "";
-        const displayBody = body || "[Comment deleted]";
-        const ast = Markdoc.parse(displayBody);
-        const content = Markdoc.transform(ast, config);
-        const isCurrentUser = session?.user?.id === userId;
-        const isAuthor = userId === postOwnerId;
-        const dateTime = Temporal.Instant.from(
-          new Date(createdAt).toISOString(),
-        );
-        const isCurrentYear =
-          new Date().getFullYear() === new Date(createdAt).getFullYear();
-        const readableDate = dateTime.toLocaleString(
-          ["en-IE"],
-          isCurrentYear
-            ? {
-                month: "long",
-                day: "numeric",
-              }
-            : {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              },
-        );
+    return commentsArr.map((comment) => {
+      const { body, createdAt, updatedAt, id, userVote, score, author } =
+        comment;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const children = (comment as any).children;
+      // Handle deleted comments (author is null)
+      const name = author?.name || "[deleted]";
+      const image = author?.image || "";
+      const username = author?.username || "";
+      const userId = author?.id || "";
+      const displayBody = body || "[Comment deleted]";
+      const ast = Markdoc.parse(displayBody);
+      const content = Markdoc.transform(ast, config);
+      const isCurrentUser = session?.user?.id === userId;
+      const isAuthor = userId === postOwnerId;
+      const dateTime = Temporal.Instant.from(new Date(createdAt).toISOString());
+      const isCurrentYear =
+        new Date().getFullYear() === new Date(createdAt).getFullYear();
+      const readableDate = dateTime.toLocaleString(
+        ["en-IE"],
+        isCurrentYear
+          ? {
+              month: "long",
+              day: "numeric",
+            }
+          : {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            },
+      );
 
-        const commentUpdated =
-          new Date(createdAt).toISOString() !==
-          new Date(updatedAt).toISOString();
-        return (
-          <section key={id}>
-            {editCommentBoxId !== id ? (
-              <>
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-sm text-neutral-700 dark:text-neutral-500">
-                    <Link href={`/${username}`}>
-                      <img
-                        className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
-                        alt={`Avatar for ${name}`}
-                        src={image}
-                      />
-                    </Link>
-                    <Link
-                      className="font-semibold text-neutral-900 hover:underline dark:text-white"
-                      href={`/${username}`}
-                    >
-                      {name}
-                    </Link>
-                    {isCurrentUser && !isAuthor && (
-                      <div className="rounded border border-orange-400 px-1 py-[2px] text-xs text-orange-400">
-                        YOU
-                      </div>
-                    )}
-                    {isAuthor && (
-                      <div className="rounded border border-pink-500 px-1 py-[2px] text-xs text-pink-500">
-                        AUTHOR
-                      </div>
-                    )}
-                    <span aria-hidden="true">&middot;</span>
-                    <time>{readableDate}</time>
+      const commentUpdated =
+        new Date(createdAt).toISOString() !== new Date(updatedAt).toISOString();
+      return (
+        <section key={id}>
+          {editCommentBoxId !== id ? (
+            <>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex items-center space-x-2 text-sm text-neutral-700 dark:text-neutral-500">
+                  <Link href={`/${username}`}>
+                    <img
+                      className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
+                      alt={`Avatar for ${name}`}
+                      src={image}
+                    />
+                  </Link>
+                  <Link
+                    className="font-semibold text-neutral-900 hover:underline dark:text-white"
+                    href={`/${username}`}
+                  >
+                    {name}
+                  </Link>
+                  {isCurrentUser && !isAuthor && (
+                    <div className="rounded border border-orange-400 px-1 py-[2px] text-xs text-orange-400">
+                      YOU
+                    </div>
+                  )}
+                  {isAuthor && (
+                    <div className="rounded border border-pink-500 px-1 py-[2px] text-xs text-pink-500">
+                      AUTHOR
+                    </div>
+                  )}
+                  <span aria-hidden="true">&middot;</span>
+                  <time>{readableDate}</time>
 
-                    {commentUpdated ? (
-                      <>
-                        <span aria-hidden="true">&middot;</span>
-                        <div>Edited</div>
-                      </>
-                    ) : null}
-                  </div>
-                  {isCurrentUser ? (
-                    <Menu as="div" className="relative">
-                      <div>
-                        <MenuButton className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
-                          <span className="sr-only">Open user menu</span>
-                          <EllipsisHorizontalIcon className="h-6 w-6" />
-                        </MenuButton>
-                      </div>
-                      <Transition
-                        as={Fragment}
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
-                      >
-                        <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <>
-                            <MenuItem>
-                              <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
-                                onClick={() => {
-                                  if (id !== editCommentBoxId) {
-                                    setValue("edit", body);
-                                  }
-                                  setEditCommentBoxId(id);
-                                  setShowCommentBoxId(null);
-                                }}
-                              >
-                                Edit comment
-                              </button>
-                            </MenuItem>
-                            <MenuItem>
-                              <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
-                                onClick={() => {
-                                  deleteComment({ id });
-                                }}
-                              >
-                                Delete comment
-                              </button>
-                            </MenuItem>
-                          </>
-                        </MenuItems>
-                      </Transition>
-                    </Menu>
+                  {commentUpdated ? (
+                    <>
+                      <span aria-hidden="true">&middot;</span>
+                      <div>Edited</div>
+                    </>
                   ) : null}
                 </div>
-
-                <div className="-mt-2 ml-4 border-l-2 border-neutral-400 pl-2 dark:border-neutral-700">
-                  <div className="prose-sm overflow-x-hidden text-sm dark:prose-invert">
-                    {Markdoc.renderers.react(content, React, {
-                      components: markdocComponents,
-                    })}
-                  </div>
-
-                  <div className="mb-4 mt-2 flex items-center">
-                    <button
-                      className="mr-1 rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
-                      onClick={() => likeComment(id, userVote)}
+                {isCurrentUser ? (
+                  <Menu as="div" className="relative">
+                    <div>
+                      <MenuButton className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
+                        <span className="sr-only">Open user menu</span>
+                        <EllipsisHorizontalIcon className="h-6 w-6" />
+                      </MenuButton>
+                    </div>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
                     >
-                      <HeartIcon
-                        className={`w-6 h-6${
-                          userVote === "up"
-                            ? "fill-red-400"
-                            : "fill-neutral-400 dark:fill-neutral-600"
-                        }`}
-                      />
-                    </button>
-                    <span className="mr-4 flex text-xs font-semibold">
-                      {score}
-                    </span>
-                    <ReportModal type="comment" comment={body} id={id} />
-                    {depth < 6 && (
-                      <button
-                        className="rounded border border-neutral-800 px-2 py-1 text-xs hover:bg-neutral-300 dark:border-white dark:hover:bg-neutral-800"
-                        onClick={() => {
-                          if (!session) return signIn();
-                          if (showCommentBoxId !== id) {
-                            // TODO: Add alert to confirm reset if there is already content being written
-                            resetField("reply");
-                            setShowCommentBoxId((currentId) =>
-                              currentId === id ? null : id,
-                            );
-                          }
-                        }}
-                      >
-                        Reply
-                      </button>
-                    )}
-                  </div>
+                      <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <>
+                          <MenuItem>
+                            <button
+                              className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                              onClick={() => {
+                                if (id !== editCommentBoxId) {
+                                  setValue("edit", body);
+                                }
+                                setEditCommentBoxId(id);
+                                setShowCommentBoxId(null);
+                              }}
+                            >
+                              Edit comment
+                            </button>
+                          </MenuItem>
+                          <MenuItem>
+                            <button
+                              className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                              onClick={() => {
+                                deleteComment({ id });
+                              }}
+                            >
+                              Delete comment
+                            </button>
+                          </MenuItem>
+                        </>
+                      </MenuItems>
+                    </Transition>
+                  </Menu>
+                ) : null}
+              </div>
 
-                  <>
-                    {showCommentBoxId === id && (
-                      <div className="mt-4">
-                        <CommentArea
-                          id={id}
-                          name="reply"
-                          parentId={id}
-                          onCancel={() => {
-                            // TODO: Add alert to confirm reset if there is already content being written
-                            resetField("reply");
-                            setShowCommentBoxId(null);
-                          }}
-                          loading={createCommentStatus === "pending"}
-                        />
-                      </div>
-                    )}
-                  </>
-                  {!!children && generateComments(children, depth + 1)}
+              <div className="-mt-2 ml-4 border-l-2 border-neutral-400 pl-2 dark:border-neutral-700">
+                <div className="prose-sm overflow-x-hidden text-sm dark:prose-invert">
+                  {Markdoc.renderers.react(content, React, {
+                    components: markdocComponents,
+                  })}
                 </div>
-              </>
-            ) : (
-              <CommentArea
-                name="edit"
-                id={id}
-                editMode
-                loading={editStatus === "pending"}
-                onCancel={() => setEditCommentBoxId(null)}
-              />
-            )}
-          </section>
-        );
-      },
-    );
+
+                <div className="mb-4 mt-2 flex items-center">
+                  <button
+                    className="mr-1 rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
+                    onClick={() => likeComment(id, userVote)}
+                  >
+                    <HeartIcon
+                      className={`w-6 h-6${
+                        userVote === "up"
+                          ? "fill-red-400"
+                          : "fill-neutral-400 dark:fill-neutral-600"
+                      }`}
+                    />
+                  </button>
+                  <span className="mr-4 flex text-xs font-semibold">
+                    {score}
+                  </span>
+                  <ReportModal type="comment" comment={body} id={id} />
+                  {depth < 6 && (
+                    <button
+                      className="rounded border border-neutral-800 px-2 py-1 text-xs hover:bg-neutral-300 dark:border-white dark:hover:bg-neutral-800"
+                      onClick={() => {
+                        if (!session) return signIn();
+                        if (showCommentBoxId !== id) {
+                          // TODO: Add alert to confirm reset if there is already content being written
+                          resetField("reply");
+                          setShowCommentBoxId((currentId) =>
+                            currentId === id ? null : id,
+                          );
+                        }
+                      }}
+                    >
+                      Reply
+                    </button>
+                  )}
+                </div>
+
+                <>
+                  {showCommentBoxId === id && (
+                    <div className="mt-4">
+                      <CommentArea
+                        id={id}
+                        name="reply"
+                        parentId={id}
+                        onCancel={() => {
+                          // TODO: Add alert to confirm reset if there is already content being written
+                          resetField("reply");
+                          setShowCommentBoxId(null);
+                        }}
+                        loading={createCommentStatus === "pending"}
+                      />
+                    </div>
+                  )}
+                </>
+                {!!children && generateComments(children, depth + 1)}
+              </div>
+            </>
+          ) : (
+            <CommentArea
+              name="edit"
+              id={id}
+              editMode
+              loading={editStatus === "pending"}
+              onCancel={() => setEditCommentBoxId(null)}
+            />
+          )}
+        </section>
+      );
+    });
   };
 
   interface CommentAreaProps {

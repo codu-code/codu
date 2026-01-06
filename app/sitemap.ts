@@ -6,7 +6,12 @@ import { post, user, feed_sources, posts } from "@/server/db/schema";
 import { lte, and, isNull, isNotNull, eq } from "drizzle-orm";
 
 const BASE_URL = "https://www.codu.co";
-const ROUTES_TO_INDEX = ["/articles", "/feed", "/sponsorship", "/code-of-conduct"];
+const ROUTES_TO_INDEX = [
+  "/articles",
+  "/feed",
+  "/sponsorship",
+  "/code-of-conduct",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // User articles with new URL pattern: /[username]/[slug]
@@ -68,8 +73,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         and(
           eq(posts.type, "link"),
           eq(posts.status, "published"),
-          eq(feed_sources.status, "active")
-        )
+          eq(feed_sources.status, "active"),
+        ),
       )
   ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
     url: `${BASE_URL}/feed/${sourceSlug}/${articleSlug}`,

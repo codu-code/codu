@@ -11,7 +11,10 @@ test.describe("Authenticated homepage", () => {
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
 
     // Check for "Topics" section on sidebar (desktop only)
-    const topicsVisible = await page.locator('text="Topics"').first().isVisible();
+    const topicsVisible = await page
+      .locator('text="Topics"')
+      .first()
+      .isVisible();
 
     if (isMobile) {
       // Topics sidebar not visible on mobile

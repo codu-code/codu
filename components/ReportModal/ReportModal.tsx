@@ -33,19 +33,27 @@ export function useReportModal() {
 
   // Parse report param format: type_id (e.g., "post_abc123", "article_42")
   const parseReportParam = useCallback(
-    (param: string | null): { type: ReportType; id: string | number } | null => {
+    (
+      param: string | null,
+    ): { type: ReportType; id: string | number } | null => {
       if (!param) return null;
       const [type, ...idParts] = param.split("_");
       const id = idParts.join("_");
       if (!type || !id) return null;
 
-      const validTypes: ReportType[] = ["post", "comment", "discussion", "article"];
+      const validTypes: ReportType[] = [
+        "post",
+        "comment",
+        "discussion",
+        "article",
+      ];
       if (!validTypes.includes(type as ReportType)) return null;
 
       // Articles use numeric IDs, posts use string IDs
-      const parsedId = type === "article" || type === "comment" || type === "discussion"
-        ? parseInt(id, 10)
-        : id;
+      const parsedId =
+        type === "article" || type === "comment" || type === "discussion"
+          ? parseInt(id, 10)
+          : id;
 
       if (typeof parsedId === "number" && isNaN(parsedId)) return null;
 
@@ -68,7 +76,9 @@ export function useReportModal() {
   const closeReport = useCallback(() => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("report");
-    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    const newUrl = params.toString()
+      ? `${pathname}?${params.toString()}`
+      : pathname;
     router.push(newUrl, { scroll: false });
   }, [searchParams, pathname, router]);
 
@@ -175,7 +185,11 @@ export function ReportModalProvider() {
 
   const { type } = reportData;
   const contentLabel =
-    type === "post" ? "article" : type === "article" ? "feed article" : "comment";
+    type === "post"
+      ? "article"
+      : type === "article"
+        ? "feed article"
+        : "comment";
 
   return (
     <Dialog

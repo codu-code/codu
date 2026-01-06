@@ -24,15 +24,18 @@ function calculateReadTime(wordCount: number): number {
 }
 
 // Extract text content from HTML and count words
-function extractTextAndWordCount(html: string): { text: string; wordCount: number } {
+function extractTextAndWordCount(html: string): {
+  text: string;
+  wordCount: number;
+} {
   const cleaned = html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 
-  const wordCount = cleaned.split(/\s+/).filter(w => w.length > 0).length;
+  const wordCount = cleaned.split(/\s+/).filter((w) => w.length > 0).length;
   return { text: cleaned, wordCount };
 }
 
@@ -57,10 +60,7 @@ async function getSsmValue(secretName: string): Promise<string> {
 }
 
 // Extract and clean excerpt from content
-function extractExcerpt(
-  content: string | undefined,
-  maxLength = 300,
-): string {
+function extractExcerpt(content: string | undefined, maxLength = 300): string {
   if (!content) return "";
 
   // Strip HTML tags
@@ -75,7 +75,8 @@ function extractExcerpt(
 
 // Generate a short random ID (similar to nanoid)
 function generateShortId(length = 8): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -123,14 +124,18 @@ function extractImageUrl(item: Parser.Item): string | null {
 }
 
 // Fetch article metadata: OG image and read time (combined to avoid double requests)
-async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | null; readTimeMins: number }> {
+async function fetchArticleMetadata(
+  url: string,
+): Promise<{ ogImage: string | null; readTimeMins: number }> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)",
+      },
     });
     clearTimeout(timeout);
 
@@ -139,14 +144,24 @@ async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | nu
 
     // Extract OG image
     let ogImage: string | null = null;
-    const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
-      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    const ogMatch =
+      html.match(
+        /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
+      ) ||
+      html.match(
+        /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i,
+      );
     if (ogMatch?.[1]) {
       ogImage = ogMatch[1];
     } else {
       // Fall back to twitter:image
-      const twitterMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
-        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+      const twitterMatch =
+        html.match(
+          /<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i,
+        ) ||
+        html.match(
+          /<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i,
+        );
       if (twitterMatch?.[1]) ogImage = twitterMatch[1];
     }
 
@@ -203,8 +218,12 @@ exports.handler = async function () {
           `SELECT external_url FROM posts WHERE source_id = $1`,
           [source.id],
         );
-        const existingUrlSet = new Set(existingUrls.map((r: { external_url: string }) => r.external_url));
-        console.log(`  Already have ${existingUrlSet.size} items from this source`);
+        const existingUrlSet = new Set(
+          existingUrls.map((r: { external_url: string }) => r.external_url),
+        );
+        console.log(
+          `  Already have ${existingUrlSet.size} items from this source`,
+        );
 
         for (const item of feed.items) {
           // Skip items without required fields

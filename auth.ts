@@ -104,7 +104,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      const htmlMessage = createWelcomeEmailTemplate(newUser?.name || undefined);
+      const htmlMessage = createWelcomeEmailTemplate(
+        newUser?.name || undefined,
+      );
 
       // Subscribe to newsletter (separate try/catch so it doesn't block welcome email)
       try {

@@ -204,7 +204,11 @@ function useCreatePage({
     await savePost();
   };
 
-  if (publishStatus === "success" && publishData?.slug && session?.user?.username) {
+  if (
+    publishStatus === "success" &&
+    publishData?.slug &&
+    session?.user?.username
+  ) {
     redirect(`/${session.user.username}/${publishData.slug}`);
   }
 
@@ -240,7 +244,12 @@ function useCreatePage({
     const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
     // Convert null to undefined for form compatibility
-    reset({ body: body ?? undefined, excerpt: excerpt ?? undefined, title, id });
+    reset({
+      body: body ?? undefined,
+      excerpt: excerpt ?? undefined,
+      title,
+      id,
+    });
   }, [data]);
 
   useEffect(() => {

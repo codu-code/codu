@@ -78,7 +78,10 @@ const UserManagement = () => {
     if (diffDays < 1) return "today";
     if (diffDays < 7) return `${diffDays}d ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const displayUsers = showBannedOnly
@@ -266,7 +269,8 @@ const UserManagement = () => {
             {"banNote" in user && user.banNote && (
               <div className="mt-3 rounded border-l-4 border-red-400 bg-red-50 p-2 dark:bg-red-900/20">
                 <p className="text-sm text-red-700 dark:text-red-300">
-                  <span className="font-medium">Ban reason:</span> {user.banNote}
+                  <span className="font-medium">Ban reason:</span>{" "}
+                  {user.banNote}
                 </p>
                 {"bannedBy" in user && user.bannedBy && (
                   <p className="text-xs text-red-600 dark:text-red-400">

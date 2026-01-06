@@ -53,7 +53,9 @@ export interface UnifiedContentCardProps {
 }
 
 // Get favicon URL from a website
-const getFaviconUrl = (websiteUrl: string | null | undefined): string | null => {
+const getFaviconUrl = (
+  websiteUrl: string | null | undefined,
+): string | null => {
   if (!websiteUrl) return null;
   try {
     const url = new URL(websiteUrl);
@@ -101,7 +103,10 @@ const getHostname = (urlString: string): string => {
 const getDisplayUrl = (urlString: string): string => {
   try {
     const url = new URL(urlString);
-    const path = url.pathname.length > 20 ? url.pathname.slice(0, 20) + "..." : url.pathname;
+    const path =
+      url.pathname.length > 20
+        ? url.pathname.slice(0, 20) + "..."
+        : url.pathname;
     return url.hostname + (path !== "/" ? path : "");
   } catch {
     return urlString.slice(0, 40) + "...";
@@ -146,45 +151,47 @@ const UnifiedContentCard = ({
         : `/feed/${id}`;
 
   // Unified content voting mutation
-  const { mutate: voteContent, status: voteStatus } = api.content.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
-      });
-    },
-    onError: (error) => {
-      setUserVote(initialUserVote);
-      setVotes({ upvotes, downvotes });
-      toast.error("Failed to update vote");
-      Sentry.captureException(error);
-    },
-    onSettled: () => {
-      utils.content.getFeed.invalidate();
-    },
-  });
+  const { mutate: voteContent, status: voteStatus } =
+    api.content.vote.useMutation({
+      onMutate: async ({ voteType }) => {
+        const oldVote = userVote;
+        setUserVote(voteType);
+        setVotes((prev) => {
+          let newUpvotes = prev.upvotes;
+          let newDownvotes = prev.downvotes;
+          if (oldVote === "up") newUpvotes--;
+          if (oldVote === "down") newDownvotes--;
+          if (voteType === "up") newUpvotes++;
+          if (voteType === "down") newDownvotes++;
+          return { upvotes: newUpvotes, downvotes: newDownvotes };
+        });
+      },
+      onError: (error) => {
+        setUserVote(initialUserVote);
+        setVotes({ upvotes, downvotes });
+        toast.error("Failed to update vote");
+        Sentry.captureException(error);
+      },
+      onSettled: () => {
+        utils.content.getFeed.invalidate();
+      },
+    });
 
   // Unified content bookmark mutation
-  const { mutate: bookmarkContent, status: bookmarkStatus } = api.content.bookmark.useMutation({
-    onMutate: async ({ setBookmarked }) => {
-      setIsBookmarked(setBookmarked);
-    },
-    onError: (error) => {
-      setIsBookmarked(initialBookmarked);
-      toast.error("Failed to update bookmark");
-      Sentry.captureException(error);
-    },
-    onSettled: () => {
-      utils.content.mySavedContent.invalidate();
-    },
-  });
+  const { mutate: bookmarkContent, status: bookmarkStatus } =
+    api.content.bookmark.useMutation({
+      onMutate: async ({ setBookmarked }) => {
+        setIsBookmarked(setBookmarked);
+      },
+      onError: (error) => {
+        setIsBookmarked(initialBookmarked);
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
+      },
+      onSettled: () => {
+        utils.content.mySavedContent.invalidate();
+      },
+    });
 
   // Click tracking for external links
   const { mutate: trackClick } = api.content.trackClick.useMutation();
@@ -229,7 +236,10 @@ const UnifiedContentCard = ({
   const hostname = externalUrl ? getHostname(externalUrl) : null;
 
   return (
-    <article className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600" data-testid="content-card">
+    <article
+      className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
+      data-testid="content-card"
+    >
       {/* Meta info row */}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
         {/* Author/Source info */}
@@ -293,21 +303,26 @@ const UnifiedContentCard = ({
         ) : null}
 
         {/* Link author (if different from source) */}
-        {type === "LINK" && linkAuthor && linkAuthor.trim() &&
-         !["by", "by,", "by ,"].includes(linkAuthor.trim().toLowerCase()) && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span className="max-w-[120px] truncate">
-              {linkAuthor.replace(/^by\s+/i, "").trim()}
-            </span>
-          </>
-        )}
+        {type === "LINK" &&
+          linkAuthor &&
+          linkAuthor.trim() &&
+          !["by", "by,", "by ,"].includes(linkAuthor.trim().toLowerCase()) && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="max-w-[120px] truncate">
+                {linkAuthor.replace(/^by\s+/i, "").trim()}
+              </span>
+            </>
+          )}
 
         {/* Time */}
         {relativeTime && (
           <>
             <span aria-hidden="true">·</span>
-            <time dateTime={dateTime?.toString()} title={readableDate || undefined}>
+            <time
+              dateTime={dateTime?.toString()}
+              title={readableDate || undefined}
+            >
               {relativeTime}
             </time>
           </>

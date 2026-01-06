@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 
 // Get favicon URL from a website
-const getFaviconUrl = (websiteUrl: string | null | undefined): string | null => {
+const getFaviconUrl = (
+  websiteUrl: string | null | undefined,
+): string | null => {
   if (!websiteUrl) return null;
   try {
     const url = new URL(websiteUrl);
@@ -63,7 +65,9 @@ const ContentMetaHeader = ({
       })
     : null;
 
-  const faviconUrl = source ? getFaviconUrl(source.websiteUrl || externalUrl) : null;
+  const faviconUrl = source
+    ? getFaviconUrl(source.websiteUrl || externalUrl)
+    : null;
   const hostname = getHostname(externalUrl);
 
   // Render author info (for user posts)
@@ -129,7 +133,9 @@ const ContentMetaHeader = ({
         </Link>
         {source.author &&
           source.author.trim() &&
-          !["by", "by,", "by ,"].includes(source.author.trim().toLowerCase()) && (
+          !["by", "by,", "by ,"].includes(
+            source.author.trim().toLowerCase(),
+          ) && (
             <>
               <span aria-hidden="true">·</span>
               <span>{source.author.replace(/^by\s+/i, "").trim()}</span>
@@ -144,7 +150,9 @@ const ContentMetaHeader = ({
         {hostname && (
           <>
             <span aria-hidden="true">·</span>
-            <span className="text-neutral-400 dark:text-neutral-500">{hostname}</span>
+            <span className="text-neutral-400 dark:text-neutral-500">
+              {hostname}
+            </span>
           </>
         )}
       </div>

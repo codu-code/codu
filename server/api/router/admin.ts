@@ -83,7 +83,8 @@ export const adminRouter = createTRPCRouter({
         conditions.push(sql`${user.id} > ${cursor.toString()}`);
       }
 
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       const users = await ctx.db.query.user.findMany({
         where: whereClause,

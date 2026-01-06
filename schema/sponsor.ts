@@ -7,7 +7,10 @@ export const sponsorInterests = [
   "CONTENT",
 ] as const;
 
-export const sponsorInterestLabels: Record<typeof sponsorInterests[number], string> = {
+export const sponsorInterestLabels: Record<
+  (typeof sponsorInterests)[number],
+  string
+> = {
   NEWSLETTER: "Newsletter Advertising",
   EVENTS: "Event Sponsorship",
   WEBSITE: "Website & Job Board",
@@ -22,7 +25,10 @@ export const sponsorBudgetRanges = [
   "OVER_5000",
 ] as const;
 
-export const sponsorBudgetLabels: Record<typeof sponsorBudgetRanges[number], string> = {
+export const sponsorBudgetLabels: Record<
+  (typeof sponsorBudgetRanges)[number],
+  string
+> = {
   EXPLORING: "Just exploring",
   UNDER_500: "Under €500/month",
   BETWEEN_500_2000: "€500 - €2,000/month",
@@ -56,10 +62,7 @@ export const SponsorInquirySchema = z.object({
     .string()
     .max(100, "Company name must be 100 characters or less")
     .optional(),
-  phone: z
-    .string()
-    .max(50, "Phone must be 50 characters or less")
-    .optional(),
+  phone: z.string().max(50, "Phone must be 50 characters or less").optional(),
 });
 
 export type SponsorInquiryInput = z.infer<typeof SponsorInquirySchema>;

@@ -64,7 +64,7 @@ export const createSponsorInquiryEmailTemplate = (
         ${details.interests
           .map(
             (interest) =>
-              `<span style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; margin: 4px 4px 4px 0;">${interest}</span>`
+              `<span style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; margin: 4px 4px 4px 0;">${interest}</span>`,
           )
           .join("")}
       </div>

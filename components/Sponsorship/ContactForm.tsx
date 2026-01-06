@@ -14,7 +14,11 @@ import { z } from "zod";
 import { Input } from "@/components/ui-components/input";
 import { Textarea } from "@/components/ui-components/textarea";
 import { Select } from "@/components/ui-components/select";
-import { Field, Label, ErrorMessage } from "@/components/ui-components/fieldset";
+import {
+  Field,
+  Label,
+  ErrorMessage,
+} from "@/components/ui-components/fieldset";
 import { api } from "@/server/trpc/react";
 import clsx from "clsx";
 import {
@@ -51,7 +55,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 <div
                   className={clsx(
                     "absolute right-1/2 h-1 w-1/2 rounded-l-full",
-                    step <= currentStep ? "bg-green-500" : "bg-neutral-800"
+                    step <= currentStep ? "bg-green-500" : "bg-neutral-800",
                   )}
                 />
               )}
@@ -60,7 +64,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 <div
                   className={clsx(
                     "absolute left-1/2 h-1 w-1/2 rounded-r-full",
-                    step < currentStep ? "bg-green-500" : "bg-neutral-800"
+                    step < currentStep ? "bg-green-500" : "bg-neutral-800",
                   )}
                 />
               )}
@@ -72,14 +76,10 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                     ? "bg-green-500 text-white"
                     : step === currentStep
                       ? "bg-gradient-to-r from-orange-400 to-pink-600 text-white"
-                      : "bg-neutral-800 text-neutral-400"
+                      : "bg-neutral-800 text-neutral-400",
                 )}
               >
-                {step < currentStep ? (
-                  <CheckIcon className="h-5 w-5" />
-                ) : (
-                  step
-                )}
+                {step < currentStep ? <CheckIcon className="h-5 w-5" /> : step}
               </div>
             </div>
             {/* Label */}
@@ -107,7 +107,8 @@ function Step1Interests({
       <div>
         <h3 className="text-xl font-bold text-white">What interests you?</h3>
         <p className="mt-2 text-neutral-400">
-          Select all the advertising options you&apos;d like to learn more about.
+          Select all the advertising options you&apos;d like to learn more
+          about.
         </p>
       </div>
 
@@ -125,7 +126,7 @@ function Step1Interests({
                 "flex items-start gap-4 rounded-xl border p-4 text-left transition-all",
                 isSelected
                   ? "border-orange-400/50 bg-gradient-to-br from-orange-400/10 to-pink-600/10"
-                  : "border-neutral-700 bg-neutral-800/50 hover:border-neutral-600 hover:bg-neutral-800"
+                  : "border-neutral-700 bg-neutral-800/50 hover:border-neutral-600 hover:bg-neutral-800",
               )}
             >
               <div
@@ -133,7 +134,7 @@ function Step1Interests({
                   "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
                   isSelected
                     ? "bg-gradient-to-br from-orange-400 to-pink-600"
-                    : "bg-neutral-700"
+                    : "bg-neutral-700",
                 )}
               >
                 <Icon className="h-5 w-5 text-white" />
@@ -148,7 +149,7 @@ function Step1Interests({
                   "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                   isSelected
                     ? "border-orange-400 bg-orange-400"
-                    : "border-neutral-600"
+                    : "border-neutral-600",
                 )}
               >
                 {isSelected && <CheckIcon className="h-4 w-4 text-white" />}
@@ -169,7 +170,9 @@ function Step2Details({
   budgetValue,
 }: {
   register: ReturnType<typeof useForm<SponsorInquiryInput>>["register"];
-  errors: ReturnType<typeof useForm<SponsorInquiryInput>>["formState"]["errors"];
+  errors: ReturnType<
+    typeof useForm<SponsorInquiryInput>
+  >["formState"]["errors"];
   budgetValue: string;
 }) {
   return (
@@ -177,7 +180,8 @@ function Step2Details({
       <div>
         <h3 className="text-xl font-bold text-white">Tell us more</h3>
         <p className="mt-2 text-neutral-400">
-          Help us understand your budget and goals so we can prepare the best options for you.
+          Help us understand your budget and goals so we can prepare the best
+          options for you.
         </p>
       </div>
 
@@ -210,7 +214,9 @@ function Step3Contact({
   errors,
 }: {
   register: ReturnType<typeof useForm<SponsorInquiryInput>>["register"];
-  errors: ReturnType<typeof useForm<SponsorInquiryInput>>["formState"]["errors"];
+  errors: ReturnType<
+    typeof useForm<SponsorInquiryInput>
+  >["formState"]["errors"];
 }) {
   return (
     <div className="space-y-6">
@@ -248,7 +254,8 @@ function Step3Contact({
       <div className="grid gap-6 sm:grid-cols-2">
         <Field>
           <Label>
-            Company <span className="font-normal text-neutral-500">(optional)</span>
+            Company{" "}
+            <span className="font-normal text-neutral-500">(optional)</span>
           </Label>
           <Input
             type="text"
@@ -259,7 +266,8 @@ function Step3Contact({
 
         <Field>
           <Label>
-            Phone <span className="font-normal text-neutral-500">(optional)</span>
+            Phone{" "}
+            <span className="font-normal text-neutral-500">(optional)</span>
           </Label>
           <Input
             type="tel"
@@ -280,8 +288,8 @@ function SuccessState({ onReset }: { onReset: () => void }) {
       </div>
       <h3 className="text-2xl font-bold text-white">Thank you!</h3>
       <p className="mx-auto mt-3 max-w-md text-neutral-300">
-        We&apos;ve received your inquiry and will be in touch within 24 hours to discuss
-        how we can help you reach our developer community.
+        We&apos;ve received your inquiry and will be in touch within 24 hours to
+        discuss how we can help you reach our developer community.
       </p>
       <button
         onClick={onReset}
@@ -399,7 +407,11 @@ export function ContactForm() {
           <Step1Interests
             selectedInterests={selectedInterests as string[]}
             onToggle={toggleInterest}
-            error={errors.interests?.message || (errors.interests?.root as { message?: string } | undefined)?.message}
+            error={
+              errors.interests?.message ||
+              (errors.interests?.root as { message?: string } | undefined)
+                ?.message
+            }
           />
         )}
         {currentStep === 2 && (
@@ -429,7 +441,7 @@ export function ContactForm() {
             "flex items-center gap-2 text-sm font-medium transition-colors",
             currentStep === 1
               ? "invisible"
-              : "text-neutral-400 hover:text-white"
+              : "text-neutral-400 hover:text-white",
           )}
         >
           <ArrowLeftIcon className="h-4 w-4" />

@@ -16,7 +16,8 @@ export const sponsorRouter = createTRPCRouter({
     .input(SponsorInquirySchema)
     .mutation(async ({ input }) => {
       try {
-        const { name, email, company, phone, interests, budgetRange, goals } = input;
+        const { name, email, company, phone, interests, budgetRange, goals } =
+          input;
         const now = new Date();
 
         // Convert interests array to comma-separated string for storage
@@ -43,7 +44,7 @@ export const sponsorRouter = createTRPCRouter({
 
         // Convert interests to readable labels
         const interestLabels = interests.map(
-          (interest) => sponsorInterestLabels[interest]
+          (interest) => sponsorInterestLabels[interest],
         );
 
         const htmlMessage = createSponsorInquiryEmailTemplate({

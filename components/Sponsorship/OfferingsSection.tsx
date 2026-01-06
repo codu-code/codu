@@ -61,7 +61,7 @@ export function OfferingsSection() {
                   <h3 className="text-lg font-semibold text-white">
                     {offering.title}
                   </h3>
-                  <p className="mt-2 text-sm text-neutral-400 leading-relaxed">
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-400">
                     {offering.description}
                   </p>
                 </div>

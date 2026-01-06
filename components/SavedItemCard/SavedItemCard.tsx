@@ -38,7 +38,9 @@ const getRelativeTime = (dateStr: string): string => {
 };
 
 // Get favicon URL from a website
-const getFaviconUrl = (sourceLogo: string | null | undefined): string | null => {
+const getFaviconUrl = (
+  sourceLogo: string | null | undefined,
+): string | null => {
   if (!sourceLogo) return null;
   return sourceLogo;
 };
@@ -106,7 +108,9 @@ const SavedItemCard = ({
             </span>
           ) : (
             <span>
-              <span className="text-neutral-400 dark:text-neutral-500">In </span>
+              <span className="text-neutral-400 dark:text-neutral-500">
+                In{" "}
+              </span>
               <span className="font-medium text-neutral-700 dark:text-neutral-300">
                 {sourceName}
               </span>
@@ -115,7 +119,10 @@ const SavedItemCard = ({
           {relativeTime && (
             <>
               <span aria-hidden="true">·</span>
-              <time dateTime={dateTime?.toString()} title={readableDate || undefined}>
+              <time
+                dateTime={dateTime?.toString()}
+                title={readableDate || undefined}
+              >
                 {relativeTime}
               </time>
             </>

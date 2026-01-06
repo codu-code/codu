@@ -5,7 +5,10 @@ interface ContentTypeBadgeProps {
   className?: string;
 }
 
-const badgeStyles: Record<ContentType, { bg: string; text: string; label: string }> = {
+const badgeStyles: Record<
+  ContentType,
+  { bg: string; text: string; label: string }
+> = {
   article: {
     bg: "bg-gradient-to-r from-orange-400 to-pink-600",
     text: "text-white",

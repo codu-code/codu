@@ -367,7 +367,9 @@ const Create = ({ session }: { session: Session | null }) => {
       id,
       published: publishedAt ? publishedAt : undefined,
     });
-    setIsPostScheduled(publishedAt ? new Date(publishedAt) > new Date() : false);
+    setIsPostScheduled(
+      publishedAt ? new Date(publishedAt) > new Date() : false,
+    );
     setPostStatus(
       publishedAt ? getPostStatus(new Date(publishedAt)) : status.DRAFT,
     );
@@ -403,14 +405,24 @@ const Create = ({ session }: { session: Session | null }) => {
   }, [title, body]);
 
   useEffect(() => {
-    if (publishStatus === "success" && publishData?.slug && session?.user?.username) {
+    if (
+      publishStatus === "success" &&
+      publishData?.slug &&
+      session?.user?.username
+    ) {
       if (isPostScheduled) {
         router.push("/my-posts?tab=scheduled");
       } else {
         router.push(`/${session.user.username}/${publishData.slug}`);
       }
     }
-  }, [publishStatus, publishData, isPostScheduled, router, session?.user?.username]);
+  }, [
+    publishStatus,
+    publishData,
+    isPostScheduled,
+    router,
+    session?.user?.username,
+  ]);
 
   const handlePublish = () => {
     if (isDisabled) return;

@@ -221,7 +221,11 @@ function useCreateContent({
     await saveContent();
   };
 
-  if (publishStatus === "success" && publishData?.slug && session?.user?.username) {
+  if (
+    publishStatus === "success" &&
+    publishData?.slug &&
+    session?.user?.username
+  ) {
     redirect(`/${session.user.username}/${publishData.slug}`);
   }
 

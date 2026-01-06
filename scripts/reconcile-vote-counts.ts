@@ -43,7 +43,10 @@ async function reconcilePostVotes(): Promise<{
 
   // Create a map for quick lookup
   const actualCountsMap = new Map(
-    actualCounts.map((c) => [c.postId, { upvotes: c.upvotes, downvotes: c.downvotes }])
+    actualCounts.map((c) => [
+      c.postId,
+      { upvotes: c.upvotes, downvotes: c.downvotes },
+    ]),
   );
 
   // Get all posts with their stored counts
@@ -109,7 +112,10 @@ async function reconcileCommentVotes(): Promise<{
 
   // Create a map for quick lookup
   const actualCountsMap = new Map(
-    actualCounts.map((c) => [c.commentId, { upvotes: c.upvotes, downvotes: c.downvotes }])
+    actualCounts.map((c) => [
+      c.commentId,
+      { upvotes: c.upvotes, downvotes: c.downvotes },
+    ]),
   );
 
   // Get all comments with their stored counts
@@ -125,7 +131,10 @@ async function reconcileCommentVotes(): Promise<{
   let fixed = 0;
 
   for (const comment of allComments) {
-    const actual = actualCountsMap.get(comment.id) || { upvotes: 0, downvotes: 0 };
+    const actual = actualCountsMap.get(comment.id) || {
+      upvotes: 0,
+      downvotes: 0,
+    };
 
     if (
       comment.upvotesCount !== actual.upvotes ||
@@ -220,18 +229,22 @@ async function reconcileCommentCounts(): Promise<{
 
 async function main() {
   console.log("=== Vote Count Reconciliation ===");
-  console.log(`Mode: ${isDryRun ? "DRY RUN (no changes will be made)" : "LIVE"}\n`);
+  console.log(
+    `Mode: ${isDryRun ? "DRY RUN (no changes will be made)" : "LIVE"}\n`,
+  );
 
   try {
     // Reconcile post votes
     const postResult = await reconcilePostVotes();
     console.log(`\nPosts checked: ${postResult.checked}`);
-    console.log(`Post vote discrepancies found: ${postResult.discrepancies.length}`);
+    console.log(
+      `Post vote discrepancies found: ${postResult.discrepancies.length}`,
+    );
     if (postResult.discrepancies.length > 0) {
       console.log("Post discrepancies:");
       for (const d of postResult.discrepancies.slice(0, 10)) {
         console.log(
-          `  ${d.id}: stored(${d.storedUpvotes}/${d.storedDownvotes}) vs actual(${d.actualUpvotes}/${d.actualDownvotes})`
+          `  ${d.id}: stored(${d.storedUpvotes}/${d.storedDownvotes}) vs actual(${d.actualUpvotes}/${d.actualDownvotes})`,
         );
       }
       if (postResult.discrepancies.length > 10) {
@@ -245,16 +258,20 @@ async function main() {
     // Reconcile comment votes
     const commentResult = await reconcileCommentVotes();
     console.log(`\nComments checked: ${commentResult.checked}`);
-    console.log(`Comment vote discrepancies found: ${commentResult.discrepancies.length}`);
+    console.log(
+      `Comment vote discrepancies found: ${commentResult.discrepancies.length}`,
+    );
     if (commentResult.discrepancies.length > 0) {
       console.log("Comment discrepancies:");
       for (const d of commentResult.discrepancies.slice(0, 10)) {
         console.log(
-          `  ${d.id}: stored(${d.storedUpvotes}/${d.storedDownvotes}) vs actual(${d.actualUpvotes}/${d.actualDownvotes})`
+          `  ${d.id}: stored(${d.storedUpvotes}/${d.storedDownvotes}) vs actual(${d.actualUpvotes}/${d.actualDownvotes})`,
         );
       }
       if (commentResult.discrepancies.length > 10) {
-        console.log(`  ... and ${commentResult.discrepancies.length - 10} more`);
+        console.log(
+          `  ... and ${commentResult.discrepancies.length - 10} more`,
+        );
       }
       if (!isDryRun) {
         console.log(`Fixed: ${commentResult.fixed}`);
@@ -263,15 +280,23 @@ async function main() {
 
     // Reconcile comment counts
     const commentCountResult = await reconcileCommentCounts();
-    console.log(`\nPosts checked for comment counts: ${commentCountResult.checked}`);
-    console.log(`Comment count discrepancies found: ${commentCountResult.discrepancies.length}`);
+    console.log(
+      `\nPosts checked for comment counts: ${commentCountResult.checked}`,
+    );
+    console.log(
+      `Comment count discrepancies found: ${commentCountResult.discrepancies.length}`,
+    );
     if (commentCountResult.discrepancies.length > 0) {
       console.log("Comment count discrepancies:");
       for (const d of commentCountResult.discrepancies.slice(0, 10)) {
-        console.log(`  ${d.postId}: stored(${d.storedCount}) vs actual(${d.actualCount})`);
+        console.log(
+          `  ${d.postId}: stored(${d.storedCount}) vs actual(${d.actualCount})`,
+        );
       }
       if (commentCountResult.discrepancies.length > 10) {
-        console.log(`  ... and ${commentCountResult.discrepancies.length - 10} more`);
+        console.log(
+          `  ... and ${commentCountResult.discrepancies.length - 10} more`,
+        );
       }
       if (!isDryRun) {
         console.log(`Fixed: ${commentCountResult.fixed}`);
@@ -292,7 +317,8 @@ async function main() {
       if (isDryRun) {
         console.log("\nRun without --dry-run to fix these discrepancies.");
       } else {
-        const totalFixed = postResult.fixed + commentResult.fixed + commentCountResult.fixed;
+        const totalFixed =
+          postResult.fixed + commentResult.fixed + commentCountResult.fixed;
         console.log(`Total fixed: ${totalFixed}`);
       }
     }

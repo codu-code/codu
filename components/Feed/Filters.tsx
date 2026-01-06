@@ -22,7 +22,13 @@ import {
 } from "@heroicons/react/20/solid";
 
 type SortOption = "recent" | "trending" | "popular";
-type ContentType = "ARTICLE" | "LINK" | "QUESTION" | "VIDEO" | "DISCUSSION" | null;
+type ContentType =
+  | "ARTICLE"
+  | "LINK"
+  | "QUESTION"
+  | "VIDEO"
+  | "DISCUSSION"
+  | null;
 
 type Props = {
   sort: SortOption;
@@ -35,13 +41,21 @@ type Props = {
   showTypeFilter?: boolean;
 };
 
-const sortOptions: { value: SortOption; label: string; icon: typeof ClockIcon }[] = [
+const sortOptions: {
+  value: SortOption;
+  label: string;
+  icon: typeof ClockIcon;
+}[] = [
   { value: "recent", label: "Recent", icon: ClockIcon },
   { value: "trending", label: "Trending", icon: FireIcon },
   { value: "popular", label: "Popular", icon: ArrowTrendingUpIcon },
 ];
 
-const typeOptions: { value: ContentType; label: string; icon: typeof DocumentTextIcon }[] = [
+const typeOptions: {
+  value: ContentType;
+  label: string;
+  icon: typeof DocumentTextIcon;
+}[] = [
   { value: null, label: "All Types", icon: Squares2X2Icon },
   { value: "ARTICLE", label: "Articles", icon: DocumentTextIcon },
   { value: "LINK", label: "Links", icon: LinkIcon },
@@ -60,8 +74,10 @@ const FeedFilters = ({
   onCategoryChange,
   showTypeFilter = true,
 }: Props) => {
-  const currentSort = sortOptions.find((opt) => opt.value === sort) || sortOptions[0];
-  const currentType = typeOptions.find((opt) => opt.value === type) || typeOptions[0];
+  const currentSort =
+    sortOptions.find((opt) => opt.value === sort) || sortOptions[0];
+  const currentType =
+    typeOptions.find((opt) => opt.value === type) || typeOptions[0];
 
   return (
     <div className="flex items-center gap-3" data-testid="feed-filters">

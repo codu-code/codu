@@ -19,13 +19,7 @@ import sanitizeHtml from "sanitize-html";
 import type { JSONContent } from "@tiptap/core";
 import NotFound from "@/components/NotFound/NotFound";
 import { db } from "@/server/db";
-import {
-  posts,
-  user,
-  feed_sources,
-  post_tags,
-  tag,
-} from "@/server/db/schema";
+import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
 import { eq, and, lte } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
@@ -148,7 +142,7 @@ async function getFeedArticle(
         eq(posts.sourceId, source.id),
         eq(posts.type, "link"),
         eq(posts.status, "published"),
-      )
+      ),
     )
     .limit(1);
 
@@ -485,10 +479,7 @@ const UnifiedPostPage = async (props: Props) => {
             {/* Discussion section - inside the card */}
             <section id="discussion" className="mt-8">
               {userPost.showComments ? (
-                <DiscussionArea
-                  contentId={userPost.id}
-                  noWrapper
-                />
+                <DiscussionArea contentId={userPost.id} noWrapper />
               ) : (
                 <div className="py-4">
                   <p className="italic text-neutral-500 dark:text-neutral-400">
@@ -573,11 +564,14 @@ const UnifiedPostPage = async (props: Props) => {
                 <>
                   <span aria-hidden="true">·</span>
                   <time>
-                    {new Date(userArticle.publishedAt).toLocaleDateString("en-IE", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {new Date(userArticle.publishedAt).toLocaleDateString(
+                      "en-IE",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      },
+                    )}
                   </time>
                 </>
               )}
@@ -649,10 +643,7 @@ const UnifiedPostPage = async (props: Props) => {
             {/* Discussion section - inside the card */}
             <section id="discussion" className="mt-8">
               {userArticle.showComments ? (
-                <DiscussionArea
-                  contentId={userArticle.id}
-                  noWrapper
-                />
+                <DiscussionArea contentId={userArticle.id} noWrapper />
               ) : (
                 <div className="py-4">
                   <p className="italic text-neutral-500 dark:text-neutral-400">

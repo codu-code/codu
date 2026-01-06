@@ -43,18 +43,15 @@ const reasonColors: Record<ReportReason, string> = {
   COPYRIGHT:
     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
   NSFW: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
-  OFF_TOPIC:
-    "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+  OFF_TOPIC: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
   OTHER: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
 };
 
 const statusColors: Record<ReportStatus, string> = {
   PENDING:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  REVIEWED:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  DISMISSED:
-    "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+  REVIEWED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  DISMISSED: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
   ACTIONED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 

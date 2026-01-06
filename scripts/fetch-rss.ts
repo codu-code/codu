@@ -51,16 +51,19 @@ function calculateReadTime(wordCount: number): number {
 }
 
 // Extract text content from HTML and count words
-function extractTextAndWordCount(html: string): { text: string; wordCount: number } {
+function extractTextAndWordCount(html: string): {
+  text: string;
+  wordCount: number;
+} {
   // Remove scripts and styles
   const cleaned = html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 
-  const wordCount = cleaned.split(/\s+/).filter(w => w.length > 0).length;
+  const wordCount = cleaned.split(/\s+/).filter((w) => w.length > 0).length;
   return { text: cleaned, wordCount };
 }
 
@@ -73,13 +76,20 @@ function extractImage(item: Parser.Item): string | null {
 
   // Check media:content
   const mediaContent = (item as Record<string, unknown>)["media:content"];
-  if (mediaContent && typeof mediaContent === "object" && "url" in (mediaContent as Record<string, unknown>)) {
+  if (
+    mediaContent &&
+    typeof mediaContent === "object" &&
+    "url" in (mediaContent as Record<string, unknown>)
+  ) {
     return (mediaContent as Record<string, string>).url;
   }
 
   // Try to extract from content
-  const itemContent = item.content || (item as Record<string, unknown>)["content:encoded"] || "";
-  const imgMatch = (itemContent as string).match(/<img[^>]+src=["']([^"']+)["']/i);
+  const itemContent =
+    item.content || (item as Record<string, unknown>)["content:encoded"] || "";
+  const imgMatch = (itemContent as string).match(
+    /<img[^>]+src=["']([^"']+)["']/i,
+  );
   if (imgMatch) {
     return imgMatch[1];
   }
@@ -88,14 +98,18 @@ function extractImage(item: Parser.Item): string | null {
 }
 
 // Fetch article metadata: OG image and read time (combined to avoid double requests)
-async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | null; readTimeMins: number }> {
+async function fetchArticleMetadata(
+  url: string,
+): Promise<{ ogImage: string | null; readTimeMins: number }> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)" },
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)",
+      },
     });
     clearTimeout(timeout);
 
@@ -104,14 +118,24 @@ async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | nu
 
     // Extract OG image
     let ogImage: string | null = null;
-    const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
-      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    const ogMatch =
+      html.match(
+        /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
+      ) ||
+      html.match(
+        /<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i,
+      );
     if (ogMatch?.[1]) {
       ogImage = ogMatch[1];
     } else {
       // Fall back to twitter:image
-      const twitterMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
-        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+      const twitterMatch =
+        html.match(
+          /<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i,
+        ) ||
+        html.match(
+          /<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i,
+        );
       if (twitterMatch?.[1]) ogImage = twitterMatch[1];
     }
 
@@ -126,7 +150,7 @@ async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | nu
 }
 
 // Small delay helper for rate limiting
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface FeedSource {
   id: number;
@@ -139,7 +163,9 @@ async function fetchAndProcessFeed(source: FeedSource) {
   console.log(`\nFetching: ${source.name} (${source.url})`);
 
   if (!source.userId) {
-    console.log(`  Skipping: No linked user profile (run create-source-users.ts first)`);
+    console.log(
+      `  Skipping: No linked user profile (run create-source-users.ts first)`,
+    );
     return { success: false, error: "No user profile" };
   }
 
@@ -152,7 +178,7 @@ async function fetchAndProcessFeed(source: FeedSource) {
       .select({ url: posts.externalUrl })
       .from(posts)
       .where(eq(posts.sourceId, source.id));
-    const existingUrlSet = new Set(existingUrls.map(r => r.url));
+    const existingUrlSet = new Set(existingUrls.map((r) => r.url));
     console.log(`  Already have ${existingUrlSet.size} items from this source`);
 
     let newCount = 0;
@@ -187,7 +213,7 @@ async function fetchAndProcessFeed(source: FeedSource) {
 
       // Extract excerpt from RSS content
       const excerpt = extractExcerpt(
-        item.contentSnippet || item.content || item.summary || ""
+        item.contentSnippet || item.content || item.summary || "",
       );
       let imageUrl = extractImage(item);
 
@@ -236,7 +262,9 @@ async function fetchAndProcessFeed(source: FeedSource) {
     console.log(`  Added: ${newCount}, Skipped: ${skippedCount}`);
     return { success: true, newCount, skippedCount };
   } catch (error) {
-    console.error(`  Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+    console.error(
+      `  Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
     return { success: false, error };
   }
 }
@@ -248,7 +276,7 @@ async function main() {
   const sources = await db.query.feed_sources.findMany({
     where: and(
       eq(feed_sources.status, "active"),
-      isNotNull(feed_sources.userId)
+      isNotNull(feed_sources.userId),
     ),
   });
 
@@ -258,12 +286,14 @@ async function main() {
   const sourcesWithoutUsers = await db.query.feed_sources.findMany({
     where: and(
       eq(feed_sources.status, "active"),
-      eq(feed_sources.userId, null as unknown as string)
+      eq(feed_sources.userId, null as unknown as string),
     ),
   });
 
   if (sourcesWithoutUsers.length > 0) {
-    console.log(`\n⚠️  ${sourcesWithoutUsers.length} active sources have no linked user profiles.`);
+    console.log(
+      `\n⚠️  ${sourcesWithoutUsers.length} active sources have no linked user profiles.`,
+    );
     console.log("   Run: npx tsx scripts/create-source-users.ts");
     for (const source of sourcesWithoutUsers) {
       console.log(`   - ${source.name}`);

@@ -20,7 +20,18 @@ import {
   posts,
   user,
 } from "@/server/db/schema";
-import { and, count, desc, eq, isNull, sql, asc, gt, lt, like } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  isNull,
+  sql,
+  asc,
+  gt,
+  lt,
+  like,
+} from "drizzle-orm";
 import { db } from "@/server/db";
 import { increment, decrement } from "./utils";
 
@@ -133,7 +144,11 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      if (!parentId && postData[0].authorId && postData[0].authorId !== authorId) {
+      if (
+        !parentId &&
+        postData[0].authorId &&
+        postData[0].authorId !== authorId
+      ) {
         // Notification for new top-level comment on post
         await ctx.db.insert(notification).values({
           notifierId: authorId,
@@ -297,8 +312,8 @@ export const commentRouter = createTRPCRouter({
         .where(
           and(
             eq(commentVotes.commentId, commentId),
-            eq(commentVotes.userId, userId)
-          )
+            eq(commentVotes.userId, userId),
+          ),
         )
         .limit(1);
 
@@ -388,12 +403,7 @@ export const commentRouter = createTRPCRouter({
       const [commentCount] = await db
         .select({ count: count() })
         .from(comments)
-        .where(
-          and(
-            eq(comments.postId, postId),
-            isNull(comments.deletedAt)
-          )
-        );
+        .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)));
 
       // Build user votes subquery if logged in
       const userVotesSubquery = userId
@@ -413,7 +423,9 @@ export const commentRouter = createTRPCRouter({
           case "best":
           case "top":
             // Score = upvotes - downvotes
-            return desc(sql`${comments.upvotesCount} - ${comments.downvotesCount}`);
+            return desc(
+              sql`${comments.upvotesCount} - ${comments.downvotesCount}`,
+            );
           case "new":
             return desc(comments.createdAt);
           case "old":
@@ -455,13 +467,11 @@ export const commentRouter = createTRPCRouter({
           })
           .from(comments)
           .leftJoin(user, eq(comments.authorId, user.id))
-          .leftJoin(userVotesSubquery, eq(comments.id, userVotesSubquery.commentId))
-          .where(
-            and(
-              eq(comments.postId, postId),
-              isNull(comments.parentId)
-            )
+          .leftJoin(
+            userVotesSubquery,
+            eq(comments.id, userVotesSubquery.commentId),
           )
+          .where(and(eq(comments.postId, postId), isNull(comments.parentId)))
           .orderBy(getOrderBy())
           .limit(limit);
       } else {
@@ -488,12 +498,7 @@ export const commentRouter = createTRPCRouter({
           })
           .from(comments)
           .leftJoin(user, eq(comments.authorId, user.id))
-          .where(
-            and(
-              eq(comments.postId, postId),
-              isNull(comments.parentId)
-            )
-          )
+          .where(and(eq(comments.postId, postId), isNull(comments.parentId)))
           .orderBy(getOrderBy())
           .limit(limit);
       }
@@ -530,12 +535,15 @@ export const commentRouter = createTRPCRouter({
               })
               .from(comments)
               .leftJoin(user, eq(comments.authorId, user.id))
-              .leftJoin(userVotesSubquery, eq(comments.id, userVotesSubquery.commentId))
+              .leftJoin(
+                userVotesSubquery,
+                eq(comments.id, userVotesSubquery.commentId),
+              )
               .where(
                 and(
                   eq(comments.postId, postId),
-                  like(comments.path, pathPrefix)
-                )
+                  like(comments.path, pathPrefix),
+                ),
               )
               .orderBy(asc(comments.path)); // Order by path for tree reconstruction
           } else {
@@ -563,8 +571,8 @@ export const commentRouter = createTRPCRouter({
               .where(
                 and(
                   eq(comments.postId, postId),
-                  like(comments.path, pathPrefix)
-                )
+                  like(comments.path, pathPrefix),
+                ),
               )
               .orderBy(asc(comments.path));
           }
@@ -573,7 +581,7 @@ export const commentRouter = createTRPCRouter({
 
           // Build tree structure from flat list
           return buildCommentTree(topComment, children);
-        })
+        }),
       );
 
       return {
@@ -590,10 +598,7 @@ export const commentRouter = createTRPCRouter({
         .select({ count: count() })
         .from(comments)
         .where(
-          and(
-            eq(comments.postId, input.postId),
-            isNull(comments.deletedAt)
-          )
+          and(eq(comments.postId, input.postId), isNull(comments.deletedAt)),
         );
 
       return result.count;
@@ -640,9 +645,14 @@ export const commentRouter = createTRPCRouter({
           })
           .from(comments)
           .leftJoin(user, eq(comments.authorId, user.id))
-          .leftJoin(userVotesSubquery, eq(comments.id, userVotesSubquery.commentId))
+          .leftJoin(
+            userVotesSubquery,
+            eq(comments.id, userVotesSubquery.commentId),
+          )
           .where(eq(comments.parentId, parentId))
-          .orderBy(desc(sql`${comments.upvotesCount} - ${comments.downvotesCount}`))
+          .orderBy(
+            desc(sql`${comments.upvotesCount} - ${comments.downvotesCount}`),
+          )
           .limit(limit);
       } else {
         query = db
@@ -667,7 +677,9 @@ export const commentRouter = createTRPCRouter({
           .from(comments)
           .leftJoin(user, eq(comments.authorId, user.id))
           .where(eq(comments.parentId, parentId))
-          .orderBy(desc(sql`${comments.upvotesCount} - ${comments.downvotesCount}`))
+          .orderBy(
+            desc(sql`${comments.upvotesCount} - ${comments.downvotesCount}`),
+          )
           .limit(limit);
       }
 

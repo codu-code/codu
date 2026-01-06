@@ -161,7 +161,9 @@ ${chance.paragraph()}
       .onConflictDoNothing()
       .returning();
 
-    console.log(`Added ${usersResponse.length} users and ${postResponse.length} posts`);
+    console.log(
+      `Added ${usersResponse.length} users and ${postResponse.length} posts`,
+    );
 
     return { users: usersResponse, posts: postResponse, tags: tagResponse };
   };
@@ -177,21 +179,24 @@ ${chance.paragraph()}
       url: "https://www.joshwcomeau.com/rss.xml",
       websiteUrl: "https://www.joshwcomeau.com",
       category: "frontend",
-      description: "Frontend developer sharing CSS tricks, React patterns, and web development insights through interactive tutorials.",
+      description:
+        "Frontend developer sharing CSS tricks, React patterns, and web development insights through interactive tutorials.",
     },
     {
       name: "Kent C. Dodds",
       url: "https://kentcdodds.com/blog/rss.xml",
       websiteUrl: "https://kentcdodds.com",
       category: "react",
-      description: "Full stack JavaScript engineer teaching React and testing best practices through EpicReact and Testing JavaScript.",
+      description:
+        "Full stack JavaScript engineer teaching React and testing best practices through EpicReact and Testing JavaScript.",
     },
     {
       name: "Dan Abramov (Overreacted)",
       url: "https://overreacted.io/rss.xml",
       websiteUrl: "https://overreacted.io",
       category: "react",
-      description: "React core team member exploring JavaScript fundamentals and React internals with deep technical insights.",
+      description:
+        "React core team member exploring JavaScript fundamentals and React internals with deep technical insights.",
     },
     {
       name: "Robin Wieruch",
@@ -586,11 +591,13 @@ ${chance.paragraph()}
   ) => {
     if (sourceIds.length === 0) {
       console.log("No sources to add links for, fetching from DB...");
-      const existingSources = await db.select({
-        id: feed_sources.id,
-        websiteUrl: feed_sources.websiteUrl,
-        slug: feed_sources.slug,
-      }).from(feed_sources);
+      const existingSources = await db
+        .select({
+          id: feed_sources.id,
+          websiteUrl: feed_sources.websiteUrl,
+          slug: feed_sources.slug,
+        })
+        .from(feed_sources);
       if (existingSources.length === 0) {
         console.log("No feed sources found, skipping sample links");
         return [];
@@ -599,7 +606,9 @@ ${chance.paragraph()}
     }
 
     // Filter to only sources with valid websiteUrls
-    const validSources = sourceIds.filter(s => s.websiteUrl && s.websiteUrl.length > 0);
+    const validSources = sourceIds.filter(
+      (s) => s.websiteUrl && s.websiteUrl.length > 0,
+    );
     if (validSources.length === 0) {
       console.log("No sources with valid websiteUrls, skipping sample links");
       return [];
@@ -667,10 +676,16 @@ ${chance.paragraph()}
       const source = validSources[i];
       for (let j = 0; j < 3; j++) {
         const daysAgo = chance.integer({ min: 1, max: 14 });
-        const publishedDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+        const publishedDate = new Date(
+          now.getTime() - daysAgo * 24 * 60 * 60 * 1000,
+        );
         const shortId = generateShortId();
         const title = sampleTitles[(i * 3 + j) % sampleTitles.length];
-        const slug = `${title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").substring(0, 100)}-${shortId}`;
+        const slug = `${title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .substring(0, 100)}-${shortId}`;
 
         sampleLinks.push({
           type: "link" as const,
@@ -703,7 +718,10 @@ ${chance.paragraph()}
   };
 
   // Add sample comments on posts
-  const addSampleComments = async (users: { id: string }[], postItems: { id: string }[]) => {
+  const addSampleComments = async (
+    users: { id: string }[],
+    postItems: { id: string }[],
+  ) => {
     if (users.length === 0) {
       console.log("No users found, skipping comments");
       return;
@@ -752,7 +770,9 @@ ${chance.paragraph()}
         // Generate reply path by appending to parent's path
         const replyPathId = generateShortId().replace(/[^a-zA-Z0-9]/g, "");
         replies.push({
-          body: chance.sentence({ words: chance.integer({ min: 10, max: 30 }) }),
+          body: chance.sentence({
+            words: chance.integer({ min: 10, max: 30 }),
+          }),
           postId: comment.postId,
           authorId: users[chance.integer({ min: 0, max: users.length - 1 })].id,
           parentId: comment.id,
@@ -787,7 +807,9 @@ ${chance.paragraph()}
       // Add sample comments on posts
       if (userData && userData.posts.length > 0) {
         // Filter to only published posts
-        const publishedPosts = userData.posts.filter(p => p.status === "published");
+        const publishedPosts = userData.posts.filter(
+          (p) => p.status === "published",
+        );
         await addSampleComments(userData.users, publishedPosts);
       }
     } catch (error) {

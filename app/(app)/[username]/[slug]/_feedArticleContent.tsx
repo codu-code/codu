@@ -186,8 +186,12 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
       })
     : null;
 
-  const faviconUrl = getFaviconUrl(article.source?.websiteUrl || article.externalUrl);
-  const hostname = article.externalUrl ? getHostname(article.externalUrl) : null;
+  const faviconUrl = getFaviconUrl(
+    article.source?.websiteUrl || article.externalUrl,
+  );
+  const hostname = article.externalUrl
+    ? getHostname(article.externalUrl)
+    : null;
   const score = article.upvotes - article.downvotes;
 
   return (
@@ -241,7 +245,9 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
             ) && (
               <>
                 <span aria-hidden="true">·</span>
-                <span>{article.sourceAuthor.replace(/^by\s+/i, "").trim()}</span>
+                <span>
+                  {article.sourceAuthor.replace(/^by\s+/i, "").trim()}
+                </span>
               </>
             )}
           {readableDate && (
@@ -423,10 +429,7 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
 
         {/* Discussion section - inside the card */}
         <section id="discussion" className="mt-8">
-          <DiscussionArea
-            contentId={article.id}
-            noWrapper
-          />
+          <DiscussionArea contentId={article.id} noWrapper />
         </section>
       </article>
     </div>

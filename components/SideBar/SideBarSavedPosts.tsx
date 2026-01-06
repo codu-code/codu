@@ -61,7 +61,10 @@ export default React.memo(function SideBarSavedPosts() {
         )}
       </div>
       {(totalNumberSaved && totalNumberSaved > howManySavedToShow && (
-        <Link href="/saved" className="secondary-button mt-4 block w-full text-center">
+        <Link
+          href="/saved"
+          className="secondary-button mt-4 block w-full text-center"
+        >
           View all saved posts
         </Link>
       )) ||

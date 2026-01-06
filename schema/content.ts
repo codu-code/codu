@@ -157,8 +157,15 @@ export type PublishContentInput = z.TypeOf<typeof PublishContentSchema>;
 
 // Confirm Content Schema - validation before publishing
 export const ConfirmContentSchema = z.object({
-  body: z.string().trim().min(50, "Content is too short. Minimum of 50 characters."),
-  title: z.string().trim().max(500).min(10, "Title is too short. Minimum of 10 characters."),
+  body: z
+    .string()
+    .trim()
+    .min(50, "Content is too short. Minimum of 50 characters."),
+  title: z
+    .string()
+    .trim()
+    .max(500)
+    .min(10, "Title is too short. Minimum of 10 characters."),
   excerpt: z.string().trim().max(300).optional(),
   canonicalUrl: z.string().trim().url().optional().or(z.literal("")),
   tags: z.string().array().max(5).optional(),

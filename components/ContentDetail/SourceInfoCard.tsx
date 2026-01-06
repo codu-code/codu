@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 // Get favicon URL from a website
-const getFaviconUrl = (websiteUrl: string | null | undefined): string | null => {
+const getFaviconUrl = (
+  websiteUrl: string | null | undefined,
+): string | null => {
   if (!websiteUrl) return null;
   try {
     const url = new URL(websiteUrl);

@@ -6,11 +6,13 @@ export const FeedVoteTypeSchema = z.enum(["up", "down"]);
 // Get Feed Schema (for RSS aggregated content)
 export const GetFeedSchema = z.object({
   limit: z.number().min(1).max(100).optional(),
-  cursor: z.object({
-    id: z.string(),
-    publishedAt: z.string().optional(),
-    score: z.number().optional(),
-  }).nullish(),
+  cursor: z
+    .object({
+      id: z.string(),
+      publishedAt: z.string().optional(),
+      score: z.number().optional(),
+    })
+    .nullish(),
   sort: z.enum(["recent", "trending", "popular"]).default("recent"),
   sourceId: z.number().optional(),
   category: z.string().optional(),
@@ -61,20 +63,26 @@ export const GetArticleBySlugAndShortIdSchema = z.object({
   shortId: z.string().min(1).max(20),
 });
 
-export type GetArticleBySlugAndShortIdInput = z.TypeOf<typeof GetArticleBySlugAndShortIdSchema>;
+export type GetArticleBySlugAndShortIdInput = z.TypeOf<
+  typeof GetArticleBySlugAndShortIdSchema
+>;
 
 // Get Articles by Source Schema
 export const GetArticlesBySourceSchema = z.object({
   sourceSlug: z.string().min(1).max(100),
   limit: z.number().min(1).max(100).optional(),
-  cursor: z.object({
-    id: z.string(),
-    publishedAt: z.string().optional(),
-  }).nullish(),
+  cursor: z
+    .object({
+      id: z.string(),
+      publishedAt: z.string().optional(),
+    })
+    .nullish(),
   sort: z.enum(["recent", "trending", "popular"]).default("recent"),
 });
 
-export type GetArticlesBySourceInput = z.TypeOf<typeof GetArticlesBySourceSchema>;
+export type GetArticlesBySourceInput = z.TypeOf<
+  typeof GetArticlesBySourceSchema
+>;
 
 // Get Article by Source and Article Slug
 export const GetArticleBySourceAndArticleSlugSchema = z.object({
@@ -82,7 +90,9 @@ export const GetArticleBySourceAndArticleSlugSchema = z.object({
   articleSlug: z.string().min(1).max(350),
 });
 
-export type GetArticleBySourceAndArticleSlugInput = z.TypeOf<typeof GetArticleBySourceAndArticleSlugSchema>;
+export type GetArticleBySourceAndArticleSlugInput = z.TypeOf<
+  typeof GetArticleBySourceAndArticleSlugSchema
+>;
 
 // Feed Source Schemas (RSS source management)
 export const CreateFeedSourceSchema = z.object({

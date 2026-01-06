@@ -39,7 +39,9 @@ type Props = {
 };
 
 // Get favicon URL from a website
-const getFaviconUrl = (websiteUrl: string | null | undefined): string | null => {
+const getFaviconUrl = (
+  websiteUrl: string | null | undefined,
+): string | null => {
   if (!websiteUrl) return null;
   try {
     const url = new URL(websiteUrl);
@@ -104,7 +106,8 @@ const FeedItemAggregated = ({
   isBookmarked: initialBookmarked,
 }: Props) => {
   // Build the article URL - use new format if available, fallback to old
-  const articleUrl = sourceSlug && shortId ? `/feed/${sourceSlug}/${shortId}` : `/feed/${id}`;
+  const articleUrl =
+    sourceSlug && shortId ? `/feed/${sourceSlug}/${shortId}` : `/feed/${id}`;
   const sourceProfileUrl = sourceSlug ? `/feed/${sourceSlug}` : null;
   const [imageError, setImageError] = useState(false);
   const { data: session } = useSession();
@@ -198,7 +201,10 @@ const FeedItemAggregated = ({
       {/* Source info row - full width above content */}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
         {sourceProfileUrl ? (
-          <Link href={sourceProfileUrl} className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200">
+          <Link
+            href={sourceProfileUrl}
+            className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
+          >
             {sourceLogo ? (
               <img
                 src={sourceLogo}
@@ -232,12 +238,16 @@ const FeedItemAggregated = ({
             <span className="font-medium">{sourceName || "Unknown"}</span>
           </>
         )}
-        {author && author.trim() && !["by", "by,", "by ,"].includes(author.trim().toLowerCase()) && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span className="max-w-[120px] truncate">{author.replace(/^by\s+/i, "").trim()}</span>
-          </>
-        )}
+        {author &&
+          author.trim() &&
+          !["by", "by,", "by ,"].includes(author.trim().toLowerCase()) && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="max-w-[120px] truncate">
+                {author.replace(/^by\s+/i, "").trim()}
+              </span>
+            </>
+          )}
         {relativeTime && (
           <>
             <span aria-hidden="true">·</span>
@@ -289,9 +299,7 @@ const FeedItemAggregated = ({
             {/* Vote buttons */}
             <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
               <button
-                onClick={() =>
-                  handleVote(userVote === "up" ? null : "up")
-                }
+                onClick={() => handleVote(userVote === "up" ? null : "up")}
                 disabled={voteStatus === "pending"}
                 className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
                   userVote === "up"
@@ -314,9 +322,7 @@ const FeedItemAggregated = ({
                 {score}
               </span>
               <button
-                onClick={() =>
-                  handleVote(userVote === "down" ? null : "down")
-                }
+                onClick={() => handleVote(userVote === "down" ? null : "down")}
                 disabled={voteStatus === "pending"}
                 className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
                   userVote === "down"
@@ -342,7 +348,9 @@ const FeedItemAggregated = ({
             <button
               onClick={handleBookmark}
               disabled={bookmarkStatus === "pending"}
-              aria-label={initialBookmarked ? "Remove from saved" : "Save article"}
+              aria-label={
+                initialBookmarked ? "Remove from saved" : "Save article"
+              }
               className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                 initialBookmarked
                   ? "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
@@ -366,7 +374,9 @@ const FeedItemAggregated = ({
               className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
               <ShareIcon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline" aria-hidden="true">Share</span>
+              <span className="hidden sm:inline" aria-hidden="true">
+                Share
+              </span>
             </button>
 
             {/* Report button */}
@@ -399,7 +409,10 @@ const FeedItemAggregated = ({
               loading="lazy"
             />
             {/* External link icon overlay */}
-            <div className="absolute bottom-1 right-1 rounded bg-black/60 p-0.5" aria-hidden="true">
+            <div
+              className="absolute bottom-1 right-1 rounded bg-black/60 p-0.5"
+              aria-hidden="true"
+            >
               <ArrowTopRightOnSquareIcon className="h-3 w-3 text-white" />
             </div>
           </a>

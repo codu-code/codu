@@ -1,9 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   GetUnifiedFeedSchema,
   GetContentByIdSchema,
@@ -32,17 +28,7 @@ import {
   user,
   comments,
 } from "@/server/db/schema";
-import {
-  and,
-  eq,
-  desc,
-  lt,
-  lte,
-  gt,
-  sql,
-  isNotNull,
-  count,
-} from "drizzle-orm";
+import { and, eq, desc, lt, lte, gt, sql, isNotNull, count } from "drizzle-orm";
 import { increment, decrement } from "./utils";
 import crypto from "crypto";
 
@@ -66,8 +52,13 @@ function calculateReadTime(body: string | null | undefined): number {
 }
 
 // Helper to convert frontend type (POST, LINK, ARTICLE) to DB type (article, link)
-function toDbType(frontendType: string): "article" | "discussion" | "link" | "resource" {
-  const typeMap: Record<string, "article" | "discussion" | "link" | "resource"> = {
+function toDbType(
+  frontendType: string,
+): "article" | "discussion" | "link" | "resource" {
+  const typeMap: Record<
+    string,
+    "article" | "discussion" | "link" | "resource"
+  > = {
     POST: "article",
     ARTICLE: "article", // Alias for POST
     LINK: "link",
@@ -159,16 +150,18 @@ export const contentRouter = createTRPCRouter({
           case "trending":
             return {
               orderBy: desc(scoreExpr),
-              cursorCondition: cursor?.score !== undefined
-                ? lt(scoreExpr, cursor.score)
-                : undefined,
+              cursorCondition:
+                cursor?.score !== undefined
+                  ? lt(scoreExpr, cursor.score)
+                  : undefined,
             };
           case "popular":
             return {
               orderBy: desc(posts.upvotesCount),
-              cursorCondition: cursor?.score !== undefined
-                ? lt(posts.upvotesCount, cursor.score)
-                : undefined,
+              cursorCondition:
+                cursor?.score !== undefined
+                  ? lt(posts.upvotesCount, cursor.score)
+                  : undefined,
             };
           default:
             return {
@@ -275,7 +268,9 @@ export const contentRouter = createTRPCRouter({
       const results = await query;
 
       // Check if there's a next page
-      let nextCursor: { id: string; publishedAt?: string; score?: number } | undefined;
+      let nextCursor:
+        | { id: string; publishedAt?: string; score?: number }
+        | undefined;
       if (results.length > limit) {
         const lastItem = results.pop()!;
         const score = lastItem.upvotes - lastItem.downvotes;
@@ -366,18 +361,15 @@ export const contentRouter = createTRPCRouter({
             .where(
               and(
                 eq(post_votes.postId, input.id),
-                eq(post_votes.userId, userId)
-              )
+                eq(post_votes.userId, userId),
+              ),
             )
             .limit(1),
           ctx.db
             .select({ id: bookmarks.id })
             .from(bookmarks)
             .where(
-              and(
-                eq(bookmarks.postId, input.id),
-                eq(bookmarks.userId, userId)
-              )
+              and(eq(bookmarks.postId, input.id), eq(bookmarks.userId, userId)),
             )
             .limit(1),
         ]);
@@ -469,18 +461,15 @@ export const contentRouter = createTRPCRouter({
             .where(
               and(
                 eq(post_votes.postId, item.id),
-                eq(post_votes.userId, userId)
-              )
+                eq(post_votes.userId, userId),
+              ),
             )
             .limit(1),
           ctx.db
             .select({ id: bookmarks.id })
             .from(bookmarks)
             .where(
-              and(
-                eq(bookmarks.postId, item.id),
-                eq(bookmarks.userId, userId)
-              )
+              and(eq(bookmarks.postId, item.id), eq(bookmarks.userId, userId)),
             )
             .limit(1),
         ]);
@@ -518,7 +507,10 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      if ((input.type === "LINK" || input.type === "VIDEO") && !input.externalUrl) {
+      if (
+        (input.type === "LINK" || input.type === "VIDEO") &&
+        !input.externalUrl
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "External URL is required for links and videos",
@@ -612,11 +604,15 @@ export const contentRouter = createTRPCRouter({
         updateData.readingTime = calculateReadTime(input.body);
       }
       if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
-      if (input.externalUrl !== undefined) updateData.externalUrl = input.externalUrl;
+      if (input.externalUrl !== undefined)
+        updateData.externalUrl = input.externalUrl;
       if (input.imageUrl !== undefined) updateData.coverImage = input.imageUrl;
-      if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
-      if (input.canonicalUrl !== undefined) updateData.canonicalUrl = input.canonicalUrl;
-      if (input.showComments !== undefined) updateData.showComments = input.showComments;
+      if (input.coverImage !== undefined)
+        updateData.coverImage = input.coverImage;
+      if (input.canonicalUrl !== undefined)
+        updateData.canonicalUrl = input.canonicalUrl;
+      if (input.showComments !== undefined)
+        updateData.showComments = input.showComments;
       if (input.published !== undefined) {
         updateData.status = input.published ? "published" : "draft";
         if (input.published) {
@@ -632,9 +628,7 @@ export const contentRouter = createTRPCRouter({
 
       // Update tags if provided
       if (input.tags !== undefined) {
-        await ctx.db
-          .delete(post_tags)
-          .where(eq(post_tags.postId, input.id));
+        await ctx.db.delete(post_tags).where(eq(post_tags.postId, input.id));
 
         for (const tagName of input.tags) {
           const existingTags = await ctx.db
@@ -705,7 +699,11 @@ export const contentRouter = createTRPCRouter({
 
       // Check if content exists
       const contentItem = await ctx.db
-        .select({ id: posts.id, upvotes: posts.upvotesCount, downvotes: posts.downvotesCount })
+        .select({
+          id: posts.id,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+        })
         .from(posts)
         .where(eq(posts.id, contentId))
         .limit(1);
@@ -722,10 +720,7 @@ export const contentRouter = createTRPCRouter({
         .select({ id: post_votes.id, voteType: post_votes.voteType })
         .from(post_votes)
         .where(
-          and(
-            eq(post_votes.postId, contentId),
-            eq(post_votes.userId, userId)
-          )
+          and(eq(post_votes.postId, contentId), eq(post_votes.userId, userId)),
         )
         .limit(1);
 
@@ -785,10 +780,7 @@ export const contentRouter = createTRPCRouter({
         await ctx.db
           .delete(bookmarks)
           .where(
-            and(
-              eq(bookmarks.postId, contentId),
-              eq(bookmarks.userId, userId)
-            )
+            and(eq(bookmarks.postId, contentId), eq(bookmarks.userId, userId)),
           );
       }
 
@@ -981,12 +973,7 @@ export const contentRouter = createTRPCRouter({
           updatedAt: posts.updatedAt,
         })
         .from(posts)
-        .where(
-          and(
-            eq(posts.id, input.id),
-            eq(posts.authorId, userId)
-          )
-        )
+        .where(and(eq(posts.id, input.id), eq(posts.authorId, userId)))
         .limit(1);
 
       if (results.length === 0) {
@@ -1038,8 +1025,8 @@ export const contentRouter = createTRPCRouter({
           and(
             eq(posts.authorId, userId),
             eq(posts.type, "article"),
-            eq(posts.status, "draft")
-          )
+            eq(posts.status, "draft"),
+          ),
         )
         .orderBy(desc(posts.updatedAt))
         .limit(input.limit);
@@ -1078,8 +1065,8 @@ export const contentRouter = createTRPCRouter({
             eq(posts.authorId, userId),
             eq(posts.type, "article"),
             eq(posts.status, "published"),
-            lte(posts.publishedAt, now)
-          )
+            lte(posts.publishedAt, now),
+          ),
         )
         .orderBy(desc(posts.publishedAt))
         .limit(input.limit);
@@ -1116,8 +1103,8 @@ export const contentRouter = createTRPCRouter({
             eq(posts.authorId, userId),
             eq(posts.type, "article"),
             eq(posts.status, "scheduled"),
-            gt(posts.publishedAt, now)
-          )
+            gt(posts.publishedAt, now),
+          ),
         )
         .orderBy(desc(posts.publishedAt))
         .limit(input.limit);

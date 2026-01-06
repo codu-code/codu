@@ -20,8 +20,7 @@ export async function fetchOgImage(url: string): Promise<string | null> {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)",
+        "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)",
         Accept: "text/html",
       },
     });

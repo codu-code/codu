@@ -32,8 +32,7 @@ const MARKDOWN_SYNTAX = [
   {
     syntax: "`code`",
     result: "inline code",
-    style:
-      "font-mono bg-neutral-200 dark:bg-neutral-700 px-1 rounded text-sm",
+    style: "font-mono bg-neutral-200 dark:bg-neutral-700 px-1 rounded text-sm",
   },
   { syntax: "```\\ncode\\n```", result: "code block", style: "font-mono" },
 ];

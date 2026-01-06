@@ -40,7 +40,10 @@ function estimateReadTime(title: string, excerpt: string | null): number {
 }
 
 // Generate a unique slug by adding a suffix if needed
-async function getUniqueSlug(baseSlug: string, contentId: string): Promise<string> {
+async function getUniqueSlug(
+  baseSlug: string,
+  contentId: string,
+): Promise<string> {
   let slug = baseSlug;
   let suffix = 1;
 
@@ -172,9 +175,7 @@ async function syncPostsToContent() {
 }
 
 async function syncAggregatedArticlesToContent() {
-  console.log(
-    "Syncing aggregated articles to content table as LINK type..."
-  );
+  console.log("Syncing aggregated articles to content table as LINK type...");
 
   // Get all aggregated articles with their source info
   const articles = await db
@@ -310,9 +311,11 @@ async function main() {
     const articleResult = await syncAggregatedArticlesToContent();
 
     console.log("\n=== Summary ===");
-    console.log(`Posts synced: ${postResult.synced} (${postResult.errors} errors)`);
     console.log(
-      `Articles synced: ${articleResult.synced} (${articleResult.errors} errors)`
+      `Posts synced: ${postResult.synced} (${postResult.errors} errors)`,
+    );
+    console.log(
+      `Articles synced: ${articleResult.synced} (${articleResult.errors} errors)`,
     );
 
     // Show final stats

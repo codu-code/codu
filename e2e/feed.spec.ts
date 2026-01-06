@@ -86,7 +86,9 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.waitForSelector("article");
 
     // Vote buttons should be visible (using aria-label)
-    await expect(page.getByLabel("Upvote").first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByLabel("Upvote").first()).toBeVisible({
+      timeout: 15000,
+    });
     await expect(page.getByLabel("Downvote").first()).toBeVisible();
   });
 
@@ -95,9 +97,9 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.waitForSelector("article");
 
     // Bookmark buttons should be visible
-    await expect(
-      page.getByTestId("bookmark-button").first(),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId("bookmark-button").first()).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("Should navigate to content detail when clicking title", async ({
@@ -107,7 +109,11 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.waitForSelector("article");
 
     // Click on the first article title
-    const firstArticleLink = page.locator("article").first().locator("a").first();
+    const firstArticleLink = page
+      .locator("article")
+      .first()
+      .locator("a")
+      .first();
     await firstArticleLink.click();
 
     // Should navigate to article detail page

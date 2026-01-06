@@ -124,14 +124,7 @@ const MyPosts = () => {
 
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
-              ({
-                id,
-                title,
-                excerpt,
-                slug,
-                publishedAt,
-                updatedAt,
-              }) => {
+              ({ id, title, excerpt, slug, publishedAt, updatedAt }) => {
                 const postStatus = publishedAt
                   ? getPostStatus(new Date(publishedAt))
                   : status.DRAFT;
@@ -156,22 +149,29 @@ const MyPosts = () => {
                       <div className="flex-grow">
                         {publishedAt && postStatus === status.SCHEDULED ? (
                           <>
-                            {renderDate("Scheduled to publish on ", publishedAt)}
+                            {renderDate(
+                              "Scheduled to publish on ",
+                              publishedAt,
+                            )}
                           </>
                         ) : publishedAt && postStatus === status.PUBLISHED ? (
                           <>
                             {/*If updatedAt is greater than publishedAt by more than one minute show updated at else show publishedAt
                               as on updating publishedAt updatedAt is automatically updated and is greater than publishedAt*/}
-                            {updatedAt && new Date(updatedAt).getTime() -
+                            {updatedAt &&
+                            new Date(updatedAt).getTime() -
                               new Date(publishedAt).getTime() >=
-                            60000 ? (
+                              60000 ? (
                               <>{renderDate("Last updated on ", updatedAt)}</>
                             ) : (
                               <>{renderDate("Published on ", publishedAt)}</>
                             )}
                           </>
                         ) : postStatus === status.DRAFT ? (
-                          <>{updatedAt && renderDate("Last updated on ", updatedAt)}</>
+                          <>
+                            {updatedAt &&
+                              renderDate("Last updated on ", updatedAt)}
+                          </>
                         ) : null}
                       </div>
 

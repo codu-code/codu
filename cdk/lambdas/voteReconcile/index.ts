@@ -157,7 +157,9 @@ exports.handler = async function () {
         AND id NOT IN (SELECT DISTINCT comment_id FROM comment_votes WHERE vote_type = 'down')
     `);
     stats.commentDownvotesZeroed = commentDownvotesZeroResult.rowCount || 0;
-    console.log(`Zeroed ${stats.commentDownvotesZeroed} comment downvote counts`);
+    console.log(
+      `Zeroed ${stats.commentDownvotesZeroed} comment downvote counts`,
+    );
 
     // 9. Fix post comment counts (excluding soft-deleted comments)
     const commentCountsResult = await client.query(`
@@ -205,7 +207,10 @@ exports.handler = async function () {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
       body: {
-        message: totalFixes === 0 ? "All counts in sync" : `Fixed ${totalFixes} discrepancies`,
+        message:
+          totalFixes === 0
+            ? "All counts in sync"
+            : `Fixed ${totalFixes} discrepancies`,
         stats,
       },
     };
