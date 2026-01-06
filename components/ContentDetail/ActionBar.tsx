@@ -85,7 +85,7 @@ const UnifiedActionBar = ({
   });
 
   // Article voting mutation
-  const { mutate: voteArticle, status: voteArticleStatus } = api.feed.vote.useMutation({
+  const { mutate: voteArticle, status: voteArticleStatus } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {
       const oldVote = userVote;
       setUserVote(voteType);
@@ -106,7 +106,7 @@ const UnifiedActionBar = ({
       Sentry.captureException(error);
     },
     onSettled: () => {
-      utils.feed.getFeed.invalidate();
+      utils.content.getFeed.invalidate();
     },
   });
 
@@ -151,7 +151,7 @@ const UnifiedActionBar = ({
     if (contentType === "post") {
       votePost({ postId: contentId as string, voteType });
     } else {
-      voteArticle({ articleId: String(contentId), voteType });
+      voteArticle({ contentId: String(contentId), voteType });
     }
   };
 

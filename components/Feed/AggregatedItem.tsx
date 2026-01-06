@@ -114,9 +114,9 @@ const FeedItemAggregated = ({
   // Convert http to https for images
   const imageUrl = ensureHttps(rawImageUrl);
 
-  const { mutate: vote, status: voteStatus } = api.feed.vote.useMutation({
+  const { mutate: vote, status: voteStatus } = api.content.vote.useMutation({
     onSuccess: () => {
-      utils.feed.getFeed.invalidate();
+      utils.content.getFeed.invalidate();
     },
     onError: (error) => {
       toast.error("Failed to update vote");
@@ -147,7 +147,7 @@ const FeedItemAggregated = ({
       signIn();
       return;
     }
-    vote({ articleId: id, voteType });
+    vote({ contentId: id, voteType });
   };
 
   const handleBookmark = () => {

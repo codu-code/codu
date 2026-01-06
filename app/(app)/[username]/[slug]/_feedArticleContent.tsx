@@ -71,13 +71,13 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
       { enabled: !!article?.id },
     );
 
-  const { mutate: vote, status: voteStatus } = api.feed.vote.useMutation({
+  const { mutate: vote, status: voteStatus } = api.content.vote.useMutation({
     onSuccess: () => {
       utils.feed.getBySourceAndArticleSlug.invalidate({
         sourceSlug,
         articleSlug,
       });
-      utils.feed.getFeed.invalidate();
+      utils.content.getFeed.invalidate();
     },
     onError: (error) => {
       toast.error("Failed to update vote");
@@ -109,7 +109,7 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
       return;
     }
     if (article) {
-      vote({ articleId: article.id, voteType });
+      vote({ contentId: article.id, voteType });
     }
   };
 
