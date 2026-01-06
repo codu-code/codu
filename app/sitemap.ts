@@ -5,6 +5,9 @@ import { db } from "@/server/db";
 import { post, user, feed_sources, posts } from "@/server/db/schema";
 import { lte, and, isNull, isNotNull, eq } from "drizzle-orm";
 
+// Regenerate sitemap every hour to pick up new feed content from cron jobs
+export const revalidate = 3600;
+
 const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
   "/articles",
