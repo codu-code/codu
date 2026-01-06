@@ -15,7 +15,6 @@ import {
   GetSourcesSchema,
   DeleteFeedSourceSchema,
   GetArticleByIdSchema,
-  GetArticleBySlugSchema,
   GetArticleBySlugAndShortIdSchema,
   GetSourceBySlugSchema,
   GetArticlesBySourceSchema,
@@ -29,7 +28,6 @@ import {
   feed_sources,
   tag,
   post_tags,
-  user,
 } from "@/server/db/schema";
 import {
   and,
@@ -42,7 +40,7 @@ import {
   isNotNull,
   count,
 } from "drizzle-orm";
-import { increment, decrement } from "./utils";
+import { increment } from "./utils";
 import { db } from "@/server/db";
 
 export const feedRouter = createTRPCRouter({
@@ -261,13 +259,11 @@ export const feedRouter = createTRPCRouter({
         }
       } else {
         // Insert new vote
-        await ctx.db
-          .insert(post_votes)
-          .values({
-            postId: articleId,
-            userId,
-            voteType: voteType as "up" | "down",
-          });
+        await ctx.db.insert(post_votes).values({
+          postId: articleId,
+          userId,
+          voteType: voteType as "up" | "down",
+        });
       }
 
       return { success: true, voteType };
@@ -325,12 +321,8 @@ export const feedRouter = createTRPCRouter({
     const userId = ctx.session.user.id;
 
     // Import from new schema
-    const {
-      posts,
-      bookmarks,
-      feed_sources,
-      user: userTable,
-    } = await import("@/server/db/schema");
+    const { posts, bookmarks, feed_sources } =
+      await import("@/server/db/schema");
 
     const saved = await ctx.db
       .select({

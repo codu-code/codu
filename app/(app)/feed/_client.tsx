@@ -3,6 +3,7 @@
 import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useSession } from "next-auth/react";
 import { FeedItemLoading, FeedFilters } from "@/components/Feed";
@@ -302,12 +303,12 @@ const SavedArticlesPreview = () => {
         />
       ))}
       {data.items.length > 3 && (
-        <a
+        <Link
           href="/saved"
           className="block text-center text-sm text-orange-600 hover:text-orange-500 dark:text-orange-400"
         >
           View all saved
-        </a>
+        </Link>
       )}
     </div>
   );

@@ -3,15 +3,7 @@ import { db } from "@/server/db/index";
 import * as Sentry from "@sentry/nextjs";
 import "server-only";
 import { z } from "zod";
-import {
-  bookmark,
-  post,
-  posts,
-  user,
-  aggregated_article,
-  feed_source,
-  feed_sources,
-} from "../db/schema";
+import { bookmark, post, posts, user, feed_sources } from "../db/schema";
 import { eq, and, isNotNull, lte, desc, sql } from "drizzle-orm";
 
 export const GetPostSchema = z.object({

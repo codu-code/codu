@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Menu,
   MenuButton,
@@ -39,7 +39,6 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<string | null>(null);
   const [editCommentBoxId, setEditCommentBoxId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
-  const [initiallyLoaded, setInitiallyLoaded] = useState<boolean>(false);
   const [sortOrder, setSortOrder] = useState<SortOrder>("top");
 
   const { data: session } = useSession();
@@ -114,12 +113,8 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     return sorted as typeof items;
   };
 
-  useEffect(() => {
-    if (initiallyLoaded) {
-      return;
-    }
-    setInitiallyLoaded(true);
-  }, [discussionStatus, initiallyLoaded]);
+  // Derive initial load state from query status - data exists means loaded at least once
+  const initiallyLoaded = discussionStatus === "success" || !!discussions;
 
   const handleCreateComment = async (body: string, parentId?: string) => {
     // validate markdoc syntax

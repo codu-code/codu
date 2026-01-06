@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { EditorContent } from "@tiptap/react";
 import TextareaAutosize from "react-textarea-autosize";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
@@ -39,13 +39,6 @@ export function DiscussionEditor({
     placeholder: "What are your thoughts?",
     onSubmit,
   });
-
-  // Reset toolbar visibility when editor collapses so it opens clean
-  useEffect(() => {
-    if (!isExpanded) {
-      setShowToolbar(false);
-    }
-  }, [isExpanded]);
 
   // Collapsed state
   if (!isExpanded) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { XMarkIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { toast } from "sonner";
 import { signIn, useSession } from "next-auth/react";
@@ -93,16 +93,22 @@ export function useReportModal() {
 // Global modal component that reads from URL
 export function ReportModalProvider() {
   const { data: session } = useSession();
-  const { isOpen, reportData, closeReport } = useReportModal();
+  const { isOpen, reportData, closeReport: closeReportUrl } = useReportModal();
   const [reportBody, setReportBody] = useState("");
   const [loading, setLoading] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Wrap closeReport to also reset form state
+  const closeReport = useCallback(() => {
+    closeReportUrl();
+    setReportBody("");
+    setLoading(false);
+  }, [closeReportUrl]);
 
   const { mutate: sendReport } = api.report.send.useMutation({
     onSuccess: () => {
       toast.success("Report submitted successfully");
       closeReport();
-      setReportBody("");
     },
     onError: () => {
       toast.error("Failed to submit report. Please try again.");
@@ -117,7 +123,6 @@ export function ReportModalProvider() {
     onSuccess: () => {
       toast.success("Report submitted successfully");
       closeReport();
-      setReportBody("");
     },
     onError: (error) => {
       if (error.message === "You have already reported this item") {
@@ -130,14 +135,6 @@ export function ReportModalProvider() {
       setLoading(false);
     },
   });
-
-  // Reset form when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setReportBody("");
-      setLoading(false);
-    }
-  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

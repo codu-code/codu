@@ -29,7 +29,7 @@ import {
   comments,
 } from "@/server/db/schema";
 import { and, eq, desc, lt, lte, gt, sql, isNotNull, count } from "drizzle-orm";
-import { increment, decrement } from "./utils";
+import { increment } from "./utils";
 import crypto from "crypto";
 
 // Helper to generate slug from title

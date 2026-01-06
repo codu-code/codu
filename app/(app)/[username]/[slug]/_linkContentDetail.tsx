@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowTopRightOnSquareIcon,
@@ -66,20 +66,38 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
       { enabled: !!linkContent?.id },
     );
 
-  // Vote state management
-  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
-  const [votes, setVotes] = useState({ upvotes: 0, downvotes: 0 });
+  // Vote state management - derive initial values from query data
+  const initialVoteState = useMemo(
+    () => ({
+      userVote: linkContent?.userVote ?? null,
+      upvotes: linkContent?.upvotes ?? 0,
+      downvotes: linkContent?.downvotes ?? 0,
+    }),
+    [linkContent?.userVote, linkContent?.upvotes, linkContent?.downvotes],
+  );
 
-  // Initialize vote state when data loads
-  useEffect(() => {
-    if (linkContent) {
-      setUserVote(linkContent.userVote ?? null);
-      setVotes({
-        upvotes: linkContent.upvotes,
-        downvotes: linkContent.downvotes,
-      });
-    }
-  }, [linkContent]);
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(
+    initialVoteState.userVote,
+  );
+  const [votes, setVotes] = useState({
+    upvotes: initialVoteState.upvotes,
+    downvotes: initialVoteState.downvotes,
+  });
+
+  // Sync state when server data changes (e.g., after mutation invalidation)
+  const currentUserVote = linkContent?.userVote ?? null;
+  const currentUpvotes = linkContent?.upvotes ?? 0;
+  const currentDownvotes = linkContent?.downvotes ?? 0;
+
+  // Use refs to track if we need to sync
+  const serverVoteKey = `${currentUserVote}-${currentUpvotes}-${currentDownvotes}`;
+  const [lastSyncedKey, setLastSyncedKey] = useState(serverVoteKey);
+
+  if (serverVoteKey !== lastSyncedKey && linkContent) {
+    setUserVote(currentUserVote);
+    setVotes({ upvotes: currentUpvotes, downvotes: currentDownvotes });
+    setLastSyncedKey(serverVoteKey);
+  }
 
   const { mutate: vote, status: voteStatus } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {

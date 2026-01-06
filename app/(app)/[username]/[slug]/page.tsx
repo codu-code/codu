@@ -301,7 +301,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 const parseJSON = (str: string): JSONContent | null => {
   try {
     return JSON.parse(str);
-  } catch (e) {
+  } catch {
     return null;
   }
 };

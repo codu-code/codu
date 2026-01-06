@@ -39,11 +39,10 @@ import {
   sql,
   isNotNull,
   count,
-  inArray,
   asc,
   isNull,
 } from "drizzle-orm";
-import { increment, decrement } from "./utils";
+import { increment } from "./utils";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -72,15 +71,7 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 25;
-      const {
-        cursor,
-        sort,
-        type,
-        category,
-        sourceId,
-        tag: tagFilter,
-        authorId,
-      } = input;
+      const { cursor, sort, type, sourceId, authorId } = input;
 
       // Build the vote subquery for current user
       const userVotesSubquery = userId

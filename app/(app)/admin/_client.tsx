@@ -8,68 +8,68 @@ import {
   RssIcon,
   ShieldExclamationIcon,
   NewspaperIcon,
-  LinkIcon,
 } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
+
+const colorClasses = {
+  blue: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+  green: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+  yellow:
+    "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400",
+  red: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  purple:
+    "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+  orange:
+    "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+};
+
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  href,
+  color = "blue",
+  isLoading,
+}: {
+  title: string;
+  value: number | undefined;
+  icon: React.ComponentType<{ className?: string }>;
+  href?: string;
+  color?: "blue" | "green" | "yellow" | "red" | "purple" | "orange";
+  isLoading?: boolean;
+}) => {
+  const content = (
+    <div className="rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600">
+      <div className="flex items-center gap-3">
+        <div className={`rounded-lg p-2 ${colorClasses[color]}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            {title}
+          </p>
+          <p className="text-2xl font-bold text-neutral-900 dark:text-white">
+            {isLoading ? (
+              <span className="inline-block h-8 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+            ) : (
+              (value ?? 0)
+            )}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  return content;
+};
 
 const AdminDashboard = () => {
   const { data: stats, isLoading } = api.admin.getStats.useQuery();
   const { data: reportCounts } = api.report.getCounts.useQuery();
-
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    href,
-    color = "blue",
-  }: {
-    title: string;
-    value: number | undefined;
-    icon: React.ComponentType<{ className?: string }>;
-    href?: string;
-    color?: "blue" | "green" | "yellow" | "red" | "purple" | "orange";
-  }) => {
-    const colorClasses = {
-      blue: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-      green:
-        "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-      yellow:
-        "bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400",
-      red: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-      purple:
-        "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-      orange:
-        "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-    };
-
-    const content = (
-      <div className="rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600">
-        <div className="flex items-center gap-3">
-          <div className={`rounded-lg p-2 ${colorClasses[color]}`}>
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {title}
-            </p>
-            <p className="text-2xl font-bold text-neutral-900 dark:text-white">
-              {isLoading ? (
-                <span className="inline-block h-8 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-              ) : (
-                (value ?? 0)
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-
-    if (href) {
-      return <Link href={href}>{content}</Link>;
-    }
-
-    return content;
-  };
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -90,18 +90,21 @@ const AdminDashboard = () => {
           icon={UsersIcon}
           color="blue"
           href="/admin/users"
+          isLoading={isLoading}
         />
         <StatCard
           title="Published Posts"
           value={stats?.publishedPosts}
           icon={DocumentTextIcon}
           color="green"
+          isLoading={isLoading}
         />
         <StatCard
           title="Aggregated Articles"
           value={stats?.aggregatedArticles}
           icon={NewspaperIcon}
           color="purple"
+          isLoading={isLoading}
         />
         <StatCard
           title="Active Feed Sources"
@@ -109,6 +112,7 @@ const AdminDashboard = () => {
           icon={RssIcon}
           color="orange"
           href="/admin/sources"
+          isLoading={isLoading}
         />
       </div>
 
@@ -124,12 +128,14 @@ const AdminDashboard = () => {
             icon={FlagIcon}
             color="yellow"
             href="/admin/moderation"
+            isLoading={isLoading}
           />
           <StatCard
             title="Actioned Reports"
             value={reportCounts?.actioned}
             icon={ShieldExclamationIcon}
             color="red"
+            isLoading={isLoading}
           />
           <StatCard
             title="Banned Users"
@@ -137,12 +143,14 @@ const AdminDashboard = () => {
             icon={ShieldExclamationIcon}
             color="red"
             href="/admin/users?filter=banned"
+            isLoading={isLoading}
           />
           <StatCard
             title="Dismissed Reports"
             value={reportCounts?.dismissed}
             icon={FlagIcon}
             color="green"
+            isLoading={isLoading}
           />
         </div>
       </div>

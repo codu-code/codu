@@ -19,9 +19,9 @@ import {
   posts,
   user,
 } from "@/server/db/schema";
-import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, count, eq, isNull } from "drizzle-orm";
 import { db } from "@/server/db";
-import { increment, decrement } from "./utils";
+import { decrement } from "./utils";
 
 // Helper to generate ltree path
 function generatePath(parentPath: string | null, id: string): string {
@@ -30,11 +30,6 @@ function generatePath(parentPath: string | null, id: string): string {
     return `${parentPath}.${cleanId}`;
   }
   return cleanId;
-}
-
-// Helper to calculate depth from path
-function calculateDepth(path: string): number {
-  return path.split(".").length - 1;
 }
 
 export const discussionRouter = createTRPCRouter({

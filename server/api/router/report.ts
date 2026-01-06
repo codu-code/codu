@@ -19,8 +19,6 @@ import {
   post,
   user,
   content_report,
-  content,
-  discussion,
   aggregated_article,
   feed_source,
 } from "@/server/db/schema";
