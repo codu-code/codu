@@ -181,11 +181,12 @@ exports.handler = async function () {
     await client.connect();
     console.log("Connected to database");
 
-    // Get active feed sources (use new lowercase table name)
+    // Get active feed sources with linked user profiles
+    // Sources without a user_id are skipped (run create-source-users.ts first)
     const { rows: sources } = await client.query(`
-      SELECT id, url, name
+      SELECT id, url, name, user_id
       FROM feed_sources
-      WHERE status = 'active'
+      WHERE status = 'active' AND user_id IS NOT NULL
     `);
 
     console.log(`Found ${sources.length} active feed sources`);
@@ -257,10 +258,11 @@ exports.handler = async function () {
           const slug = generateSlug(item.title, shortId);
 
           // Insert directly into posts table (new schema)
+          // author_id comes from the feed source's linked user profile
           await client.query(
             `INSERT INTO posts
-             (type, title, slug, excerpt, external_url, cover_image, source_id, source_author, reading_time, status, published_at, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())`,
+             (type, title, slug, excerpt, external_url, cover_image, source_id, source_author, reading_time, status, published_at, author_id, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())`,
             [
               "link", // Post type (lowercase in new schema)
               item.title.substring(0, 500), // Limit title length
@@ -273,6 +275,7 @@ exports.handler = async function () {
               readTimeMins,
               "published", // status (lowercase in new schema)
               item.pubDate ? new Date(item.pubDate).toISOString() : null,
+              source.user_id, // author_id from feed source's linked user
             ],
           );
 

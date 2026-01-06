@@ -1,15 +1,18 @@
 /**
- * Local script to fetch RSS feeds and populate the Content table directly.
+ * Local script to fetch RSS feeds and populate the posts table directly.
  * Use this for testing without running the Lambda cron.
+ *
+ * Prerequisites: Run create-source-users.ts first to ensure all sources have linked users.
  *
  * Usage: npx tsx scripts/fetch-rss.ts
  */
 
 import { db } from "../server/db";
-import { feed_source, content } from "../server/db/schema";
-import { eq, and } from "drizzle-orm";
+import { feed_sources, posts } from "../server/db/schema";
+import { eq, and, isNotNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import Parser from "rss-parser";
+import crypto from "crypto";
 
 const parser = new Parser({
   timeout: 10000,
@@ -125,8 +128,20 @@ async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | nu
 // Small delay helper for rate limiting
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
+interface FeedSource {
+  id: number;
+  name: string;
+  url: string;
+  userId: string | null;
+}
+
+async function fetchAndProcessFeed(source: FeedSource) {
   console.log(`\nFetching: ${source.name} (${source.url})`);
+
+  if (!source.userId) {
+    console.log(`  Skipping: No linked user profile (run create-source-users.ts first)`);
+    return { success: false, error: "No user profile" };
+  }
 
   try {
     const feed = await parser.parseURL(source.url);
@@ -134,9 +149,9 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
 
     // Batch fetch existing URLs for this source (O(1) lookup instead of O(n) queries)
     const existingUrls = await db
-      .select({ url: content.externalUrl })
-      .from(content)
-      .where(eq(content.sourceId, source.id));
+      .select({ url: posts.externalUrl })
+      .from(posts)
+      .where(eq(posts.sourceId, source.id));
     const existingUrlSet = new Set(existingUrls.map(r => r.url));
     console.log(`  Already have ${existingUrlSet.size} items from this source`);
 
@@ -177,7 +192,6 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
       let imageUrl = extractImage(item);
 
       // Fetch article metadata (OG image + accurate read time from actual content)
-      let ogImageUrl: string | null = null;
       let readTimeMins = 3; // Default fallback
 
       console.log(`    Fetching: ${item.title.substring(0, 50)}...`);
@@ -185,8 +199,7 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
       readTimeMins = metadata.readTimeMins;
 
       if (!imageUrl && metadata.ogImage) {
-        ogImageUrl = metadata.ogImage;
-        imageUrl = ogImageUrl;
+        imageUrl = metadata.ogImage;
         console.log(`    ✓ Found OG image, ${readTimeMins} min read`);
       } else {
         console.log(`    ✓ ${readTimeMins} min read`);
@@ -195,26 +208,25 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
       // Rate limit: small delay between fetches
       await delay(200);
 
-      // Generate shortId for unique content ID
+      // Generate shortId for unique slug
       const shortId = nanoid(7);
-      const contentId = `link-${source.id}-${shortId}`;
       const slug = generateSlug(item.title, shortId);
 
-      // Insert directly into Content table
-      await db.insert(content).values({
-        id: contentId,
-        type: "LINK",
+      // Insert into posts table (new unified schema)
+      await db.insert(posts).values({
+        id: crypto.randomUUID(),
+        type: "link",
         title: item.title.substring(0, 500),
+        slug,
         excerpt: excerpt || null,
         externalUrl: item.link,
-        imageUrl: imageUrl,
-        ogImageUrl: ogImageUrl,
+        coverImage: imageUrl,
         sourceId: source.id,
         sourceAuthor: item.creator || item.author || null,
-        slug,
-        published: true,
+        readingTime: readTimeMins,
+        status: "published",
         publishedAt: publishedDate.toISOString(),
-        readTimeMins,
+        authorId: source.userId, // Use the feed source's linked user
         showComments: true,
       });
 
@@ -230,14 +242,33 @@ async function fetchAndProcessFeed(source: typeof feed_source.$inferSelect) {
 }
 
 async function main() {
-  console.log("=== RSS Feed Fetcher (Direct to Content) ===\n");
+  console.log("=== RSS Feed Fetcher (Direct to Posts) ===\n");
 
-  // Get all active sources
-  const sources = await db.query.feed_source.findMany({
-    where: eq(feed_source.status, "ACTIVE"),
+  // Get all active sources with linked user profiles
+  const sources = await db.query.feed_sources.findMany({
+    where: and(
+      eq(feed_sources.status, "active"),
+      isNotNull(feed_sources.userId)
+    ),
   });
 
-  console.log(`Found ${sources.length} active feed sources`);
+  console.log(`Found ${sources.length} active feed sources with user profiles`);
+
+  // Check for sources without users
+  const sourcesWithoutUsers = await db.query.feed_sources.findMany({
+    where: and(
+      eq(feed_sources.status, "active"),
+      eq(feed_sources.userId, null as unknown as string)
+    ),
+  });
+
+  if (sourcesWithoutUsers.length > 0) {
+    console.log(`\n⚠️  ${sourcesWithoutUsers.length} active sources have no linked user profiles.`);
+    console.log("   Run: npx tsx scripts/create-source-users.ts");
+    for (const source of sourcesWithoutUsers) {
+      console.log(`   - ${source.name}`);
+    }
+  }
 
   const results = {
     total: sources.length,

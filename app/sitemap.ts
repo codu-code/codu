@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { type MetadataRoute } from "next";
 
 import { db } from "@/server/db";
-import { post, user, feed_source, aggregated_article } from "@/server/db/schema";
+import { post, user, feed_sources, posts } from "@/server/db/schema";
 import { lte, and, isNull, isNotNull, eq } from "drizzle-orm";
 
 const BASE_URL = "https://www.codu.co";
@@ -42,34 +42,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // Feed sources (pseudo-user profiles): /[sourceSlug]
+  // Feed sources (pseudo-user profiles): /feed/[sourceSlug]
   const sources = (
-    await db.query.feed_source.findMany({
-      where: eq(feed_source.status, "ACTIVE"),
+    await db.query.feed_sources.findMany({
+      where: eq(feed_sources.status, "active"),
     })
   ).map(({ slug, updatedAt, createdAt }) => ({
-    url: `${BASE_URL}/${slug}`,
+    url: `${BASE_URL}/feed/${slug}`,
     lastModified: new Date(updatedAt || createdAt),
     priority: 0.6,
   }));
 
-  // Feed articles: /[sourceSlug]/[articleSlug]
+  // Feed articles from posts table (type=link): /feed/[sourceSlug]/[slug]
   const feedArticles = (
     await db
       .select({
-        articleSlug: aggregated_article.slug,
-        shortId: aggregated_article.shortId,
-        sourceSlug: feed_source.slug,
-        fetchedAt: aggregated_article.fetchedAt,
-        publishedAt: aggregated_article.publishedAt,
+        articleSlug: posts.slug,
+        sourceSlug: feed_sources.slug,
+        publishedAt: posts.publishedAt,
+        updatedAt: posts.updatedAt,
       })
-      .from(aggregated_article)
-      .innerJoin(feed_source, eq(aggregated_article.sourceId, feed_source.id))
-      .where(eq(feed_source.status, "ACTIVE"))
-  ).map(({ articleSlug, shortId, sourceSlug, fetchedAt, publishedAt }) => ({
-    // Use article slug if available, fallback to shortId
-    url: `${BASE_URL}/${sourceSlug}/${articleSlug || shortId}`,
-    lastModified: new Date(fetchedAt || publishedAt || new Date()),
+      .from(posts)
+      .innerJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+      .where(
+        and(
+          eq(posts.type, "link"),
+          eq(posts.status, "published"),
+          eq(feed_sources.status, "active")
+        )
+      )
+  ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
+    url: `${BASE_URL}/feed/${sourceSlug}/${articleSlug}`,
+    lastModified: new Date(updatedAt || publishedAt || new Date()),
     priority: 0.5,
   }));
 
