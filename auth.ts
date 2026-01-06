@@ -9,6 +9,8 @@ import { createWelcomeEmailTemplate } from "@/utils/createEmailTemplate";
 import { createPasswordLessEmailTemplate } from "@/utils/createPasswordLessEmailTemplate";
 import { manageNewsletterSubscription } from "@/server/lib/newsletter";
 import sendEmail, { nodemailerSesTransporter } from "@/utils/sendEmail";
+import { isAdminEmail } from "@/server/lib/adminConfig";
+import { eq } from "drizzle-orm";
 import * as Sentry from "@sentry/nextjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -82,15 +84,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   events: {
-    async createUser({ user }) {
-      const { email } = user;
+    async createUser({ user: newUser }) {
+      const { email, id } = newUser;
 
       if (!email) {
         console.error("Missing email so cannot send welcome email");
         Sentry.captureMessage("Missing 'email' so cannot send welcome email");
         return;
       }
-      const htmlMessage = createWelcomeEmailTemplate(user?.name || undefined);
+
+      // Grant admin role if email is in ADMIN_EMAILS environment variable
+      if (isAdminEmail(email)) {
+        try {
+          await db.update(user).set({ role: "ADMIN" }).where(eq(user.id, id));
+          console.log(`Granted ADMIN role to ${email}`);
+        } catch (error) {
+          console.error("Failed to grant admin role:", error);
+          Sentry.captureException(error);
+        }
+      }
+
+      const htmlMessage = createWelcomeEmailTemplate(newUser?.name || undefined);
 
       // Subscribe to newsletter (separate try/catch so it doesn't block welcome email)
       try {
