@@ -159,6 +159,8 @@ export const userRelations = relations(user, ({ one, many }) => ({
   bookmarks: many(bookmarks),
   reportsMade: many(reports, { relationName: "reportsMade" }),
   reportsReviewed: many(reports, { relationName: "reportsReviewed" }),
+  // Feed sources owned by this user (RSS source profiles)
+  feedSources: many(feed_sources),
   // Legacy relations (kept for backward compatibility)
   legacyPosts: many(post),
   legacyComments: many(comment),
@@ -187,6 +189,8 @@ export const feed_sources = pgTable(
     category: varchar("category", { length: 50 }),
     description: text("description"),
     status: feedSourceStatus("status").default("active").notNull(),
+    // User profile linked to this feed source (serves as author for aggregated articles)
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
     lastFetchedAt: timestamp("last_fetched_at", {
       precision: 3,
       mode: "string",
@@ -218,10 +222,12 @@ export const feed_sources = pgTable(
   (table) => ({
     urlKey: uniqueIndex("feed_sources_url_key").on(table.url),
     slugKey: uniqueIndex("feed_sources_slug_key").on(table.slug),
+    userIdIdx: index("feed_sources_user_id_idx").on(table.userId),
   }),
 );
 
-export const feedSourcesRelations = relations(feed_sources, ({ many }) => ({
+export const feedSourcesRelations = relations(feed_sources, ({ one, many }) => ({
+  user: one(user, { fields: [feed_sources.userId], references: [user.id] }),
   posts: many(posts),
 }));
 
@@ -296,10 +302,14 @@ export const posts = pgTable(
       .notNull()
       .$onUpdate(() => new Date().toISOString())
       .default(sql`CURRENT_TIMESTAMP`),
+
+    // Migration tracking: references legacy Post.id
+    legacyPostId: text("legacy_post_id"),
   },
   (table) => ({
     authorIdIdx: index("posts_author_id_idx").on(table.authorId),
     slugKey: uniqueIndex("posts_slug_idx").on(table.slug),
+    legacyPostIdIdx: uniqueIndex("posts_legacy_post_id_idx").on(table.legacyPostId),
     statusIdx: index("posts_status_idx").on(table.status),
     publishedAtIdx: index("posts_published_at_idx").on(table.publishedAt),
     typeIdx: index("posts_type_idx").on(table.type),
@@ -366,12 +376,16 @@ export const comments = pgTable(
       mode: "string",
       withTimezone: true,
     }), // Soft delete for "[deleted]" placeholders
+
+    // Migration tracking: references legacy Comment.id
+    legacyCommentId: integer("legacy_comment_id"),
   },
   (table) => ({
     postIdIdx: index("comments_post_id_idx").on(table.postId),
     authorIdIdx: index("comments_author_id_idx").on(table.authorId),
     parentIdIdx: index("comments_parent_id_idx").on(table.parentId),
     createdAtIdx: index("comments_created_at_idx").on(table.createdAt),
+    legacyCommentIdIdx: uniqueIndex("comments_legacy_comment_id_idx").on(table.legacyCommentId),
     commentParentIdFkey: foreignKey({
       columns: [table.parentId],
       foreignColumns: [table.id],

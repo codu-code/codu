@@ -92,6 +92,34 @@
       "when": 1736100001000,
       "tag": "0012_sponsor_inquiry",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1736178000000,
+      "tag": "0013_feed_source_user",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1736178001000,
+      "tag": "0014_create_source_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1736178002000,
+      "tag": "0015_migrate_post_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1736178003000,
+      "tag": "0016_migrate_comments",
+      "breakpoints": true
     }
   ]
 }
