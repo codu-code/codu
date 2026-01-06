@@ -28,6 +28,11 @@ export const ReportSchema = z.discriminatedUnion("type", [
     id: z.number().int(),
     body: z.string(),
   }),
+  z.strictObject({
+    type: z.literal("article"),
+    id: z.number().int(),
+    body: z.string(),
+  }),
 ]);
 
 export type ReportInput = z.TypeOf<typeof ReportSchema>;

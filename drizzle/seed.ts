@@ -1,15 +1,13 @@
 import { nanoid, customAlphabet } from "nanoid";
 import { Chance } from "chance";
 import {
-  post,
+  posts,
   user,
   tag,
-  like,
-  post_tag,
+  post_tags,
   session,
-  feed_source,
-  aggregated_article,
-  discussion,
+  feed_sources,
+  comments,
 } from "../server/db/schema";
 import { sql, eq } from "drizzle-orm";
 
@@ -59,6 +57,7 @@ const main = async () => {
     "BACKEND",
   ];
 
+  // Generate posts for the new posts table
   const randomPosts = (count = 10) => {
     return Array(count)
       .fill(null)
@@ -66,28 +65,29 @@ const main = async () => {
         const title = chance.sentence({
           words: chance.integer({ min: 4, max: 8 }),
         });
+        const shortId = generateShortId();
+        const isPublished = chance.bool({ likelihood: 70 });
+        const publishedDate = isPublished
+          ? new Date(chance.date({ year: 2024 })).toISOString()
+          : null;
+
         return {
-          id: nanoid(8),
+          type: "article" as const,
           title: title,
-          published: chance.pickone([
-            new Date(chance.date({ year: 2023 })).toISOString(),
-            undefined,
-          ]),
-          excerpt: chance.sentence({
-            words: chance.integer({ min: 10, max: 20 }),
-          }),
-          updatedAt: new Date().toISOString(),
           slug: `${title
             .toLowerCase()
             .replace(/ /g, "-")
-            .replace(/[^\w-]+/g, "")}-${chance.string({
-            length: 5,
-            alpha: true,
-            casing: "lower",
-          })}`,
-          likes: chance.integer({ min: 0, max: 1000 }),
-          readTimeMins: chance.integer({ min: 1, max: 10 }),
-          // The body needs this indentation or it all appears as codeblocks when rendered
+            .replace(/[^\w-]+/g, "")
+            .substring(0, 100)}-${shortId}`,
+          excerpt: chance.sentence({
+            words: chance.integer({ min: 10, max: 20 }),
+          }),
+          readingTime: chance.integer({ min: 1, max: 10 }),
+          status: isPublished ? ("published" as const) : ("draft" as const),
+          publishedAt: publishedDate,
+          upvotesCount: isPublished ? chance.integer({ min: 0, max: 50 }) : 0,
+          downvotesCount: isPublished ? chance.integer({ min: 0, max: 5 }) : 0,
+          showComments: true,
           body: `Hello world -
 ${chance.paragraph()}
 ## ${chance.sentence({ words: 6 })}
@@ -139,75 +139,31 @@ ${chance.paragraph()}
   const userData = generateUserData();
 
   const addUserData = async () => {
-    const tags = sampleTags.map((title) => ({ title }));
+    const tagsData = sampleTags.map((title) => ({ title }));
 
     const tagResponse = await db
       .insert(tag)
-      .values(tags)
+      .values(tagsData)
       .onConflictDoNothing()
       .returning({ id: tag.id, title: tag.title });
 
     const usersResponse = await db.insert(user).values(userData).returning();
 
-    for (let i = 0; i < usersResponse.length; i++) {
-      const posts = randomPosts(
-        chance.integer({
-          min: 1,
-          max: 5,
-        }),
-      ).map((post) => ({ ...post, userId: usersResponse[i].id }));
+    const postsData = randomPosts(60);
+    const postsToInsert = postsData.map((p, index) => ({
+      ...p,
+      authorId: usersResponse[index % usersResponse.length].id,
+    }));
 
-      const postsResponse = await db
-        .insert(post)
-        .values(posts)
-        .onConflictDoNothing()
-        .returning();
+    const postResponse = await db
+      .insert(posts)
+      .values(postsToInsert)
+      .onConflictDoNothing()
+      .returning();
 
-      for (let j = 0; j < postsResponse.length; j++) {
-        const randomTag = tagResponse[chance.integer({ min: 0, max: 9 })];
-        await db
-          .insert(post_tag)
-          .values({ postId: postsResponse[j].id, tagId: randomTag.id })
-          .onConflictDoNothing();
-      }
-    }
+    console.log(`Added ${usersResponse.length} users and ${postResponse.length} posts`);
 
-    const posts = await db.select().from(post);
-
-    for (let i = 0; i < usersResponse.length; i++) {
-      const numberOfLikedPosts = chance.integer({
-        min: 1,
-        max: posts.length / 2,
-      });
-
-      const likedPosts: Array<string> = [];
-
-      for (let j = 0; j < numberOfLikedPosts; j++) {
-        likedPosts.push(
-          posts[
-            chance.integer({
-              min: 0,
-              max: posts.length - 1,
-            })
-          ].id,
-        );
-      }
-
-      await Promise.all(
-        likedPosts.map((post) =>
-          db
-            .insert(like)
-            .values({ userId: usersResponse[i].id, postId: post })
-            .onConflictDoNothing(),
-        ),
-      );
-    }
-
-    console.log(`Added ${usersResponse.length} users with posts and likes`);
-
-    // Return posts for discussion seeding
-    const allPosts = await db.select().from(post);
-    return { users: usersResponse, posts: allPosts };
+    return { users: usersResponse, posts: postResponse, tags: tagResponse };
   };
 
   // Initial RSS feed sources for content aggregator
@@ -614,7 +570,7 @@ ${chance.paragraph()}
 
   const addFeedSources = async () => {
     const sourcesResponse = await db
-      .insert(feed_source)
+      .insert(feed_sources)
       .values(feedSources)
       .onConflictDoNothing()
       .returning();
@@ -623,13 +579,20 @@ ${chance.paragraph()}
     return sourcesResponse;
   };
 
-  // Add sample aggregated articles for testing
-  const addSampleArticles = async (sourceIds: { id: number; websiteUrl: string | null }[]) => {
+  // Add sample LINK posts directly to posts table for testing
+  const addSampleLinks = async (
+    sourceIds: { id: number; websiteUrl: string | null; slug: string | null }[],
+    users: { id: string }[],
+  ) => {
     if (sourceIds.length === 0) {
-      console.log("No sources to add articles for, fetching from DB...");
-      const existingSources = await db.select({ id: feed_source.id, websiteUrl: feed_source.websiteUrl }).from(feed_source);
+      console.log("No sources to add links for, fetching from DB...");
+      const existingSources = await db.select({
+        id: feed_sources.id,
+        websiteUrl: feed_sources.websiteUrl,
+        slug: feed_sources.slug,
+      }).from(feed_sources);
       if (existingSources.length === 0) {
-        console.log("No feed sources found, skipping sample articles");
+        console.log("No feed sources found, skipping sample links");
         return [];
       }
       sourceIds = existingSources;
@@ -638,109 +601,168 @@ ${chance.paragraph()}
     // Filter to only sources with valid websiteUrls
     const validSources = sourceIds.filter(s => s.websiteUrl && s.websiteUrl.length > 0);
     if (validSources.length === 0) {
-      console.log("No sources with valid websiteUrls, skipping sample articles");
+      console.log("No sources with valid websiteUrls, skipping sample links");
       return [];
     }
 
-    const sampleArticles = [];
+    if (users.length === 0) {
+      console.log("No users to assign as authors, skipping sample links");
+      return [];
+    }
+
+    const sampleLinks = [];
     const now = new Date();
 
-    // Add 3 sample articles per source (first 5 sources only to keep it manageable)
-    for (let i = 0; i < Math.min(5, validSources.length); i++) {
+    // Sample article titles
+    const sampleTitles = [
+      "Building Scalable React Applications with Server Components",
+      "The Complete Guide to CSS Grid Layout in 2024",
+      "Understanding TypeScript Generics: A Practical Guide",
+      "10 JavaScript Performance Tips Every Developer Should Know",
+      "How We Migrated Our Monolith to Microservices",
+      "Introduction to Edge Computing for Web Developers",
+      "Mastering Git Branching Strategies for Large Teams",
+      "Deep Dive into Node.js Event Loop",
+      "Creating Accessible Forms: Best Practices",
+      "The Future of Web Development: Trends to Watch",
+      "Optimizing Database Queries in PostgreSQL",
+      "Building Real-time Applications with WebSockets",
+      "Container Security Best Practices for Kubernetes",
+      "A Beginner's Guide to GraphQL APIs",
+      "Testing React Applications with Vitest and Testing Library",
+      "Modern Authentication Patterns with OAuth 2.0 and OIDC",
+      "Deploying Next.js Applications to the Edge",
+      "State Management in 2024: Redux vs Zustand vs Jotai",
+      "Web Performance Optimization: Core Web Vitals Deep Dive",
+      "Building Design Systems with Tailwind CSS",
+      "Understanding React Concurrent Features",
+      "Advanced CSS Animations and Transitions",
+      "Migrating from REST to GraphQL: Lessons Learned",
+      "Serverless Architecture Patterns for Modern Apps",
+      "End-to-End Testing with Playwright",
+      "TypeScript 5.0: New Features and Migration Guide",
+      "CI/CD Pipeline Best Practices for JavaScript Projects",
+      "Implementing Dark Mode: A Complete Guide",
+      "Web Components vs React: When to Use Each",
+      "Database Indexing Strategies for High Performance",
+      "Building CLI Tools with Node.js",
+      "WebAssembly for JavaScript Developers",
+      "Micro-Frontends Architecture in Practice",
+      "API Rate Limiting and Throttling Techniques",
+      "Debugging Production Issues in Node.js",
+      "React Query vs SWR: Data Fetching Compared",
+      "Secure Coding Practices for Web Developers",
+      "Progressive Web Apps in 2024",
+      "Understanding the JavaScript Module System",
+      "Building Accessible Navigation Components",
+      "Docker Best Practices for Development Teams",
+      "Functional Programming Patterns in JavaScript",
+      "Real-time Collaboration with CRDTs",
+      "Monitoring and Observability for Web Apps",
+      "Code Review Best Practices for Remote Teams",
+    ];
+
+    // Add 3 sample links per source
+    for (let i = 0; i < Math.min(15, validSources.length); i++) {
       const source = validSources[i];
       for (let j = 0; j < 3; j++) {
         const daysAgo = chance.integer({ min: 1, max: 14 });
         const publishedDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+        const shortId = generateShortId();
+        const title = sampleTitles[(i * 3 + j) % sampleTitles.length];
+        const slug = `${title.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").substring(0, 100)}-${shortId}`;
 
-        sampleArticles.push({
-          sourceId: source.id,
-          shortId: generateShortId(),
-          title: chance.sentence({ words: chance.integer({ min: 5, max: 12 }) }),
+        sampleLinks.push({
+          type: "link" as const,
+          title,
           excerpt: chance.paragraph(),
-          url: `${source.websiteUrl}/posts/${chance.word()}-${chance.word()}-${chance.integer({ min: 1000, max: 9999 })}`,
-          author: chance.name(),
+          externalUrl: `${source.websiteUrl}/posts/${chance.word()}-${chance.word()}-${chance.integer({ min: 1000, max: 9999 })}`,
+          sourceId: source.id,
+          sourceAuthor: chance.name(),
+          slug,
+          authorId: users[0].id, // Use first user as author for external links
+          status: "published" as const,
           publishedAt: publishedDate.toISOString(),
-          upvotes: chance.integer({ min: 0, max: 100 }),
-          downvotes: chance.integer({ min: 0, max: 10 }),
-          clickCount: chance.integer({ min: 0, max: 500 }),
+          upvotesCount: chance.integer({ min: 0, max: 100 }),
+          downvotesCount: chance.integer({ min: 0, max: 10 }),
+          viewsCount: chance.integer({ min: 0, max: 500 }),
+          readingTime: chance.integer({ min: 3, max: 15 }),
+          showComments: true,
         });
       }
     }
 
-    const articlesResponse = await db
-      .insert(aggregated_article)
-      .values(sampleArticles)
+    const linksResponse = await db
+      .insert(posts)
+      .values(sampleLinks)
       .onConflictDoNothing()
       .returning();
 
-    console.log(`Added ${articlesResponse.length} sample articles`);
-    return articlesResponse;
+    console.log(`Added ${linksResponse.length} sample LINK posts`);
+    return linksResponse;
   };
 
-  // Add sample discussions on posts and articles
-  const addSampleDiscussions = async (users: { id: string }[], articles: { id: number }[], posts: { id: string }[]) => {
+  // Add sample comments on posts
+  const addSampleComments = async (users: { id: string }[], postItems: { id: string }[]) => {
     if (users.length === 0) {
-      console.log("No users found, skipping discussions");
+      console.log("No users found, skipping comments");
       return;
     }
 
-    const discussions = [];
+    if (postItems.length === 0) {
+      console.log("No posts found, skipping comments");
+      return;
+    }
 
-    // Add discussions on articles
-    for (const article of articles.slice(0, 10)) {
+    const commentsData = [];
+
+    // Add comments on posts
+    for (const postItem of postItems.slice(0, 10)) {
       const numComments = chance.integer({ min: 1, max: 5 });
       for (let i = 0; i < numComments; i++) {
-        discussions.push({
+        // Generate a unique path for each comment (ltree format: alphanumeric, underscores)
+        const pathId = generateShortId().replace(/[^a-zA-Z0-9]/g, "");
+        commentsData.push({
           body: chance.paragraph(),
-          targetType: "ARTICLE" as const,
-          articleId: article.id,
-          userId: users[chance.integer({ min: 0, max: users.length - 1 })].id,
+          postId: postItem.id,
+          authorId: users[chance.integer({ min: 0, max: users.length - 1 })].id,
+          path: pathId,
+          depth: 0,
         });
       }
     }
 
-    // Add discussions on posts
-    for (const p of posts.slice(0, 10)) {
-      const numComments = chance.integer({ min: 1, max: 3 });
-      for (let i = 0; i < numComments; i++) {
-        discussions.push({
-          body: chance.paragraph(),
-          targetType: "POST" as const,
-          postId: p.id,
-          userId: users[chance.integer({ min: 0, max: users.length - 1 })].id,
-        });
-      }
-    }
-
-    if (discussions.length === 0) {
-      console.log("No discussions to add");
+    if (commentsData.length === 0) {
+      console.log("No comments to add");
       return;
     }
 
-    const discussionsResponse = await db
-      .insert(discussion)
-      .values(discussions)
+    const commentsResponse = await db
+      .insert(comments)
+      .values(commentsData)
       .onConflictDoNothing()
       .returning();
 
-    console.log(`Added ${discussionsResponse.length} sample discussions`);
+    console.log(`Added ${commentsResponse.length} sample comments`);
 
     // Add some nested replies
-    if (discussionsResponse.length > 0) {
+    if (commentsResponse.length > 0) {
       const replies = [];
-      for (const disc of discussionsResponse.slice(0, 5)) {
+      for (const comment of commentsResponse.slice(0, 5)) {
+        // Generate reply path by appending to parent's path
+        const replyPathId = generateShortId().replace(/[^a-zA-Z0-9]/g, "");
         replies.push({
           body: chance.sentence({ words: chance.integer({ min: 10, max: 30 }) }),
-          targetType: disc.targetType,
-          articleId: disc.articleId,
-          postId: disc.postId,
-          userId: users[chance.integer({ min: 0, max: users.length - 1 })].id,
-          parentId: disc.id,
+          postId: comment.postId,
+          authorId: users[chance.integer({ min: 0, max: users.length - 1 })].id,
+          parentId: comment.id,
+          path: `${comment.path}.${replyPathId}`,
+          depth: 1,
         });
       }
 
       const repliesResponse = await db
-        .insert(discussion)
+        .insert(comments)
         .values(replies)
         .onConflictDoNothing()
         .returning();
@@ -753,18 +775,20 @@ ${chance.paragraph()}
     console.log(`Start seeding, please wait... `);
 
     try {
-      // Add users and posts
+      // Add users and posts (to new posts table)
       const userData = await addUserData();
 
       // Add feed sources with slugs
       const sources = await addFeedSources();
 
-      // Add sample articles for testing (sources already has id and websiteUrl from returning())
-      const articles = await addSampleArticles(sources);
+      // Add sample LINK posts for testing (directly to posts table)
+      await addSampleLinks(sources, userData.users);
 
-      // Add sample discussions on posts and articles
-      if (userData && articles.length > 0) {
-        await addSampleDiscussions(userData.users, articles, userData.posts);
+      // Add sample comments on posts
+      if (userData && userData.posts.length > 0) {
+        // Filter to only published posts
+        const publishedPosts = userData.posts.filter(p => p.status === "published");
+        await addSampleComments(userData.users, publishedPosts);
       }
     } catch (error) {
       console.log("Error:", error);

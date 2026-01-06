@@ -1,35 +1,34 @@
 import z from "zod";
 
-// Feed Query Schema
+// Vote type for feed (lowercase to match new schema)
+export const FeedVoteTypeSchema = z.enum(["up", "down"]);
+
+// Get Feed Schema (for RSS aggregated content)
 export const GetFeedSchema = z.object({
-  limit: z.number().min(1).max(100).nullish(),
-  cursor: z
-    .object({
-      id: z.number(),
-      publishedAt: z.string().optional(),
-      score: z.number().optional(),
-    })
-    .nullish(),
-  sort: z.enum(["recent", "trending", "popular"]),
-  category: z.string().nullish(),
-  tag: z.string().nullish(),
-  sourceId: z.number().nullish(),
-  includeCommunity: z.boolean().default(true),
+  limit: z.number().min(1).max(100).optional(),
+  cursor: z.object({
+    id: z.string(),
+    publishedAt: z.string().optional(),
+    score: z.number().optional(),
+  }).nullish(),
+  sort: z.enum(["recent", "trending", "popular"]).default("recent"),
+  sourceId: z.number().optional(),
+  category: z.string().optional(),
 });
 
 export type GetFeedInput = z.TypeOf<typeof GetFeedSchema>;
 
-// Vote Schema
+// Vote on Article Schema
 export const VoteArticleSchema = z.object({
-  articleId: z.number(),
-  voteType: z.enum(["UP", "DOWN"]).nullable(),
+  articleId: z.string(),
+  voteType: FeedVoteTypeSchema.nullable(), // null to remove vote
 });
 
 export type VoteArticleInput = z.TypeOf<typeof VoteArticleSchema>;
 
-// Bookmark Schema
+// Bookmark Article Schema
 export const BookmarkArticleSchema = z.object({
-  articleId: z.number(),
+  articleId: z.string(),
   setBookmarked: z.boolean(),
 });
 
@@ -37,23 +36,62 @@ export type BookmarkArticleInput = z.TypeOf<typeof BookmarkArticleSchema>;
 
 // Track Click Schema
 export const TrackClickSchema = z.object({
-  articleId: z.number(),
+  articleId: z.string(),
 });
 
 export type TrackClickInput = z.TypeOf<typeof TrackClickSchema>;
 
 // Get Article by ID Schema
 export const GetArticleByIdSchema = z.object({
-  id: z.number(),
+  id: z.string(),
 });
 
-// Feed Source Schemas
+export type GetArticleByIdInput = z.TypeOf<typeof GetArticleByIdSchema>;
+
+// Get Article by Slug Schema
+export const GetArticleBySlugSchema = z.object({
+  slug: z.string().min(1).max(350),
+});
+
+export type GetArticleBySlugInput = z.TypeOf<typeof GetArticleBySlugSchema>;
+
+// Get Article by Source Slug and ShortId Schema (Reddit-style URLs)
+export const GetArticleBySlugAndShortIdSchema = z.object({
+  sourceSlug: z.string().min(1).max(100),
+  shortId: z.string().min(1).max(20),
+});
+
+export type GetArticleBySlugAndShortIdInput = z.TypeOf<typeof GetArticleBySlugAndShortIdSchema>;
+
+// Get Articles by Source Schema
+export const GetArticlesBySourceSchema = z.object({
+  sourceSlug: z.string().min(1).max(100),
+  limit: z.number().min(1).max(100).optional(),
+  cursor: z.object({
+    id: z.string(),
+    publishedAt: z.string().optional(),
+  }).nullish(),
+  sort: z.enum(["recent", "trending", "popular"]).default("recent"),
+});
+
+export type GetArticlesBySourceInput = z.TypeOf<typeof GetArticlesBySourceSchema>;
+
+// Get Article by Source and Article Slug
+export const GetArticleBySourceAndArticleSlugSchema = z.object({
+  sourceSlug: z.string().min(1).max(100),
+  articleSlug: z.string().min(1).max(350),
+});
+
+export type GetArticleBySourceAndArticleSlugInput = z.TypeOf<typeof GetArticleBySourceAndArticleSlugSchema>;
+
+// Feed Source Schemas (RSS source management)
 export const CreateFeedSourceSchema = z.object({
   name: z.string().min(1).max(100),
   url: z.string().url(),
   websiteUrl: z.string().url().optional(),
   logoUrl: z.string().url().optional(),
   category: z.string().max(50).optional(),
+  description: z.string().max(500).optional(),
 });
 
 export type CreateFeedSourceInput = z.TypeOf<typeof CreateFeedSourceSchema>;
@@ -65,6 +103,7 @@ export const UpdateFeedSourceSchema = z.object({
   category: z.string().max(50).optional(),
   logoUrl: z.string().url().optional(),
   websiteUrl: z.string().url().optional(),
+  description: z.string().max(500).optional(),
 });
 
 export type UpdateFeedSourceInput = z.TypeOf<typeof UpdateFeedSourceSchema>;
@@ -84,14 +123,6 @@ export const DeleteFeedSourceSchema = z.object({
 
 export type DeleteFeedSourceInput = z.TypeOf<typeof DeleteFeedSourceSchema>;
 
-// Get Article by Slug and ShortId (Reddit-style URL)
-export const GetArticleBySlugSchema = z.object({
-  sourceSlug: z.string().min(1).max(100),
-  shortId: z.string().min(1).max(7),
-});
-
-export type GetArticleBySlugInput = z.TypeOf<typeof GetArticleBySlugSchema>;
-
 // Get Source Profile by Slug
 export const GetSourceBySlugSchema = z.object({
   slug: z.string().min(1).max(100),
@@ -99,19 +130,12 @@ export const GetSourceBySlugSchema = z.object({
 
 export type GetSourceBySlugInput = z.TypeOf<typeof GetSourceBySlugSchema>;
 
-// Get Articles by Source (paginated)
-export const GetArticlesBySourceSchema = z.object({
+// Get Content by Source Slug and Content Slug (for LINK type content)
+export const GetLinkContentBySourceAndSlugSchema = z.object({
   sourceSlug: z.string().min(1).max(100),
-  limit: z.number().min(1).max(100).default(20),
-  cursor: z
-    .object({
-      id: z.number(),
-      publishedAt: z.string().optional(),
-    })
-    .nullish(),
-  sort: z.enum(["recent", "trending", "popular"]).default("recent"),
+  contentSlug: z.string().min(1).max(350),
 });
 
-export type GetArticlesBySourceInput = z.TypeOf<
-  typeof GetArticlesBySourceSchema
+export type GetLinkContentBySourceAndSlugInput = z.TypeOf<
+  typeof GetLinkContentBySourceAndSlugSchema
 >;

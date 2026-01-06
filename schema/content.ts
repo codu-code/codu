@@ -1,12 +1,15 @@
 import z from "zod";
 
 // Content Type enum matching the database
+// POST/ARTICLE = user-created articles, LINK = external/RSS content
+// ARTICLE is an alias for POST (frontend uses ARTICLE, backend uses POST)
 export const ContentTypeSchema = z.enum([
-  "ARTICLE",
+  "POST",
   "LINK",
   "QUESTION",
   "VIDEO",
   "DISCUSSION",
+  "ARTICLE", // Alias for POST
 ]);
 export type ContentType = z.TypeOf<typeof ContentTypeSchema>;
 
@@ -88,7 +91,7 @@ export type DeleteContentInput = z.TypeOf<typeof DeleteContentSchema>;
 // Vote Schema
 export const VoteContentSchema = z.object({
   contentId: z.string(),
-  voteType: z.enum(["UP", "DOWN"]).nullable(), // null removes the vote
+  voteType: z.enum(["up", "down"]).nullable(), // null removes the vote
 });
 
 export type VoteContentInput = z.TypeOf<typeof VoteContentSchema>;
@@ -135,3 +138,51 @@ export const GetSavedContentSchema = z.object({
 });
 
 export type GetSavedContentInput = z.TypeOf<typeof GetSavedContentSchema>;
+
+// Edit Draft Schema - get user's own content by ID for editing
+export const EditDraftContentSchema = z.object({
+  id: z.string(),
+});
+
+export type EditDraftContentInput = z.TypeOf<typeof EditDraftContentSchema>;
+
+// Publish Content Schema - separate publish action
+export const PublishContentSchema = z.object({
+  id: z.string(),
+  published: z.boolean(),
+  publishTime: z.date().optional(), // For scheduling
+});
+
+export type PublishContentInput = z.TypeOf<typeof PublishContentSchema>;
+
+// Confirm Content Schema - validation before publishing
+export const ConfirmContentSchema = z.object({
+  body: z.string().trim().min(50, "Content is too short. Minimum of 50 characters."),
+  title: z.string().trim().max(500).min(10, "Title is too short. Minimum of 10 characters."),
+  excerpt: z.string().trim().max(300).optional(),
+  canonicalUrl: z.string().trim().url().optional().or(z.literal("")),
+  tags: z.string().array().max(5).optional(),
+});
+
+export type ConfirmContentInput = z.TypeOf<typeof ConfirmContentSchema>;
+
+// My Drafts Schema
+export const MyDraftsContentSchema = z.object({
+  limit: z.number().min(1).max(100).default(20),
+});
+
+export type MyDraftsContentInput = z.TypeOf<typeof MyDraftsContentSchema>;
+
+// My Published Schema
+export const MyPublishedContentSchema = z.object({
+  limit: z.number().min(1).max(100).default(20),
+});
+
+export type MyPublishedContentInput = z.TypeOf<typeof MyPublishedContentSchema>;
+
+// My Scheduled Schema
+export const MyScheduledContentSchema = z.object({
+  limit: z.number().min(1).max(100).default(20),
+});
+
+export type MyScheduledContentInput = z.TypeOf<typeof MyScheduledContentSchema>;
