@@ -73,5 +73,27 @@ export class CronStack extends cdk.Stack {
     });
 
     rssFetcherRule.addTarget(new targets.LambdaFunction(rssFetcherFn));
+
+    // Vote Count Reconciliation Lambda
+    const voteReconcileFn = new NodejsFunction(this, "VoteReconcileLambda", {
+      timeout: cdk.Duration.seconds(120),
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(__dirname, "/../lambdas/voteReconcile/index.ts"),
+      depsLockFilePath: path.join(
+        __dirname,
+        "/../lambdas/voteReconcile/package-lock.json",
+      ),
+      role: lambdaRole,
+      bundling: {
+        nodeModules: ["@aws-sdk/client-ssm", "pg"],
+      },
+    });
+
+    // Run daily at 5:00 AM UTC (before Algolia at 6 AM)
+    const voteReconcileRule = new events.Rule(this, "VoteReconcileRule", {
+      schedule: events.Schedule.expression("cron(0 5 * * ? *)"),
+    });
+
+    voteReconcileRule.addTarget(new targets.LambdaFunction(voteReconcileFn));
   }
 }
