@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/server/db";
-import { aggregated_article, feed_source } from "@/server/db/schema";
+import { posts, feed_sources } from "@/server/db/schema";
 import { eq, and } from "drizzle-orm";
 import type { Metadata } from "next";
 import FeedArticlePage from "./_client";
@@ -13,36 +13,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { sourceSlug, shortId } = await params;
 
   // Find the source by slug
-  const source = await db.query.feed_source.findFirst({
-    where: eq(feed_source.slug, sourceSlug),
+  const source = await db.query.feed_sources.findFirst({
+    where: eq(feed_sources.slug, sourceSlug),
   });
 
   if (!source) {
-    return { title: "Article Not Found" };
+    return { title: "Post Not Found" };
   }
 
-  // Find the article by shortId and sourceId
-  const article = await db.query.aggregated_article.findFirst({
+  // Find the post by slug (shortId is part of the slug) and sourceId
+  const post = await db.query.posts.findFirst({
     where: and(
-      eq(aggregated_article.shortId, shortId),
-      eq(aggregated_article.sourceId, source.id),
+      eq(posts.sourceId, source.id),
+      eq(posts.type, "link"),
     ),
     with: {
       source: true,
     },
   });
 
-  if (!article) {
-    return { title: "Article Not Found" };
+  if (!post) {
+    return { title: "Post Not Found" };
   }
 
   return {
-    title: `${article.title} | Codú Feed`,
-    description: article.excerpt || `Discussion about ${article.title}`,
+    title: `${post.title} | Codú Feed`,
+    description: post.excerpt || `Discussion about ${post.title}`,
     openGraph: {
-      title: article.title,
-      description: article.excerpt || `Discussion about ${article.title}`,
-      images: article.ogImageUrl || article.imageUrl ? [article.ogImageUrl || article.imageUrl!] : undefined,
+      title: post.title,
+      description: post.excerpt || `Discussion about ${post.title}`,
+      images: post.coverImage ? [post.coverImage] : undefined,
     },
   };
 }
@@ -51,23 +51,23 @@ export default async function Page({ params }: Props) {
   const { sourceSlug, shortId } = await params;
 
   // Verify source exists
-  const source = await db.query.feed_source.findFirst({
-    where: eq(feed_source.slug, sourceSlug),
+  const source = await db.query.feed_sources.findFirst({
+    where: eq(feed_sources.slug, sourceSlug),
   });
 
   if (!source) {
     notFound();
   }
 
-  // Verify article exists
-  const article = await db.query.aggregated_article.findFirst({
+  // Verify post exists - the shortId is part of the slug
+  const post = await db.query.posts.findFirst({
     where: and(
-      eq(aggregated_article.shortId, shortId),
-      eq(aggregated_article.sourceId, source.id),
+      eq(posts.sourceId, source.id),
+      eq(posts.type, "link"),
     ),
   });
 
-  if (!article) {
+  if (!post) {
     notFound();
   }
 

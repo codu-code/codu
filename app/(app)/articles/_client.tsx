@@ -30,6 +30,7 @@ import CoduChallenge from "@/components/CoduChallenge/CoduChallenge";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { FeedFilters } from "@/components/Feed";
+import { useReportModal } from "@/components/ReportModal/ReportModal";
 
 // Get relative time string
 const getRelativeTime = (dateStr: string): string => {
@@ -60,7 +61,7 @@ type ArticleCardProps = {
   readTime: number;
   upvotes: number;
   downvotes: number;
-  userVote: "UP" | "DOWN" | null;
+  userVote: "up" | "down" | null;
   isBookmarked: boolean;
   discussionCount?: number;
 };
@@ -86,6 +87,7 @@ const ArticleCard = ({
   const [userVote, setUserVote] = useState(initialUserVote);
   const [votes, setVotes] = useState({ upvotes, downvotes });
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+  const { openReport } = useReportModal();
 
   const { mutate: vote, status: voteStatus } = api.post.vote.useMutation({
     onMutate: async ({ voteType }) => {
@@ -98,12 +100,12 @@ const ArticleCard = ({
         let newDownvotes = prev.downvotes;
 
         // Remove old vote
-        if (oldVote === "UP") newUpvotes--;
-        if (oldVote === "DOWN") newDownvotes--;
+        if (oldVote === "up") newUpvotes--;
+        if (oldVote === "down") newDownvotes--;
 
         // Add new vote
-        if (voteType === "UP") newUpvotes++;
-        if (voteType === "DOWN") newDownvotes++;
+        if (voteType === "up") newUpvotes++;
+        if (voteType === "down") newDownvotes++;
 
         return { upvotes: newUpvotes, downvotes: newDownvotes };
       });
@@ -135,7 +137,7 @@ const ArticleCard = ({
       },
     });
 
-  const handleVote = (voteType: "UP" | "DOWN" | null) => {
+  const handleVote = (voteType: "up" | "down" | null) => {
     if (!session) {
       signIn();
       return;
@@ -152,13 +154,21 @@ const ArticleCard = ({
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/articles/${slug}`;
+    const shareUrl = `${window.location.origin}/${username}/${slug}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied to clipboard");
     } catch {
       toast.error("Failed to copy link");
     }
+  };
+
+  const handleReport = () => {
+    if (!session) {
+      signIn();
+      return;
+    }
+    openReport("post", id);
   };
 
   const relativeTime = getRelativeTime(date);
@@ -192,7 +202,7 @@ const ArticleCard = ({
       {/* Title */}
       <h2 className="mb-1">
         <Link
-          href={`/articles/${slug}`}
+          href={`/${username}/${slug}`}
           className="text-lg font-semibold leading-snug text-neutral-900 hover:underline dark:text-neutral-100 sm:text-xl"
         >
           {title}
@@ -211,10 +221,10 @@ const ArticleCard = ({
         {/* Vote buttons */}
         <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
           <button
-            onClick={() => handleVote(userVote === "UP" ? null : "UP")}
+            onClick={() => handleVote(userVote === "up" ? null : "up")}
             disabled={voteStatus === "pending"}
             className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-              userVote === "UP"
+              userVote === "up"
                 ? "text-green-500"
                 : "text-neutral-400 dark:text-neutral-500"
             }`}
@@ -234,10 +244,10 @@ const ArticleCard = ({
             {score}
           </span>
           <button
-            onClick={() => handleVote(userVote === "DOWN" ? null : "DOWN")}
+            onClick={() => handleVote(userVote === "down" ? null : "down")}
             disabled={voteStatus === "pending"}
             className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-              userVote === "DOWN"
+              userVote === "down"
                 ? "text-red-500"
                 : "text-neutral-400 dark:text-neutral-500"
             }`}
@@ -249,7 +259,7 @@ const ArticleCard = ({
 
         {/* Comments button */}
         <Link
-          href={`/articles/${slug}#comments`}
+          href={`/${username}/${slug}#comments`}
           className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
         >
           <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
@@ -307,6 +317,14 @@ const ArticleCard = ({
                   className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
                 >
                   Copy link
+                </button>
+              </MenuItem>
+              <MenuItem>
+                <button
+                  onClick={handleReport}
+                  className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                >
+                  Report
                 </button>
               </MenuItem>
             </MenuItems>
@@ -480,7 +498,7 @@ const ArticlesPage = () => {
                               username={user?.username || ""}
                               image={user?.image || ""}
                               date={published}
-                              readTime={readTimeMins}
+                              readTime={readTimeMins ?? 0}
                               upvotes={upvotes ?? 0}
                               downvotes={downvotes ?? 0}
                               userVote={userVote ?? null}

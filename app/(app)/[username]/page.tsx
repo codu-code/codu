@@ -1,9 +1,12 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import Content from "./_usernameClient";
+import SourceProfileContent from "./_sourceProfileClient";
 import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
+import { feed_sources } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -11,6 +14,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const username = params.username;
 
+  // First check if it's a user
   const profile = await db.query.user.findFirst({
     columns: {
       bio: true,
@@ -19,38 +23,58 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     where: (users, { eq }) => eq(users.username, username),
   });
 
-  if (!profile) {
-    notFound();
+  if (profile) {
+    const { bio, name } = profile;
+    const title = `${name || username} - Codú Profile | Codú - The Web Developer Community`;
+    const description = `${name || username}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "profile",
+        images: [
+          {
+            url: "/images/og/home-og.png",
+            width: 1200,
+            height: 630,
+            alt: `${name || username}'s profile on Codú`,
+          },
+        ],
+        siteName: "Codú",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: ["/images/og/home-og.png"],
+      },
+    };
   }
 
-  const { bio, name } = profile;
-  const title = `${name || username} - Codú Profile | Codú - The Web Developer Community`;
-  const description = `${name || username}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
+  // Check if it's a feed source
+  const source = await db.query.feed_sources.findFirst({
+    where: eq(feed_sources.slug, username),
+  });
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "profile",
-      images: [
-        {
-          url: "/images/og/home-og.png",
-          width: 1200,
-          height: 630,
-          alt: `${name || username}'s profile on Codú`,
-        },
-      ],
-      siteName: "Codú",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ["/images/og/home-og.png"],
-    },
-  };
+  if (source) {
+    return {
+      title: `${source.name} | Codú Feed`,
+      description:
+        source.description || `Articles from ${source.name} on Codú Feed`,
+      openGraph: {
+        title: source.name,
+        description:
+          source.description || `Articles from ${source.name} on Codú Feed`,
+        images: source.logoUrl ? [source.logoUrl] : undefined,
+      },
+    };
+  }
+
+  // Neither user nor source found
+  return { title: "Profile Not Found" };
 }
 
 export default async function Page(props: {
@@ -63,6 +87,7 @@ export default async function Page(props: {
     notFound();
   }
 
+  // First check if it's a user
   const profile = await db.query.user.findFirst({
     columns: {
       bio: true,
@@ -78,48 +103,53 @@ export default async function Page(props: {
           title: true,
           excerpt: true,
           slug: true,
-          readTimeMins: true,
-          published: true,
+          readingTime: true,
+          publishedAt: true,
           id: true,
         },
-        where: (posts, { isNotNull, and, lte }) =>
+        where: (posts, { eq, and, lte }) =>
           and(
-            isNotNull(posts.published),
-            lte(posts.published, new Date().toISOString()),
+            eq(posts.status, "published"),
+            lte(posts.publishedAt, new Date().toISOString()),
           ),
-        orderBy: (posts, { desc }) => [desc(posts.published)],
+        orderBy: (posts, { desc }) => [desc(posts.publishedAt)],
       },
     },
     where: (users, { eq }) => eq(users.username, username),
   });
 
-  if (!profile) {
-    notFound();
+  if (profile) {
+    const bannedUser = await db.query.banned_users.findFirst({
+      where: (bannedUsers, { eq }) => eq(bannedUsers.userId, profile.id),
+    });
+
+    const accountLocked = !!bannedUser;
+    const session = await getServerAuthSession();
+    const isOwner = session?.user?.id === profile.id;
+
+    const shapedProfile = {
+      ...profile,
+      posts: accountLocked ? [] : profile.posts,
+      accountLocked,
+    };
+
+    return (
+      <>
+        <h1 className="sr-only">{`${shapedProfile.name || shapedProfile.username}'s Coding Profile`}</h1>
+        <Content profile={shapedProfile} isOwner={isOwner} session={session} />
+      </>
+    );
   }
 
-  const bannedUser = await db.query.banned_users.findFirst({
-    where: (bannedUsers, { eq }) => eq(bannedUsers.userId, profile.id),
+  // Check if it's a feed source
+  const source = await db.query.feed_sources.findFirst({
+    where: eq(feed_sources.slug, username),
   });
 
-  const accountLocked = !!bannedUser;
-  const session = await getServerAuthSession();
-  const isOwner = session?.user?.id === profile.id;
+  if (source) {
+    return <SourceProfileContent sourceSlug={username} />;
+  }
 
-  const shapedProfile = {
-    ...profile,
-    posts: accountLocked
-      ? []
-      : profile.posts.map((post) => ({
-          ...post,
-          published: post.published,
-        })),
-    accountLocked,
-  };
-
-  return (
-    <>
-      <h1 className="sr-only">{`${shapedProfile.name || shapedProfile.username}'s Coding Profile`}</h1>
-      <Content profile={shapedProfile} isOwner={isOwner} session={session} />
-    </>
-  );
+  // Neither user nor source found
+  notFound();
 }

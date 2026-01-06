@@ -3,7 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import React from "react";
 import Link from "next/link";
-import ArticlePreview from "@/components/ArticlePreview/ArticlePreview";
+import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,11 +16,11 @@ type Props = {
   isOwner: boolean;
   profile: {
     posts: {
-      published: string | null;
+      publishedAt: string | null;
       title: string;
-      excerpt: string;
+      excerpt: string | null;
       slug: string;
-      readTimeMins: number;
+      readingTime: number | null;
       id: string;
     }[];
     accountLocked: boolean;
@@ -127,36 +127,38 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                         slug,
                         title,
                         excerpt,
-                        readTimeMins,
-                        published,
+                        readingTime,
+                        publishedAt,
                         id,
                       }) => {
-                        if (!published) return;
+                        if (!publishedAt) return null;
                         return (
-                          <ArticlePreview
-                            key={slug}
-                            slug={slug}
-                            title={title}
-                            excerpt={excerpt}
-                            name={name}
-                            username={username || ""}
-                            image={image}
-                            date={published}
-                            readTime={readTimeMins}
-                            menuOptions={
-                              isOwner
-                                ? [
-                                    {
-                                      label: "Edit",
-                                      href: `/create/${id}`,
-                                      postId: id,
-                                    },
-                                  ]
-                                : undefined
-                            }
-                            showBookmark={!isOwner}
-                            id={id}
-                          />
+                          <div key={slug} className="relative">
+                            <UnifiedContentCard
+                              type="POST"
+                              id={id}
+                              title={title}
+                              excerpt={excerpt}
+                              slug={slug}
+                              publishedAt={publishedAt}
+                              readTimeMins={readingTime}
+                              upvotes={0}
+                              downvotes={0}
+                              author={{
+                                name: name,
+                                username: username || "",
+                                image: image,
+                              }}
+                            />
+                            {isOwner && (
+                              <Link
+                                href={`/create/${id}`}
+                                className="absolute right-2 top-2 rounded-md bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                              >
+                                Edit
+                              </Link>
+                            )}
+                          </div>
                         );
                       },
                     )

@@ -5,14 +5,16 @@ import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { useSession } from "next-auth/react";
-import {
-  FeedItemAggregated,
-  FeedItemLoading,
-  FeedFilters,
-} from "@/components/Feed";
+import { FeedItemLoading, FeedFilters } from "@/components/Feed";
+import { UnifiedContentCard } from "@/components/UnifiedContentCard";
+import { SavedItemCard } from "@/components/SavedItemCard";
 
 type SortOption = "recent" | "trending" | "popular";
+type ContentType = "ARTICLE" | "LINK" | "QUESTION" | "VIDEO" | "DISCUSSION" | null;
+
 const validSorts: SortOption[] = ["recent", "trending", "popular"];
+// Lowercase type values for URL params (converted to uppercase for API)
+const validTypesLower: string[] = ["article", "link", "question", "video", "discussion"];
 
 const FeedPage = () => {
   const searchParams = useSearchParams();
@@ -22,6 +24,7 @@ const FeedPage = () => {
   // Get filter params from URL
   const sortParam = searchParams?.get("sort");
   const categoryParam = searchParams?.get("category");
+  const typeParam = searchParams?.get("type")?.toLowerCase();
 
   // Validate sort param
   const sort: SortOption = validSorts.includes(sortParam as SortOption)
@@ -30,14 +33,19 @@ const FeedPage = () => {
 
   const category = typeof categoryParam === "string" ? categoryParam : null;
 
-  // Fetch feed data with infinite scroll
+  // Validate type param (URL uses lowercase, API uses uppercase)
+  const type: ContentType = validTypesLower.includes(typeParam || "")
+    ? (typeParam?.toUpperCase() as ContentType)
+    : null;
+
+  // Fetch feed data with infinite scroll using the unified content API
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
-    api.feed.getFeed.useInfiniteQuery(
+    api.content.getFeed.useInfiniteQuery(
       {
-        limit: 20,
+        limit: 25,
         sort,
+        type,
         category,
-        includeCommunity: false,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -45,7 +53,7 @@ const FeedPage = () => {
     );
 
   // Fetch categories for filter dropdown
-  const { data: categoriesData } = api.feed.getCategories.useQuery();
+  const { data: categoriesData } = api.content.getCategories.useQuery();
 
   // Intersection observer for infinite scroll
   const { ref, inView } = useInView();
@@ -69,12 +77,23 @@ const FeedPage = () => {
     const params = new URLSearchParams();
     if (sort !== "recent") params.set("sort", sort);
     if (newCategory) params.set("category", newCategory);
+    if (type) params.set("type", type);
+    const queryString = params.toString();
+    router.push(`/feed${queryString ? `?${queryString}` : ""}`);
+  };
+
+  const handleTypeChange = (newType: ContentType) => {
+    const params = new URLSearchParams();
+    if (sort !== "recent") params.set("sort", sort);
+    if (category) params.set("category", category);
+    // Use lowercase in URL params for cleaner URLs
+    if (newType) params.set("type", newType.toLowerCase());
     const queryString = params.toString();
     router.push(`/feed${queryString ? `?${queryString}` : ""}`);
   };
 
   return (
-    <div className="mx-2">
+    <main className="mx-2">
       {/* Header */}
       <div className="mt-8 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
         <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
@@ -82,10 +101,13 @@ const FeedPage = () => {
         </h1>
         <FeedFilters
           sort={sort}
+          type={type}
           category={category}
           categories={categoriesData || []}
           onSortChange={handleSortChange}
+          onTypeChange={handleTypeChange}
           onCategoryChange={handleCategoryChange}
+          showTypeFilter={true}
         />
       </div>
 
@@ -106,34 +128,51 @@ const FeedPage = () => {
             {status === "success" &&
               data.pages.map((page, pageIndex) => (
                 <Fragment key={pageIndex}>
-                  {page.articles.map((article) => (
-                    <FeedItemAggregated
-                      key={article.id}
-                      id={article.id}
-                      shortId={article.shortId}
-                      title={article.title}
-                      excerpt={article.excerpt}
-                      url={article.url}
-                      imageUrl={article.imageUrl}
-                      publishedAt={article.publishedAt}
-                      upvotes={article.upvotes}
-                      downvotes={article.downvotes}
-                      sourceName={article.sourceName}
-                      sourceSlug={article.sourceSlug}
-                      sourceLogo={article.sourceLogo}
-                      sourceWebsite={article.sourceWebsite}
-                      author={article.author}
-                      userVote={article.userVote}
-                      isBookmarked={article.isBookmarked}
+                  {page.items.map((item) => (
+                    <UnifiedContentCard
+                      key={item.id}
+                      type={item.type as "POST" | "LINK"}
+                      id={item.id}
+                      title={item.title}
+                      excerpt={item.excerpt}
+                      slug={item.slug}
+                      imageUrl={item.imageUrl || item.ogImageUrl}
+                      externalUrl={item.externalUrl}
+                      publishedAt={item.publishedAt}
+                      readTimeMins={item.readTimeMins}
+                      upvotes={item.upvotes}
+                      downvotes={item.downvotes}
+                      userVote={item.userVote}
+                      isBookmarked={item.isBookmarked}
+                      author={
+                        item.userId && item.authorName
+                          ? {
+                              name: item.authorName,
+                              username: item.authorUsername || "",
+                              image: item.authorImage,
+                            }
+                          : null
+                      }
+                      source={
+                        item.sourceId && item.sourceName
+                          ? {
+                              name: item.sourceName,
+                              slug: item.sourceSlug,
+                              logo: item.sourceLogo,
+                              websiteUrl: item.sourceWebsite,
+                            }
+                          : null
+                      }
+                      linkAuthor={item.sourceAuthor}
                     />
                   ))}
                 </Fragment>
               ))}
 
-            {status === "success" && !data.pages[0].articles.length && (
+            {status === "success" && !data.pages[0].items.length && (
               <div className="mt-8 rounded-lg border border-neutral-200 bg-neutral-50 p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
                 <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
-                  No articles yet
+                  No content yet
                 </h2>
                 <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
                   Check back soon for curated developer content.
@@ -198,13 +237,13 @@ const FeedPage = () => {
           )}
         </section>
       </div>
-    </div>
+    </main>
   );
 };
 
 // Component to show saved articles preview in sidebar
 const SavedArticlesPreview = () => {
-  const { data, status } = api.feed.mySavedArticles.useQuery();
+  const { data, status } = api.post.myBookmarks.useQuery({ limit: 5 });
 
   if (status === "pending") {
     return (
@@ -219,7 +258,7 @@ const SavedArticlesPreview = () => {
     );
   }
 
-  if (status === "error" || !data?.length) {
+  if (status === "error" || !data?.items?.length) {
     return (
       <p className="text-sm text-neutral-500 dark:text-neutral-400">
         No saved articles yet. Save articles to read them later!
@@ -227,30 +266,35 @@ const SavedArticlesPreview = () => {
     );
   }
 
+  // Map DB type to frontend type
+  const toFrontendType = (dbType: string | null): "POST" | "LINK" => {
+    if (dbType === "article") return "POST";
+    return "LINK";
+  };
+
   return (
     <div className="space-y-2">
-      {data.slice(0, 3).map((article) => (
-        <a
-          key={article.id}
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-neutral-600"
-        >
-          <h4 className="line-clamp-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-            {article.title}
-          </h4>
-          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-            {article.sourceName}
-          </p>
-        </a>
+      {data.items.slice(0, 3).map((item) => (
+        <SavedItemCard
+          key={item.id}
+          id={item.id}
+          title={item.title}
+          slug={item.slug}
+          publishedAt={item.publishedAt}
+          sourceName={item.sourceName}
+          sourceSlug={item.sourceSlug}
+          authorName={item.authorName}
+          authorUsername={item.authorUsername}
+          authorImage={item.authorImage}
+          type={toFrontendType(item.type)}
+        />
       ))}
-      {data.length > 3 && (
+      {data.items.length > 3 && (
         <a
           href="/saved"
           className="block text-center text-sm text-orange-600 hover:text-orange-500 dark:text-orange-400"
         >
-          View all saved ({data.length})
+          View all saved
         </a>
       )}
     </div>

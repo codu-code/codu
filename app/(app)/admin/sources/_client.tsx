@@ -141,7 +141,8 @@ const AdminSourcesPage = () => {
   };
 
   const handleStatusToggle = (id: number, currentStatus: string) => {
-    const newStatus = currentStatus === "ACTIVE" ? "PAUSED" : "ACTIVE";
+    // Status is now lowercase in the new schema, but UpdateFeedSourceSchema still expects uppercase
+    const newStatus = currentStatus === "active" ? "PAUSED" : "ACTIVE";
     updateSource.mutate({ id, status: newStatus as "ACTIVE" | "PAUSED" | "ERROR" });
   };
 
@@ -359,9 +360,9 @@ const AdminSourcesPage = () => {
                         <button
                           onClick={() => handleStatusToggle(source.sourceId, source.status)}
                           className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-                          title={source.status === "ACTIVE" ? "Pause" : "Activate"}
+                          title={source.status === "active" ? "Pause" : "Activate"}
                         >
-                          {source.status === "ACTIVE" ? (
+                          {source.status === "active" ? (
                             <PauseCircleIcon className="h-5 w-5" />
                           ) : (
                             <CheckCircleIcon className="h-5 w-5" />

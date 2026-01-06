@@ -33,7 +33,7 @@ function getDomainFromUrl(url: string) {
   return domain;
 }
 
-const SourceProfilePage = ({ sourceSlug }: Props) => {
+const SourceProfileContent = ({ sourceSlug }: Props) => {
   const [sort, setSort] = useState<"recent" | "trending" | "popular">("recent");
   const { ref: loadMoreRef, inView } = useInView({ threshold: 0 });
 
@@ -226,13 +226,18 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
                     })
                   : null;
 
+                // Use slug for SEO-friendly URLs, fallback to shortId for legacy articles
+                const articlePath = article.slug
+                  ? `/${sourceSlug}/${article.slug}`
+                  : `/${sourceSlug}/${article.shortId}`;
+
                 return (
                   <article
                     key={article.id}
                     className="border-b border-neutral-100 py-4 dark:border-neutral-800"
                   >
                     <Link
-                      href={`/feed/${sourceSlug}/${article.shortId}`}
+                      href={articlePath}
                       className="group"
                     >
                       <h2 className="font-semibold text-neutral-900 group-hover:underline dark:text-neutral-100">
@@ -290,4 +295,4 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
   );
 };
 
-export default SourceProfilePage;
+export default SourceProfileContent;
