@@ -22,7 +22,9 @@
     "drizzle:up": "drizzle-kit up",
     "feed:fetch": "npx tsx -r dotenv/config ./scripts/fetch-rss.ts",
     "algolia:test": "npx tsx -r dotenv/config ./scripts/test-algolia-index.ts",
-    "content:sync": "npx tsx -r dotenv/config ./scripts/sync-content-table.ts"
+    "content:sync": "npx tsx -r dotenv/config ./scripts/sync-content-table.ts",
+    "votes:reconcile": "npx tsx -r dotenv/config ./scripts/reconcile-vote-counts.ts",
+    "votes:reconcile:dry": "npx tsx -r dotenv/config ./scripts/reconcile-vote-counts.ts --dry-run"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown",
