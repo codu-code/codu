@@ -317,7 +317,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     onClick={() => likeComment(id, userVote)}
                   >
                     <HeartIcon
-                      className={`w-6 h-6 ${
+                      className={`h-6 w-6 ${
                         userVote === "up"
                           ? "fill-red-400"
                           : "fill-neutral-400 dark:fill-neutral-600"
