@@ -31,7 +31,7 @@ const VoteButtons = ({
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" data-testid="vote-buttons">
       <button
         onClick={() => handleVote("up")}
         disabled={isLoading}
@@ -39,6 +39,7 @@ const VoteButtons = ({
           userVote === "up" ? "text-orange-500" : "text-neutral-400"
         }`}
         aria-label="Upvote"
+        data-testid="vote-up-button"
       >
         <ChevronUpIcon className="h-6 w-6" />
       </button>
@@ -50,6 +51,7 @@ const VoteButtons = ({
               ? "text-blue-500"
               : "text-neutral-500"
         }`}
+        data-testid="vote-score"
       >
         {score}
       </span>
@@ -60,6 +62,7 @@ const VoteButtons = ({
           userVote === "down" ? "text-blue-500" : "text-neutral-400"
         }`}
         aria-label="Downvote"
+        data-testid="vote-down-button"
       >
         <ChevronDownIcon className="h-6 w-6" />
       </button>

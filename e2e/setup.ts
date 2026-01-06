@@ -1,6 +1,6 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { post, comment, session, user } from "@/server/db/schema";
+import { posts, comments, session, user } from "@/server/db/schema";
 import {
   articleContent,
   articleExcerpt,
@@ -10,12 +10,14 @@ import {
   E2E_USER_TWO_EMAIL,
   E2E_USER_TWO_ID,
   E2E_USER_TWO_SESSION_ID,
+  E2E_ADMIN_EMAIL,
+  E2E_ADMIN_ID,
+  E2E_ADMIN_SESSION_ID,
   E2E_PUBLISHED_POST_ID,
   E2E_SCHEDULED_POST_ID,
   E2E_DRAFT_POST_ID,
 } from "./constants";
 import { eq } from "drizzle-orm";
-import type { Article } from "@/types/types";
 
 export const setup = async () => {
   // Dynamically import nanoid
@@ -25,16 +27,21 @@ export const setup = async () => {
     postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
   );
 
+  // Helper to generate short ID for slugs
+  const generateShortId = () => {
+    const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+    let result = "";
+    for (let i = 0; i < 7; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   const addE2EArticleAndComment = async (
     authorId: string,
     commenterId: string,
   ) => {
-    // Use fixed IDs for posts that need to be referenced (e.g., by comments)
-    const publishedPostId = E2E_PUBLISHED_POST_ID;
-    const scheduledPostId = E2E_SCHEDULED_POST_ID;
-    const draftPostId = E2E_DRAFT_POST_ID;
-
-    // Clean up any old E2E test posts by slug (in case they have different IDs)
+    // Clean up any old E2E test posts by slug pattern
     const e2eSlugs = [
       "e2e-test-slug-published",
       "e2e-test-slug-scheduled",
@@ -47,180 +54,188 @@ export const setup = async () => {
       "e2e-web-accessibility-fundamentals",
     ];
 
-    for (const slug of e2eSlugs) {
-      // First delete comments for posts with this slug
+    for (const slugPattern of e2eSlugs) {
+      // Find posts with slugs starting with this pattern
       const postsToDelete = await db
-        .select({ id: post.id })
-        .from(post)
-        .where(eq(post.slug, slug));
+        .select({ id: posts.id })
+        .from(posts)
+        .where(eq(posts.slug, slugPattern));
 
       for (const p of postsToDelete) {
-        await db.delete(comment).where(eq(comment.postId, p.id));
+        await db.delete(comments).where(eq(comments.postId, p.id));
       }
 
-      // Then delete the posts
-      await db.delete(post).where(eq(post.slug, slug));
+      // Delete posts with exact slug match (they might have shortId suffix)
+      await db.delete(posts).where(eq(posts.slug, slugPattern));
     }
 
     const now = new Date().toISOString();
-    const scheduled = new Date(
-      new Date().setFullYear(new Date().getFullYear() + 1),
-    ).toISOString();
+    const scheduledDate = new Date();
+    scheduledDate.setFullYear(scheduledDate.getFullYear() + 1);
+    const scheduled = scheduledDate.toISOString();
 
-    const articles: Article[] = [
+    // New posts table schema uses different column names
+    const articlesToCreate = [
       {
-        id: publishedPostId,
+        type: "article" as const,
         title: "Published Article",
         slug: "e2e-test-slug-published",
         excerpt: articleExcerpt,
         body: articleContent,
-        likes: 0,
-        readTimeMins: 2,
-        published: now,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 10,
+        downvotesCount: 0,
+        readingTime: 2,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: scheduledPostId,
+        type: "article" as const,
         title: "Scheduled Article",
         slug: "e2e-test-slug-scheduled",
         excerpt: "This is an excerpt for a scheduled article.",
         body: "This is the body for a scheduled article.",
-        likes: 0,
-        readTimeMins: 2,
-        published: scheduled,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 0,
+        downvotesCount: 0,
+        readingTime: 2,
+        status: "scheduled" as const,
+        publishedAt: scheduled,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: draftPostId,
+        type: "article" as const,
         title: "Draft Article",
         slug: "e2e-test-slug-draft",
         excerpt: "This is an excerpt for a draft article.",
         body: "This is the body for a draft article.",
-        likes: 0,
-        readTimeMins: 2,
-        published: null,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 0,
+        downvotesCount: 0,
+        readingTime: 2,
+        status: "draft" as const,
+        publishedAt: null,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: nanoid(8),
+        type: "article" as const,
         title: "Next.js Best Practices",
         slug: "e2e-nextjs-best-practices",
-        excerpt:
-          "Optimize your Next.js applications with these best practices.",
+        excerpt: "Optimize your Next.js applications with these best practices.",
         body: "This guide explores how to structure your Next.js projects effectively, utilize Server-Side Rendering (SSR) and Static Site Generation (SSG) to enhance performance, and make the most of API routes to handle server-side logic.",
-        likes: 20,
-        readTimeMins: 4,
-        published: now,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 20,
+        downvotesCount: 2,
+        readingTime: 4,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: nanoid(8),
+        type: "article" as const,
         title: "Understanding HTML5 Semantics",
         slug: "e2e-understanding-html5-semantics",
         excerpt: "Master the use of semantic tags in HTML5.",
         body: "Semantic HTML5 elements are foundational to web accessibility and search engine optimization.",
-        likes: 15,
-        readTimeMins: 3,
-        published: now,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 15,
+        downvotesCount: 1,
+        readingTime: 3,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: nanoid(8),
+        type: "article" as const,
         title: "JavaScript ES6 Features",
         slug: "e2e-javascript-es6-features",
         excerpt: "Discover the powerful features of ES6.",
         body: "ECMAScript 6 introduces a wealth of new features to JavaScript, revolutionizing how developers write JS.",
-        likes: 25,
-        readTimeMins: 5,
-        published: null,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 25,
+        downvotesCount: 0,
+        readingTime: 5,
+        status: "draft" as const,
+        publishedAt: null,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: nanoid(8),
+        type: "article" as const,
         title: "CSS Grid vs. Flexbox",
         slug: "e2e-css-grid-vs-flexbox",
         excerpt: "Choosing between CSS Grid and Flexbox.",
         body: "CSS Grid and Flexbox are powerful tools for creating responsive layouts.",
-        likes: 18,
-        readTimeMins: 4,
-        published: null,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 18,
+        downvotesCount: 0,
+        readingTime: 4,
+        status: "draft" as const,
+        publishedAt: null,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: nanoid(8),
+        type: "article" as const,
         title: "React Hooks Explained",
         slug: "e2e-react-hooks-explained",
         excerpt: "Simplify your React code with Hooks.",
         body: "React Hooks provide a robust solution to use state and other React features without writing a class.",
-        likes: 22,
-        readTimeMins: 5,
-        published: scheduled,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 22,
+        downvotesCount: 1,
+        readingTime: 5,
+        status: "scheduled" as const,
+        publishedAt: scheduled,
+        authorId: authorId,
+        showComments: true,
       },
       {
-        id: nanoid(8),
+        type: "article" as const,
         title: "Web Accessibility Fundamentals",
         slug: "e2e-web-accessibility-fundamentals",
         excerpt: "Essential guidelines for web accessibility.",
         body: "Creating accessible websites is a critical aspect of modern web development.",
-        likes: 20,
-        readTimeMins: 3,
-        published: scheduled,
-        updatedAt: now,
-        userId: authorId,
+        upvotesCount: 20,
+        downvotesCount: 0,
+        readingTime: 3,
+        status: "scheduled" as const,
+        publishedAt: scheduled,
+        authorId: authorId,
+        showComments: true,
       },
     ];
 
-    await Promise.all(
-      articles.map(
-        ({
-          id,
-          title,
-          slug,
-          excerpt,
-          body,
-          likes,
-          readTimeMins,
-          published,
-          updatedAt,
-          userId,
-        }) =>
-          db
-            .insert(post)
-            .values({
-              id,
-              title,
-              slug,
-              excerpt,
-              body,
-              likes,
-              readTimeMins,
-              published,
-              updatedAt,
-              userId,
-            })
-            .onConflictDoNothing()
-            .returning(),
-      ),
-    );
-
-    await db
-      .insert(comment)
-      .values({
-        postId: publishedPostId,
-        body: "What a great article! Thanks for sharing",
-        userId: commenterId,
-      })
+    // Insert articles into new posts table
+    const insertedPosts = await db
+      .insert(posts)
+      .values(articlesToCreate)
       .onConflictDoNothing()
       .returning();
+
+    console.log(`Created ${insertedPosts.length} E2E test articles`);
+
+    // Find the published article to add a comment
+    const publishedPost = insertedPosts.find(
+      (p) => p.slug === "e2e-test-slug-published",
+    );
+
+    if (publishedPost) {
+      // Generate a unique path for the comment (ltree format)
+      const pathId = generateShortId().replace(/[^a-zA-Z0-9]/g, "");
+
+      await db
+        .insert(comments)
+        .values({
+          postId: publishedPost.id,
+          body: "What a great article! Thanks for sharing",
+          authorId: commenterId,
+          path: pathId,
+          depth: 0,
+        })
+        .onConflictDoNothing()
+        .returning();
+
+      console.log("Created E2E test comment");
+    }
   };
 
   const seedE2EUser = async (
@@ -228,6 +243,7 @@ export const setup = async () => {
     id: string,
     name: string,
     username: string,
+    role: "USER" | "ADMIN" | "MODERATOR" = "USER",
   ) => {
     const [existingE2EUser] = await db
       .selectDistinct()
@@ -244,6 +260,7 @@ export const setup = async () => {
       username,
       name,
       email,
+      role,
       image: `https://robohash.org/${encodeURIComponent(name)}?bgset=bg1`,
       location: "Ireland",
       bio: "Hi I am a robot",
@@ -283,7 +300,7 @@ export const setup = async () => {
 
   try {
     console.log("Creating users");
-    const [userOne, userTwo] = await Promise.all([
+    const [userOne, userTwo, adminUser] = await Promise.all([
       seedE2EUser(
         E2E_USER_ONE_EMAIL,
         E2E_USER_ONE_ID,
@@ -296,12 +313,20 @@ export const setup = async () => {
         "E2E Test User Two",
         "e2e-test-user-two-222",
       ),
+      seedE2EUser(
+        E2E_ADMIN_EMAIL,
+        E2E_ADMIN_ID,
+        "E2E Admin User",
+        "e2e-admin-user",
+        "ADMIN",
+      ),
     ]);
 
     console.log("Creating sessions");
     await Promise.all([
       seedE2EUserSession(userOne.id, E2E_USER_ONE_SESSION_ID),
       seedE2EUserSession(userTwo.id, E2E_USER_TWO_SESSION_ID),
+      seedE2EUserSession(adminUser.id, E2E_ADMIN_SESSION_ID),
     ]);
 
     console.log("Creating articles");

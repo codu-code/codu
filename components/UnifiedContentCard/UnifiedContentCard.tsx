@@ -229,7 +229,7 @@ const UnifiedContentCard = ({
   const hostname = externalUrl ? getHostname(externalUrl) : null;
 
   return (
-    <article className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600">
+    <article className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600" data-testid="content-card">
       {/* Meta info row */}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
         {/* Author/Source info */}
@@ -445,6 +445,7 @@ const UnifiedContentCard = ({
               : "text-neutral-400 hover:bg-neutral-100 dark:text-neutral-500 dark:hover:bg-neutral-800"
           }`}
           aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"}
+          data-testid="bookmark-button"
         >
           {isBookmarked ? (
             <BookmarkIcon className="h-4 w-4" />

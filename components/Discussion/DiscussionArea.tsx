@@ -592,11 +592,11 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   );
 
   if (noWrapper) {
-    return <section className="relative w-full pt-6">{content}</section>;
+    return <section className="relative w-full pt-6" data-testid="discussion-section">{content}</section>;
   }
 
   return (
-    <section className="relative w-full rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
+    <section className="relative w-full rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900" data-testid="discussion-section">
       {content}
     </section>
   );
