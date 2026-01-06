@@ -13,7 +13,7 @@ const Home = async () => {
   const session = await getServerAuthSession();
 
   return (
-    <>
+    <main>
       <div>
         <Hero />
         {session == null && (
@@ -29,10 +29,10 @@ const Home = async () => {
                   Get started
                 </Link>
                 <Link
-                  href="/articles/explore-the-benefits-of-being-a-part-of-cod-ety1wehv"
+                  href="/feed"
                   className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
                 >
-                  Learn more <span aria-hidden="true">→</span>
+                  Browse feed <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>
@@ -68,7 +68,7 @@ const Home = async () => {
           </section>
         </div>
       </div>
-    </>
+    </main>
   );
 };
 

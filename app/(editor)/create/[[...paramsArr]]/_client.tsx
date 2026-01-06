@@ -12,8 +12,8 @@ import {
   Transition,
 } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/20/solid";
-import type { SavePostInput } from "@/schema/post";
-import { ConfirmPostSchema } from "@/schema/post";
+import type { UpdateContentInput } from "@/schema/content";
+import { ConfirmContentSchema } from "@/schema/content";
 import { api } from "@/server/trpc/react";
 import { removeMarkdown } from "@/utils/removeMarkdown";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -122,6 +122,17 @@ const Create = ({ session }: { session: Session | null }) => {
   useMarkdownHotkeys(textareaRef);
   useMarkdownShortcuts(textareaRef);
 
+  // Form input type for the editor
+  type EditorFormInput = {
+    id?: string;
+    title: string;
+    body: string;
+    excerpt?: string;
+    canonicalUrl?: string;
+    published?: string;
+    tags?: string[];
+  };
+
   const {
     handleSubmit,
     register,
@@ -131,7 +142,7 @@ const Create = ({ session }: { session: Session | null }) => {
     formState: { isDirty, errors },
     setError,
     clearErrors,
-  } = useForm<SavePostInput>({
+  } = useForm<EditorFormInput>({
     mode: "onSubmit",
     defaultValues: {
       title: "",
@@ -147,14 +158,14 @@ const Create = ({ session }: { session: Session | null }) => {
     mutate: publish,
     status: publishStatus,
     data: publishData,
-  } = api.post.publish.useMutation({
+  } = api.content.publish.useMutation({
     onError(error) {
       toast.error("Error saving settings.");
       Sentry.captureException(error);
     },
   });
 
-  const { mutate: save, status: saveStatus } = api.post.update.useMutation({
+  const { mutate: save, status: saveStatus } = api.content.update.useMutation({
     onError(error) {
       // TODO: Add error messages from field validations
       toast.error("Error auto-saving");
@@ -166,15 +177,14 @@ const Create = ({ session }: { session: Session | null }) => {
     data: createData,
     isError,
     isSuccess,
-  } = api.post.create.useMutation();
+  } = api.content.create.useMutation();
 
-  // TODO get rid of this for standard get post
-  // Should be allowed get draft post through regular mechanism if you own it
+  // Fetch user's own content for editing
   const {
     data,
     status: dataStatus,
     isError: draftFetchError,
-  } = api.post.editDraft.useQuery(
+  } = api.content.editDraft.useQuery(
     { id: postId },
     {
       enabled: !!postId && shouldRefetch,
@@ -223,12 +233,28 @@ const Create = ({ session }: { session: Session | null }) => {
 
   const savePost = async () => {
     const formData = getFormData();
-    // Don't include published time when saving post, handle separately in onSubmit
-    delete formData.published;
+    // Don't include published time when saving content, handle separately in onSubmit
+    const { published: _published, ...saveData } = formData;
     if (!formData.id) {
-      await create({ ...formData });
+      // Create new content as ARTICLE type
+      await create({
+        type: "POST",
+        title: saveData.title,
+        body: saveData.body,
+        excerpt: saveData.excerpt,
+        canonicalUrl: saveData.canonicalUrl,
+        tags: saveData.tags,
+        published: false,
+      });
     } else {
-      await save({ ...formData, id: postId });
+      await save({
+        id: postId,
+        title: saveData.title,
+        body: saveData.body,
+        excerpt: saveData.excerpt,
+        canonicalUrl: saveData.canonicalUrl,
+        tags: saveData.tags,
+      });
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -244,11 +270,11 @@ const Create = ({ session }: { session: Session | null }) => {
     saveStatus === "pending" ||
     dataStatus === "pending";
 
-  const currentPostStatus = data?.published
-    ? getPostStatus(new Date(data.published))
+  const currentPostStatus = data?.publishedAt
+    ? getPostStatus(new Date(data.publishedAt))
     : status.DRAFT;
 
-  const onSubmit = async (inputData: SavePostInput) => {
+  const onSubmit = async (inputData: EditorFormInput) => {
     // validate markdoc syntax
     const ast = Markdoc.parse(inputData.body);
     const errors = Markdoc.validate(ast, config).filter(
@@ -266,15 +292,15 @@ const Create = ({ session }: { session: Session | null }) => {
     await savePost();
 
     if (currentPostStatus === status.PUBLISHED) {
-      if (data) {
-        router.push(`/articles/${data.slug}`);
+      if (data && session?.user?.username) {
+        router.push(`/${session.user.username}/${data.slug}`);
       }
       return;
     }
 
     try {
       const formData = getFormData();
-      ConfirmPostSchema.parse(formData);
+      ConfirmContentSchema.parse(formData);
       await publish({
         id: postId,
         published: true,
@@ -332,20 +358,22 @@ const Create = ({ session }: { session: Session | null }) => {
 
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags, published } = data;
-    setTags(tags.map(({ tag }) => tag.title));
+    const { body, excerpt, title, id, tags, publishedAt } = data;
+    setTags(tags.map(({ tag }) => tag.title.toUpperCase()));
     reset({
-      body,
-      excerpt,
-      title,
+      body: body || "",
+      excerpt: excerpt || "",
+      title: title || "",
       id,
-      published: published ? published : undefined,
+      published: publishedAt ? publishedAt : undefined,
     });
-    setIsPostScheduled(published ? new Date(published) > new Date() : false);
-    setPostStatus(
-      published ? getPostStatus(new Date(published)) : status.DRAFT,
+    setIsPostScheduled(
+      publishedAt ? new Date(publishedAt) > new Date() : false,
     );
-  }, [data]);
+    setPostStatus(
+      publishedAt ? getPostStatus(new Date(publishedAt)) : status.DRAFT,
+    );
+  }, [data, reset]);
 
   useEffect(() => {
     if ((title + body).length < 5) {
@@ -377,14 +405,24 @@ const Create = ({ session }: { session: Session | null }) => {
   }, [title, body]);
 
   useEffect(() => {
-    if (publishStatus === "success" && publishData?.slug) {
+    if (
+      publishStatus === "success" &&
+      publishData?.slug &&
+      session?.user?.username
+    ) {
       if (isPostScheduled) {
         router.push("/my-posts?tab=scheduled");
       } else {
-        router.push(`/articles/${publishData.slug}`);
+        router.push(`/${session.user.username}/${publishData.slug}`);
       }
     }
-  }, [publishStatus, publishData, isPostScheduled, router]);
+  }, [
+    publishStatus,
+    publishData,
+    isPostScheduled,
+    router,
+    session?.user?.username,
+  ]);
 
   const handlePublish = () => {
     if (isDisabled) return;
@@ -490,8 +528,8 @@ const Create = ({ session }: { session: Session | null }) => {
                     </div>
 
                     {data &&
-                      (data.published === null ||
-                        new Date(data.published) > new Date()) && (
+                      (data.publishedAt === null ||
+                        new Date(data.publishedAt) > new Date()) && (
                         <div className="col-span-12">
                           <div className="mb-2 flex items-center gap-2">
                             <label

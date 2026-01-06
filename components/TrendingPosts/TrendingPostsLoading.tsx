@@ -1,10 +1,10 @@
-import ArticleLoading from "@/components/ArticlePreview/ArticleLoading";
+import { FeedItemLoading } from "@/components/Feed";
 
 function LoadingTrendingPosts() {
   return (
     <div>
       {Array.from({ length: 5 }, (_, i) => (
-        <ArticleLoading key={i} />
+        <FeedItemLoading key={i} />
       ))}
     </div>
   );

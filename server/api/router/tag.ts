@@ -18,7 +18,7 @@ export const tagRouter = createTRPCRouter({
         .orderBy(desc(count(tag.title)));
 
       return { data };
-    } catch (error) {
+    } catch {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch tags",

@@ -1,0 +1,9 @@
+{
+  "name": "vote-reconcile-lambda",
+  "version": "1.0.0",
+  "description": "Lambda to reconcile vote counts with database triggers",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.0.0",
+    "pg": "^8.0.0"
+  }
+}

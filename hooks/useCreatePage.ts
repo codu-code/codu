@@ -13,6 +13,7 @@ import { ConfirmPostSchema } from "../schema/post";
 import { api } from "@/server/trpc/react";
 import { useDebounce } from "./useDebounce";
 import { redirect, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export type useCreatePageReturnType = {
   tags: string[];
@@ -58,6 +59,7 @@ type useCreatepagePropTypes = {
 function useCreatePage({
   postId,
 }: useCreatepagePropTypes): useCreatePageReturnType {
+  const { data: session } = useSession();
   const [tags, setTags] = useState<string[]>([]);
   const [tagValue, setTagValue] = useState<string>("");
   const [savedTime, setSavedTime] = useState<string>("");
@@ -100,9 +102,6 @@ function useCreatePage({
       return toast.error("Something went wrong auto-saving");
     },
     onSuccess() {
-      console.log("saved");
-
-      // toast.success("Saved");
       setSavedTime(
         new Date().toLocaleString(undefined, {
           dateStyle: "medium",
@@ -114,10 +113,6 @@ function useCreatePage({
   const { mutate: create, data: createData } = api.post.create.useMutation({
     onError() {
       toast.error("Something went wrong creating draft");
-    },
-    onSuccess() {
-      console.log("saved");
-      // toast.success("Saved draft");
     },
   });
 
@@ -170,7 +165,8 @@ function useCreatePage({
     const updatedFormData = { ...formData, title: titleText };
 
     if (!formData.id) {
-      create({ ...updatedFormData });
+      // New posts default to article type
+      create({ ...updatedFormData, type: "article" as const });
     } else {
       save({ ...updatedFormData, id: postId });
     }
@@ -182,7 +178,7 @@ function useCreatePage({
     saveStatus === "pending" ||
     dataStatus === "pending";
 
-  const published = !!data?.published || false;
+  const published = !!data?.publishedAt || false;
 
   const onSubmit = async (data: SavePostInput) => {
     if (!published) {
@@ -201,8 +197,12 @@ function useCreatePage({
     await savePost();
   };
 
-  if (publishStatus === "success" && publishData?.slug) {
-    redirect(`/articles/${publishData.slug}`);
+  if (
+    publishStatus === "success" &&
+    publishData?.slug &&
+    session?.user?.username
+  ) {
+    redirect(`/${session.user.username}/${publishData.slug}`);
   }
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,7 +236,13 @@ function useCreatePage({
     if (!data) return;
     const { body, excerpt, title, id, tags } = data;
     setTags(tags.map(({ tag }) => tag.title));
-    reset({ body, excerpt, title, id });
+    // Convert null to undefined for form compatibility
+    reset({
+      body: body ?? undefined,
+      excerpt: excerpt ?? undefined,
+      title,
+      id,
+    });
   }, [data]);
 
   useEffect(() => {

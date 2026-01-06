@@ -42,15 +42,15 @@ const MyPosts = () => {
 
   const [selectedArticleToDelete, setSelectedArticleToDelete] =
     useState<string>();
-  const drafts = api.post.myDrafts.useQuery();
-  const scheduled = api.post.myScheduled.useQuery();
-  const published = api.post.myPublished.useQuery();
+  const drafts = api.content.myDrafts.useQuery({});
+  const scheduled = api.content.myScheduled.useQuery({});
+  const publishedContent = api.content.myPublished.useQuery({});
 
-  const { mutate, status: deleteStatus } = api.post.delete.useMutation({
+  const { mutate, status: deleteStatus } = api.content.delete.useMutation({
     onSuccess() {
       setSelectedArticleToDelete(undefined);
       drafts.refetch();
-      published.refetch();
+      publishedContent.refetch();
     },
   });
 
@@ -83,8 +83,8 @@ const MyPosts = () => {
       name: "Published",
       href: `?tab=${PUBLISHED}`,
       value: PUBLISHED,
-      data: published.data,
-      status: published.status,
+      data: publishedContent.data,
+      status: publishedContent.status,
       current: selectedTab === PUBLISHED,
     },
   ];
@@ -124,17 +124,9 @@ const MyPosts = () => {
 
           {selectedTabData.status === "success" &&
             selectedTabData.data?.map(
-              ({
-                id,
-                title,
-                excerpt,
-                readTimeMins,
-                slug,
-                published,
-                updatedAt,
-              }) => {
-                const postStatus = published
-                  ? getPostStatus(new Date(published))
+              ({ id, title, excerpt, slug, publishedAt, updatedAt }) => {
+                const postStatus = publishedAt
+                  ? getPostStatus(new Date(publishedAt))
                   : status.DRAFT;
                 return (
                   <article
@@ -153,29 +145,33 @@ const MyPosts = () => {
                     <p className="break-words">
                       {excerpt || "No excerpt yet... Write more to see one."}
                     </p>
-                    <p className="mt-2 text-sm font-light text-neutral-400">
-                      Read time so far: {readTimeMins} mins
-                    </p>
                     <div className="flex items-center">
                       <div className="flex-grow">
-                        {published && postStatus === status.SCHEDULED ? (
+                        {publishedAt && postStatus === status.SCHEDULED ? (
                           <>
-                            {renderDate("Scheduled to publish on ", published)}
+                            {renderDate(
+                              "Scheduled to publish on ",
+                              publishedAt,
+                            )}
                           </>
-                        ) : published && postStatus === status.PUBLISHED ? (
+                        ) : publishedAt && postStatus === status.PUBLISHED ? (
                           <>
-                            {/*If updatedAt is greater than published by more than on minutes show updated at else show published 
-                              as on updating published updatedAt is automatically updated and is greater than published*/}
-                            {new Date(updatedAt).getTime() -
-                              new Date(published).getTime() >=
-                            60000 ? (
+                            {/*If updatedAt is greater than publishedAt by more than one minute show updated at else show publishedAt
+                              as on updating publishedAt updatedAt is automatically updated and is greater than publishedAt*/}
+                            {updatedAt &&
+                            new Date(updatedAt).getTime() -
+                              new Date(publishedAt).getTime() >=
+                              60000 ? (
                               <>{renderDate("Last updated on ", updatedAt)}</>
                             ) : (
-                              <>{renderDate("Published on ", published)}</>
+                              <>{renderDate("Published on ", publishedAt)}</>
                             )}
                           </>
                         ) : postStatus === status.DRAFT ? (
-                          <>{renderDate("Last updated on ", updatedAt)}</>
+                          <>
+                            {updatedAt &&
+                              renderDate("Last updated on ", updatedAt)}
+                          </>
                         ) : null}
                       </div>
 

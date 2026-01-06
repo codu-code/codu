@@ -1,9 +1,14 @@
 "use client";
 import { api } from "@/server/trpc/react";
 import React from "react";
-
-import SideBarSavedArticlePreview from "./SideBarSavedArticlePreview";
 import Link from "next/link";
+import { SavedItemCard } from "@/components/SavedItemCard";
+
+// Map DB type to frontend type
+const toFrontendType = (dbType: string | null): "POST" | "LINK" => {
+  if (dbType === "article") return "POST";
+  return "LINK";
+};
 
 export default React.memo(function SideBarSavedPosts() {
   const howManySavedToShow = 3;
@@ -12,15 +17,15 @@ export default React.memo(function SideBarSavedPosts() {
       limit: howManySavedToShow,
     });
 
-  const totalNumberSaved = bookmarksData?.totalCount || 0;
-  const bookmarks = bookmarksData?.bookmarks || [];
+  const totalNumberSaved = bookmarksData?.items?.length || 0;
+  const bookmarks = bookmarksData?.items || [];
 
   return (
     <div className="w-full">
       <h3 className="mb-4 mt-8 text-2xl font-semibold leading-6 tracking-wide">
         Recent bookmarks
       </h3>
-      <div className="w-full">
+      <div className="w-full space-y-2">
         {bookmarkStatus === "pending" &&
           Array.from({ length: howManySavedToShow }, (_, i) => (
             <LoadingSkeleton key={i} />
@@ -33,28 +38,21 @@ export default React.memo(function SideBarSavedPosts() {
 
         {bookmarks &&
           bookmarkStatus === "success" &&
-          bookmarks.map(
-            ({
-              id,
-              slug,
-              title,
-              user: { name, username },
-              published,
-              readTimeMins,
-            }) => {
-              return (
-                <SideBarSavedArticlePreview
-                  key={id}
-                  username={username || ""}
-                  slug={slug}
-                  title={title}
-                  name={name}
-                  date={published}
-                  readTime={readTimeMins}
-                />
-              );
-            },
-          )}
+          bookmarks.map((item) => (
+            <SavedItemCard
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              slug={item.slug}
+              publishedAt={item.publishedAt}
+              sourceName={item.sourceName}
+              sourceSlug={item.sourceSlug}
+              authorName={item.authorName}
+              authorUsername={item.authorUsername}
+              authorImage={item.authorImage}
+              type={toFrontendType(item.type)}
+            />
+          ))}
         {bookmarkStatus === "success" && bookmarks?.length === 0 && (
           <p className="py-4 font-medium">
             Recently Saved posts will be displayed in this section for easy
@@ -63,8 +61,11 @@ export default React.memo(function SideBarSavedPosts() {
         )}
       </div>
       {(totalNumberSaved && totalNumberSaved > howManySavedToShow && (
-        <Link href="/saved" className="secondary-button w-full">
-          View all saved posts →
+        <Link
+          href="/saved"
+          className="secondary-button mt-4 block w-full text-center"
+        >
+          View all saved posts
         </Link>
       )) ||
         ""}
@@ -74,17 +75,6 @@ export default React.memo(function SideBarSavedPosts() {
 
 function LoadingSkeleton() {
   return (
-    <div className="my-4 flex h-32 w-full animate-pulse flex-col bg-white p-4 shadow dark:bg-neutral-900">
-      <div className="flex grow items-center">
-        <div className="h-5 w-full rounded bg-neutral-300 dark:bg-neutral-800"></div>
-      </div>
-      <div className="flex grow items-center">
-        <div className="mx-2 h-8 w-8 rounded-full bg-neutral-300 dark:bg-neutral-800"></div>
-        <div className="ml-2">
-          <div className="mb-2 h-2.5 w-36 rounded bg-neutral-300 dark:bg-neutral-800"></div>
-          <div className="h-2.5 w-36 rounded bg-neutral-300 dark:bg-neutral-800"></div>
-        </div>
-      </div>
-    </div>
+    <div className="h-16 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700" />
   );
 }

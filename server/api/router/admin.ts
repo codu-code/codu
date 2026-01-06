@@ -1,11 +1,157 @@
 import { TRPCError } from "@trpc/server";
 import { BanUserSchema, UnbanUserSchema } from "../../../schema/admin";
+import z from "zod";
 
 import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
-import { banned_users, session } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import {
+  banned_users,
+  session,
+  user,
+  post,
+  content,
+  content_report,
+  aggregated_article,
+  feed_source,
+} from "@/server/db/schema";
+import { and, count, desc, eq, isNotNull, like, lte, sql } from "drizzle-orm";
 
 export const adminRouter = createTRPCRouter({
+  // Get dashboard stats
+  getStats: adminOnlyProcedure.query(async ({ ctx }) => {
+    const [usersCount] = await ctx.db.select({ count: count() }).from(user);
+
+    const [postsCount] = await ctx.db
+      .select({ count: count() })
+      .from(post)
+      .where(isNotNull(post.published));
+
+    const [contentCount] = await ctx.db
+      .select({ count: count() })
+      .from(content)
+      .where(eq(content.published, true));
+
+    const [articlesCount] = await ctx.db
+      .select({ count: count() })
+      .from(aggregated_article);
+
+    const [pendingReports] = await ctx.db
+      .select({ count: count() })
+      .from(content_report)
+      .where(eq(content_report.status, "PENDING"));
+
+    const [bannedUsersCount] = await ctx.db
+      .select({ count: count() })
+      .from(banned_users);
+
+    const [activeSourcesCount] = await ctx.db
+      .select({ count: count() })
+      .from(feed_source)
+      .where(eq(feed_source.status, "ACTIVE"));
+
+    return {
+      totalUsers: usersCount.count,
+      publishedPosts: postsCount.count,
+      unifiedContent: contentCount.count,
+      aggregatedArticles: articlesCount.count,
+      pendingReports: pendingReports.count,
+      bannedUsers: bannedUsersCount.count,
+      activeFeedSources: activeSourcesCount.count,
+    };
+  }),
+
+  // Get users with search/filter
+  getUsers: adminOnlyProcedure
+    .input(
+      z.object({
+        search: z.string().optional(),
+        limit: z.number().min(1).max(100).default(20),
+        cursor: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { search, limit, cursor } = input;
+
+      const conditions = [];
+
+      if (search) {
+        conditions.push(
+          sql`(${user.username} ILIKE ${`%${search}%`} OR ${user.name} ILIKE ${`%${search}%`} OR ${user.email} ILIKE ${`%${search}%`})`,
+        );
+      }
+
+      if (cursor) {
+        conditions.push(sql`${user.id} > ${cursor.toString()}`);
+      }
+
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
+
+      const users = await ctx.db.query.user.findMany({
+        where: whereClause,
+        columns: {
+          id: true,
+          username: true,
+          name: true,
+          email: true,
+          image: true,
+          role: true,
+          createdAt: true,
+        },
+        with: {
+          bannedUsers: {
+            columns: {
+              id: true,
+              createdAt: true,
+              note: true,
+            },
+          },
+        },
+        orderBy: [desc(user.createdAt)],
+        limit: limit + 1,
+      });
+
+      let nextCursor: number | undefined;
+      if (users.length > limit) {
+        users.pop();
+        nextCursor = users.length;
+      }
+
+      return {
+        users: users.map((u) => ({
+          ...u,
+          isBanned: !!u.bannedUsers,
+        })),
+        nextCursor,
+      };
+    }),
+
+  // Get banned users list
+  getBannedUsers: adminOnlyProcedure.query(async ({ ctx }) => {
+    const banned = await ctx.db.query.banned_users.findMany({
+      with: {
+        user: {
+          columns: {
+            id: true,
+            username: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        bannedBy: {
+          columns: {
+            id: true,
+            username: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: [desc(banned_users.createdAt)],
+    });
+
+    return banned;
+  }),
+
   ban: adminOnlyProcedure
     .input(BanUserSchema)
     .mutation(async ({ input, ctx }) => {

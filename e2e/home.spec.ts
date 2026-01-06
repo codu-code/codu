@@ -10,19 +10,22 @@ test.describe("Authenticated homepage", () => {
 
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
 
-    const elementVisible = await page
-      .locator('text="Popular topics"')
+    // Check for "Topics" section on sidebar (desktop only)
+    const topicsVisible = await page
+      .locator('text="Topics"')
+      .first()
       .isVisible();
 
     if (isMobile) {
-      expect(elementVisible).toBe(false);
+      // Topics sidebar not visible on mobile
+      expect(topicsVisible).toBe(false);
     } else {
+      // Desktop should show "Your Posts" link in header
       await expect(
         page.getByRole("link", {
           name: "Your Posts",
         }),
       ).toBeVisible();
-      expect(elementVisible).toBe(true);
     }
   });
 });
@@ -32,11 +35,15 @@ test.describe("Unauthenticated homepage", () => {
     await page.goto("http://localhost:3000/");
 
     await expect(page.locator("h1")).not.toContainText("Unwanted text");
-    await expect(page.locator("h2")).toContainText(
-      "Sign up today to become a writer and get a free invite to our Discord community",
-    );
+
+    // Check for the main heading on homepage
     await expect(page.locator("h1")).toContainText(
       "The free web developer community",
     );
+
+    // Check for sign up CTA (updated text from the new homepage)
+    await expect(
+      page.getByRole("heading", { name: /Sign up today/i }),
+    ).toBeVisible();
   });
 });

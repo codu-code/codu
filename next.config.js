@@ -32,6 +32,20 @@ const config = {
         destination: "https://newsletter.codu.co",
         permanent: true,
       },
+      // Redirect legacy feed article URLs to new unified pattern
+      // /feed/[sourceSlug]/[articleId] -> /[sourceSlug]/[articleId]
+      {
+        source: "/feed/:sourceSlug/:articleId",
+        destination: "/:sourceSlug/:articleId",
+        permanent: true,
+      },
+      // Redirect legacy feed source URLs to new unified pattern
+      // /feed/[sourceSlug] -> /[sourceSlug]
+      {
+        source: "/feed/:sourceSlug",
+        destination: "/:sourceSlug",
+        permanent: true,
+      },
     ];
   },
   // Turbopack configuration for SVGR (replaces webpack config)

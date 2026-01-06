@@ -9,9 +9,7 @@ export const GetTagsSchema = z.object({
   take: z.number(),
 });
 
-type GetTags = z.infer<typeof GetTagsSchema>;
-
-export async function GetTags({ take }: GetTags) {
+export async function GetTags({ take }: z.infer<typeof GetTagsSchema>) {
   try {
     GetTagsSchema.parse({ take });
 

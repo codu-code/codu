@@ -136,7 +136,7 @@ const ArticlePreview: NextPage<Props> = ({
       <header>
         <Link
           className="cursor-pointer break-words text-2xl font-semibold leading-6 tracking-wide hover:underline"
-          href={`/articles/${slug}`}
+          href={`/${username}/${slug}`}
         >
           {title}
         </Link>
@@ -148,7 +148,7 @@ const ArticlePreview: NextPage<Props> = ({
         <div className="flex w-full items-center justify-between">
           <Link
             className="semibold cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-lg tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
-            href={`/articles/${slug}`}
+            href={`/${username}/${slug}`}
           >
             Read full article
           </Link>
