@@ -1,400 +1,1313 @@
-import { nanoid } from "nanoid";
 import { TRPCError } from "@trpc/server";
-import { readingTime } from "@/utils/readingTime";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
-  PublishPostSchema,
-  SavePostSchema,
+  GetFeedSchema,
+  GetPostByIdSchema,
+  GetPostBySlugSchema,
   CreatePostSchema,
+  SavePostSchema,
   DeletePostSchema,
-  GetPostsSchema,
-  LikePostSchema,
   VotePostSchema,
   BookmarkPostSchema,
+  GetUserPostsSchema,
+  GetBookmarkedPostsSchema,
   GetByIdSchema,
+  PublishPostSchema,
+  GetPostsSchema,
   GetLimitSidePosts,
-} from "../../../schema/post";
-import { removeMarkdown } from "../../../utils/removeMarkdown";
-import { bookmark, like, post, post_tag, post_vote, tag, user } from "@/server/db/schema";
+  FeaturePostSchema,
+  PinPostSchema,
+} from "@/schema/post";
+import {
+  posts,
+  postVotes,
+  bookmarks,
+  postTags,
+  feedSources,
+  comments,
+  tag,
+  user,
+} from "@/server/db/schema";
 import {
   and,
   eq,
-  gt,
-  inArray,
-  isNotNull,
-  isNull,
-  lte,
   desc,
   lt,
-  asc,
+  lte,
+  gt,
   gte,
   sql,
+  isNotNull,
+  count,
+  inArray,
+  asc,
+  isNull,
 } from "drizzle-orm";
-import { decrement, increment } from "./utils";
+import { increment, decrement } from "./utils";
+import crypto from "crypto";
+
+// Helper to generate slug from title
+function generateSlug(title: string): string {
+  const baseSlug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 80);
+  const uniqueId = crypto.randomBytes(3).toString("hex");
+  return `${baseSlug}-${uniqueId}`;
+}
+
+// Helper to calculate read time
+function calculateReadTime(body: string | null | undefined): number {
+  if (!body) return 1;
+  const wordsPerMinute = 200;
+  const words = body.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
 
 export const postRouter = createTRPCRouter({
+  // Get unified feed with optional type filtering
+  getFeed: publicProcedure
+    .input(GetFeedSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+      const limit = input?.limit ?? 25;
+      const { cursor, sort, type, category, sourceId, tag: tagFilter, authorId } = input;
+
+      // Build the vote subquery for current user
+      const userVotesSubquery = userId
+        ? ctx.db
+            .select({
+              postId: postVotes.postId,
+              voteType: postVotes.voteType,
+            })
+            .from(postVotes)
+            .where(eq(postVotes.userId, userId))
+            .as("userVotes")
+        : null;
+
+      // Build the bookmark subquery for current user
+      const userBookmarksSubquery = userId
+        ? ctx.db
+            .select({
+              postId: bookmarks.postId,
+            })
+            .from(bookmarks)
+            .where(eq(bookmarks.userId, userId))
+            .as("userBookmarks")
+        : null;
+
+      // Calculate score for trending
+      const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
+
+      // Build conditions
+      const conditions = [eq(posts.status, "published")];
+
+      if (type) {
+        conditions.push(eq(posts.type, type));
+      }
+
+      if (sourceId) {
+        conditions.push(eq(posts.sourceId, sourceId));
+      }
+
+      if (authorId) {
+        conditions.push(eq(posts.authorId, authorId));
+      }
+
+      // Build order by and cursor conditions based on sort type
+      const getOrderAndCursor = () => {
+        switch (sort) {
+          case "recent":
+            return {
+              orderBy: desc(posts.publishedAt),
+              cursorCondition: cursor?.publishedAt
+                ? lte(posts.publishedAt, cursor.publishedAt)
+                : undefined,
+            };
+          case "trending":
+            return {
+              orderBy: desc(scoreExpr),
+              cursorCondition: cursor?.score !== undefined
+                ? lt(scoreExpr, cursor.score)
+                : undefined,
+            };
+          case "popular":
+            return {
+              orderBy: desc(posts.upvotesCount),
+              cursorCondition: cursor?.score !== undefined
+                ? lt(posts.upvotesCount, cursor.score)
+                : undefined,
+            };
+          default:
+            return {
+              orderBy: desc(posts.publishedAt),
+              cursorCondition: undefined,
+            };
+        }
+      };
+
+      const { orderBy, cursorCondition } = getOrderAndCursor();
+
+      if (cursorCondition) {
+        conditions.push(cursorCondition);
+      }
+
+      // Build query
+      let query;
+      if (userVotesSubquery && userBookmarksSubquery) {
+        query = ctx.db
+          .select({
+            id: posts.id,
+            type: posts.type,
+            title: posts.title,
+            excerpt: posts.excerpt,
+            body: posts.body,
+            externalUrl: posts.externalUrl,
+            coverImage: posts.coverImage,
+            slug: posts.slug,
+            publishedAt: posts.publishedAt,
+            upvotesCount: posts.upvotesCount,
+            downvotesCount: posts.downvotesCount,
+            commentsCount: posts.commentsCount,
+            viewsCount: posts.viewsCount,
+            readingTime: posts.readingTime,
+            authorId: posts.authorId,
+            sourceId: posts.sourceId,
+            sourceAuthor: posts.sourceAuthor,
+            featured: posts.featured,
+            pinnedUntil: posts.pinnedUntil,
+            createdAt: posts.createdAt,
+            // Source info
+            sourceName: feedSources.name,
+            sourceSlug: feedSources.slug,
+            sourceLogo: feedSources.logoUrl,
+            sourceWebsite: feedSources.websiteUrl,
+            sourceCategory: feedSources.category,
+            // Author info
+            authorName: user.name,
+            authorUsername: user.username,
+            authorImage: user.image,
+            // User-specific
+            userVote: userVotesSubquery.voteType,
+            isBookmarked: sql<boolean>`${userBookmarksSubquery.postId} IS NOT NULL`,
+          })
+          .from(posts)
+          .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+          .leftJoin(user, eq(posts.authorId, user.id))
+          .leftJoin(userVotesSubquery, eq(posts.id, userVotesSubquery.postId))
+          .leftJoin(userBookmarksSubquery, eq(posts.id, userBookmarksSubquery.postId))
+          .where(and(...conditions))
+          .orderBy(orderBy)
+          .limit(limit + 1);
+      } else {
+        query = ctx.db
+          .select({
+            id: posts.id,
+            type: posts.type,
+            title: posts.title,
+            excerpt: posts.excerpt,
+            body: posts.body,
+            externalUrl: posts.externalUrl,
+            coverImage: posts.coverImage,
+            slug: posts.slug,
+            publishedAt: posts.publishedAt,
+            upvotesCount: posts.upvotesCount,
+            downvotesCount: posts.downvotesCount,
+            commentsCount: posts.commentsCount,
+            viewsCount: posts.viewsCount,
+            readingTime: posts.readingTime,
+            authorId: posts.authorId,
+            sourceId: posts.sourceId,
+            sourceAuthor: posts.sourceAuthor,
+            featured: posts.featured,
+            pinnedUntil: posts.pinnedUntil,
+            createdAt: posts.createdAt,
+            // Source info
+            sourceName: feedSources.name,
+            sourceSlug: feedSources.slug,
+            sourceLogo: feedSources.logoUrl,
+            sourceWebsite: feedSources.websiteUrl,
+            sourceCategory: feedSources.category,
+            // Author info
+            authorName: user.name,
+            authorUsername: user.username,
+            authorImage: user.image,
+            // User-specific (null when not logged in)
+            userVote: sql<"up" | "down" | null>`NULL`,
+            isBookmarked: sql<boolean>`FALSE`,
+          })
+          .from(posts)
+          .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+          .leftJoin(user, eq(posts.authorId, user.id))
+          .where(and(...conditions))
+          .orderBy(orderBy)
+          .limit(limit + 1);
+      }
+
+      const results = await query;
+
+      // Check if there's a next page
+      let nextCursor: { id: string; publishedAt?: string; score?: number } | undefined;
+      if (results.length > limit) {
+        const lastItem = results.pop()!;
+        const score = lastItem.upvotesCount - lastItem.downvotesCount;
+        nextCursor = {
+          id: lastItem.id,
+          publishedAt: lastItem.publishedAt || undefined,
+          score,
+        };
+      }
+
+      return {
+        items: results,
+        nextCursor,
+      };
+    }),
+
+  // Get post by ID
+  getById: publicProcedure
+    .input(GetPostByIdSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          coverImage: posts.coverImage,
+                    slug: posts.slug,
+          canonicalUrl: posts.canonicalUrl,
+          publishedAt: posts.publishedAt,
+          upvotesCount: posts.upvotesCount,
+          downvotesCount: posts.downvotesCount,
+          commentsCount: posts.commentsCount,
+          viewsCount: posts.viewsCount,
+          readingTime: posts.readingTime,
+          showComments: posts.showComments,
+          authorId: posts.authorId,
+          sourceId: posts.sourceId,
+          sourceAuthor: posts.sourceAuthor,
+          status: posts.status,
+          featured: posts.featured,
+          pinnedUntil: posts.pinnedUntil,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+          // Source info
+          sourceName: feedSources.name,
+          sourceSlug: feedSources.slug,
+          sourceLogo: feedSources.logoUrl,
+          sourceWebsite: feedSources.websiteUrl,
+          sourceCategory: feedSources.category,
+          // Author info
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+        })
+        .from(posts)
+        .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(eq(posts.id, input.id))
+        .limit(1);
+
+      if (results.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+      }
+
+      const item = results[0];
+
+      // Get user vote if logged in
+      let userVote: "up" | "down" | null = null;
+      let isBookmarked = false;
+
+      if (userId) {
+        const [voteResult, bookmarkResult] = await Promise.all([
+          ctx.db
+            .select({ voteType: postVotes.voteType })
+            .from(postVotes)
+            .where(
+              and(
+                eq(postVotes.postId, input.id),
+                eq(postVotes.userId, userId)
+              )
+            )
+            .limit(1),
+          ctx.db
+            .select({ id: bookmarks.id })
+            .from(bookmarks)
+            .where(
+              and(
+                eq(bookmarks.postId, input.id),
+                eq(bookmarks.userId, userId)
+              )
+            )
+            .limit(1),
+        ]);
+
+        userVote = voteResult[0]?.voteType ?? null;
+        isBookmarked = bookmarkResult.length > 0;
+      }
+
+      return {
+        ...item,
+        userVote,
+        isBookmarked,
+      };
+    }),
+
+  // Get post by slug
+  getBySlug: publicProcedure
+    .input(GetPostBySlugSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          coverImage: posts.coverImage,
+                    slug: posts.slug,
+          canonicalUrl: posts.canonicalUrl,
+          publishedAt: posts.publishedAt,
+          upvotesCount: posts.upvotesCount,
+          downvotesCount: posts.downvotesCount,
+          commentsCount: posts.commentsCount,
+          viewsCount: posts.viewsCount,
+          readingTime: posts.readingTime,
+          showComments: posts.showComments,
+          authorId: posts.authorId,
+          sourceId: posts.sourceId,
+          sourceAuthor: posts.sourceAuthor,
+          status: posts.status,
+          featured: posts.featured,
+          pinnedUntil: posts.pinnedUntil,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+          // Source info
+          sourceName: feedSources.name,
+          sourceSlug: feedSources.slug,
+          sourceLogo: feedSources.logoUrl,
+          sourceWebsite: feedSources.websiteUrl,
+          sourceCategory: feedSources.category,
+          // Author info
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+        })
+        .from(posts)
+        .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(eq(posts.slug, input.slug))
+        .limit(1);
+
+      if (results.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+      }
+
+      const item = results[0];
+
+      // Get user vote if logged in
+      let userVote: "up" | "down" | null = null;
+      let isBookmarked = false;
+
+      if (userId) {
+        const [voteResult, bookmarkResult] = await Promise.all([
+          ctx.db
+            .select({ voteType: postVotes.voteType })
+            .from(postVotes)
+            .where(
+              and(
+                eq(postVotes.postId, item.id),
+                eq(postVotes.userId, userId)
+              )
+            )
+            .limit(1),
+          ctx.db
+            .select({ id: bookmarks.id })
+            .from(bookmarks)
+            .where(
+              and(
+                eq(bookmarks.postId, item.id),
+                eq(bookmarks.userId, userId)
+              )
+            )
+            .limit(1),
+        ]);
+
+        userVote = voteResult[0]?.voteType ?? null;
+        isBookmarked = bookmarkResult.length > 0;
+      }
+
+      return {
+        ...item,
+        userVote,
+        isBookmarked,
+      };
+    }),
+
+  // Create new post
   create: protectedProcedure
     .input(CreatePostSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { body } = input;
-      const id = nanoid(8);
+    .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.session.user.id;
+
+      // Validate based on post type
+      if (input.type === "article" && !input.body) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Body is required for articles",
+        });
+      }
+
+      if ((input.type === "link" || input.type === "resource") && !input.externalUrl) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "External URL is required for links and resources",
+        });
+      }
+
+      const slug = generateSlug(input.title);
+      const readingTime = calculateReadTime(input.body);
+
       const [newPost] = await ctx.db
-        .insert(post)
+        .insert(posts)
         .values({
-          ...input,
-          id,
-          readTimeMins: readingTime(body),
-          slug: id,
-          userId: ctx.session.user.id,
+          type: input.type,
+          title: input.title,
+          body: input.body,
+          excerpt: input.excerpt,
+          externalUrl: input.externalUrl,
+          coverImage: input.coverImage,
+          canonicalUrl: input.canonicalUrl,
+          authorId,
+          slug,
+          readingTime,
+          status: input.status,
+          publishedAt: input.status === "published" ? new Date().toISOString() : null,
+          showComments: input.showComments,
         })
         .returning();
+
+      // Add tags if provided
+      if (input.tags && input.tags.length > 0) {
+        for (const tagName of input.tags) {
+          // Try to find existing tag
+          const existingTags = await ctx.db
+            .select({ id: tag.id })
+            .from(tag)
+            .where(eq(tag.title, tagName.toLowerCase()))
+            .limit(1);
+
+          let tagId: number;
+          if (existingTags.length > 0) {
+            tagId = existingTags[0].id;
+          } else {
+            // Create new tag
+            const [newTag] = await ctx.db
+              .insert(tag)
+              .values({ title: tagName.toLowerCase() })
+              .returning();
+            tagId = newTag.id;
+          }
+
+          // Link tag to post
+          await ctx.db
+            .insert(postTags)
+            .values({ postId: newPost.id, tagId })
+            .onConflictDoNothing();
+        }
+      }
 
       return newPost;
     }),
+
+  // Update/save post
   update: protectedProcedure
     .input(SavePostSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { id, body, title, excerpt, canonicalUrl, tags = [] } = input;
+    .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.session.user.id;
 
-      const currentPost = await ctx.db.query.post.findFirst({
-        where: (posts, { eq }) => eq(posts.id, id),
-      });
+      // Check ownership
+      const existing = await ctx.db
+        .select({ authorId: posts.authorId, type: posts.type })
+        .from(posts)
+        .where(eq(posts.id, input.id))
+        .limit(1);
 
-      if (currentPost?.userId !== ctx.session.user.id) {
+      if (existing.length === 0) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: "NOT_FOUND",
+          message: "Post not found",
         });
       }
 
-      // if user doesnt link any tags to the article no point in doing the tag operations
-      // This also makes autosave during writing faster
-      if (tags.length > 0) {
-        const existingTags = await ctx.db
-          .select()
-          .from(tag)
-          .where(inArray(tag.title, tags));
-
-        const tagResponse = (
-          await Promise.all(
-            tags.map((tagTitle) =>
-              ctx.db
-                .insert(tag)
-                .values({ title: tagTitle })
-                .onConflictDoNothing({
-                  target: [tag.title],
-                })
-                .returning(),
-            ),
-          )
-        ).flat(2);
-
-        const tagsToLinkToPost = [...tagResponse, ...existingTags];
-
-        await ctx.db.delete(post_tag).where(eq(post_tag.postId, id));
-
-        await Promise.all(
-          tagsToLinkToPost.map((tag) =>
-            ctx.db.insert(post_tag).values({
-              tagId: tag.id,
-              postId: id,
-            }),
-          ),
-        );
-      }
-
-      const getExcerptValue = (): string | undefined => {
-        if (currentPost.published) {
-          return excerpt && excerpt.length > 0
-            ? excerpt
-            : // @Todo why is body string | null ?
-              removeMarkdown(currentPost.body as string, {}).substring(0, 156);
-        }
-        return excerpt;
-      };
-
-      const postResponse = await ctx.db
-        .update(post)
-        .set({
-          id,
-          body,
-          title,
-          excerpt: getExcerptValue() || "",
-          readTimeMins: readingTime(body),
-          canonicalUrl: !!canonicalUrl ? canonicalUrl : null,
-        })
-        .where(eq(post.id, id));
-
-      return postResponse;
-    }),
-  publish: protectedProcedure
-    .input(PublishPostSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { published, id, publishTime } = input;
-
-      const getPublishedTime = () => {
-        if (!published) {
-          return null;
-        }
-        if (publishTime) {
-          return new Date(publishTime).toISOString();
-        }
-        return new Date().toISOString();
-      };
-
-      const currentPost = await ctx.db.query.post.findFirst({
-        where: (posts, { eq }) => eq(posts.id, id),
-      });
-
-      if (currentPost?.userId !== ctx.session.user.id) {
+      if (existing[0].authorId !== authorId) {
         throw new TRPCError({
           code: "FORBIDDEN",
+          message: "You can only edit your own posts",
         });
       }
 
-      const { excerpt, title } = currentPost;
+      const updateData: Record<string, unknown> = {
+        updatedAt: new Date(),
+      };
+      if (input.title !== undefined) updateData.title = input.title;
+      if (input.body !== undefined) {
+        updateData.body = input.body;
+        updateData.readingTime = calculateReadTime(input.body);
+      }
+      if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
+      if (input.canonicalUrl !== undefined) updateData.canonicalUrl = input.canonicalUrl || null;
+      if (input.status !== undefined) {
+        updateData.status = input.status;
+        if (input.status === "published" && input.publishedAt) {
+          updateData.publishedAt = input.publishedAt;
+        } else if (input.status === "published") {
+          updateData.publishedAt = new Date().toISOString();
+        }
+      }
 
-      const excerptOrCreatedExcerpt: string =
-        excerpt.length > 0
-          ? excerpt
-          : removeMarkdown(currentPost.body, {}).substring(0, 156);
-
-      const [updatedPost] = await ctx.db
-        .update(post)
-        .set({
-          slug: `${title.replace(/\W+/g, "-")}-${id}`
-            .toLowerCase()
-            .replace(/^-+|-+(?=-|$)/g, ""),
-          published: getPublishedTime(),
-          excerpt: excerptOrCreatedExcerpt,
-        })
-        .where(eq(post.id, id))
+      const [updated] = await ctx.db
+        .update(posts)
+        .set(updateData)
+        .where(eq(posts.id, input.id))
         .returning();
 
-      return updatedPost;
+      // Update tags if provided
+      if (input.tags !== undefined) {
+        // Remove existing tags
+        await ctx.db
+          .delete(postTags)
+          .where(eq(postTags.postId, input.id));
+
+        // Add new tags
+        for (const tagName of input.tags) {
+          const existingTags = await ctx.db
+            .select({ id: tag.id })
+            .from(tag)
+            .where(eq(tag.title, tagName.toLowerCase()))
+            .limit(1);
+
+          let tagId: number;
+          if (existingTags.length > 0) {
+            tagId = existingTags[0].id;
+          } else {
+            const [newTag] = await ctx.db
+              .insert(tag)
+              .values({ title: tagName.toLowerCase() })
+              .returning();
+            tagId = newTag.id;
+          }
+
+          await ctx.db
+            .insert(postTags)
+            .values({ postId: input.id, tagId })
+            .onConflictDoNothing();
+        }
+      }
+
+      return updated;
     }),
+
+  // Delete post
   delete: protectedProcedure
     .input(DeletePostSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { id } = input;
-
-      const currentPost = await ctx.db.query.post.findFirst({
-        where: (posts, { eq }) => eq(posts.id, id),
-      });
-
+    .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.session.user.id;
       const isAdmin = ctx.session.user.role === "ADMIN";
 
-      if (!isAdmin && currentPost?.userId !== ctx.session.user.id) {
+      // Check ownership
+      const existing = await ctx.db
+        .select({ authorId: posts.authorId })
+        .from(posts)
+        .where(eq(posts.id, input.id))
+        .limit(1);
+
+      if (existing.length === 0) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: "NOT_FOUND",
+          message: "Post not found",
         });
       }
 
-      const [deletedPost] = await ctx.db
-        .delete(post)
-        .where(eq(post.id, id))
-        .returning();
+      if (!isAdmin && existing[0].authorId !== authorId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only delete your own posts",
+        });
+      }
 
-      return deletedPost;
+      await ctx.db.delete(posts).where(eq(posts.id, input.id));
+
+      return { success: true };
     }),
-  like: protectedProcedure
-    .input(LikePostSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { postId, setLiked } = input;
-      const userId = ctx.session.user.id;
-      let res;
 
-      setLiked
-        ? await ctx.db.transaction(async (tx) => {
-            res = await tx.insert(like).values({ postId, userId }).returning();
-            await tx
-              .update(post)
-              .set({
-                likes: increment(post.likes),
-              })
-              .where(eq(post.id, postId));
-          })
-        : await ctx.db.transaction(async (tx) => {
-            res = await tx
-              .delete(like)
-              .where(
-                and(
-                  eq(like.postId, postId),
-                  eq(like.userId, ctx.session?.user?.id),
-                ),
-              )
-              .returning();
-            if (res.length !== 0) {
-              await tx
-                .update(post)
-                .set({
-                  likes: decrement(post.likes),
-                })
-                .where(eq(post.id, postId));
-            }
-          });
-
-      return res;
-    }),
+  // Vote on post (Reddit-style)
   vote: protectedProcedure
     .input(VotePostSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { postId, voteType } = input;
+    .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      const { postId, voteType } = input;
 
-      return await ctx.db.transaction(async (tx) => {
-        // Get existing vote
-        const [existingVote] = await tx
-          .select()
-          .from(post_vote)
-          .where(
-            and(eq(post_vote.postId, postId), eq(post_vote.userId, userId)),
-          );
+      // Check if post exists
+      const postItem = await ctx.db
+        .select({ id: posts.id })
+        .from(posts)
+        .where(eq(posts.id, postId))
+        .limit(1);
 
-        // If removing vote (voteType is null)
-        if (voteType === null) {
-          if (existingVote) {
-            await tx
-              .delete(post_vote)
-              .where(
-                and(eq(post_vote.postId, postId), eq(post_vote.userId, userId)),
-              );
+      if (postItem.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+      }
 
-            // Update counts
-            if (existingVote.voteType === "UP") {
-              await tx
-                .update(post)
-                .set({ upvotes: decrement(post.upvotes) })
-                .where(eq(post.id, postId));
-            } else {
-              await tx
-                .update(post)
-                .set({ downvotes: decrement(post.downvotes) })
-                .where(eq(post.id, postId));
-            }
-          }
-          return { voteType: null };
-        }
+      // Get existing vote
+      const existingVote = await ctx.db
+        .select({ id: postVotes.id, voteType: postVotes.voteType })
+        .from(postVotes)
+        .where(
+          and(
+            eq(postVotes.postId, postId),
+            eq(postVotes.userId, userId)
+          )
+        )
+        .limit(1);
 
-        // If changing vote
-        if (existingVote) {
-          if (existingVote.voteType !== voteType) {
-            // Update vote type
-            await tx
-              .update(post_vote)
-              .set({ voteType })
-              .where(
-                and(eq(post_vote.postId, postId), eq(post_vote.userId, userId)),
-              );
+      // Triggers handle counter updates, but we still update manually for consistency
+      // until triggers are verified in production
+      if (voteType === null) {
+        // Remove vote
+        if (existingVote.length > 0) {
+          const oldVoteType = existingVote[0].voteType;
+          await ctx.db
+            .delete(postVotes)
+            .where(eq(postVotes.id, existingVote[0].id));
 
-            // Update counts (swap)
-            if (voteType === "UP") {
-              await tx
-                .update(post)
-                .set({
-                  upvotes: increment(post.upvotes),
-                  downvotes: decrement(post.downvotes),
-                })
-                .where(eq(post.id, postId));
-            } else {
-              await tx
-                .update(post)
-                .set({
-                  upvotes: decrement(post.upvotes),
-                  downvotes: increment(post.downvotes),
-                })
-                .where(eq(post.id, postId));
-            }
-          }
-        } else {
-          // New vote
-          await tx.insert(post_vote).values({ postId, userId, voteType });
-
-          // Update counts
-          if (voteType === "UP") {
-            await tx
-              .update(post)
-              .set({ upvotes: increment(post.upvotes) })
-              .where(eq(post.id, postId));
+          // Update vote counts manually (triggers should handle this too)
+          if (oldVoteType === "up") {
+            await ctx.db
+              .update(posts)
+              .set({ upvotesCount: decrement(posts.upvotesCount) })
+              .where(eq(posts.id, postId));
           } else {
-            await tx
-              .update(post)
-              .set({ downvotes: increment(post.downvotes) })
-              .where(eq(post.id, postId));
+            await ctx.db
+              .update(posts)
+              .set({ downvotesCount: decrement(posts.downvotesCount) })
+              .where(eq(posts.id, postId));
           }
         }
+        return { voteType: null };
+      } else if (existingVote.length === 0) {
+        // New vote
+        await ctx.db.insert(postVotes).values({
+          postId,
+          userId,
+          voteType,
+        });
 
+        // Update vote counts
+        if (voteType === "up") {
+          await ctx.db
+            .update(posts)
+            .set({ upvotesCount: increment(posts.upvotesCount) })
+            .where(eq(posts.id, postId));
+        } else {
+          await ctx.db
+            .update(posts)
+            .set({ downvotesCount: increment(posts.downvotesCount) })
+            .where(eq(posts.id, postId));
+        }
         return { voteType };
-      });
+      } else if (existingVote[0].voteType !== voteType) {
+        // Change vote
+        await ctx.db
+          .update(postVotes)
+          .set({ voteType })
+          .where(eq(postVotes.id, existingVote[0].id));
+
+        // Update vote counts (flip both)
+        if (voteType === "up") {
+          await ctx.db
+            .update(posts)
+            .set({
+              upvotesCount: increment(posts.upvotesCount),
+              downvotesCount: decrement(posts.downvotesCount),
+            })
+            .where(eq(posts.id, postId));
+        } else {
+          await ctx.db
+            .update(posts)
+            .set({
+              upvotesCount: decrement(posts.upvotesCount),
+              downvotesCount: increment(posts.downvotesCount),
+            })
+            .where(eq(posts.id, postId));
+        }
+        return { voteType };
+      }
+
+      // Same vote, no change needed
+      return { voteType };
     }),
+
+  // Bookmark post
   bookmark: protectedProcedure
     .input(BookmarkPostSchema)
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
       const { postId, setBookmarked } = input;
-      let res;
 
-      setBookmarked
-        ? await ctx.db
-            .insert(bookmark)
-            .values({ postId, userId: ctx.session?.user?.id })
-        : await ctx.db
-            .delete(bookmark)
-            .where(
-              and(
-                eq(bookmark.postId, postId),
-                eq(bookmark.userId, ctx.session?.user?.id),
-              ),
-            );
-      return res;
+      // Check if post exists
+      const postItem = await ctx.db
+        .select({ id: posts.id })
+        .from(posts)
+        .where(eq(posts.id, postId))
+        .limit(1);
+
+      if (postItem.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+      }
+
+      if (setBookmarked) {
+        await ctx.db
+          .insert(bookmarks)
+          .values({ postId, userId })
+          .onConflictDoNothing();
+      } else {
+        await ctx.db
+          .delete(bookmarks)
+          .where(
+            and(
+              eq(bookmarks.postId, postId),
+              eq(bookmarks.userId, userId)
+            )
+          );
+      }
+
+      return { success: true };
     }),
+
+  // Get sidebar data for a post
   sidebarData: publicProcedure
     .input(GetByIdSchema)
-    .query(async ({ input, ctx }) => {
+    .query(async ({ ctx, input }) => {
       const { id } = input;
+      const userId = ctx.session?.user?.id;
 
-      const [[postData], [userVoteData], [userBookedmarkedPost]] =
-        await Promise.all([
-          ctx.db
-            .select({
-              upvotes: post.upvotes,
-              downvotes: post.downvotes,
-              likes: post.likes,
-            })
-            .from(post)
-            .where(eq(post.id, id)),
-          // Get user's vote on this post
-          ctx.session?.user?.id
-            ? ctx.db
-                .select({ voteType: post_vote.voteType })
-                .from(post_vote)
-                .where(
-                  and(
-                    eq(post_vote.postId, id),
-                    eq(post_vote.userId, ctx.session.user.id),
-                  ),
+      const [[postData], [userVoteData], [userBookmark]] = await Promise.all([
+        ctx.db
+          .select({
+            upvotesCount: posts.upvotesCount,
+            downvotesCount: posts.downvotesCount,
+          })
+          .from(posts)
+          .where(eq(posts.id, id)),
+        userId
+          ? ctx.db
+              .select({ voteType: postVotes.voteType })
+              .from(postVotes)
+              .where(
+                and(
+                  eq(postVotes.postId, id),
+                  eq(postVotes.userId, userId)
                 )
-            : [null],
-          // if user not logged in and they wont have any bookmarked posts so default to a count of 0
-          ctx.session?.user?.id
-            ? ctx.db
-                .selectDistinct()
-                .from(bookmark)
-                .where(
-                  and(
-                    eq(bookmark.postId, id),
-                    eq(bookmark.userId, ctx.session.user.id),
-                  ),
+              )
+          : [null],
+        userId
+          ? ctx.db
+              .select({ id: bookmarks.id })
+              .from(bookmarks)
+              .where(
+                and(
+                  eq(bookmarks.postId, id),
+                  eq(bookmarks.userId, userId)
                 )
-            : [false],
-        ]);
+              )
+          : [null],
+      ]);
+
       return {
-        upvotes: postData?.upvotes ?? 0,
-        downvotes: postData?.downvotes ?? 0,
-        likes: postData?.likes ?? 0,
-        userVote: (userVoteData as { voteType: "UP" | "DOWN" } | null)?.voteType ?? null,
-        currentUserLiked: false, // Deprecated, kept for backwards compatibility
-        currentUserBookmarked: !!userBookedmarkedPost,
+        upvotes: postData?.upvotesCount ?? 0,
+        downvotes: postData?.downvotesCount ?? 0,
+        userVote: (userVoteData as { voteType: "up" | "down" } | null)?.voteType ?? null,
+        currentUserBookmarked: !!userBookmark,
       };
     }),
+
+  // Get user's posts
+  getUserPosts: publicProcedure
+    .input(GetUserPostsSchema)
+    .query(async ({ ctx, input }) => {
+      const { authorId: targetAuthorId, type, limit, cursor } = input;
+      const currentUserId = ctx.session?.user?.id;
+
+      const conditions = [eq(posts.authorId, targetAuthorId)];
+
+      // Only show published posts unless viewing own profile
+      if (currentUserId !== targetAuthorId) {
+        conditions.push(eq(posts.status, "published"));
+      }
+
+      if (type) {
+        conditions.push(eq(posts.type, type));
+      }
+
+      if (cursor?.publishedAt) {
+        conditions.push(lte(posts.publishedAt, cursor.publishedAt));
+      }
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          slug: posts.slug,
+          publishedAt: posts.publishedAt,
+          upvotesCount: posts.upvotesCount,
+          downvotesCount: posts.downvotesCount,
+          commentsCount: posts.commentsCount,
+          status: posts.status,
+          createdAt: posts.createdAt,
+        })
+        .from(posts)
+        .where(and(...conditions))
+        .orderBy(desc(posts.publishedAt))
+        .limit(limit + 1);
+
+      let nextCursor: { id: string; publishedAt?: string } | undefined;
+      if (results.length > limit) {
+        const lastItem = results.pop()!;
+        nextCursor = {
+          id: lastItem.id,
+          publishedAt: lastItem.publishedAt || undefined,
+        };
+      }
+
+      return {
+        items: results,
+        nextCursor,
+      };
+    }),
+
+  // Get bookmarked posts for current user
+  myBookmarks: protectedProcedure
+    .input(GetBookmarkedPostsSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const { limit, cursor } = input;
+
+      const conditions = [eq(bookmarks.userId, userId)];
+
+      if (cursor?.createdAt) {
+        conditions.push(lte(bookmarks.createdAt, cursor.createdAt));
+      }
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          slug: posts.slug,
+          publishedAt: posts.publishedAt,
+          upvotesCount: posts.upvotesCount,
+          downvotesCount: posts.downvotesCount,
+          readingTime: posts.readingTime,
+          sourceName: feedSources.name,
+          sourceSlug: feedSources.slug,
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+          bookmarkedAt: bookmarks.createdAt,
+        })
+        .from(bookmarks)
+        .innerJoin(posts, eq(bookmarks.postId, posts.id))
+        .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(and(...conditions))
+        .orderBy(desc(bookmarks.createdAt))
+        .limit(limit + 1);
+
+      let nextCursor: { id: string; createdAt?: string } | undefined;
+      if (results.length > limit) {
+        const lastItem = results.pop()!;
+        nextCursor = {
+          id: lastItem.id,
+          createdAt: lastItem.bookmarkedAt || undefined,
+        };
+      }
+
+      return {
+        items: results,
+        nextCursor,
+      };
+    }),
+
+  // Edit Draft - get user's own post by ID for editing
+  editDraft: protectedProcedure
+    .input(GetByIdSchema)
+    .query(async ({ ctx, input }) => {
+      const authorId = ctx.session.user.id;
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          canonicalUrl: posts.canonicalUrl,
+          coverImage: posts.coverImage,
+          slug: posts.slug,
+          status: posts.status,
+          publishedAt: posts.publishedAt,
+          showComments: posts.showComments,
+          readingTime: posts.readingTime,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.id, input.id),
+            eq(posts.authorId, authorId)
+          )
+        )
+        .limit(1);
+
+      if (results.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found or you don't have permission to edit it",
+        });
+      }
+
+      // Get tags for this post
+      const postTagsResult = await ctx.db
+        .select({
+          tag: {
+            id: tag.id,
+            title: tag.title,
+          },
+        })
+        .from(postTags)
+        .innerJoin(tag, eq(postTags.tagId, tag.id))
+        .where(eq(postTags.postId, input.id));
+
+      return {
+        ...results[0],
+        tags: postTagsResult,
+      };
+    }),
+
+  // My Drafts - get user's draft posts (articles)
+  myDrafts: protectedProcedure.query(async ({ ctx }) => {
+    const authorId = ctx.session.user.id;
+
+    return await ctx.db
+      .select({
+        id: posts.id,
+        type: posts.type,
+        title: posts.title,
+        excerpt: posts.excerpt,
+        slug: posts.slug,
+        status: posts.status,
+        publishedAt: posts.publishedAt,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+      })
+      .from(posts)
+      .where(
+        and(
+          eq(posts.authorId, authorId),
+          eq(posts.type, "article"),
+          eq(posts.status, "draft")
+        )
+      )
+      .orderBy(desc(posts.updatedAt));
+  }),
+
+  // My Published - get user's published posts (articles)
+  myPublished: protectedProcedure.query(async ({ ctx }) => {
+    const authorId = ctx.session.user.id;
+    const now = new Date().toISOString();
+
+    return await ctx.db
+      .select({
+        id: posts.id,
+        type: posts.type,
+        title: posts.title,
+        excerpt: posts.excerpt,
+        slug: posts.slug,
+        status: posts.status,
+        publishedAt: posts.publishedAt,
+        upvotesCount: posts.upvotesCount,
+        downvotesCount: posts.downvotesCount,
+        commentsCount: posts.commentsCount,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+      })
+      .from(posts)
+      .where(
+        and(
+          eq(posts.authorId, authorId),
+          eq(posts.type, "article"),
+          eq(posts.status, "published"),
+          lte(posts.publishedAt, now)
+        )
+      )
+      .orderBy(desc(posts.publishedAt));
+  }),
+
+  // My Scheduled - get user's scheduled posts (publishedAt > now)
+  myScheduled: protectedProcedure.query(async ({ ctx }) => {
+    const authorId = ctx.session.user.id;
+    const now = new Date().toISOString();
+
+    return await ctx.db
+      .select({
+        id: posts.id,
+        type: posts.type,
+        title: posts.title,
+        excerpt: posts.excerpt,
+        slug: posts.slug,
+        status: posts.status,
+        publishedAt: posts.publishedAt,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+      })
+      .from(posts)
+      .where(
+        and(
+          eq(posts.authorId, authorId),
+          eq(posts.type, "article"),
+          eq(posts.status, "scheduled"),
+          gt(posts.publishedAt, now)
+        )
+      )
+      .orderBy(asc(posts.publishedAt));
+  }),
+
+  // Publish - publish/unpublish/schedule a post
+  publish: protectedProcedure
+    .input(PublishPostSchema)
+    .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.session.user.id;
+
+      // Check ownership
+      const existing = await ctx.db
+        .select({
+          id: posts.id,
+          authorId: posts.authorId,
+          title: posts.title,
+          slug: posts.slug,
+          status: posts.status,
+        })
+        .from(posts)
+        .where(eq(posts.id, input.id))
+        .limit(1);
+
+      if (existing.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Post not found",
+        });
+      }
+
+      if (existing[0].authorId !== authorId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only publish your own posts",
+        });
+      }
+
+      const updateData: Record<string, unknown> = {};
+
+      if (input.published) {
+        updateData.status = "published";
+        if (input.publishTime) {
+          updateData.publishedAt = input.publishTime.toISOString();
+          // If publish time is in the future, mark as scheduled
+          if (input.publishTime > new Date()) {
+            updateData.status = "scheduled";
+          }
+        } else {
+          updateData.publishedAt = new Date().toISOString();
+        }
+
+        // Generate new slug if this is the first time publishing
+        if (existing[0].status === "draft" && existing[0].title) {
+          updateData.slug = generateSlug(existing[0].title);
+        }
+      } else {
+        updateData.status = "draft";
+      }
+
+      const [updated] = await ctx.db
+        .update(posts)
+        .set(updateData)
+        .where(eq(posts.id, input.id))
+        .returning();
+
+      return updated;
+    }),
+
+  // Get categories (from sources)
+  getCategories: publicProcedure.query(async ({ ctx }) => {
+    const results = await ctx.db
+      .selectDistinct({ category: feedSources.category })
+      .from(feedSources)
+      .where(isNotNull(feedSources.category));
+
+    return results
+      .map((r) => r.category)
+      .filter((c): c is string => c !== null)
+      .sort();
+  }),
+
+  // Get post types count
+  getTypeCounts: publicProcedure.query(async ({ ctx }) => {
+    const results = await ctx.db
+      .select({
+        type: posts.type,
+        count: count(),
+      })
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .groupBy(posts.type);
+
+    return results;
+  }),
+
+  // Track view on a post
+  trackView: publicProcedure
+    .input(GetByIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(posts)
+        .set({ viewsCount: increment(posts.viewsCount) })
+        .where(eq(posts.id, input.id));
+
+      return { success: true };
+    }),
+
+  // Feature a post (admin only)
+  feature: protectedProcedure
+    .input(FeaturePostSchema)
+    .mutation(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === "ADMIN";
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can feature posts",
+        });
+      }
+
+      const [updated] = await ctx.db
+        .update(posts)
+        .set({ featured: input.featured })
+        .where(eq(posts.id, input.postId))
+        .returning();
+
+      return updated;
+    }),
+
+  // Pin a post (admin only)
+  pin: protectedProcedure
+    .input(PinPostSchema)
+    .mutation(async ({ ctx, input }) => {
+      const isAdmin = ctx.session.user.role === "ADMIN";
+
+      if (!isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only admins can pin posts",
+        });
+      }
+
+      const [updated] = await ctx.db
+        .update(posts)
+        .set({ pinnedUntil: input.pinnedUntil?.toISOString() ?? null })
+        .where(eq(posts.id, input.postId))
+        .returning();
+
+      return updated;
+    }),
+
+  // Get featured posts
+  getFeatured: publicProcedure
+    .input(GetLimitSidePosts)
+    .query(async ({ ctx, input }) => {
+      const limit = input?.limit ?? 5;
+
+      return await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          slug: posts.slug,
+          publishedAt: posts.publishedAt,
+          upvotesCount: posts.upvotesCount,
+          downvotesCount: posts.downvotesCount,
+          commentsCount: posts.commentsCount,
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+        })
+        .from(posts)
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(
+          and(
+            eq(posts.status, "published"),
+            eq(posts.featured, true)
+          )
+        )
+        .orderBy(desc(posts.publishedAt))
+        .limit(limit);
+    }),
+
+  // Get comment count for a post
+  getCommentCount: publicProcedure
+    .input(GetByIdSchema)
+    .query(async ({ ctx, input }) => {
+      const [result] = await ctx.db
+        .select({ count: count() })
+        .from(comments)
+        .where(
+          and(
+            eq(comments.postId, input.id),
+            isNull(comments.deletedAt)
+          )
+        );
+
+      return result.count;
+    }),
+
+  // Legacy: Get published posts (for backwards compatibility)
   published: publicProcedure
     .input(GetPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -403,102 +1316,98 @@ export const postRouter = createTRPCRouter({
       const { cursor, sort, tag: tagFilter } = input;
 
       // Reddit-style hot score calculation
-      // Formula: log10(max(|score|, 1)) + sign(score) * seconds / 45000
-      // This makes recent content with votes rank higher than old content with many votes
       const hotScoreExpr = sql<number>`
-        LOG(GREATEST(ABS(${post.upvotes} - ${post.downvotes}), 1)) +
-        SIGN(${post.upvotes} - ${post.downvotes}) *
-        EXTRACT(EPOCH FROM (${post.published}::timestamp - '2024-01-01'::timestamp)) / 45000
+        LOG(GREATEST(ABS(${posts.upvotesCount} - ${posts.downvotesCount}), 1)) +
+        SIGN(${posts.upvotesCount} - ${posts.downvotesCount}) *
+        EXTRACT(EPOCH FROM (${posts.publishedAt}::timestamp - '2024-01-01'::timestamp)) / 45000
       `;
 
       const paginationMapping = {
         newest: {
-          orderBy: desc(post.published),
-          cursor: lte(post.published, cursor?.published as string),
+          orderBy: desc(posts.publishedAt),
+          cursor: cursor?.published ? lte(posts.publishedAt, cursor.published) : undefined,
         },
         oldest: {
-          orderBy: asc(post.published),
-          cursor: gte(post.published, cursor?.published as string),
+          orderBy: asc(posts.publishedAt),
+          cursor: cursor?.published ? gte(posts.publishedAt, cursor.published) : undefined,
         },
         top: {
-          orderBy: desc(sql`${post.upvotes} - ${post.downvotes}`),
-          cursor: lt(sql`${post.upvotes} - ${post.downvotes}`, cursor?.likes as number),
+          orderBy: desc(sql`${posts.upvotesCount} - ${posts.downvotesCount}`),
+          cursor: cursor?.likes !== undefined
+            ? lt(sql`${posts.upvotesCount} - ${posts.downvotesCount}`, cursor.likes)
+            : undefined,
         },
         trending: {
           orderBy: desc(hotScoreExpr),
-          cursor: cursor?.hotScore
+          cursor: cursor?.hotScore !== undefined
             ? lt(hotScoreExpr, cursor.hotScore)
             : undefined,
         },
       };
 
-      const bookmarked = ctx.db
+      const userBookmarksSubquery = ctx.db
         .select()
-        .from(bookmark)
-        // if user not logged in just default to searching for "" as user which will always result in post not being bookmarked
-        // TODO figure out a way to skip this entire block if user is not logged in
-        .where(eq(bookmark.userId, userId || ""))
+        .from(bookmarks)
+        .where(eq(bookmarks.userId, userId || ""))
         .as("bookmarked");
 
-      const userVoteSubquery = ctx.db
+      const userVotesSubquery = ctx.db
         .select()
-        .from(post_vote)
-        .where(eq(post_vote.userId, userId || ""))
+        .from(postVotes)
+        .where(eq(postVotes.userId, userId || ""))
         .as("userVote");
 
       const response = await ctx.db
         .select({
           post: {
-            id: post.id,
-            slug: post.slug,
-            title: post.title,
-            excerpt: post.excerpt,
-            published: post.published,
-            readTimeMins: post.readTimeMins,
-            likes: post.likes,
-            upvotes: post.upvotes,
-            downvotes: post.downvotes,
+            id: posts.id,
+            slug: posts.slug,
+            title: posts.title,
+            excerpt: posts.excerpt,
+            published: posts.publishedAt,
+            readTimeMins: posts.readingTime,
+            upvotes: posts.upvotesCount,
+            downvotes: posts.downvotesCount,
           },
-          bookmarked: { id: bookmarked.id },
-          userVote: { voteType: userVoteSubquery.voteType },
+          bookmarked: { id: userBookmarksSubquery.id },
+          userVote: { voteType: userVotesSubquery.voteType },
           user: { name: user.name, username: user.username, image: user.image },
         })
-        .from(post)
-        .leftJoin(user, eq(post.userId, user.id))
-        .leftJoin(bookmarked, eq(bookmarked.postId, post.id))
-        .leftJoin(userVoteSubquery, eq(userVoteSubquery.postId, post.id))
-        .leftJoin(post_tag, eq(post.id, post_tag.postId))
-        .leftJoin(tag, eq(post_tag.tagId, tag.id))
+        .from(posts)
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .leftJoin(userBookmarksSubquery, eq(userBookmarksSubquery.postId, posts.id))
+        .leftJoin(userVotesSubquery, eq(userVotesSubquery.postId, posts.id))
+        .leftJoin(postTags, eq(posts.id, postTags.postId))
+        .leftJoin(tag, eq(postTags.tagId, tag.id))
         .where(
           and(
-            isNotNull(post.published),
-            lte(post.published, new Date().toISOString()),
+            eq(posts.status, "published"),
+            lte(posts.publishedAt, new Date().toISOString()),
             tagFilter ? eq(tag.title, tagFilter.toUpperCase()) : undefined,
-            cursor ? paginationMapping[sort].cursor : undefined,
-          ),
+            cursor ? paginationMapping[sort].cursor : undefined
+          )
         )
         .groupBy(
-          post.id,
-          post.slug,
-          post.title,
-          post.excerpt,
-          post.published,
-          post.readTimeMins,
-          post.likes,
-          post.upvotes,
-          post.downvotes,
-          bookmarked.id,
-          userVoteSubquery.voteType,
-          user.id,
+          posts.id,
+          posts.slug,
+          posts.title,
+          posts.excerpt,
+          posts.publishedAt,
+          posts.readingTime,
+          posts.upvotesCount,
+          posts.downvotesCount,
+          userBookmarksSubquery.id,
+          userVotesSubquery.voteType,
+          user.id
         )
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 
-      // Calculate hotScore for each post (for pagination)
+      // Calculate hotScore for each post
       const calculateHotScore = (
         upvotes: number,
         downvotes: number,
-        publishedAt: string,
+        publishedAt: string
       ): number => {
         const score = upvotes - downvotes;
         const sign = score > 0 ? 1 : score < 0 ? -1 : 0;
@@ -513,7 +1422,7 @@ export const postRouter = createTRPCRouter({
         const hotScore = calculateHotScore(
           elem.post.upvotes,
           elem.post.downvotes,
-          elem.post.published as string,
+          elem.post.published as string
         );
         return {
           ...elem.post,
@@ -521,6 +1430,8 @@ export const postRouter = createTRPCRouter({
           currentUserBookmarkedPost,
           userVote: elem.userVote?.voteType ?? null,
           hotScore,
+          // Legacy field mappings
+          likes: elem.post.upvotes,
         };
       });
 
@@ -537,103 +1448,5 @@ export const postRouter = createTRPCRouter({
       }
 
       return { posts: cleaned, nextCursor };
-    }),
-  myPublished: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.post.findMany({
-      where: (posts, { lte, isNotNull, eq }) =>
-        and(
-          isNotNull(posts.published),
-          lte(posts.published, new Date().toISOString()),
-          eq(posts.userId, ctx?.session?.user?.id),
-        ),
-      orderBy: (posts, { desc, sql }) => [
-        desc(sql`GREATEST(${posts.updatedAt}, ${posts.published})`),
-      ],
-    });
-  }),
-  myScheduled: protectedProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.post.findMany({
-      where: (posts, { eq }) =>
-        and(
-          gt(posts.published, new Date().toISOString()),
-          isNotNull(posts.published),
-          eq(posts.userId, ctx?.session?.user?.id),
-        ),
-      orderBy: (posts, { asc }) => [asc(posts.published)],
-    });
-  }),
-  myDrafts: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.post.findMany({
-      where: (posts, { eq }) =>
-        and(eq(posts.userId, ctx.session.user.id), isNull(posts.published)),
-      orderBy: (posts, { desc }) => [desc(posts.updatedAt)],
-    });
-  }),
-  editDraft: protectedProcedure
-    .input(GetByIdSchema)
-    .query(async ({ input, ctx }) => {
-      const { id } = input;
-
-      const currentPost = await ctx.db.query.post.findFirst({
-        where: (posts, { eq }) => eq(posts.id, id),
-        with: {
-          tags: { with: { tag: true } },
-        },
-      });
-
-      if (currentPost?.userId !== ctx.session.user.id) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-        });
-      }
-
-      return currentPost;
-    }),
-  myBookmarks: protectedProcedure
-    .input(GetLimitSidePosts)
-    .query(async ({ ctx, input }) => {
-      const limit = input?.limit ?? undefined;
-
-      const response = await ctx.db.query.bookmark.findMany({
-        columns: {
-          id: true,
-        },
-        where: (bookmarks, { eq }) => eq(bookmarks.userId, ctx.session.user.id),
-        with: {
-          post: {
-            columns: {
-              id: true,
-              title: true,
-              excerpt: true,
-              updatedAt: true,
-              published: true,
-              readTimeMins: true,
-              slug: true,
-            },
-            with: {
-              user: {
-                columns: {
-                  name: true,
-                  username: true,
-                  image: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: (bookmarks, { desc }) => [desc(bookmarks.id)],
-      });
-
-      const totalCount = response.length;
-
-      const bookmarksResponse = response.slice(0, limit || response.length);
-
-      return {
-        totalCount,
-        bookmarks: bookmarksResponse.map(({ id, post }) => ({
-          bookmarkId: id,
-          ...post,
-        })),
-      };
     }),
 });

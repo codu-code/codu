@@ -121,7 +121,7 @@ export async function POST(request: Request) {
 
           // Check if exists
           const existing = await db.query.aggregated_article.findFirst({
-            where: eq(aggregated_article.url, item.link),
+            where: eq(aggregated_article.externalUrl, item.link),
           });
 
           if (existing) {
@@ -133,16 +133,24 @@ export async function POST(request: Request) {
           const excerpt = extractExcerpt(contentSnippet);
           const imageUrl = extractImageUrl(item);
 
+          // Generate slug from title
+          const slug = item.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "")
+            .substring(0, 300);
+
           const [newArticle] = await db
             .insert(aggregated_article)
             .values({
               sourceId: source.id,
               shortId: generateShortId(),
               title: item.title.substring(0, 500),
+              slug,
               excerpt,
-              url: item.link,
+              externalUrl: item.link,
               imageUrl,
-              author: item.creator || null,
+              sourceAuthor: item.creator || null,
               publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : null,
             })
             .returning();

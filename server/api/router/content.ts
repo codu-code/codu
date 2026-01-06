@@ -16,16 +16,21 @@ import {
   TrackClickContentSchema,
   GetUserContentSchema,
   GetSavedContentSchema,
+  EditDraftContentSchema,
+  PublishContentSchema,
+  MyDraftsContentSchema,
+  MyPublishedContentSchema,
+  MyScheduledContentSchema,
 } from "../../../schema/content";
 import {
-  content,
-  content_vote,
-  content_bookmark,
-  content_tag,
-  feed_source,
+  posts,
+  post_votes,
+  bookmarks,
+  post_tags,
+  feed_sources,
   tag,
   user,
-  discussion,
+  comments,
 } from "@/server/db/schema";
 import {
   and,
@@ -33,13 +38,12 @@ import {
   desc,
   lt,
   lte,
+  gt,
   sql,
   isNotNull,
   count,
-  inArray,
 } from "drizzle-orm";
 import { increment, decrement } from "./utils";
-import { db } from "@/server/db";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -61,24 +65,52 @@ function calculateReadTime(body: string | null | undefined): number {
   return Math.max(1, Math.ceil(words / wordsPerMinute));
 }
 
+// Helper to convert frontend type (POST, LINK, ARTICLE) to DB type (article, link)
+function toDbType(frontendType: string): "article" | "discussion" | "link" | "resource" {
+  const typeMap: Record<string, "article" | "discussion" | "link" | "resource"> = {
+    POST: "article",
+    ARTICLE: "article", // Alias for POST
+    LINK: "link",
+    QUESTION: "discussion",
+    VIDEO: "link",
+    DISCUSSION: "discussion",
+    article: "article",
+    link: "link",
+    discussion: "discussion",
+    resource: "resource",
+  };
+  return typeMap[frontendType] || "article";
+}
+
+// Helper to convert DB type to frontend type (for backwards compatibility)
+function toFrontendType(dbType: string): string {
+  const typeMap: Record<string, string> = {
+    article: "POST",
+    link: "LINK",
+    discussion: "DISCUSSION",
+    resource: "LINK",
+  };
+  return typeMap[dbType] || dbType.toUpperCase();
+}
+
 export const contentRouter = createTRPCRouter({
   // Get unified feed with optional type filtering
   getFeed: publicProcedure
     .input(GetUnifiedFeedSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
-      const limit = input?.limit ?? 20;
-      const { cursor, sort, type, category, sourceId } = input;
+      const limit = input?.limit ?? 25;
+      const { cursor, sort, type, sourceId, category } = input;
 
       // Build the vote subquery for current user
       const userVotes = userId
         ? ctx.db
             .select({
-              contentId: content_vote.contentId,
-              voteType: content_vote.voteType,
+              postId: post_votes.postId,
+              voteType: post_votes.voteType,
             })
-            .from(content_vote)
-            .where(eq(content_vote.userId, userId))
+            .from(post_votes)
+            .where(eq(post_votes.userId, userId))
             .as("userVotes")
         : null;
 
@@ -86,25 +118,32 @@ export const contentRouter = createTRPCRouter({
       const userBookmarks = userId
         ? ctx.db
             .select({
-              contentId: content_bookmark.contentId,
+              postId: bookmarks.postId,
             })
-            .from(content_bookmark)
-            .where(eq(content_bookmark.userId, userId))
+            .from(bookmarks)
+            .where(eq(bookmarks.userId, userId))
             .as("userBookmarks")
         : null;
 
       // Calculate score for trending
-      const scoreExpr = sql<number>`(${content.upvotes} - ${content.downvotes})`;
+      const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
-      // Build conditions
-      const conditions = [eq(content.published, true)];
+      // Build conditions - status = 'published'
+      const conditions = [eq(posts.status, "published")];
 
       if (type) {
-        conditions.push(eq(content.type, type));
+        // Convert frontend type (POST, LINK) to db type (article, link)
+        const dbType = toDbType(type);
+        conditions.push(eq(posts.type, dbType));
       }
 
       if (sourceId) {
-        conditions.push(eq(content.sourceId, sourceId));
+        conditions.push(eq(posts.sourceId, sourceId));
+      }
+
+      // Filter by category (matches source category)
+      if (category) {
+        conditions.push(eq(feed_sources.category, category));
       }
 
       // Build order by and cursor conditions based on sort type
@@ -112,9 +151,9 @@ export const contentRouter = createTRPCRouter({
         switch (sort) {
           case "recent":
             return {
-              orderBy: desc(content.publishedAt),
+              orderBy: desc(posts.publishedAt),
               cursorCondition: cursor?.publishedAt
-                ? lte(content.publishedAt, cursor.publishedAt)
+                ? lte(posts.publishedAt, cursor.publishedAt)
                 : undefined,
             };
           case "trending":
@@ -126,14 +165,14 @@ export const contentRouter = createTRPCRouter({
             };
           case "popular":
             return {
-              orderBy: desc(content.upvotes),
+              orderBy: desc(posts.upvotesCount),
               cursorCondition: cursor?.score !== undefined
-                ? lt(content.upvotes, cursor.score)
+                ? lt(posts.upvotesCount, cursor.score)
                 : undefined,
             };
           default:
             return {
-              orderBy: desc(content.publishedAt),
+              orderBy: desc(posts.publishedAt),
               cursorCondition: undefined,
             };
         }
@@ -150,84 +189,84 @@ export const contentRouter = createTRPCRouter({
       if (userVotes && userBookmarks) {
         query = ctx.db
           .select({
-            id: content.id,
-            type: content.type,
-            title: content.title,
-            excerpt: content.excerpt,
-            body: content.body,
-            externalUrl: content.externalUrl,
-            imageUrl: content.imageUrl,
-            ogImageUrl: content.ogImageUrl,
-            slug: content.slug,
-            publishedAt: content.publishedAt,
-            upvotes: content.upvotes,
-            downvotes: content.downvotes,
-            clickCount: content.clickCount,
-            readTimeMins: content.readTimeMins,
-            userId: content.userId,
-            sourceId: content.sourceId,
-            sourceAuthor: content.sourceAuthor,
-            createdAt: content.createdAt,
+            id: posts.id,
+            type: posts.type,
+            title: posts.title,
+            excerpt: posts.excerpt,
+            body: posts.body,
+            externalUrl: posts.externalUrl,
+            imageUrl: posts.coverImage,
+            ogImageUrl: posts.coverImage,
+            slug: posts.slug,
+            publishedAt: posts.publishedAt,
+            upvotes: posts.upvotesCount,
+            downvotes: posts.downvotesCount,
+            clickCount: posts.viewsCount,
+            readTimeMins: posts.readingTime,
+            userId: posts.authorId,
+            sourceId: posts.sourceId,
+            sourceAuthor: posts.sourceAuthor,
+            createdAt: posts.createdAt,
             // Source info
-            sourceName: feed_source.name,
-            sourceSlug: feed_source.slug,
-            sourceLogo: feed_source.logoUrl,
-            sourceWebsite: feed_source.websiteUrl,
-            sourceCategory: feed_source.category,
+            sourceName: feed_sources.name,
+            sourceSlug: feed_sources.slug,
+            sourceLogo: feed_sources.logoUrl,
+            sourceWebsite: feed_sources.websiteUrl,
+            sourceCategory: feed_sources.category,
             // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
             // User-specific
             userVote: userVotes.voteType,
-            isBookmarked: sql<boolean>`${userBookmarks.contentId} IS NOT NULL`,
+            isBookmarked: sql<boolean>`${userBookmarks.postId} IS NOT NULL`,
           })
-          .from(content)
-          .leftJoin(feed_source, eq(content.sourceId, feed_source.id))
-          .leftJoin(user, eq(content.userId, user.id))
-          .leftJoin(userVotes, eq(content.id, userVotes.contentId))
-          .leftJoin(userBookmarks, eq(content.id, userBookmarks.contentId))
+          .from(posts)
+          .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+          .leftJoin(user, eq(posts.authorId, user.id))
+          .leftJoin(userVotes, eq(posts.id, userVotes.postId))
+          .leftJoin(userBookmarks, eq(posts.id, userBookmarks.postId))
           .where(and(...conditions))
           .orderBy(orderBy)
           .limit(limit + 1);
       } else {
         query = ctx.db
           .select({
-            id: content.id,
-            type: content.type,
-            title: content.title,
-            excerpt: content.excerpt,
-            body: content.body,
-            externalUrl: content.externalUrl,
-            imageUrl: content.imageUrl,
-            ogImageUrl: content.ogImageUrl,
-            slug: content.slug,
-            publishedAt: content.publishedAt,
-            upvotes: content.upvotes,
-            downvotes: content.downvotes,
-            clickCount: content.clickCount,
-            readTimeMins: content.readTimeMins,
-            userId: content.userId,
-            sourceId: content.sourceId,
-            sourceAuthor: content.sourceAuthor,
-            createdAt: content.createdAt,
+            id: posts.id,
+            type: posts.type,
+            title: posts.title,
+            excerpt: posts.excerpt,
+            body: posts.body,
+            externalUrl: posts.externalUrl,
+            imageUrl: posts.coverImage,
+            ogImageUrl: posts.coverImage,
+            slug: posts.slug,
+            publishedAt: posts.publishedAt,
+            upvotes: posts.upvotesCount,
+            downvotes: posts.downvotesCount,
+            clickCount: posts.viewsCount,
+            readTimeMins: posts.readingTime,
+            userId: posts.authorId,
+            sourceId: posts.sourceId,
+            sourceAuthor: posts.sourceAuthor,
+            createdAt: posts.createdAt,
             // Source info
-            sourceName: feed_source.name,
-            sourceSlug: feed_source.slug,
-            sourceLogo: feed_source.logoUrl,
-            sourceWebsite: feed_source.websiteUrl,
-            sourceCategory: feed_source.category,
+            sourceName: feed_sources.name,
+            sourceSlug: feed_sources.slug,
+            sourceLogo: feed_sources.logoUrl,
+            sourceWebsite: feed_sources.websiteUrl,
+            sourceCategory: feed_sources.category,
             // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
             // User-specific (null when not logged in)
-            userVote: sql<"UP" | "DOWN" | null>`NULL`,
+            userVote: sql<"up" | "down" | null>`NULL`,
             isBookmarked: sql<boolean>`FALSE`,
           })
-          .from(content)
-          .leftJoin(feed_source, eq(content.sourceId, feed_source.id))
-          .leftJoin(user, eq(content.userId, user.id))
+          .from(posts)
+          .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+          .leftJoin(user, eq(posts.authorId, user.id))
           .where(and(...conditions))
           .orderBy(orderBy)
           .limit(limit + 1);
@@ -247,8 +286,14 @@ export const contentRouter = createTRPCRouter({
         };
       }
 
+      // Map types from DB format (article, link) to frontend format (POST, LINK)
+      const mappedItems = results.map((item) => ({
+        ...item,
+        type: toFrontendType(item.type),
+      }));
+
       return {
-        items: results,
+        items: mappedItems,
         nextCursor,
       };
     }),
@@ -261,43 +306,43 @@ export const contentRouter = createTRPCRouter({
 
       const results = await ctx.db
         .select({
-          id: content.id,
-          type: content.type,
-          title: content.title,
-          body: content.body,
-          excerpt: content.excerpt,
-          externalUrl: content.externalUrl,
-          imageUrl: content.imageUrl,
-          ogImageUrl: content.ogImageUrl,
-          slug: content.slug,
-          canonicalUrl: content.canonicalUrl,
-          coverImage: content.coverImage,
-          publishedAt: content.publishedAt,
-          upvotes: content.upvotes,
-          downvotes: content.downvotes,
-          clickCount: content.clickCount,
-          readTimeMins: content.readTimeMins,
-          showComments: content.showComments,
-          userId: content.userId,
-          sourceId: content.sourceId,
-          sourceAuthor: content.sourceAuthor,
-          createdAt: content.createdAt,
-          updatedAt: content.updatedAt,
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          imageUrl: posts.coverImage,
+          ogImageUrl: posts.coverImage,
+          slug: posts.slug,
+          canonicalUrl: posts.canonicalUrl,
+          coverImage: posts.coverImage,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          clickCount: posts.viewsCount,
+          readTimeMins: posts.readingTime,
+          showComments: posts.showComments,
+          userId: posts.authorId,
+          sourceId: posts.sourceId,
+          sourceAuthor: posts.sourceAuthor,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
           // Source info
-          sourceName: feed_source.name,
-          sourceSlug: feed_source.slug,
-          sourceLogo: feed_source.logoUrl,
-          sourceWebsite: feed_source.websiteUrl,
-          sourceCategory: feed_source.category,
+          sourceName: feed_sources.name,
+          sourceSlug: feed_sources.slug,
+          sourceLogo: feed_sources.logoUrl,
+          sourceWebsite: feed_sources.websiteUrl,
+          sourceCategory: feed_sources.category,
           // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
         })
-        .from(content)
-        .leftJoin(feed_source, eq(content.sourceId, feed_source.id))
-        .leftJoin(user, eq(content.userId, user.id))
-        .where(eq(content.id, input.id))
+        .from(posts)
+        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(eq(posts.id, input.id))
         .limit(1);
 
       if (results.length === 0) {
@@ -310,28 +355,28 @@ export const contentRouter = createTRPCRouter({
       const item = results[0];
 
       // Get user vote if logged in
-      let userVote: "UP" | "DOWN" | null = null;
+      let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
       if (userId) {
         const [voteResult, bookmarkResult] = await Promise.all([
           ctx.db
-            .select({ voteType: content_vote.voteType })
-            .from(content_vote)
+            .select({ voteType: post_votes.voteType })
+            .from(post_votes)
             .where(
               and(
-                eq(content_vote.contentId, input.id),
-                eq(content_vote.userId, userId)
+                eq(post_votes.postId, input.id),
+                eq(post_votes.userId, userId)
               )
             )
             .limit(1),
           ctx.db
-            .select({ id: content_bookmark.id })
-            .from(content_bookmark)
+            .select({ id: bookmarks.id })
+            .from(bookmarks)
             .where(
               and(
-                eq(content_bookmark.contentId, input.id),
-                eq(content_bookmark.userId, userId)
+                eq(bookmarks.postId, input.id),
+                eq(bookmarks.userId, userId)
               )
             )
             .limit(1),
@@ -341,17 +386,18 @@ export const contentRouter = createTRPCRouter({
         isBookmarked = bookmarkResult.length > 0;
       }
 
-      // Get discussion count
-      const discussionCountResult = await ctx.db
+      // Get comments count
+      const commentsCountResult = await ctx.db
         .select({ count: count() })
-        .from(discussion)
-        .where(eq(discussion.contentId, input.id));
+        .from(comments)
+        .where(eq(comments.postId, input.id));
 
       return {
         ...item,
+        type: toFrontendType(item.type),
         userVote,
         isBookmarked,
-        discussionCount: discussionCountResult[0]?.count ?? 0,
+        discussionCount: commentsCountResult[0]?.count ?? 0,
       };
     }),
 
@@ -359,10 +405,47 @@ export const contentRouter = createTRPCRouter({
   getBySlug: publicProcedure
     .input(GetContentBySlugSchema)
     .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+
       const results = await ctx.db
-        .select({ id: content.id })
-        .from(content)
-        .where(eq(content.slug, input.slug))
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          imageUrl: posts.coverImage,
+          ogImageUrl: posts.coverImage,
+          slug: posts.slug,
+          canonicalUrl: posts.canonicalUrl,
+          coverImage: posts.coverImage,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          clickCount: posts.viewsCount,
+          readTimeMins: posts.readingTime,
+          showComments: posts.showComments,
+          userId: posts.authorId,
+          sourceId: posts.sourceId,
+          sourceAuthor: posts.sourceAuthor,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+          // Source info
+          sourceName: feed_sources.name,
+          sourceSlug: feed_sources.slug,
+          sourceLogo: feed_sources.logoUrl,
+          sourceWebsite: feed_sources.websiteUrl,
+          sourceCategory: feed_sources.category,
+          // Author info
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+        })
+        .from(posts)
+        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(eq(posts.slug, input.slug))
         .limit(1);
 
       if (results.length === 0) {
@@ -372,10 +455,53 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Reuse getById logic
-      return ctx.db.query.content.findFirst({
-        where: eq(content.slug, input.slug),
-      });
+      const item = results[0];
+
+      // Get user vote if logged in
+      let userVote: "up" | "down" | null = null;
+      let isBookmarked = false;
+
+      if (userId) {
+        const [voteResult, bookmarkResult] = await Promise.all([
+          ctx.db
+            .select({ voteType: post_votes.voteType })
+            .from(post_votes)
+            .where(
+              and(
+                eq(post_votes.postId, item.id),
+                eq(post_votes.userId, userId)
+              )
+            )
+            .limit(1),
+          ctx.db
+            .select({ id: bookmarks.id })
+            .from(bookmarks)
+            .where(
+              and(
+                eq(bookmarks.postId, item.id),
+                eq(bookmarks.userId, userId)
+              )
+            )
+            .limit(1),
+        ]);
+
+        userVote = voteResult[0]?.voteType ?? null;
+        isBookmarked = bookmarkResult.length > 0;
+      }
+
+      // Get comments count
+      const commentsCountResult = await ctx.db
+        .select({ count: count() })
+        .from(comments)
+        .where(eq(comments.postId, item.id));
+
+      return {
+        ...item,
+        type: toFrontendType(item.type),
+        userVote,
+        isBookmarked,
+        discussionCount: commentsCountResult[0]?.count ?? 0,
+      };
     }),
 
   // Create new content
@@ -385,10 +511,10 @@ export const contentRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
 
       // Validate based on content type
-      if (input.type === "ARTICLE" && !input.body) {
+      if (input.type === "POST" && !input.body) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Body is required for articles",
+          message: "Body is required for posts",
         });
       }
 
@@ -400,33 +526,31 @@ export const contentRouter = createTRPCRouter({
       }
 
       const slug = generateSlug(input.title);
-      const readTimeMins = calculateReadTime(input.body);
+      const readingTime = calculateReadTime(input.body);
+      const dbType = toDbType(input.type);
 
       const [newContent] = await ctx.db
-        .insert(content)
+        .insert(posts)
         .values({
-          type: input.type,
+          type: dbType,
           title: input.title,
           body: input.body,
           excerpt: input.excerpt,
           externalUrl: input.externalUrl,
-          imageUrl: input.imageUrl,
-          coverImage: input.coverImage,
+          coverImage: input.imageUrl || input.coverImage,
           canonicalUrl: input.canonicalUrl,
-          userId,
+          authorId: userId,
           slug,
-          readTimeMins,
-          published: input.published,
+          readingTime,
+          status: input.published ? "published" : "draft",
           publishedAt: input.published ? new Date().toISOString() : null,
-          showComments: input.showComments,
+          showComments: input.showComments ?? true,
         })
         .returning();
 
       // Add tags if provided
       if (input.tags && input.tags.length > 0) {
-        // Get or create tags
         for (const tagName of input.tags) {
-          // Try to find existing tag
           const existingTags = await ctx.db
             .select({ id: tag.id })
             .from(tag)
@@ -437,7 +561,6 @@ export const contentRouter = createTRPCRouter({
           if (existingTags.length > 0) {
             tagId = existingTags[0].id;
           } else {
-            // Create new tag
             const [newTag] = await ctx.db
               .insert(tag)
               .values({ title: tagName.toLowerCase() })
@@ -445,10 +568,9 @@ export const contentRouter = createTRPCRouter({
             tagId = newTag.id;
           }
 
-          // Link tag to content
           await ctx.db
-            .insert(content_tag)
-            .values({ contentId: newContent.id, tagId })
+            .insert(post_tags)
+            .values({ postId: newContent.id, tagId })
             .onConflictDoNothing();
         }
       }
@@ -464,9 +586,9 @@ export const contentRouter = createTRPCRouter({
 
       // Check ownership
       const existing = await ctx.db
-        .select({ userId: content.userId, type: content.type })
-        .from(content)
-        .where(eq(content.id, input.id))
+        .select({ authorId: posts.authorId, type: posts.type })
+        .from(posts)
+        .where(eq(posts.id, input.id))
         .limit(1);
 
       if (existing.length === 0) {
@@ -476,7 +598,7 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      if (existing[0].userId !== userId) {
+      if (existing[0].authorId !== userId) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You can only edit your own content",
@@ -487,35 +609,33 @@ export const contentRouter = createTRPCRouter({
       if (input.title !== undefined) updateData.title = input.title;
       if (input.body !== undefined) {
         updateData.body = input.body;
-        updateData.readTimeMins = calculateReadTime(input.body);
+        updateData.readingTime = calculateReadTime(input.body);
       }
       if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
       if (input.externalUrl !== undefined) updateData.externalUrl = input.externalUrl;
-      if (input.imageUrl !== undefined) updateData.imageUrl = input.imageUrl;
+      if (input.imageUrl !== undefined) updateData.coverImage = input.imageUrl;
       if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
       if (input.canonicalUrl !== undefined) updateData.canonicalUrl = input.canonicalUrl;
       if (input.showComments !== undefined) updateData.showComments = input.showComments;
       if (input.published !== undefined) {
-        updateData.published = input.published;
+        updateData.status = input.published ? "published" : "draft";
         if (input.published) {
           updateData.publishedAt = new Date().toISOString();
         }
       }
 
       const [updated] = await ctx.db
-        .update(content)
+        .update(posts)
         .set(updateData)
-        .where(eq(content.id, input.id))
+        .where(eq(posts.id, input.id))
         .returning();
 
       // Update tags if provided
       if (input.tags !== undefined) {
-        // Remove existing tags
         await ctx.db
-          .delete(content_tag)
-          .where(eq(content_tag.contentId, input.id));
+          .delete(post_tags)
+          .where(eq(post_tags.postId, input.id));
 
-        // Add new tags
         for (const tagName of input.tags) {
           const existingTags = await ctx.db
             .select({ id: tag.id })
@@ -535,8 +655,8 @@ export const contentRouter = createTRPCRouter({
           }
 
           await ctx.db
-            .insert(content_tag)
-            .values({ contentId: input.id, tagId })
+            .insert(post_tags)
+            .values({ postId: input.id, tagId })
             .onConflictDoNothing();
         }
       }
@@ -552,9 +672,9 @@ export const contentRouter = createTRPCRouter({
 
       // Check ownership
       const existing = await ctx.db
-        .select({ userId: content.userId })
-        .from(content)
-        .where(eq(content.id, input.id))
+        .select({ authorId: posts.authorId })
+        .from(posts)
+        .where(eq(posts.id, input.id))
         .limit(1);
 
       if (existing.length === 0) {
@@ -564,14 +684,14 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      if (existing[0].userId !== userId) {
+      if (existing[0].authorId !== userId) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "You can only delete your own content",
         });
       }
 
-      await ctx.db.delete(content).where(eq(content.id, input.id));
+      await ctx.db.delete(posts).where(eq(posts.id, input.id));
 
       return { success: true };
     }),
@@ -585,9 +705,9 @@ export const contentRouter = createTRPCRouter({
 
       // Check if content exists
       const contentItem = await ctx.db
-        .select({ id: content.id, upvotes: content.upvotes, downvotes: content.downvotes })
-        .from(content)
-        .where(eq(content.id, contentId))
+        .select({ id: posts.id, upvotes: posts.upvotesCount, downvotes: posts.downvotesCount })
+        .from(posts)
+        .where(eq(posts.id, contentId))
         .limit(1);
 
       if (contentItem.length === 0) {
@@ -599,12 +719,12 @@ export const contentRouter = createTRPCRouter({
 
       // Get existing vote
       const existingVote = await ctx.db
-        .select({ id: content_vote.id, voteType: content_vote.voteType })
-        .from(content_vote)
+        .select({ id: post_votes.id, voteType: post_votes.voteType })
+        .from(post_votes)
         .where(
           and(
-            eq(content_vote.contentId, contentId),
-            eq(content_vote.userId, userId)
+            eq(post_votes.postId, contentId),
+            eq(post_votes.userId, userId)
           )
         )
         .limit(1);
@@ -614,66 +734,66 @@ export const contentRouter = createTRPCRouter({
         if (existingVote.length > 0) {
           const oldVoteType = existingVote[0].voteType;
           await ctx.db
-            .delete(content_vote)
-            .where(eq(content_vote.id, existingVote[0].id));
+            .delete(post_votes)
+            .where(eq(post_votes.id, existingVote[0].id));
 
           // Update vote counts
-          if (oldVoteType === "UP") {
+          if (oldVoteType === "up") {
             await ctx.db
-              .update(content)
-              .set({ upvotes: decrement(content.upvotes) })
-              .where(eq(content.id, contentId));
+              .update(posts)
+              .set({ upvotesCount: decrement(posts.upvotesCount) })
+              .where(eq(posts.id, contentId));
           } else {
             await ctx.db
-              .update(content)
-              .set({ downvotes: decrement(content.downvotes) })
-              .where(eq(content.id, contentId));
+              .update(posts)
+              .set({ downvotesCount: decrement(posts.downvotesCount) })
+              .where(eq(posts.id, contentId));
           }
         }
       } else if (existingVote.length === 0) {
         // New vote
-        await ctx.db.insert(content_vote).values({
-          contentId,
+        await ctx.db.insert(post_votes).values({
+          postId: contentId,
           userId,
-          voteType,
+          voteType: voteType as "up" | "down",
         });
 
         // Update vote counts
-        if (voteType === "UP") {
+        if (voteType === "up") {
           await ctx.db
-            .update(content)
-            .set({ upvotes: increment(content.upvotes) })
-            .where(eq(content.id, contentId));
+            .update(posts)
+            .set({ upvotesCount: increment(posts.upvotesCount) })
+            .where(eq(posts.id, contentId));
         } else {
           await ctx.db
-            .update(content)
-            .set({ downvotes: increment(content.downvotes) })
-            .where(eq(content.id, contentId));
+            .update(posts)
+            .set({ downvotesCount: increment(posts.downvotesCount) })
+            .where(eq(posts.id, contentId));
         }
       } else if (existingVote[0].voteType !== voteType) {
         // Change vote
         await ctx.db
-          .update(content_vote)
-          .set({ voteType })
-          .where(eq(content_vote.id, existingVote[0].id));
+          .update(post_votes)
+          .set({ voteType: voteType as "up" | "down" })
+          .where(eq(post_votes.id, existingVote[0].id));
 
         // Update vote counts (flip both)
-        if (voteType === "UP") {
+        if (voteType === "up") {
           await ctx.db
-            .update(content)
+            .update(posts)
             .set({
-              upvotes: increment(content.upvotes),
-              downvotes: decrement(content.downvotes),
+              upvotesCount: increment(posts.upvotesCount),
+              downvotesCount: decrement(posts.downvotesCount),
             })
-            .where(eq(content.id, contentId));
+            .where(eq(posts.id, contentId));
         } else {
           await ctx.db
-            .update(content)
+            .update(posts)
             .set({
-              upvotes: decrement(content.upvotes),
-              downvotes: increment(content.downvotes),
+              upvotesCount: decrement(posts.upvotesCount),
+              downvotesCount: increment(posts.downvotesCount),
             })
-            .where(eq(content.id, contentId));
+            .where(eq(posts.id, contentId));
         }
       }
 
@@ -689,9 +809,9 @@ export const contentRouter = createTRPCRouter({
 
       // Check if content exists
       const contentItem = await ctx.db
-        .select({ id: content.id })
-        .from(content)
-        .where(eq(content.id, contentId))
+        .select({ id: posts.id })
+        .from(posts)
+        .where(eq(posts.id, contentId))
         .limit(1);
 
       if (contentItem.length === 0) {
@@ -703,16 +823,16 @@ export const contentRouter = createTRPCRouter({
 
       if (setBookmarked) {
         await ctx.db
-          .insert(content_bookmark)
-          .values({ contentId, userId })
+          .insert(bookmarks)
+          .values({ postId: contentId, userId })
           .onConflictDoNothing();
       } else {
         await ctx.db
-          .delete(content_bookmark)
+          .delete(bookmarks)
           .where(
             and(
-              eq(content_bookmark.contentId, contentId),
-              eq(content_bookmark.userId, userId)
+              eq(bookmarks.postId, contentId),
+              eq(bookmarks.userId, userId)
             )
           );
       }
@@ -725,9 +845,9 @@ export const contentRouter = createTRPCRouter({
     .input(TrackClickContentSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.db
-        .update(content)
-        .set({ clickCount: increment(content.clickCount) })
-        .where(eq(content.id, input.contentId));
+        .update(posts)
+        .set({ viewsCount: increment(posts.viewsCount) })
+        .where(eq(posts.id, input.contentId));
 
       return { success: true };
     }),
@@ -739,37 +859,38 @@ export const contentRouter = createTRPCRouter({
       const { userId: targetUserId, type, limit, cursor } = input;
       const currentUserId = ctx.session?.user?.id;
 
-      const conditions = [eq(content.userId, targetUserId)];
+      const conditions = [eq(posts.authorId, targetUserId)];
 
       // Only show published content unless viewing own profile
       if (currentUserId !== targetUserId) {
-        conditions.push(eq(content.published, true));
+        conditions.push(eq(posts.status, "published"));
       }
 
       if (type) {
-        conditions.push(eq(content.type, type));
+        const dbType = toDbType(type);
+        conditions.push(eq(posts.type, dbType));
       }
 
       if (cursor?.publishedAt) {
-        conditions.push(lte(content.publishedAt, cursor.publishedAt));
+        conditions.push(lte(posts.publishedAt, cursor.publishedAt));
       }
 
       const results = await ctx.db
         .select({
-          id: content.id,
-          type: content.type,
-          title: content.title,
-          excerpt: content.excerpt,
-          slug: content.slug,
-          publishedAt: content.publishedAt,
-          upvotes: content.upvotes,
-          downvotes: content.downvotes,
-          published: content.published,
-          createdAt: content.createdAt,
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          slug: posts.slug,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          published: sql<boolean>`${posts.status} = 'published'`,
+          createdAt: posts.createdAt,
         })
-        .from(content)
+        .from(posts)
         .where(and(...conditions))
-        .orderBy(desc(content.publishedAt))
+        .orderBy(desc(posts.publishedAt))
         .limit(limit + 1);
 
       let nextCursor: { id: string; publishedAt?: string } | undefined;
@@ -781,8 +902,14 @@ export const contentRouter = createTRPCRouter({
         };
       }
 
+      // Map types from DB format to frontend format
+      const mappedItems = results.map((item) => ({
+        ...item,
+        type: toFrontendType(item.type),
+      }));
+
       return {
-        items: results,
+        items: mappedItems,
         nextCursor,
       };
     }),
@@ -794,35 +921,35 @@ export const contentRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const { limit, cursor } = input;
 
-      const conditions = [eq(content_bookmark.userId, userId)];
+      const conditions = [eq(bookmarks.userId, userId)];
 
       if (cursor?.createdAt) {
-        conditions.push(lte(content_bookmark.createdAt, cursor.createdAt));
+        conditions.push(lte(bookmarks.createdAt, cursor.createdAt));
       }
 
       const results = await ctx.db
         .select({
-          id: content.id,
-          type: content.type,
-          title: content.title,
-          excerpt: content.excerpt,
-          externalUrl: content.externalUrl,
-          slug: content.slug,
-          publishedAt: content.publishedAt,
-          upvotes: content.upvotes,
-          downvotes: content.downvotes,
-          sourceName: feed_source.name,
-          sourceSlug: feed_source.slug,
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          slug: posts.slug,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          sourceName: feed_sources.name,
+          sourceSlug: feed_sources.slug,
           authorName: user.name,
           authorUsername: user.username,
-          bookmarkedAt: content_bookmark.createdAt,
+          bookmarkedAt: bookmarks.createdAt,
         })
-        .from(content_bookmark)
-        .innerJoin(content, eq(content_bookmark.contentId, content.id))
-        .leftJoin(feed_source, eq(content.sourceId, feed_source.id))
-        .leftJoin(user, eq(content.userId, user.id))
+        .from(bookmarks)
+        .innerJoin(posts, eq(bookmarks.postId, posts.id))
+        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
         .where(and(...conditions))
-        .orderBy(desc(content_bookmark.createdAt))
+        .orderBy(desc(bookmarks.createdAt))
         .limit(limit + 1);
 
       let nextCursor: { id: string; createdAt?: string } | undefined;
@@ -834,8 +961,14 @@ export const contentRouter = createTRPCRouter({
         };
       }
 
+      // Map types from DB format to frontend format
+      const mappedItems = results.map((item) => ({
+        ...item,
+        type: toFrontendType(item.type),
+      }));
+
       return {
-        items: results,
+        items: mappedItems,
         nextCursor,
       };
     }),
@@ -843,9 +976,9 @@ export const contentRouter = createTRPCRouter({
   // Get categories (from sources)
   getCategories: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
-      .selectDistinct({ category: feed_source.category })
-      .from(feed_source)
-      .where(isNotNull(feed_source.category));
+      .selectDistinct({ category: feed_sources.category })
+      .from(feed_sources)
+      .where(isNotNull(feed_sources.category));
 
     return results
       .map((r) => r.category)
@@ -857,13 +990,247 @@ export const contentRouter = createTRPCRouter({
   getTypeCounts: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .select({
-        type: content.type,
+        type: posts.type,
         count: count(),
       })
-      .from(content)
-      .where(eq(content.published, true))
-      .groupBy(content.type);
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .groupBy(posts.type);
 
     return results;
   }),
+
+  // Edit Draft - get user's own content by ID for editing
+  editDraft: protectedProcedure
+    .input(EditDraftContentSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          imageUrl: posts.coverImage,
+          canonicalUrl: posts.canonicalUrl,
+          coverImage: posts.coverImage,
+          slug: posts.slug,
+          published: sql<boolean>`${posts.status} = 'published'`,
+          publishedAt: posts.publishedAt,
+          showComments: posts.showComments,
+          readTimeMins: posts.readingTime,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.id, input.id),
+            eq(posts.authorId, userId)
+          )
+        )
+        .limit(1);
+
+      if (results.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Content not found or you don't have permission to edit it",
+        });
+      }
+
+      // Get tags for this content
+      const contentTags = await ctx.db
+        .select({
+          tag: {
+            id: tag.id,
+            title: tag.title,
+          },
+        })
+        .from(post_tags)
+        .innerJoin(tag, eq(post_tags.tagId, tag.id))
+        .where(eq(post_tags.postId, input.id));
+
+      return {
+        ...results[0],
+        type: toFrontendType(results[0].type),
+        tags: contentTags,
+      };
+    }),
+
+  // My Drafts - get user's unpublished ARTICLE content
+  myDrafts: protectedProcedure
+    .input(MyDraftsContentSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          slug: posts.slug,
+          published: sql<boolean>`${posts.status} = 'published'`,
+          publishedAt: posts.publishedAt,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.authorId, userId),
+            eq(posts.type, "article"),
+            eq(posts.status, "draft")
+          )
+        )
+        .orderBy(desc(posts.updatedAt))
+        .limit(input.limit);
+
+      // Map types from DB format to frontend format
+      return results.map((item) => ({
+        ...item,
+        type: toFrontendType(item.type),
+      }));
+    }),
+
+  // My Published - get user's published ARTICLE content
+  myPublished: protectedProcedure
+    .input(MyPublishedContentSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const now = new Date().toISOString();
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          slug: posts.slug,
+          published: sql<boolean>`${posts.status} = 'published'`,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.authorId, userId),
+            eq(posts.type, "article"),
+            eq(posts.status, "published"),
+            lte(posts.publishedAt, now)
+          )
+        )
+        .orderBy(desc(posts.publishedAt))
+        .limit(input.limit);
+
+      // Map types from DB format to frontend format
+      return results.map((item) => ({
+        ...item,
+        type: toFrontendType(item.type),
+      }));
+    }),
+
+  // My Scheduled - get user's scheduled ARTICLE content (publishedAt > now)
+  myScheduled: protectedProcedure
+    .input(MyScheduledContentSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const now = new Date().toISOString();
+
+      const results = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          slug: posts.slug,
+          published: sql<boolean>`${posts.status} = 'published'`,
+          publishedAt: posts.publishedAt,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+        })
+        .from(posts)
+        .where(
+          and(
+            eq(posts.authorId, userId),
+            eq(posts.type, "article"),
+            eq(posts.status, "scheduled"),
+            gt(posts.publishedAt, now)
+          )
+        )
+        .orderBy(desc(posts.publishedAt))
+        .limit(input.limit);
+
+      // Map types from DB format to frontend format
+      return results.map((item) => ({
+        ...item,
+        type: toFrontendType(item.type),
+      }));
+    }),
+
+  // Publish - separate mutation to publish/unpublish content
+  publish: protectedProcedure
+    .input(PublishContentSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      // Check ownership
+      const existing = await ctx.db
+        .select({
+          id: posts.id,
+          authorId: posts.authorId,
+          title: posts.title,
+          slug: posts.slug,
+          status: posts.status,
+        })
+        .from(posts)
+        .where(eq(posts.id, input.id))
+        .limit(1);
+
+      if (existing.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Content not found",
+        });
+      }
+
+      if (existing[0].authorId !== userId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only publish your own content",
+        });
+      }
+
+      const updateData: Record<string, unknown> = {
+        status: input.published ? "published" : "draft",
+      };
+
+      // Set publishedAt when publishing
+      if (input.published) {
+        if (input.publishTime) {
+          updateData.publishedAt = input.publishTime.toISOString();
+        } else {
+          updateData.publishedAt = new Date().toISOString();
+        }
+
+        // Generate new slug if this is the first time publishing
+        if (existing[0].status === "draft" && existing[0].title) {
+          updateData.slug = generateSlug(existing[0].title);
+        }
+      }
+
+      const [updated] = await ctx.db
+        .update(posts)
+        .set(updateData)
+        .where(eq(posts.id, input.id))
+        .returning();
+
+      return updated;
+    }),
 });

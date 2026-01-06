@@ -21,6 +21,8 @@ import {
   content_report,
   content,
   discussion,
+  aggregated_article,
+  feed_source,
 } from "@/server/db/schema";
 import { and, count, desc, eq, lt } from "drizzle-orm";
 import { db } from "@/server/db";
@@ -52,26 +54,32 @@ export const reportRouter = createTRPCRouter({
           const [commentDetails] = await ctx.db
             .select({
               body: comment.body,
-              post: { slug: post.slug },
-              user: {
-                email: user.email,
-                userId: user.id,
-                username: user.username,
-              },
+              postSlug: post.slug,
+              postAuthorUsername: user.username,
+              commentUserEmail: user.email,
+              commentUserId: user.id,
+              commentUserUsername: user.username,
             })
             .from(comment)
             .innerJoin(user, eq(user.id, comment.userId))
             .innerJoin(post, eq(comment.postId, post.id))
             .where(eq(comment.id, id));
 
+          // Get post author username
+          const [postAuthor] = await ctx.db
+            .select({ username: user.username })
+            .from(post)
+            .innerJoin(user, eq(user.id, post.userId))
+            .where(eq(post.slug, commentDetails.postSlug));
+
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/articles/${commentDetails.post.slug}`,
+            url: `${getBaseUrl()}/${postAuthor.username}/${commentDetails.postSlug}`,
             id,
-            email: commentDetails.user.email || "",
+            email: commentDetails.commentUserEmail || "",
             comment: commentDetails.body || "",
-            userId: commentDetails.user.userId || "",
-            username: commentDetails.user.username || "",
+            userId: commentDetails.commentUserId || "",
+            username: commentDetails.commentUserUsername || "",
             reportedBy: {
               username: reportingUser.username,
               id: reportingUser.id,
@@ -106,7 +114,7 @@ export const reportRouter = createTRPCRouter({
 
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/articles/${postDetails.slug}`,
+            url: `${getBaseUrl()}/${postDetails.user.username}/${postDetails.slug}`,
             id,
             email: postDetails.user.email || "",
             title: postDetails.title,
@@ -123,6 +131,52 @@ export const reportRouter = createTRPCRouter({
             recipient: process.env.ADMIN_EMAIL,
             htmlMessage,
             subject: "A user has reported an article - codu.co",
+          });
+          return { message: "Report has been sent!" };
+        }
+
+        if (type === "article" && typeof id === "string") {
+          const [articleDetails] = await ctx.db
+            .select({
+              slug: aggregated_article.slug,
+              shortId: aggregated_article.shortId,
+              title: aggregated_article.title,
+              url: aggregated_article.externalUrl,
+              sourceSlug: feed_source.slug,
+              sourceName: feed_source.name,
+            })
+            .from(aggregated_article)
+            .leftJoin(feed_source, eq(aggregated_article.sourceId, feed_source.id))
+            .where(eq(aggregated_article.id, id));
+
+          if (!articleDetails) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Article not found",
+            });
+          }
+
+          // Use slug if available, fallback to shortId
+          const articlePath = articleDetails.slug || articleDetails.shortId;
+          const report = {
+            reason: body,
+            url: `${getBaseUrl()}/${articleDetails.sourceSlug}/${articlePath}`,
+            id: String(id),
+            email: "", // Feed articles don't have a user email
+            title: articleDetails.title,
+            userId: "", // Feed articles don't have a userId
+            username: articleDetails.sourceName || articleDetails.sourceSlug || "Unknown Source",
+            reportedBy: {
+              username: reportingUser.username,
+              id: reportingUser.id,
+              email: reportingUser?.email || "",
+            },
+          };
+          const htmlMessage = createArticleReportEmailTemplate(report);
+          await sendEmail({
+            recipient: process.env.ADMIN_EMAIL,
+            htmlMessage,
+            subject: "A user has reported a feed article - codu.co",
           });
           return { message: "Report has been sent!" };
         }

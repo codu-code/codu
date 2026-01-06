@@ -2,25 +2,32 @@ import { createTRPCRouter } from "../trpc";
 import { postRouter } from "./post";
 import { profileRouter } from "./profile";
 import { commentRouter } from "./comment";
-import { discussionRouter } from "./discussion";
-
 import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
 import { reportRouter } from "./report";
 import { tagRouter } from "./tag";
 import { feedRouter } from "./feed";
+import { sponsorRouter } from "./sponsor";
+
+// Legacy routers (kept for backward compatibility during migration)
+import { discussionRouter } from "./discussion";
 import { contentRouter } from "./content";
 
 export const appRouter = createTRPCRouter({
+  // Primary routers (using new schema)
   post: postRouter,
-  profile: profileRouter,
   comment: commentRouter,
-  discussion: discussionRouter,
+  profile: profileRouter,
   notification: notificationRouter,
   admin: adminRouter,
   report: reportRouter,
   tag: tagRouter,
   feed: feedRouter,
+  sponsor: sponsorRouter,
+
+  // Legacy routers (for backward compatibility)
+  // TODO: Remove once all frontend is migrated
+  discussion: discussionRouter,
   content: contentRouter,
 });
 
