@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { EditorContent } from "@tiptap/react";
 import TextareaAutosize from "react-textarea-autosize";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
-import { useDiscussionEditor } from "./hooks/useDiscussionEditor";
-import { DiscussionEditorToolbar } from "./DiscussionEditorToolbar";
+import { useDiscussionEditor } from "./hooks/useEditor";
+import { DiscussionEditorToolbar } from "./Toolbar";
 import { MarkdownHelpModal } from "./MarkdownHelpModal";
 import type { DiscussionEditorProps } from "./types";
 

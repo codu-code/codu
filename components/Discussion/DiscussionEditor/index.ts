@@ -1,2 +1,2 @@
-export { DiscussionEditor } from "./DiscussionEditor";
+export { DiscussionEditor } from "./Editor";
 export type { DiscussionEditorProps, EditorMode } from "./types";
