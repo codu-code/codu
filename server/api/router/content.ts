@@ -729,26 +729,13 @@ export const contentRouter = createTRPCRouter({
         )
         .limit(1);
 
+      // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
         // Remove vote
         if (existingVote.length > 0) {
-          const oldVoteType = existingVote[0].voteType;
           await ctx.db
             .delete(post_votes)
             .where(eq(post_votes.id, existingVote[0].id));
-
-          // Update vote counts
-          if (oldVoteType === "up") {
-            await ctx.db
-              .update(posts)
-              .set({ upvotesCount: decrement(posts.upvotesCount) })
-              .where(eq(posts.id, contentId));
-          } else {
-            await ctx.db
-              .update(posts)
-              .set({ downvotesCount: decrement(posts.downvotesCount) })
-              .where(eq(posts.id, contentId));
-          }
         }
       } else if (existingVote.length === 0) {
         // New vote
@@ -757,44 +744,12 @@ export const contentRouter = createTRPCRouter({
           userId,
           voteType: voteType as "up" | "down",
         });
-
-        // Update vote counts
-        if (voteType === "up") {
-          await ctx.db
-            .update(posts)
-            .set({ upvotesCount: increment(posts.upvotesCount) })
-            .where(eq(posts.id, contentId));
-        } else {
-          await ctx.db
-            .update(posts)
-            .set({ downvotesCount: increment(posts.downvotesCount) })
-            .where(eq(posts.id, contentId));
-        }
       } else if (existingVote[0].voteType !== voteType) {
         // Change vote
         await ctx.db
           .update(post_votes)
           .set({ voteType: voteType as "up" | "down" })
           .where(eq(post_votes.id, existingVote[0].id));
-
-        // Update vote counts (flip both)
-        if (voteType === "up") {
-          await ctx.db
-            .update(posts)
-            .set({
-              upvotesCount: increment(posts.upvotesCount),
-              downvotesCount: decrement(posts.downvotesCount),
-            })
-            .where(eq(posts.id, contentId));
-        } else {
-          await ctx.db
-            .update(posts)
-            .set({
-              upvotesCount: decrement(posts.upvotesCount),
-              downvotesCount: increment(posts.downvotesCount),
-            })
-            .where(eq(posts.id, contentId));
-        }
       }
 
       return { success: true };

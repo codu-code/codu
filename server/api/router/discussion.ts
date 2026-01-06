@@ -99,11 +99,7 @@ export const discussionRouter = createTRPCRouter({
         .set({ path: finalPath })
         .where(eq(comments.id, createdComment.id));
 
-      // Update post's comment count
-      await ctx.db
-        .update(posts)
-        .set({ commentsCount: increment(posts.commentsCount) })
-        .where(eq(posts.id, contentId));
+      // Note: Comment count is updated via trigger (tr_post_comments_count) on INSERT
 
       // Send notifications for replies
       if (parentId && parentAuthorId && parentAuthorId !== userId) {
@@ -175,7 +171,7 @@ export const discussionRouter = createTRPCRouter({
         .set({ deletedAt: new Date().toISOString() })
         .where(eq(comments.id, id));
 
-      // Decrement post's comment count
+      // Manual decrement needed because soft delete (UPDATE) doesn't trigger tr_post_comments_count
       await ctx.db
         .update(posts)
         .set({ commentsCount: decrement(posts.commentsCount) })
@@ -217,26 +213,13 @@ export const discussionRouter = createTRPCRouter({
         )
         .limit(1);
 
+      // Database triggers handle vote count updates automatically (tr_comment_vote_counts)
       if (voteType === null) {
         // Remove vote
         if (existingVote.length > 0) {
-          const oldVoteType = existingVote[0].voteType;
           await ctx.db
             .delete(comment_votes)
             .where(eq(comment_votes.id, existingVote[0].id));
-
-          // Update vote counts
-          if (oldVoteType === "up") {
-            await ctx.db
-              .update(comments)
-              .set({ upvotesCount: decrement(comments.upvotesCount) })
-              .where(eq(comments.id, commentId));
-          } else {
-            await ctx.db
-              .update(comments)
-              .set({ downvotesCount: decrement(comments.downvotesCount) })
-              .where(eq(comments.id, commentId));
-          }
         }
         return { voteType: null };
       } else if (existingVote.length === 0) {
@@ -246,19 +229,6 @@ export const discussionRouter = createTRPCRouter({
           userId,
           voteType: voteType as "up" | "down",
         });
-
-        // Update vote counts
-        if (voteType === "up") {
-          await ctx.db
-            .update(comments)
-            .set({ upvotesCount: increment(comments.upvotesCount) })
-            .where(eq(comments.id, commentId));
-        } else {
-          await ctx.db
-            .update(comments)
-            .set({ downvotesCount: increment(comments.downvotesCount) })
-            .where(eq(comments.id, commentId));
-        }
         return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
         // Change vote
@@ -266,25 +236,6 @@ export const discussionRouter = createTRPCRouter({
           .update(comment_votes)
           .set({ voteType: voteType as "up" | "down" })
           .where(eq(comment_votes.id, existingVote[0].id));
-
-        // Update vote counts (flip both)
-        if (voteType === "up") {
-          await ctx.db
-            .update(comments)
-            .set({
-              upvotesCount: increment(comments.upvotesCount),
-              downvotesCount: decrement(comments.downvotesCount),
-            })
-            .where(eq(comments.id, commentId));
-        } else {
-          await ctx.db
-            .update(comments)
-            .set({
-              upvotesCount: decrement(comments.upvotesCount),
-              downvotesCount: increment(comments.downvotesCount),
-            })
-            .where(eq(comments.id, commentId));
-        }
         return { voteType };
       }
 

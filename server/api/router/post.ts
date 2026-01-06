@@ -689,28 +689,13 @@ export const postRouter = createTRPCRouter({
         )
         .limit(1);
 
-      // Triggers handle counter updates, but we still update manually for consistency
-      // until triggers are verified in production
+      // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
         // Remove vote
         if (existingVote.length > 0) {
-          const oldVoteType = existingVote[0].voteType;
           await ctx.db
             .delete(postVotes)
             .where(eq(postVotes.id, existingVote[0].id));
-
-          // Update vote counts manually (triggers should handle this too)
-          if (oldVoteType === "up") {
-            await ctx.db
-              .update(posts)
-              .set({ upvotesCount: decrement(posts.upvotesCount) })
-              .where(eq(posts.id, postId));
-          } else {
-            await ctx.db
-              .update(posts)
-              .set({ downvotesCount: decrement(posts.downvotesCount) })
-              .where(eq(posts.id, postId));
-          }
         }
         return { voteType: null };
       } else if (existingVote.length === 0) {
@@ -720,19 +705,6 @@ export const postRouter = createTRPCRouter({
           userId,
           voteType,
         });
-
-        // Update vote counts
-        if (voteType === "up") {
-          await ctx.db
-            .update(posts)
-            .set({ upvotesCount: increment(posts.upvotesCount) })
-            .where(eq(posts.id, postId));
-        } else {
-          await ctx.db
-            .update(posts)
-            .set({ downvotesCount: increment(posts.downvotesCount) })
-            .where(eq(posts.id, postId));
-        }
         return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
         // Change vote
@@ -740,25 +712,6 @@ export const postRouter = createTRPCRouter({
           .update(postVotes)
           .set({ voteType })
           .where(eq(postVotes.id, existingVote[0].id));
-
-        // Update vote counts (flip both)
-        if (voteType === "up") {
-          await ctx.db
-            .update(posts)
-            .set({
-              upvotesCount: increment(posts.upvotesCount),
-              downvotesCount: decrement(posts.downvotesCount),
-            })
-            .where(eq(posts.id, postId));
-        } else {
-          await ctx.db
-            .update(posts)
-            .set({
-              upvotesCount: decrement(posts.upvotesCount),
-              downvotesCount: increment(posts.downvotesCount),
-            })
-            .where(eq(posts.id, postId));
-        }
         return { voteType };
       }
 
