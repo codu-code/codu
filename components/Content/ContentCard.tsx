@@ -24,7 +24,7 @@ import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 
-type ContentType = "ARTICLE" | "LINK" | "QUESTION" | "VIDEO" | "DISCUSSION";
+type ContentType = "POST" | "LINK" | "QUESTION" | "VIDEO" | "DISCUSSION";
 
 type Props = {
   id: string;
@@ -50,7 +50,7 @@ type Props = {
   sourceWebsite?: string | null;
   sourceAuthor?: string | null;
   // User state
-  userVote?: "UP" | "DOWN" | null;
+  userVote?: "up" | "down" | null;
   isBookmarked?: boolean;
   // Options
   showBookmark?: boolean;
@@ -107,7 +107,7 @@ const ensureHttps = (url: string | null | undefined): string | null => {
 
 // Content type badge colors
 const typeColors: Record<ContentType, { bg: string; text: string }> = {
-  ARTICLE: { bg: "bg-blue-100 dark:bg-blue-900", text: "text-blue-700 dark:text-blue-300" },
+  POST: { bg: "bg-blue-100 dark:bg-blue-900", text: "text-blue-700 dark:text-blue-300" },
   LINK: { bg: "bg-green-100 dark:bg-green-900", text: "text-green-700 dark:text-green-300" },
   QUESTION: { bg: "bg-purple-100 dark:bg-purple-900", text: "text-purple-700 dark:text-purple-300" },
   VIDEO: { bg: "bg-red-100 dark:bg-red-900", text: "text-red-700 dark:text-red-300" },
@@ -115,7 +115,7 @@ const typeColors: Record<ContentType, { bg: string; text: string }> = {
 };
 
 const typeLabels: Record<ContentType, string> = {
-  ARTICLE: "Article",
+  POST: "Article",
   LINK: "Link",
   QUESTION: "Question",
   VIDEO: "Video",
@@ -187,7 +187,7 @@ const ContentCard = ({
     trackClick({ contentId: id });
   };
 
-  const handleVote = (voteType: "UP" | "DOWN" | null) => {
+  const handleVote = (voteType: "up" | "down" | null) => {
     if (!session) {
       signIn();
       return;
@@ -266,7 +266,7 @@ const ContentCard = ({
         )}
 
         {/* Type badge - only show for non-articles */}
-        {type !== "ARTICLE" && (
+        {type !== "POST" && (
           <>
             <span aria-hidden="true">·</span>
             <span
@@ -326,10 +326,10 @@ const ContentCard = ({
             {/* Vote buttons */}
             <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
               <button
-                onClick={() => handleVote(userVote === "UP" ? null : "UP")}
+                onClick={() => handleVote(userVote === "up" ? null : "up")}
                 disabled={voteStatus === "pending"}
                 className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                  userVote === "UP"
+                  userVote === "up"
                     ? "text-green-500"
                     : "text-neutral-400 dark:text-neutral-500"
                 }`}
@@ -349,10 +349,10 @@ const ContentCard = ({
                 {score}
               </span>
               <button
-                onClick={() => handleVote(userVote === "DOWN" ? null : "DOWN")}
+                onClick={() => handleVote(userVote === "down" ? null : "down")}
                 disabled={voteStatus === "pending"}
                 className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                  userVote === "DOWN"
+                  userVote === "down"
                     ? "text-red-500"
                     : "text-neutral-400 dark:text-neutral-500"
                 }`}
@@ -376,6 +376,7 @@ const ContentCard = ({
               <button
                 onClick={handleBookmark}
                 disabled={bookmarkStatus === "pending"}
+                aria-label={initialBookmarked ? "Remove from saved" : "Save article"}
                 className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                   initialBookmarked
                     ? "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
@@ -387,7 +388,7 @@ const ContentCard = ({
                 ) : (
                   <BookmarkOutlineIcon className="h-3.5 w-3.5" />
                 )}
-                <span className="hidden sm:inline">
+                <span className="hidden sm:inline" aria-hidden="true">
                   {initialBookmarked ? "Saved" : "Save"}
                 </span>
               </button>
@@ -396,10 +397,11 @@ const ContentCard = ({
             {/* Share button */}
             <button
               onClick={handleShare}
+              aria-label="Share article"
               className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
               <ShareIcon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Share</span>
+              <span className="hidden sm:inline" aria-hidden="true">Share</span>
             </button>
 
             {/* Triple-dot menu */}

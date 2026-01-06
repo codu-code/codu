@@ -46,9 +46,9 @@ interface Props {
 }
 
 const CommentsArea = ({ postId, postOwnerId }: Props) => {
-  const [showCommentBoxId, setShowCommentBoxId] = useState<number | null>(null);
-  const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
-  const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
+  const [showCommentBoxId, setShowCommentBoxId] = useState<string | null>(null);
+  const [editCommentBoxId, setEditCommentBoxId] = useState<string | null>(null);
+  const [viewPreviewId, setViewPreviewId] = useState<string | null>(null);
   const [initiallyLoaded, setInitiallyLoaded] = useState<boolean>(false);
 
   const { data: session } = useSession();
@@ -78,17 +78,19 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
       },
     });
 
-  const { mutate: like, status: likeStatus } = api.comment.like.useMutation({
+  const { mutate: vote, status: voteStatus } = api.comment.vote.useMutation({
     onSettled() {
       refetch();
     },
   });
 
-  const likeComment = async (commentId: number) => {
+  // Toggle upvote for a comment
+  const likeComment = async (commentId: string, currentVote: "up" | "down" | null) => {
     if (!session) return signIn();
-    if (likeStatus === "pending") return;
+    if (voteStatus === "pending") return;
     try {
-      await like({ commentId });
+      // If already upvoted, remove vote; otherwise upvote
+      await vote({ commentId, voteType: currentVote === "up" ? null : "up" });
     } catch (err) {
       toast.error("Something went wrong, try again.");
     }
@@ -124,7 +126,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
 
   const onSubmit = async (
     body: string,
-    parentId: number | undefined,
+    parentId: string | undefined,
     fieldName: FieldName,
   ) => {
     // vaidate markdoc syntax
@@ -143,7 +145,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
     if (fieldName === "edit") {
       try {
         EditCommentSchema.parse({ body, id: editCommentBoxId });
-        if (typeof editCommentBoxId !== "number")
+        if (typeof editCommentBoxId !== "string")
           throw new Error("Invalid edit.");
         await editComment({ body: body || "", id: editCommentBoxId });
         resetField(fieldName);
@@ -177,17 +179,25 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
   ) => {
     if (!commentsArr) return null;
     return commentsArr.map(
-      ({
-        body,
-        createdAt,
-        updatedAt,
-        id,
-        youLikedThis,
-        likeCount,
-        user: { name, image, username, id: userId },
-        children,
-      }) => {
-        const ast = Markdoc.parse(body);
+      (comment) => {
+        const {
+          body,
+          createdAt,
+          updatedAt,
+          id,
+          userVote,
+          score,
+          author,
+        } = comment;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const children = (comment as any).children;
+        // Handle deleted comments (author is null)
+        const name = author?.name || "[deleted]";
+        const image = author?.image || "";
+        const username = author?.username || "";
+        const userId = author?.id || "";
+        const displayBody = body || "[Comment deleted]";
+        const ast = Markdoc.parse(displayBody);
         const content = Markdoc.transform(ast, config);
         const isCurrentUser = session?.user?.id === userId;
         const isAuthor = userId === postOwnerId;
@@ -312,18 +322,18 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                   <div className="mb-4 mt-2 flex items-center">
                     <button
                       className="mr-1 rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
-                      onClick={() => likeComment(id)}
+                      onClick={() => likeComment(id, userVote)}
                     >
                       <HeartIcon
                         className={`w-6 h-6${
-                          youLikedThis
+                          userVote === "up"
                             ? "fill-red-400"
                             : "fill-neutral-400 dark:fill-neutral-600"
                         }`}
                       />
                     </button>
                     <span className="mr-4 flex text-xs font-semibold">
-                      {likeCount}
+                      {score}
                     </span>
                     <ReportModal type="comment" comment={body} id={id} />
                     {depth < 6 && (
@@ -382,8 +392,8 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
 
   interface CommentAreaProps {
     onCancel?: () => void;
-    parentId?: number;
-    id: number | null;
+    parentId?: string;
+    id: string | null;
     name: FieldName;
     editMode?: boolean;
     loading?: boolean;
@@ -499,7 +509,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
       </h2>
       <div className="mt-4">
         {session ? (
-          <CommentArea id={0} name="comment" />
+          <CommentArea id={null} name="comment" />
         ) : (
           <div className="mb-4 border-b border-neutral-800 pb-4 text-lg">
             <p className="mb-2">Hey! 👋</p>

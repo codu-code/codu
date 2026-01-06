@@ -6,8 +6,8 @@ import { signIn, useSession } from "next-auth/react";
 type Props = {
   upvotes: number;
   downvotes: number;
-  userVote: "UP" | "DOWN" | null;
-  onVote: (voteType: "UP" | "DOWN" | null) => void;
+  userVote: "up" | "down" | null;
+  onVote: (voteType: "up" | "down" | null) => void;
   isLoading?: boolean;
 };
 
@@ -21,7 +21,7 @@ const VoteButtons = ({
   const { data: session } = useSession();
   const score = upvotes - downvotes;
 
-  const handleVote = (voteType: "UP" | "DOWN") => {
+  const handleVote = (voteType: "up" | "down") => {
     if (!session) {
       signIn();
       return;
@@ -33,10 +33,10 @@ const VoteButtons = ({
   return (
     <div className="flex items-center gap-1">
       <button
-        onClick={() => handleVote("UP")}
+        onClick={() => handleVote("up")}
         disabled={isLoading}
         className={`rounded p-1 transition-colors hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
-          userVote === "UP" ? "text-orange-500" : "text-neutral-400"
+          userVote === "up" ? "text-orange-500" : "text-neutral-400"
         }`}
         aria-label="Upvote"
       >
@@ -54,10 +54,10 @@ const VoteButtons = ({
         {score}
       </span>
       <button
-        onClick={() => handleVote("DOWN")}
+        onClick={() => handleVote("down")}
         disabled={isLoading}
         className={`rounded p-1 transition-colors hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
-          userVote === "DOWN" ? "text-blue-500" : "text-neutral-400"
+          userVote === "down" ? "text-blue-500" : "text-neutral-400"
         }`}
         aria-label="Downvote"
       >

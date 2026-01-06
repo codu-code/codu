@@ -30,7 +30,7 @@ interface ArticleActionBarProps {
   postUsername: string;
   initialUpvotes: number;
   initialDownvotes: number;
-  initialUserVote: "UP" | "DOWN" | null;
+  initialUserVote: "up" | "down" | null;
   initialBookmarked: boolean;
   discussionCount?: number;
 }
@@ -64,11 +64,11 @@ const ArticleActionBar = ({
         let newUpvotes = prev.upvotes;
         let newDownvotes = prev.downvotes;
 
-        if (oldVote === "UP") newUpvotes--;
-        if (oldVote === "DOWN") newDownvotes--;
+        if (oldVote === "up") newUpvotes--;
+        if (oldVote === "down") newDownvotes--;
 
-        if (voteType === "UP") newUpvotes++;
-        if (voteType === "DOWN") newDownvotes++;
+        if (voteType === "up") newUpvotes++;
+        if (voteType === "down") newDownvotes++;
 
         return { upvotes: newUpvotes, downvotes: newDownvotes };
       });
@@ -99,7 +99,7 @@ const ArticleActionBar = ({
       },
     });
 
-  const handleVote = (voteType: "UP" | "DOWN" | null) => {
+  const handleVote = (voteType: "up" | "down" | null) => {
     if (!session) {
       signIn();
       return;
@@ -131,10 +131,10 @@ const ArticleActionBar = ({
       {/* Vote buttons */}
       <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
         <button
-          onClick={() => handleVote(userVote === "UP" ? null : "UP")}
+          onClick={() => handleVote(userVote === "up" ? null : "up")}
           disabled={voteStatus === "pending"}
           className={`rounded-l-full p-2 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-            userVote === "UP"
+            userVote === "up"
               ? "text-green-500"
               : "text-neutral-400 dark:text-neutral-500"
           }`}
@@ -154,10 +154,10 @@ const ArticleActionBar = ({
           {score}
         </span>
         <button
-          onClick={() => handleVote(userVote === "DOWN" ? null : "DOWN")}
+          onClick={() => handleVote(userVote === "down" ? null : "down")}
           disabled={voteStatus === "pending"}
           className={`rounded-r-full p-2 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-            userVote === "DOWN"
+            userVote === "down"
               ? "text-red-500"
               : "text-neutral-400 dark:text-neutral-500"
           }`}

@@ -10,15 +10,17 @@ import {
   ShareIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  FlagIcon,
 } from "@heroicons/react/20/solid";
 import { BookmarkIcon as BookmarkOutlineIcon } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Temporal } from "@js-temporal/polyfill";
+import { useReportModal } from "@/components/ReportModal/ReportModal";
 
 type Props = {
-  id: number;
+  id: string;
   shortId: string | null;
   title: string;
   excerpt: string | null;
@@ -32,7 +34,7 @@ type Props = {
   sourceLogo: string | null;
   sourceWebsite?: string | null;
   author: string | null;
-  userVote: "UP" | "DOWN" | null;
+  userVote: "up" | "down" | null;
   isBookmarked: boolean;
 };
 
@@ -107,6 +109,7 @@ const FeedItemAggregated = ({
   const [imageError, setImageError] = useState(false);
   const { data: session } = useSession();
   const utils = api.useUtils();
+  const { openReport } = useReportModal();
 
   // Convert http to https for images
   const imageUrl = ensureHttps(rawImageUrl);
@@ -139,7 +142,7 @@ const FeedItemAggregated = ({
     trackClick({ articleId: id });
   };
 
-  const handleVote = (voteType: "UP" | "DOWN" | null) => {
+  const handleVote = (voteType: "up" | "down" | null) => {
     if (!session) {
       signIn();
       return;
@@ -163,6 +166,14 @@ const FeedItemAggregated = ({
     } catch {
       toast.error("Failed to copy link");
     }
+  };
+
+  const handleReport = () => {
+    if (!session) {
+      signIn();
+      return;
+    }
+    openReport("article", id);
   };
 
   const dateTime = publishedAt
@@ -279,11 +290,11 @@ const FeedItemAggregated = ({
             <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
               <button
                 onClick={() =>
-                  handleVote(userVote === "UP" ? null : "UP")
+                  handleVote(userVote === "up" ? null : "up")
                 }
                 disabled={voteStatus === "pending"}
                 className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                  userVote === "UP"
+                  userVote === "up"
                     ? "text-green-500"
                     : "text-neutral-400 dark:text-neutral-500"
                 }`}
@@ -304,11 +315,11 @@ const FeedItemAggregated = ({
               </span>
               <button
                 onClick={() =>
-                  handleVote(userVote === "DOWN" ? null : "DOWN")
+                  handleVote(userVote === "down" ? null : "down")
                 }
                 disabled={voteStatus === "pending"}
                 className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                  userVote === "DOWN"
+                  userVote === "down"
                     ? "text-red-500"
                     : "text-neutral-400 dark:text-neutral-500"
                 }`}
@@ -331,6 +342,7 @@ const FeedItemAggregated = ({
             <button
               onClick={handleBookmark}
               disabled={bookmarkStatus === "pending"}
+              aria-label={initialBookmarked ? "Remove from saved" : "Save article"}
               className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                 initialBookmarked
                   ? "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
@@ -342,7 +354,7 @@ const FeedItemAggregated = ({
               ) : (
                 <BookmarkOutlineIcon className="h-3.5 w-3.5" />
               )}
-              <span className="hidden sm:inline">
+              <span className="hidden sm:inline" aria-hidden="true">
                 {initialBookmarked ? "Saved" : "Save"}
               </span>
             </button>
@@ -350,10 +362,20 @@ const FeedItemAggregated = ({
             {/* Share button */}
             <button
               onClick={handleShare}
+              aria-label="Share article"
               className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
               <ShareIcon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Share</span>
+              <span className="hidden sm:inline" aria-hidden="true">Share</span>
+            </button>
+
+            {/* Report button */}
+            <button
+              onClick={handleReport}
+              className="flex items-center rounded-full border border-neutral-200 p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600 dark:border-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+              aria-label="Report article"
+            >
+              <FlagIcon className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
@@ -365,17 +387,19 @@ const FeedItemAggregated = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleClick}
+            aria-label={`View article: ${title}`}
             className="relative hidden w-[120px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:block"
           >
             <img
               src={imageUrl}
               alt=""
+              aria-hidden="true"
               className="aspect-video w-full object-cover transition-opacity hover:opacity-90"
               onError={() => setImageError(true)}
               loading="lazy"
             />
             {/* External link icon overlay */}
-            <div className="absolute bottom-1 right-1 rounded bg-black/60 p-0.5">
+            <div className="absolute bottom-1 right-1 rounded bg-black/60 p-0.5" aria-hidden="true">
               <ArrowTopRightOnSquareIcon className="h-3 w-3 text-white" />
             </div>
           </a>

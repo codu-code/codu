@@ -33,7 +33,7 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
       <header className="flex grow items-center">
         <Link
           className="mb-2 cursor-pointer text-base font-semibold leading-6 tracking-wide hover:underline"
-          href={`/articles/${slug}`}
+          href={`/${username}/${slug}`}
         >
           {title}
         </Link>

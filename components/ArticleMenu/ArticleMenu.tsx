@@ -56,7 +56,7 @@ const ArticleMenu = ({
     return () => clearTimeout(to);
   }, [copied]);
 
-  const { mutate: like, status: likeStatus } = api.post.like.useMutation({
+  const { mutate: vote, status: voteStatus } = api.post.vote.useMutation({
     onSettled() {
       refetch();
     },
@@ -69,10 +69,11 @@ const ArticleMenu = ({
       },
     });
 
+  // Like is now implemented as an upvote
   const likePost = async (postId: string, setLiked = true) => {
-    if (likeStatus === "pending") return;
+    if (voteStatus === "pending") return;
     try {
-      await like({ postId, setLiked });
+      await vote({ postId, voteType: setLiked ? "up" : null });
     } catch (err) {
       // @TODO handle error
       console.error(err);
@@ -124,7 +125,7 @@ const ArticleMenu = ({
               aria-label="like-trigger"
               className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800"
               onClick={() => {
-                if (data?.currentUserLiked) return likePost(postId, false);
+                if (data?.userVote === "up") return likePost(postId, false);
                 likePost(postId);
                 if (!session) {
                   signIn();
@@ -133,13 +134,13 @@ const ArticleMenu = ({
             >
               <HeartIcon
                 className={`h-6 w-6 ${
-                  data?.currentUserLiked
+                  data?.userVote === "up"
                     ? "fill-red-400"
                     : "fill-neutral-400 dark:fill-neutral-600"
                 }`}
               />
             </button>
-            <span>{data?.likes || 0}</span>
+            <span>{(data?.upvotes ?? 0) - (data?.downvotes ?? 0)}</span>
           </div>
 
           <button

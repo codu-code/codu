@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Menu,
   MenuButton,
@@ -14,68 +14,46 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/20/solid";
 import { signIn, useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import TextareaAutosize from "react-textarea-autosize";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import Markdoc from "@markdoc/markdoc";
 import { toast } from "sonner";
-import z, { ZodError } from "zod";
+import { ZodError } from "zod";
 import { ChatBubbleLeftIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 import { EditDiscussionSchema } from "@/schema/discussion";
 import { api } from "@/server/trpc/react";
-import { ReportModal } from "@/components/ReportModal/ReportModal";
-
-const SaveSchema = z.object({
-  body: z
-    .string()
-    .min(1, "Comment can't be empty!")
-    .max(5000, "We have a character limit of 5000 for comments.")
-    .trim()
-    .optional(),
-});
-
-export type SaveInput = {
-  comment: string;
-  reply: string;
-  edit: string;
-};
+import { useReportModal } from "@/components/ReportModal/ReportModal";
+import { DiscussionEditor } from "./DiscussionEditor";
 
 interface Props {
-  targetType: "POST" | "ARTICLE";
-  postId?: string;
-  articleId?: number;
+  contentId: string;
+  noWrapper?: boolean;
 }
 
-const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
-  const [showCommentBoxId, setShowCommentBoxId] = useState<number | null>(null);
-  const [editCommentBoxId, setEditCommentBoxId] = useState<number | null>(null);
-  const [viewPreviewId, setViewPreviewId] = useState<number | null>(null);
+type SortOrder = "top" | "new";
+
+const DiscussionArea = ({
+  contentId,
+  noWrapper = false,
+}: Props) => {
+  const [showCommentBoxId, setShowCommentBoxId] = useState<string | null>(null);
+  const [editCommentBoxId, setEditCommentBoxId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
   const [initiallyLoaded, setInitiallyLoaded] = useState<boolean>(false);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("top");
 
   const { data: session } = useSession();
-
-  const { handleSubmit, register, getValues, resetField, setValue } =
-    useForm<SaveInput>({
-      mode: "onSubmit",
-      defaultValues: {
-        comment: "",
-        reply: "",
-        edit: "",
-      },
-    });
+  const { openReport } = useReportModal();
 
   const {
     data: discussionsResponse,
     refetch,
     status: discussionStatus,
   } = api.discussion.get.useQuery({
-    targetType,
-    postId,
-    articleId,
+    contentId,
   });
 
   const { mutate, status: createDiscussionStatus } =
@@ -95,7 +73,10 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
     },
   });
 
-  const voteDiscussion = (discussionId: number, voteType: "UP" | "DOWN" | null) => {
+  const voteDiscussion = (
+    discussionId: string,
+    voteType: "up" | "down" | null,
+  ) => {
     if (!session) return signIn();
     if (voteStatus === "pending") return;
     vote({ discussionId, voteType });
@@ -120,20 +101,28 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
 
   type Discussions = typeof discussions;
   type Children = typeof firstChild;
-  type FieldName = "comment" | "reply" | "edit";
+
+  // Sort discussions based on selected sort order
+  const sortDiscussions = (items: Discussions | Children | undefined): typeof items => {
+    if (!items) return items;
+    const sorted = [...items].sort((a, b) => {
+      if (sortOrder === "top") {
+        return b.score - a.score;
+      }
+      // "new" - sort by createdAt descending
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    return sorted as typeof items;
+  };
 
   useEffect(() => {
     if (initiallyLoaded) {
       return;
     }
     setInitiallyLoaded(true);
-  }, [discussionStatus]);
+  }, [discussionStatus, initiallyLoaded]);
 
-  const onSubmit = async (
-    body: string,
-    parentId: number | undefined,
-    fieldName: FieldName,
-  ) => {
+  const handleCreateComment = async (body: string, parentId?: string) => {
     // validate markdoc syntax
     const ast = Markdoc.parse(body);
     const errors = Markdoc.validate(ast, config).filter(
@@ -144,43 +133,47 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
       errors.forEach((err) => {
         toast.error(err.error.message);
       });
-      return;
-    }
-
-    if (fieldName === "edit") {
-      try {
-        EditDiscussionSchema.parse({ body, id: editCommentBoxId });
-        if (typeof editCommentBoxId !== "number")
-          throw new Error("Invalid edit.");
-        await editDiscussion({ body: body || "", id: editCommentBoxId });
-        resetField(fieldName);
-        setEditCommentBoxId(null);
-        setViewPreviewId(null);
-        return;
-      } catch (err) {
-        if (err instanceof ZodError) {
-          return toast.error(err.issues[0].message);
-        }
-        toast.error("Something went wrong editing your comment.");
-      }
+      throw new Error("Invalid markdown");
     }
 
     try {
-      SaveSchema.parse({ body });
       await mutate({
-        body: body || "",
-        targetType,
-        postId,
-        articleId,
+        body,
+        contentId,
         parentId,
       });
-      resetField(fieldName);
-      setViewPreviewId(null);
+    } catch (err) {
+      toast.error("Something went wrong saving your comment.");
+      throw err;
+    }
+  };
+
+  const handleEditComment = async (body: string, id: string) => {
+    // validate markdoc syntax
+    const ast = Markdoc.parse(body);
+    const errors = Markdoc.validate(ast, config).filter(
+      (e) => e.error.level === "critical",
+    );
+
+    if (errors.length > 0) {
+      errors.forEach((err) => {
+        toast.error(err.error.message);
+      });
+      throw new Error("Invalid markdown");
+    }
+
+    try {
+      EditDiscussionSchema.parse({ body, id });
+      await editDiscussion({ body, id });
+      setEditCommentBoxId(null);
+      setEditContent("");
     } catch (err) {
       if (err instanceof ZodError) {
-        return toast.error(err.issues[0].message);
+        toast.error(err.issues[0].message);
+        throw err;
       }
-      toast.error("Something went wrong saving your comment.");
+      toast.error("Something went wrong editing your comment.");
+      throw err;
     }
   };
 
@@ -189,28 +182,27 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
     depth = 0,
   ) => {
     if (!discussionsArr) return null;
-    return discussionsArr.map(
+    const sortedDiscussions = sortDiscussions(discussionsArr);
+    if (!sortedDiscussions) return null;
+
+    return sortedDiscussions.map(
       ({
         body,
         createdAt,
         updatedAt,
         id,
-        youLikedThis,
-        likeCount,
         userVote,
         score,
-        upvotes,
-        downvotes,
         user: { name, image, username, id: odiserId },
         children,
       }: {
         body: string;
         createdAt: string;
         updatedAt: string;
-        id: number;
+        id: string;
         youLikedThis: boolean;
         likeCount: number;
-        userVote: "UP" | "DOWN" | null;
+        userVote: "up" | "down" | null;
         score: number;
         upvotes: number;
         downvotes: number;
@@ -242,48 +234,54 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
         const discussionUpdated =
           new Date(createdAt).toISOString() !==
           new Date(updatedAt).toISOString();
-        return (
-          <section key={id}>
-            {editCommentBoxId !== id ? (
-              <>
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-sm text-neutral-700 dark:text-neutral-500">
-                    <Link href={`/${username}`}>
-                      <img
-                        className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
-                        alt={`Avatar for ${name}`}
-                        src={image}
-                      />
-                    </Link>
-                    <Link
-                      className="font-semibold text-neutral-900 hover:underline dark:text-white"
-                      href={`/${username}`}
-                    >
-                      {name}
-                    </Link>
-                    {isCurrentUser && (
-                      <div className="rounded border border-orange-400 px-1 py-[2px] text-xs text-orange-400">
-                        YOU
-                      </div>
-                    )}
-                    <span aria-hidden="true">&middot;</span>
-                    <time>{readableDate}</time>
 
-                    {discussionUpdated ? (
-                      <>
-                        <span aria-hidden="true">&middot;</span>
-                        <div>Edited</div>
-                      </>
-                    ) : null}
-                  </div>
-                  {isCurrentUser ? (
+        const hasReplies = children && children.length > 0;
+
+        return (
+          <section key={id} className="group/comment">
+            {editCommentBoxId !== id ? (
+              <div className="flex">
+                {/* Avatar column - no self-stretch, just contains avatar */}
+                <div className="relative mr-3 flex-shrink-0" style={{ width: '32px' }}>
+                  <Link href={`/${username}`}>
+                    <img
+                      className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
+                      alt={`Avatar for ${name}`}
+                      src={image}
+                    />
+                  </Link>
+                </div>
+
+                {/* Content column */}
+                <div className="min-w-0 flex-1 pb-2">
+                  {/* Header row */}
+                  <div className="mb-1 flex items-center justify-between">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+                      <Link
+                        className="font-semibold text-neutral-900 hover:underline dark:text-white"
+                        href={`/${username}`}
+                      >
+                        {name}
+                      </Link>
+                      {isCurrentUser && (
+                        <span className="rounded border border-orange-400 px-1 py-[1px] text-xs text-orange-400">
+                          YOU
+                        </span>
+                      )}
+                      <span aria-hidden="true">·</span>
+                      <time>{readableDate}</time>
+                      {discussionUpdated && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>Edited</span>
+                        </>
+                      )}
+                    </div>
                     <Menu as="div" className="relative">
-                      <div>
-                        <MenuButton className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
-                          <span className="sr-only">Open user menu</span>
-                          <EllipsisHorizontalIcon className="h-6 w-6" />
-                        </MenuButton>
-                      </div>
+                      <MenuButton className="rounded-full p-1 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300">
+                        <span className="sr-only">Comment options</span>
+                        <EllipsisHorizontalIcon className="h-5 w-5" />
+                      </MenuButton>
                       <Transition
                         as={Fragment}
                         enter="transition ease-out duration-100"
@@ -293,56 +291,71 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <>
+                        <MenuItems className="absolute right-0 top-8 z-10 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800">
+                          {isCurrentUser ? (
+                            <>
+                              <MenuItem>
+                                <button
+                                  className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black dark:text-neutral-200 dark:hover:bg-neutral-700 dark:data-[focus]:bg-neutral-700 dark:data-[focus]:text-white"
+                                  onClick={() => {
+                                    setEditContent(body);
+                                    setEditCommentBoxId(id);
+                                    setShowCommentBoxId(null);
+                                  }}
+                                >
+                                  Edit comment
+                                </button>
+                              </MenuItem>
+                              <MenuItem>
+                                <button
+                                  className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black dark:text-neutral-200 dark:hover:bg-neutral-700 dark:data-[focus]:bg-neutral-700 dark:data-[focus]:text-white"
+                                  onClick={() => {
+                                    deleteDiscussion({ id });
+                                  }}
+                                >
+                                  Delete comment
+                                </button>
+                              </MenuItem>
+                            </>
+                          ) : (
                             <MenuItem>
                               <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
+                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black dark:text-neutral-200 dark:hover:bg-neutral-700 dark:data-[focus]:bg-neutral-700 dark:data-[focus]:text-white"
                                 onClick={() => {
-                                  if (id !== editCommentBoxId) {
-                                    setValue("edit", body);
+                                  if (!session) {
+                                    signIn();
+                                    return;
                                   }
-                                  setEditCommentBoxId(id);
-                                  setShowCommentBoxId(null);
+                                  openReport("discussion", id);
                                 }}
                               >
-                                Edit comment
+                                Report comment
                               </button>
                             </MenuItem>
-                            <MenuItem>
-                              <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black"
-                                onClick={() => {
-                                  deleteDiscussion({ id });
-                                }}
-                              >
-                                Delete comment
-                              </button>
-                            </MenuItem>
-                          </>
+                          )}
                         </MenuItems>
                       </Transition>
                     </Menu>
-                  ) : null}
-                </div>
+                  </div>
 
-                <div className="-mt-2 ml-4 border-l-2 border-neutral-400 pl-2 dark:border-neutral-700">
+                  {/* Comment body */}
                   <div className="prose-sm overflow-x-hidden text-sm dark:prose-invert">
                     {Markdoc.renderers.react(content, React, {
                       components: markdocComponents,
                     })}
                   </div>
 
-                  <div className="mb-4 mt-2 flex items-center gap-2">
+                  {/* Action bar */}
+                  <div className="mt-2 flex items-center gap-2">
                     {/* Vote buttons */}
                     <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
                       <button
                         onClick={() =>
-                          voteDiscussion(id, userVote === "UP" ? null : "UP")
+                          voteDiscussion(id, userVote === "up" ? null : "up")
                         }
                         disabled={voteStatus === "pending"}
                         className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                          userVote === "UP"
+                          userVote === "up"
                             ? "text-green-500"
                             : "text-neutral-400 dark:text-neutral-500"
                         }`}
@@ -363,11 +376,11 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
                       </span>
                       <button
                         onClick={() =>
-                          voteDiscussion(id, userVote === "DOWN" ? null : "DOWN")
+                          voteDiscussion(id, userVote === "down" ? null : "down")
                         }
                         disabled={voteStatus === "pending"}
                         className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                          userVote === "DOWN"
+                          userVote === "down"
                             ? "text-red-500"
                             : "text-neutral-400 dark:text-neutral-500"
                         }`}
@@ -376,52 +389,106 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
                         <ChevronDownIcon className="h-5 w-5" />
                       </button>
                     </div>
-                    <ReportModal type="discussion" comment={body} id={id} />
                     {depth < 6 && (
                       <button
-                        className="rounded border border-neutral-800 px-2 py-1 text-xs hover:bg-neutral-300 dark:border-white dark:hover:bg-neutral-800"
+                        className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-sm font-medium text-neutral-500 transition-colors hover:border-neutral-300 hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
                         onClick={() => {
                           if (!session) return signIn();
-                          if (showCommentBoxId !== id) {
-                            resetField("reply");
-                            setShowCommentBoxId((currentId) =>
-                              currentId === id ? null : id,
-                            );
-                          }
+                          setShowCommentBoxId((currentId) =>
+                            currentId === id ? null : id,
+                          );
                         }}
                       >
+                        <ChatBubbleLeftIcon className="h-4 w-4" />
                         Reply
                       </button>
                     )}
                   </div>
 
-                  <>
-                    {showCommentBoxId === id && (
-                      <div className="mt-4">
-                        <DiscussionInput
-                          id={id}
-                          name="reply"
-                          parentId={id}
-                          onCancel={() => {
-                            resetField("reply");
-                            setShowCommentBoxId(null);
-                          }}
-                          loading={createDiscussionStatus === "pending"}
-                        />
+                  {/* Reply editor */}
+                  {showCommentBoxId === id && (
+                    <div className="mt-4">
+                      <DiscussionEditor
+                        onSubmit={async (markdown) => {
+                          await handleCreateComment(markdown, id);
+                          setShowCommentBoxId(null);
+                        }}
+                        onCancel={() => setShowCommentBoxId(null)}
+                        autoExpand
+                        placeholder="Write a reply..."
+                        submitLabel="Reply"
+                        disabled={createDiscussionStatus === "pending"}
+                      />
+                    </div>
+                  )}
+
+                  {/* Nested replies with curved connectors */}
+                  {hasReplies && (
+                    <div className="relative mt-2">
+                      <div className="space-y-1">
+                        {(sortDiscussions(children) || []).map((child: typeof children[0], index: number, arr: typeof children) => {
+                          const isLast = index === arr.length - 1;
+                          const isFirst = index === 0;
+                          return (
+                            <div key={child.id} className="relative">
+                              {/* Vertical line from parent avatar area down to this curved connector */}
+                              {isFirst && (
+                                <div
+                                  className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                  style={{
+                                    left: '-29px',
+                                    top: '-90px',
+                                    height: '98px',
+                                  }}
+                                />
+                              )}
+                              {/* Curved connector from thread line to this reply */}
+                              <div
+                                className="absolute border-b border-l border-neutral-400 dark:border-neutral-600"
+                                style={{
+                                  left: '-29px',
+                                  top: '0px',
+                                  width: '21px',
+                                  height: '16px',
+                                  borderBottomLeftRadius: '8px',
+                                }}
+                              />
+                              {/* Vertical line continues to next reply (if not last) */}
+                              {!isLast && (
+                                <div
+                                  className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                  style={{
+                                    left: '-29px',
+                                    top: '15px',
+                                    bottom: '-8px',
+                                  }}
+                                />
+                              )}
+                              {generateDiscussions([child], depth + 1)}
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </>
-                  {!!children && generateDiscussions(children, depth + 1)}
+                    </div>
+                  )}
                 </div>
-              </>
+              </div>
             ) : (
-              <DiscussionInput
-                name="edit"
-                id={id}
-                editMode
-                loading={editStatus === "pending"}
-                onCancel={() => setEditCommentBoxId(null)}
-              />
+              <div className="mb-4">
+                <DiscussionEditor
+                  onSubmit={async (markdown) => {
+                    await handleEditComment(markdown, id);
+                  }}
+                  onCancel={() => {
+                    setEditCommentBoxId(null);
+                    setEditContent("");
+                  }}
+                  initialContent={editContent}
+                  autoExpand
+                  submitLabel="Update"
+                  disabled={editStatus === "pending"}
+                />
+              </div>
             )}
           </section>
         );
@@ -429,129 +496,63 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
     );
   };
 
-  interface DiscussionInputProps {
-    onCancel?: () => void;
-    parentId?: number;
-    id: number | null;
-    name: FieldName;
-    editMode?: boolean;
-    loading?: boolean;
-  }
-
-  const DiscussionInput = ({
-    onCancel,
-    parentId,
-    id,
-    name,
-    editMode = false,
-    loading = false,
-  }: DiscussionInputProps) => {
-    return (
-      <form
-        className="relative mb-8"
-        onSubmit={handleSubmit((e) => onSubmit(e[name], parentId, name))}
-      >
-        {loading && (
-          <div className="absolute bottom-0 left-0 right-0 top-0">
-            <div className="flex h-full items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-700 border-l-neutral-500 opacity-100" />
-            </div>
-          </div>
-        )}
-        {session?.user?.image && (
-          <div className="mb-2 flex items-center">
-            <img
-              className="mr-2 h-8 w-8 rounded-full bg-neutral-700 object-cover"
-              alt={`Avatar for ${session.user.name}`}
-              src={session.user.image}
-            />
-            <div>{session.user.name}</div>
-          </div>
-        )}
-        {viewPreviewId === id ? (
-          <article
-            className="prose-sm prose-invert overflow-x-hidden text-sm"
-            style={{ whiteSpace: "pre-wrap" }}
-          >
-            {Markdoc.renderers.react(
-              Markdoc.transform(Markdoc.parse(getValues()[name]), config),
-              React,
-              {
-                components: markdocComponents,
-              },
-            )}
-          </article>
-        ) : (
-          <>
-            <label htmlFor={name} className="sr-only">
-              What do you think?
-            </label>
-            <TextareaAutosize
-              {...register(name)}
-              id={name}
-              minLength={1}
-              className="mb-2 w-full rounded bg-neutral-300 p-2 dark:bg-black"
-              placeholder="What do you think?"
-              minRows={3}
-            />
-          </>
-        )}
-        <div className="flex">
-          <button
-            disabled={createDiscussionStatus === "pending"}
-            type="submit"
-            className="primary-button border-2 text-sm text-neutral-300 hover:text-white"
-          >
-            {editMode ? "Update" : "Submit"}
-          </button>
-          <button
-            disabled={createDiscussionStatus === "pending"}
-            type="button"
-            className="secondary-button ml-2 text-sm"
-            onClick={() =>
-              setViewPreviewId((current) => {
-                if (current === id) return null;
-                return id;
-              })
-            }
-          >
-            {viewPreviewId === id ? "Edit" : "Preview"}
-          </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="ml-2 px-4 py-2 text-sm opacity-60 hover:opacity-100"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-    );
-  };
-
-  return (
-    <section className="relative w-full rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
+  const content = (
+    <>
       {!initiallyLoaded && (
-        <div className="absolute bottom-0 left-0 right-0 top-0 z-20 rounded-lg bg-white/80 dark:bg-neutral-900/80">
+        <div
+          className={`absolute bottom-0 left-0 right-0 top-0 z-20 ${noWrapper ? "" : "rounded-lg"} bg-white/80 dark:bg-neutral-900/80`}
+        >
           <div className="flex h-full items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-700 border-l-neutral-500 opacity-100" />
             <span className="sr-only">Loading</span>
           </div>
         </div>
       )}
-      <h2 className="mb-4 flex items-center gap-2 border-b border-neutral-200 pb-2 text-lg font-semibold dark:border-neutral-700">
-        <ChatBubbleLeftIcon className="h-5 w-5" />
-        {initiallyLoaded
-          ? `Discussion (${discussionsResponse?.count || 0})`
-          : "Loading discussion..."}
-      </h2>
-      <div className="mt-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <ChatBubbleLeftIcon className="h-5 w-5" />
+          {initiallyLoaded
+            ? `Discussion (${discussionsResponse?.count || 0})`
+            : "Loading discussion..."}
+        </h2>
+        {initiallyLoaded && (discussionsResponse?.count ?? 0) > 1 && (
+          <div className="flex items-center gap-1 text-sm">
+            <span className="text-neutral-500 dark:text-neutral-400">Sort:</span>
+            <button
+              onClick={() => setSortOrder("top")}
+              className={`rounded-full px-3 py-1 font-medium transition-colors ${
+                sortOrder === "top"
+                  ? "bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white"
+                  : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+              }`}
+            >
+              Top
+            </button>
+            <button
+              onClick={() => setSortOrder("new")}
+              className={`rounded-full px-3 py-1 font-medium transition-colors ${
+                sortOrder === "new"
+                  ? "bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white"
+                  : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+              }`}
+            >
+              New
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="mb-6">
         {session ? (
-          <DiscussionInput id={0} name="comment" />
+          <DiscussionEditor
+            onSubmit={async (markdown) => {
+              await handleCreateComment(markdown);
+            }}
+            placeholder="Join the conversation..."
+            submitLabel="Comment"
+            disabled={createDiscussionStatus === "pending"}
+          />
         ) : (
-          <div className="mb-4 border-b border-neutral-200 pb-4 text-base dark:border-neutral-700">
+          <div className="mb-4 text-base">
             <p className="mb-2">Hey! 👋</p>
             <p className="mb-2">Got something to say?</p>
             <p>
@@ -574,6 +575,16 @@ const DiscussionArea = ({ targetType, postId, articleId }: Props) => {
         )}
       </div>
       <div className="mb-4">{generateDiscussions(discussions)}</div>
+    </>
+  );
+
+  if (noWrapper) {
+    return <section className="relative w-full pt-6">{content}</section>;
+  }
+
+  return (
+    <section className="relative w-full rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
+      {content}
     </section>
   );
 };
