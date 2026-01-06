@@ -15,30 +15,26 @@ const parser = new Parser({
   },
 });
 
-// Keyword to tag mapping for auto-tagging
-const TAG_KEYWORDS: Record<string, string[]> = {
-  JAVASCRIPT: [
-    "javascript",
-    "js",
-    "node",
-    "nodejs",
-    "deno",
-    "bun",
-    "npm",
-    "yarn",
-  ],
-  REACT: ["react", "nextjs", "next.js", "remix", "gatsby"],
-  VUE: ["vue", "nuxt", "vuejs"],
-  TYPESCRIPT: ["typescript", "ts"],
-  PYTHON: ["python", "django", "flask", "fastapi"],
-  CSS: ["css", "tailwind", "sass", "scss", "styling", "styled-components"],
-  "WEB DEV": ["web", "frontend", "backend", "fullstack", "api", "rest", "graphql"],
-  DEVOPS: ["docker", "kubernetes", "k8s", "ci/cd", "aws", "azure", "gcp", "cloud"],
-  CAREER: ["career", "job", "interview", "resume", "hiring", "salary"],
-  TUTORIAL: ["tutorial", "guide", "how to", "learn", "beginner", "getting started"],
-  AI: ["ai", "machine learning", "ml", "gpt", "llm", "openai", "claude", "chatgpt"],
-  DATABASE: ["database", "sql", "postgres", "mongodb", "redis", "prisma", "drizzle"],
-};
+// Calculate read time from word count
+function calculateReadTime(wordCount: number): number {
+  // Reading speed: ~225 words per minute
+  const readTimeMinutes = Math.ceil(wordCount / 225);
+  // Clamp between 1 and 30 minutes
+  return Math.max(1, Math.min(30, readTimeMinutes));
+}
+
+// Extract text content from HTML and count words
+function extractTextAndWordCount(html: string): { text: string; wordCount: number } {
+  const cleaned = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const wordCount = cleaned.split(/\s+/).filter(w => w.length > 0).length;
+  return { text: cleaned, wordCount };
+}
 
 // Helper to get values from AWS SSM
 async function getSsmValue(secretName: string): Promise<string> {
@@ -60,20 +56,6 @@ async function getSsmValue(secretName: string): Promise<string> {
   }
 }
 
-// Extract tags from title and content based on keywords
-function extractTags(title: string, content: string): string[] {
-  const text = `${title} ${content}`.toLowerCase();
-  const tags: string[] = [];
-
-  for (const [tag, keywords] of Object.entries(TAG_KEYWORDS)) {
-    if (keywords.some((keyword) => text.includes(keyword))) {
-      tags.push(tag);
-    }
-  }
-
-  return tags.slice(0, 5); // Max 5 tags per article
-}
-
 // Extract and clean excerpt from content
 function extractExcerpt(
   content: string | undefined,
@@ -89,6 +71,29 @@ function extractExcerpt(
 
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + "...";
+}
+
+// Generate a short random ID (similar to nanoid)
+function generateShortId(length = 8): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+// Generate SEO-friendly slug from title + shortId
+function generateSlug(title: string, shortId: string): string {
+  const slugifiedTitle = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single
+    .substring(0, 280) // Limit length
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+
+  return `${slugifiedTitle}-${shortId}`;
 }
 
 // Extract image URL from various RSS item fields
@@ -117,6 +122,44 @@ function extractImageUrl(item: Parser.Item): string | null {
   return null;
 }
 
+// Fetch article metadata: OG image and read time (combined to avoid double requests)
+async function fetchArticleMetadata(url: string): Promise<{ ogImage: string | null; readTimeMins: number }> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; CoduBot/1.0; +https://codu.co)" },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) return { ogImage: null, readTimeMins: 3 };
+    const html = await response.text();
+
+    // Extract OG image
+    let ogImage: string | null = null;
+    const ogMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    if (ogMatch?.[1]) {
+      ogImage = ogMatch[1];
+    } else {
+      // Fall back to twitter:image
+      const twitterMatch = html.match(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
+        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i);
+      if (twitterMatch?.[1]) ogImage = twitterMatch[1];
+    }
+
+    // Calculate read time from word count
+    const { wordCount } = extractTextAndWordCount(html);
+    const readTimeMins = calculateReadTime(wordCount);
+
+    return { ogImage, readTimeMins };
+  } catch {
+    return { ogImage: null, readTimeMins: 3 };
+  }
+}
+
 // Main Lambda handler
 exports.handler = async function () {
   console.log("RSS Fetcher Lambda running");
@@ -138,11 +181,11 @@ exports.handler = async function () {
     await client.connect();
     console.log("Connected to database");
 
-    // Get active feed sources
+    // Get active feed sources (use new lowercase table name)
     const { rows: sources } = await client.query(`
       SELECT id, url, name
-      FROM "FeedSource"
-      WHERE status = 'ACTIVE'
+      FROM feed_sources
+      WHERE status = 'active'
     `);
 
     console.log(`Found ${sources.length} active feed sources`);
@@ -153,6 +196,14 @@ exports.handler = async function () {
 
         const feed = await parser.parseURL(source.url);
         let newArticles = 0;
+
+        // Batch fetch existing URLs for this source (O(1) lookup instead of O(n) queries)
+        const { rows: existingUrls } = await client.query(
+          `SELECT external_url FROM posts WHERE source_id = $1`,
+          [source.id],
+        );
+        const existingUrlSet = new Set(existingUrls.map((r: { external_url: string }) => r.external_url));
+        console.log(`  Already have ${existingUrlSet.size} items from this source`);
 
         for (const item of feed.items) {
           // Skip items without required fields
@@ -174,13 +225,8 @@ exports.handler = async function () {
             continue;
           }
 
-          // Check if article already exists (by URL)
-          const { rows: existing } = await client.query(
-            `SELECT id FROM "AggregatedArticle" WHERE url = $1`,
-            [item.link],
-          );
-
-          if (existing.length > 0) {
+          // Fast duplicate check using Set (O(1) lookup)
+          if (existingUrlSet.has(item.link)) {
             continue;
           }
 
@@ -188,71 +234,59 @@ exports.handler = async function () {
           const contentSnippet =
             item.contentSnippet || item.content || item.summary || "";
           const excerpt = extractExcerpt(contentSnippet);
-          const imageUrl = extractImageUrl(item);
+          let imageUrl = extractImageUrl(item);
 
-          // Insert new article
-          const {
-            rows: [newArticle],
-          } = await client.query(
-            `INSERT INTO "AggregatedArticle"
-             ("sourceId", "title", "excerpt", "url", "imageUrl", "author", "publishedAt", "fetchedAt", "createdAt")
-             VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-             RETURNING id`,
+          // Fetch article metadata (OG image + accurate read time from actual content)
+          console.log(`    Fetching: ${item.title.substring(0, 50)}...`);
+          const metadata = await fetchArticleMetadata(item.link);
+          const readTimeMins = metadata.readTimeMins;
+
+          // Use OG image as fallback if no RSS image found
+          if (!imageUrl && metadata.ogImage) {
+            imageUrl = metadata.ogImage;
+            console.log(`    ✓ Found OG image, ${readTimeMins} min read`);
+          } else {
+            console.log(`    ✓ ${readTimeMins} min read`);
+          }
+
+          // Small delay between fetches to be polite
+          await new Promise((resolve) => setTimeout(resolve, 200));
+
+          // Generate shortId and slug for the new article (7 chars to match DB column)
+          const shortId = generateShortId(7);
+          const slug = generateSlug(item.title, shortId);
+
+          // Insert directly into posts table (new schema)
+          await client.query(
+            `INSERT INTO posts
+             (type, title, slug, excerpt, external_url, cover_image, source_id, source_author, reading_time, status, published_at, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())`,
             [
-              source.id,
+              "link", // Post type (lowercase in new schema)
               item.title.substring(0, 500), // Limit title length
+              slug,
               excerpt,
               item.link,
-              imageUrl,
+              imageUrl, // cover_image
+              source.id,
               item.creator || item.author || null,
+              readTimeMins,
+              "published", // status (lowercase in new schema)
               item.pubDate ? new Date(item.pubDate).toISOString() : null,
             ],
           );
-
-          // Auto-tag the article
-          const tags = extractTags(item.title, contentSnippet);
-          for (const tagTitle of tags) {
-            try {
-              // Get or create tag
-              let tagId: number;
-              const { rows: existingTags } = await client.query(
-                `SELECT id FROM "Tag" WHERE title = $1`,
-                [tagTitle],
-              );
-
-              if (existingTags.length > 0) {
-                tagId = existingTags[0].id;
-              } else {
-                const { rows: newTags } = await client.query(
-                  `INSERT INTO "Tag" (title, "createdAt") VALUES ($1, NOW()) RETURNING id`,
-                  [tagTitle],
-                );
-                tagId = newTags[0].id;
-              }
-
-              // Link tag to article
-              await client.query(
-                `INSERT INTO "AggregatedArticleTag" ("articleId", "tagId")
-                 VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-                [newArticle.id, tagId],
-              );
-            } catch (tagError) {
-              // Log but don't fail if tagging fails
-              console.warn(`Failed to add tag "${tagTitle}":`, tagError);
-            }
-          }
 
           newArticles++;
         }
 
         // Update source status - success
         await client.query(
-          `UPDATE "FeedSource"
-           SET "lastFetchedAt" = NOW(),
-               "lastSuccessAt" = NOW(),
-               "errorCount" = 0,
-               "lastError" = NULL,
-               "updatedAt" = NOW()
+          `UPDATE feed_sources
+           SET last_fetched_at = NOW(),
+               last_success_at = NOW(),
+               error_count = 0,
+               last_error = NULL,
+               updated_at = NOW()
            WHERE id = $1`,
           [source.id],
         );
@@ -267,12 +301,12 @@ exports.handler = async function () {
 
         // Update source with error status
         await client.query(
-          `UPDATE "FeedSource"
-           SET "lastFetchedAt" = NOW(),
-               "errorCount" = "errorCount" + 1,
-               "lastError" = $1,
-               "status" = CASE WHEN "errorCount" >= 5 THEN 'ERROR' ELSE status END,
-               "updatedAt" = NOW()
+          `UPDATE feed_sources
+           SET last_fetched_at = NOW(),
+               error_count = error_count + 1,
+               last_error = $1,
+               status = CASE WHEN error_count >= 5 THEN 'error' ELSE status END,
+               updated_at = NOW()
            WHERE id = $2`,
           [(error as Error).message.substring(0, 500), source.id],
         );

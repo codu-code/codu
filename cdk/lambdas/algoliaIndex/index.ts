@@ -50,18 +50,21 @@ exports.handler = async function () {
     await client.connect();
 
     const { rows: posts } = await client.query(
-      `SELECT title, excerpt, slug FROM "Post" WHERE "published" < NOW() AND "approved" = true;`,
+      `SELECT p.title, p.excerpt, p.slug, u.username
+       FROM "Post" p
+       INNER JOIN "user" u ON p."userId" = u.id
+       WHERE p."published" < NOW() AND p."approved" = true;`,
     );
 
     const { rows: users } = await client.query(
       `SELECT username, name, image, bio FROM "user";`,
     );
 
-    const postIdx = posts.map(({ title, excerpt, slug }) => ({
+    const postIdx = posts.map(({ title, excerpt, slug, username }) => ({
       category: ARTICLE,
       title,
       description: excerpt,
-      url: `${BASE_URL}/articles/${slug}`,
+      url: `${BASE_URL}/${username}/${slug}`,
       image: null,
     }));
 
@@ -92,7 +95,7 @@ exports.handler = async function () {
       },
       {
         title: "Code of Conduct",
-        description: "Codu's Code of Conduct",
+        description: "Codú's Code of Conduct",
         url: "/code-of-conduct",
         category: PAGE,
         image: null,
