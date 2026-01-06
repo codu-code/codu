@@ -35,10 +35,7 @@ interface Props {
 
 type SortOrder = "top" | "new";
 
-const DiscussionArea = ({
-  contentId,
-  noWrapper = false,
-}: Props) => {
+const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<string | null>(null);
   const [editCommentBoxId, setEditCommentBoxId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
@@ -103,7 +100,9 @@ const DiscussionArea = ({
   type Children = typeof firstChild;
 
   // Sort discussions based on selected sort order
-  const sortDiscussions = (items: Discussions | Children | undefined): typeof items => {
+  const sortDiscussions = (
+    items: Discussions | Children | undefined,
+  ): typeof items => {
     if (!items) return items;
     const sorted = [...items].sort((a, b) => {
       if (sortOrder === "top") {
@@ -242,7 +241,10 @@ const DiscussionArea = ({
             {editCommentBoxId !== id ? (
               <div className="flex">
                 {/* Avatar column - no self-stretch, just contains avatar */}
-                <div className="relative mr-3 flex-shrink-0" style={{ width: '32px' }}>
+                <div
+                  className="relative mr-3 flex-shrink-0"
+                  style={{ width: "32px" }}
+                >
                   <Link href={`/${username}`}>
                     <img
                       className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
@@ -376,7 +378,10 @@ const DiscussionArea = ({
                       </span>
                       <button
                         onClick={() =>
-                          voteDiscussion(id, userVote === "down" ? null : "down")
+                          voteDiscussion(
+                            id,
+                            userVote === "down" ? null : "down",
+                          )
                         }
                         disabled={voteStatus === "pending"}
                         className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
@@ -426,48 +431,54 @@ const DiscussionArea = ({
                   {hasReplies && (
                     <div className="relative mt-2">
                       <div className="space-y-1">
-                        {(sortDiscussions(children) || []).map((child: typeof children[0], index: number, arr: typeof children) => {
-                          const isLast = index === arr.length - 1;
-                          const isFirst = index === 0;
-                          return (
-                            <div key={child.id} className="relative">
-                              {/* Vertical line from parent avatar area down to this curved connector */}
-                              {isFirst && (
+                        {(sortDiscussions(children) || []).map(
+                          (
+                            child: (typeof children)[0],
+                            index: number,
+                            arr: typeof children,
+                          ) => {
+                            const isLast = index === arr.length - 1;
+                            const isFirst = index === 0;
+                            return (
+                              <div key={child.id} className="relative">
+                                {/* Vertical line from parent avatar area down to this curved connector */}
+                                {isFirst && (
+                                  <div
+                                    className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                    style={{
+                                      left: "-29px",
+                                      top: "-90px",
+                                      height: "98px",
+                                    }}
+                                  />
+                                )}
+                                {/* Curved connector from thread line to this reply */}
                                 <div
-                                  className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                  className="absolute border-b border-l border-neutral-400 dark:border-neutral-600"
                                   style={{
-                                    left: '-29px',
-                                    top: '-90px',
-                                    height: '98px',
+                                    left: "-29px",
+                                    top: "0px",
+                                    width: "21px",
+                                    height: "16px",
+                                    borderBottomLeftRadius: "8px",
                                   }}
                                 />
-                              )}
-                              {/* Curved connector from thread line to this reply */}
-                              <div
-                                className="absolute border-b border-l border-neutral-400 dark:border-neutral-600"
-                                style={{
-                                  left: '-29px',
-                                  top: '0px',
-                                  width: '21px',
-                                  height: '16px',
-                                  borderBottomLeftRadius: '8px',
-                                }}
-                              />
-                              {/* Vertical line continues to next reply (if not last) */}
-                              {!isLast && (
-                                <div
-                                  className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
-                                  style={{
-                                    left: '-29px',
-                                    top: '15px',
-                                    bottom: '-8px',
-                                  }}
-                                />
-                              )}
-                              {generateDiscussions([child], depth + 1)}
-                            </div>
-                          );
-                        })}
+                                {/* Vertical line continues to next reply (if not last) */}
+                                {!isLast && (
+                                  <div
+                                    className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                    style={{
+                                      left: "-29px",
+                                      top: "15px",
+                                      bottom: "-8px",
+                                    }}
+                                  />
+                                )}
+                                {generateDiscussions([child], depth + 1)}
+                              </div>
+                            );
+                          },
+                        )}
                       </div>
                     </div>
                   )}
@@ -517,7 +528,9 @@ const DiscussionArea = ({
         </h2>
         {initiallyLoaded && (discussionsResponse?.count ?? 0) > 1 && (
           <div className="flex items-center gap-1 text-sm">
-            <span className="text-neutral-500 dark:text-neutral-400">Sort:</span>
+            <span className="text-neutral-500 dark:text-neutral-400">
+              Sort:
+            </span>
             <button
               onClick={() => setSortOrder("top")}
               className={`rounded-full px-3 py-1 font-medium transition-colors ${
@@ -541,7 +554,7 @@ const DiscussionArea = ({
           </div>
         )}
       </div>
-      <div className="mb-6">
+      <div className={discussions?.length ? "mb-6" : ""}>
         {session ? (
           <DiscussionEditor
             onSubmit={async (markdown) => {

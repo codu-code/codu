@@ -127,7 +127,7 @@ const ArticleActionBar = ({
   const score = votes.upvotes - votes.downvotes;
 
   return (
-    <div className="my-6 flex flex-wrap items-center gap-2 border-t border-b border-neutral-200 py-4 dark:border-neutral-700">
+    <div className="flex flex-wrap items-center gap-2">
       {/* Vote buttons */}
       <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
         <button

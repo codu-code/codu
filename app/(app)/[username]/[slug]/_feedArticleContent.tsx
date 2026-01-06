@@ -300,7 +300,46 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
           </a>
         )}
 
-        {/* Action bar */}
+        {/* Inline source info - styled like author bio */}
+        {article.source && (
+          <div className="mt-8 flex items-center gap-3">
+            <Link href={`/${sourceSlug}`} className="flex-shrink-0">
+              {article.source.logoUrl ? (
+                <img
+                  src={article.source.logoUrl}
+                  alt=""
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : faviconUrl ? (
+                <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
+              ) : (
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+                  {article.source.name?.charAt(0).toUpperCase() || "?"}
+                </div>
+              )}
+            </Link>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/${sourceSlug}`}
+                  className="font-medium text-neutral-900 hover:underline dark:text-neutral-100"
+                >
+                  {article.source.name}
+                </Link>
+                <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                  @{sourceSlug}
+                </span>
+              </div>
+              {article.source.description && (
+                <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">
+                  {article.source.description}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Action bar - just above discussion */}
         <div className="mt-8 flex flex-wrap items-center gap-2">
           {/* Vote buttons */}
           <div className="flex items-center rounded-full bg-neutral-100 dark:bg-neutral-800">
@@ -381,40 +420,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
             Share
           </button>
         </div>
-
-        {/* Inline source info */}
-        {article.source && (
-          <div className="mt-6 flex items-center gap-3">
-            <Link href={`/${sourceSlug}`} className="flex-shrink-0">
-              {article.source.logoUrl ? (
-                <img
-                  src={article.source.logoUrl}
-                  alt=""
-                  className="h-8 w-8 rounded-lg object-cover"
-                />
-              ) : faviconUrl ? (
-                <img src={faviconUrl} alt="" className="h-8 w-8 rounded-lg" />
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
-                  {article.source.name?.charAt(0).toUpperCase() || "?"}
-                </div>
-              )}
-            </Link>
-            <div className="min-w-0 flex-1">
-              <Link
-                href={`/${sourceSlug}`}
-                className="font-medium text-neutral-900 hover:underline dark:text-neutral-100"
-              >
-                {article.source.name}
-              </Link>
-              {article.source.description && (
-                <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">
-                  {article.source.description}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Discussion section - inside the card */}
         <section id="discussion" className="mt-8">

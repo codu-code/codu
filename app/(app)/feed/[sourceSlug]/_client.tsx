@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
-import { Temporal } from "@js-temporal/polyfill";
 import { useInView } from "react-intersection-observer";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Heading } from "@/components/ui-components/heading";
+import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 
 type Props = {
   sourceSlug: string;
@@ -34,7 +34,6 @@ function getDomainFromUrl(url: string) {
 }
 
 const SourceProfilePage = ({ sourceSlug }: Props) => {
-  const [sort, setSort] = useState<"recent" | "trending" | "popular">("recent");
   const { ref: loadMoreRef, inView } = useInView({ threshold: 0 });
 
   const { data: source, status: sourceStatus } =
@@ -47,7 +46,7 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
     hasNextPage,
     isFetchingNextPage,
   } = api.feed.getArticlesBySource.useInfiniteQuery(
-    { sourceSlug, sort, limit: 25 },
+    { sourceSlug, sort: "recent", limit: 25 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
@@ -98,24 +97,23 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
 
   const faviconUrl = getFaviconUrl(source.websiteUrl);
   const articles = articlesData?.pages.flatMap((page) => page.articles) ?? [];
-  const totalScore = source.totalUpvotes - source.totalDownvotes;
 
   return (
     <>
-      <div className="mx-auto max-w-2xl px-4 text-black dark:text-white">
-        {/* Profile header - matching user profile pattern */}
+      <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
+        {/* Profile header - matching user profile pattern exactly */}
         <main className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             {source.logoUrl ? (
               <img
                 className="mb-2 h-20 w-20 rounded-full object-cover sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32"
-                alt={`Logo for ${source.name}`}
+                alt={`Avatar for ${source.name}`}
                 src={source.logoUrl}
               />
             ) : faviconUrl ? (
               <img
                 className="mb-2 h-20 w-20 rounded-full sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32"
-                alt={`Favicon for ${source.name}`}
+                alt={`Avatar for ${source.name}`}
                 src={faviconUrl}
               />
             ) : (
@@ -126,12 +124,10 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
           </div>
           <div className="flex flex-col justify-center">
             <h1 className="mb-0 text-lg font-bold md:text-xl">{source.name}</h1>
-            {source.category && (
-              <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
-                {source.category}
-              </h2>
-            )}
-            <p className="mt-1">{source.description || "No description available."}</p>
+            <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
+              @{sourceSlug}
+            </h2>
+            <p className="mt-1">{source.description || ""}</p>
             {source.websiteUrl && (
               <Link
                 href={source.websiteUrl}
@@ -145,64 +141,24 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
                 </p>
               </Link>
             )}
-            {/* Stats inline with header */}
-            <div className="mt-2 flex gap-4 text-sm text-neutral-500 dark:text-neutral-400">
-              <span>
-                <strong className="text-neutral-900 dark:text-neutral-100">
-                  {source.articleCount}
-                </strong>{" "}
-                articles
-              </span>
-              <span>
-                <strong
-                  className={
-                    totalScore > 0
-                      ? "text-green-500"
-                      : totalScore < 0
-                        ? "text-red-500"
-                        : "text-neutral-900 dark:text-neutral-100"
-                  }
-                >
-                  {totalScore >= 0 ? "+" : ""}
-                  {totalScore}
-                </strong>{" "}
-                karma
-              </span>
-            </div>
           </div>
         </main>
 
-        {/* Sort tabs + Articles header */}
+        {/* Articles header - matching user profile */}
         <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
-          <div className="flex items-center justify-between">
-            <Heading level={1}>{`Articles (${source.articleCount})`}</Heading>
-            <div className="flex gap-1">
-              {(["recent", "trending", "popular"] as const).map((sortOption) => (
-                <button
-                  key={sortOption}
-                  onClick={() => setSort(sortOption)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors ${
-                    sort === sortOption
-                      ? "bg-orange-500 text-white"
-                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-                  }`}
-                >
-                  {sortOption}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Heading level={1}>{`Articles (${source.articleCount})`}</Heading>
         </div>
 
-        {/* Articles list */}
-        <div className="mt-4">
+        {/* Articles list using UnifiedContentCard */}
+        <div>
           {articlesStatus === "pending" ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="animate-pulse border-b border-neutral-100 pb-4 dark:border-neutral-800"
+                  className="animate-pulse rounded-lg border border-neutral-200 p-3 dark:border-neutral-700"
                 >
+                  <div className="mb-2 h-4 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700" />
                   <div className="mb-2 h-5 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
                   <div className="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700" />
                 </div>
@@ -213,59 +169,33 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
           ) : (
             <>
               {articles.map((article) => {
-                const dateTime = article.publishedAt
-                  ? Temporal.Instant.from(
-                      new Date(article.publishedAt).toISOString(),
-                    )
-                  : null;
-                const readableDate = dateTime
-                  ? dateTime.toLocaleString(["en-IE"], {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : null;
+                // Use slug for SEO-friendly URLs, fallback to shortId for legacy articles
+                const articleSlug = article.slug || article.shortId;
 
                 return (
-                  <article
+                  <UnifiedContentCard
                     key={article.id}
-                    className="border-b border-neutral-100 py-4 dark:border-neutral-800"
-                  >
-                    <Link
-                      href={`/feed/${sourceSlug}/${article.shortId}`}
-                      className="group"
-                    >
-                      <h2 className="font-semibold text-neutral-900 group-hover:underline dark:text-neutral-100">
-                        {article.title}
-                      </h2>
-                    </Link>
-                    {article.excerpt && (
-                      <p className="mt-1 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
-                        {article.excerpt}
-                      </p>
-                    )}
-                    <div className="mt-2 flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
-                      {readableDate && <span>{readableDate}</span>}
-                      {article.author && article.author.trim() && !["by", "by,", "by ,"].includes(article.author.trim().toLowerCase()) && (
-                        <>
-                          <span aria-hidden="true">·</span>
-                          <span>{article.author.replace(/^by\s+/i, "").trim()}</span>
-                        </>
-                      )}
-                      <span aria-hidden="true">·</span>
-                      <span
-                        className={
-                          article.score > 0
-                            ? "text-green-500"
-                            : article.score < 0
-                              ? "text-red-500"
-                              : ""
-                        }
-                      >
-                        {article.score} points
-                      </span>
-                    </div>
-                  </article>
+                    type="LINK"
+                    id={article.id}
+                    title={article.title}
+                    excerpt={article.excerpt}
+                    slug={articleSlug}
+                    imageUrl={article.imageUrl}
+                    externalUrl={article.url}
+                    publishedAt={article.publishedAt}
+                    upvotes={article.upvotes}
+                    downvotes={article.downvotes}
+                    userVote={article.userVote}
+                    isBookmarked={article.isBookmarked}
+                    discussionCount={0}
+                    source={{
+                      name: source.name,
+                      slug: sourceSlug,
+                      logo: source.logoUrl,
+                      websiteUrl: source.websiteUrl,
+                    }}
+                    linkAuthor={article.author}
+                  />
                 );
               })}
 

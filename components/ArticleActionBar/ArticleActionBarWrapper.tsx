@@ -26,7 +26,7 @@ const ArticleActionBarWrapper = ({
 
   if (isLoading) {
     return (
-      <div className="my-6 flex items-center gap-2 border-t border-b border-neutral-200 py-4 dark:border-neutral-700">
+      <div className="flex items-center gap-2">
         <div className="h-10 w-24 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
         <div className="h-10 w-20 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
         <div className="h-10 w-16 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />

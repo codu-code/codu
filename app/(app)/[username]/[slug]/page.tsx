@@ -462,7 +462,17 @@ const UnifiedPostPage = async (props: Props) => {
               </section>
             )}
 
-            {/* Action bar */}
+            {/* Compact inline author bio */}
+            <div className="mt-8">
+              <InlineAuthorBio
+                name={userPost.user.name || "Unknown"}
+                username={userPost.user.username || ""}
+                image={userPost.user.image}
+                bio={userPost.user.bio}
+              />
+            </div>
+
+            {/* Action bar - just above discussion */}
             <div className="mt-8">
               <ArticleActionBarWrapper
                 postId={userPost.id}
@@ -471,16 +481,6 @@ const UnifiedPostPage = async (props: Props) => {
                 postUsername={userPost.user.username || ""}
                 initialUpvotes={userPost.upvotes ?? 0}
                 initialDownvotes={userPost.downvotes ?? 0}
-              />
-            </div>
-
-            {/* Compact inline author bio */}
-            <div className="mt-6">
-              <InlineAuthorBio
-                name={userPost.user.name || "Unknown"}
-                username={userPost.user.username || ""}
-                image={userPost.user.image}
-                bio={userPost.user.bio}
               />
             </div>
 
@@ -626,7 +626,17 @@ const UnifiedPostPage = async (props: Props) => {
               </section>
             )}
 
-            {/* Action bar - using Content voting */}
+            {/* Compact inline author bio */}
+            <div className="mt-8">
+              <InlineAuthorBio
+                name={userArticle.user.name || "Unknown"}
+                username={userArticle.user.username || ""}
+                image={userArticle.user.image}
+                bio={userArticle.user.bio}
+              />
+            </div>
+
+            {/* Action bar - just above discussion */}
             <div className="mt-8">
               <ArticleActionBarWrapper
                 postId={userArticle.id}
@@ -635,16 +645,6 @@ const UnifiedPostPage = async (props: Props) => {
                 postUsername={userArticle.user.username || ""}
                 initialUpvotes={userArticle.upvotes ?? 0}
                 initialDownvotes={userArticle.downvotes ?? 0}
-              />
-            </div>
-
-            {/* Compact inline author bio */}
-            <div className="mt-6">
-              <InlineAuthorBio
-                name={userArticle.user.name || "Unknown"}
-                username={userArticle.user.username || ""}
-                image={userArticle.user.image}
-                bio={userArticle.user.bio}
               />
             </div>
 
