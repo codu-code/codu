@@ -10,7 +10,6 @@ export default async function ArticlePage(props: Props) {
   const params = await props.params;
   const { slug } = params;
 
-  // Look up the post and its author
   const postRecord = await db
     .select({
       slug: post.slug,

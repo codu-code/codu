@@ -34,7 +34,6 @@ type Props = { params: Promise<{ username: string; slug: string }> };
 
 // Helper to fetch user article by username and slug (uses new posts table)
 async function getUserPost(username: string, postSlug: string) {
-  // First find user
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
     where: eq(user.username, username),
@@ -113,7 +112,6 @@ async function getFeedArticle(
   sourceSlug: string,
   articleSlugOrShortId: string,
 ) {
-  // First find feed source by slug
   const source = await db.query.feed_sources.findFirst({
     where: eq(feed_sources.slug, sourceSlug),
   });

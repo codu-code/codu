@@ -91,7 +91,6 @@ const ArticleCard = ({
 
   const { mutate: vote, status: voteStatus } = api.post.vote.useMutation({
     onMutate: async ({ voteType }) => {
-      // Optimistic update
       const oldVote = userVote;
       setUserVote(voteType);
 
@@ -99,11 +98,9 @@ const ArticleCard = ({
         let newUpvotes = prev.upvotes;
         let newDownvotes = prev.downvotes;
 
-        // Remove old vote
         if (oldVote === "up") newUpvotes--;
         if (oldVote === "down") newDownvotes--;
 
-        // Add new vote
         if (voteType === "up") newUpvotes++;
         if (voteType === "down") newDownvotes++;
 
@@ -111,7 +108,6 @@ const ArticleCard = ({
       });
     },
     onError: (error) => {
-      // Revert on error
       setUserVote(initialUserVote);
       setVotes({ upvotes, downvotes });
       toast.error("Failed to update vote");

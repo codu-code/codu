@@ -79,7 +79,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
 
   const { mutate: vote, status: voteStatus } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {
-      // Optimistic update
       const oldVote = userVote;
       setUserVote(voteType);
       setVotes((prev) => {
@@ -93,7 +92,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
       });
     },
     onError: () => {
-      // Revert on error
       setUserVote(linkContent?.userVote ?? null);
       setVotes({ upvotes: linkContent?.upvotes ?? 0, downvotes: linkContent?.downvotes ?? 0 });
       toast.error("Failed to update vote");
