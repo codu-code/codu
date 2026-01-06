@@ -9,7 +9,7 @@ const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
   "/articles",
   "/feed",
-  "/sponsorship",
+  "/advertise",
   "/code-of-conduct",
 ];
 
@@ -47,18 +47,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  // Feed sources (pseudo-user profiles): /feed/[sourceSlug]
+  // Feed sources (pseudo-user profiles): /[sourceSlug]
   const sources = (
     await db.query.feed_sources.findMany({
       where: eq(feed_sources.status, "active"),
     })
   ).map(({ slug, updatedAt, createdAt }) => ({
-    url: `${BASE_URL}/feed/${slug}`,
+    url: `${BASE_URL}/${slug}`,
     lastModified: new Date(updatedAt || createdAt),
     priority: 0.6,
   }));
 
-  // Feed articles from posts table (type=link): /feed/[sourceSlug]/[slug]
+  // Feed articles from posts table (type=link): /[sourceSlug]/[slug]
   const feedArticles = (
     await db
       .select({
@@ -77,7 +77,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ),
       )
   ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
-    url: `${BASE_URL}/feed/${sourceSlug}/${articleSlug}`,
+    url: `${BASE_URL}/${sourceSlug}/${articleSlug}`,
     lastModified: new Date(updatedAt || publishedAt || new Date()),
     priority: 0.5,
   }));
