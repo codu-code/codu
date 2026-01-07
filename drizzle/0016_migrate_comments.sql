@@ -192,7 +192,7 @@ BEGIN
             END IF;
 
             -- Get parent's new ID and path
-            SELECT new_comment_id, path INTO parent_comment_id, parent_path
+            SELECT m.new_comment_id, nc.path INTO parent_comment_id, parent_path
             FROM _comment_migration_map m
             JOIN comments nc ON nc.id = m.new_comment_id
             WHERE m.legacy_comment_id = comment_record."parentId";
