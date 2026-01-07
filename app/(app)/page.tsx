@@ -14,9 +14,9 @@ const Home = async () => {
 
   return (
     <main>
-      <div>
-        <Hero />
-        {session == null && (
+      {!session && (
+        <div>
+          <Hero />
           <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
             <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
               <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
@@ -37,11 +37,11 @@ const Home = async () => {
               </div>
             </div>
           </section>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="mx-2" id={session ? "cta" : ""}>
-        <div className="mt-6 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
+        <div className="mt-6 flex max-w-5xl items-center justify-between pb-2 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
           <h3 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
             Trending
           </h3>
@@ -51,6 +51,7 @@ const Home = async () => {
             <TrendingPosts session={session} />
           </Suspense>
           <section className="col-span-5 hidden lg:block">
+            <div className="sticky top-20">
             <CoduChallenge />
             <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Popular topics
@@ -65,6 +66,7 @@ const Home = async () => {
                 <SideBarSavedPosts />
               </div>
             )}
+            </div>
           </section>
         </div>
       </div>
