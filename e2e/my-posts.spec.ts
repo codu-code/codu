@@ -15,6 +15,8 @@ async function openTab(page: Page, tabName: TabName) {
   await expect(page.getByText("Fetching your posts...")).toBeHidden({
     timeout: 15000,
   });
+  // Additional wait for content to render
+  await page.waitForTimeout(500);
 }
 
 async function openDeleteModal(page: Page, title: string) {

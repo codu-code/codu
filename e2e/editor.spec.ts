@@ -798,14 +798,15 @@ test.describe("Publish Flow", () => {
     await page.locator(SELECTORS.editorContent).click();
     await page.keyboard.type(articleContent);
 
-    // Wait for state to update
-    await page.waitForTimeout(500);
-
-    // Click Publish button in nav
-    await page.locator('nav button:has-text("Publish")').click();
+    // Wait for Publish button to be enabled
+    const publishButton = page.locator('nav button:has-text("Publish")');
+    await expect(publishButton).toBeEnabled({ timeout: 10000 });
+    await publishButton.click();
 
     // Modal should appear with whimsical content
-    await expect(page.locator('text="Ready to launch?"')).toBeVisible();
+    await expect(page.locator('text="Ready to launch?"')).toBeVisible({
+      timeout: 5000,
+    });
     await expect(page.locator(SELECTORS.letsDoThisButton)).toBeVisible();
     await expect(page.locator(SELECTORS.maybeLaterButton)).toBeVisible();
   });
@@ -820,17 +821,25 @@ test.describe("Publish Flow", () => {
       "Content for modal close test with enough text for testing",
     );
 
-    // Wait for state to update
+    // Wait for auto-save to complete before opening modal
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
     await page.waitForTimeout(500);
 
-    // Open modal
-    await page.locator('nav button:has-text("Publish")').click();
-    await expect(page.locator('text="Ready to launch?"')).toBeVisible();
+    // Wait for Publish button to be enabled, then open modal
+    const publishButton = page.locator('nav button:has-text("Publish")');
+    await expect(publishButton).toBeEnabled({ timeout: 10000 });
+    await publishButton.click();
+    await expect(page.locator('text="Ready to launch?"')).toBeVisible({
+      timeout: 5000,
+    });
 
     // Wait for modal animation to settle, then click Maybe later
     const maybeLaterBtn = page.locator(SELECTORS.maybeLaterButton);
-    await expect(maybeLaterBtn).toBeVisible();
-    await maybeLaterBtn.click({ timeout: 10000 });
+    await expect(maybeLaterBtn).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(300); // Allow animation to settle
+    await maybeLaterBtn.click();
 
     // Modal should close
     await expect(page.locator('text="Ready to launch?"')).toBeHidden();
@@ -870,16 +879,27 @@ test.describe("Publish Flow", () => {
     const titleValue = await titleInput.inputValue();
     expect(titleValue.length).toBeGreaterThan(0);
 
-    // Click Publish button in nav
-    await page.locator('nav button:has-text("Publish")').click();
-
-    // Should show link-specific modal text (not an error)
-    await expect(page.locator('text="Spread the word!"')).toBeVisible({
-      timeout: 5000,
+    // Wait for auto-save to complete (check nav "Saved" timestamp)
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
     });
 
+    // Additional wait for any pending state updates to settle
+    await page.waitForTimeout(1000);
+
+    // Wait for Publish button to be enabled (requires valid title + URL)
+    const publishButton = page.locator('nav button:has-text("Publish")');
+    await expect(publishButton).toBeEnabled({ timeout: 10000 });
+    await publishButton.click();
+
+    // Should show link-specific modal text (not an error)
+    const spreadTheWordText = page.locator('text="Spread the word!"');
+    await expect(spreadTheWordText).toBeVisible({ timeout: 10000 });
+
     // Click Share it! to publish
-    await page.locator(SELECTORS.shareItButton).click();
+    const shareBtn = page.locator(SELECTORS.shareItButton);
+    await expect(shareBtn).toBeVisible({ timeout: 5000 });
+    await shareBtn.click();
 
     // Wait for publish to complete - should redirect to post page
     // The redirect URL pattern is /{username}/{slug}
@@ -900,11 +920,19 @@ test.describe("Publish Flow", () => {
     await page.locator(SELECTORS.editorContent).click();
     await page.keyboard.type(articleContent);
 
-    // Wait for state to update
+    // Wait for auto-save to complete before publishing (check nav "Saved" timestamp)
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
     await page.waitForTimeout(500);
 
     // Publish
-    await page.locator('nav button:has-text("Publish")').click();
+    const publishButton = page.locator('nav button:has-text("Publish")');
+    await expect(publishButton).toBeEnabled({ timeout: 10000 });
+    await publishButton.click();
+    await expect(page.locator(SELECTORS.letsDoThisButton)).toBeVisible({
+      timeout: 5000,
+    });
     await page.locator(SELECTORS.letsDoThisButton).click();
 
     // Should redirect to article page
