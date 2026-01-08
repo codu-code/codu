@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import React, {
   useState,
   useEffect,
@@ -231,11 +231,11 @@ const CommandList = ({
   range: any;
 }) => {
   // Use items.length as key to reset selectedIndex when items change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Reset selection when items change - using useLayoutEffect to run synchronously
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useLayoutEffect(() => {
     setSelectedIndex(0);
   }, [items]);
