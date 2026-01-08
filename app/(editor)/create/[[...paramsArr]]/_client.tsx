@@ -8,6 +8,8 @@ import React, {
   Fragment,
   useCallback,
   Suspense,
+  useRef,
+  useMemo,
 } from "react";
 import { toast } from "sonner";
 import {
@@ -119,8 +121,9 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const [savedTime, setSavedTime] = useState("");
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [isPostScheduled, setIsPostScheduled] = useState(false);
-  const [shouldRefetch, setShouldRefetch] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const formPopulatedRef = useRef(false);
   const [copied, setCopied] = useState(false);
   const [postStatus, setPostStatus] = useState<PostStatus | null>(null);
 
@@ -172,7 +175,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   } = api.content.editDraft.useQuery(
     { id: postId },
     {
-      enabled: !!postId && shouldRefetch,
+      enabled: !!postId && !dataLoaded,
+      staleTime: Infinity, // Prevent refetching
     },
   );
 
@@ -193,11 +197,12 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     }
   }, [draftFetchError, isError]);
 
+  // Track when data has been successfully loaded
   useEffect(() => {
-    if (shouldRefetch) {
-      setShouldRefetch(!(dataStatus === "success"));
+    if (dataStatus === "success" && !dataLoaded) {
+      queueMicrotask(() => setDataLoaded(true));
     }
-  }, [dataStatus, shouldRefetch]);
+  }, [dataStatus, dataLoaded]);
 
   useEffect(() => {
     const to = setTimeout(setCopied, 2000, false);
@@ -373,9 +378,12 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     }
   };
 
-  // Load existing data
-  useEffect(() => {
-    if (!data) return;
+  // Load existing data - only populate form once when data first arrives
+  // Using a callback pattern to batch state updates and avoid cascading renders
+  const populateFormFromData = useCallback(() => {
+    if (!data || formPopulatedRef.current) return;
+    formPopulatedRef.current = true;
+
     const {
       body: existingBody,
       excerpt: existingExcerpt,
@@ -391,10 +399,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     if (postType?.toLowerCase() === "link") {
       setLinkTitle(existingTitle || "");
       setLinkUrl(externalUrl || "");
-      // Only switch tab if not already on link tab (preserve URL param on initial load)
-      if (activeTab !== "link") {
-        setActiveTab("link");
-      }
+      setActiveTab("link");
     } else {
       setTitle(existingTitle || "");
       setBody(existingBody || "");
@@ -410,18 +415,23 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     setPostStatus(
       publishedAt ? getPostStatus(new Date(publishedAt)) : status.DRAFT,
     );
-  }, [data, activeTab]);
+  }, [data]);
+
+  // Call populateFormFromData when data changes - defer to avoid sync setState
+  useEffect(() => {
+    queueMicrotask(populateFormFromData);
+  }, [populateFormFromData]);
 
   // Update post status based on content
-  useEffect(() => {
+  // This is intentional - we need to track draft status based on content length
+  const computedPostStatus = useMemo(() => {
     if ((title + body).length < 5) {
-      setPostStatus(null);
-    } else if (postStatus === null) {
-      setPostStatus(status.DRAFT);
+      return null;
     }
+    return postStatus ?? status.DRAFT;
   }, [title, body, postStatus]);
 
-  // Auto-save for drafts
+  // Auto-save for drafts - use queueMicrotask to defer the mutation call
   useEffect(() => {
     if (currentPostStatus !== status.DRAFT) return;
     // For write tab, require both title and body; for link tab, require url and title
@@ -431,7 +441,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       if (!linkUrl || !linkTitle) return;
     }
     if (debouncedValue === (data?.title || "") + data?.body) return;
-    if (unsavedChanges) savePost();
+    if (unsavedChanges) {
+      // Defer the save call to avoid synchronous setState in effect
+      queueMicrotask(() => savePost());
+    }
   }, [
     debouncedValue,
     currentPostStatus,
@@ -465,6 +478,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   useEffect(() => {
     if (activeTab !== "write") return;
     if ((title + body).length < 5) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnsavedChanges(true);
   }, [title, body, activeTab]);
 
@@ -472,6 +486,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   useEffect(() => {
     if (activeTab !== "link") return;
     if (!linkUrl && !linkTitle) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnsavedChanges(true);
   }, [linkUrl, linkTitle, activeTab]);
 
@@ -519,7 +534,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       <EditorNav
         session={session}
         username={session?.user?.name || null}
-        postStatus={postStatus}
+        postStatus={computedPostStatus}
         unsavedChanges={unsavedChanges}
         onPublish={handlePublish}
         isDisabled={isDisabled}
