@@ -7,20 +7,18 @@ test.describe("Unauthenticated Login Page", () => {
     await page.context().clearCookies();
     await page.goto("http://localhost:3000/get-started");
   });
-  test("Sign up page contains sign up links", async ({ page, isMobile }) => {
-    await expect(page.getByText("CodúBetaSign in or create")).toBeVisible();
+  test("Sign up page contains sign up links", async ({ page }) => {
     await expect(
       page.getByRole("heading", { name: "Sign in or create your account" }),
     ).toBeVisible();
     await expect(page.getByRole("link", { name: "return home" })).toBeVisible();
-    if (!isMobile) {
-      await expect(
-        page.getByRole("button", { name: "Sign up for free" }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: "Sign in", exact: true }),
-      ).toBeVisible();
-    }
+    // Check for OAuth provider buttons
+    await expect(
+      page.getByRole("button", { name: "Continue with GitHub" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Continue with GitLab" }),
+    ).toBeVisible();
   });
   test("Login page contains GitHub button", async ({ page }) => {
     await expect(page.getByTestId("github-login-button")).toBeVisible();
@@ -35,23 +33,21 @@ test.describe("Authenticated Login Page", () => {
   test.beforeEach(async ({ page }) => {
     await loggedInAsUserOne(page);
   });
-  test("Sign up page contains sign up links", async ({ page, isMobile }) => {
+  test("Sign up page contains sign up links", async ({ page }) => {
     // authenticated users are kicked back to the homepage if they try to go to /get-started
     await page.goto("http://localhost:3000/get-started");
     expect(page.url()).toEqual("http://localhost:3000/");
-    await expect(page.getByText("CodúBetaSign in or create")).toBeHidden();
     await expect(
       page.getByRole("heading", { name: "Sign in or create your account" }),
     ).toBeHidden();
     await expect(page.getByRole("link", { name: "return home" })).toBeHidden();
-    if (!isMobile) {
-      await expect(
-        page.getByRole("button", { name: "Sign up for free" }),
-      ).toBeHidden();
-      await expect(
-        page.getByRole("button", { name: "Sign in", exact: true }),
-      ).toBeHidden();
-    }
+    // OAuth provider buttons should be hidden on homepage
+    await expect(
+      page.getByRole("button", { name: "Continue with GitHub" }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Continue with GitLab" }),
+    ).toBeHidden();
   });
   test("Login page contains GitHub button", async ({ page }) => {
     await expect(page.getByTestId("github-login-button")).toBeHidden();

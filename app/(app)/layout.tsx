@@ -1,8 +1,6 @@
 import { headers } from "next/headers";
 import ThemeProvider from "@/components/Theme/ThemeProvider";
 import { TRPCReactProvider } from "@/server/trpc/react";
-import Footer from "@/components/Footer/Footer";
-import Nav from "@/components/Nav/Nav";
 import { getServerAuthSession } from "@/server/auth";
 import AuthProvider from "@/context/AuthProvider";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
@@ -11,6 +9,7 @@ import { PromptProvider } from "@/components/PromptService";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { user } from "@/server/db/schema";
+import { SidebarAppLayout } from "@/components/Layout/SidebarAppLayout";
 
 export const metadata = {
   title: "Codú - Join Our Web Developer Community",
@@ -78,14 +77,12 @@ export default async function RootLayout({
     : null;
 
   return (
-    <>
-      <Nav
-        session={session}
-        algoliaSearchConfig={algoliaSearchConfig}
-        username={userData?.username || null}
-      />
+    <SidebarAppLayout
+      session={session}
+      algoliaSearchConfig={algoliaSearchConfig}
+      username={userData?.username || null}
+    >
       {children}
-      <Footer />
-    </>
+    </SidebarAppLayout>
   );
 }

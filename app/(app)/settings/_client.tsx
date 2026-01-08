@@ -12,7 +12,7 @@ import { saveSettingsSchema } from "@/schema/profile";
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sun, Moon } from "lucide-react";
 import { Subheading, Heading } from "@/components/ui-components/heading";
 import { Avatar } from "@/components/ui-components/avatar";
 import { Input } from "@/components/ui-components/input";
@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui-components/textarea";
 import { Switch } from "@/components/ui-components/switch";
 import { Divider } from "@/components/ui-components/divider";
 import { Text } from "@/components/ui-components/text";
+import { useTheme } from "next-themes";
 
 type User = Pick<
   typeof user.$inferSelect,
@@ -59,6 +60,7 @@ const Settings = ({ profile }: { profile: User }) => {
     },
   });
 
+  const { setTheme, resolvedTheme } = useTheme();
   const { emailNotifications: eNotifications, newsletter } = profile;
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
@@ -428,6 +430,33 @@ const Settings = ({ profile }: { profile: User }) => {
             checked={weeklyNewsletter}
             onChange={setWeeklyNewsletter}
           />
+        </Field>
+      </section>
+
+      <Divider className="my-10" soft />
+
+      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Subheading level={2}>Appearance</Subheading>
+          <Text>Choose your preferred theme</Text>
+        </div>
+        <Field className="flex items-center justify-between">
+          <Label passive className="flex flex-col">
+            <span>Theme</span>
+            <Text className="text-xs text-gray-500">
+              Toggle between light and dark theme
+            </Text>
+          </Label>
+
+          <div className="flex items-center gap-2">
+            <Sun className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+            <Switch
+              color="pink"
+              checked={resolvedTheme === "dark"}
+              onChange={(checked) => setTheme(checked ? "dark" : "light")}
+            />
+            <Moon className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+          </div>
         </Field>
       </section>
 

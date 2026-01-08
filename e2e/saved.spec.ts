@@ -35,12 +35,11 @@ test.describe("Authenticated Saved Page", () => {
     await page.goto("http://localhost:3000/feed?type=article");
     await page.waitForSelector("article");
 
-    // Get the title of the first article before bookmarking
+    // Get the title of the first article before bookmarking (use h2 heading)
     const articleTitle = await page
       .locator("article")
       .first()
-      .locator("a")
-      .first()
+      .locator("h2")
       .textContent();
 
     // Click bookmark on first item
@@ -53,7 +52,9 @@ test.describe("Authenticated Saved Page", () => {
 
     // The bookmarked article should appear
     if (articleTitle) {
-      await expect(page.getByText(articleTitle.trim())).toBeVisible({
+      await expect(
+        page.getByRole("heading", { name: articleTitle.trim() }),
+      ).toBeVisible({
         timeout: 10000,
       });
     }

@@ -1,7 +1,7 @@
 // useCustomShortcuts.tsx
 import { useCallback } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { RefObject } from "react";
+import type { RefObject } from "react";
 
 type Shortcuts = {
   [name: string]: string;

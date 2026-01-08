@@ -27,7 +27,7 @@ export const PostAuthPage = (content: {
   if (!mounted) return null;
 
   return (
-    <main className="flex w-full flex-grow flex-col justify-center bg-neutral-100 px-4 py-20 dark:bg-black sm:px-6 lg:py-40">
+    <div className="flex w-full flex-grow flex-col justify-center bg-neutral-100 px-4 py-20 dark:bg-black sm:px-6 lg:py-40">
       <div className="flex flex-shrink-0 justify-center">
         <Link href="/">
           <span className="sr-only">Codú</span>
@@ -62,7 +62,7 @@ export const PostAuthPage = (content: {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

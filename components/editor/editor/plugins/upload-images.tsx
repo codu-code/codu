@@ -18,7 +18,7 @@ const UploadImagesPlugin = () =>
       apply(tr, set) {
         set = set.map(tr.mapping, tr.doc);
         // See if the transaction adds or removes any placeholders
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const action = tr.getMeta(uploadKey as any);
         if (action && action.add) {
           const { id, pos, src } = action.add;

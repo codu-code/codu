@@ -10,14 +10,14 @@ How popular? Check out [this list](https://trends.builtwith.com/websitelist/Reac
 
 React has a small API, and you need to know only a handful of concepts to start being productive:
 
-* Components
-* JSX
-* Styling
-* State
-* Props
-* Effects
+- Components
+- JSX
+- Styling
+- State
+- Props
+- Effects
 
-We will cover all of these concepts in this series, and by the end, you should be able to create your first small applications in React from scratch. 
+We will cover all of these concepts in this series, and by the end, you should be able to create your first small applications in React from scratch.
 
 You might initially find learning React hard, but once you understand some of the fundamentals, it'll be one of the best developer experiences.
 
@@ -27,7 +27,7 @@ Be patient, practice, and you'll be rewarded!
 
 Facebook (and, more specifically, a Facebook employee named Jordan Walke) started developing it as they faced issues with code maintenance in 2011\.
 
-It was then open-sourced and made available in 2013, where we have seen it co-developed by Facebook and the open-source community ever since. 
+It was then open-sourced and made available in 2013, where we have seen it co-developed by Facebook and the open-source community ever since.
 
 ## Benefits of using React
 
@@ -35,7 +35,7 @@ Before you dive into React, I think it's worth understanding some of the benefit
 
 Here are some of the highlights:
 
-**Reusable components:** React's component-based architecture promotes code reusability, making it easier to maintain, scale, and update applications. This reuse makes developers much more productive since they can share common patterns and components throughout an application. 
+**Reusable components:** React's component-based architecture promotes code reusability, making it easier to maintain, scale, and update applications. This reuse makes developers much more productive since they can share common patterns and components throughout an application.
 
 **Improved performance:** React's virtual DOM implementation reduces the need for frequent DOM manipulation, resulting in faster and more efficient rendering of user interfaces.
 
@@ -51,16 +51,16 @@ If you're knowledgeable in JavaScript, React should be relatively easy to get th
 
 Here's a list of the JavaScript topics you should be comfortable with to get the most from the series:
 
-* Variables and data types
-* Control structures (if-else, loops)
-* Functions (including arrow functions)
-* Callback functions
-* Arrays and objects
-* Array methods (map, filter, reduce)
-* Object destructuring and spread operator
-* Template literals
-* Modules (import, export)
-* Promises
+- Variables and data types
+- Control structures (if-else, loops)
+- Functions (including arrow functions)
+- Callback functions
+- Arrays and objects
+- Array methods (map, filter, reduce)
+- Object destructuring and spread operator
+- Template literals
+- Modules (import, export)
+- Promises
 
 These topics will be noteworthy because we will use them within the code examples.
 

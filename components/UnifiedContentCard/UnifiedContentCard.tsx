@@ -143,12 +143,13 @@ const UnifiedContentCard = ({
   const imageUrl = ensureHttps(rawImageUrl);
 
   // Determine the URL for the card
+  // Priority: author (POST or user-created LINK) > source (aggregated LINK) > fallback
   const cardUrl =
-    type === "POST"
-      ? `/${author?.username || ""}/${slug || ""}`
+    author?.username && slug
+      ? `/${author.username}/${slug}` // User-created content (POST or LINK)
       : source?.slug && slug
-        ? `/${source.slug}/${slug}`
-        : `/feed/${id}`;
+        ? `/${source.slug}/${slug}` // Aggregated content with source
+        : `/feed/${id}`; // Fallback
 
   // Unified content voting mutation
   const { mutate: voteContent, status: voteStatus } =
@@ -242,8 +243,8 @@ const UnifiedContentCard = ({
     >
       {/* Meta info row */}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
-        {/* Author/Source info */}
-        {type === "POST" && author ? (
+        {/* Author/Source info - show author for any content type with author */}
+        {author ? (
           <Link
             href={`/${author.username}`}
             className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"

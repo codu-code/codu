@@ -5,9 +5,9 @@ import { Menu, Transition } from "@headlessui/react";
 import { BellIcon } from "@heroicons/react/20/solid";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { Fragment } from "react";
 import { type Session } from "next-auth";
-import Logo from "@/icons/logo.svg";
 import { type PostStatus, status } from "@/utils/post";
 
 type EditorNavProps = {
@@ -17,6 +17,8 @@ type EditorNavProps = {
   unsavedChanges: boolean;
   onPublish: () => void;
   isDisabled: boolean;
+  savedTime?: string;
+  isSaving?: boolean;
 };
 
 const EditorNav = ({
@@ -26,6 +28,8 @@ const EditorNav = ({
   unsavedChanges,
   onPublish,
   isDisabled,
+  savedTime,
+  isSaving,
 }: EditorNavProps) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: !!session,
@@ -57,12 +61,21 @@ const EditorNav = ({
   const statusText = getStatusText();
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-sm dark:bg-black">
+    <nav
+      aria-label="Editor navigation"
+      className="sticky top-0 z-50 bg-white shadow-sm dark:bg-black"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center">
-              <Logo className="h-6 w-auto" />
+              <Image
+                src="/images/codu.png"
+                alt="Codú"
+                height={16}
+                width={64}
+                className="dark:invert-0"
+              />
             </Link>
 
             {statusText && (
@@ -73,10 +86,15 @@ const EditorNav = ({
           </div>
 
           <div className="flex items-center space-x-4">
+            {savedTime && (
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                {isSaving ? "Saving..." : `Saved ${savedTime}`}
+              </span>
+            )}
             <button
               onClick={onPublish}
               disabled={isDisabled}
-              className="rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1.5 text-sm font-medium text-white hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-pink-500 px-2.5 py-1 text-sm font-medium text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {postStatus === status.PUBLISHED ? "Save changes" : "Publish"}
             </button>
@@ -119,30 +137,24 @@ const EditorNav = ({
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-zinc-800 dark:ring-white/10">
                       {userNavigation.map((item) => (
                         <Menu.Item key={item.name}>
-                          {({ active }) =>
-                            item.onClick ? (
-                              <button
-                                onClick={item.onClick}
-                                className={`${
-                                  active ? "bg-neutral-100" : ""
-                                } block w-full px-4 py-2 text-left text-sm text-neutral-700`}
-                              >
-                                {item.name}
-                              </button>
-                            ) : (
-                              <Link
-                                href={item.href}
-                                className={`${
-                                  active ? "bg-neutral-100" : ""
-                                } block px-4 py-2 text-sm text-neutral-700`}
-                              >
-                                {item.name}
-                              </Link>
-                            )
-                          }
+                          {item.onClick ? (
+                            <button
+                              onClick={item.onClick}
+                              className="flex w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-zinc-700"
+                            >
+                              {item.name}
+                            </button>
+                          ) : (
+                            <Link
+                              href={item.href}
+                              className="block rounded px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-zinc-700"
+                            >
+                              {item.name}
+                            </Link>
+                          )}
                         </Menu.Item>
                       ))}
                     </Menu.Items>

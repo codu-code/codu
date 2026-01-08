@@ -92,6 +92,20 @@ interface CreateArticleInput {
   authorId?: string;
 }
 
+// Interface for creating link posts
+interface CreateLinkPostInput {
+  title: string;
+  slug: string;
+  externalUrl: string;
+  excerpt?: string;
+  upvotesCount?: number;
+  downvotesCount?: number;
+  readingTime?: number;
+  status?: "draft" | "published" | "scheduled" | "unlisted";
+  publishedAt?: string | null;
+  authorId?: string;
+}
+
 export async function createArticle({
   title,
   slug,
@@ -130,5 +144,47 @@ export async function createArticle({
     return result[0];
   } catch (err) {
     throw Error(`Error while creating E2E test article: ${err}`);
+  }
+}
+
+export async function createLinkPost({
+  title,
+  slug,
+  externalUrl,
+  excerpt = "",
+  upvotesCount = 0,
+  downvotesCount = 0,
+  readingTime = 1,
+  status = "draft",
+  publishedAt = null,
+  authorId = E2E_USER_ONE_ID,
+}: CreateLinkPostInput) {
+  const db = drizzle(
+    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
+  );
+
+  try {
+    const result = await db
+      .insert(posts)
+      .values({
+        type: "link",
+        title,
+        slug,
+        excerpt,
+        body: "", // Link posts don't have body content
+        externalUrl,
+        upvotesCount,
+        downvotesCount,
+        readingTime,
+        status,
+        publishedAt,
+        authorId,
+        showComments: true,
+      })
+      .onConflictDoNothing()
+      .returning();
+    return result[0];
+  } catch (err) {
+    throw Error(`Error while creating E2E test link post: ${err}`);
   }
 }

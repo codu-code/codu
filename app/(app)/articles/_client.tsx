@@ -26,7 +26,7 @@ import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { useSession, signIn } from "next-auth/react";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
-import CoduChallenge from "@/components/CoduChallenge/CoduChallenge";
+import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { FeedFilters } from "@/components/Feed";
@@ -432,7 +432,7 @@ const ArticlesPage = () => {
   return (
     <>
       <div className="mx-2">
-        <div className="mt-8 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
+        <div className="mt-8 flex max-w-5xl items-center justify-between pb-2 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
           <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
             {typeof tag === "string" ? (
               <div className="flex items-center justify-center">
@@ -523,7 +523,7 @@ const ArticlesPage = () => {
             </section>
           </div>
           <section className="col-span-5 hidden lg:block">
-            <CoduChallenge />
+            <NewsletterCTA isSubscribed={session?.user?.newsletter} />
             <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Popular topics
             </h3>

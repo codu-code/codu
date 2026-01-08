@@ -7,7 +7,7 @@ export const metadata = {
 const CodeOfConduct = () => {
   return (
     <div>
-      <main className="relative bg-white p-4 shadow-lg dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
+      <div className="relative bg-white p-4 shadow-lg dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
         <div className="lg:max-w-8xl relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:px-8">
           <div className="lg:pl-8">
             <div className="mx-auto max-w-prose text-base">
@@ -155,7 +155,7 @@ const CodeOfConduct = () => {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

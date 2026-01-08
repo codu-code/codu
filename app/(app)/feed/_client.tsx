@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import { FeedItemLoading, FeedFilters } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
+import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
@@ -106,9 +107,9 @@ const FeedPage = () => {
   };
 
   return (
-    <main className="mx-2">
+    <div className="mx-2">
       {/* Header */}
-      <div className="mt-8 flex max-w-5xl items-center justify-between border-b border-b-neutral-300 pb-2 dark:border-b-neutral-600 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
+      <div className="mt-8 flex max-w-5xl items-center justify-between pb-2 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
         <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
           Feed
         </h1>
@@ -203,54 +204,61 @@ const FeedPage = () => {
 
         {/* Sidebar */}
         <section className="col-span-5 hidden lg:block">
-          {/* About section - moved above topics */}
-          <div className="mt-4 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
-            <h3 className="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">
-              About the Feed
-            </h3>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              Curated developer content from across the web. Upvote articles you
-              find helpful, save them for later, and discover trending topics in
-              the developer community.
-            </p>
-          </div>
-
-          {/* Categories section */}
-          <div className="mt-6">
-            <h3 className="mb-4 text-2xl font-semibold leading-6 tracking-wide">
-              Topics
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {categoriesData?.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() =>
-                    handleCategoryChange(category === cat ? null : cat)
-                  }
-                  className={`rounded border px-4 py-2 text-sm capitalize transition-colors ${
-                    category === cat
-                      ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-950 dark:text-orange-300"
-                      : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Saved articles for logged in users */}
-          {session && (
-            <div className="mt-6">
-              <h3 className="mb-4 text-lg font-semibold leading-6 tracking-wide">
-                Your Saved Articles
+          <div className="sticky top-20">
+            {/* About section - aligned with first feed item */}
+            <div className="mt-2 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
+              <h3 className="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">
+                About the Feed
               </h3>
-              <SavedArticlesPreview />
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                Curated developer content from across the web. Upvote articles
+                you find helpful, save them for later, and discover trending
+                topics in the developer community.
+              </p>
             </div>
-          )}
+
+            {/* Newsletter CTA */}
+            <div className="mt-6">
+              <NewsletterCTA isSubscribed={session?.user?.newsletter} />
+            </div>
+
+            {/* Categories section */}
+            <div className="mt-6">
+              <h3 className="mb-4 text-2xl font-semibold leading-6 tracking-wide">
+                Topics
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {categoriesData?.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() =>
+                      handleCategoryChange(category === cat ? null : cat)
+                    }
+                    className={`rounded border px-4 py-2 text-sm capitalize transition-colors ${
+                      category === cat
+                        ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-950 dark:text-orange-300"
+                        : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Saved articles for logged in users */}
+            {session && (
+              <div className="mt-6">
+                <h3 className="mb-4 text-lg font-semibold leading-6 tracking-wide">
+                  Your Saved Articles
+                </h3>
+                <SavedArticlesPreview />
+              </div>
+            )}
+          </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 };
 

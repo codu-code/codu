@@ -23,6 +23,7 @@ import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
 import { eq, and, lte } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
+import UserLinkDetail from "./_userLinkDetail";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
@@ -97,6 +98,82 @@ async function getUserPost(username: string, postSlug: string) {
       image: postRecord.authorImage,
       username: postRecord.authorUsername,
       bio: postRecord.authorBio,
+    },
+  };
+}
+
+// Helper to fetch user-created link post by username and slug (user shared a link)
+async function getUserLinkPost(username: string, postSlug: string) {
+  const userRecord = await db.query.user.findFirst({
+    columns: { id: true },
+    where: eq(user.username, username),
+  });
+
+  if (!userRecord) return null;
+
+  // Find published link post by slug that belongs to this user (no sourceId)
+  const linkPostResults = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      body: posts.body,
+      excerpt: posts.excerpt,
+      slug: posts.slug,
+      externalUrl: posts.externalUrl,
+      coverImage: posts.coverImage,
+      status: posts.status,
+      publishedAt: posts.publishedAt,
+      updatedAt: posts.updatedAt,
+      readingTime: posts.readingTime,
+      showComments: posts.showComments,
+      upvotesCount: posts.upvotesCount,
+      downvotesCount: posts.downvotesCount,
+      type: posts.type,
+      // Author info via JOIN
+      authorId: user.id,
+      authorName: user.name,
+      authorImage: user.image,
+      authorUsername: user.username,
+      authorBio: user.bio,
+    })
+    .from(posts)
+    .leftJoin(user, eq(posts.authorId, user.id))
+    .where(
+      and(
+        eq(posts.slug, postSlug),
+        eq(posts.authorId, userRecord.id),
+        eq(posts.status, "published"),
+        eq(posts.type, "link"),
+        lte(posts.publishedAt, new Date().toISOString()),
+      ),
+    )
+    .limit(1);
+
+  if (linkPostResults.length === 0) return null;
+
+  const linkPost = linkPostResults[0];
+
+  // Fetch tags separately using explicit JOIN
+  const tagsResult = await db
+    .select({ title: tag.title })
+    .from(post_tags)
+    .innerJoin(tag, eq(post_tags.tagId, tag.id))
+    .where(eq(post_tags.postId, linkPost.id));
+
+  // Map to expected shape
+  return {
+    ...linkPost,
+    published: linkPost.publishedAt,
+    readTimeMins: linkPost.readingTime,
+    upvotes: linkPost.upvotesCount,
+    downvotes: linkPost.downvotesCount,
+    tags: tagsResult.map((t) => ({ tag: { title: t.title } })),
+    user: {
+      id: linkPost.authorId,
+      name: linkPost.authorName,
+      image: linkPost.authorImage,
+      username: linkPost.authorUsername,
+      bio: linkPost.authorBio,
     },
   };
 }
@@ -253,6 +330,28 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       },
       alternates: {
         canonical: userArticle.canonicalUrl,
+      },
+    };
+  }
+
+  // Try user-created link post (user shared a link)
+  const userLinkPost = await getUserLinkPost(username, slug);
+  if (userLinkPost && userLinkPost.user) {
+    const host = (await headers()).get("host") || "";
+    const linkAuthorName = userLinkPost.user.name || "Unknown";
+
+    return {
+      title: `${userLinkPost.title} | shared by ${linkAuthorName} | Codú`,
+      authors: {
+        name: linkAuthorName,
+        url: `https://www.${host}/${userLinkPost.user.username}`,
+      },
+      description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
+      openGraph: {
+        title: userLinkPost.title,
+        description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
+        images: userLinkPost.coverImage ? [userLinkPost.coverImage] : undefined,
+        siteName: "Codú",
       },
     };
   }
@@ -660,6 +759,14 @@ const UnifiedPostPage = async (props: Props) => {
         )}
       </>
     );
+  }
+
+  // Try user-created link post (user shared a link)
+  const userLinkPost = await getUserLinkPost(username, slug);
+
+  if (userLinkPost && userLinkPost.user) {
+    // Render user link post
+    return <UserLinkDetail username={username} contentSlug={slug} />;
   }
 
   // Then try feed article (legacy aggregated_article table)

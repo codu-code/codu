@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const Forbidden: NextPage = () => {
   return (
-    <main className="flex w-full flex-grow flex-col justify-center bg-white px-4 py-20 sm:px-6 lg:py-40">
+    <div className="flex w-full flex-grow flex-col justify-center bg-white px-4 py-20 sm:px-6 lg:py-40">
       <div className="flex flex-shrink-0 justify-center">
         <Link href="/">
           <span className="sr-only">Codú</span>
@@ -37,7 +37,7 @@ const Forbidden: NextPage = () => {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

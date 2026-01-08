@@ -18,6 +18,7 @@
     "db:push": "drizzle-kit push --force",
     "db:migrate": "npx tsx -r dotenv/config ./drizzle/migrate.ts",
     "db:seed": "npx tsx -r dotenv/config ./drizzle/seed.ts",
+    "db:seed:sources": "npx tsx -r dotenv/config ./drizzle/seed-sources.ts",
     "db:nuke": "npx tsx -r dotenv/config ./drizzle/nuke.ts",
     "drizzle:up": "drizzle-kit up",
     "feed:fetch": "npx tsx -r dotenv/config ./scripts/fetch-rss.ts",

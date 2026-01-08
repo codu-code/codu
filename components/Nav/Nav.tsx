@@ -16,7 +16,6 @@ import { PromptLink as Link } from "../PromptService/PromptLink";
 import { Fragment } from "react";
 import { navigation } from "../../config/site_settings";
 import { type Session } from "next-auth";
-import ThemeToggle from "../Theme/ThemeToggle/ThemeToggle";
 import AnimatedHamburger from "./AnimatedHamburger";
 import Logo from "@/icons/logo.svg";
 import MobileNav from "./MobileNav";
@@ -147,10 +146,6 @@ const Nav = ({
                     </>
                   )}
 
-                  <div className="ml-3">
-                    <ThemeToggle />
-                  </div>
-
                   {session && (
                     <>
                       <Link
@@ -220,7 +215,6 @@ const Nav = ({
               </div>
               <div className="-mr-2 flex items-center md:hidden">
                 <MobileSearch algoliaSearchConfig={algoliaSearchConfig} />
-                <ThemeToggle />
                 {session && (
                   <Link
                     to="/notifications"

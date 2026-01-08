@@ -690,7 +690,7 @@ export const commentRouter = createTRPCRouter({
 });
 
 // Shape a single comment for API response
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function shapeComment(comment: any) {
   const isDeleted = !!comment.deletedAt;
 
@@ -721,10 +721,10 @@ function shapeComment(comment: any) {
 }
 
 // Build tree structure from flat list of comments
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function buildCommentTree(rootComment: any, descendants: any[]) {
   // Create a map of id -> comment with children array
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const commentMap = new Map<string, any>();
 
   // Initialize root

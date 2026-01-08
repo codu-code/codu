@@ -11,6 +11,7 @@ declare module "next-auth" {
       role: Role;
       username: string;
       id: string;
+      newsletter: boolean;
     } & DefaultSession["user"];
   }
 
@@ -18,5 +19,6 @@ declare module "next-auth" {
     username?: string;
     role: Role;
     id: string;
+    newsletter: boolean;
   }
 }
