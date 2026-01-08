@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   GetUnifiedFeedSchema,
@@ -28,7 +29,7 @@ import {
   user,
   comments,
 } from "@/server/db/schema";
-import { and, eq, desc, lt, lte, gt, sql, isNotNull, count } from "drizzle-orm";
+import { and, eq, desc, lt, lte, sql, isNotNull, count } from "drizzle-orm";
 import { increment } from "./utils";
 import crypto from "crypto";
 
@@ -1078,12 +1079,11 @@ export const contentRouter = createTRPCRouter({
       }));
     }),
 
-  // My Scheduled - get user's scheduled ARTICLE content (publishedAt > now)
+  // My Scheduled - get user's scheduled ARTICLE content
   myScheduled: protectedProcedure
     .input(MyScheduledContentSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const now = new Date().toISOString();
 
       const results = await ctx.db
         .select({
@@ -1103,7 +1103,6 @@ export const contentRouter = createTRPCRouter({
             eq(posts.authorId, userId),
             eq(posts.type, "article"),
             eq(posts.status, "scheduled"),
-            gt(posts.publishedAt, now),
           ),
         )
         .orderBy(desc(posts.publishedAt))
@@ -1174,5 +1173,120 @@ export const contentRouter = createTRPCRouter({
         .returning();
 
       return updated;
+    }),
+
+  // Get user-created link post by username and slug
+  getUserLinkBySlug: publicProcedure
+    .input(GetContentBySlugSchema.extend({ username: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+
+      // Find the user
+      const userResult = await ctx.db
+        .select({ id: user.id })
+        .from(user)
+        .where(eq(user.username, input.username))
+        .limit(1);
+
+      if (userResult.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found",
+        });
+      }
+
+      const authorId = userResult[0].id;
+
+      // Find the link post
+      const linkPostResults = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          coverImage: posts.coverImage,
+          slug: posts.slug,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          showComments: posts.showComments,
+          createdAt: posts.createdAt,
+          updatedAt: posts.updatedAt,
+          // Author info
+          authorId: user.id,
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+          authorBio: user.bio,
+        })
+        .from(posts)
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(
+          and(
+            eq(posts.slug, input.slug),
+            eq(posts.authorId, authorId),
+            eq(posts.type, "link"),
+            eq(posts.status, "published"),
+            lte(posts.publishedAt, new Date().toISOString()),
+          ),
+        )
+        .limit(1);
+
+      if (linkPostResults.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Link post not found",
+        });
+      }
+
+      const linkPost = linkPostResults[0];
+
+      // Get user vote if logged in
+      let userVote: "up" | "down" | null = null;
+      let isBookmarked = false;
+
+      if (userId) {
+        const [voteResult, bookmarkResult] = await Promise.all([
+          ctx.db
+            .select({ voteType: post_votes.voteType })
+            .from(post_votes)
+            .where(
+              and(
+                eq(post_votes.postId, linkPost.id),
+                eq(post_votes.userId, userId),
+              ),
+            )
+            .limit(1),
+          ctx.db
+            .select({ id: bookmarks.id })
+            .from(bookmarks)
+            .where(
+              and(
+                eq(bookmarks.postId, linkPost.id),
+                eq(bookmarks.userId, userId),
+              ),
+            )
+            .limit(1),
+        ]);
+
+        userVote = voteResult[0]?.voteType ?? null;
+        isBookmarked = bookmarkResult.length > 0;
+      }
+
+      return {
+        ...linkPost,
+        type: toFrontendType(linkPost.type),
+        userVote,
+        isBookmarked,
+        author: {
+          id: linkPost.authorId,
+          name: linkPost.authorName,
+          username: linkPost.authorUsername,
+          image: linkPost.authorImage,
+          bio: linkPost.authorBio,
+        },
+      };
     }),
 });
