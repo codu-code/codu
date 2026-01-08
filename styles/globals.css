@@ -1,5 +1,10 @@
 @tailwind base;
 
+html {
+  /* Prevent layout shift when scrollbar appears/disappears */
+  scrollbar-gutter: stable;
+}
+
 body {
   @apply bg-neutral-100 text-neutral-900 dark:bg-black dark:text-white;
 }
