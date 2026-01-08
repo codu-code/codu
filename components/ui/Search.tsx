@@ -366,7 +366,7 @@ function SearchDialog({
   const searchParams = useSearchParams();
 
   // Close dialog when pathname or searchParams change
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     setOpen(false);
   }, [pathname, searchParams, setOpen]);

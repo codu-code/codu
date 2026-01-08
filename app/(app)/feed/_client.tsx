@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import { FeedItemLoading, FeedFilters } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
+import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
@@ -210,10 +211,15 @@ const FeedPage = () => {
                 About the Feed
               </h3>
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Curated developer content from across the web. Upvote articles you
-                find helpful, save them for later, and discover trending topics in
-                the developer community.
+                Curated developer content from across the web. Upvote articles
+                you find helpful, save them for later, and discover trending
+                topics in the developer community.
               </p>
+            </div>
+
+            {/* Newsletter CTA */}
+            <div className="mt-6">
+              <NewsletterCTA isSubscribed={session?.user?.newsletter} />
             </div>
 
             {/* Categories section */}

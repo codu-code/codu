@@ -6,8 +6,17 @@ import { NavbarItem } from "./navbar";
 
 function MenuIcon() {
   return (
-    <svg data-slot="icon" viewBox="0 0 20 20" aria-hidden="true" fill="currentColor">
-      <path fillRule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" />
+    <svg
+      data-slot="icon"
+      viewBox="0 0 20 20"
+      aria-hidden="true"
+      fill="currentColor"
+    >
+      <path
+        fillRule="evenodd"
+        d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z"
+        clipRule="evenodd"
+      />
     </svg>
   );
 }
@@ -79,14 +88,12 @@ export function SidebarLayout({
       {/* Outer frame: animates width, has border */}
       <div
         data-collapsed={isCollapsed ? "true" : undefined}
-        className={`fixed top-16 bottom-0 left-0 z-30 max-lg:hidden border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300 ease-in-out ${isCollapsed ? "w-16" : "w-64"}`}
+        className={`fixed bottom-0 left-0 top-16 z-30 border-r border-neutral-200 transition-all duration-300 ease-in-out dark:border-neutral-800 max-lg:hidden ${isCollapsed ? "w-16" : "w-64"}`}
       >
         {/* Middle: clips content */}
         <div className="h-full overflow-hidden">
           {/* Inner: fixed width, content doesn't move */}
-          <div className="w-64 h-full">
-            {sidebar}
-          </div>
+          <div className="h-full w-64">{sidebar}</div>
         </div>
       </div>
 
@@ -113,7 +120,7 @@ export function SidebarLayout({
 
       {/* Content */}
       <main
-        className={`flex flex-1 flex-col lg:min-w-0 lg:pt-16 transition-all duration-300 ease-in-out ${contentPadding}`}
+        className={`flex flex-1 flex-col transition-all duration-300 ease-in-out lg:min-w-0 lg:pt-16 ${contentPadding}`}
       >
         <div className="grow">{children}</div>
       </main>

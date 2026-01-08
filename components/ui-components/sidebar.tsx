@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable jsx-a11y/heading-has-content */
+ 
 
 import * as Headless from "@headlessui/react";
 import clsx from "clsx";
@@ -92,7 +92,7 @@ export function SidebarDivider({
       {...props}
       className={clsx(
         className,
-        "my-4 border-t border-neutral-200 dark:border-neutral-800 -mx-3",
+        "-mx-3 my-4 border-t border-neutral-200 dark:border-neutral-800",
       )}
     />
   );

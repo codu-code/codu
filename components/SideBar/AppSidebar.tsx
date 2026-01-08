@@ -104,7 +104,9 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
                     className={`!size-5 shrink-0 ${isActive(item.href) ? "text-neutral-800 dark:text-white" : "text-neutral-400"}`}
                   />
                 )}
-                <SidebarLabel className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}>
+                <SidebarLabel
+                  className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}
+                >
                   {item.name}
                 </SidebarLabel>
               </SidebarItem>
@@ -116,7 +118,11 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
           <>
             <SidebarDivider />
             <SidebarSection>
-              <SidebarHeading className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}>Account</SidebarHeading>
+              <SidebarHeading
+                className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}
+              >
+                Account
+              </SidebarHeading>
               {sidebarUserNavigation.map((item) => {
                 const Icon = iconMap[item.icon as keyof typeof iconMap];
                 const href = getUserNavHref(
@@ -134,7 +140,9 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
                         className={`!size-5 shrink-0 ${isActive(href) ? "text-neutral-800 dark:text-white" : "text-neutral-400"}`}
                       />
                     )}
-                    <SidebarLabel className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}>
+                    <SidebarLabel
+                      className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}
+                    >
                       {item.name}
                     </SidebarLabel>
                   </SidebarItem>
@@ -146,7 +154,9 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
 
         <SidebarSpacer />
 
-        <SidebarSection className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}>
+        <SidebarSection
+          className={`transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}
+        >
           {sidebarFooterNav.map((item) => (
             <SidebarItem key={item.name} href={item.href}>
               <SidebarLabel className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -157,7 +167,9 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
         </SidebarSection>
       </SidebarBody>
 
-      <SidebarFooter className={`border-t-0 transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}>
+      <SidebarFooter
+        className={`border-t-0 transition-opacity duration-300 ${isCollapsed ? "opacity-0" : "opacity-100"}`}
+      >
         <div className="flex items-center justify-center gap-4 py-2">
           {socialLinks.map((item) => (
             <a

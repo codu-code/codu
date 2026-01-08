@@ -201,7 +201,6 @@ export function MinimalHeader({
             </button>
           </>
         )}
-
       </div>
     </div>
   );

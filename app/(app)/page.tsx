@@ -7,7 +7,7 @@ import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { getServerAuthSession } from "@/server/auth";
 import PopularTags from "@/components/PopularTags/PopularTags";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
-import CoduChallenge from "@/components/CoduChallenge/CoduChallenge";
+import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
 
 const Home = async () => {
   const session = await getServerAuthSession();
@@ -52,20 +52,20 @@ const Home = async () => {
           </Suspense>
           <section className="col-span-5 hidden lg:block">
             <div className="sticky top-20">
-            <CoduChallenge />
-            <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
-              Popular topics
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              <Suspense fallback={<PopularTagsLoading />}>
-                <PopularTags />
-              </Suspense>
-            </div>
-            {session && (
+              <NewsletterCTA isSubscribed={session?.user?.newsletter} />
+              <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
+                Popular topics
+              </h4>
               <div className="flex flex-wrap gap-2">
-                <SideBarSavedPosts />
+                <Suspense fallback={<PopularTagsLoading />}>
+                  <PopularTags />
+                </Suspense>
               </div>
-            )}
+              {session && (
+                <div className="flex flex-wrap gap-2">
+                  <SideBarSavedPosts />
+                </div>
+              )}
             </div>
           </section>
         </div>
