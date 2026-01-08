@@ -432,8 +432,8 @@ const ArticlesPage = () => {
   return (
     <>
       <div className="mx-2">
-        <div className="mt-8 flex max-w-5xl items-center justify-between pb-2 sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:text-4xl">
+        <div className="mt-2 flex max-w-5xl items-center justify-between sm:mx-auto sm:mt-6 sm:max-w-2xl lg:max-w-5xl">
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50">
             {typeof tag === "string" ? (
               <div className="flex items-center justify-center">
                 <TagIcon className="mr-3 h-6 w-6 text-neutral-800 dark:text-neutral-200" />

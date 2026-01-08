@@ -384,7 +384,7 @@ const UnifiedContentCard = ({
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
-            className="relative hidden w-[120px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:block"
+            className="relative w-[80px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:w-[120px]"
           >
             <img
               src={imageUrl}

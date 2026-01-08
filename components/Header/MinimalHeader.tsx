@@ -87,8 +87,8 @@ export function MinimalHeader({
         </Link>
       </div>
 
-      {/* Mobile: Logo in center */}
-      <div className="flex flex-1 justify-center lg:hidden">
+      {/* Mobile: Logo on left */}
+      <div className="flex lg:hidden">
         <Link to="/">
           <Image
             src="/images/codu.png"

@@ -80,11 +80,11 @@ const FeedFilters = ({
     typeOptions.find((opt) => opt.value === type) || typeOptions[0];
 
   return (
-    <div className="flex items-center gap-3" data-testid="feed-filters">
+    <div className="flex items-center gap-2 sm:gap-3" data-testid="feed-filters">
       {/* Content Type Dropdown */}
       {showTypeFilter && onTypeChange && (
         <Menu as="div" className="relative" data-testid="type-filter">
-          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">
+          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 sm:px-3 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">
             <currentType.icon className="h-4 w-4" />
             <span>{currentType.label}</span>
             <ChevronDownIcon className="h-4 w-4" />
@@ -129,7 +129,7 @@ const FeedFilters = ({
 
       {/* Sort Dropdown */}
       <Menu as="div" className="relative" data-testid="sort-filter">
-        <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">
+        <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 sm:px-3 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">
           <currentSort.icon className="h-4 w-4" />
           <span>{currentSort.label}</span>
           <ChevronDownIcon className="h-4 w-4" />
@@ -174,7 +174,7 @@ const FeedFilters = ({
       {/* Category Dropdown */}
       {categories.length > 0 && (
         <Menu as="div" className="relative" data-testid="topic-filter">
-          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">
+          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 sm:px-3 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700">
             <span>{category || "All Topics"}</span>
             <ChevronDownIcon className="h-4 w-4" />
           </MenuButton>
