@@ -1,28 +1,39 @@
 "use client";
+
 import * as Sentry from "@sentry/nextjs";
 import { ZodError } from "zod";
-import React, { useState, useEffect, Fragment, useRef } from "react";
-import { useForm } from "react-hook-form";
-import CustomTextareaAutosize from "@/components/CustomTextareAutosize/CustomTextareaAutosize";
+import React, {
+  useState,
+  useEffect,
+  Fragment,
+  useCallback,
+  Suspense,
+} from "react";
 import { toast } from "sonner";
 import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
   Transition,
+  TransitionChild,
 } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/20/solid";
-import type { UpdateContentInput } from "@/schema/content";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { ConfirmContentSchema } from "@/schema/content";
 import { api } from "@/server/trpc/react";
 import { removeMarkdown } from "@/utils/removeMarkdown";
 import { useDebounce } from "@/hooks/useDebounce";
 import Markdoc from "@markdoc/markdoc";
-import { useMarkdownHotkeys } from "@/markdoc/editor/hotkeys/hotkeys.markdoc";
-import { useMarkdownShortcuts } from "@/markdoc/editor/shortcuts/shortcuts.markdoc";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
-import { notFound, useParams, useRouter } from "next/navigation";
+import {
+  notFound,
+  useParams,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 import copy from "copy-to-clipboard";
@@ -32,128 +43,103 @@ import {
   isValidScheduleTime,
   status,
 } from "@/utils/post";
-import { ImageUp, LoaderCircle } from "lucide-react";
-import { uploadFile } from "@/utils/s3helpers";
-import { getUploadUrl } from "@/app/actions/getUploadUrl";
+import {
+  PenLine,
+  Link as LinkIcon,
+  Eye,
+  EyeOff,
+  Settings2,
+  Share2,
+} from "lucide-react";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
+import { motion, LayoutGroup } from "framer-motion";
 
-const Create = ({ session }: { session: Session | null }) => {
+// Import new PostEditor components
+import { WriteTab } from "@/components/PostEditor/tabs/WriteTab";
+import { LinkTab } from "@/components/PostEditor/tabs/LinkTab";
+import { TagInput } from "@/components/PostEditor/components/TagInput";
+import type { LinkMetadata } from "@/components/PostEditor/hooks/useLinkMetadata";
+
+type PostType = "write" | "link";
+
+const TAB_CONFIG = [
+  {
+    id: "write" as const,
+    label: "Write",
+    icon: PenLine,
+    description: "Write an article",
+  },
+  {
+    id: "link" as const,
+    label: "Link",
+    icon: LinkIcon,
+    description: "Share a link",
+  },
+];
+
+// Inner component that uses useSearchParams
+const CreateContent = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const postId = params?.paramsArr?.[0] || "";
 
-  // @TODO - Redirect to create/:id if paramArr.length > 2
+  // Tab state from URL
+  const initialTab = (searchParams.get("tab") as PostType) || "write";
+  const [activeTab, setActiveTab] = useState<PostType>(initialTab);
 
-  const [viewPreview, setViewPreview] = useState<boolean>(false);
+  // Handle tab change with URL update
+  const handleTabChange = useCallback(
+    (tab: PostType) => {
+      setActiveTab(tab);
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("tab", tab);
+      router.replace(`?${newParams.toString()}`, { scroll: false });
+    },
+    [searchParams, router],
+  );
+
+  // Form state
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [tagValue, setTagValue] = useState<string>("");
-  const [savedTime, setSavedTime] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
-  const [isPostScheduled, setIsPostScheduled] = useState<boolean>(false);
-  const [shouldRefetch, setShouldRefetch] = useState<boolean>(true);
-  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [uploadUrl, setUploadUrl] = useState<string | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<
-    "pending" | "error" | "success" | "default"
-  >("default");
+  const [excerpt, setExcerpt] = useState("");
+  const [canonicalUrl, setCanonicalUrl] = useState("");
+  const [publishedTime, setPublishedTime] = useState("");
+
+  // Link tab state
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
+  const [linkMetadata, setLinkMetadata] = useState<LinkMetadata | null>(null);
+
+  // UI state
+  const [viewPreview, setViewPreview] = useState(false);
+  const [savedTime, setSavedTime] = useState("");
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [isPostScheduled, setIsPostScheduled] = useState(false);
+  const [shouldRefetch, setShouldRefetch] = useState(true);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [postStatus, setPostStatus] = useState<PostStatus | null>(null);
 
-  const { unsavedChanges: _unsaved, setUnsavedChanges: _setUnsaved } =
-    usePrompt();
+  // Tab locking - disable switching when content exists
+  const hasWriteContent = body.trim().length > 0;
+  const hasLinkContent = linkUrl.trim().length > 0;
+  const isWriteTabDisabled = hasLinkContent && activeTab === "link";
+  const isLinkTabDisabled = hasWriteContent && activeTab === "write";
+
+  const { setUnsavedChanges: _setUnsaved } = usePrompt();
 
   useEffect(() => {
     _setUnsaved(unsavedChanges);
   }, [unsavedChanges, _setUnsaved]);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (uploadStatus === "pending") {
-      return toast.info("Upload in progress, please wait...");
-    }
-    if (e.target.files && e.target.files.length > 0) {
-      setUploadUrl(null);
-      setUploadStatus("pending");
-
-      const file = e.target.files[0];
-      const { size, type } = file;
-
-      try {
-        const res = await getUploadUrl({
-          size,
-          type,
-          uploadType: "uploads",
-        });
-
-        const signedUrl = res?.data;
-
-        if (!signedUrl) {
-          setUploadStatus("error");
-          return toast.error(
-            "Something went wrong uploading the photo, please retry.",
-          );
-        }
-
-        const { fileLocation } = await uploadFile(signedUrl, file);
-        if (!fileLocation) {
-          setUploadStatus("error");
-          return toast.error(
-            "Something went wrong uploading the photo, please retry.",
-          );
-        }
-        setUploadStatus("success");
-        setUploadUrl(fileLocation);
-      } catch (error) {
-        setUploadStatus("error");
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while uploading the image.",
-        );
-        Sentry.captureException(error);
-      }
-    }
-  };
-
-  const allowUpdate = unsavedChanges;
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useMarkdownHotkeys(textareaRef);
-  useMarkdownShortcuts(textareaRef);
-
-  // Form input type for the editor
-  type EditorFormInput = {
-    id?: string;
-    title: string;
-    body: string;
-    excerpt?: string;
-    canonicalUrl?: string;
-    published?: string;
-    tags?: string[];
-  };
-
-  const {
-    handleSubmit,
-    register,
-    watch,
-    reset,
-    getValues,
-    formState: { isDirty, errors },
-    setError,
-    clearErrors,
-  } = useForm<EditorFormInput>({
-    mode: "onSubmit",
-    defaultValues: {
-      title: "",
-      body: "",
-    },
-  });
-
-  const { title, body, published } = watch();
-
+  // Debounce for auto-save
   const debouncedValue = useDebounce(title + body, 1500);
 
+  // TRPC mutations
   const {
     mutate: publish,
     status: publishStatus,
@@ -167,19 +153,18 @@ const Create = ({ session }: { session: Session | null }) => {
 
   const { mutate: save, status: saveStatus } = api.content.update.useMutation({
     onError(error) {
-      // TODO: Add error messages from field validations
       toast.error("Error auto-saving");
       Sentry.captureException(error);
     },
   });
+
   const {
-    mutate: create,
+    mutateAsync: create,
     data: createData,
     isError,
-    isSuccess,
   } = api.content.create.useMutation();
 
-  // Fetch user's own content for editing
+  // Fetch existing draft for editing
   const {
     data,
     status: dataStatus,
@@ -191,19 +176,18 @@ const Create = ({ session }: { session: Session | null }) => {
     },
   );
 
-  const PREVIEW_URL = `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.codu.co"}/draft/${postId}`;
-  const UPLOADED_IMAGE_URL = `![Image description](${uploadUrl})`;
+  const PREVIEW_URL = `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.codu.co"}/draft/${createData?.id || postId}`;
 
   const handleCopyToClipboard = () => {
     copy(PREVIEW_URL);
     setCopied(true);
   };
 
+  // Error handling
   useEffect(() => {
     if (isError) {
       toast.error("Error saving");
     }
-
     if (draftFetchError) {
       notFound();
     }
@@ -220,40 +204,53 @@ const Create = ({ session }: { session: Session | null }) => {
     return () => clearTimeout(to);
   }, [copied]);
 
-  const getFormData = () => {
-    const data = getValues();
-    const formData = {
-      ...data,
+  // Get form data for saving
+  const getFormData = useCallback(() => {
+    const currentExcerpt =
+      excerpt || removeMarkdown(body, {}).substring(0, 155);
+    return {
+      title,
+      body,
       tags,
-      canonicalUrl: data.canonicalUrl || undefined,
-      excerpt: data.excerpt || removeMarkdown(data.body, {}).substring(0, 155),
+      excerpt: currentExcerpt,
+      canonicalUrl: canonicalUrl || undefined,
+      published: publishedTime,
     };
-    return formData;
-  };
+  }, [title, body, tags, excerpt, canonicalUrl, publishedTime]);
 
-  const savePost = async () => {
+  // Save post - returns the post ID (either new or existing)
+  const savePost = useCallback(async (): Promise<string> => {
     const formData = getFormData();
-    // Don't include published time when saving content, handle separately in onSubmit
-    const { published: _published, ...saveData } = formData;
-    if (!formData.id) {
-      // Create new content as ARTICLE type
-      await create({
-        type: "POST",
-        title: saveData.title,
-        body: saveData.body,
-        excerpt: saveData.excerpt,
-        canonicalUrl: saveData.canonicalUrl,
-        tags: saveData.tags,
+
+    if (!postId) {
+      // Create new content
+      const result = await create({
+        type: activeTab === "link" ? "LINK" : "POST",
+        title: activeTab === "link" ? linkTitle || title : formData.title,
+        body: activeTab === "link" ? "" : formData.body,
+        excerpt:
+          activeTab === "link"
+            ? linkMetadata?.description || ""
+            : formData.excerpt,
+        canonicalUrl: activeTab === "write" ? formData.canonicalUrl : undefined,
+        externalUrl: activeTab === "link" ? linkUrl : undefined,
+        tags: formData.tags,
         published: false,
       });
+      setUnsavedChanges(false);
+      return result.id;
     } else {
       await save({
         id: postId,
-        title: saveData.title,
-        body: saveData.body,
-        excerpt: saveData.excerpt,
-        canonicalUrl: saveData.canonicalUrl,
-        tags: saveData.tags,
+        title: activeTab === "link" ? linkTitle || title : formData.title,
+        body: activeTab === "link" ? "" : formData.body,
+        excerpt:
+          activeTab === "link"
+            ? linkMetadata?.description || ""
+            : formData.excerpt,
+        canonicalUrl: activeTab === "write" ? formData.canonicalUrl : undefined,
+        externalUrl: activeTab === "link" ? linkUrl : undefined,
+        tags: formData.tags,
       });
       setSavedTime(
         new Date().toLocaleString(undefined, {
@@ -261,172 +258,260 @@ const Create = ({ session }: { session: Session | null }) => {
           timeStyle: "short",
         }),
       );
+      setUnsavedChanges(false);
+      return postId;
     }
-    setUnsavedChanges(false);
-  };
+  }, [
+    getFormData,
+    postId,
+    create,
+    save,
+    activeTab,
+    linkTitle,
+    title,
+    linkUrl,
+    linkMetadata,
+  ]);
 
   const hasLoadingState =
     publishStatus === "pending" ||
     saveStatus === "pending" ||
-    dataStatus === "pending";
+    (!!postId && dataStatus === "pending");
 
   const currentPostStatus = data?.publishedAt
     ? getPostStatus(new Date(data.publishedAt))
     : status.DRAFT;
 
-  const onSubmit = async (inputData: EditorFormInput) => {
-    // validate markdoc syntax
-    const ast = Markdoc.parse(inputData.body);
-    const errors = Markdoc.validate(ast, config).filter(
-      (e) => e.error.level === "critical",
-    );
+  // Handle publish/submit
+  const onSubmit = async () => {
+    // Validate content BEFORE saving
+    if (activeTab === "write") {
+      // For write tab, validate markdoc syntax
+      const ast = Markdoc.parse(body);
+      const errors = Markdoc.validate(ast, config).filter(
+        (e) => e.error.level === "critical",
+      );
 
-    if (errors.length > 0) {
-      console.error(errors);
-      errors.forEach((err) => {
-        toast.error(err.error.message);
-      });
-      return;
-    }
-
-    await savePost();
-
-    if (currentPostStatus === status.PUBLISHED) {
-      if (data && session?.user?.username) {
-        router.push(`/${session.user.username}/${data.slug}`);
+      if (errors.length > 0) {
+        console.error(errors);
+        errors.forEach((err) => {
+          toast.error(err.error.message);
+        });
+        return;
       }
-      return;
+    } else {
+      // For link tab, validate URL and title
+      if (!linkUrl || !linkTitle) {
+        toast.error("URL and title are required for link posts");
+        return;
+      }
     }
 
     try {
+      // Save the post and get the ID (important for new posts)
+      const savedPostId = await savePost();
+
+      // If already published, just redirect
+      if (currentPostStatus === status.PUBLISHED) {
+        setUnsavedChanges(false);
+        setShowPublishConfirm(false);
+        if (data && session?.user?.username) {
+          router.push(`/${session.user.username}/${data.slug}`);
+        }
+        return;
+      }
+
       const formData = getFormData();
-      ConfirmContentSchema.parse(formData);
-      await publish({
-        id: postId,
-        published: true,
-        publishTime:
-          isPostScheduled && formData.published
-            ? new Date(formData.published)
-            : new Date(),
-      });
+
+      // Additional content validation for write tab
+      if (activeTab === "write") {
+        ConfirmContentSchema.parse(formData);
+      }
+
+      // Use the saved post ID (not the one from URL params which might be stale)
+      // Use mutateAsync pattern for proper await
+      const publishResult = await new Promise<{ slug: string }>(
+        (resolve, reject) => {
+          publish(
+            {
+              id: savedPostId,
+              published: true,
+              publishTime:
+                isPostScheduled && publishedTime
+                  ? new Date(publishedTime)
+                  : new Date(),
+            },
+            {
+              onSuccess: (data) => resolve(data),
+              onError: (error) => reject(error),
+            },
+          );
+        },
+      );
+
+      // Clear states immediately
+      setUnsavedChanges(false);
+      setShowPublishConfirm(false);
+
+      // Redirect based on scheduling
+      if (session?.user?.username && publishResult?.slug) {
+        if (isPostScheduled) {
+          toast.success("Post scheduled!");
+          router.push("/my-posts?tab=scheduled");
+        } else {
+          toast.success("Published!");
+          router.push(`/${session.user.username}/${publishResult.slug}`);
+        }
+      }
     } catch (err) {
       if (err instanceof ZodError) {
         return toast.error(err.issues[0].message);
       } else {
-        return toast.error("Something went when trying to publish.");
+        console.error("Publish error:", err);
+        return toast.error("Something went wrong when trying to publish.");
       }
     }
   };
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const { value } = e.target;
-    setTagValue(value);
-  };
-
-  const onDelete = (tag: string) => {
-    setTags((t) => t.filter((t) => t !== tag));
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (errors.tags) {
-      clearErrors("tags");
-    }
-    const { key } = e;
-    const trimmedInput = tagValue
-      .trim()
-      .toUpperCase()
-      .replace(/[^\w\s]/gi, "");
-    if (
-      (key === "," || key === "." || key === "Enter") &&
-      trimmedInput.length
-    ) {
-      if (!tags.includes(trimmedInput)) {
-        e.preventDefault();
-        setTags((prevState) => [...prevState, trimmedInput]);
-        setTagValue("");
-      } else {
-        setError("tags", {
-          type: "manual",
-          message: "Tag already exists",
-        });
-        e.preventDefault();
-        setTagValue("");
-      }
-    }
-  };
-
+  // Load existing data
   useEffect(() => {
     if (!data) return;
-    const { body, excerpt, title, id, tags, publishedAt } = data;
-    setTags(tags.map(({ tag }) => tag.title.toUpperCase()));
-    reset({
-      body: body || "",
-      excerpt: excerpt || "",
-      title: title || "",
-      id,
-      published: publishedAt ? publishedAt : undefined,
-    });
+    const {
+      body: existingBody,
+      excerpt: existingExcerpt,
+      title: existingTitle,
+      tags: existingTags,
+      publishedAt,
+      canonicalUrl: existingCanonical,
+      type: postType,
+      externalUrl,
+    } = data;
+
+    // Handle link posts vs article posts (case-insensitive check)
+    if (postType?.toLowerCase() === "link") {
+      setLinkTitle(existingTitle || "");
+      setLinkUrl(externalUrl || "");
+      // Only switch tab if not already on link tab (preserve URL param on initial load)
+      if (activeTab !== "link") {
+        setActiveTab("link");
+      }
+    } else {
+      setTitle(existingTitle || "");
+      setBody(existingBody || "");
+      setCanonicalUrl(existingCanonical || "");
+    }
+
+    setExcerpt(existingExcerpt || "");
+    setTags(existingTags.map(({ tag }) => tag.title.toUpperCase()));
+    setPublishedTime(publishedAt || "");
     setIsPostScheduled(
       publishedAt ? new Date(publishedAt) > new Date() : false,
     );
     setPostStatus(
       publishedAt ? getPostStatus(new Date(publishedAt)) : status.DRAFT,
     );
-  }, [data, reset]);
+  }, [data, activeTab]);
 
+  // Update post status based on content
   useEffect(() => {
     if ((title + body).length < 5) {
       setPostStatus(null);
     } else if (postStatus === null) {
       setPostStatus(status.DRAFT);
     }
-  }, [title, body]);
+  }, [title, body, postStatus]);
 
+  // Auto-save for drafts
   useEffect(() => {
     if (currentPostStatus !== status.DRAFT) return;
-    if ((title + body).length < 5) return;
+    // For write tab, require both title and body; for link tab, require url and title
+    if (activeTab === "write") {
+      if (title.length < 5 || body.length < 10) return;
+    } else {
+      if (!linkUrl || !linkTitle) return;
+    }
     if (debouncedValue === (data?.title || "") + data?.body) return;
-    if (allowUpdate) savePost();
-  }, [debouncedValue]);
+    if (unsavedChanges) savePost();
+  }, [
+    debouncedValue,
+    currentPostStatus,
+    data?.title,
+    data?.body,
+    unsavedChanges,
+    savePost,
+    title,
+    body,
+    activeTab,
+    linkUrl,
+    linkTitle,
+  ]);
 
+  // Redirect after creating new post - preserve tab parameter
   useEffect(() => {
     if (!createData?.id) return;
-    router.push(`create/${createData.id}`);
-  }, [createData]);
+    const tabParam = activeTab !== "write" ? `?tab=${activeTab}` : "";
+    router.push(`create/${createData.id}${tabParam}`);
+  }, [createData, router, activeTab]);
 
-  const hasContent = title.length >= 5 && body.length >= 10;
+  // Check if form has enough content
+  const hasContent =
+    activeTab === "write"
+      ? title.length >= 5 && body.length >= 10
+      : linkUrl.length > 0 && linkTitle.length > 0;
 
   const isDisabled = hasLoadingState || !hasContent;
 
+  // Track unsaved changes for write tab
   useEffect(() => {
+    if (activeTab !== "write") return;
     if ((title + body).length < 5) return;
-    if (isDirty) setUnsavedChanges(true);
-  }, [title, body]);
+    setUnsavedChanges(true);
+  }, [title, body, activeTab]);
 
+  // Track unsaved changes for link tab
   useEffect(() => {
-    if (
-      publishStatus === "success" &&
-      publishData?.slug &&
-      session?.user?.username
-    ) {
-      if (isPostScheduled) {
-        router.push("/my-posts?tab=scheduled");
-      } else {
-        router.push(`/${session.user.username}/${publishData.slug}`);
-      }
-    }
-  }, [
-    publishStatus,
-    publishData,
-    isPostScheduled,
-    router,
-    session?.user?.username,
-  ]);
+    if (activeTab !== "link") return;
+    if (!linkUrl && !linkTitle) return;
+    setUnsavedChanges(true);
+  }, [linkUrl, linkTitle, activeTab]);
+
+  // Note: Redirect after publish is now handled directly in onSubmit for better flow control
 
   const handlePublish = () => {
     if (isDisabled) return;
-    setOpen(true);
+    setShowPublishConfirm(true);
+  };
+
+  // Handle content changes from WriteTab
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setTitle(newTitle);
+  }, []);
+
+  const handleBodyChange = useCallback((newBody: string) => {
+    setBody(newBody);
+  }, []);
+
+  // Handle link metadata
+  const handleMetadataFetched = useCallback(
+    (metadata: LinkMetadata) => {
+      setLinkMetadata(metadata);
+      if (metadata.title && !linkTitle) {
+        setLinkTitle(metadata.title);
+      }
+    },
+    [linkTitle],
+  );
+
+  // Get publish button text
+  const getPublishButtonText = () => {
+    if (currentPostStatus === status.PUBLISHED) return "Save changes";
+    if (currentPostStatus === status.DRAFT) {
+      return isPostScheduled ? "Schedule" : "Publish now";
+    }
+    if (currentPostStatus === status.SCHEDULED) {
+      return isPostScheduled ? "Update schedule" : "Publish now";
+    }
+    return "Publish";
   };
 
   return (
@@ -438,99 +523,303 @@ const Create = ({ session }: { session: Session | null }) => {
         unsavedChanges={unsavedChanges}
         onPublish={handlePublish}
         isDisabled={isDisabled}
+        savedTime={savedTime}
+        isSaving={saveStatus === "pending"}
       />
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Transition show={open} as={Fragment}>
-          <div className="old-input fixed bottom-0 left-0 top-0 z-50 h-screen w-full overflow-y-scroll bg-white dark:bg-black">
-            <div className="m-2 max-w-full">
-              <button
-                type="button"
-                className="absolute right-8 top-8 z-50 cursor-pointer underline"
-                onClick={() => setOpen(false)}
-              >
-                Close
-              </button>
-              <div className="relative flex h-full flex-col items-center justify-center overflow-y-auto">
-                <div className="pb-8 pt-16">
-                  <div className="block w-full max-w-2xl gap-6 sm:grid sm:grid-cols-12">
-                    <div className="mt-8 sm:col-span-6 sm:mt-0">
-                      <label htmlFor="excerpt">Excerpt</label>
-                      <textarea
-                        maxLength={156}
-                        id="excerpt"
-                        rows={3}
-                        {...register("excerpt")}
-                      />
-                      <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                        What readers will see before they click on your article.
-                        Good SEO descriptions utilize keywords, summarize the
-                        story and are between 140-156 characters long.
-                      </small>
-                    </div>
-                    <div className="my-4 sm:col-span-6 sm:my-0">
-                      <label htmlFor="tags">Topics</label>
-                      <input
-                        id="tags"
-                        name="tag"
-                        disabled={tags.length >= 5}
-                        placeholder={
-                          tags.length >= 5
-                            ? "Maximum 5 tags"
-                            : "Comma seperated tags"
-                        }
-                        type="text"
-                        onChange={(e) => onChange(e)}
-                        value={tagValue}
-                        onKeyDown={onKeyDown}
-                      />
-                      {errors.tags && (
-                        <p className="mt-1 text-sm text-red-600">
-                          {`${
-                            errors.tags.message ||
-                            "Something is wrong with the tags"
-                          }`}
-                        </p>
-                      )}
-                      <div>
-                        {tags.map((tag) => (
-                          <div
-                            key={tag}
-                            className="mr-1 mt-2 inline-flex items-center overflow-hidden bg-neutral-300 text-sm"
-                          >
-                            <span
-                              className="ml-2 mr-1 max-w-xs truncate px-1 text-xs font-semibold leading-relaxed text-black"
-                              x-text="tag"
-                            >
-                              {tag}
-                            </span>
-                            <button
-                              onClick={() => onDelete(tag)}
-                              className="inline-block h-6 w-6 bg-neutral-600 align-middle text-white focus:outline-none"
-                            >
-                              <svg
-                                className="mx-auto h-6 w-6 fill-current"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                        Tag with up to 5 topics. This makes it easier for
-                        readers to find and know what your story is about.
-                      </small>
-                    </div>
 
-                    {data &&
-                      (data.publishedAt === null ||
+      {/* Whimsical Pre-Publish Dialog */}
+      <Transition show={showPublishConfirm} as={Fragment}>
+        <Dialog
+          onClose={() => setShowPublishConfirm(false)}
+          className="relative z-50"
+        >
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+          </TransitionChild>
+
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <TransitionChild
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <DialogPanel className="mx-auto max-w-md rounded-xl bg-white p-8 text-center shadow-xl dark:bg-neutral-900">
+                <div className="mb-3 text-5xl">
+                  {isPostScheduled ? "⏰" : activeTab === "link" ? "🔗" : "🚀"}
+                </div>
+                <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-white">
+                  {isPostScheduled
+                    ? "Time travel activated!"
+                    : activeTab === "link"
+                      ? "Spread the word!"
+                      : "Ready to launch?"}
+                </DialogTitle>
+                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  {isPostScheduled
+                    ? `"${title || "Untitled"}" will appear on ${new Date(publishedTime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at ${new Date(publishedTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`
+                    : activeTab === "link"
+                      ? "Share this gem with the community?"
+                      : `Your masterpiece "${title || "Untitled"}" is about to go live!`}
+                </p>
+                <div className="mt-8 flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowPublishConfirm(false)}
+                    className="rounded-lg border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  >
+                    {isPostScheduled
+                      ? "Change my mind"
+                      : activeTab === "link"
+                        ? "Not yet"
+                        : "Maybe later"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onSubmit}
+                    disabled={hasLoadingState}
+                    className="rounded-lg bg-pink-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+                  >
+                    {hasLoadingState
+                      ? "Working on it..."
+                      : isPostScheduled
+                        ? "Set it and forget it!"
+                        : activeTab === "link"
+                          ? "Share it!"
+                          : "Let's do this!"}
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Loading state */}
+      {dataStatus === "pending" && postId && (
+        <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
+          <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
+            <div className="loader-dots relative mt-2 block h-5 w-20">
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+            </div>
+            <div className="mt-2 text-center text-xs font-medium text-neutral-400">
+              Fetching post data.
+            </div>
+          </div>
+          <div className="z-60 absolute bottom-0 left-0 right-0 top-0 bg-black opacity-25" />
+        </div>
+      )}
+
+      {/* Main content area - single card layout */}
+      <div className="mx-auto w-full max-w-3xl px-4 py-6">
+        <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          {/* Tab Bar with pink underline */}
+          <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
+            <LayoutGroup id="editor-tabs">
+              <div className="flex gap-1">
+                {TAB_CONFIG.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  const isDisabledTab =
+                    tab.id === "write" ? isWriteTabDisabled : isLinkTabDisabled;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => !isDisabledTab && handleTabChange(tab.id)}
+                      disabled={isDisabledTab}
+                      title={
+                        isDisabledTab
+                          ? `Clear ${tab.id === "write" ? "link URL" : "article content"} to switch tabs`
+                          : tab.description
+                      }
+                      className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+                        isDisabledTab
+                          ? "cursor-not-allowed opacity-50"
+                          : isActive
+                            ? "text-neutral-900 dark:text-white"
+                            : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {tab.label}
+                      {isActive && (
+                        <motion.div
+                          layoutId="active-tab-indicator"
+                          className="absolute inset-x-0 -bottom-3 h-0.5 bg-pink-600"
+                          transition={{
+                            type: "spring",
+                            bounce: 0.2,
+                            duration: 0.5,
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </LayoutGroup>
+
+            {/* Share Draft & Preview toggle */}
+            <div className="flex items-center gap-4">
+              {activeTab === "write" && (createData?.id || postId) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const draftUrl = `${window.location.origin}/draft/${createData?.id || postId}`;
+                    navigator.clipboard.writeText(draftUrl);
+                    toast.success("Draft link copied!");
+                  }}
+                  className="flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-pink-600 dark:text-neutral-400 dark:hover:text-pink-500"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share Draft
+                </button>
+              )}
+              {activeTab === "write" && (
+                <button
+                  type="button"
+                  onClick={() => setViewPreview((current) => !current)}
+                  className="flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                >
+                  {viewPreview ? (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      Edit
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4" />
+                      Preview
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Editor Content */}
+          {activeTab === "write" ? (
+            viewPreview ? (
+              // Preview mode - matches published article width
+              <section className="px-6 py-8">
+                <article
+                  className="prose prose-neutral mx-auto max-w-none dark:prose-invert lg:prose-lg"
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    overflowWrap: "anywhere",
+                  }}
+                >
+                  <h1>{title || "Untitled"}</h1>
+                  {Markdoc.renderers.react(
+                    Markdoc.transform(Markdoc.parse(body), config),
+                    React,
+                    {
+                      components: markdocComponents,
+                    },
+                  )}
+                </article>
+              </section>
+            ) : (
+              // Edit mode - TipTap Editor
+              <WriteTab
+                initialContent={body}
+                title={title}
+                onTitleChange={handleTitleChange}
+                onBodyChange={handleBodyChange}
+                titlePlaceholder="Article title"
+                editorPlaceholder="Start writing your article..."
+                className="min-h-[500px]"
+              />
+            )
+          ) : (
+            // Link tab
+            <LinkTab
+              url={linkUrl}
+              onUrlChange={setLinkUrl}
+              title={linkTitle}
+              onTitleChange={setLinkTitle}
+              onMetadataFetched={handleMetadataFetched}
+              urlPlaceholder="https://example.com/interesting-article"
+              titlePlaceholder="Link title (auto-populated from URL)"
+            />
+          )}
+
+          {/* Tags section - with divider */}
+          <div className="border-t border-neutral-200 p-4 dark:border-neutral-700">
+            <TagInput
+              tags={tags}
+              onChange={setTags}
+              maxTags={5}
+              label="Tags"
+              helpText="Add up to 5 tags to help readers find your post."
+            />
+          </div>
+
+          {/* More Options - collapsible accordion (Write tab only) */}
+          {activeTab === "write" && (
+            <Disclosure>
+              {({ open: disclosureOpen }) => (
+                <>
+                  <DisclosureButton className="flex w-full items-center justify-between border-t border-neutral-200 px-4 py-3 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800">
+                    <span className="flex items-center gap-2">
+                      <Settings2 className="h-4 w-4" />
+                      More Options
+                      <span className="text-xs font-normal text-neutral-500">
+                        (SEO, scheduling)
+                      </span>
+                    </span>
+                    <ChevronDownIcon
+                      className={`${disclosureOpen ? "rotate-180" : ""} h-5 w-5 text-neutral-400 transition-transform`}
+                    />
+                  </DisclosureButton>
+                  <DisclosurePanel className="border-t border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+                    <div className="space-y-6">
+                      {/* Excerpt */}
+                      <div>
+                        <label
+                          htmlFor="excerpt"
+                          className="mb-1 block text-sm font-medium text-neutral-800 dark:text-white"
+                        >
+                          Excerpt
+                        </label>
+                        <textarea
+                          maxLength={156}
+                          id="excerpt"
+                          rows={3}
+                          value={excerpt}
+                          onChange={(e) => setExcerpt(e.target.value)}
+                          placeholder={
+                            removeMarkdown(body, {}).substring(0, 155) ||
+                            "Brief description of your post..."
+                          }
+                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
+                        />
+                        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                          What readers will see before clicking. Good SEO
+                          descriptions are 140-156 characters.
+                        </p>
+                      </div>
+
+                      {/* Schedule post - show for new drafts and unpublished posts */}
+                      {(!data?.publishedAt ||
                         new Date(data.publishedAt) > new Date()) && (
-                        <div className="col-span-12">
+                        <div>
                           <div className="mb-2 flex items-center gap-2">
                             <label
                               htmlFor="schedule-switch"
@@ -547,319 +836,122 @@ const Create = ({ session }: { session: Session | null }) => {
                           {isPostScheduled && (
                             <input
                               type="datetime-local"
-                              {...register("published")}
+                              value={publishedTime}
+                              onChange={(e) => setPublishedTime(e.target.value)}
                               min={new Date().toISOString().slice(0, 16)}
+                              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
                             />
                           )}
-                          <small className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                             Publish your post at a later time.
-                          </small>
+                          </p>
                         </div>
                       )}
 
-                    <div className="col-span-12 border-b border-neutral-300 pb-4">
-                      <Disclosure>
-                        {({ open }) => (
-                          <>
-                            <DisclosureButton className="flex w-full justify-between py-2 text-left text-sm font-medium text-neutral-800 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75 dark:text-white">
-                              <span>More Options</span>
-                              <ChevronUpIcon
-                                className={`${
-                                  open ? "" : "rotate-180 transform"
-                                } h-5 w-5 text-neutral-400`}
-                              />
-                            </DisclosureButton>
-                            <DisclosurePanel className="pb-2 pt-4">
-                              <label htmlFor="canonicalUrl">
-                                Canonical URL
-                              </label>
-                              <input
-                                id="canonicalUrl"
-                                type="text"
-                                placeholder="https://www.somesite.com/i-posted-here-first"
-                                defaultValue={
-                                  data?.canonicalUrl ? data.canonicalUrl : ""
-                                }
-                                {...register("canonicalUrl")}
-                              />
-                              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                                Add this if the post was originally published
-                                elsewhere and you want to link to it as the
-                                original source.
-                              </p>
-                              <h3 className="mb-1 mt-2 text-sm font-medium text-neutral-800 dark:text-white">
-                                Draft link
-                              </h3>
-                              <button
-                                onClick={handleCopyToClipboard}
-                                type="button"
-                                className="relative flex w-full focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50"
-                              >
-                                <div className="flex w-full max-w-full flex-1 overflow-hidden border px-2 py-2 text-left text-black shadow-sm ring-offset-1 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:border-white dark:bg-black dark:text-white sm:text-sm">
-                                  {PREVIEW_URL}
-                                </div>
-                                <div className="absolute bottom-0 right-0 top-0 w-[120px] border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-600 shadow-sm">
-                                  {copied ? "Copied" : "Copy Link"}
-                                </div>
-                              </button>
-                              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                                Share this link with others to preview your
-                                draft. Anyone with the link can view your draft.
-                              </p>
-                            </DisclosurePanel>
-                          </>
-                        )}
-                      </Disclosure>
-                    </div>
-                    <div className="mt-4 flex w-full justify-end sm:col-span-12 sm:mt-0">
-                      {currentPostStatus === status.DRAFT && (
-                        <button
-                          type="button"
-                          disabled={isDisabled}
-                          className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50"
-                          onClick={async () => {
-                            if (isDisabled) return;
-                            await savePost();
-                            router.push("/my-posts?tab=drafts");
-                          }}
+                      {/* Canonical URL */}
+                      <div>
+                        <label
+                          htmlFor="canonicalUrl"
+                          className="mb-1 block text-sm font-medium text-neutral-800 dark:text-white"
                         >
-                          Save draft
-                        </button>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={
-                          isDisabled ||
-                          (isPostScheduled && isValidScheduleTime(published))
-                        }
-                        className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:from-orange-300 active:hover:to-pink-500 disabled:opacity-50"
-                      >
-                        {hasLoadingState ? (
-                          <>
-                            <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-orange-600 border-t-white" />
-                            {"Saving"}
-                          </>
-                        ) : (
-                          <>
-                            {currentPostStatus === status.PUBLISHED
-                              ? "Save changes"
-                              : currentPostStatus === status.DRAFT
-                                ? isPostScheduled
-                                  ? "Schedule"
-                                  : "Publish now"
-                                : currentPostStatus === status.SCHEDULED
-                                  ? isPostScheduled
-                                    ? "Update schedule"
-                                    : "Publish now"
-                                  : "Publish"}
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Transition>
-        {dataStatus === "pending" && postId && (
-          <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
-            <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
-              <div className="loader-dots relative mt-2 block h-5 w-20">
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-              </div>
-              <div className="mt-2 text-center text-xs font-medium text-neutral-400">
-                Fetching post data.
-              </div>
-            </div>
-            <div className="z-60 absolute bottom-0 left-0 right-0 top-0 bg-black opacity-25" />
-          </div>
-        )}
-        <>
-          <div className="mx-auto w-full max-w-7xl flex-grow lg:flex xl:px-8">
-            {/* Left sidebar & main wrapper */}
-            <div className="min-w-0 flex-1 xl:flex">
-              <div className="xl:w-64 xl:flex-shrink-0">
-                <div className="h-full py-6 pl-4 pr-6 sm:pl-6 lg:px-4 xl:pl-0">
-                  {/* Start left column area */}
-                  <div className="relative h-full">
-                    <div className="bg-white p-6 text-neutral-600 shadow dark:bg-neutral-900">
-                      <h1 className="text-3xl font-extrabold tracking-tight text-neutral-800 dark:text-white">
-                        {viewPreview ? "Previewing" : "Editing"} post
-                      </h1>
-                      <p className="mt-2 text-neutral-600 dark:text-neutral-400">
-                        The body of your content can be edited using markdown.
-                        Your post remains private until you
-                        &#8220;publish&#8221; the article.
-                      </p>
-                      <div className="flex">
-                        <button
-                          type="button"
-                          className="mt-4 inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
-                          onClick={() => setViewPreview((current) => !current)}
-                        >
-                          {viewPreview ? "Back to editing" : "View preview"}
-                        </button>
+                          Canonical URL
+                        </label>
+                        <input
+                          id="canonicalUrl"
+                          type="text"
+                          placeholder="https://www.somesite.com/i-posted-here-first"
+                          value={canonicalUrl}
+                          onChange={(e) => setCanonicalUrl(e.target.value)}
+                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
+                        />
+                        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                          Add this if the post was originally published
+                          elsewhere.
+                        </p>
                       </div>
-                    </div>
-                  </div>
-                  {/* End left column area */}
-                </div>
-              </div>
-              <div className="lg:min-w-0 lg:flex-1">
-                <div className="h-full px-4 py-0 sm:px-6 lg:px-4 lg:py-6">
-                  {/* Start main area*/}
-                  <div className="relative h-full">
-                    <div className="bg-white text-black shadow dark:bg-neutral-900 dark:text-white">
-                      {viewPreview ? (
-                        <section className="mx-auto max-w-xl px-4 py-6 pb-4 sm:p-6 lg:pb-8">
-                          <article
-                            className="prose"
-                            style={{
-                              whiteSpace: "pre-wrap",
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            <h1>{title}</h1>
-                            {Markdoc.renderers.react(
-                              Markdoc.transform(Markdoc.parse(body), config),
-                              React,
-                              {
-                                components: markdocComponents,
-                              },
-                            )}
-                          </article>
-                        </section>
-                      ) : (
-                        <div className="px-4 py-6 sm:p-6 lg:pb-8">
-                          <div className="mb-4 ml-2 flex items-center gap-2">
-                            <label
-                              htmlFor="file-input"
-                              className={`flex flex-row items-center gap-1 rounded-md border p-2 text-sm ${uploadStatus === "pending" ? "border-neutral-600 font-medium text-neutral-600 hover:cursor-not-allowed dark:border-neutral-500 dark:text-neutral-500" : "border-neutral-500 font-medium text-neutral-500 hover:bg-neutral-200 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"} `}
-                            >
-                              {uploadStatus === "pending" ? (
-                                <LoaderCircle
-                                  height={16}
-                                  width={16}
-                                  className="mr-1 animate-spin"
-                                />
-                              ) : (
-                                <ImageUp
-                                  height={16}
-                                  width={16}
-                                  className="mr-1"
-                                />
-                              )}
-                              Upload image
-                            </label>
-                            <input
-                              id="file-input"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleUpload}
-                              disabled={uploadStatus === "pending"}
-                            />
 
-                            {uploadStatus === "success" && (
-                              <button
-                                onClick={() => {
-                                  copy(UPLOADED_IMAGE_URL);
-                                  setCopied(true);
-                                }}
-                                type="button"
-                                className="relative flex w-full flex-1 overflow-x-hidden rounded-md border border-neutral-500 font-medium text-neutral-500 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 active:hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-600 hover:dark:bg-neutral-800 hover:dark:text-neutral-400"
-                              >
-                                <div className="flex flex-nowrap items-center text-nowrap p-2 text-sm">
-                                  {UPLOADED_IMAGE_URL}
-                                </div>
-                                <div className="absolute bottom-0 right-0 top-0 w-[100px] rounded-r-md border-l border-neutral-500 bg-white px-4 py-2 text-sm font-medium text-neutral-600 dark:border-l-0 dark:bg-neutral-600 dark:text-white">
-                                  {copied ? "Copied" : "Copy Link"}
-                                </div>
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex flex-col">
-                            <label htmlFor="article-title" className="sr-only">
-                              Article title
-                            </label>
+                      {/* Draft preview link */}
+                      {postId && (
+                        <div>
+                          <label className="mb-1 block text-sm font-medium text-neutral-800 dark:text-white">
+                            Draft Preview Link
+                          </label>
+                          <div className="flex gap-2">
                             <input
-                              className="border-none bg-white text-2xl leading-5 placeholder:text-neutral-400 focus:bg-neutral-200 focus:ring-0 dark:bg-neutral-900 placeholder:dark:text-neutral-700 focus:dark:bg-black"
-                              placeholder="Article title"
                               type="text"
-                              id="article-title"
-                              {...register("title")}
+                              readOnly
+                              value={PREVIEW_URL}
+                              className="flex-1 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-sm text-neutral-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
                             />
-
-                            <label
-                              htmlFor="article-content"
-                              className="sr-only"
+                            <button
+                              onClick={handleCopyToClipboard}
+                              type="button"
+                              className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
                             >
-                              Enter Article Content
-                            </label>
-                            <CustomTextareaAutosize
-                              placeholder="Enter your content here 💖"
-                              className="mb-8 border-none bg-white text-lg shadow-none outline-none placeholder:text-neutral-400 focus:bg-neutral-200 focus:ring-0 dark:bg-neutral-900 placeholder:dark:text-neutral-700 dark:focus:bg-black"
-                              minRows={25}
-                              id="article-content"
-                              {...register("body")}
-                              ref={(node: HTMLTextAreaElement | null) => {
-                                // Merge refs: update textareaRef for hotkeys/shortcuts
-                                textareaRef.current = node;
-                                // Also call the register ref
-                                register("body").ref(node);
-                              }}
-                            />
+                              {copied ? "Copied!" : "Copy"}
+                            </button>
                           </div>
+                          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                            Share this link with others to preview your draft.
+                          </p>
                         </div>
                       )}
                     </div>
-                  </div>
-                  {/* End main area */}
-                </div>
-              </div>
-            </div>
-            <div className="pr-4 sm:pr-6 lg:flex-shrink-0 lg:pr-8 xl:pr-0">
-              <div className="h-full py-6 pl-4 sm:pl-6 lg:w-80 xl:pl-4">
-                {/* Start right column area */}
-                <div className="bg-white p-6 text-neutral-600 shadow dark:bg-neutral-900">
-                  <h3 className="text-xl font-semibold tracking-tight text-neutral-800 dark:text-white">
-                    How to use the editor
-                  </h3>
-                  <p className="mt-1 text-neutral-600 dark:text-neutral-400">
-                    You can edit and format the main content of your article
-                    using Markdown. If you have never used Markdown, you can
-                    check out{" "}
-                    <a
-                      href="https://www.markdownguide.org/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
-                    >
-                      this
-                    </a>{" "}
-                    free guide on{" "}
-                    <a
-                      href="https://www.markdownguide.org/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
-                    >
-                      markdownguide
-                    </a>
-                    .
-                  </p>
-                </div>
-                {/* End right column area */}
-              </div>
-            </div>
+                  </DisclosurePanel>
+                </>
+              )}
+            </Disclosure>
+          )}
+
+          {/* Action Bar */}
+          <div className="flex items-center justify-end gap-3 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700">
+            {activeTab === "write" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (isDisabled) return;
+                  await savePost();
+                  toast.success("Draft saved!");
+                }}
+                disabled={!unsavedChanges || isDisabled}
+                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                  unsavedChanges && !isDisabled
+                    ? "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                    : "cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-500"
+                }`}
+              >
+                {unsavedChanges ? "Save Draft" : "Saved"}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handlePublish}
+              disabled={isDisabled}
+              className="rounded-lg bg-pink-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {currentPostStatus === status.PUBLISHED
+                ? "Save Changes"
+                : "Publish"}
+            </button>
           </div>
-        </>
-      </form>
+        </div>
+      </div>
     </>
+  );
+};
+
+// Wrapper component with Suspense for useSearchParams
+const Create = ({ session }: { session: Session | null }) => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-pink-600 border-t-transparent" />
+        </div>
+      }
+    >
+      <CreateContent session={session} />
+    </Suspense>
   );
 };
 

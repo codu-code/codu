@@ -46,6 +46,9 @@ export const setup = async () => {
       "e2e-css-grid-vs-flexbox",
       "e2e-react-hooks-explained",
       "e2e-web-accessibility-fundamentals",
+      // Link post slugs
+      "e2e-link-published",
+      "e2e-link-draft",
     ];
 
     for (const slugPattern of e2eSlugs) {
@@ -197,6 +200,37 @@ export const setup = async () => {
         authorId: authorId,
         showComments: true,
       },
+      // Link posts for testing
+      {
+        type: "link" as const,
+        title: "Codú GitHub Repository",
+        slug: "e2e-link-published",
+        excerpt: "The open-source repository for Codú - a space for coders.",
+        body: "", // Link posts don't have body content
+        externalUrl: "https://github.com/codu-code/codu",
+        upvotesCount: 15,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "link" as const,
+        title: "Draft Link Post for Testing",
+        slug: "e2e-link-draft",
+        excerpt: "A draft link post used for E2E testing.",
+        body: "",
+        externalUrl: "https://www.codu.co",
+        upvotesCount: 0,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "draft" as const,
+        publishedAt: null,
+        authorId: authorId,
+        showComments: true,
+      },
     ];
 
     // Insert articles into new posts table
@@ -206,7 +240,9 @@ export const setup = async () => {
       .onConflictDoNothing()
       .returning();
 
-    console.log(`Created ${insertedPosts.length} E2E test articles`);
+    console.log(
+      `Created ${insertedPosts.length} E2E test posts (articles + links)`,
+    );
 
     // Find the published article to add a comment
     const publishedPost = insertedPosts.find(

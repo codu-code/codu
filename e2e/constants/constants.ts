@@ -19,3 +19,9 @@ export const E2E_ADMIN_SESSION_ID = "21245877-cd7d-5c63-94e8-57fd1b5dc986";
 export const E2E_PUBLISHED_POST_ID = "e2epubl1";
 export const E2E_SCHEDULED_POST_ID = "e2esched";
 export const E2E_DRAFT_POST_ID = "e2edraft";
+
+// Link post test constants
+export const E2E_LINK_POST_ID = "e2elinkp";
+export const E2E_LINK_POST_DRAFT_ID = "e2elnkdr";
+export const TEST_LINK_URL = "https://github.com/codu-code/codu";
+export const TEST_LINK_TITLE = "Codú - A space for coders";

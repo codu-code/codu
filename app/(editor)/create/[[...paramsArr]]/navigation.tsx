@@ -17,6 +17,8 @@ type EditorNavProps = {
   unsavedChanges: boolean;
   onPublish: () => void;
   isDisabled: boolean;
+  savedTime?: string;
+  isSaving?: boolean;
 };
 
 const EditorNav = ({
@@ -26,6 +28,8 @@ const EditorNav = ({
   unsavedChanges,
   onPublish,
   isDisabled,
+  savedTime,
+  isSaving,
 }: EditorNavProps) => {
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: !!session,
@@ -82,6 +86,11 @@ const EditorNav = ({
           </div>
 
           <div className="flex items-center space-x-4">
+            {savedTime && (
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                {isSaving ? "Saving..." : `Saved ${savedTime}`}
+              </span>
+            )}
             <button
               onClick={onPublish}
               disabled={isDisabled}
