@@ -34,7 +34,7 @@ export const S3ImageUploadPlugin = () =>
         set = set.map(tr.mapping, tr.doc);
 
         // Handle add/remove placeholder actions
-         
+
         const action = tr.getMeta(uploadKey as any);
         if (action?.add) {
           const { id, pos, src } = action.add;

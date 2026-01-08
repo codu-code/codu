@@ -1,4 +1,4 @@
-import type { Node} from "@markdoc/markdoc";
+import type { Node } from "@markdoc/markdoc";
 import { Tag } from "@markdoc/markdoc";
 import Code from "../../components/markdocNodes/Code/Code";
 

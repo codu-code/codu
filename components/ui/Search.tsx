@@ -366,7 +366,7 @@ function SearchDialog({
   const searchParams = useSearchParams();
 
   // Close dialog when pathname or searchParams change
-   
+
   useEffect(() => {
     setOpen(false);
   }, [pathname, searchParams, setOpen]);

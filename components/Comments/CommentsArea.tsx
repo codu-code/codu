@@ -184,7 +184,7 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
     return commentsArr.map((comment) => {
       const { body, createdAt, updatedAt, id, userVote, score, author } =
         comment;
-       
+
       const children = (comment as any).children;
       // Handle deleted comments (author is null)
       const name = author?.name || "[deleted]";

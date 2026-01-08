@@ -690,7 +690,7 @@ export const commentRouter = createTRPCRouter({
 });
 
 // Shape a single comment for API response
- 
+
 function shapeComment(comment: any) {
   const isDeleted = !!comment.deletedAt;
 
@@ -721,10 +721,10 @@ function shapeComment(comment: any) {
 }
 
 // Build tree structure from flat list of comments
- 
+
 function buildCommentTree(rootComment: any, descendants: any[]) {
   // Create a map of id -> comment with children array
-   
+
   const commentMap = new Map<string, any>();
 
   // Initialize root

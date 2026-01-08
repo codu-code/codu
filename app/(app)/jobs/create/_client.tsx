@@ -22,7 +22,7 @@ import {
 } from "@/components/ui-components/radio";
 import { Strong, Text } from "@/components/ui-components/text";
 import { Textarea } from "@/components/ui-components/textarea";
-import type { saveJobsInput} from "@/schema/job";
+import type { saveJobsInput } from "@/schema/job";
 import { saveJobsSchema } from "@/schema/job";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 import { uploadFile } from "@/utils/s3helpers";
@@ -31,7 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import React, { useRef, useState } from "react";
-import type { SubmitHandler} from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
 import { Controller, useForm } from "react-hook-form";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";

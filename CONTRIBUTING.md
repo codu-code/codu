@@ -120,7 +120,7 @@ For e2e tests we are using playwright
 
 After making changes make sure that tests passes
 
-To create a e2e test make a file in `/e2e` directory 
+To create a e2e test make a file in `/e2e` directory
 
 **1.** Start the codu application by typing this command:
 
@@ -135,7 +135,6 @@ yarn test:e2e
 ```
 
 Read Playwright [documentation](https://playwright.dev/)
-
 
 ---
 

@@ -81,7 +81,7 @@ export function UrlMetadataPreview({
       {/* Cover Image */}
       {metadata.image && (
         <div className="relative aspect-video w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
-          { }
+          {}
           <img
             src={metadata.image}
             alt={metadata.title || "Link preview"}

@@ -6,7 +6,7 @@ export function FallbackMedia(
   return (
     <div>
       {/* TODO Review this as it should have a title */}
-      { }
+      {}
       <iframe style={{ width: "100%", height: "300px" }} {...props} />
     </div>
   );
