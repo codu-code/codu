@@ -3,7 +3,15 @@ import { db } from "@/server/db/index";
 import * as Sentry from "@sentry/nextjs";
 import "server-only";
 import { z } from "zod";
-import { bookmark, post, posts, user, feed_sources } from "../db/schema";
+import {
+  bookmark,
+  post,
+  posts,
+  user,
+  feed_sources,
+  post_tags,
+  tag,
+} from "../db/schema";
 import { eq, and, isNotNull, lte, desc, sql } from "drizzle-orm";
 
 export const GetPostSchema = z.object({
@@ -73,43 +81,69 @@ export async function getPostPreview({ id }: GetPreview) {
   try {
     GetPreviewSchema.parse({ id });
 
-    const response = await db.query.post.findFirst({
-      columns: {
-        id: true,
-        title: true,
-        body: true,
-        published: true,
-        updatedAt: true,
-        readTimeMins: true,
-        slug: true,
-        excerpt: true,
-        canonicalUrl: true,
-        showComments: true,
-      },
-      where: (posts, { eq }) => eq(posts.id, id),
-      with: {
-        tags: {
-          columns: { id: true },
-          with: { tag: { columns: { title: true } } },
-        },
-        user: {
-          columns: {
-            name: true,
-            image: true,
-            username: true,
-            bio: true,
-            id: true,
-          },
-        },
-      },
-    });
+    // Use direct query with join instead of ORM relations
+    const result = await db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        body: posts.body,
+        publishedAt: posts.publishedAt,
+        updatedAt: posts.updatedAt,
+        readingTime: posts.readingTime,
+        slug: posts.slug,
+        excerpt: posts.excerpt,
+        canonicalUrl: posts.canonicalUrl,
+        showComments: posts.showComments,
+        userName: user.name,
+        userImage: user.image,
+        userUsername: user.username,
+        userBio: user.bio,
+        userId: user.id,
+      })
+      .from(posts)
+      .leftJoin(user, eq(posts.authorId, user.id))
+      .where(eq(posts.id, id))
+      .limit(1);
 
-    if (!response) {
+    if (result.length === 0) {
       return null;
     }
 
-    return response;
+    const postData = result[0];
+
+    // Get tags separately
+    const postTags = await db
+      .select({
+        id: post_tags.id,
+        tagTitle: tag.title,
+      })
+      .from(post_tags)
+      .innerJoin(tag, eq(post_tags.tagId, tag.id))
+      .where(eq(post_tags.postId, id));
+
+    // Map to expected format for backward compatibility
+    return {
+      id: postData.id,
+      title: postData.title,
+      body: postData.body,
+      published: postData.publishedAt,
+      updatedAt: postData.updatedAt,
+      readTimeMins: postData.readingTime,
+      slug: postData.slug,
+      excerpt: postData.excerpt,
+      canonicalUrl: postData.canonicalUrl,
+      showComments: postData.showComments,
+      user: {
+        id: postData.userId,
+        name: postData.userName,
+        image: postData.userImage,
+        username: postData.userUsername,
+        bio: postData.userBio,
+      },
+      tags: postTags.map((pt) => ({ id: pt.id, tag: { title: pt.tagTitle } })),
+    };
   } catch (error) {
+    console.error("getPostPreview error:", error);
     Sentry.captureException(error);
     throw new Error("Error fetching post");
   }

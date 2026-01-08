@@ -422,7 +422,9 @@ const feedSourcesRaw = [
 ];
 
 async function seedFeedSources() {
-  console.log(`Seeding ${feedSourcesRaw.length} feed sources with bot users...`);
+  console.log(
+    `Seeding ${feedSourcesRaw.length} feed sources with bot users...`,
+  );
 
   let usersCreated = 0;
   let sourcesCreated = 0;
