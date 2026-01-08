@@ -11,6 +11,10 @@ async function openTab(page: Page, tabName: TabName) {
   const slug = tabName.toLowerCase();
   await page.waitForURL(`http://localhost:3000/my-posts?tab=${slug}`);
   await expect(page).toHaveURL(new RegExp(`\\/my-posts\\?tab=${slug}`));
+  // Wait for content to load - wait for loading message to disappear
+  await expect(page.getByText("Fetching your posts...")).toBeHidden({
+    timeout: 15000,
+  });
 }
 
 async function openDeleteModal(page: Page, title: string) {
@@ -73,7 +77,7 @@ test.describe("Authenticated my-posts Page", () => {
 
     await openTab(page, "Drafts");
     await expect(
-      page.getByRole("heading", { name: "Draft Article" }),
+      page.getByRole("heading", { name: "Draft Article", exact: true }),
     ).toBeVisible();
     await expect(
       page.getByText("This is an excerpt for a draft article.", {

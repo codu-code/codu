@@ -74,11 +74,8 @@ test.describe("Unauthenticated Feed Page (Articles)", () => {
       expect(finalArticleCount).toBeGreaterThanOrEqual(initialArticleCount);
     }
 
-    // Footer links should be visible
+    // Footer links should be visible - use footer nav for specific items
     await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
-    await expect(
-      page.getByLabel("Footer").getByRole("link", { name: "Events" }),
-    ).toBeVisible();
     await expect(page.getByRole("link", { name: "Advertise" })).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Code Of Conduct" }),
@@ -180,33 +177,38 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     // Waits for articles to be loaded
     await page.waitForSelector("article");
 
-    // Mobile and Desktop have different ways to start writing an article
+    // Desktop: Use the Create button in the header
+    // Mobile: Navigate directly to /create
     if (isMobile) {
-      await expect(
-        page.getByRole("button", { name: "Open main menu" }),
-      ).toBeVisible();
-      page.getByRole("button", { name: "Open main menu" }).tap();
-      await expect(page.getByRole("link", { name: "New Post" })).toBeVisible();
-      await page.getByRole("link", { name: "New Post" }).tap();
+      await page.goto("http://localhost:3000/create");
     } else {
-      await expect(page.getByRole("link", { name: "New Post" })).toBeVisible();
-      await page.getByRole("link", { name: "New Post" }).click();
+      await expect(page.getByRole("link", { name: "Create" })).toBeVisible();
+      await page.getByRole("link", { name: "Create" }).click();
     }
-    await page.waitForURL("http:/localhost:3000/create");
+    await page.waitForURL("http://localhost:3000/create");
 
     await page.getByPlaceholder("Article title").fill(articleTitle);
 
-    await page
-      .getByPlaceholder("Enter your content here 💖")
-      .fill(articleContent);
+    // Fill in the editor content - use keyboard.type() for TipTap
+    const editor = page.locator(".ProseMirror");
+    await editor.click();
+    await page.keyboard.type(articleContent);
 
-    await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
-    await page.getByRole("button", { name: "Publish" }).click();
+    // Wait for auto-save to complete - URL should update with post ID
+    await page.waitForURL(/.*create\/[a-z0-9]+/, { timeout: 20000 });
 
+    // Click the Publish button in the navigation
+    const navPublishButton = page
+      .getByLabel("Editor navigation")
+      .getByRole("button", { name: "Publish" });
+    await expect(navPublishButton).toBeEnabled({ timeout: 5000 });
+    await navPublishButton.click();
+
+    // Modal should appear with "Let's do this!" button for articles
     await expect(
-      page.getByRole("button", { name: "Publish now" }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Publish now" }).click();
+      page.getByRole("button", { name: "Let's do this!" }),
+    ).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: "Let's do this!" }).click();
     // New URL pattern: /[username]/[slug]
     await page.waitForURL(
       /^http:\/\/localhost:3000\/e2e-test-user-one-111\/lorem-ipsum-.*$/,

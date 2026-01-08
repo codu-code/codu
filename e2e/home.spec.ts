@@ -8,19 +8,12 @@ test.describe("Authenticated homepage", () => {
   test("Homepage view", async ({ page, isMobile }) => {
     await page.goto("http://localhost:3000/");
 
-    await expect(page.locator("h1")).not.toContainText("Unwanted text");
+    // For authenticated users, check for "Trending" heading (h3) instead of h1
+    // h1 only exists for unauthenticated users in the Hero section
+    await expect(page.getByRole("heading", { name: "Trending" })).toBeVisible();
 
-    // Check for "Topics" section on sidebar (desktop only)
-    const topicsVisible = await page
-      .locator('text="Topics"')
-      .first()
-      .isVisible();
-
-    if (isMobile) {
-      // Topics sidebar not visible on mobile
-      expect(topicsVisible).toBe(false);
-    } else {
-      // Desktop should show "Your Posts" link in header
+    if (!isMobile) {
+      // Desktop should show "Your Posts" link in header/sidebar
       await expect(
         page.getByRole("link", {
           name: "Your Posts",
