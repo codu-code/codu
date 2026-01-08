@@ -13,6 +13,7 @@ export function Navbar({
 }: React.ComponentPropsWithoutRef<"nav">) {
   return (
     <nav
+      aria-label="Top navigation"
       {...props}
       className={clsx(className, "flex flex-1 items-center gap-4 py-2.5")}
     />

@@ -13,7 +13,7 @@ const Home = async () => {
   const session = await getServerAuthSession();
 
   return (
-    <main>
+    <>
       {!session && (
         <div>
           <Hero />
@@ -70,7 +70,7 @@ const Home = async () => {
           </section>
         </div>
       </div>
-    </main>
+    </>
   );
 };
 

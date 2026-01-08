@@ -61,7 +61,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
   if (sourceStatus === "pending") {
     return (
       <div className="mx-auto max-w-2xl px-4 text-black dark:text-white">
-        <main className="pt-6 sm:flex">
+        <div className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             <div className="mb-2 h-20 w-20 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700 sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32" />
           </div>
@@ -69,7 +69,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
             <div className="mb-2 h-6 w-48 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
             <div className="h-4 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
           </div>
-        </main>
+        </div>
       </div>
     );
   }
@@ -102,7 +102,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
     <>
       <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
         {/* Profile header - matching user profile pattern exactly */}
-        <main className="pt-6 sm:flex">
+        <div className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             {source.logoUrl ? (
               <img
@@ -142,7 +142,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
               </Link>
             )}
           </div>
-        </main>
+        </div>
 
         {/* Articles header - matching user profile */}
         <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">

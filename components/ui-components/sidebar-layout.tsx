@@ -68,7 +68,10 @@ export function SidebarLayout({
   return (
     <div className="relative isolate flex min-h-svh w-full bg-neutral-100 dark:bg-black max-lg:flex-col">
       {/* Desktop navbar - completely independent, full width, above everything */}
-      <header className="fixed left-0 right-0 top-0 z-50 hidden h-16 items-center border-b border-neutral-200 bg-neutral-100 px-6 dark:border-neutral-800 dark:bg-black lg:flex">
+      <header
+        aria-label="Site header"
+        className="fixed left-0 right-0 top-0 z-50 hidden h-16 items-center border-b border-neutral-200 bg-neutral-100 px-6 dark:border-neutral-800 dark:bg-black lg:flex"
+      >
         {navbar}
       </header>
 
@@ -93,7 +96,10 @@ export function SidebarLayout({
       </MobileSidebar>
 
       {/* Navbar on mobile */}
-      <header className="flex items-center border-b border-neutral-200 px-4 dark:border-neutral-800 lg:hidden">
+      <header
+        aria-label="Site header"
+        className="flex items-center border-b border-neutral-200 px-4 dark:border-neutral-800 lg:hidden"
+      >
         <div className="py-2.5">
           <NavbarItem
             onClick={() => setShowSidebar(true)}

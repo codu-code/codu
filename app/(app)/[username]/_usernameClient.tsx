@@ -77,7 +77,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
   return (
     <>
       <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
-        <main className="pt-6 sm:flex">
+        <div className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
             {image && (
               <img
@@ -106,7 +106,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               </Link>
             )}
           </div>
-        </main>
+        </div>
         {accountLocked ? (
           <div className="mt-8 flex items-center justify-between border-b pb-4 text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-4xl">
             <Heading level={1}>Account locked 🔒</Heading>

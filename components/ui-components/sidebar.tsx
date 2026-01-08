@@ -14,6 +14,7 @@ export function Sidebar({
 }: React.ComponentPropsWithoutRef<"nav">) {
   return (
     <nav
+      aria-label="Main navigation"
       {...props}
       className={clsx(className, "flex h-full min-h-0 flex-col")}
     />
