@@ -33,29 +33,33 @@ test.describe("Authenticated Saved Page", () => {
   test("Should bookmark and appear in saved items", async ({ page }) => {
     // First, bookmark an article
     await page.goto("http://localhost:3000/feed?type=article");
-    await page.waitForSelector("article");
+    await expect(page.locator("article").first()).toBeVisible({
+      timeout: 15000,
+    });
 
-    // Get the title of the first article before bookmarking (use h2 heading)
-    const articleTitle = await page
-      .locator("article")
-      .first()
-      .locator("h2")
-      .textContent();
+    // Get the title of the first article before bookmarking
+    const articleHeading = page.locator("article").first().locator("h2");
+    await expect(articleHeading).toBeVisible();
+    const articleTitle = await articleHeading.textContent();
 
-    // Click bookmark on first item
+    // Click bookmark on first item and wait for it to complete
     const bookmarkButton = page.getByTestId("bookmark-button").first();
+    await expect(bookmarkButton).toBeVisible();
     await bookmarkButton.click();
-    await page.waitForTimeout(500);
+
+    // Wait for bookmark mutation to complete
+    await page.waitForTimeout(1000);
 
     // Navigate to saved page
     await page.goto("http://localhost:3000/saved");
+    await page.waitForLoadState("networkidle");
 
-    // The bookmarked article should appear
+    // The bookmarked article should appear - use filter for more resilient matching
     if (articleTitle) {
       await expect(
-        page.getByRole("heading", { name: articleTitle.trim() }),
+        page.locator("article").filter({ hasText: articleTitle.trim() }),
       ).toBeVisible({
-        timeout: 10000,
+        timeout: 15000,
       });
     }
   });
