@@ -360,14 +360,6 @@ const sortUIToAPI: Record<UISortOption, APISortOption> = {
   popular: "top",
 };
 
-// Map API sort to UI sort (for URL params)
-const sortAPIToUI: Record<APISortOption, UISortOption> = {
-  newest: "recent",
-  oldest: "recent", // fallback
-  top: "popular",
-  trending: "trending",
-};
-
 const validUISorts: UISortOption[] = ["recent", "trending", "popular"];
 
 const ArticlesPage = () => {

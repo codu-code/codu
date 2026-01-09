@@ -35,9 +35,9 @@ type Props = {
   type?: ContentType;
   category?: string | null;
   categories: string[];
-  onSortChange: (sort: SortOption) => void;
-  onTypeChange?: (type: ContentType) => void;
-  onCategoryChange: (category: string | null) => void;
+  onSortChange: (_sort: SortOption) => void;
+  onTypeChange?: (_type: ContentType) => void;
+  onCategoryChange: (_category: string | null) => void;
   showTypeFilter?: boolean;
 };
 

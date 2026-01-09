@@ -52,7 +52,7 @@ test.describe("Authenticated Saved Page", () => {
 
     // Navigate to saved page
     await page.goto("http://localhost:3000/saved");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // The bookmarked article should appear - use filter for more resilient matching
     if (articleTitle) {
