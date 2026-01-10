@@ -5,6 +5,9 @@ import { loggedInAsUserOne, articleContent } from "./utils";
 const BASE_URL = process.env.E2E_BASE_URL || "http://localhost:3000";
 const CREATE_URL = `${BASE_URL}/create`;
 
+// Modifier key for keyboard shortcuts (Meta on Mac, Control on Windows/Linux)
+const MOD_KEY = process.platform === "darwin" ? "Meta" : "Control";
+
 // Selectors
 const SELECTORS = {
   // Tabs
@@ -156,10 +159,10 @@ test.describe("Write Tab Editor", () => {
       await page.keyboard.type("bold text");
 
       // Select all text using keyboard
-      await page.keyboard.press("Meta+a");
+      await page.keyboard.press(`${MOD_KEY}+a`);
 
       // Apply bold via keyboard shortcut
-      await page.keyboard.press("Meta+b");
+      await page.keyboard.press(`${MOD_KEY}+b`);
 
       // Check for bold formatting - TipTap uses <strong> tag
       await expect(
@@ -179,10 +182,10 @@ test.describe("Write Tab Editor", () => {
       await page.keyboard.type("italic text");
 
       // Select all text using keyboard
-      await page.keyboard.press("Meta+a");
+      await page.keyboard.press(`${MOD_KEY}+a`);
 
       // Apply italic via keyboard shortcut
-      await page.keyboard.press("Meta+i");
+      await page.keyboard.press(`${MOD_KEY}+i`);
 
       // Check for italic formatting - TipTap uses <em> tag
       await expect(page.locator(`${SELECTORS.editorContent} em`)).toBeVisible({
@@ -686,7 +689,7 @@ test.describe("Publish Button Validation", () => {
 
       // Clear the title field using Select All + Delete
       await page.locator(SELECTORS.linkTitleInput).focus();
-      await page.keyboard.press("Meta+a");
+      await page.keyboard.press(`${MOD_KEY}+a`);
       await page.keyboard.press("Backspace");
 
       // Verify the field is empty

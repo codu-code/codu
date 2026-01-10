@@ -243,8 +243,8 @@ const UnifiedContentCard = ({
     >
       {/* Meta info row */}
       <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
-        {/* Author/Source info - show author for any content type with author */}
-        {author ? (
+        {/* Author/Source info - show author for content with valid author username */}
+        {author?.username ? (
           <Link
             href={`/${author.username}`}
             className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
@@ -384,7 +384,7 @@ const UnifiedContentCard = ({
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
-            className="relative hidden w-[120px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:block"
+            className="relative w-[80px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:w-[120px]"
           >
             <img
               src={imageUrl}

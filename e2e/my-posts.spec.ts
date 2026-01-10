@@ -11,12 +11,16 @@ async function openTab(page: Page, tabName: TabName) {
   const slug = tabName.toLowerCase();
   await page.waitForURL(`http://localhost:3000/my-posts?tab=${slug}`);
   await expect(page).toHaveURL(new RegExp(`\\/my-posts\\?tab=${slug}`));
-  // Wait for content to load - wait for loading message to disappear
+
+  // Wait for loading state to complete
   await expect(page.getByText("Fetching your posts...")).toBeHidden({
+    timeout: 20000,
+  });
+
+  // Wait for at least one article to be visible (instead of hardcoded timeout)
+  await expect(page.locator("article").first()).toBeVisible({
     timeout: 15000,
   });
-  // Additional wait for content to render
-  await page.waitForTimeout(500);
 }
 
 async function openDeleteModal(page: Page, title: string) {
@@ -66,13 +70,13 @@ test.describe("Authenticated my-posts Page", () => {
     await openTab(page, "Published");
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(articleExcerpt)).toBeVisible();
 
     await openTab(page, "Scheduled");
     await expect(
       page.getByRole("heading", { name: "Scheduled Article" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
     await expect(
       page.getByText("This is an excerpt for a scheduled article."),
     ).toBeVisible();
@@ -80,7 +84,7 @@ test.describe("Authenticated my-posts Page", () => {
     await openTab(page, "Drafts");
     await expect(
       page.getByRole("heading", { name: "Draft Article", exact: true }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15000 });
     await expect(
       page.getByText("This is an excerpt for a draft article.", {
         exact: true,

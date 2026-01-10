@@ -1,11 +1,5 @@
-import { headers } from "next/headers";
-import ThemeProvider from "@/components/Theme/ThemeProvider";
-import { TRPCReactProvider } from "@/server/trpc/react";
 import { getServerAuthSession } from "@/server/auth";
-import AuthProvider from "@/context/AuthProvider";
-import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import React from "react";
-import { PromptProvider } from "@/components/PromptService";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { user } from "@/server/db/schema";
