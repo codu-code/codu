@@ -8,6 +8,7 @@ import {
   RssIcon,
   ShieldExclamationIcon,
   NewspaperIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 
@@ -202,6 +203,21 @@ const AdminDashboard = () => {
               </p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 Manage RSS feed sources
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/tags"
+            className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:border-green-300 hover:bg-green-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-green-700 dark:hover:bg-green-900/20"
+          >
+            <TagIcon className="h-6 w-6 text-green-500" />
+            <div>
+              <p className="font-medium text-neutral-900 dark:text-white">
+                Tag Management
+              </p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                Merge, curate, and manage tags
               </p>
             </div>
           </Link>
