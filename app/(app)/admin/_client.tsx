@@ -7,7 +7,6 @@ import {
   FlagIcon,
   RssIcon,
   ShieldExclamationIcon,
-  NewspaperIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
@@ -101,18 +100,19 @@ const AdminDashboard = () => {
           isLoading={isLoading}
         />
         <StatCard
-          title="Aggregated Articles"
-          value={stats?.aggregatedArticles}
-          icon={NewspaperIcon}
-          color="purple"
-          isLoading={isLoading}
-        />
-        <StatCard
           title="Active Feed Sources"
           value={stats?.activeFeedSources}
           icon={RssIcon}
           color="orange"
           href="/admin/sources"
+          isLoading={isLoading}
+        />
+        <StatCard
+          title="Total Reports"
+          value={reportCounts?.total}
+          icon={FlagIcon}
+          color="purple"
+          href="/admin/moderation"
           isLoading={isLoading}
         />
       </div>

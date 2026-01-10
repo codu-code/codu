@@ -21,6 +21,8 @@ import {
   GetArticleBySourceAndArticleSlugSchema,
   GetLinkContentBySourceAndSlugSchema,
 } from "../../../schema/feed";
+import { getPresignedUrl } from "@/server/common/getPresignedUrl";
+import { z } from "zod";
 import {
   posts,
   post_votes,
@@ -882,6 +884,11 @@ export const feedRouter = createTRPCRouter({
         sourceId: feed_sources.id,
         sourceName: feed_sources.name,
         status: feed_sources.status,
+        url: feed_sources.url,
+        websiteUrl: feed_sources.websiteUrl,
+        logoUrl: feed_sources.logoUrl,
+        category: feed_sources.category,
+        description: feed_sources.description,
         articleCount: count(posts.id),
         lastFetchedAt: feed_sources.lastFetchedAt,
         errorCount: feed_sources.errorCount,
@@ -974,6 +981,36 @@ export const feedRouter = createTRPCRouter({
       await ctx.db.delete(feed_sources).where(eq(feed_sources.id, input.id));
 
       return { success: true };
+    }),
+
+  // Admin: Get presigned URL for source logo upload
+  getSourceUploadUrl: adminOnlyProcedure
+    .input(z.object({ size: z.number(), type: z.string() }))
+    .mutation(async ({ input }) => {
+      const { size, type } = input;
+      const extension = type.split("/")[1];
+
+      const acceptedFormats = ["jpg", "jpeg", "gif", "png", "webp"];
+
+      if (!acceptedFormats.includes(extension)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Invalid file. Accepted file formats: ${acceptedFormats.join(", ")}.`,
+        });
+      }
+
+      if (size > 1048576 * 5) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Maximum file size 5MB",
+        });
+      }
+
+      const signedUrl = await getPresignedUrl(type, size, {
+        kind: "sources",
+      });
+
+      return signedUrl;
     }),
 
   // Get link post by source slug and post slug
