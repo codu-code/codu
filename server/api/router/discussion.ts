@@ -102,6 +102,8 @@ export const discussionRouter = createTRPCRouter({
           notifierId: userId,
           type: NEW_REPLY_TO_YOUR_COMMENT,
           userId: parentAuthorId,
+          postId: contentId,
+          commentId: createdComment.id,
         });
       }
 
@@ -115,6 +117,8 @@ export const discussionRouter = createTRPCRouter({
           notifierId: userId,
           type: NEW_COMMENT_ON_YOUR_POST,
           userId: postData[0].authorId,
+          postId: contentId,
+          commentId: createdComment.id,
         });
       }
 

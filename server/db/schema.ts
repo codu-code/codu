@@ -940,11 +940,11 @@ export const notification = pgTable(
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    postId: text("postId").references(() => post.id, {
+    postId: uuid("postId").references(() => posts.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
-    commentId: integer("commentId").references(() => comment.id, {
+    commentId: uuid("commentId").references(() => comments.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
@@ -961,16 +961,16 @@ export const notification = pgTable(
 );
 
 export const notificationRelations = relations(notification, ({ one }) => ({
-  comment: one(comment, {
+  comment: one(comments, {
     fields: [notification.commentId],
-    references: [comment.id],
+    references: [comments.id],
   }),
   notifier: one(user, {
     fields: [notification.notifierId],
     references: [user.id],
     relationName: "notificationsCreated",
   }),
-  post: one(post, { fields: [notification.postId], references: [post.id] }),
+  post: one(posts, { fields: [notification.postId], references: [posts.id] }),
   user: one(user, {
     fields: [notification.userId],
     references: [user.id],

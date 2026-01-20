@@ -14,7 +14,7 @@ import { api } from "@/server/trpc/react";
 
 // Moved outside to avoid "cannot create components during render" error
 const Placeholder = () => (
-  <div className="my-4 w-full border border-neutral-100 bg-neutral-100 p-4 shadow dark:border-white dark:bg-black">
+  <div className="my-2 w-full rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
     <div className="animate-pulse">
       <div className="flex space-x-4">
         <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-neutral-800"></div>
@@ -138,7 +138,7 @@ const Notifications = () => {
                       return null;
                     return (
                       <div key={id}>
-                        <div className="my-2 flex justify-between border border-neutral-300 bg-white p-4 text-neutral-800 dark:border-white dark:bg-black dark:text-neutral-200">
+                        <div className="my-2 flex justify-between rounded-lg border border-neutral-200 bg-white p-4 text-neutral-800 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600">
                           <div>
                             <div className="flex gap-3 sm:gap-5">
                               <div>
