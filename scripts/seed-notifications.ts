@@ -122,7 +122,7 @@ async function main() {
     .where(eq(comments.postId, targetPost.id))
     .limit(1);
 
-  let commentId: number | undefined;
+  let commentId: string | undefined;
   if (existingComment) {
     commentId = existingComment.id;
   }

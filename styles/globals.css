@@ -277,7 +277,6 @@ input[type="email"] {
 table div {
   display: flex;
   flex-direction: column;
-  background: blue;
   width: 100%;
 }
 

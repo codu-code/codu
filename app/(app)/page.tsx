@@ -8,12 +8,17 @@ import { getServerAuthSession } from "@/server/auth";
 import PopularTags from "@/components/PopularTags/PopularTags";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
 import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
+import { JsonLd } from "@/components/JsonLd";
+import { getWebSiteSchema } from "@/lib/structured-data";
 
 const Home = async () => {
   const session = await getServerAuthSession();
 
   return (
     <>
+      {/* WebSite JSON-LD for homepage SEO and sitelinks search box */}
+      <JsonLd data={getWebSiteSchema()} />
+
       {!session && (
         <div>
           <Hero />

@@ -15,6 +15,7 @@ import {
   PencilSquareIcon,
   XMarkIcon,
   PhotoIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/20/solid";
 
 const statusColors = {
@@ -33,12 +34,10 @@ const statusIcons = {
 // Component for logo with fallback
 const LogoWithFallback = ({
   logoUrl,
-  websiteUrl,
   name,
   size = "sm",
 }: {
   logoUrl: string | null;
-  websiteUrl: string | null;
   name: string;
   size?: "sm" | "md";
 }) => {
@@ -67,6 +66,39 @@ const LogoWithFallback = ({
   );
 };
 
+// Helper to check which fields are missing for data completeness
+const getMissingFields = (source: {
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  category: string | null;
+  description: string | null;
+}): string[] => {
+  const missing: string[] = [];
+  if (!source.logoUrl) missing.push("Logo");
+  if (!source.websiteUrl) missing.push("Website URL");
+  if (!source.category) missing.push("Category");
+  if (!source.description) missing.push("Description");
+  return missing;
+};
+
+// Data completeness badge component
+const DataCompletenessBadge = ({
+  missingFields,
+}: {
+  missingFields: string[];
+}) => {
+  if (missingFields.length === 0) return null;
+
+  return (
+    <span className="group relative ml-1.5 inline-flex">
+      <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-neutral-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-neutral-700">
+        Missing: {missingFields.join(", ")}
+      </span>
+    </span>
+  );
+};
+
 const AdminSourcesPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
@@ -89,8 +121,6 @@ const AdminSourcesPage = () => {
     category: "",
   });
   const logoInputRef = useRef<HTMLInputElement>(null);
-
-  const utils = api.useUtils();
 
   // Sync all sources
   const handleSyncAll = async () => {
@@ -657,12 +687,14 @@ const AdminSourcesPage = () => {
                       <span className="inline-flex items-center gap-3">
                         <LogoWithFallback
                           logoUrl={source.logoUrl}
-                          websiteUrl={source.websiteUrl}
                           name={source.sourceName}
                         />
                         <span>
-                          <span className="block font-medium text-neutral-900 dark:text-neutral-100">
+                          <span className="flex items-center font-medium text-neutral-900 dark:text-neutral-100">
                             {source.sourceName}
+                            <DataCompletenessBadge
+                              missingFields={getMissingFields(source)}
+                            />
                           </span>
                           {source.websiteUrl && (
                             <span className="block text-xs text-neutral-500 dark:text-neutral-400">
@@ -705,49 +737,49 @@ const AdminSourcesPage = () => {
                       {source.errorCount}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEditModal(source)}
-                          className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
                           title="Edit"
                         >
-                          <PencilSquareIcon className="h-5 w-5" />
+                          <PencilSquareIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() =>
                             handleSyncSource(source.sourceId, source.sourceName)
                           }
                           disabled={syncingSourceId === source.sourceId}
-                          className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200 disabled:opacity-50"
                           title="Sync now"
                         >
                           <ArrowPathIcon
-                            className={`h-5 w-5 ${syncingSourceId === source.sourceId ? "animate-spin" : ""}`}
+                            className={`h-4 w-4 ${syncingSourceId === source.sourceId ? "animate-spin" : ""}`}
                           />
                         </button>
                         <button
                           onClick={() =>
                             handleStatusToggle(source.sourceId, source.status)
                           }
-                          className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
                           title={
                             source.status === "active" ? "Pause" : "Activate"
                           }
                         >
                           {source.status === "active" ? (
-                            <PauseCircleIcon className="h-5 w-5" />
+                            <PauseCircleIcon className="h-4 w-4" />
                           ) : (
-                            <CheckCircleIcon className="h-5 w-5" />
+                            <CheckCircleIcon className="h-4 w-4" />
                           )}
                         </button>
                         <button
                           onClick={() =>
                             handleDelete(source.sourceId, source.sourceName)
                           }
-                          className="rounded p-1 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
+                          className="rounded bg-transparent p-1.5 text-red-400 transition-colors hover:bg-red-950 hover:text-red-300"
                           title="Delete"
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <TrashIcon className="h-4 w-4" />
                         </button>
                       </div>
                     </td>

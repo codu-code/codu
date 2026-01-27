@@ -24,6 +24,12 @@ import { eq, and, lte } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
+import { JsonLd } from "@/components/JsonLd";
+import {
+  getArticleSchema,
+  getBreadcrumbSchema,
+  getNewsArticleSchema,
+} from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
@@ -457,8 +463,40 @@ const UnifiedPostPage = async (props: Props) => {
       }) as unknown as string;
     }
 
+    // Prepare JSON-LD structured data
+    const articleSchema = getArticleSchema({
+      title: userPost.title,
+      excerpt: userPost.excerpt,
+      slug: userPost.slug,
+      publishedAt: userPost.published,
+      updatedAt: userPost.updatedAt,
+      readingTime: userPost.readTimeMins,
+      canonicalUrl: userPost.canonicalUrl,
+      tags: userPost.tags.map((t) => ({ title: t.tag.title })),
+      author: {
+        name: userPost.user.name,
+        username: userPost.user.username,
+        image: userPost.user.image,
+        bio: userPost.user.bio,
+      },
+    });
+
+    const breadcrumbSchema = getBreadcrumbSchema([
+      { name: "Home", url: "https://www.codu.co" },
+      { name: "Feed", url: "https://www.codu.co/feed" },
+      {
+        name: userPost.user.name || "Author",
+        url: `https://www.codu.co/${userPost.user.username}`,
+      },
+      { name: userPost.title },
+    ]);
+
     return (
       <>
+        {/* JSON-LD Structured Data for SEO */}
+        <JsonLd data={articleSchema} />
+        <JsonLd data={breadcrumbSchema} />
+
         <div className="mx-auto max-w-3xl px-4 py-8">
           {/* Breadcrumb navigation */}
           <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
@@ -618,8 +656,40 @@ const UnifiedPostPage = async (props: Props) => {
       }) as unknown as string;
     }
 
+    // Prepare JSON-LD structured data
+    const articleSchema = getArticleSchema({
+      title: userArticle.title,
+      excerpt: userArticle.excerpt,
+      slug: userArticle.slug,
+      publishedAt: userArticle.publishedAt,
+      updatedAt: userArticle.updatedAt,
+      readingTime: userArticle.readTimeMins,
+      canonicalUrl: userArticle.canonicalUrl,
+      tags: userArticle.tags?.map((t) => ({ title: t.tag.title })),
+      author: {
+        name: userArticle.user.name,
+        username: userArticle.user.username,
+        image: userArticle.user.image,
+        bio: userArticle.user.bio,
+      },
+    });
+
+    const breadcrumbSchema = getBreadcrumbSchema([
+      { name: "Home", url: "https://www.codu.co" },
+      { name: "Feed", url: "https://www.codu.co/feed" },
+      {
+        name: userArticle.user.name || "Author",
+        url: `https://www.codu.co/${userArticle.user.username}`,
+      },
+      { name: userArticle.title },
+    ]);
+
     return (
       <>
+        {/* JSON-LD Structured Data for SEO */}
+        <JsonLd data={articleSchema} />
+        <JsonLd data={breadcrumbSchema} />
+
         <div className="mx-auto max-w-3xl px-4 py-8">
           {/* Breadcrumb navigation */}
           <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
@@ -773,16 +843,78 @@ const UnifiedPostPage = async (props: Props) => {
   const feedArticle = await getFeedArticle(username, slug);
 
   if (feedArticle) {
-    // Render feed article
-    return <FeedArticleContent sourceSlug={username} articleSlug={slug} />;
+    // Prepare JSON-LD structured data for feed article
+    const newsArticleSchema = getNewsArticleSchema({
+      title: feedArticle.title,
+      excerpt: feedArticle.excerpt,
+      slug: feedArticle.slug,
+      externalUrl: feedArticle.externalUrl || "",
+      coverImage: feedArticle.imageUrl || feedArticle.ogImageUrl,
+      publishedAt: feedArticle.publishedAt,
+      source: {
+        name: feedArticle.source?.name || null,
+        slug: feedArticle.source?.slug || username,
+        logoUrl: feedArticle.source?.logoUrl,
+      },
+    });
+
+    const breadcrumbSchema = getBreadcrumbSchema([
+      { name: "Home", url: "https://www.codu.co" },
+      { name: "Feed", url: "https://www.codu.co/feed" },
+      {
+        name: feedArticle.source?.name || username,
+        url: `https://www.codu.co/${feedArticle.source?.slug || username}`,
+      },
+      { name: feedArticle.title },
+    ]);
+
+    // Render feed article with JSON-LD
+    return (
+      <>
+        <JsonLd data={newsArticleSchema} />
+        <JsonLd data={breadcrumbSchema} />
+        <FeedArticleContent sourceSlug={username} articleSlug={slug} />
+      </>
+    );
   }
 
   // Try unified content table (new LINK type items)
   const linkContent = await getLinkContent(username, slug);
 
   if (linkContent) {
-    // Render link content
-    return <LinkContentDetail sourceSlug={username} contentSlug={slug} />;
+    // Prepare JSON-LD structured data for link content
+    const newsArticleSchema = getNewsArticleSchema({
+      title: linkContent.title,
+      excerpt: linkContent.excerpt,
+      slug: linkContent.slug,
+      externalUrl: linkContent.externalUrl || "",
+      coverImage: linkContent.imageUrl || linkContent.ogImageUrl,
+      publishedAt: linkContent.publishedAt,
+      source: {
+        name: linkContent.source?.name || null,
+        slug: linkContent.source?.slug || username,
+        logoUrl: linkContent.source?.logoUrl,
+      },
+    });
+
+    const breadcrumbSchema = getBreadcrumbSchema([
+      { name: "Home", url: "https://www.codu.co" },
+      { name: "Feed", url: "https://www.codu.co/feed" },
+      {
+        name: linkContent.source?.name || username,
+        url: `https://www.codu.co/${linkContent.source?.slug || username}`,
+      },
+      { name: linkContent.title },
+    ]);
+
+    // Render link content with JSON-LD
+    return (
+      <>
+        <JsonLd data={newsArticleSchema} />
+        <JsonLd data={breadcrumbSchema} />
+        <LinkContentDetail sourceSlug={username} contentSlug={slug} />
+      </>
+    );
   }
 
   // Nothing found

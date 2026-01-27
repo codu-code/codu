@@ -196,7 +196,7 @@ interface CreateNotificationInput {
   notifierId: string;
   type: number; // 0 = NEW_COMMENT_ON_YOUR_POST, 1 = NEW_REPLY_TO_YOUR_COMMENT
   postId?: string;
-  commentId?: number;
+  commentId?: string; // UUID
 }
 
 export async function createNotification({
