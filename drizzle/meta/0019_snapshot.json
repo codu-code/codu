@@ -2847,13 +2847,13 @@
         },
         "postId": {
           "name": "postId",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "commentId": {
           "name": "commentId",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
