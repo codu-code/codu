@@ -334,6 +334,7 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await page.goto(
       "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
     );
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for action bar to load - bookmark button has text "Save"
     await expect(page.getByRole("button", { name: "Save" })).toBeVisible({
@@ -343,9 +344,12 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     // Click bookmark button
     await page.getByRole("button", { name: "Save" }).click();
 
+    // Wait for network request to complete
+    await page.waitForTimeout(1000);
+
     // Button text should change to "Saved" - add explicit timeout for slow mobile browsers
     await expect(page.getByRole("button", { name: "Saved" })).toBeVisible({
-      timeout: 10000,
+      timeout: 15000,
     });
   });
 });

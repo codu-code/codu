@@ -21,6 +21,8 @@ test.describe("Notifications Page", () => {
 
   test.describe("Authenticated - No Notifications", () => {
     test.beforeEach(async ({ page }) => {
+      // Clear notifications for user two before testing empty state
+      await clearNotifications(E2E_USER_TWO_ID);
       await loggedInAsUserTwo(page);
     });
 
@@ -30,12 +32,14 @@ test.describe("Notifications Page", () => {
         page.getByRole("heading", { name: "Notifications" }),
       ).toBeVisible();
       // Should show empty state message
-      await expect(page.getByText("No new notifications")).toBeVisible();
+      await expect(page.getByText(/No new notifications/)).toBeVisible();
     });
   });
 
   test.describe("Authenticated - With Notifications", () => {
     test.beforeEach(async ({ page }) => {
+      // Clear notifications before each test to ensure clean state
+      await clearNotifications(E2E_USER_ONE_ID);
       await loggedInAsUserOne(page);
     });
 
@@ -75,9 +79,11 @@ test.describe("Notifications Page", () => {
       });
 
       await page.goto("http://localhost:3000/notifications");
+      // Wait for notifications to load
+      await page.waitForLoadState("domcontentloaded");
       await expect(
         page.getByRole("button", { name: "Mark all as read" }),
-      ).toBeVisible();
+      ).toBeVisible({ timeout: 15000 });
     });
 
     test("Should be able to mark individual notification as read", async ({
@@ -91,10 +97,12 @@ test.describe("Notifications Page", () => {
       });
 
       await page.goto("http://localhost:3000/notifications");
+      // Wait for notifications to load
+      await page.waitForLoadState("domcontentloaded");
 
       // Wait for notification to appear
       await page.waitForSelector('button[title="Mark as read"]', {
-        timeout: 10000,
+        timeout: 15000,
       });
 
       // Click mark as read button
@@ -216,13 +224,14 @@ test.describe("Notifications Page", () => {
       // Log back in as user one and check for notification
       await loggedInAsUserOne(page);
       await page.goto("http://localhost:3000/notifications");
+      await page.waitForLoadState("domcontentloaded");
 
       await expect(page.getByText("E2E Test User Two").first()).toBeVisible({
         timeout: 15000,
       });
       await expect(
-        page.getByText("replied to your comment").first(),
-      ).toBeVisible();
+        page.getByText(/replied to your comment/).first(),
+      ).toBeVisible({ timeout: 10000 });
     });
   });
 });

@@ -43,11 +43,11 @@ test.describe("Admin Dashboard", () => {
     // Should show Published Posts stat
     await expect(page.getByText("Published Posts")).toBeVisible();
 
-    // Should show Aggregated Articles stat
-    await expect(page.getByText("Aggregated Articles")).toBeVisible();
-
     // Should show Active Feed Sources stat
     await expect(page.getByText("Active Feed Sources")).toBeVisible();
+
+    // Should show Total Reports stat
+    await expect(page.getByText("Total Reports")).toBeVisible();
   });
 
   test("Should show moderation section", async ({ page }) => {

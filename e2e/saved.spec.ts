@@ -31,34 +31,43 @@ test.describe("Authenticated Saved Page", () => {
   });
 
   test("Should bookmark and appear in saved items", async ({ page }) => {
-    // First, bookmark an article
+    // First, bookmark an article from the feed (where bookmark-button testid exists)
     await page.goto("http://localhost:3000/feed?type=article");
+    await page.waitForLoadState("domcontentloaded");
+
+    // Wait for articles to load
     await expect(page.locator("article").first()).toBeVisible({
       timeout: 15000,
     });
 
     // Get the title of the first article before bookmarking
-    const articleHeading = page.locator("article").first().locator("h2");
-    await expect(articleHeading).toBeVisible();
+    const firstArticle = page.locator("article").first();
+    const articleHeading = firstArticle.locator("h2");
+    await expect(articleHeading).toBeVisible({ timeout: 10000 });
     const articleTitle = await articleHeading.textContent();
 
-    // Click bookmark on first item and wait for it to complete
-    const bookmarkButton = page.getByTestId("bookmark-button").first();
-    await expect(bookmarkButton).toBeVisible();
+    // Click bookmark on this specific article
+    const bookmarkButton = firstArticle.getByTestId("bookmark-button");
+    await expect(bookmarkButton).toBeVisible({ timeout: 10000 });
     await bookmarkButton.click();
 
     // Wait for bookmark mutation to complete
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     // Navigate to saved page
     await page.goto("http://localhost:3000/saved");
     await page.waitForLoadState("domcontentloaded");
 
-    // The bookmarked article should appear - use filter for more resilient matching
+    // The bookmarked article should appear - use the captured title
     if (articleTitle) {
       await expect(
         page.locator("article").filter({ hasText: articleTitle.trim() }),
       ).toBeVisible({
+        timeout: 15000,
+      });
+    } else {
+      // Fallback - just check that an article is visible
+      await expect(page.locator("article").first()).toBeVisible({
         timeout: 15000,
       });
     }

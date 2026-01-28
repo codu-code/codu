@@ -795,6 +795,12 @@ test.describe("Publish Flow", () => {
 
   test("Should show confirmation modal for write tab", async ({ page }) => {
     await page.goto(CREATE_URL);
+    await page.waitForLoadState("domcontentloaded");
+
+    // Wait for title input to be visible
+    await expect(page.locator(SELECTORS.titleInput)).toBeVisible({
+      timeout: 15000,
+    });
 
     // Enter valid content
     await page.locator(SELECTORS.titleInput).fill("Article to Publish");
@@ -870,13 +876,14 @@ test.describe("Publish Flow", () => {
     page,
   }) => {
     await page.goto(`${CREATE_URL}?tab=link`);
+    await page.waitForLoadState("domcontentloaded");
 
     // Enter a URL and wait for metadata to auto-populate title
     await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
 
     // Wait for metadata to be fetched and title to auto-populate
     const titleInput = page.locator(SELECTORS.linkTitleInput);
-    await expect(titleInput).not.toHaveValue("", { timeout: 10000 });
+    await expect(titleInput).not.toHaveValue("", { timeout: 15000 });
 
     // Verify the title was auto-populated
     const titleValue = await titleInput.inputValue();

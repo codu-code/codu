@@ -7,6 +7,7 @@ type TabName = "Drafts" | "Scheduled" | "Published";
 
 async function openTab(page: Page, tabName: TabName) {
   await page.goto("http://localhost:3000/my-posts");
+  await page.waitForLoadState("domcontentloaded");
   await page.getByRole("link", { name: tabName }).click();
   const slug = tabName.toLowerCase();
   await page.waitForURL(`http://localhost:3000/my-posts?tab=${slug}`);
@@ -17,7 +18,8 @@ async function openTab(page: Page, tabName: TabName) {
     timeout: 20000,
   });
 
-  // Wait for at least one article to be visible (instead of hardcoded timeout)
+  // Wait for network to settle and at least one article to be visible
+  await page.waitForLoadState("domcontentloaded");
   await expect(page.locator("article").first()).toBeVisible({
     timeout: 15000,
   });
