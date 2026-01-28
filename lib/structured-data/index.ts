@@ -19,7 +19,10 @@ export type {
 } from "./types";
 
 // Schema builders
-export { getOrganizationSchema, getOrganizationRef } from "./schemas/organization";
+export {
+  getOrganizationSchema,
+  getOrganizationRef,
+} from "./schemas/organization";
 export { getPersonSchema, getPersonRef } from "./schemas/person";
 export { getArticleSchema } from "./schemas/article";
 export { getNewsArticleSchema } from "./schemas/news-article";

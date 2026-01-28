@@ -19,6 +19,20 @@ import {
 type SortField = "postCount" | "title" | "createdAt";
 type SortOrder = "asc" | "desc";
 
+const SortIcon = ({
+  field,
+  sortField,
+}: {
+  field: SortField;
+  sortField: SortField;
+}) => (
+  <ChevronUpDownIcon
+    className={`ml-1 inline h-4 w-4 ${
+      sortField === field ? "text-orange-500" : "text-neutral-400"
+    }`}
+  />
+);
+
 const TagsAdmin = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("postCount");
@@ -41,8 +55,6 @@ const TagsAdmin = () => {
     postCount: number;
   } | null>(null);
   const [showMergePanel, setShowMergePanel] = useState(false);
-
-  const utils = api.useUtils();
 
   // Fetch all tags with admin stats
   const { data, status, refetch } = api.tag.getAdminStats.useQuery();
@@ -194,14 +206,6 @@ const TagsAdmin = () => {
     }
     setShowMergePanel(true);
   };
-
-  const SortIcon = ({ field }: { field: SortField }) => (
-    <ChevronUpDownIcon
-      className={`ml-1 inline h-4 w-4 ${
-        sortField === field ? "text-orange-500" : "text-neutral-400"
-      }`}
-    />
-  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -380,9 +384,7 @@ const TagsAdmin = () => {
             <button
               onClick={handleMerge}
               disabled={
-                !mergeSource ||
-                !mergeTarget ||
-                mergeTags.status === "pending"
+                !mergeSource || !mergeTarget || mergeTags.status === "pending"
               }
               className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
@@ -495,7 +497,9 @@ const TagsAdmin = () => {
                   disabled={updateTag.status === "pending"}
                   className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
                 >
-                  {updateTag.status === "pending" ? "Saving..." : "Save Changes"}
+                  {updateTag.status === "pending"
+                    ? "Saving..."
+                    : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -526,7 +530,7 @@ const TagsAdmin = () => {
                   className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                 >
                   Tag
-                  <SortIcon field="title" />
+                  <SortIcon field="title" sortField={sortField} />
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                   Slug
@@ -536,14 +540,14 @@ const TagsAdmin = () => {
                   className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                 >
                   Posts
-                  <SortIcon field="postCount" />
+                  <SortIcon field="postCount" sortField={sortField} />
                 </th>
                 <th
                   onClick={() => handleSort("createdAt")}
                   className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
                 >
                   Created
-                  <SortIcon field="createdAt" />
+                  <SortIcon field="createdAt" sortField={sortField} />
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                   Actions
@@ -656,9 +660,7 @@ const TagsAdmin = () => {
           </table>
           {filteredTags?.length === 0 && (
             <div className="py-12 text-center text-neutral-500 dark:text-neutral-400">
-              {searchQuery
-                ? "No tags match your search."
-                : "No tags yet."}
+              {searchQuery ? "No tags match your search." : "No tags yet."}
             </div>
           )}
         </div>

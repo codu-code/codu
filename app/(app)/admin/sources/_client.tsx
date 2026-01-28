@@ -60,7 +60,9 @@ const LogoWithFallback = ({
 
   // Fallback to initial letter
   return (
-    <span className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-orange-500 ${textSize} font-medium text-white`}>
+    <span
+      className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-orange-500 ${textSize} font-medium text-white`}
+    >
       {initial}
     </span>
   );
@@ -223,7 +225,8 @@ const AdminSourcesPage = () => {
 
   // Handle logo image upload
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !editingSource) return;
+    if (!e.target.files || e.target.files.length === 0 || !editingSource)
+      return;
 
     const file = e.target.files[0];
     const { size, type } = file;
@@ -628,7 +631,9 @@ const AdminSourcesPage = () => {
                   disabled={updateSource.status === "pending"}
                   className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
                 >
-                  {updateSource.status === "pending" ? "Saving..." : "Save Changes"}
+                  {updateSource.status === "pending"
+                    ? "Saving..."
+                    : "Save Changes"}
                 </button>
               </div>
             </form>

@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useMemo,
   type KeyboardEvent,
   type ChangeEvent,
 } from "react";
@@ -54,6 +55,7 @@ export function TagInput({
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [lastSuggestionsLength, setLastSuggestionsLength] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -69,10 +71,19 @@ export function TagInput({
   );
 
   // Filter out already selected tags
-  const suggestions: TagSuggestion[] =
-    searchResults?.data?.filter(
-      (t) => !tags.includes(t.title.toLowerCase()),
-    ) || [];
+  const suggestions: TagSuggestion[] = useMemo(
+    () =>
+      searchResults?.data?.filter(
+        (t) => !tags.includes(t.title.toLowerCase()),
+      ) || [],
+    [searchResults?.data, tags],
+  );
+
+  // Reset highlighted index when suggestions change (synchronous state derivation)
+  if (suggestions.length !== lastSuggestionsLength) {
+    setHighlightedIndex(-1);
+    setLastSuggestionsLength(suggestions.length);
+  }
 
   const addTag = useCallback(
     (tag: string) => {
@@ -165,11 +176,6 @@ export function TagInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Reset highlighted index when suggestions change
-  useEffect(() => {
-    setHighlightedIndex(-1);
-  }, [suggestions.length]);
-
   const isMaxReached = tags.length >= maxTags;
 
   // Format post count for display
@@ -229,7 +235,7 @@ export function TagInput({
               onFocus={() => inputValue.length >= 1 && setIsOpen(true)}
               placeholder={tags.length === 0 ? placeholder : "Add more..."}
               disabled={disabled}
-              className="min-w-[120px] w-full border-none bg-transparent px-1 py-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder:text-neutral-500"
+              className="w-full min-w-[120px] border-none bg-transparent px-1 py-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder:text-neutral-500"
               autoComplete="off"
             />
 
@@ -237,11 +243,11 @@ export function TagInput({
             {isOpen && inputValue.length >= 1 && (
               <div
                 ref={dropdownRef}
-                className="absolute left-0 top-full z-50 mt-1 w-72 max-h-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+                className="absolute left-0 top-full z-50 mt-1 max-h-64 w-72 overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center p-4 text-neutral-500">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     <span className="text-sm">Searching...</span>
                   </div>
                 ) : suggestions.length > 0 ? (
@@ -262,7 +268,7 @@ export function TagInput({
                             {suggestion.title}
                           </span>
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full ${
+                            className={`rounded-full px-2 py-0.5 text-xs ${
                               suggestion.postCount > 100
                                 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                 : suggestion.postCount > 10

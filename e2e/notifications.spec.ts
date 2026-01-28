@@ -6,10 +6,7 @@ import {
   createNotification,
   clearNotifications,
 } from "./utils";
-import {
-  E2E_USER_ONE_ID,
-  E2E_USER_TWO_ID,
-} from "./constants";
+import { E2E_USER_ONE_ID, E2E_USER_TWO_ID } from "./constants";
 
 test.describe("Notifications Page", () => {
   test.describe("Unauthenticated", () => {
@@ -29,7 +26,9 @@ test.describe("Notifications Page", () => {
 
     test("Should show empty state when no notifications", async ({ page }) => {
       await page.goto("http://localhost:3000/notifications");
-      await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Notifications" }),
+      ).toBeVisible();
       // Should show empty state message
       await expect(page.getByText("No new notifications")).toBeVisible();
     });
@@ -51,13 +50,17 @@ test.describe("Notifications Page", () => {
       });
 
       await page.goto("http://localhost:3000/notifications");
-      await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Notifications" }),
+      ).toBeVisible();
 
       // Wait for notifications to load
       await page.waitForSelector('[class*="rounded-lg"]', { timeout: 10000 });
 
       // Verify notification card styling (rounded corners, proper borders)
-      const notificationCard = page.locator('[class*="rounded-lg"][class*="border-neutral-200"]').first();
+      const notificationCard = page
+        .locator('[class*="rounded-lg"][class*="border-neutral-200"]')
+        .first();
       await expect(notificationCard).toBeVisible();
     });
 
@@ -72,7 +75,9 @@ test.describe("Notifications Page", () => {
       });
 
       await page.goto("http://localhost:3000/notifications");
-      await expect(page.getByRole("button", { name: "Mark all as read" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Mark all as read" }),
+      ).toBeVisible();
     });
 
     test("Should be able to mark individual notification as read", async ({
@@ -88,7 +93,9 @@ test.describe("Notifications Page", () => {
       await page.goto("http://localhost:3000/notifications");
 
       // Wait for notification to appear
-      await page.waitForSelector('button[title="Mark as read"]', { timeout: 10000 });
+      await page.waitForSelector('button[title="Mark as read"]', {
+        timeout: 10000,
+      });
 
       // Click mark as read button
       await page.locator('button[title="Mark as read"]').first().click();
@@ -139,11 +146,17 @@ test.describe("Notifications Page", () => {
       await page.goto("http://localhost:3000/notifications");
 
       // Should see notification from user two
-      await expect(page.getByRole("heading", { name: "Notifications" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Notifications" }),
+      ).toBeVisible();
 
       // Wait for notifications to load - use first() to handle multiple notifications
-      await expect(page.getByText("E2E Test User Two").first()).toBeVisible({ timeout: 15000 });
-      await expect(page.getByText("started a discussion on your post").first()).toBeVisible();
+      await expect(page.getByText("E2E Test User Two").first()).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(
+        page.getByText("started a discussion on your post").first(),
+      ).toBeVisible();
     });
 
     test("Should create notification when user replies to another user's comment", async ({
@@ -168,7 +181,9 @@ test.describe("Notifications Page", () => {
       const originalComment = `Original comment for reply test ${randomUUID()}`;
       await page.keyboard.type(originalComment);
       await page.getByRole("button", { name: "Comment", exact: true }).click();
-      await expect(page.getByText(originalComment)).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText(originalComment)).toBeVisible({
+        timeout: 10000,
+      });
 
       // Now log in as user two and reply to user one's comment
       await loggedInAsUserTwo(page);
@@ -176,7 +191,9 @@ test.describe("Notifications Page", () => {
         "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
       );
 
-      await expect(page.getByText(originalComment)).toBeVisible({ timeout: 15000 });
+      await expect(page.getByText(originalComment)).toBeVisible({
+        timeout: 15000,
+      });
 
       // Click reply on the first comment
       await page.getByRole("button", { name: "Reply" }).first().click();
@@ -200,8 +217,12 @@ test.describe("Notifications Page", () => {
       await loggedInAsUserOne(page);
       await page.goto("http://localhost:3000/notifications");
 
-      await expect(page.getByText("E2E Test User Two").first()).toBeVisible({ timeout: 15000 });
-      await expect(page.getByText("replied to your comment").first()).toBeVisible();
+      await expect(page.getByText("E2E Test User Two").first()).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(
+        page.getByText("replied to your comment").first(),
+      ).toBeVisible();
     });
   });
 });

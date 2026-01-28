@@ -42,7 +42,9 @@ async function main() {
   const emailOrUsername = process.argv[2];
 
   if (!emailOrUsername) {
-    console.error("Usage: npx tsx scripts/seed-notifications.ts <email_or_username>");
+    console.error(
+      "Usage: npx tsx scripts/seed-notifications.ts <email_or_username>",
+    );
     console.error("");
     console.error("Examples:");
     console.error("  npx tsx scripts/seed-notifications.ts niall@codu.co");
@@ -54,7 +56,12 @@ async function main() {
 
   // Find the target user by email or username
   const [targetUser] = await db
-    .select({ id: user.id, name: user.name, email: user.email, username: user.username })
+    .select({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      username: user.username,
+    })
     .from(user)
     .where(
       emailOrUsername.includes("@")
@@ -73,7 +80,12 @@ async function main() {
 
   // Find another user to act as the notifier
   const [notifierUser] = await db
-    .select({ id: user.id, name: user.name, username: user.username, image: user.image })
+    .select({
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      image: user.image,
+    })
     .from(user)
     .where(ne(user.id, targetUser.id))
     .limit(1);
@@ -84,17 +96,16 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Using notifier: ${notifierUser.name} (@${notifierUser.username})`);
+  console.log(
+    `Using notifier: ${notifierUser.name} (@${notifierUser.username})`,
+  );
 
   // Find a published post (preferably owned by the target user, or any published post)
   let [targetPost] = await db
     .select({ id: posts.id, title: posts.title, slug: posts.slug })
     .from(posts)
     .where(
-      and(
-        eq(posts.authorId, targetUser.id),
-        eq(posts.status, "published"),
-      ),
+      and(eq(posts.authorId, targetUser.id), eq(posts.status, "published")),
     )
     .limit(1);
 
@@ -142,7 +153,9 @@ async function main() {
     })
     .returning();
 
-  console.log(`Created notification: "${notifierUser.name} started a discussion on your post: ${targetPost.title}"`);
+  console.log(
+    `Created notification: "${notifierUser.name} started a discussion on your post: ${targetPost.title}"`,
+  );
 
   // Type 1: Reply to your comment
   const notification2 = await db
@@ -156,7 +169,9 @@ async function main() {
     })
     .returning();
 
-  console.log(`Created notification: "${notifierUser.name} replied to your comment on: ${targetPost.title}"`);
+  console.log(
+    `Created notification: "${notifierUser.name} replied to your comment on: ${targetPost.title}"`,
+  );
 
   // Create a few more for variety
   const notification3 = await db
@@ -170,7 +185,9 @@ async function main() {
     })
     .returning();
 
-  console.log(`Created notification: "${notifierUser.name} started a discussion on your post: ${targetPost.title}"`);
+  console.log(
+    `Created notification: "${notifierUser.name} started a discussion on your post: ${targetPost.title}"`,
+  );
 
   console.log("\n-------------------------------------------");
   console.log("SUCCESS! Created 3 test notifications.");

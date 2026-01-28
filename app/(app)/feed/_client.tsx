@@ -6,7 +6,11 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useSession } from "next-auth/react";
-import { FeedItemLoading, FeedFilters, PopularTagsSidebar } from "@/components/Feed";
+import {
+  FeedItemLoading,
+  FeedFilters,
+  PopularTagsSidebar,
+} from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
 import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
@@ -238,7 +242,10 @@ const FeedPage = () => {
 
             {/* Popular Tags section */}
             <div className="mt-6">
-              <PopularTagsSidebar selectedTag={tag} onTagClick={handleTagChange} />
+              <PopularTagsSidebar
+                selectedTag={tag}
+                onTagClick={handleTagChange}
+              />
             </div>
 
             {/* Categories section (RSS source categories) */}

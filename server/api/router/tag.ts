@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import {
   tag,
@@ -130,7 +126,11 @@ export const tagRouter = createTRPCRouter({
   getOrCreate: protectedProcedure
     .input(
       z.object({
-        title: z.string().min(1).max(50).transform((s) => s.toLowerCase().trim()),
+        title: z
+          .string()
+          .min(1)
+          .max(50)
+          .transform((s) => s.toLowerCase().trim()),
       }),
     )
     .mutation(async ({ ctx, input }) => {

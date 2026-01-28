@@ -29,7 +29,17 @@ import {
   user,
   comments,
 } from "@/server/db/schema";
-import { and, eq, desc, lt, lte, sql, isNotNull, count, exists } from "drizzle-orm";
+import {
+  and,
+  eq,
+  desc,
+  lt,
+  lte,
+  sql,
+  isNotNull,
+  count,
+  exists,
+} from "drizzle-orm";
 import { increment } from "./utils";
 import crypto from "crypto";
 
@@ -146,9 +156,7 @@ export const contentRouter = createTRPCRouter({
               .select({ one: sql`1` })
               .from(post_tags)
               .innerJoin(dbTag, eq(post_tags.tagId, dbTag.id))
-              .where(
-                and(eq(post_tags.postId, posts.id), eq(dbTag.slug, tag)),
-              ),
+              .where(and(eq(post_tags.postId, posts.id), eq(dbTag.slug, tag))),
           ),
         );
       }
