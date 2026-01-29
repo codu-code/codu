@@ -807,6 +807,12 @@ test.describe("Publish Flow", () => {
     await page.locator(SELECTORS.editorContent).click();
     await page.keyboard.type(articleContent);
 
+    // Wait for auto-save to complete before opening modal
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
+    await page.waitForTimeout(300); // Allow state to settle
+
     // Wait for Publish button to be enabled
     const publishButton = page.locator('nav button:has-text("Publish")');
     await expect(publishButton).toBeEnabled({ timeout: 10000 });
@@ -861,8 +867,11 @@ test.describe("Publish Flow", () => {
     await page.locator(SELECTORS.linkUrlInput).fill("https://github.com");
     await page.locator(SELECTORS.linkTitleInput).fill("GitHub Link");
 
-    // Wait for state to update
-    await page.waitForTimeout(500);
+    // Wait for auto-save to complete before opening modal
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
+    await page.waitForTimeout(300); // Allow state to settle
 
     // Click Publish button in nav
     await page.locator('nav button:has-text("Publish")').click();
@@ -968,8 +977,10 @@ test.describe("Publish Flow", () => {
       "Content for scheduled article test here with enough text to pass validation",
     );
 
-    // Wait for body content to register (debounce)
-    await page.waitForTimeout(2000);
+    // Wait for auto-save to complete
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
 
     // Expand More Options
     await page.locator(SELECTORS.moreOptionsButton).click();
@@ -993,8 +1004,8 @@ test.describe("Publish Flow", () => {
     const dateString = futureDate.toISOString().slice(0, 16);
     await page.locator(SELECTORS.datetimeInput).fill(dateString);
 
-    // Wait for state to update
-    await page.waitForTimeout(500);
+    // Wait for state to settle after date input
+    await page.waitForTimeout(300);
 
     // Click Publish button in nav
     await page.locator('nav button:has-text("Publish")').click();

@@ -341,11 +341,15 @@ test.describe("Authenticated Feed Page (Articles)", () => {
       timeout: 15000,
     });
 
-    // Click bookmark button
+    // Wait for TRPC bookmark mutation response
+    const bookmarkResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/trpc/") &&
+        response.url().includes("bookmark") &&
+        response.status() === 200,
+    );
     await page.getByRole("button", { name: "Save" }).click();
-
-    // Wait for network request to complete
-    await page.waitForTimeout(1000);
+    await bookmarkResponsePromise;
 
     // Button text should change to "Saved" - add explicit timeout for slow mobile browsers
     await expect(page.getByRole("button", { name: "Saved" })).toBeVisible({

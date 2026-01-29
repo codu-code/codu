@@ -49,14 +49,26 @@ test.describe("Authenticated Saved Page", () => {
     // Click bookmark on this specific article
     const bookmarkButton = firstArticle.getByTestId("bookmark-button");
     await expect(bookmarkButton).toBeVisible({ timeout: 10000 });
+
+    // Wait for TRPC bookmark mutation response
+    const bookmarkResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/trpc/") &&
+        response.url().includes("bookmark") &&
+        response.status() === 200,
+    );
     await bookmarkButton.click();
+    await bookmarkResponsePromise;
 
-    // Wait for bookmark mutation to complete
-    await page.waitForTimeout(2000);
-
-    // Navigate to saved page
+    // Navigate to saved page and wait for TRPC response
+    const savedResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/trpc/") &&
+        response.url().includes("post.myBookmarks") &&
+        response.status() === 200,
+    );
     await page.goto("http://localhost:3000/saved");
-    await page.waitForLoadState("domcontentloaded");
+    await savedResponsePromise;
 
     // The bookmarked article should appear - use the captured title
     if (articleTitle) {
@@ -78,13 +90,19 @@ test.describe("Authenticated Saved Page", () => {
     await page.goto("http://localhost:3000/feed?type=article");
     await page.waitForSelector("article");
 
-    // Bookmark an item
+    // Wait for TRPC bookmark mutation response
+    const bookmarkResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/trpc/") &&
+        response.url().includes("bookmark") &&
+        response.status() === 200,
+    );
     await page.getByTestId("bookmark-button").first().click();
-    await page.waitForTimeout(500);
+    await bookmarkResponsePromise;
 
     // Go to saved page
     await page.goto("http://localhost:3000/saved");
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState("domcontentloaded");
 
     // Click on a saved item to navigate to it
     const firstLink = page.locator("article").first().locator("a").first();
@@ -108,9 +126,15 @@ test.describe("Authenticated Saved Page", () => {
     await page.goto("http://localhost:3000/feed?type=article");
     await page.waitForSelector("article");
 
-    // Click bookmark on first item
+    // Wait for TRPC bookmark mutation response
+    const bookmarkResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/trpc/") &&
+        response.url().includes("bookmark") &&
+        response.status() === 200,
+    );
     await page.getByTestId("bookmark-button").first().click();
-    await page.waitForTimeout(500);
+    await bookmarkResponsePromise;
 
     // Sidebar should show "Your Saved Articles" section
     await expect(

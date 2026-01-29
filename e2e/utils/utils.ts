@@ -13,6 +13,9 @@ import {
 
 export const loggedInAsUserOne = async (page: Page) => {
   try {
+    // Clear cookies to ensure fresh session (prevents stale React Query cache when switching users)
+    await page.context().clearCookies();
+
     await page.context().addCookies([
       {
         name: "authjs.session-token",
@@ -59,6 +62,9 @@ export const loggedInAsUserTwo = async (page: Page) => {
 
 export const loggedInAsAdmin = async (page: Page) => {
   try {
+    // Clear cookies to ensure fresh session (prevents stale React Query cache when switching users)
+    await page.context().clearCookies();
+
     await page.context().addCookies([
       {
         name: "authjs.session-token",

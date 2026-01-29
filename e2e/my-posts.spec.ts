@@ -5,10 +5,23 @@ import { articleExcerpt } from "./constants";
 
 type TabName = "Drafts" | "Scheduled" | "Published";
 
-async function openTab(page: Page, tabName: TabName) {
+async function openTab(
+  page: Page,
+  tabName: TabName,
+  isMobile: boolean = false,
+) {
   await page.goto("http://localhost:3000/my-posts");
   await page.waitForLoadState("domcontentloaded");
-  await page.getByRole("link", { name: tabName }).click();
+
+  // Mobile renders tabs as a select dropdown, desktop uses links
+  if (isMobile) {
+    const tabSelect = page.locator("select#tabs");
+    await expect(tabSelect).toBeVisible({ timeout: 10000 });
+    await tabSelect.selectOption({ label: tabName });
+  } else {
+    await page.getByRole("link", { name: tabName }).click();
+  }
+
   const slug = tabName.toLowerCase();
   await page.waitForURL(`http://localhost:3000/my-posts?tab=${slug}`);
   await expect(page).toHaveURL(new RegExp(`\\/my-posts\\?tab=${slug}`));
@@ -52,30 +65,49 @@ test.describe("Authenticated my-posts Page", () => {
 
   test("Tabs for different type of posts should be visible", async ({
     page,
+    isMobile,
   }) => {
     await page.goto("http://localhost:3000/my-posts");
 
-    await expect(page.getByRole("link", { name: "Drafts" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Scheduled" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Published" })).toBeVisible();
+    // Mobile renders tabs as a select dropdown, desktop uses links
+    if (isMobile) {
+      const tabSelect = page.locator("select#tabs");
+      await expect(tabSelect).toBeVisible({ timeout: 10000 });
+      // Verify the select has the correct options
+      await expect(tabSelect.locator('option:has-text("Drafts")')).toBeVisible();
+      await expect(
+        tabSelect.locator('option:has-text("Scheduled")'),
+      ).toBeVisible();
+      await expect(
+        tabSelect.locator('option:has-text("Published")'),
+      ).toBeVisible();
+    } else {
+      await expect(page.getByRole("link", { name: "Drafts" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Scheduled" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Published" })).toBeVisible();
+    }
   });
 
   test("Different article tabs should correctly display articles matching that type", async ({
     page,
+    isMobile,
   }) => {
     await page.goto("http://localhost:3000/my-posts");
 
-    await expect(page.getByRole("link", { name: "Drafts" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Scheduled" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Published" })).toBeVisible();
+    // Check tab visibility - on mobile these are in a select dropdown
+    if (!isMobile) {
+      await expect(page.getByRole("link", { name: "Drafts" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Scheduled" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Published" })).toBeVisible();
+    }
 
-    await openTab(page, "Published");
+    await openTab(page, "Published", isMobile);
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible({ timeout: 15000 });
     await expect(page.getByText(articleExcerpt)).toBeVisible();
 
-    await openTab(page, "Scheduled");
+    await openTab(page, "Scheduled", isMobile);
     await expect(
       page.getByRole("heading", { name: "Scheduled Article" }),
     ).toBeVisible({ timeout: 15000 });
@@ -83,7 +115,7 @@ test.describe("Authenticated my-posts Page", () => {
       page.getByText("This is an excerpt for a scheduled article."),
     ).toBeVisible();
 
-    await openTab(page, "Drafts");
+    await openTab(page, "Drafts", isMobile);
     await expect(
       page.getByRole("heading", { name: "Draft Article", exact: true }),
     ).toBeVisible({ timeout: 15000 });
@@ -96,10 +128,11 @@ test.describe("Authenticated my-posts Page", () => {
 
   test("User should close delete modal with Cancel button", async ({
     page,
+    isMobile,
   }) => {
     const title = "Published Article";
     await page.goto("http://localhost:3000/my-posts");
-    await openTab(page, "Published");
+    await openTab(page, "Published", isMobile);
     await openDeleteModal(page, title);
 
     const closeButton = page.getByRole("button", { name: "Cancel" });
@@ -110,10 +143,13 @@ test.describe("Authenticated my-posts Page", () => {
     ).toBeHidden();
   });
 
-  test("User should close delete modal with Close button", async ({ page }) => {
+  test("User should close delete modal with Close button", async ({
+    page,
+    isMobile,
+  }) => {
     const title = "Published Article";
     await page.goto("http://localhost:3000/my-posts");
-    await openTab(page, "Published");
+    await openTab(page, "Published", isMobile);
     await openDeleteModal(page, title);
 
     const closeButton = page.getByRole("button", { name: "Close" });
@@ -124,7 +160,7 @@ test.describe("Authenticated my-posts Page", () => {
     ).toBeHidden();
   });
 
-  test("User should delete published article", async ({ page }) => {
+  test("User should delete published article", async ({ page, isMobile }) => {
     const article = {
       id: "test-id-for-deletion",
       title: "Article to be deleted",
@@ -134,7 +170,7 @@ test.describe("Authenticated my-posts Page", () => {
     };
     await createArticle(article);
     await page.goto("http://localhost:3000/my-posts");
-    await openTab(page, "Published");
+    await openTab(page, "Published", isMobile);
     await expect(page.getByRole("link", { name: article.title })).toBeVisible();
     await openDeleteModal(page, article.title);
 

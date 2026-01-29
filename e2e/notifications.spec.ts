@@ -78,9 +78,16 @@ test.describe("Notifications Page", () => {
         type: 0,
       });
 
+      // Wait for TRPC notification response to complete
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/trpc/") &&
+          response.url().includes("notification") &&
+          response.status() === 200,
+      );
       await page.goto("http://localhost:3000/notifications");
-      // Wait for notifications to load
-      await page.waitForLoadState("domcontentloaded");
+      await responsePromise;
+
       await expect(
         page.getByRole("button", { name: "Mark all as read" }),
       ).toBeVisible({ timeout: 15000 });
@@ -96,27 +103,38 @@ test.describe("Notifications Page", () => {
         type: 0,
       });
 
+      // Wait for TRPC notification response to complete
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/trpc/") &&
+          response.url().includes("notification") &&
+          response.status() === 200,
+      );
       await page.goto("http://localhost:3000/notifications");
-      // Wait for notifications to load
-      await page.waitForLoadState("domcontentloaded");
+      await responsePromise;
 
       // Wait for notification to appear
       await page.waitForSelector('button[title="Mark as read"]', {
         timeout: 15000,
       });
 
-      // Click mark as read button
+      // Click mark as read button and wait for mutation response
+      const markReadResponsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/trpc/") &&
+          response.url().includes("notification") &&
+          response.status() === 200,
+      );
       await page.locator('button[title="Mark as read"]').first().click();
-
-      // Wait for the notification to disappear or the count to decrease
-      await page.waitForTimeout(1000);
+      await markReadResponsePromise;
     });
   });
 
   test.describe("Notification Creation Flow", () => {
     test.beforeEach(async () => {
-      // Clear notifications before each test to avoid strict mode violations
+      // Clear notifications for both users before each test to avoid strict mode violations
       await clearNotifications(E2E_USER_ONE_ID);
+      await clearNotifications(E2E_USER_TWO_ID);
     });
 
     test("Should create notification when user comments on another user's post", async ({
@@ -151,7 +169,18 @@ test.describe("Notifications Page", () => {
 
       // Now log in as user one and check notifications
       await loggedInAsUserOne(page);
-      await page.goto("http://localhost:3000/notifications");
+
+      // Wait for TRPC notification response to complete
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/trpc/") &&
+          response.url().includes("notification") &&
+          response.status() === 200,
+      );
+      await page.goto("http://localhost:3000/notifications", {
+        waitUntil: "commit",
+      });
+      await responsePromise;
 
       // Should see notification from user two
       await expect(
@@ -203,12 +232,19 @@ test.describe("Notifications Page", () => {
         timeout: 15000,
       });
 
-      // Click reply on the first comment
-      await page.getByRole("button", { name: "Reply" }).first().click();
+      // Find the comment container that has the original comment text and click its first reply button
+      const commentContainer = page
+        .locator("article")
+        .filter({ hasText: originalComment })
+        .first();
+      await commentContainer
+        .getByRole("button", { name: "Reply" })
+        .first()
+        .click();
 
       // Wait for reply editor to expand
       await page.waitForTimeout(500);
-      // Focus the reply editor and type
+      // Focus the reply editor and type - find the editor within the comment's reply section
       await page.locator(".ProseMirror").last().click();
       const replyText = `Reply to trigger notification ${randomUUID()}`;
       await page.keyboard.type(replyText);
@@ -223,8 +259,18 @@ test.describe("Notifications Page", () => {
 
       // Log back in as user one and check for notification
       await loggedInAsUserOne(page);
-      await page.goto("http://localhost:3000/notifications");
-      await page.waitForLoadState("domcontentloaded");
+
+      // Wait for TRPC notification response to complete
+      const notificationResponsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/trpc/") &&
+          response.url().includes("notification") &&
+          response.status() === 200,
+      );
+      await page.goto("http://localhost:3000/notifications", {
+        waitUntil: "commit",
+      });
+      await notificationResponsePromise;
 
       await expect(page.getByText("E2E Test User Two").first()).toBeVisible({
         timeout: 15000,
