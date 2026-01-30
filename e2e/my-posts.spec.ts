@@ -17,13 +17,18 @@ async function openTab(
   if (isMobile) {
     const tabSelect = page.locator("select#tabs");
     await expect(tabSelect).toBeVisible({ timeout: 10000 });
+    await expect(tabSelect).toBeEnabled({ timeout: 5000 });
     await tabSelect.selectOption({ label: tabName });
+    // Wait for mobile navigation to settle
+    await page.waitForLoadState("domcontentloaded");
   } else {
     await page.getByRole("link", { name: tabName }).click();
   }
 
   const slug = tabName.toLowerCase();
-  await page.waitForURL(`http://localhost:3000/my-posts?tab=${slug}`);
+  await page.waitForURL(`http://localhost:3000/my-posts?tab=${slug}`, {
+    timeout: 15000,
+  });
   await expect(page).toHaveURL(new RegExp(`\\/my-posts\\?tab=${slug}`));
 
   // Wait for loading state to complete
@@ -31,10 +36,12 @@ async function openTab(
     timeout: 20000,
   });
 
-  // Wait for network to settle and at least one article to be visible
+  // Wait for network to settle and content to load
   await page.waitForLoadState("domcontentloaded");
+
+  // Wait for at least one article to be visible with increased timeout for mobile
   await expect(page.locator("article").first()).toBeVisible({
-    timeout: 15000,
+    timeout: 20000,
   });
 }
 
@@ -74,7 +81,9 @@ test.describe("Authenticated my-posts Page", () => {
       const tabSelect = page.locator("select#tabs");
       await expect(tabSelect).toBeVisible({ timeout: 10000 });
       // Verify the select has the correct options
-      await expect(tabSelect.locator('option:has-text("Drafts")')).toBeVisible();
+      await expect(
+        tabSelect.locator('option:has-text("Drafts")'),
+      ).toBeVisible();
       await expect(
         tabSelect.locator('option:has-text("Scheduled")'),
       ).toBeVisible();

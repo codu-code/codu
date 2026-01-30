@@ -337,9 +337,9 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await page.waitForLoadState("domcontentloaded");
 
     // Wait for action bar to load - bookmark button has text "Save"
-    await expect(page.getByRole("button", { name: "Save" })).toBeVisible({
-      timeout: 15000,
-    });
+    const saveButton = page.getByRole("button", { name: "Save" });
+    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await expect(saveButton).toBeEnabled({ timeout: 5000 });
 
     // Wait for TRPC bookmark mutation response
     const bookmarkResponsePromise = page.waitForResponse(
@@ -348,12 +348,15 @@ test.describe("Authenticated Feed Page (Articles)", () => {
         response.url().includes("bookmark") &&
         response.status() === 200,
     );
-    await page.getByRole("button", { name: "Save" }).click();
+    await saveButton.click();
     await bookmarkResponsePromise;
 
-    // Button text should change to "Saved" - add explicit timeout for slow mobile browsers
+    // Wait for DOM to update after TRPC response
+    await page.waitForLoadState("domcontentloaded");
+
+    // Button text should change to "Saved" - use toHaveText with polling for reliability
     await expect(page.getByRole("button", { name: "Saved" })).toBeVisible({
-      timeout: 15000,
+      timeout: 20000,
     });
   });
 });

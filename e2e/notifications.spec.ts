@@ -113,10 +113,15 @@ test.describe("Notifications Page", () => {
       await page.goto("http://localhost:3000/notifications");
       await responsePromise;
 
-      // Wait for notification to appear
-      await page.waitForSelector('button[title="Mark as read"]', {
-        timeout: 15000,
-      });
+      // Wait for page to stabilize after TRPC response
+      await page.waitForLoadState("domcontentloaded");
+
+      // Wait for the mark as read button to be visible and enabled
+      const markAsReadButton = page
+        .locator('button[title="Mark as read"]')
+        .first();
+      await expect(markAsReadButton).toBeVisible({ timeout: 15000 });
+      await expect(markAsReadButton).toBeEnabled({ timeout: 5000 });
 
       // Click mark as read button and wait for mutation response
       const markReadResponsePromise = page.waitForResponse(
@@ -125,7 +130,7 @@ test.describe("Notifications Page", () => {
           response.url().includes("notification") &&
           response.status() === 200,
       );
-      await page.locator('button[title="Mark as read"]').first().click();
+      await markAsReadButton.click();
       await markReadResponsePromise;
     });
   });

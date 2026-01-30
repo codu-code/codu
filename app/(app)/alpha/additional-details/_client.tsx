@@ -120,7 +120,7 @@ function SlideOne({ details }: { details: UserDetails }) {
       } else {
         toast.error("Error, saving was unsuccessful.");
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred.");
     }
   };
@@ -274,7 +274,7 @@ function SlideTwo({ details }: { details: UserDetails }) {
       } else {
         toast.error("Error, saving was unsuccessful.");
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred.");
     }
   };
@@ -441,7 +441,7 @@ function SlideThree({ details }: { details: UserDetails }) {
         } else {
           toast.error("Error, saving was unsuccessful.");
         }
-      } catch (error) {
+      } catch {
         toast.error("An unexpected error occurred.");
       }
     }

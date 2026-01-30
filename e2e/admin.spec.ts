@@ -92,10 +92,19 @@ test.describe("Admin Dashboard", () => {
 
   test("Should navigate to feed sources", async ({ page }) => {
     await page.goto("http://localhost:3000/admin");
+    await page.waitForLoadState("domcontentloaded");
+
     // Use role link to be more specific since "Feed Sources" appears multiple times
-    await page
-      .getByRole("link", { name: /Feed Sources.*Manage RSS feed/i })
-      .click();
+    const feedSourcesLink = page.getByRole("link", {
+      name: /Feed Sources.*Manage RSS feed/i,
+    });
+    await expect(feedSourcesLink).toBeVisible({ timeout: 10000 });
+
+    // Wait for navigation to complete after click
+    await Promise.all([
+      page.waitForURL("http://localhost:3000/admin/sources"),
+      feedSourcesLink.click(),
+    ]);
     await expect(page).toHaveURL("http://localhost:3000/admin/sources");
   });
 });
