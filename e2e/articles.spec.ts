@@ -335,19 +335,31 @@ test.describe("Authenticated Feed Page (Articles)", () => {
       "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
     );
 
-    // Wait for action bar to load - bookmark button has text "Save"
+    // Wait for page to be fully loaded including all network requests
+    await page.waitForLoadState("networkidle");
+
+    // Wait for action bar to load - bookmark button shows either "Save" or "Saved"
+    // depending on whether another parallel test has already bookmarked it
     const saveButton = page.getByRole("button", { name: "Save" });
+    const savedButton = page.getByRole("button", { name: "Saved" });
+
+    // Check which state the button is currently in
+    const isSaved = await savedButton.isVisible().catch(() => false);
+
+    if (isSaved) {
+      // Article is already bookmarked - unbookmark then rebookmark to test the flow
+      await savedButton.scrollIntoViewIfNeeded();
+      await savedButton.click({ force: true });
+      await expect(saveButton).toBeVisible({ timeout: 15000 });
+    }
+
+    // Now bookmark the article
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await expect(saveButton).toBeEnabled({ timeout: 5000 });
-
-    // Click the save button
-    await saveButton.click();
+    await saveButton.scrollIntoViewIfNeeded();
+    await saveButton.click({ force: true });
 
     // Wait for button text to change to "Saved" after React state update
-    // The expect().toBeVisible() auto-retries until the element appears or timeout
-    // This is more reliable than waiting for HTTP response since it waits for actual DOM change
-    await expect(page.getByRole("button", { name: "Saved" })).toBeVisible({
-      timeout: 30000,
-    });
+    await expect(savedButton).toBeVisible({ timeout: 30000 });
   });
 });
