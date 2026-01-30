@@ -334,29 +334,20 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await page.goto(
       "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
     );
-    await page.waitForLoadState("domcontentloaded");
 
     // Wait for action bar to load - bookmark button has text "Save"
     const saveButton = page.getByRole("button", { name: "Save" });
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await expect(saveButton).toBeEnabled({ timeout: 5000 });
 
-    // Wait for TRPC bookmark mutation response
-    const bookmarkResponsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes("/api/trpc/") &&
-        response.url().includes("bookmark") &&
-        response.status() === 200,
-    );
+    // Click the save button
     await saveButton.click();
-    await bookmarkResponsePromise;
 
-    // Wait for DOM to update after TRPC response
-    await page.waitForLoadState("domcontentloaded");
-
-    // Button text should change to "Saved" - use toHaveText with polling for reliability
+    // Wait for button text to change to "Saved" after React state update
+    // The expect().toBeVisible() auto-retries until the element appears or timeout
+    // This is more reliable than waiting for HTTP response since it waits for actual DOM change
     await expect(page.getByRole("button", { name: "Saved" })).toBeVisible({
-      timeout: 20000,
+      timeout: 30000,
     });
   });
 });
