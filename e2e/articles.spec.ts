@@ -336,7 +336,7 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     );
 
     // Wait for page to be fully loaded including all network requests
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Wait for action bar to load - bookmark button shows either "Save" or "Saved"
     // depending on whether another parallel test has already bookmarked it

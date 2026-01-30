@@ -227,27 +227,32 @@ test.describe("Notifications Page", () => {
         timeout: 15000,
       });
 
-      // Find the comment container that has the original comment text and click its first reply button
-      const commentContainer = page
-        .locator("article")
+      // Find the comment section that has the original comment text and click its reply button
+      // Discussion comments are wrapped in <section> elements with class "group/comment"
+      const commentSection = page
+        .locator("section.group\\/comment")
         .filter({ hasText: originalComment })
         .first();
-      await commentContainer
+      await commentSection
         .getByRole("button", { name: "Reply" })
         .first()
         .click();
 
       // Wait for reply editor to expand
       await page.waitForTimeout(500);
-      // Focus the reply editor and type - find the editor within the comment's reply section
-      await page.locator(".ProseMirror").last().click();
+
+      // The reply editor appears within the same comment section
+      // Find the ProseMirror editor that appeared after clicking Reply
+      const replyEditor = commentSection.locator(".ProseMirror").first();
+      await replyEditor.click();
       const replyText = `Reply to trigger notification ${randomUUID()}`;
       await page.keyboard.type(replyText);
 
-      // Submit the reply - use nth(1) to get the reply button in the form, not the expand button
-      await page
+      // Submit the reply - click the Reply button within the reply form
+      // The submit button has the same text "Reply" as the expand button, but it's the last one
+      await commentSection
         .getByRole("button", { name: "Reply", exact: true })
-        .nth(1)
+        .last()
         .click();
 
       // Verify reply was posted - this confirms the mutation completed and notification was created

@@ -11,7 +11,7 @@ async function openTab(
   isMobile: boolean = false,
 ) {
   await page.goto("http://localhost:3000/my-posts");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 
   // Mobile renders tabs as a select dropdown, desktop uses links
   if (isMobile) {
@@ -20,7 +20,7 @@ async function openTab(
     await expect(tabSelect).toBeEnabled({ timeout: 5000 });
     await tabSelect.selectOption({ label: tabName });
     // Wait for mobile navigation to settle
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
   } else {
     await page.getByRole("link", { name: tabName }).click();
   }
@@ -37,7 +37,7 @@ async function openTab(
   });
 
   // Wait for network to settle and content to load
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 
   // Wait for at least one article to be visible with increased timeout for mobile
   await expect(page.locator("article").first()).toBeVisible({
@@ -131,9 +131,9 @@ test.describe("Authenticated my-posts Page", () => {
       timeout: 15000,
     });
     // Verify the article has a heading (h2)
-    await expect(
-      page.locator("article").first().locator("h2"),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("article").first().locator("h2")).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("User should close delete modal with Cancel button", async ({

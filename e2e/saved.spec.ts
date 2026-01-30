@@ -40,7 +40,7 @@ test.describe("Authenticated Saved Page", () => {
     );
 
     // Wait for page to be fully loaded including network requests
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Get the bookmark button - on article detail page it shows "Save" or "Saved"
     const saveButton = page.getByRole("button", { name: "Save" });
@@ -65,13 +65,20 @@ test.describe("Authenticated Saved Page", () => {
 
     // Navigate to saved page
     await page.goto("http://localhost:3000/saved");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Verify the saved page loaded and shows either:
     // - The bookmarked article (if no parallel test unbookmarked it)
     // - Or at least the page loaded successfully
-    const hasArticle = await page.locator("article").first().isVisible().catch(() => false);
-    const hasEmptyState = await page.getByText("Your saved posts will show up here.").isVisible().catch(() => false);
+    const hasArticle = await page
+      .locator("article")
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const hasEmptyState = await page
+      .getByText("Your saved posts will show up here.")
+      .isVisible()
+      .catch(() => false);
 
     // Either we have saved articles, or we see the empty state (parallel test interference)
     // Both are acceptable outcomes since we already verified the bookmark action succeeded
@@ -81,7 +88,7 @@ test.describe("Authenticated Saved Page", () => {
   test("Should navigate to content from saved items", async ({ page }) => {
     // First ensure there's a saved item
     await page.goto("http://localhost:3000/feed?type=article");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await page.waitForSelector("article");
 
     // Click bookmark
@@ -92,7 +99,7 @@ test.describe("Authenticated Saved Page", () => {
 
     // Go to saved page
     await page.goto("http://localhost:3000/saved");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Click on a saved item to navigate to it
     const firstLink = page.locator("article").first().locator("a").first();
@@ -114,7 +121,7 @@ test.describe("Authenticated Saved Page", () => {
 
     // First, bookmark an article
     await page.goto("http://localhost:3000/feed?type=article");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await page.waitForSelector("article");
 
     // Click bookmark
