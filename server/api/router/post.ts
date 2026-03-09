@@ -27,6 +27,7 @@ import {
   comments,
   tag,
   user,
+  banned_users,
 } from "@/server/db/schema";
 import {
   and,
@@ -100,7 +101,10 @@ export const postRouter = createTRPCRouter({
       const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
       // Build conditions
-      const conditions = [eq(posts.status, "published")];
+      const conditions = [
+        eq(posts.status, "published"),
+        isNull(banned_users.userId),
+      ];
 
       if (type) {
         conditions.push(eq(posts.type, type));
@@ -196,6 +200,7 @@ export const postRouter = createTRPCRouter({
           .from(posts)
           .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
           .leftJoin(user, eq(posts.authorId, user.id))
+          .leftJoin(banned_users, eq(posts.authorId, banned_users.userId))
           .leftJoin(userVotesSubquery, eq(posts.id, userVotesSubquery.postId))
           .leftJoin(
             userBookmarksSubquery,
@@ -244,6 +249,7 @@ export const postRouter = createTRPCRouter({
           .from(posts)
           .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
           .leftJoin(user, eq(posts.authorId, user.id))
+          .leftJoin(banned_users, eq(posts.authorId, banned_users.userId))
           .where(and(...conditions))
           .orderBy(orderBy)
           .limit(limit + 1);

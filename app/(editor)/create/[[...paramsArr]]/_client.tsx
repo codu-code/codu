@@ -243,6 +243,12 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         published: false,
       });
       setUnsavedChanges(false);
+      setSavedTime(
+        new Date().toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }),
+      );
       return result.id;
     } else {
       await save({

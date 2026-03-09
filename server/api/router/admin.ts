@@ -11,7 +11,7 @@ import {
   content_report,
   feed_sources,
 } from "@/server/db/schema";
-import { and, count, desc, eq, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 
 export const adminRouter = createTRPCRouter({
   // Get dashboard stats
@@ -166,6 +166,12 @@ export const adminRouter = createTRPCRouter({
 
       await ctx.db.delete(session).where(eq(session.userId, userId));
 
+      // Hide all published posts by the banned user
+      await ctx.db
+        .update(posts)
+        .set({ status: "draft" })
+        .where(and(eq(posts.authorId, userId), eq(posts.status, "published")));
+
       return { banned: true };
     }),
   unban: adminOnlyProcedure
@@ -174,6 +180,18 @@ export const adminRouter = createTRPCRouter({
       const { userId } = input;
 
       await ctx.db.delete(banned_users).where(eq(banned_users.userId, userId));
+
+      // Restore posts that were previously published (have publishedAt set)
+      await ctx.db
+        .update(posts)
+        .set({ status: "published" })
+        .where(
+          and(
+            eq(posts.authorId, userId),
+            eq(posts.status, "draft"),
+            isNotNull(posts.publishedAt),
+          ),
+        );
 
       return { unbanned: true };
     }),

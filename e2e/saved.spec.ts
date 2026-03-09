@@ -51,14 +51,20 @@ test.describe("Authenticated Saved Page", () => {
     const isSaved = await savedButton.isVisible().catch(() => false);
     if (isSaved) {
       await savedButton.scrollIntoViewIfNeeded();
-      await savedButton.click({ force: true });
+      await Promise.all([
+        page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+        savedButton.click(),
+      ]);
       await expect(saveButton).toBeVisible({ timeout: 10000 });
     }
 
     // Now bookmark it
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await saveButton.scrollIntoViewIfNeeded();
-    await saveButton.click({ force: true });
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+      saveButton.click(),
+    ]);
 
     // Wait for the saved state to appear - this confirms the bookmark mutation succeeded
     await expect(savedButton).toBeVisible({ timeout: 15000 });
