@@ -52,7 +52,10 @@ test.describe("Authenticated Saved Page", () => {
     if (isSaved) {
       await savedButton.scrollIntoViewIfNeeded();
       await Promise.all([
-        page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("trpc") && resp.url().includes("bookmark"),
+        ),
         savedButton.click(),
       ]);
       await expect(saveButton).toBeVisible({ timeout: 10000 });
@@ -62,7 +65,10 @@ test.describe("Authenticated Saved Page", () => {
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await saveButton.scrollIntoViewIfNeeded();
     await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("trpc") && resp.url().includes("bookmark"),
+      ),
       saveButton.click(),
     ]);
 

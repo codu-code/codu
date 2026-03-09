@@ -351,7 +351,10 @@ test.describe("Authenticated Feed Page (Articles)", () => {
       // Article is already bookmarked - unbookmark then rebookmark to test the flow
       await savedButton.scrollIntoViewIfNeeded();
       await Promise.all([
-        page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("trpc") && resp.url().includes("bookmark"),
+        ),
         savedButton.click(),
       ]);
       await expect(saveButton).toBeVisible({ timeout: 15000 });
@@ -362,7 +365,10 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await expect(saveButton).toBeEnabled({ timeout: 5000 });
     await saveButton.scrollIntoViewIfNeeded();
     await Promise.all([
-      page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("trpc") && resp.url().includes("bookmark"),
+      ),
       saveButton.click(),
     ]);
 
