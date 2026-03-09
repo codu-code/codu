@@ -663,6 +663,11 @@ export const reportsRelations = relations(reports, ({ one }) => ({
 export const tag = pgTable(
   "Tag",
   {
+    id: serial("id").primaryKey().notNull().unique(),
+    title: varchar("title", { length: 50 }).notNull(),
+    slug: varchar("slug", { length: 50 }),
+    description: text("description"),
+    postCount: integer("post_count").default(0).notNull(),
     createdAt: timestamp("createdAt", {
       precision: 3,
       mode: "string",
@@ -670,22 +675,101 @@ export const tag = pgTable(
     })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    id: serial("id").primaryKey().notNull().unique(),
-    title: varchar("title", { length: 20 }).notNull(),
   },
   (table) => {
     return {
       titleKey: uniqueIndex("Tag_title_key").on(table.title),
+      slugKey: uniqueIndex("Tag_slug_key").on(table.slug),
     };
   },
 );
 
 export const tagRelations = relations(tag, ({ many }) => ({
   postTags: many(post_tags),
+  mergeSuggestionsAsSource: many(tag_merge_suggestions, {
+    relationName: "sourceTag",
+  }),
+  mergeSuggestionsAsTarget: many(tag_merge_suggestions, {
+    relationName: "targetTag",
+  }),
   // Legacy
   legacyPostTag: many(post_tag),
   legacyContentTag: many(content_tag),
 }));
+
+// ============================================
+// TAG MERGE SUGGESTIONS (for AI-powered tag cleanup)
+// ============================================
+
+export const tagMergeSuggestionStatus = pgEnum("tag_merge_suggestion_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
+export const tag_merge_suggestions = pgTable(
+  "tag_merge_suggestions",
+  {
+    id: serial("id").primaryKey().notNull(),
+    sourceTagId: integer("source_tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+    targetTagId: integer("target_tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+    similarityScore: integer("similarity_score").notNull(), // 0-100
+    reason: text("reason"),
+    status: tagMergeSuggestionStatus("status").default("pending").notNull(),
+    reviewedById: text("reviewed_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestamp("reviewed_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    sourceTagIdx: index("tag_merge_suggestions_source_tag_idx").on(
+      table.sourceTagId,
+    ),
+    targetTagIdx: index("tag_merge_suggestions_target_tag_idx").on(
+      table.targetTagId,
+    ),
+    statusIdx: index("tag_merge_suggestions_status_idx").on(table.status),
+    uniqueSuggestion: unique("tag_merge_suggestions_source_target_key").on(
+      table.sourceTagId,
+      table.targetTagId,
+    ),
+  }),
+);
+
+export const tagMergeSuggestionsRelations = relations(
+  tag_merge_suggestions,
+  ({ one }) => ({
+    sourceTag: one(tag, {
+      fields: [tag_merge_suggestions.sourceTagId],
+      references: [tag.id],
+      relationName: "sourceTag",
+    }),
+    targetTag: one(tag, {
+      fields: [tag_merge_suggestions.targetTagId],
+      references: [tag.id],
+      relationName: "targetTag",
+    }),
+    reviewedBy: one(user, {
+      fields: [tag_merge_suggestions.reviewedById],
+      references: [user.id],
+    }),
+  }),
+);
 
 // ============================================
 // SPONSOR INQUIRY
@@ -856,11 +940,11 @@ export const notification = pgTable(
     userId: text("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    postId: text("postId").references(() => post.id, {
+    postId: uuid("postId").references(() => posts.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
-    commentId: integer("commentId").references(() => comment.id, {
+    commentId: uuid("commentId").references(() => comments.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
@@ -877,16 +961,16 @@ export const notification = pgTable(
 );
 
 export const notificationRelations = relations(notification, ({ one }) => ({
-  comment: one(comment, {
+  comment: one(comments, {
     fields: [notification.commentId],
-    references: [comment.id],
+    references: [comments.id],
   }),
   notifier: one(user, {
     fields: [notification.notifierId],
     references: [user.id],
     relationName: "notificationsCreated",
   }),
-  post: one(post, { fields: [notification.postId], references: [post.id] }),
+  post: one(posts, { fields: [notification.postId], references: [posts.id] }),
   user: one(user, {
     fields: [notification.userId],
     references: [user.id],

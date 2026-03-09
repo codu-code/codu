@@ -21,19 +21,6 @@ type Props = {
   contentSlug: string;
 };
 
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-  } catch {
-    return null;
-  }
-};
-
 // Get hostname from URL
 const getHostname = (urlString: string): string => {
   try {
@@ -189,7 +176,6 @@ const UserLinkDetail = ({ username, contentSlug }: Props) => {
       })
     : null;
 
-  const faviconUrl = getFaviconUrl(externalUrl);
   const hostname = externalUrl ? getHostname(externalUrl) : null;
   const score = votes.upvotes - votes.downvotes;
 

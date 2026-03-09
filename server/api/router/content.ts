@@ -25,11 +25,21 @@ import {
   bookmarks,
   post_tags,
   feed_sources,
-  tag,
+  tag as dbTag,
   user,
   comments,
 } from "@/server/db/schema";
-import { and, eq, desc, lt, lte, sql, isNotNull, count } from "drizzle-orm";
+import {
+  and,
+  eq,
+  desc,
+  lt,
+  lte,
+  sql,
+  isNotNull,
+  count,
+  exists,
+} from "drizzle-orm";
 import { increment } from "./utils";
 import crypto from "crypto";
 
@@ -92,7 +102,7 @@ export const contentRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 25;
-      const { cursor, sort, type, sourceId, category } = input;
+      const { cursor, sort, type, sourceId, category, tag } = input;
 
       // Build the vote subquery for current user
       const userVotes = userId
@@ -136,6 +146,19 @@ export const contentRouter = createTRPCRouter({
       // Filter by category (matches source category)
       if (category) {
         conditions.push(eq(feed_sources.category, category));
+      }
+
+      // Filter by tag (matches tag slug via post_tags junction)
+      if (tag) {
+        conditions.push(
+          exists(
+            ctx.db
+              .select({ one: sql`1` })
+              .from(post_tags)
+              .innerJoin(dbTag, eq(post_tags.tagId, dbTag.id))
+              .where(and(eq(post_tags.postId, posts.id), eq(dbTag.slug, tag))),
+          ),
+        );
       }
 
       // Build order by and cursor conditions based on sort type
@@ -545,9 +568,9 @@ export const contentRouter = createTRPCRouter({
       if (input.tags && input.tags.length > 0) {
         for (const tagName of input.tags) {
           const existingTags = await ctx.db
-            .select({ id: tag.id })
-            .from(tag)
-            .where(eq(tag.title, tagName.toLowerCase()))
+            .select({ id: dbTag.id })
+            .from(dbTag)
+            .where(eq(dbTag.title, tagName.toLowerCase()))
             .limit(1);
 
           let tagId: number;
@@ -555,7 +578,7 @@ export const contentRouter = createTRPCRouter({
             tagId = existingTags[0].id;
           } else {
             const [newTag] = await ctx.db
-              .insert(tag)
+              .insert(dbTag)
               .values({ title: tagName.toLowerCase() })
               .returning();
             tagId = newTag.id;
@@ -633,9 +656,9 @@ export const contentRouter = createTRPCRouter({
 
         for (const tagName of input.tags) {
           const existingTags = await ctx.db
-            .select({ id: tag.id })
-            .from(tag)
-            .where(eq(tag.title, tagName.toLowerCase()))
+            .select({ id: dbTag.id })
+            .from(dbTag)
+            .where(eq(dbTag.title, tagName.toLowerCase()))
             .limit(1);
 
           let tagId: number;
@@ -643,7 +666,7 @@ export const contentRouter = createTRPCRouter({
             tagId = existingTags[0].id;
           } else {
             const [newTag] = await ctx.db
-              .insert(tag)
+              .insert(dbTag)
               .values({ title: tagName.toLowerCase() })
               .returning();
             tagId = newTag.id;
@@ -988,12 +1011,12 @@ export const contentRouter = createTRPCRouter({
       const contentTags = await ctx.db
         .select({
           tag: {
-            id: tag.id,
-            title: tag.title,
+            id: dbTag.id,
+            title: dbTag.title,
           },
         })
         .from(post_tags)
-        .innerJoin(tag, eq(post_tags.tagId, tag.id))
+        .innerJoin(dbTag, eq(post_tags.tagId, dbTag.id))
         .where(eq(post_tags.postId, input.id));
 
       return {

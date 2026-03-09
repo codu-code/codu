@@ -21,6 +21,8 @@ import {
   GetArticleBySourceAndArticleSlugSchema,
   GetLinkContentBySourceAndSlugSchema,
 } from "../../../schema/feed";
+import { getPresignedUrl } from "@/server/common/getPresignedUrl";
+import { z } from "zod";
 import {
   posts,
   post_votes,
@@ -28,6 +30,7 @@ import {
   feed_sources,
   tag,
   post_tags,
+  banned_users,
 } from "@/server/db/schema";
 import {
   and,
@@ -38,6 +41,7 @@ import {
   lt,
   sql,
   isNotNull,
+  isNull,
   count,
 } from "drizzle-orm";
 import { increment } from "./utils";
@@ -154,11 +158,18 @@ export const feedRouter = createTRPCRouter({
         ) as typeof query;
       }
 
+      // Add banned users join for defense-in-depth filtering
+      query = query.leftJoin(
+        banned_users,
+        eq(posts.authorId, banned_users.userId),
+      ) as typeof query;
+
       // Build where conditions - only link type posts with sources
       const whereConditions = [
         eq(posts.type, "link"),
         eq(posts.status, "published"),
         isNotNull(posts.sourceId),
+        isNull(banned_users.userId),
         category ? eq(feed_sources.category, category) : undefined,
         cursorCondition,
       ].filter(Boolean);
@@ -782,10 +793,17 @@ export const feedRouter = createTRPCRouter({
         ) as typeof query;
       }
 
+      // Add banned users join for defense-in-depth filtering
+      query = query.leftJoin(
+        banned_users,
+        eq(posts.authorId, banned_users.userId),
+      ) as typeof query;
+
       // Build where conditions
       const whereConditions = [
         eq(posts.sourceId, source.id),
         eq(posts.status, "published"),
+        isNull(banned_users.userId),
         cursorCondition,
       ].filter(Boolean);
 
@@ -882,6 +900,11 @@ export const feedRouter = createTRPCRouter({
         sourceId: feed_sources.id,
         sourceName: feed_sources.name,
         status: feed_sources.status,
+        url: feed_sources.url,
+        websiteUrl: feed_sources.websiteUrl,
+        logoUrl: feed_sources.logoUrl,
+        category: feed_sources.category,
+        description: feed_sources.description,
         articleCount: count(posts.id),
         lastFetchedAt: feed_sources.lastFetchedAt,
         errorCount: feed_sources.errorCount,
@@ -974,6 +997,36 @@ export const feedRouter = createTRPCRouter({
       await ctx.db.delete(feed_sources).where(eq(feed_sources.id, input.id));
 
       return { success: true };
+    }),
+
+  // Admin: Get presigned URL for source logo upload
+  getSourceUploadUrl: adminOnlyProcedure
+    .input(z.object({ size: z.number(), type: z.string() }))
+    .mutation(async ({ input }) => {
+      const { size, type } = input;
+      const extension = type.split("/")[1];
+
+      const acceptedFormats = ["jpg", "jpeg", "gif", "png", "webp"];
+
+      if (!acceptedFormats.includes(extension)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Invalid file. Accepted file formats: ${acceptedFormats.join(", ")}.`,
+        });
+      }
+
+      if (size > 1048576 * 5) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Maximum file size 5MB",
+        });
+      }
+
+      const signedUrl = await getPresignedUrl(type, size, {
+        kind: "sources",
+      });
+
+      return signedUrl;
     }),
 
   // Get link post by source slug and post slug

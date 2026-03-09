@@ -1,8 +1,9 @@
-import { posts } from "@/server/db/schema";
+import { posts, notification } from "@/server/db/schema";
 import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { eq, and } from "drizzle-orm";
 import {
   E2E_USER_ONE_SESSION_ID,
   E2E_USER_TWO_SESSION_ID,
@@ -12,6 +13,9 @@ import {
 
 export const loggedInAsUserOne = async (page: Page) => {
   try {
+    // Clear cookies to ensure fresh session (prevents stale React Query cache when switching users)
+    await page.context().clearCookies();
+
     await page.context().addCookies([
       {
         name: "authjs.session-token",
@@ -58,6 +62,9 @@ export const loggedInAsUserTwo = async (page: Page) => {
 
 export const loggedInAsAdmin = async (page: Page) => {
   try {
+    // Clear cookies to ensure fresh session (prevents stale React Query cache when switching users)
+    await page.context().clearCookies();
+
     await page.context().addCookies([
       {
         name: "authjs.session-token",
@@ -186,5 +193,68 @@ export async function createLinkPost({
     return result[0];
   } catch (err) {
     throw Error(`Error while creating E2E test link post: ${err}`);
+  }
+}
+
+// Interface for creating notifications
+interface CreateNotificationInput {
+  userId: string;
+  notifierId: string;
+  type: number; // 0 = NEW_COMMENT_ON_YOUR_POST, 1 = NEW_REPLY_TO_YOUR_COMMENT
+  postId?: string;
+  commentId?: string; // UUID
+}
+
+export async function createNotification({
+  userId,
+  notifierId,
+  type,
+  postId,
+  commentId,
+}: CreateNotificationInput) {
+  const db = drizzle(
+    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
+  );
+
+  try {
+    // If no postId provided, get a published post to use
+    let actualPostId = postId;
+    if (!actualPostId) {
+      const [publishedPost] = await db
+        .select({ id: posts.id })
+        .from(posts)
+        .where(eq(posts.slug, "e2e-test-slug-published"))
+        .limit(1);
+
+      if (publishedPost) {
+        actualPostId = publishedPost.id;
+      }
+    }
+
+    const result = await db
+      .insert(notification)
+      .values({
+        userId,
+        notifierId,
+        type,
+        postId: actualPostId,
+        commentId,
+      })
+      .returning();
+    return result[0];
+  } catch (err) {
+    throw Error(`Error while creating E2E test notification: ${err}`);
+  }
+}
+
+export async function clearNotifications(userId: string) {
+  const db = drizzle(
+    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
+  );
+
+  try {
+    await db.delete(notification).where(eq(notification.userId, userId));
+  } catch (err) {
+    throw Error(`Error while clearing E2E test notifications: ${err}`);
   }
 }

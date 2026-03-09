@@ -7,6 +7,8 @@ import { type Metadata } from "next";
 import { db } from "@/server/db";
 import { feed_sources } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
+import { JsonLd } from "@/components/JsonLd";
+import { getPersonSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -133,8 +135,20 @@ export default async function Page(props: {
       accountLocked,
     };
 
+    // Prepare Person JSON-LD for SEO
+    const personSchema = getPersonSchema({
+      name: shapedProfile.name,
+      username: shapedProfile.username,
+      image: shapedProfile.image,
+      bio: shapedProfile.bio,
+      websiteUrl: shapedProfile.websiteUrl,
+    });
+
     return (
       <>
+        {/* Person JSON-LD for profile SEO */}
+        <JsonLd data={personSchema} />
+
         <h1 className="sr-only">{`${shapedProfile.name || shapedProfile.username}'s Coding Profile`}</h1>
         <Content profile={shapedProfile} isOwner={isOwner} session={session} />
       </>

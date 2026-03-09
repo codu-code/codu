@@ -6,7 +6,11 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useSession } from "next-auth/react";
-import { FeedItemLoading, FeedFilters } from "@/components/Feed";
+import {
+  FeedItemLoading,
+  FeedFilters,
+  PopularTagsSidebar,
+} from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
 import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
@@ -38,6 +42,7 @@ const FeedPage = () => {
   // Get filter params from URL
   const sortParam = searchParams?.get("sort");
   const categoryParam = searchParams?.get("category");
+  const tagParam = searchParams?.get("tag");
   const typeParam = searchParams?.get("type")?.toLowerCase();
 
   // Validate sort param
@@ -46,6 +51,7 @@ const FeedPage = () => {
     : "recent";
 
   const category = typeof categoryParam === "string" ? categoryParam : null;
+  const tag = typeof tagParam === "string" ? tagParam : null;
 
   // Validate type param (URL uses lowercase, API uses uppercase)
   const type: ContentType = validTypesLower.includes(typeParam || "")
@@ -100,8 +106,19 @@ const FeedPage = () => {
     const params = new URLSearchParams();
     if (sort !== "recent") params.set("sort", sort);
     if (category) params.set("category", category);
+    if (tag) params.set("tag", tag);
     // Use lowercase in URL params for cleaner URLs
     if (newType) params.set("type", newType.toLowerCase());
+    const queryString = params.toString();
+    router.push(`/feed${queryString ? `?${queryString}` : ""}`);
+  };
+
+  const handleTagChange = (newTag: string | null) => {
+    const params = new URLSearchParams();
+    if (sort !== "recent") params.set("sort", sort);
+    if (category) params.set("category", category);
+    if (newTag) params.set("tag", newTag);
+    if (type) params.set("type", type.toLowerCase());
     const queryString = params.toString();
     router.push(`/feed${queryString ? `?${queryString}` : ""}`);
   };
@@ -160,7 +177,7 @@ const FeedPage = () => {
                       userVote={item.userVote}
                       isBookmarked={item.isBookmarked}
                       author={
-                        item.userId && item.authorName
+                        item.userId && item.authorName && !item.sourceId
                           ? {
                               name: item.authorName,
                               username: item.authorUsername || "",
@@ -223,29 +240,39 @@ const FeedPage = () => {
               <NewsletterCTA isSubscribed={session?.user?.newsletter} />
             </div>
 
-            {/* Categories section */}
+            {/* Popular Tags section */}
             <div className="mt-6">
-              <h3 className="mb-4 text-2xl font-semibold leading-6 tracking-wide">
-                Topics
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {categoriesData?.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() =>
-                      handleCategoryChange(category === cat ? null : cat)
-                    }
-                    className={`rounded border px-4 py-2 text-sm capitalize transition-colors ${
-                      category === cat
-                        ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-950 dark:text-orange-300"
-                        : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+              <PopularTagsSidebar
+                selectedTag={tag}
+                onTagClick={handleTagChange}
+              />
             </div>
+
+            {/* Categories section (RSS source categories) */}
+            {categoriesData && categoriesData.length > 0 && (
+              <div className="mt-6">
+                <h3 className="mb-4 text-lg font-semibold leading-6 tracking-wide">
+                  Sources
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {categoriesData.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() =>
+                        handleCategoryChange(category === cat ? null : cat)
+                      }
+                      className={`rounded border px-3 py-1.5 text-sm capitalize transition-colors ${
+                        category === cat
+                          ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-950 dark:text-orange-300"
+                          : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Saved articles for logged in users */}
             {session && (

@@ -4,6 +4,8 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { user } from "@/server/db/schema";
 import { SidebarAppLayout } from "@/components/Layout/SidebarAppLayout";
+import { JsonLd } from "@/components/JsonLd";
+import { getOrganizationSchema } from "@/lib/structured-data";
 
 export const metadata = {
   title: "Codú - Join Our Web Developer Community",
@@ -71,12 +73,17 @@ export default async function RootLayout({
     : null;
 
   return (
-    <SidebarAppLayout
-      session={session}
-      algoliaSearchConfig={algoliaSearchConfig}
-      username={userData?.username || null}
-    >
-      {children}
-    </SidebarAppLayout>
+    <>
+      {/* Organization JSON-LD for site-wide SEO */}
+      <JsonLd data={getOrganizationSchema()} />
+
+      <SidebarAppLayout
+        session={session}
+        algoliaSearchConfig={algoliaSearchConfig}
+        username={userData?.username || null}
+      >
+        {children}
+      </SidebarAppLayout>
+    </>
   );
 }

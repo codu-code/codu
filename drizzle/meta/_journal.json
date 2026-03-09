@@ -127,6 +127,20 @@
       "when": 1767989282360,
       "tag": "0017_lowly_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1768031304583,
+      "tag": "0018_blue_bloodaxe",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1768377165753,
+      "tag": "0019_update-notification-fk",
+      "breakpoints": true
     }
   ]
 }

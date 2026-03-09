@@ -189,6 +189,7 @@ test.describe("Authenticated Feed Page (Articles)", () => {
   });
 
   test("Should write and publish an article", async ({ page, isMobile }) => {
+    test.slow();
     const articleTitle = "Lorem Ipsum";
     await page.goto("http://localhost:3000");
     // Waits for articles to be loaded
@@ -335,17 +336,43 @@ test.describe("Authenticated Feed Page (Articles)", () => {
       "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
     );
 
-    // Wait for action bar to load - bookmark button has text "Save"
-    await expect(page.getByRole("button", { name: "Save" })).toBeVisible({
-      timeout: 15000,
-    });
+    // Wait for page to be fully loaded including all network requests
+    await page.waitForLoadState("domcontentloaded");
 
-    // Click bookmark button
-    await page.getByRole("button", { name: "Save" }).click();
+    // Wait for action bar to load - bookmark button shows either "Save" or "Saved"
+    // depending on whether another parallel test has already bookmarked it
+    const saveButton = page.getByRole("button", { name: "Save" });
+    const savedButton = page.getByRole("button", { name: "Saved" });
 
-    // Button text should change to "Saved" - add explicit timeout for slow mobile browsers
-    await expect(page.getByRole("button", { name: "Saved" })).toBeVisible({
-      timeout: 10000,
-    });
+    // Check which state the button is currently in
+    const isSaved = await savedButton.isVisible().catch(() => false);
+
+    if (isSaved) {
+      // Article is already bookmarked - unbookmark then rebookmark to test the flow
+      await savedButton.scrollIntoViewIfNeeded();
+      await Promise.all([
+        page.waitForResponse(
+          (resp) =>
+            resp.url().includes("trpc") && resp.url().includes("bookmark"),
+        ),
+        savedButton.click(),
+      ]);
+      await expect(saveButton).toBeVisible({ timeout: 15000 });
+    }
+
+    // Now bookmark the article
+    await expect(saveButton).toBeVisible({ timeout: 15000 });
+    await expect(saveButton).toBeEnabled({ timeout: 5000 });
+    await saveButton.scrollIntoViewIfNeeded();
+    await Promise.all([
+      page.waitForResponse(
+        (resp) =>
+          resp.url().includes("trpc") && resp.url().includes("bookmark"),
+      ),
+      saveButton.click(),
+    ]);
+
+    // Wait for button text to change to "Saved" after React state update
+    await expect(savedButton).toBeVisible({ timeout: 30000 });
   });
 });

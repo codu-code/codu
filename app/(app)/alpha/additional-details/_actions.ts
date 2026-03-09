@@ -2,7 +2,6 @@
 
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 
 import {
   type TypeSlideOneSchema,
@@ -35,12 +34,7 @@ export async function slideOneSubmitAction(dataInput: TypeSlideOneSchema) {
       .where(eq(user.id, session.user.id));
 
     return true;
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.issues);
-    } else {
-      console.error("Error updating the User model:", error);
-    }
+  } catch {
     return false;
   }
 }
@@ -63,12 +57,7 @@ export async function slideTwoSubmitAction(dataInput: TypeSlideTwoSchema) {
       .where(eq(user.id, session.user.id));
 
     return true;
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.issues);
-    } else {
-      console.error("Error updating the User model:", error);
-    }
+  } catch {
     return false;
   }
 }
@@ -95,12 +84,7 @@ export async function slideThreeSubmitAction(dataInput: TypeSlideThreeSchema) {
       .where(eq(user.id, session.user.id));
 
     return true;
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error("Validation error:", error.issues);
-    } else {
-      console.error("Error updating the User model:", error);
-    }
+  } catch {
     return false;
   }
 }

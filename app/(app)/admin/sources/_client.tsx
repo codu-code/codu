@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
+import { uploadFile } from "@/utils/s3helpers";
 import {
   PlusIcon,
   CheckCircleIcon,
@@ -11,25 +12,109 @@ import {
   TrashIcon,
   ArrowPathIcon,
   CloudArrowDownIcon,
+  PencilSquareIcon,
+  XMarkIcon,
+  PhotoIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/20/solid";
 
 const statusColors = {
-  ACTIVE: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  PAUSED:
+  active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  paused:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  ERROR: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  error: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
 };
 
 const statusIcons = {
-  ACTIVE: CheckCircleIcon,
-  PAUSED: PauseCircleIcon,
-  ERROR: XCircleIcon,
+  active: CheckCircleIcon,
+  paused: PauseCircleIcon,
+  error: XCircleIcon,
+};
+
+// Component for logo with fallback
+const LogoWithFallback = ({
+  logoUrl,
+  name,
+  size = "sm",
+}: {
+  logoUrl: string | null;
+  name: string;
+  size?: "sm" | "md";
+}) => {
+  const [imageError, setImageError] = useState(false);
+  const initial = name.charAt(0).toUpperCase();
+  const sizeClass = size === "md" ? "h-10 w-10" : "h-8 w-8";
+  const textSize = size === "md" ? "text-base" : "text-sm";
+
+  // If we have a logoUrl and it hasn't errored, show the image
+  if (logoUrl && !imageError) {
+    return (
+      <img
+        src={logoUrl}
+        alt={`${name} logo`}
+        className={`${sizeClass} flex-shrink-0 rounded object-cover`}
+        onError={() => setImageError(true)}
+      />
+    );
+  }
+
+  // Fallback to initial letter
+  return (
+    <span
+      className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-orange-500 ${textSize} font-medium text-white`}
+    >
+      {initial}
+    </span>
+  );
+};
+
+// Helper to check which fields are missing for data completeness
+const getMissingFields = (source: {
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  category: string | null;
+  description: string | null;
+}): string[] => {
+  const missing: string[] = [];
+  if (!source.logoUrl) missing.push("Logo");
+  if (!source.websiteUrl) missing.push("Website URL");
+  if (!source.category) missing.push("Category");
+  if (!source.description) missing.push("Description");
+  return missing;
+};
+
+// Data completeness badge component
+const DataCompletenessBadge = ({
+  missingFields,
+}: {
+  missingFields: string[];
+}) => {
+  if (missingFields.length === 0) return null;
+
+  return (
+    <span className="group relative ml-1.5 inline-flex">
+      <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-neutral-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-neutral-700">
+        Missing: {missingFields.join(", ")}
+      </span>
+    </span>
+  );
 };
 
 const AdminSourcesPage = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
   const [syncingSourceId, setSyncingSourceId] = useState<number | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [editingSource, setEditingSource] = useState<{
+    id: number;
+    name: string;
+    url: string;
+    websiteUrl: string;
+    logoUrl: string;
+    category: string;
+    description: string;
+  } | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -37,8 +122,7 @@ const AdminSourcesPage = () => {
     logoUrl: "",
     category: "",
   });
-
-  const utils = api.useUtils();
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Sync all sources
   const handleSyncAll = async () => {
@@ -119,6 +203,7 @@ const AdminSourcesPage = () => {
   const updateSource = api.feed.updateSource.useMutation({
     onSuccess: () => {
       toast.success("Feed source updated");
+      setEditingSource(null);
       refetch();
     },
     onError: (error) => {
@@ -136,6 +221,50 @@ const AdminSourcesPage = () => {
     },
   });
 
+  const { mutate: getUploadUrl } = api.feed.getSourceUploadUrl.useMutation();
+
+  // Handle logo image upload
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !editingSource)
+      return;
+
+    const file = e.target.files[0];
+    const { size, type } = file;
+
+    setUploadingLogo(true);
+
+    await getUploadUrl(
+      { size, type },
+      {
+        onError(error) {
+          setUploadingLogo(false);
+          if (error) return toast.error(error.message);
+          return toast.error("Failed to upload logo, please try again.");
+        },
+        async onSuccess(signedUrl) {
+          try {
+            const response = await uploadFile(signedUrl, file);
+            const { fileLocation } = response;
+            setEditingSource({
+              ...editingSource,
+              logoUrl: fileLocation,
+            });
+            toast.success("Logo uploaded successfully");
+          } catch {
+            toast.error("Failed to upload logo, please try again.");
+          } finally {
+            setUploadingLogo(false);
+          }
+        },
+      },
+    );
+
+    // Reset the input so the same file can be selected again
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createSource.mutate({
@@ -147,8 +276,20 @@ const AdminSourcesPage = () => {
     });
   };
 
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSource) return;
+    updateSource.mutate({
+      id: editingSource.id,
+      name: editingSource.name,
+      websiteUrl: editingSource.websiteUrl || undefined,
+      logoUrl: editingSource.logoUrl || undefined,
+      category: editingSource.category || undefined,
+      description: editingSource.description || undefined,
+    });
+  };
+
   const handleStatusToggle = (id: number, currentStatus: string) => {
-    // Status is now lowercase in the new schema, but UpdateFeedSourceSchema still expects uppercase
     const newStatus = currentStatus === "active" ? "PAUSED" : "ACTIVE";
     updateSource.mutate({
       id,
@@ -164,6 +305,26 @@ const AdminSourcesPage = () => {
     ) {
       deleteSource.mutate({ id });
     }
+  };
+
+  const openEditModal = (source: {
+    sourceId: number;
+    sourceName: string;
+    url: string | null;
+    websiteUrl: string | null;
+    logoUrl: string | null;
+    category: string | null;
+    description: string | null;
+  }) => {
+    setEditingSource({
+      id: source.sourceId,
+      name: source.sourceName,
+      url: source.url || "",
+      websiteUrl: source.websiteUrl || "",
+      logoUrl: source.logoUrl || "",
+      category: source.category || "",
+      description: source.description || "",
+    });
   };
 
   return (
@@ -297,6 +458,189 @@ const AdminSourcesPage = () => {
         </div>
       )}
 
+      {/* Edit Modal */}
+      {editingSource && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-lg rounded-lg bg-white p-6 dark:bg-neutral-800">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                Edit Feed Source
+              </h2>
+              <button
+                onClick={() => setEditingSource(null)}
+                className="rounded p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={editingSource.name}
+                  onChange={(e) =>
+                    setEditingSource({ ...editingSource, name: e.target.value })
+                  }
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  RSS Feed URL (read-only)
+                </label>
+                <input
+                  type="url"
+                  value={editingSource.url}
+                  readOnly
+                  className="w-full rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-neutral-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Website URL
+                </label>
+                <input
+                  type="url"
+                  value={editingSource.websiteUrl}
+                  onChange={(e) =>
+                    setEditingSource({
+                      ...editingSource,
+                      websiteUrl: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  placeholder="https://example.com"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Logo
+                </label>
+                <div className="flex items-start gap-4">
+                  {/* Logo preview */}
+                  <div className="flex-shrink-0">
+                    {editingSource.logoUrl ? (
+                      <img
+                        src={editingSource.logoUrl}
+                        alt={`${editingSource.name} logo`}
+                        className="h-16 w-16 rounded-lg border border-neutral-200 object-cover dark:border-neutral-600"
+                        onError={(e) => {
+                          // Hide broken images
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800">
+                        <PhotoIcon className="h-8 w-8 text-neutral-400" />
+                      </div>
+                    )}
+                  </div>
+                  {/* Upload controls */}
+                  <div className="flex-1 space-y-2">
+                    <input
+                      type="file"
+                      ref={logoInputRef}
+                      onChange={handleLogoUpload}
+                      accept="image/png, image/jpeg, image/gif, image/webp"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={uploadingLogo}
+                      className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                    >
+                      {uploadingLogo ? (
+                        <>
+                          <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <PhotoIcon className="h-4 w-4" />
+                          Upload Logo
+                        </>
+                      )}
+                    </button>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      PNG, JPG, GIF or WEBP. Max 5MB.
+                    </p>
+                    {/* URL input as fallback */}
+                    <input
+                      type="url"
+                      value={editingSource.logoUrl}
+                      onChange={(e) =>
+                        setEditingSource({
+                          ...editingSource,
+                          logoUrl: e.target.value,
+                        })
+                      }
+                      className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-700"
+                      placeholder="Or paste image URL..."
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  value={editingSource.category}
+                  onChange={(e) =>
+                    setEditingSource({
+                      ...editingSource,
+                      category: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  placeholder="e.g., frontend, react, career"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                  Description
+                </label>
+                <textarea
+                  value={editingSource.description}
+                  onChange={(e) =>
+                    setEditingSource({
+                      ...editingSource,
+                      description: e.target.value,
+                    })
+                  }
+                  rows={3}
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  placeholder="A brief description of this feed source..."
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingSource(null)}
+                  className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateSource.status === "pending"}
+                  className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                >
+                  {updateSource.status === "pending"
+                    ? "Saving..."
+                    : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Sources Table */}
       {status === "pending" && (
         <div className="flex items-center justify-center py-12">
@@ -345,13 +689,34 @@ const AdminSourcesPage = () => {
                 return (
                   <tr key={source.sourceId}>
                     <td className="whitespace-nowrap px-6 py-4">
-                      <div className="font-medium text-neutral-900 dark:text-neutral-100">
-                        {source.sourceName}
-                      </div>
+                      <span className="inline-flex items-center gap-3">
+                        <LogoWithFallback
+                          logoUrl={source.logoUrl}
+                          name={source.sourceName}
+                        />
+                        <span>
+                          <span className="flex items-center font-medium text-neutral-900 dark:text-neutral-100">
+                            {source.sourceName}
+                            <DataCompletenessBadge
+                              missingFields={getMissingFields(source)}
+                            />
+                          </span>
+                          {source.websiteUrl && (
+                            <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                              {(() => {
+                                try {
+                                  return new URL(source.websiteUrl).hostname;
+                                } catch {
+                                  return "";
+                                }
+                              })()}
+                            </span>
+                          )}
+                        </span>
+                      </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                      {/* Category would need to be fetched separately or added to stats */}
-                      -
+                      {source.category || "-"}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <span
@@ -377,42 +742,49 @@ const AdminSourcesPage = () => {
                       {source.errorCount}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => openEditModal(source)}
+                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
+                          title="Edit"
+                        >
+                          <PencilSquareIcon className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() =>
                             handleSyncSource(source.sourceId, source.sourceName)
                           }
                           disabled={syncingSourceId === source.sourceId}
-                          className="rounded p-1 text-blue-500 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50 dark:hover:bg-blue-950"
+                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200 disabled:opacity-50"
                           title="Sync now"
                         >
                           <ArrowPathIcon
-                            className={`h-5 w-5 ${syncingSourceId === source.sourceId ? "animate-spin" : ""}`}
+                            className={`h-4 w-4 ${syncingSourceId === source.sourceId ? "animate-spin" : ""}`}
                           />
                         </button>
                         <button
                           onClick={() =>
                             handleStatusToggle(source.sourceId, source.status)
                           }
-                          className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
                           title={
                             source.status === "active" ? "Pause" : "Activate"
                           }
                         >
                           {source.status === "active" ? (
-                            <PauseCircleIcon className="h-5 w-5" />
+                            <PauseCircleIcon className="h-4 w-4" />
                           ) : (
-                            <CheckCircleIcon className="h-5 w-5" />
+                            <CheckCircleIcon className="h-4 w-4" />
                           )}
                         </button>
                         <button
                           onClick={() =>
                             handleDelete(source.sourceId, source.sourceName)
                           }
-                          className="rounded p-1 text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950"
+                          className="rounded bg-transparent p-1.5 text-red-400 transition-colors hover:bg-red-950 hover:text-red-300"
                           title="Delete"
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <TrashIcon className="h-4 w-4" />
                         </button>
                       </div>
                     </td>

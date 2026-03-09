@@ -7,13 +7,11 @@ import {
   banned_users,
   session,
   user,
-  post,
-  content,
+  posts,
   content_report,
-  aggregated_article,
-  feed_source,
+  feed_sources,
 } from "@/server/db/schema";
-import { and, count, desc, eq, isNotNull, like, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 
 export const adminRouter = createTRPCRouter({
   // Get dashboard stats
@@ -22,17 +20,8 @@ export const adminRouter = createTRPCRouter({
 
     const [postsCount] = await ctx.db
       .select({ count: count() })
-      .from(post)
-      .where(isNotNull(post.published));
-
-    const [contentCount] = await ctx.db
-      .select({ count: count() })
-      .from(content)
-      .where(eq(content.published, true));
-
-    const [articlesCount] = await ctx.db
-      .select({ count: count() })
-      .from(aggregated_article);
+      .from(posts)
+      .where(eq(posts.status, "published"));
 
     const [pendingReports] = await ctx.db
       .select({ count: count() })
@@ -45,14 +34,12 @@ export const adminRouter = createTRPCRouter({
 
     const [activeSourcesCount] = await ctx.db
       .select({ count: count() })
-      .from(feed_source)
-      .where(eq(feed_source.status, "ACTIVE"));
+      .from(feed_sources)
+      .where(eq(feed_sources.status, "active"));
 
     return {
       totalUsers: usersCount.count,
       publishedPosts: postsCount.count,
-      unifiedContent: contentCount.count,
-      aggregatedArticles: articlesCount.count,
       pendingReports: pendingReports.count,
       bannedUsers: bannedUsersCount.count,
       activeFeedSources: activeSourcesCount.count,
@@ -179,6 +166,12 @@ export const adminRouter = createTRPCRouter({
 
       await ctx.db.delete(session).where(eq(session.userId, userId));
 
+      // Hide all published posts by the banned user
+      await ctx.db
+        .update(posts)
+        .set({ status: "draft" })
+        .where(and(eq(posts.authorId, userId), eq(posts.status, "published")));
+
       return { banned: true };
     }),
   unban: adminOnlyProcedure
@@ -187,6 +180,18 @@ export const adminRouter = createTRPCRouter({
       const { userId } = input;
 
       await ctx.db.delete(banned_users).where(eq(banned_users.userId, userId));
+
+      // Restore posts that were previously published (have publishedAt set)
+      await ctx.db
+        .update(posts)
+        .set({ status: "published" })
+        .where(
+          and(
+            eq(posts.authorId, userId),
+            eq(posts.status, "draft"),
+            isNotNull(posts.publishedAt),
+          ),
+        );
 
       return { unbanned: true };
     }),

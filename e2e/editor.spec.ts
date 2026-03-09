@@ -795,11 +795,23 @@ test.describe("Publish Flow", () => {
 
   test("Should show confirmation modal for write tab", async ({ page }) => {
     await page.goto(CREATE_URL);
+    await page.waitForLoadState("domcontentloaded");
+
+    // Wait for title input to be visible
+    await expect(page.locator(SELECTORS.titleInput)).toBeVisible({
+      timeout: 15000,
+    });
 
     // Enter valid content
     await page.locator(SELECTORS.titleInput).fill("Article to Publish");
     await page.locator(SELECTORS.editorContent).click();
     await page.keyboard.type(articleContent);
+
+    // Wait for auto-save to complete before opening modal
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
+    await page.waitForTimeout(300); // Allow state to settle
 
     // Wait for Publish button to be enabled
     const publishButton = page.locator('nav button:has-text("Publish")');
@@ -855,8 +867,11 @@ test.describe("Publish Flow", () => {
     await page.locator(SELECTORS.linkUrlInput).fill("https://github.com");
     await page.locator(SELECTORS.linkTitleInput).fill("GitHub Link");
 
-    // Wait for state to update
-    await page.waitForTimeout(500);
+    // Wait for auto-save to complete before opening modal
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
+    await page.waitForTimeout(300); // Allow state to settle
 
     // Click Publish button in nav
     await page.locator('nav button:has-text("Publish")').click();
@@ -870,13 +885,14 @@ test.describe("Publish Flow", () => {
     page,
   }) => {
     await page.goto(`${CREATE_URL}?tab=link`);
+    await page.waitForLoadState("domcontentloaded");
 
     // Enter a URL and wait for metadata to auto-populate title
     await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
 
     // Wait for metadata to be fetched and title to auto-populate
     const titleInput = page.locator(SELECTORS.linkTitleInput);
-    await expect(titleInput).not.toHaveValue("", { timeout: 10000 });
+    await expect(titleInput).not.toHaveValue("", { timeout: 15000 });
 
     // Verify the title was auto-populated
     const titleValue = await titleInput.inputValue();
@@ -961,8 +977,10 @@ test.describe("Publish Flow", () => {
       "Content for scheduled article test here with enough text to pass validation",
     );
 
-    // Wait for body content to register (debounce)
-    await page.waitForTimeout(2000);
+    // Wait for auto-save to complete
+    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
+      timeout: 15000,
+    });
 
     // Expand More Options
     await page.locator(SELECTORS.moreOptionsButton).click();
@@ -986,8 +1004,8 @@ test.describe("Publish Flow", () => {
     const dateString = futureDate.toISOString().slice(0, 16);
     await page.locator(SELECTORS.datetimeInput).fill(dateString);
 
-    // Wait for state to update
-    await page.waitForTimeout(500);
+    // Wait for state to settle after date input
+    await page.waitForTimeout(300);
 
     // Click Publish button in nav
     await page.locator('nav button:has-text("Publish")').click();
