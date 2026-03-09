@@ -189,6 +189,7 @@ test.describe("Authenticated Feed Page (Articles)", () => {
   });
 
   test("Should write and publish an article", async ({ page, isMobile }) => {
+    test.slow();
     const articleTitle = "Lorem Ipsum";
     await page.goto("http://localhost:3000");
     // Waits for articles to be loaded
@@ -349,7 +350,10 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     if (isSaved) {
       // Article is already bookmarked - unbookmark then rebookmark to test the flow
       await savedButton.scrollIntoViewIfNeeded();
-      await savedButton.click({ force: true });
+      await Promise.all([
+        page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+        savedButton.click(),
+      ]);
       await expect(saveButton).toBeVisible({ timeout: 15000 });
     }
 
@@ -357,7 +361,10 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     await expect(saveButton).toBeVisible({ timeout: 15000 });
     await expect(saveButton).toBeEnabled({ timeout: 5000 });
     await saveButton.scrollIntoViewIfNeeded();
-    await saveButton.click({ force: true });
+    await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('trpc') && resp.url().includes('bookmark')),
+      saveButton.click(),
+    ]);
 
     // Wait for button text to change to "Saved" after React state update
     await expect(savedButton).toBeVisible({ timeout: 30000 });

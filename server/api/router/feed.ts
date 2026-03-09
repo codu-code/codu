@@ -30,6 +30,7 @@ import {
   feed_sources,
   tag,
   post_tags,
+  banned_users,
 } from "@/server/db/schema";
 import {
   and,
@@ -40,6 +41,7 @@ import {
   lt,
   sql,
   isNotNull,
+  isNull,
   count,
 } from "drizzle-orm";
 import { increment } from "./utils";
@@ -156,11 +158,18 @@ export const feedRouter = createTRPCRouter({
         ) as typeof query;
       }
 
+      // Add banned users join for defense-in-depth filtering
+      query = query.leftJoin(
+        banned_users,
+        eq(posts.authorId, banned_users.userId),
+      ) as typeof query;
+
       // Build where conditions - only link type posts with sources
       const whereConditions = [
         eq(posts.type, "link"),
         eq(posts.status, "published"),
         isNotNull(posts.sourceId),
+        isNull(banned_users.userId),
         category ? eq(feed_sources.category, category) : undefined,
         cursorCondition,
       ].filter(Boolean);
@@ -784,10 +793,17 @@ export const feedRouter = createTRPCRouter({
         ) as typeof query;
       }
 
+      // Add banned users join for defense-in-depth filtering
+      query = query.leftJoin(
+        banned_users,
+        eq(posts.authorId, banned_users.userId),
+      ) as typeof query;
+
       // Build where conditions
       const whereConditions = [
         eq(posts.sourceId, source.id),
         eq(posts.status, "published"),
+        isNull(banned_users.userId),
         cursorCondition,
       ].filter(Boolean);
 
