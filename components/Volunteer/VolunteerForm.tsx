@@ -68,10 +68,10 @@ export function VolunteerForm() {
     const result = VolunteerApplicationSchema.safeParse(data);
     if (!result.success) {
       result.error.issues.forEach((issue) => {
-        setError(
-          issue.path.join(".") as FieldPath<VolunteerApplicationInput>,
-          { type: "manual", message: issue.message },
-        );
+        setError(issue.path.join(".") as FieldPath<VolunteerApplicationInput>, {
+          type: "manual",
+          message: issue.message,
+        });
       });
       return;
     }
@@ -190,9 +190,7 @@ export function VolunteerForm() {
           {...register("workOn")}
           invalid={!!errors.workOn}
         />
-        {errors.workOn && (
-          <ErrorMessage>{errors.workOn.message}</ErrorMessage>
-        )}
+        {errors.workOn && <ErrorMessage>{errors.workOn.message}</ErrorMessage>}
       </Field>
 
       <Field>

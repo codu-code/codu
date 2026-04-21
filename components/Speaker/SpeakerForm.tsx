@@ -77,10 +77,10 @@ export function SpeakerForm() {
     const result = SpeakerApplicationSchema.safeParse(data);
     if (!result.success) {
       result.error.issues.forEach((issue) => {
-        setError(
-          issue.path.join(".") as FieldPath<SpeakerApplicationInput>,
-          { type: "manual", message: issue.message },
-        );
+        setError(issue.path.join(".") as FieldPath<SpeakerApplicationInput>, {
+          type: "manual",
+          message: issue.message,
+        });
       });
       return;
     }

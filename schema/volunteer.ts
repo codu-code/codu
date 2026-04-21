@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-export const volunteerAreas = ["MARKETING", "EVENTS", "BOTH_OR_UNSURE"] as const;
+export const volunteerAreas = [
+  "MARKETING",
+  "EVENTS",
+  "BOTH_OR_UNSURE",
+] as const;
 
 export const volunteerAreaLabels: Record<
   (typeof volunteerAreas)[number],
@@ -45,10 +49,7 @@ export const VolunteerApplicationSchema = z.object({
     .email("Please enter a valid email address")
     .max(255, "Email must be 255 characters or less"),
   link: z
-    .union([
-      z.literal(""),
-      z.string().url("Please enter a valid URL").max(500),
-    ])
+    .union([z.literal(""), z.string().url("Please enter a valid URL").max(500)])
     .optional(),
   location: z
     .string()

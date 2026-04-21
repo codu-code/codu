@@ -14,11 +14,7 @@ export const talkLengthLabels: Record<(typeof talkLengths)[number], string> = {
   FLEXIBLE: "Flexible",
 };
 
-export const speakerFormats = [
-  "IN_PERSON_DUBLIN",
-  "REMOTE",
-  "EITHER",
-] as const;
+export const speakerFormats = ["IN_PERSON_DUBLIN", "REMOTE", "EITHER"] as const;
 
 export const speakerFormatLabels: Record<
   (typeof speakerFormats)[number],
@@ -75,10 +71,7 @@ export const SpeakerApplicationSchema = z.object({
     .email("Please enter a valid email address")
     .max(255, "Email must be 255 characters or less"),
   link: z
-    .union([
-      z.literal(""),
-      z.string().url("Please enter a valid URL").max(500),
-    ])
+    .union([z.literal(""), z.string().url("Please enter a valid URL").max(500)])
     .optional(),
   location: z
     .string()
