@@ -86,6 +86,7 @@
     "drizzle-orm": "^0.39.1",
     "fathom-client": "^3.7.2",
     "framer-motion": "^12.23.25",
+    "googleapis": "^171.4.0",
     "highlight.js": "^11.10.0",
     "holy-loader": "^2.3.1",
     "lowlight": "^3.1.0",
