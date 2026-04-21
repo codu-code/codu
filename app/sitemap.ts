@@ -14,6 +14,8 @@ const ROUTES_TO_INDEX = [
   "/feed",
   "/advertise",
   "/code-of-conduct",
+  "/volunteer",
+  "/speakers",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

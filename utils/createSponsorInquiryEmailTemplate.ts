@@ -1,3 +1,5 @@
+import { escapeHtml, sanitizeHref } from "./escapeHtml";
+
 type SponsorInquiryDetails = {
   name: string;
   email: string;
@@ -11,7 +13,20 @@ type SponsorInquiryDetails = {
 
 export const createSponsorInquiryEmailTemplate = (
   details: SponsorInquiryDetails,
-) => `
+) => {
+  const name = escapeHtml(details.name);
+  const email = escapeHtml(details.email);
+  const emailHref = sanitizeHref(`mailto:${details.email}`);
+  const company = escapeHtml(details.company);
+  const phone = escapeHtml(details.phone);
+  const budgetRange = escapeHtml(details.budgetRange);
+  const goals = escapeHtml(details.goals);
+  const submittedAt = escapeHtml(details.submittedAt);
+  const replyHref = sanitizeHref(
+    `mailto:${details.email}?subject=Re: Codu Advertising Inquiry`,
+  );
+
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,18 +46,18 @@ export const createSponsorInquiryEmailTemplate = (
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
         <tr>
           <td style="padding: 8px 0; color: #525252; width: 120px;">Name</td>
-          <td style="padding: 8px 0; font-weight: 600;">${details.name}</td>
+          <td style="padding: 8px 0; font-weight: 600;">${name}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #525252;">Email</td>
-          <td style="padding: 8px 0;"><a href="mailto:${details.email}" style="color: #db2777; text-decoration: none; font-weight: 600;">${details.email}</a></td>
+          <td style="padding: 8px 0;"><a href="${emailHref}" style="color: #db2777; text-decoration: none; font-weight: 600;">${email}</a></td>
         </tr>
         ${
           details.company
             ? `
         <tr>
           <td style="padding: 8px 0; color: #525252;">Company</td>
-          <td style="padding: 8px 0; font-weight: 600;">${details.company}</td>
+          <td style="padding: 8px 0; font-weight: 600;">${company}</td>
         </tr>
         `
             : ""
@@ -51,7 +66,7 @@ export const createSponsorInquiryEmailTemplate = (
             ? `
         <tr>
           <td style="padding: 8px 0; color: #525252;">Phone</td>
-          <td style="padding: 8px 0;">${details.phone}</td>
+          <td style="padding: 8px 0;">${phone}</td>
         </tr>
         `
             : ""
@@ -64,14 +79,14 @@ export const createSponsorInquiryEmailTemplate = (
         ${details.interests
           .map(
             (interest) =>
-              `<span style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; margin: 4px 4px 4px 0;">${interest}</span>`,
+              `<span style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px; margin: 4px 4px 4px 0;">${escapeHtml(interest)}</span>`,
           )
           .join("")}
       </div>
 
       <!-- Budget -->
       <h2 style="color: #171717; font-size: 16px; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e5e5;">Budget Range</h2>
-      <p style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #171717;">${details.budgetRange}</p>
+      <p style="margin: 0 0 24px 0; font-size: 18px; font-weight: 600; color: #171717;">${budgetRange}</p>
 
       <!-- Goals -->
       ${
@@ -79,20 +94,20 @@ export const createSponsorInquiryEmailTemplate = (
           ? `
       <h2 style="color: #171717; font-size: 16px; margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e5e5;">Goals & Requirements</h2>
       <div style="margin-bottom: 24px; padding: 16px; background: #fafafa; border-radius: 8px; border-left: 4px solid #db2777;">
-        <p style="margin: 0; color: #404040; white-space: pre-wrap; line-height: 1.6;">${details.goals}</p>
+        <p style="margin: 0; color: #404040; white-space: pre-wrap; line-height: 1.6;">${goals}</p>
       </div>
       `
           : ""
       }
 
       <!-- Timestamp -->
-      <p style="color: #a3a3a3; font-size: 12px; margin: 0;">Submitted: ${details.submittedAt}</p>
+      <p style="color: #a3a3a3; font-size: 12px; margin: 0;">Submitted: ${submittedAt}</p>
 
       <!-- CTA -->
       <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center;">
-        <a href="mailto:${details.email}?subject=Re: Codu Advertising Inquiry"
+        <a href="${replyHref}"
            style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-          Reply to ${details.name}
+          Reply to ${name}
         </a>
       </div>
     </div>
@@ -104,3 +119,4 @@ export const createSponsorInquiryEmailTemplate = (
 </body>
 </html>
 `;
+};
