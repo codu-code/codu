@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { JsonLd } from "@/components/JsonLd";
 import { VolunteerClient } from "./_client";
 
 const PAGE_URL = "https://www.codu.co/volunteer";
@@ -34,36 +33,6 @@ export const metadata: Metadata = {
   },
 };
 
-const volunteerJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "JobPosting",
-  title: "Volunteer — Marketing & Events",
-  description: PAGE_DESCRIPTION,
-  employmentType: "VOLUNTEER",
-  hiringOrganization: {
-    "@type": "Organization",
-    name: "Codú",
-    sameAs: "https://www.codu.co",
-    logo: "https://www.codu.co/images/codu-logo.png",
-  },
-  jobLocation: {
-    "@type": "Place",
-    address: {
-      "@type": "PostalAddress",
-      addressCountry: "IE",
-    },
-  },
-  applicantLocationRequirements: { "@type": "Country", name: "Worldwide" },
-  jobLocationType: "TELECOMMUTE",
-  datePosted: new Date().toISOString().split("T")[0],
-  url: PAGE_URL,
-};
-
 export default function VolunteerPage() {
-  return (
-    <>
-      <JsonLd data={volunteerJsonLd} />
-      <VolunteerClient />
-    </>
-  );
+  return <VolunteerClient />;
 }

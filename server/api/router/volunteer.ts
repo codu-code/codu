@@ -61,6 +61,11 @@ export const volunteerRouter = createTRPCRouter({
 
       const adminEmail = process.env.ADMIN_EMAIL || "hi@codu.co";
 
+      // Partial-failure policy: run both side effects in parallel. If exactly
+      // one fails, we still return success to the user (the other channel
+      // carries the signal) and rely on Sentry + console to flag the gap.
+      // Only if BOTH fail do we error out so the user can retry. Low-volume
+      // form — duplicate retries are cheaper than lost submissions.
       const [sheetResult, emailResult] = await Promise.allSettled([
         appendRowToSubmissionsSheet({
           tab: VOLUNTEER_SHEET_TAB,

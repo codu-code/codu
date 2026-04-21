@@ -74,6 +74,8 @@ export const speakerRouter = createTRPCRouter({
         return [t?.title ?? "", t?.lengthLabel ?? "", t?.abstract ?? ""];
       };
 
+      // Partial-failure policy: see volunteer.ts for the same pattern. If one
+      // channel fails we still return success; only both failing errors out.
       const [sheetResult, emailResult] = await Promise.allSettled([
         appendRowToSubmissionsSheet({
           tab: SPEAKER_SHEET_TAB,

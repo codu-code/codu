@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { JsonLd } from "@/components/JsonLd";
 import { SpeakersClient } from "./_client";
 
 const PAGE_URL = "https://www.codu.co/speakers";
@@ -33,37 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-const speakerJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "JobPosting",
-  title: "Speaker — Codú Meetups",
-  description: PAGE_DESCRIPTION,
-  employmentType: "VOLUNTEER",
-  hiringOrganization: {
-    "@type": "Organization",
-    name: "Codú",
-    sameAs: "https://www.codu.co",
-    logo: "https://www.codu.co/images/codu-logo.png",
-  },
-  jobLocation: {
-    "@type": "Place",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Dublin",
-      addressCountry: "IE",
-    },
-  },
-  applicantLocationRequirements: { "@type": "Country", name: "Worldwide" },
-  jobLocationType: "TELECOMMUTE",
-  datePosted: new Date().toISOString().split("T")[0],
-  url: PAGE_URL,
-};
-
 export default function SpeakersPage() {
-  return (
-    <>
-      <JsonLd data={speakerJsonLd} />
-      <SpeakersClient />
-    </>
-  );
+  return <SpeakersClient />;
 }

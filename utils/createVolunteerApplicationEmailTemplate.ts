@@ -1,3 +1,5 @@
+import { escapeHtml, sanitizeHref } from "./escapeHtml";
+
 type VolunteerApplicationDetails = {
   name: string;
   email: string;
@@ -13,15 +15,29 @@ type VolunteerApplicationDetails = {
 };
 
 const section = (title: string, body: string) => `
-      <h2 style="color: #171717; font-size: 16px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e5e5;">${title}</h2>
+      <h2 style="color: #171717; font-size: 16px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e5e5;">${escapeHtml(title)}</h2>
       <div style="margin-bottom: 16px; padding: 16px; background: #fafafa; border-radius: 8px; border-left: 4px solid #db2777;">
-        <p style="margin: 0; color: #404040; white-space: pre-wrap; line-height: 1.6;">${body}</p>
+        <p style="margin: 0; color: #404040; white-space: pre-wrap; line-height: 1.6;">${escapeHtml(body)}</p>
       </div>
 `;
 
 export const createVolunteerApplicationEmailTemplate = (
   details: VolunteerApplicationDetails,
-) => `
+) => {
+  const name = escapeHtml(details.name);
+  const email = escapeHtml(details.email);
+  const emailHref = sanitizeHref(`mailto:${details.email}`);
+  const location = escapeHtml(details.location);
+  const areaLabel = escapeHtml(details.areaLabel);
+  const commitmentLabel = escapeHtml(details.commitmentLabel);
+  const submittedAt = escapeHtml(details.submittedAt);
+  const linkHref = sanitizeHref(details.link);
+  const linkText = escapeHtml(details.link);
+  const replyHref = sanitizeHref(
+    `mailto:${details.email}?subject=Re: Codú Volunteer Application`,
+  );
+
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -40,22 +56,22 @@ export const createVolunteerApplicationEmailTemplate = (
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
         <tr>
           <td style="padding: 8px 0; color: #525252; width: 120px;">Name</td>
-          <td style="padding: 8px 0; font-weight: 600;">${details.name}</td>
+          <td style="padding: 8px 0; font-weight: 600;">${name}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #525252;">Email</td>
-          <td style="padding: 8px 0;"><a href="mailto:${details.email}" style="color: #db2777; text-decoration: none; font-weight: 600;">${details.email}</a></td>
+          <td style="padding: 8px 0;"><a href="${emailHref}" style="color: #db2777; text-decoration: none; font-weight: 600;">${email}</a></td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #525252;">Location</td>
-          <td style="padding: 8px 0;">${details.location}</td>
+          <td style="padding: 8px 0;">${location}</td>
         </tr>
         ${
-          details.link
+          linkHref
             ? `
         <tr>
           <td style="padding: 8px 0; color: #525252;">Link</td>
-          <td style="padding: 8px 0;"><a href="${details.link}" style="color: #db2777; text-decoration: none;">${details.link}</a></td>
+          <td style="padding: 8px 0;"><a href="${linkHref}" style="color: #db2777; text-decoration: none;">${linkText}</a></td>
         </tr>
         `
             : ""
@@ -64,23 +80,23 @@ export const createVolunteerApplicationEmailTemplate = (
 
       <h2 style="color: #171717; font-size: 16px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e5e5;">Area of interest</h2>
       <p style="margin: 0 0 8px 0;">
-        <span style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px;">${details.areaLabel}</span>
+        <span style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 6px 14px; border-radius: 9999px; font-size: 13px;">${areaLabel}</span>
       </p>
 
       <h2 style="color: #171717; font-size: 16px; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #e5e5e5;">Time commitment</h2>
-      <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #171717;">${details.commitmentLabel}</p>
+      <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #171717;">${commitmentLabel}</p>
 
       ${section("What they want to work on", details.workOn)}
       ${details.experience ? section("Relevant experience", details.experience) : ""}
       ${section("Why Codú", details.whyCodu)}
       ${details.other ? section("Anything else", details.other) : ""}
 
-      <p style="color: #a3a3a3; font-size: 12px; margin: 24px 0 0 0;">Submitted: ${details.submittedAt}</p>
+      <p style="color: #a3a3a3; font-size: 12px; margin: 24px 0 0 0;">Submitted: ${submittedAt}</p>
 
       <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e5e5; text-align: center;">
-        <a href="mailto:${details.email}?subject=Re: Codú Volunteer Application"
+        <a href="${replyHref}"
            style="display: inline-block; background: linear-gradient(to right, #fb923c, #db2777); color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-          Reply to ${details.name}
+          Reply to ${name}
         </a>
       </div>
     </div>
@@ -92,3 +108,4 @@ export const createVolunteerApplicationEmailTemplate = (
 </body>
 </html>
 `;
+};
