@@ -13,6 +13,28 @@ import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { PromptProvider } from "@/components/PromptService";
 import { ReportModalProvider } from "@/components/ReportModal/ReportModal";
 import { Suspense } from "react";
+import {
+  Bricolage_Grotesque,
+  Hanken_Grotesk,
+  JetBrains_Mono,
+} from "next/font/google";
+
+// Relaunch type system: characterful display, clean body, mono for labels/code.
+const fontDisplay = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+const fontSans = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 // @TODO layout app in way that doesn't need to use client session check
 export const metadata = {
@@ -78,7 +100,11 @@ export default async function RootLayout({
   });
 
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`h-full ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
+      suppressHydrationWarning
+    >
       <link
         rel="alternate"
         type="application/rss+xml"
