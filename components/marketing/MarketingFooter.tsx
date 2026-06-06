@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { NewsletterCapture } from "@/components/ds";
 import {
   discordInviteUrl,
@@ -42,11 +43,14 @@ export function MarketingFooter() {
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
           {/* Brand */}
           <div>
-            <Link
-              href="/"
-              className="font-display text-2xl font-extrabold tracking-tight text-fg"
-            >
-              Codú<span className="text-accent">.</span>
+            <Link href="/" aria-label="Codú home">
+              <Image
+                src="/images/codu.png"
+                alt="Codú"
+                width={189}
+                height={60}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-3 max-w-xs text-sm text-muted">
               The community for AI builders &amp; indie hackers. Learn, ship, and

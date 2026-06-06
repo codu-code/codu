@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Session } from "next-auth";
 
 const links = [
@@ -11,11 +12,15 @@ export function MarketingNav({ session }: { session: Session | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-hairline bg-canvas/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link
-          href="/"
-          className="font-display text-xl font-extrabold tracking-tight text-fg"
-        >
-          Codú<span className="text-accent">.</span>
+        <Link href="/" aria-label="Codú home">
+          <Image
+            src="/images/codu.png"
+            alt="Codú"
+            width={189}
+            height={60}
+            className="h-7 w-auto"
+            priority
+          />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

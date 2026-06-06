@@ -3,7 +3,7 @@ import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 
 export const metadata = {
-  title: "Sign up or sign in",
+  title: "Join Codú — sign in or create your account",
   description: "Sign in or sign up to get free access to the Codú community.",
 };
 
