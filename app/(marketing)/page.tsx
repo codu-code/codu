@@ -18,6 +18,7 @@ async function getRecentFeed() {
         title: posts.title,
         slug: posts.slug,
         excerpt: posts.excerpt,
+        coverImage: posts.coverImage,
         sourceName: feed_sources.name,
         sourceSlug: feed_sources.slug,
       })
@@ -117,24 +118,46 @@ export default async function HomePage() {
                 See all ›
               </Link>
             </div>
-            <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {feed.map((p) => (
                 <Link
                   key={`${p.sourceSlug}-${p.slug}`}
                   href={`/${p.sourceSlug}/${p.slug}`}
-                  className="group flex flex-col bg-canvas p-6 transition-colors hover:bg-surface"
+                  className="group flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-accent/50"
                 >
-                  <span className="font-mono text-xs text-faint">
-                    {p.sourceName}
-                  </span>
-                  <h3 className="mt-2 font-display text-lg font-bold leading-snug text-fg group-hover:text-accent">
-                    {p.title}
-                  </h3>
-                  {p.excerpt && (
-                    <p className="mt-2 line-clamp-2 text-sm text-muted">
-                      {p.excerpt}
-                    </p>
+                  {/* Preview image (CSS bg — external domains aren't allowed by next/image) */}
+                  {p.coverImage ? (
+                    <div
+                      className="aspect-[16/9] bg-elevated bg-cover bg-center"
+                      style={{ backgroundImage: `url("${p.coverImage}")` }}
+                    />
+                  ) : (
+                    <div className="flex aspect-[16/9] items-center justify-center bg-elevated bg-grid-dots bg-[length:18px_18px]">
+                      <span className="px-4 text-center font-display text-lg font-bold text-faint">
+                        {p.sourceName}
+                      </span>
+                    </div>
                   )}
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <span className="font-mono text-xs text-faint">
+                      {p.sourceName}
+                    </span>
+                    <h3 className="mt-2 font-display text-base font-bold leading-snug text-fg group-hover:text-accent">
+                      {p.title}
+                    </h3>
+                    {p.excerpt && (
+                      <p className="mt-2 line-clamp-2 text-sm text-muted">
+                        {p.excerpt}
+                      </p>
+                    )}
+                    <span className="mt-4 inline-flex items-center gap-1 font-mono text-xs font-semibold text-accent">
+                      Read
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">
+                        ›
+                      </span>
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
