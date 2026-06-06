@@ -6,14 +6,14 @@ const NewsletterCTA = ({ isSubscribed = false }: NewsletterCTAProps) => {
   return (
     <div className="mb-8 mt-2 overflow-hidden rounded-lg border border-neutral-300 bg-gradient-to-br from-blue-600 to-pink-600 text-white shadow-lg dark:border-neutral-600">
       <div className="p-6">
-        <h3 className="mb-2 text-2xl font-bold">Level up every week</h3>
+        <h3 className="mb-2 text-2xl font-bold">Build something every week</h3>
         <p className="mb-4 text-base opacity-95">
-          Join developers getting weekly curated content: top articles,
-          tutorials, and resources from the community.
+          Join builders getting weekly curated content: what&apos;s working in
+          AI, plus top articles, tutorials, and tools from the community.
         </p>
 
         <div className="mb-5 flex flex-wrap gap-2">
-          {["Articles", "Tutorials", "Resources"].map((item) => (
+          {["AI", "Tutorials", "Tools"].map((item) => (
             <span
               key={item}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm"

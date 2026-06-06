@@ -27,7 +27,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   if (profile) {
     const { bio, name } = profile;
-    const title = `${name || username} - Codú Profile | Codú - The Web Developer Community`;
+    const title = `${name || username} - Codú Profile | Codú - The community for AI builders & indie hackers`;
     const description = `${name || username}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
 
     return {

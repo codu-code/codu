@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { AdvertiseClient } from "./_client";
 
 export const metadata: Metadata = {
-  title: "Advertise with Codú - Reach Ireland's Developer Community",
+  title: "Advertise with Codú — Reach a global community of AI builders",
   description:
-    "Partner with Codú to reach 100,000+ monthly developer visits. Job postings, newsletter ads, event branding, and more. Connect with Ireland's largest web developer community.",
+    "Partner with Codú to reach a global community of AI builders and indie hackers. Newsletter ads, job postings, event branding, and more.",
   openGraph: {
     title: "Advertise with Codú",
     description:
-      "Connect your brand with Ireland's most engaged developer community. Sponsorship packages for job postings, newsletter advertising, and event branding.",
+      "Connect your brand with a global community of AI builders and indie hackers. Sponsorship packages for newsletter advertising, job postings, and event branding.",
   },
 };
 

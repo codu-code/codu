@@ -19,14 +19,14 @@ export function HeroSection() {
           <span className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-transparent">
             20,000+
           </span>{" "}
-          Developers Every Month
+          Builders Every Month
         </h1>
 
         {/* Subheadline */}
         <p className="mx-auto mt-6 max-w-2xl text-lg text-neutral-300 sm:text-xl">
-          Connect your brand with one of the most engaged web developer
-          communities online. From newsletter ads to event sponsorships, we help
-          you hire and grow.
+          Connect your brand with one of the most engaged communities of AI
+          builders and indie hackers online. From newsletter ads to event
+          sponsorships, we help you hire and grow.
         </p>
 
         {/* Single CTA - research shows single CTA converts 266% better */}

@@ -230,13 +230,13 @@ export default function Hero() {
             id="hero-heading"
             className="text-2xl font-semibold text-white sm:text-4xl md:text-4xl"
           >
-            The <span className="font-extrabold text-pink-600">free</span> web
-            developer community
+            The community for{" "}
+            <span className="font-extrabold text-pink-600">AI builders</span> &
+            indie hackers
           </h1>
           <p className="mx-auto max-w-2xl text-sm text-neutral-300 sm:text-base md:text-lg">
-            {`Codú's community offers hundreds of tutorials, an online community, and answers 
-              questions on a wide range of web development topics. Sign up for a free account today
-            and join the community.`}
+            {`Learn to build with AI, share what you ship, and grow with people doing the same.
+              Tutorials, a community, and a weekly brief on what's actually working. Join free.`}
           </p>
         </div>
       </section>

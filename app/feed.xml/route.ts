@@ -6,7 +6,8 @@ import { getAllPosts } from "@/server/controllers/post";
 export async function GET() {
   const feed = new RSS({
     title: "Codú",
-    description: "Codú - A blog for web developers.",
+    description:
+      "Codú — articles and tutorials for AI builders and indie hackers.",
     generator: "RSS for Node and Next.js",
     feed_url: "https://www.codu.co/feed.xml",
     site_url: "https://www.codu.co/",

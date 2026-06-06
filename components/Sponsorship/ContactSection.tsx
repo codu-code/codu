@@ -9,8 +9,8 @@ export function ContactSection() {
             Let&apos;s Talk
           </h2>
           <p className="mt-4 text-neutral-400">
-            Ready to reach our global developer community? Fill out the form and
-            we&apos;ll get back to you within 24 hours.
+            Ready to reach our global community of builders? Fill out the form
+            and we&apos;ll get back to you within 24 hours.
           </p>
         </div>
 

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { VolunteerClient } from "./_client";
 
 const PAGE_URL = "https://www.codu.co/volunteer";
-const PAGE_TITLE =
-  "Volunteer with Codú — Help Build Ireland's Largest Dev Community";
+const PAGE_TITLE = "Volunteer with Codú — Help grow our community";
 const PAGE_DESCRIPTION =
   "Join the team behind Codú. We're recruiting volunteer marketers and event organisers to help run meetups, newsletters, partnerships, and socials across the Irish tech ecosystem.";
 

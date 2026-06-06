@@ -11,19 +11,19 @@ const offerings = [
     icon: EnvelopeOpenIcon,
     title: "Newsletter Advertising",
     description:
-      "Feature your company in our weekly newsletter reaching 4,000+ engaged developers who actually read their emails.",
+      "Feature your company in our weekly newsletter reaching 4,000+ engaged builders who actually read their emails.",
   },
   {
     icon: CalendarDaysIcon,
     title: "Event Sponsorship",
     description:
-      "Put your brand in front of 100+ developers at our monthly meetups and annual hackathons. Build real connections.",
+      "Put your brand in front of 100+ builders at our meetups and hackathons. Build real connections.",
   },
   {
     icon: GlobeAltIcon,
     title: "Website & Job Board",
     description:
-      "Reach 20,000+ monthly visitors with banner placements and job postings to a highly engaged developer audience.",
+      "Reach 20,000+ monthly visitors with banner placements and job postings to a highly engaged audience of AI builders.",
   },
   {
     icon: DocumentTextIcon,
@@ -43,7 +43,7 @@ export function OfferingsSection() {
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400">
             Every partnership is tailored to your goals. Here&apos;s how we can
-            help you connect with our developer community.
+            help you connect with our community of builders.
           </p>
         </div>
 
