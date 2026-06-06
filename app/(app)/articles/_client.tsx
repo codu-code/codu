@@ -26,7 +26,7 @@ import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { useSession, signIn } from "next-auth/react";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
-import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
+import { NewsletterCapture } from "@/components/ds";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { FeedFilters } from "@/components/Feed";
@@ -515,7 +515,7 @@ const ArticlesPage = () => {
             </section>
           </div>
           <section className="col-span-5 hidden lg:block">
-            <NewsletterCTA isSubscribed={session?.user?.newsletter} />
+            <NewsletterCapture variant="compact" />
             <h3 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
               Popular topics
             </h3>

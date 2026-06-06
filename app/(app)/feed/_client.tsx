@@ -13,7 +13,7 @@ import {
 } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
-import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
+import { NewsletterCapture } from "@/components/ds";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
@@ -237,7 +237,7 @@ const FeedPage = () => {
 
             {/* Newsletter CTA */}
             <div className="mt-6">
-              <NewsletterCTA isSubscribed={session?.user?.newsletter} />
+              <NewsletterCapture variant="compact" />
             </div>
 
             {/* Popular Tags section */}

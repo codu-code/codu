@@ -99,7 +99,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar className="bg-neutral-100 dark:bg-black">
+    <Sidebar className="border-r border-hairline bg-canvas">
       <SidebarBody>
         <SidebarSection>
           {navItems.map((item) => {
@@ -112,7 +112,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
               >
                 {Icon && (
                   <Icon
-                    className={`!size-5 shrink-0 ${isActive(item.href) ? "text-neutral-800 dark:text-white" : "text-neutral-400"}`}
+                    className={`!size-5 shrink-0 ${isActive(item.href) ? "text-accent" : "text-faint"}`}
                   />
                 )}
                 <SidebarLabel
@@ -148,7 +148,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
                   >
                     {Icon && (
                       <Icon
-                        className={`!size-5 shrink-0 ${isActive(href) ? "text-neutral-800 dark:text-white" : "text-neutral-400"}`}
+                        className={`!size-5 shrink-0 ${isActive(href) ? "text-accent" : "text-faint"}`}
                       />
                     )}
                     <SidebarLabel
@@ -170,7 +170,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
         >
           {sidebarFooterNav.map((item) => (
             <SidebarItem key={item.name} href={item.href}>
-              <SidebarLabel className="text-xs text-neutral-500 dark:text-neutral-400">
+              <SidebarLabel className="text-xs text-faint">
                 {item.name}
               </SidebarLabel>
             </SidebarItem>
@@ -188,7 +188,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`focus-style rounded-md p-1 text-neutral-400 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.customStyle.toLowerCase()}`}
+              className={`focus-style rounded-md p-1 text-faint transition-all duration-300 hover:scale-105 hover:text-fg hover:brightness-110 focus:scale-105 focus:text-fg focus:brightness-110 ${item.customStyle.toLowerCase()}`}
             >
               <span className="sr-only">{item.name}</span>
               <item.Icon className="h-5 w-5" aria-hidden="true" />
