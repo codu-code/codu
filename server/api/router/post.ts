@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { award } from "@/server/lib/engagement";
 import {
   GetFeedSchema,
   GetPostByIdSchema,
@@ -505,6 +506,16 @@ export const postRouter = createTRPCRouter({
           showComments: input.showComments,
         })
         .returning();
+
+      // Engagement: award points for publishing (safe — never throws).
+      if (newPost && input.status === "published") {
+        await award({
+          userId: authorId,
+          action: "post_published",
+          sourceType: "post",
+          sourceId: newPost.id,
+        });
+      }
 
       // Add tags if provided
       if (input.tags && input.tags.length > 0) {

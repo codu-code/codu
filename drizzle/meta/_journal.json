@@ -148,6 +148,13 @@
       "when": 1780779004573,
       "tag": "0020_thick_nomad",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1780789400625,
+      "tag": "0021_clear_rockslide",
+      "breakpoints": true
     }
   ]
 }

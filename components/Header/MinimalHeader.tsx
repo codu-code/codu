@@ -18,6 +18,7 @@ import { type Session } from "next-auth";
 import Image from "next/image";
 import { MobileSearch, Search } from "@/components/ui/Search";
 import { useSidebar } from "@/context/SidebarContext";
+import { StreakBadge } from "@/components/ds";
 
 type AlgoliaConfig = {
   ALGOLIA_APP_ID: string;
@@ -115,9 +116,12 @@ export function MinimalHeader({
       <div className="flex items-center gap-2">
         {session ? (
           <>
+            {/* Daily streak */}
+            <StreakBadge />
+
             {/* Create button - desktop only */}
             <Link
-              className="hidden items-center gap-1 rounded-md bg-accent px-2.5 py-1 text-sm font-medium text-white hover:bg-accent lg:flex"
+              className="hidden items-center gap-1 rounded-md bg-accent px-2.5 py-1 text-sm font-medium text-black hover:bg-accent-soft lg:flex"
               to="/create"
             >
               <PlusIcon className="h-4 w-4" />

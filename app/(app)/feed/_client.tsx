@@ -13,7 +13,7 @@ import {
 } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
-import { NewsletterCapture, ConversionHub } from "@/components/ds";
+import { NewsletterCapture, ConversionHub, BuildBoard } from "@/components/ds";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
@@ -226,6 +226,11 @@ const FeedPage = () => {
             {/* Conversion hub — contribute / monetise actions */}
             <div className="mt-2">
               <ConversionHub />
+            </div>
+
+            {/* Build Board — weekly leaderboard (flag-gated, hidden if empty) */}
+            <div className="mt-6">
+              <BuildBoard />
             </div>
 
             {/* About section */}

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { award } from "@/server/lib/engagement";
 import {
   CreateCommentSchema,
   EditCommentSchema,
@@ -127,6 +128,14 @@ export const commentRouter = createTRPCRouter({
         .set({ path: newPath })
         .where(eq(comments.id, insertedComment.id))
         .returning();
+
+      // Engagement: award points for commenting (safe — never throws).
+      await award({
+        userId: authorId,
+        action: "comment_created",
+        sourceType: "comment",
+        sourceId: createdComment.id,
+      });
 
       // Update post comment count
       await ctx.db

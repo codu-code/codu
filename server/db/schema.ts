@@ -79,6 +79,15 @@ export const jobStatus = pgEnum("job_status", [
   "rejected",
 ]);
 
+// Engagement / Build Board
+export const pointAction = pgEnum("point_action", [
+  "post_published",
+  "comment_created",
+  "upvote_received",
+  "daily_active",
+  "shipped",
+]);
+
 // Legacy enums (kept for backward compatibility during migration)
 export const legacyVoteType = pgEnum("VoteType", ["UP", "DOWN"]);
 
@@ -2029,5 +2038,93 @@ export const jobRelations = relations(job, ({ one }) => ({
     fields: [job.approvedById],
     references: [user.id],
     relationName: "job_approved_by",
+  }),
+}));
+
+// ============================================
+// ENGAGEMENT — points + streaks (Build Board)
+// ============================================
+
+// Append-only event log so any window (7-day, all-time) can be recomputed.
+export const point_event = pgTable(
+  "point_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    action: pointAction("action").notNull(),
+    points: integer("points").notNull(),
+    sourceType: varchar("source_type", { length: 30 }),
+    sourceId: text("source_id"),
+    // Who triggered it (e.g. the upvoter) — for distinct-user anti-gaming.
+    actorId: text("actor_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    userIdx: index("point_event_user_idx").on(table.userId),
+    userCreatedIdx: index("point_event_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+    createdIdx: index("point_event_created_idx").on(table.createdAt),
+    // Idempotency / anti-gaming: one award per (user, action, source, actor).
+    dedupeKey: uniqueIndex("point_event_dedupe_idx").on(
+      table.userId,
+      table.action,
+      table.sourceId,
+      table.actorId,
+    ),
+  }),
+);
+
+export const pointEventRelations = relations(point_event, ({ one }) => ({
+  user: one(user, {
+    fields: [point_event.userId],
+    references: [user.id],
+    relationName: "point_event_user",
+  }),
+  actor: one(user, {
+    fields: [point_event.actorId],
+    references: [user.id],
+    relationName: "point_event_actor",
+  }),
+}));
+
+// One row per user — current daily-activity streak.
+export const user_streak = pgTable("user_streak", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  lastActiveOn: timestamp("last_active_on", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  }),
+  freezesAvailable: integer("freezes_available").default(0).notNull(),
+  updatedAt: timestamp("updated_at", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
+    .notNull()
+    .$onUpdate(() => new Date().toISOString())
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const userStreakRelations = relations(user_streak, ({ one }) => ({
+  user: one(user, {
+    fields: [user_streak.userId],
+    references: [user.id],
   }),
 }));
