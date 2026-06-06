@@ -10,6 +10,7 @@ export const revalidate = 3600;
 
 const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
+  "/about",
   "/articles",
   "/feed",
   "/advertise",
