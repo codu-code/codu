@@ -13,7 +13,7 @@ import {
 } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { SavedItemCard } from "@/components/SavedItemCard";
-import { NewsletterCapture } from "@/components/ds";
+import { NewsletterCapture, ConversionHub } from "@/components/ds";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
@@ -223,15 +223,18 @@ const FeedPage = () => {
         {/* Sidebar */}
         <section className="col-span-5 hidden lg:block">
           <div className="sticky top-20">
-            {/* About section - aligned with first feed item */}
-            <div className="mt-2 rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
-              <h3 className="mb-2 font-semibold text-neutral-900 dark:text-neutral-100">
-                About the Feed
-              </h3>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Curated developer content from across the web. Upvote articles
-                you find helpful, save them for later, and discover trending
-                topics in the developer community.
+            {/* Conversion hub — contribute / monetise actions */}
+            <div className="mt-2">
+              <ConversionHub />
+            </div>
+
+            {/* About section */}
+            <div className="mt-6 rounded-lg border border-hairline bg-surface p-4">
+              <h3 className="mb-2 font-semibold text-fg">About the Feed</h3>
+              <p className="text-sm text-muted">
+                Curated content for AI builders &amp; indie hackers. Upvote what
+                you find helpful, save it for later, and discover what&apos;s
+                working with AI.
               </p>
             </div>
 
