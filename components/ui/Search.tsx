@@ -179,7 +179,7 @@ function LoadingIcon(props: React.ComponentPropsWithoutRef<"svg">) {
 function HighlightQuery({ text, query }: { text: string; query: string }) {
   return (
     <Highlighter
-      highlightClassName="underline bg-transparent text-pink-500"
+      highlightClassName="underline bg-transparent text-accent"
       searchWords={[query]}
       autoEscape={true}
       textToHighlight={text}
@@ -218,7 +218,7 @@ function SearchResult({
       <div
         id={`${id}-title`}
         aria-hidden="true"
-        className="flex h-full gap-3 font-medium text-neutral-900 group-aria-selected:text-pink-500 dark:text-white"
+        className="flex h-full gap-3 font-medium text-neutral-900 group-aria-selected:text-accent dark:text-white"
       >
         {result.image ? (
           <Image
@@ -334,7 +334,7 @@ const SearchInput = forwardRef<
       />
       {autocompleteState.status === "stalled" && (
         <div className="absolute inset-y-0 right-3 flex items-center">
-          <LoadingIcon className="h-5 w-5 animate-spin stroke-neutral-200 text-neutral-900 dark:stroke-neutral-800 dark:text-pink-400" />
+          <LoadingIcon className="h-5 w-5 animate-spin stroke-neutral-200 text-neutral-900 dark:stroke-neutral-800 dark:text-accent" />
         </div>
       )}
     </div>

@@ -232,7 +232,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
             ) : faviconUrl ? (
               <img src={faviconUrl} alt="" className="h-5 w-5 rounded" />
             ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+              <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
                 {linkContent.source?.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -295,7 +295,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
             href={externalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 rounded-lg bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600"
+            className="flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent"
           >
             <ArrowTopRightOnSquareIcon className="h-5 w-5" />
             Visit Link at {hostname}
@@ -315,7 +315,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
               ) : faviconUrl ? (
                 <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent dark:bg-accent/15 dark:text-accent">
                   {linkContent.source.name?.charAt(0).toUpperCase() || "?"}
                 </div>
               )}

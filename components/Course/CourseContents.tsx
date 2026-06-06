@@ -28,7 +28,7 @@ export const CourseContens = ({ title, contents }: CourseContensProps) => {
               </div>
               <CheckCircleIcon
                 className={clsx("w-6", {
-                  "text-pink-600": c.completed,
+                  "text-accent": c.completed,
                 })}
               />
             </li>

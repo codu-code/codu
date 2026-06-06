@@ -44,7 +44,7 @@ const SourceInfoCard = ({
           ) : faviconUrl ? (
             <img src={faviconUrl} alt="" className="h-12 w-12 rounded-lg" />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 text-lg font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 text-lg font-bold text-accent dark:bg-accent/15 dark:text-accent">
               {name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}

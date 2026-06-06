@@ -610,7 +610,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     type="button"
                     onClick={onSubmit}
                     disabled={hasLoadingState}
-                    className="rounded-lg bg-pink-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+                    className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent disabled:opacity-50"
                   >
                     {hasLoadingState
                       ? "Working on it..."
@@ -632,10 +632,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
           <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
             <div className="loader-dots relative mt-2 block h-5 w-20">
-              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
             </div>
             <div className="mt-2 text-center text-xs font-medium text-neutral-400">
               Fetching post data.
@@ -682,7 +682,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                       {isActive && (
                         <motion.div
                           layoutId="active-tab-indicator"
-                          className="absolute inset-x-0 -bottom-3 h-0.5 bg-pink-600"
+                          className="absolute inset-x-0 -bottom-3 h-0.5 bg-accent"
                           transition={{
                             type: "spring",
                             bounce: 0.2,
@@ -706,7 +706,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     navigator.clipboard.writeText(draftUrl);
                     toast.success("Draft link copied!");
                   }}
-                  className="flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-pink-600 dark:text-neutral-400 dark:hover:text-pink-500"
+                  className="flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-accent dark:text-neutral-400 dark:hover:text-accent"
                 >
                   <Share2 className="h-4 w-4" />
                   Share Draft
@@ -829,7 +829,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                             removeMarkdown(body, {}).substring(0, 155) ||
                             "Brief description of your post..."
                           }
-                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
+                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
                         />
                         <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                           What readers will see before clicking. Good SEO
@@ -860,7 +860,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                               value={publishedTime}
                               onChange={(e) => setPublishedTime(e.target.value)}
                               min={new Date().toISOString().slice(0, 16)}
-                              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+                              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
                             />
                           )}
                           <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -883,7 +883,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                           placeholder="https://www.somesite.com/i-posted-here-first"
                           value={canonicalUrl}
                           onChange={(e) => setCanonicalUrl(e.target.value)}
-                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
+                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
                         />
                         <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
                           Add this if the post was originally published
@@ -948,7 +948,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
               type="button"
               onClick={handlePublish}
               disabled={isDisabled}
-              className="rounded-lg bg-pink-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               {currentPostStatus === status.PUBLISHED
                 ? "Save Changes"
@@ -967,7 +967,7 @@ const Create = ({ session }: { session: Session | null }) => {
     <Suspense
       fallback={
         <div className="flex h-screen items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-pink-600 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
         </div>
       }
     >

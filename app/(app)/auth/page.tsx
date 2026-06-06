@@ -46,7 +46,7 @@ export const PostAuthPage = (content: {
       </div>
       <div className="py-16">
         <div className="text-center">
-          <p className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
+          <p className="bg-gradient-to-r from-accent to-accent bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
             {content.heading}{" "}
           </p>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black dark:text-white sm:text-5xl">
@@ -54,7 +54,7 @@ export const PostAuthPage = (content: {
           </h1>
           <div className="mt-6">
             <Link
-              className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-base font-semibold tracking-wide text-transparent"
+              className="bg-gradient-to-r from-accent to-accent bg-clip-text text-base font-semibold tracking-wide text-transparent"
               href="/"
             >
               Return home<span aria-hidden="true"> &rarr;</span>

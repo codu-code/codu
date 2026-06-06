@@ -146,7 +146,7 @@ const SubNav: FunctionComponent<SubNavProps> = ({ session, close }) => {
             ref={disclosureButtonRef}
             className={classNames(
               item.fancy
-                ? "block justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                ? "block justify-center bg-gradient-to-r from-accent to-accent px-4 text-white shadow-sm hover:from-accent hover:to-accent focus:outline-none focus:ring-2 focus:ring-offset-2"
                 : "block px-3 text-neutral-900 hover:bg-neutral-300 hover:text-black focus:bg-neutral-300 focus:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white dark:focus:bg-neutral-900",
               "rounded-md py-2 text-center text-base font-medium",
             )}

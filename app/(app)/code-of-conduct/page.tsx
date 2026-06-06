@@ -7,7 +7,7 @@ export const metadata = {
 const CodeOfConduct = () => {
   return (
     <div>
-      <div className="relative bg-white p-4 shadow-lg dark:border-neutral-600 dark:border-l-pink-600 dark:bg-neutral-900">
+      <div className="relative bg-white p-4 shadow-lg dark:border-neutral-600 dark:border-l-accent dark:bg-neutral-900">
         <div className="lg:max-w-8xl relative px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:mx-auto lg:px-8">
           <div className="lg:pl-8">
             <div className="mx-auto max-w-prose text-base">
@@ -120,7 +120,7 @@ const CodeOfConduct = () => {
                 behavior may be reported to the project team responsible for
                 enforcement at{" "}
                 <a
-                  className="text-1xl z-20 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text font-bold text-transparent"
+                  className="text-1xl z-20 bg-gradient-to-r from-accent to-accent bg-clip-text font-bold text-transparent"
                   href="mailto:hi@codu.co"
                 >
                   hi@codu.co
@@ -135,7 +135,7 @@ const CodeOfConduct = () => {
               <p className="mt-3 text-lg text-neutral-500 dark:text-white">
                 This Code of Conduct is adapted from the{" "}
                 <a
-                  className="text-1xl z-20 bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text font-bold text-transparent"
+                  className="text-1xl z-20 bg-gradient-to-r from-accent to-accent bg-clip-text font-bold text-transparent"
                   href="https://www.contributor-covenant.org/"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -145,7 +145,7 @@ const CodeOfConduct = () => {
                 , version 2.1, available at{" "}
                 <a
                   href="https://www.contributor-covenant.org/version/2/1/code_of_conduct/"
-                  className="z-20 break-words bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-lg font-bold text-transparent lg:whitespace-nowrap"
+                  className="z-20 break-words bg-gradient-to-r from-accent to-accent bg-clip-text text-lg font-bold text-transparent lg:whitespace-nowrap"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

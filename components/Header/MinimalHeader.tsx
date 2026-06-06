@@ -117,7 +117,7 @@ export function MinimalHeader({
           <>
             {/* Create button - desktop only */}
             <Link
-              className="hidden items-center gap-1 rounded-md bg-pink-500 px-2.5 py-1 text-sm font-medium text-white hover:bg-pink-600 lg:flex"
+              className="hidden items-center gap-1 rounded-md bg-accent px-2.5 py-1 text-sm font-medium text-white hover:bg-accent lg:flex"
               to="/create"
             >
               <PlusIcon className="h-4 w-4" />
@@ -131,14 +131,14 @@ export function MinimalHeader({
             >
               <span className="sr-only">View notifications</span>
               {hasNotifications && (
-                <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-pink-600" />
+                <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-accent" />
               )}
               <BellIcon className="h-6 w-6" aria-hidden="true" />
             </Link>
 
             {/* User menu */}
             <Menu as="div" className="relative">
-              <MenuButton className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-white dark:ring-offset-zinc-900">
+              <MenuButton className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-white dark:ring-offset-zinc-900">
                 <span className="sr-only">Open user menu</span>
                 {session.user?.image ? (
                   <img

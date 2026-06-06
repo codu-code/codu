@@ -23,7 +23,7 @@ const InlineAuthorBio = ({
             className="h-8 w-8 rounded-full object-cover"
           />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent dark:bg-accent/15 dark:text-accent">
             {name?.charAt(0).toUpperCase() || "?"}
           </div>
         )}

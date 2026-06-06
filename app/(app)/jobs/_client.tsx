@@ -60,7 +60,7 @@ export default function JobsClient() {
           aria-pressed={remote}
           className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
             remote
-              ? "border-pink-600 bg-pink-600 text-white"
+              ? "border-accent bg-accent text-white"
               : "border-neutral-300 text-neutral-700 hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300"
           }`}
         >
@@ -72,7 +72,7 @@ export default function JobsClient() {
           aria-pressed={aiNative}
           className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
             aiNative
-              ? "border-pink-600 bg-pink-600 text-white"
+              ? "border-accent bg-accent text-white"
               : "border-neutral-300 text-neutral-700 hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-300"
           }`}
         >
@@ -106,7 +106,7 @@ export default function JobsClient() {
             </p>
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
               Be the first to{" "}
-              <Link href="/jobs/create" className="text-pink-600 underline">
+              <Link href="/jobs/create" className="text-accent underline">
                 post a role
               </Link>
               .
@@ -120,7 +120,7 @@ export default function JobsClient() {
             href={`/jobs/${j.slug}`}
             className={`block rounded-lg border bg-white p-5 transition-colors hover:border-neutral-400 dark:bg-neutral-900 ${
               j.featured
-                ? "border-pink-500/60 ring-1 ring-pink-500/30"
+                ? "border-accent/60 ring-1 ring-accent/30"
                 : "border-neutral-200 dark:border-neutral-800 dark:hover:border-neutral-700"
             }`}
           >
@@ -138,7 +138,7 @@ export default function JobsClient() {
                     {j.jobTitle}
                   </h2>
                   {j.featured && (
-                    <span className="rounded-full bg-pink-600 px-2 py-0.5 text-xs font-semibold text-white">
+                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
                       Featured
                     </span>
                   )}
@@ -152,7 +152,7 @@ export default function JobsClient() {
                     {TYPE_LABELS[j.type] ?? j.type}
                   </span>
                   {j.aiNative && (
-                    <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">
+                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent dark:bg-accent/15 dark:text-accent">
                       AI-native
                     </span>
                   )}

@@ -28,7 +28,7 @@ const SortIcon = ({
 }) => (
   <ChevronUpDownIcon
     className={`ml-1 inline h-4 w-4 ${
-      sortField === field ? "text-orange-500" : "text-neutral-400"
+      sortField === field ? "text-accent" : "text-neutral-400"
     }`}
   />
 );
@@ -254,7 +254,7 @@ const TagsAdmin = () => {
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               Unused Tags
             </p>
-            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+            <p className="text-2xl font-bold text-accent dark:text-accent">
               {data.stats.tagsWithNoPosts}
             </p>
           </div>
@@ -495,7 +495,7 @@ const TagsAdmin = () => {
                 <button
                   type="submit"
                   disabled={updateTag.status === "pending"}
-                  className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                  className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent disabled:opacity-50"
                 >
                   {updateTag.status === "pending"
                     ? "Saving..."

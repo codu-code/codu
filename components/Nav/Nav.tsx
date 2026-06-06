@@ -154,13 +154,13 @@ const Nav = ({
                       >
                         <span className="sr-only">View notifications</span>
                         {hasNotifications && (
-                          <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-pink-600" />
+                          <div className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-accent" />
                         )}
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
                       </Link>
                       <Menu as="div" className="relative ml-4">
                         <div>
-                          <MenuButton className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-white">
+                          <MenuButton className="flex rounded-full bg-black text-sm ring-offset-2 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-white">
                             <span className="sr-only">Open user menu</span>
                             {session.user?.image ? (
                               <img
@@ -222,7 +222,7 @@ const Nav = ({
                   >
                     <span className="sr-only">View notifications</span>
                     {hasNotifications && (
-                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-pink-500" />
+                      <div className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-accent" />
                     )}
                     <BellIcon className="h-6 w-6" aria-hidden="true" />
                   </Link>

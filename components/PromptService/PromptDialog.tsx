@@ -35,7 +35,7 @@ export const PromptDialog = ({
         </button>
       </div>
       <div className="sm:flex sm:items-start">
-        <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-pink-600 sm:mx-0 sm:h-10 sm:w-10">
+        <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-accent to-accent sm:mx-0 sm:h-10 sm:w-10">
           <ExclamationCircleIcon
             className="text-white-600 h-6 w-6"
             aria-hidden="true"

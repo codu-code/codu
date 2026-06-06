@@ -69,7 +69,7 @@ function LinkInput({ onSubmit, onCancel }: LinkInputProps) {
       />
       <button
         type="submit"
-        className="text-xs text-pink-600 hover:text-pink-500"
+        className="text-xs text-accent hover:text-accent"
       >
         Add
       </button>

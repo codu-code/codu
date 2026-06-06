@@ -263,7 +263,7 @@ const FeedPage = () => {
                       }
                       className={`rounded border px-3 py-1.5 text-sm capitalize transition-colors ${
                         category === cat
-                          ? "border-orange-500 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-950 dark:text-orange-300"
+                          ? "border-accent bg-accent/10 text-accent dark:border-accent dark:bg-accent/15 dark:text-accent"
                           : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500"
                       }`}
                     >
@@ -341,7 +341,7 @@ const SavedArticlesPreview = () => {
       {data.items.length > 3 && (
         <Link
           href="/saved"
-          className="block text-center text-sm text-orange-600 hover:text-orange-500 dark:text-orange-400"
+          className="block text-center text-sm text-accent hover:text-accent dark:text-accent"
         >
           View all saved
         </Link>

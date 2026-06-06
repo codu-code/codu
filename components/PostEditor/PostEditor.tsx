@@ -179,7 +179,7 @@ export function PostEditor({
         className={`flex min-h-[600px] items-center justify-center ${className}`}
       >
         <div className="flex flex-col items-center gap-3 text-neutral-500 dark:text-neutral-400">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-pink-600 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
           <span>Loading editor...</span>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function PostEditor({
                 onClick={() => setActiveTab(tab.id)}
                 className={`relative flex items-center gap-2 px-5 py-3.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "text-pink-600 dark:text-pink-500"
+                    ? "text-accent dark:text-accent"
                     : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
                 }`}
                 title={tab.description}
@@ -213,7 +213,7 @@ export function PostEditor({
                 {tab.label}
                 {/* Active indicator */}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-pink-600 dark:bg-pink-500" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent dark:bg-accent" />
                 )}
               </button>
             );
@@ -282,7 +282,7 @@ export function PostEditor({
             type="button"
             onClick={handlePublish}
             disabled={!isValid || isSaving}
-            className="rounded-lg bg-pink-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {activeTab === "link" ? "Share Link" : "Publish"}
           </button>

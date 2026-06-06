@@ -256,7 +256,7 @@ const UnifiedContentCard = ({
                 className="h-4 w-4 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+              <div className="flex h-4 w-4 items-center justify-center rounded-full bg-accent/10 text-[10px] font-bold text-accent dark:bg-accent/15 dark:text-accent">
                 {author.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -277,7 +277,7 @@ const UnifiedContentCard = ({
               ) : faviconUrl ? (
                 <img src={faviconUrl} alt="" className="h-4 w-4 rounded" />
               ) : (
-                <div className="flex h-4 w-4 items-center justify-center rounded bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+                <div className="flex h-4 w-4 items-center justify-center rounded bg-accent/10 text-[10px] font-bold text-accent dark:bg-accent/15 dark:text-accent">
                   {source.name?.charAt(0).toUpperCase() || "?"}
                 </div>
               )}
@@ -294,7 +294,7 @@ const UnifiedContentCard = ({
               ) : faviconUrl ? (
                 <img src={faviconUrl} alt="" className="h-4 w-4 rounded" />
               ) : (
-                <div className="flex h-4 w-4 items-center justify-center rounded bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+                <div className="flex h-4 w-4 items-center justify-center rounded bg-accent/10 text-[10px] font-bold text-accent dark:bg-accent/15 dark:text-accent">
                   {source.name?.charAt(0).toUpperCase() || "?"}
                 </div>
               )}

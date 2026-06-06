@@ -10,7 +10,7 @@ const badgeStyles: Record<
   { bg: string; text: string; label: string }
 > = {
   article: {
-    bg: "bg-gradient-to-r from-orange-400 to-pink-600",
+    bg: "bg-gradient-to-r from-accent to-accent",
     text: "text-white",
     label: "Article",
   },

@@ -35,8 +35,8 @@ const VoteButtons = ({
       <button
         onClick={() => handleVote("up")}
         disabled={isLoading}
-        className={`rounded p-1 transition-colors hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
-          userVote === "up" ? "text-orange-500" : "text-neutral-400"
+        className={`rounded p-1 transition-colors hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
+          userVote === "up" ? "text-accent" : "text-neutral-400"
         }`}
         aria-label="Upvote"
         data-testid="vote-up-button"
@@ -46,7 +46,7 @@ const VoteButtons = ({
       <span
         className={`min-w-[2rem] text-center font-medium ${
           score > 0
-            ? "text-orange-500"
+            ? "text-accent"
             : score < 0
               ? "text-blue-500"
               : "text-neutral-500"
@@ -58,7 +58,7 @@ const VoteButtons = ({
       <button
         onClick={() => handleVote("down")}
         disabled={isLoading}
-        className={`rounded p-1 transition-colors hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
+        className={`rounded p-1 transition-colors hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
           userVote === "down" ? "text-blue-500" : "text-neutral-400"
         }`}
         aria-label="Downvote"

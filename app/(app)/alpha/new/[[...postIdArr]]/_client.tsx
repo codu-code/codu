@@ -133,7 +133,7 @@ const Create = () => {
                     <Disclosure>
                       {({ open }) => (
                         <>
-                          <DisclosureButton className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-pink-300 focus-visible:ring-opacity-75">
+                          <DisclosureButton className="flex w-full justify-between py-2 text-left text-sm font-medium text-white focus:outline-none focus-visible:ring focus-visible:ring-accent focus-visible:ring-opacity-75">
                             <span>View advanced settings</span>
                             <ChevronUpIcon
                               className={`${
@@ -165,7 +165,7 @@ const Create = () => {
                       <button
                         type="button"
                         disabled={isDisabled}
-                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                        className="inline-flex justify-center border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                         onClick={async () => {
                           if (isDisabled) return;
                           await savePost();
@@ -178,11 +178,11 @@ const Create = () => {
                     <button
                       type="submit"
                       disabled={isDisabled}
-                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2"
+                      className="ml-5 inline-flex justify-center bg-gradient-to-r from-accent to-accent px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-accent hover:to-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                     >
                       {hasLoadingState ? (
                         <>
-                          <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-orange-600 border-t-white" />
+                          <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-accent border-t-white" />
                           {"Saving"}
                         </>
                       ) : (
@@ -202,10 +202,10 @@ const Create = () => {
           <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
             <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
               <div className="loader-dots relative mt-2 block h-5 w-20">
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
-                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-orange-400 to-pink-600 shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+                <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
               </div>
               <div className="mt-2 text-center text-xs font-medium text-neutral-400">
                 Fetching post data.
@@ -255,7 +255,7 @@ const Create = () => {
               <button
                 type="button"
                 disabled={isDisabled}
-                className="ml-5 inline-flex justify-center bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
+                className="ml-5 inline-flex justify-center bg-gradient-to-r from-accent to-accent px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-accent hover:to-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50"
                 onClick={() => setOpen(true)}
                 aria-label={
                   data?.published

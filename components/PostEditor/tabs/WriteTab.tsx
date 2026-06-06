@@ -141,7 +141,7 @@ export function WriteTab({
             <button
               type="button"
               onClick={toggleMode}
-              className="flex items-center gap-1.5 text-sm text-pink-600 hover:text-pink-500 dark:text-pink-500 dark:hover:text-pink-400"
+              className="flex items-center gap-1.5 text-sm text-accent hover:text-accent dark:text-accent dark:hover:text-accent"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.9 6.858l4.242 4.243L7.242 21H3v-4.243l9.9-9.9Zm1.414-1.414l2.121-2.122a1 1 0 0 1 1.414 0l2.829 2.829a1 1 0 0 1 0 1.414l-2.122 2.121-4.242-4.242Z" />

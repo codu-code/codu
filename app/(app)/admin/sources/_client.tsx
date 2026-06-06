@@ -61,7 +61,7 @@ const LogoWithFallback = ({
   // Fallback to initial letter
   return (
     <span
-      className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-orange-500 ${textSize} font-medium text-white`}
+      className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-accent ${textSize} font-medium text-white`}
     >
       {initial}
     </span>
@@ -351,7 +351,7 @@ const AdminSourcesPage = () => {
           </button>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600"
+            className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent"
           >
             <PlusIcon className="h-5 w-5" />
             Add Source
@@ -442,7 +442,7 @@ const AdminSourcesPage = () => {
               <button
                 type="submit"
                 disabled={createSource.status === "pending"}
-                className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent disabled:opacity-50"
               >
                 {createSource.status === "pending" ? "Adding..." : "Add Source"}
               </button>
@@ -629,7 +629,7 @@ const AdminSourcesPage = () => {
                 <button
                   type="submit"
                   disabled={updateSource.status === "pending"}
-                  className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                  className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent disabled:opacity-50"
                 >
                   {updateSource.status === "pending"
                     ? "Saving..."

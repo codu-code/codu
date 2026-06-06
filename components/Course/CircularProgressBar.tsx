@@ -19,7 +19,7 @@ export const CircularProgressBar = ({ progress }: { progress: number }) => {
           cy="60"
         />
         <circle
-          className="text-pink-600"
+          className="text-accent"
           stroke-width="10"
           strokeDasharray={circumference}
           strokeDashoffset={circumference - (progress / 100) * circumference}

@@ -69,7 +69,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           <div className="flex flex-wrap items-center gap-2">
             <Heading level={1}>{job.jobTitle}</Heading>
             {job.featured && (
-              <span className="rounded-full bg-pink-600 px-2 py-0.5 text-xs font-semibold text-white">
+              <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
                 Featured
               </span>
             )}
@@ -87,7 +87,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           {TYPE_LABELS[job.type] ?? job.type}
         </span>
         {job.aiNative && (
-          <span className="rounded-full bg-orange-100 px-3 py-1 text-sm text-orange-700 dark:bg-orange-500/15 dark:text-orange-400">
+          <span className="rounded-full bg-accent/10 px-3 py-1 text-sm text-accent dark:bg-accent/15 dark:text-accent">
             AI-native
           </span>
         )}

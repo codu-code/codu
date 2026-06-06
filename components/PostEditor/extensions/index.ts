@@ -116,7 +116,7 @@ export const getArticleExtensions = (
     openOnClick: false,
     HTMLAttributes: {
       class:
-        "text-pink-600 dark:text-pink-500 underline underline-offset-2 hover:text-pink-700 dark:hover:text-pink-400 cursor-pointer transition-colors",
+        "text-accent dark:text-accent underline underline-offset-2 hover:text-accent dark:hover:text-accent cursor-pointer transition-colors",
     },
   }),
 

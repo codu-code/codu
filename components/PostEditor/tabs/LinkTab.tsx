@@ -59,7 +59,7 @@ export function LinkTab({
           htmlFor="link-url"
           className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
         >
-          Link URL <span className="text-pink-600">*</span>
+          Link URL <span className="text-accent">*</span>
         </label>
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -71,7 +71,7 @@ export function LinkTab({
             value={url}
             onChange={(e) => onUrlChange(e.target.value)}
             placeholder={urlPlaceholder}
-            className="w-full rounded-lg border border-neutral-300 bg-white py-3 pl-10 pr-4 text-neutral-900 placeholder:text-neutral-400 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 dark:focus:border-pink-500"
+            className="w-full rounded-lg border border-neutral-300 bg-white py-3 pl-10 pr-4 text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 dark:focus:border-accent"
           />
         </div>
         <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400">
@@ -102,7 +102,7 @@ export function LinkTab({
           htmlFor="link-title"
           className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
         >
-          Title <span className="text-pink-600">*</span>
+          Title <span className="text-accent">*</span>
         </label>
         <input
           id="link-title"
@@ -110,7 +110,7 @@ export function LinkTab({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder={titlePlaceholder}
-          className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-400 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 dark:focus:border-pink-500"
+          className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 dark:focus:border-accent"
         />
         <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400">
           Edit the title or use the auto-populated one from the link.

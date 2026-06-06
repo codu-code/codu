@@ -198,7 +198,7 @@ export function TagInput({
       )}
 
       <div
-        className={`flex flex-wrap items-center gap-2 rounded-lg border bg-white p-2 transition-colors focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 dark:bg-neutral-800 ${
+        className={`flex flex-wrap items-center gap-2 rounded-lg border bg-white p-2 transition-colors focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 dark:bg-neutral-800 ${
           error
             ? "border-red-500 dark:border-red-500"
             : "border-neutral-300 dark:border-neutral-600"
@@ -260,7 +260,7 @@ export function TagInput({
                           onMouseEnter={() => setHighlightedIndex(index)}
                           className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
                             highlightedIndex === index
-                              ? "bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
+                              ? "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent"
                               : "text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
                           }`}
                         >
@@ -288,7 +288,7 @@ export function TagInput({
                     <button
                       type="button"
                       onClick={() => addTag(inputValue)}
-                      className="flex items-center gap-2 text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300"
+                      className="flex items-center gap-2 text-accent hover:text-accent dark:text-accent dark:hover:text-accent"
                     >
                       <TagIcon className="h-3.5 w-3.5" />
                       <span>

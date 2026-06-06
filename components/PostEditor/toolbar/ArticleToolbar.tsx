@@ -74,7 +74,7 @@ function UrlInput({
       />
       <button
         type="submit"
-        className="text-sm font-medium text-pink-600 hover:text-pink-500"
+        className="text-sm font-medium text-accent hover:text-accent"
       >
         Add
       </button>
@@ -397,7 +397,7 @@ export function ArticleToolbar({
         <button
           type="button"
           onClick={onSwitchToMarkdown}
-          className="flex items-center gap-1.5 text-sm text-pink-600 hover:text-pink-500 dark:text-pink-500 dark:hover:text-pink-400"
+          className="flex items-center gap-1.5 text-sm text-accent hover:text-accent dark:text-accent dark:hover:text-accent"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm1 2v14h16V5H4Zm3 10.5H5v-7h2l2 2.5 2-2.5h2v7h-2v-4l-2 2.5-2-2.5v4Zm11-3h2l-3 3-3-3h2V8h2v4.5Z" />

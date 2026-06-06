@@ -51,7 +51,7 @@ const PreviewPage = async (props: Props) => {
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* Draft indicator */}
       <nav className="mb-6 flex items-center gap-2 text-sm">
-        <span className="rounded-full bg-pink-100 px-3 py-1 font-medium text-pink-600 dark:bg-pink-900/30 dark:text-pink-400">
+        <span className="rounded-full bg-accent/10 px-3 py-1 font-medium text-accent dark:bg-accent/15 dark:text-accent">
           Draft Preview
         </span>
       </nav>
@@ -71,7 +71,7 @@ const PreviewPage = async (props: Props) => {
                 className="h-5 w-5 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
                 {post.user.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -100,7 +100,7 @@ const PreviewPage = async (props: Props) => {
               <Link
                 href={`/feed?tag=${tag.title.toLowerCase()}`}
                 key={tag.title}
-                className="rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700"
+                className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-white hover:bg-accent"
               >
                 {getCamelCaseFromLower(tag.title)}
               </Link>

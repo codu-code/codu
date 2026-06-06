@@ -99,7 +99,7 @@ const ArticlePreview: NextPage<Props> = ({
 
   return (
     <article className="relative my-2 rounded-r border border-l-0 border-neutral-300 bg-white p-4 pl-6 dark:border-neutral-600 dark:bg-neutral-900">
-      <div className="absolute bottom-[-1px] left-0 top-[-1px] flex w-2 justify-between bg-pink-600" />
+      <div className="absolute bottom-[-1px] left-0 top-[-1px] flex w-2 justify-between bg-accent" />
       <div className="flex justify-between">
         <div className="mb-4 flex items-center">
           <span className="sr-only">{name}</span>
@@ -147,7 +147,7 @@ const ArticlePreview: NextPage<Props> = ({
       <div className="flex w-full content-center justify-between">
         <div className="flex w-full items-center justify-between">
           <Link
-            className="semibold cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-lg tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
+            className="semibold cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text text-lg tracking-wide text-transparent hover:from-accent hover:to-accent"
             href={`/${username}/${slug}`}
           >
             Read full article
@@ -155,7 +155,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
-                className="rounded-full p-2 hover:bg-neutral-300 focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600 dark:hover:bg-neutral-800 lg:mx-auto"
+                className="rounded-full p-2 hover:bg-neutral-300 focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-accent dark:hover:bg-neutral-800 lg:mx-auto"
                 onClick={() => {
                   if (!session) {
                     return signIn();

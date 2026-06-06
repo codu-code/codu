@@ -94,7 +94,7 @@ const EditorNav = ({
             <button
               onClick={onPublish}
               disabled={isDisabled}
-              className="rounded-md bg-pink-500 px-2.5 py-1 text-sm font-medium text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-accent px-2.5 py-1 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               {postStatus === status.PUBLISHED ? "Save changes" : "Publish"}
             </button>
@@ -107,13 +107,13 @@ const EditorNav = ({
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
-                    <div className="absolute right-0 top-0 h-2 w-2 rounded-full bg-pink-500" />
+                    <div className="absolute right-0 top-0 h-2 w-2 rounded-full bg-accent" />
                   )}
                   <BellIcon className="h-5 w-5" aria-hidden="true" />
                 </Link>
                 <Menu as="div" className="relative ml-3">
                   <div>
-                    <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
+                    <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
                       <span className="sr-only">Open user menu</span>
                       {session.user?.image ? (
                         <img

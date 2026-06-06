@@ -231,7 +231,7 @@ export function ReportModalProvider() {
               placeholder="Describe the issue..."
               onChange={(e) => setReportBody(e.target.value)}
               value={reportBody}
-              className="mt-2 block w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder:text-neutral-400 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+              className="mt-2 block w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500"
               ref={textAreaRef}
             />
 
@@ -245,7 +245,7 @@ export function ReportModalProvider() {
               </button>
               <button
                 disabled={loading}
-                className="rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                 type="submit"
               >
                 {loading ? "Submitting..." : "Submit Report"}

@@ -198,7 +198,7 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleExternalClick}
-          className="flex items-center justify-center gap-2 rounded-lg bg-orange-500 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-600"
+          className="flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent"
         >
           <ArrowTopRightOnSquareIcon className="h-5 w-5" />
           Read Full Article at {hostname}

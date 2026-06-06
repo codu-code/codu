@@ -114,7 +114,7 @@ const FeedFilters = ({
                             : "text-neutral-700 dark:text-neutral-200"
                         } ${
                           type === option.value
-                            ? "font-medium text-orange-600 dark:text-orange-400"
+                            ? "font-medium text-accent dark:text-accent"
                             : ""
                         }`}
                       >
@@ -159,7 +159,7 @@ const FeedFilters = ({
                           : "text-neutral-700 dark:text-neutral-200"
                       } ${
                         sort === option.value
-                          ? "font-medium text-orange-600 dark:text-orange-400"
+                          ? "font-medium text-accent dark:text-accent"
                           : ""
                       }`}
                     >
@@ -200,7 +200,7 @@ const FeedFilters = ({
                         focus
                           ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
                           : "text-neutral-700 dark:text-neutral-200"
-                      } ${!category ? "font-medium text-orange-600 dark:text-orange-400" : ""}`}
+                      } ${!category ? "font-medium text-accent dark:text-accent" : ""}`}
                     >
                       All Topics
                     </button>
@@ -217,7 +217,7 @@ const FeedFilters = ({
                             : "text-neutral-700 dark:text-neutral-200"
                         } ${
                           category === cat
-                            ? "font-medium text-orange-600 dark:text-orange-400"
+                            ? "font-medium text-accent dark:text-accent"
                             : ""
                         }`}
                       >

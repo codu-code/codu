@@ -19,7 +19,7 @@ export default function NotFound() {
       </div>
       <div className="py-16">
         <div className="text-center">
-          <p className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
+          <p className="bg-gradient-to-r from-accent to-accent bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
             Well this is embarrassing
           </p>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black sm:text-5xl">
@@ -30,7 +30,7 @@ export default function NotFound() {
           </p>
           <div className="mt-6">
             <Link
-              className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-base font-semibold tracking-wide text-transparent"
+              className="bg-gradient-to-r from-accent to-accent bg-clip-text text-base font-semibold tracking-wide text-transparent"
               href="/"
             >
               Return home<span aria-hidden="true"> &rarr;</span>
@@ -40,7 +40,7 @@ export default function NotFound() {
             Or <span className="font-semibold">if you are feeling helpful</span>
             , send us more details by opening an issue{" "}
             <a
-              className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-base font-semibold tracking-wide text-transparent"
+              className="bg-gradient-to-r from-accent to-accent bg-clip-text text-base font-semibold tracking-wide text-transparent"
               target="_blank"
               rel="nofollow"
               href="https://github.com/codu-code/codu/issues/new"

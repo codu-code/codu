@@ -20,7 +20,7 @@ const colorClasses = {
   purple:
     "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
   orange:
-    "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+    "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
 };
 
 const StatCard = ({
@@ -164,9 +164,9 @@ const AdminDashboard = () => {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link
             href="/admin/moderation"
-            className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:border-orange-300 hover:bg-orange-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-orange-700 dark:hover:bg-orange-900/20"
+            className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:border-accent hover:bg-accent/10 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-accent dark:hover:bg-accent/20"
           >
-            <FlagIcon className="h-6 w-6 text-orange-500" />
+            <FlagIcon className="h-6 w-6 text-accent" />
             <div>
               <p className="font-medium text-neutral-900 dark:text-white">
                 Moderation Queue

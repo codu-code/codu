@@ -36,7 +36,7 @@ function SuccessState() {
         hi in our{" "}
         <a
           href="https://www.codu.co/discord"
-          className="text-orange-400 hover:underline"
+          className="text-accent hover:underline"
         >
           Discord
         </a>
@@ -184,13 +184,13 @@ export function SpeakerForm() {
           {speakerFormats.map((f) => (
             <label
               key={f}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={f}
                 {...register("format")}
-                className="h-4 w-4 accent-pink-600"
+                className="h-4 w-4 accent-accent"
               />
               <span className="text-sm">{speakerFormatLabels[f]}</span>
             </label>
@@ -260,13 +260,13 @@ export function SpeakerForm() {
                     {talkLengths.map((l) => (
                       <label
                         key={l}
-                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-900/60 px-3 py-2 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-900/60 px-3 py-2 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
                       >
                         <input
                           type="radio"
                           value={l}
                           {...register(`talks.${idx}.length` as const)}
-                          className="h-4 w-4 accent-pink-600"
+                          className="h-4 w-4 accent-accent"
                         />
                         <span className="text-sm">{talkLengthLabels[l]}</span>
                       </label>
@@ -304,7 +304,7 @@ export function SpeakerForm() {
             onClick={() =>
               append({ title: "", length: "STANDARD_20", abstract: "" })
             }
-            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:border-orange-400/60 hover:text-white"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:border-accent/60 hover:text-white"
           >
             <PlusIcon className="h-4 w-4" />
             Add another talk
@@ -331,13 +331,13 @@ export function SpeakerForm() {
           {speakerExperiences.map((e) => (
             <label
               key={e}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={e}
                 {...register("experience")}
-                className="h-4 w-4 accent-pink-600"
+                className="h-4 w-4 accent-accent"
               />
               <span>{speakerExperienceLabels[e]}</span>
             </label>

@@ -117,7 +117,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
                 src={faviconUrl}
               />
             ) : (
-              <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-3xl font-bold text-white sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32 lg:text-4xl">
+              <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent text-3xl font-bold text-white sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32 lg:text-4xl">
                 {source.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}

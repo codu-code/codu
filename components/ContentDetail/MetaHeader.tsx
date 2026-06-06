@@ -85,7 +85,7 @@ const ContentMetaHeader = ({
               className="h-5 w-5 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
               {author.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -125,7 +125,7 @@ const ContentMetaHeader = ({
           ) : faviconUrl ? (
             <img src={faviconUrl} alt="" className="h-5 w-5 rounded" />
           ) : (
-            <div className="flex h-5 w-5 items-center justify-center rounded bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+            <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
               {source.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}

@@ -46,7 +46,7 @@ export const getDiscussionExtensions = (
   Link.configure({
     openOnClick: false,
     HTMLAttributes: {
-      class: "text-pink-600 underline hover:text-pink-500 cursor-pointer",
+      class: "text-accent underline hover:text-accent cursor-pointer",
     },
   }),
   Superscript,

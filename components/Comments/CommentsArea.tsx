@@ -235,12 +235,12 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
                     {name}
                   </Link>
                   {isCurrentUser && !isAuthor && (
-                    <div className="rounded border border-orange-400 px-1 py-[2px] text-xs text-orange-400">
+                    <div className="rounded border border-accent px-1 py-[2px] text-xs text-accent">
                       YOU
                     </div>
                   )}
                   {isAuthor && (
-                    <div className="rounded border border-pink-500 px-1 py-[2px] text-xs text-pink-500">
+                    <div className="rounded border border-accent px-1 py-[2px] text-xs text-accent">
                       AUTHOR
                     </div>
                   )}
@@ -508,14 +508,14 @@ const CommentsArea = ({ postId, postOwnerId }: Props) => {
             <p>
               <button
                 onClick={() => signIn()}
-                className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
+                className="cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text tracking-wide text-transparent hover:from-accent hover:to-accent"
               >
                 Sign in
               </button>{" "}
               or{" "}
               <button
                 onClick={() => signIn()}
-                className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
+                className="cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text tracking-wide text-transparent hover:from-accent hover:to-accent"
               >
                 sign up
               </button>{" "}

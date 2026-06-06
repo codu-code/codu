@@ -32,7 +32,7 @@ function SuccessState() {
         hi in our{" "}
         <a
           href="https://www.codu.co/discord"
-          className="text-orange-400 hover:underline"
+          className="text-accent hover:underline"
         >
           Discord
         </a>
@@ -165,13 +165,13 @@ export function VolunteerForm() {
           {volunteerAreas.map((area) => (
             <label
               key={area}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={area}
                 {...register("area")}
-                className="h-4 w-4 accent-pink-600"
+                className="h-4 w-4 accent-accent"
               />
               <span>{volunteerAreaLabels[area]}</span>
             </label>
@@ -230,13 +230,13 @@ export function VolunteerForm() {
           {volunteerCommitments.map((c) => (
             <label
               key={c}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={c}
                 {...register("commitment")}
-                className="h-4 w-4 accent-pink-600"
+                className="h-4 w-4 accent-accent"
               />
               <span>{volunteerCommitmentLabels[c]}</span>
             </label>

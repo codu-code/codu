@@ -67,7 +67,7 @@ export function DiscussionEditor({
               <button
                 type="button"
                 onClick={toggleMode}
-                className="ml-2 whitespace-nowrap text-xs text-pink-600 hover:text-pink-500 hover:underline"
+                className="ml-2 whitespace-nowrap text-xs text-accent hover:text-accent hover:underline"
               >
                 Switch to Markdown
               </button>
@@ -103,7 +103,7 @@ export function DiscussionEditor({
             <button
               type="button"
               onClick={toggleMode}
-              className="text-xs text-pink-600 hover:text-pink-500 hover:underline"
+              className="text-xs text-accent hover:text-accent hover:underline"
             >
               Switch to Rich Text Editor
             </button>
@@ -129,7 +129,7 @@ export function DiscussionEditor({
             onClick={() => setShowToolbar(!showToolbar)}
             className={`font-serif text-lg transition-colors ${
               showToolbar
-                ? "text-pink-600"
+                ? "text-accent"
                 : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
             }`}
             title={
@@ -161,7 +161,7 @@ export function DiscussionEditor({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting || isEmpty()}
-            className="rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:from-orange-300 hover:to-pink-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-gradient-to-r from-accent to-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:from-accent hover:to-accent disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Submitting..." : submitLabel}
           </button>

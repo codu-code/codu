@@ -66,26 +66,26 @@ const Metrics = async () => {
       <div className="relative">
         <PageHeading>Metrics</PageHeading>
         <div className="mt-4 grid-cols-2 gap-8 sm:grid">
-          <div className="mb-4 border-l-4 border-l-orange-400 bg-neutral-800 p-8 sm:mb-0">
+          <div className="mb-4 border-l-4 border-l-accent bg-neutral-800 p-8 sm:mb-0">
             <h2 className="text-2xl font-bold">User Count</h2>
             <p className="text-8xl font-semibold">{users.count}</p>
           </div>
 
-          <div className="mb-4 border-l-4 border-l-pink-600 bg-neutral-800 p-8 sm:mb-0">
+          <div className="mb-4 border-l-4 border-l-accent bg-neutral-800 p-8 sm:mb-0">
             <h2 className="text-2xl font-bold">Published Posts</h2>
             <p className="text-8xl font-semibold">
               {postsPublishedStats.count}
             </p>
           </div>
 
-          <div className="mb-4 border-l-4 border-l-pink-600 bg-neutral-800 p-8 sm:mb-0">
+          <div className="mb-4 border-l-4 border-l-accent bg-neutral-800 p-8 sm:mb-0">
             <h2 className="text-2xl font-bold">Unpublished Posts</h2>
             <p className="text-8xl font-semibold">
               {postsNotPublishedStats.count}
             </p>
           </div>
         </div>
-        <div className="border-l-4 border-l-orange-400 bg-neutral-800 p-8 sm:mt-8">
+        <div className="border-l-4 border-l-accent bg-neutral-800 p-8 sm:mt-8">
           <h2 className="mb-6 text-2xl font-bold">Tags</h2>
           {tagsWithCount.map(({ tag, count }) => (
             <p key={tag} className="mb-1 text-xl font-semibold">

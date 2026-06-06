@@ -38,10 +38,10 @@ const reasonColors: Record<ReportReason, string> = {
   HARASSMENT: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
   HATE_SPEECH: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
   MISINFORMATION:
-    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+    "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
   COPYRIGHT:
     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  NSFW: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
+  NSFW: "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
   OFF_TOPIC: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
   OTHER: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
 };

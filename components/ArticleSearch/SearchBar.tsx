@@ -33,7 +33,7 @@ const SearchBar: React.FC<Props> = (props) => {
         placeholder="Search"
         id="searchInput"
         name="searchInput"
-        className="border-1 ml-2 mr-2 mt-2 block w-[213px] rounded border-neutral-300 p-1 pl-3 placeholder:text-neutral-400 focus:ring-2 focus:ring-pink-600 dark:border-neutral-600 max-[500px]:w-full sm:text-sm sm:leading-6"
+        className="border-1 ml-2 mr-2 mt-2 block w-[213px] rounded border-neutral-300 p-1 pl-3 placeholder:text-neutral-400 focus:ring-2 focus:ring-accent dark:border-neutral-600 max-[500px]:w-full sm:text-sm sm:leading-6"
       />
     </div>
   );

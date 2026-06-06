@@ -5,7 +5,7 @@ export function SpeakersClient() {
     <div className="bg-black">
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <header className="mb-10">
-          <p className="mb-4 inline-block rounded-full bg-gradient-to-r from-orange-400/20 to-pink-600/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-300">
+          <p className="mb-4 inline-block rounded-full bg-gradient-to-r from-accent/20 to-accent/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-accent">
             Speak at Codú
           </p>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">

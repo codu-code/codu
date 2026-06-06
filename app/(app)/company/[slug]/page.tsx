@@ -43,7 +43,7 @@ export default async function Page(props: Props) {
               {company.url && (
                 <a
                   href={company.url}
-                  className="mt-4 inline-flex items-center text-sm font-medium text-pink-600 hover:text-pink-500 dark:text-pink-600 dark:hover:text-pink-500"
+                  className="mt-4 inline-flex items-center text-sm font-medium text-accent hover:text-accent dark:text-accent dark:hover:text-accent"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
