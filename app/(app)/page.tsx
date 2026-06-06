@@ -7,7 +7,7 @@ import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
 import { getServerAuthSession } from "@/server/auth";
 import PopularTags from "@/components/PopularTags/PopularTags";
 import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
-import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
+import { NewsletterCapture, Eyebrow } from "@/components/ds";
 import { JsonLd } from "@/components/JsonLd";
 import { getWebSiteSchema } from "@/lib/structured-data";
 
@@ -22,22 +22,22 @@ const Home = async () => {
       {!session && (
         <div>
           <Hero />
-          <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
-            <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
-              <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
-                <span className="font-extrabold">Join builders shipping</span>{" "}
-                with AI — get a <span className="font-extrabold">free</span>{" "}
-                invite to our Discord and start sharing what you build.
+          <section className="border-b border-hairline bg-surface px-4" id="cta">
+            <div className="mx-auto max-w-5xl py-20 sm:py-24">
+              <Eyebrow>the community</Eyebrow>
+              <h2 className="mt-4 max-w-2xl font-display text-3xl font-extrabold tracking-tight text-fg sm:text-4xl">
+                Build in public with people who get it.
               </h2>
-              <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
-                <Link href="/get-started" className="primary-button">
-                  Get started
-                </Link>
+              <p className="mt-4 max-w-xl text-lg text-muted">
+                Share what you&apos;re building, get real feedback, and swap what&apos;s
+                actually working with AI — free, in our Discord and on your profile.
+              </p>
+              <div className="mt-8">
                 <Link
-                  href="/feed"
-                  className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
+                  href="/get-started"
+                  className="primary-button px-6 py-3 text-base"
                 >
-                  Browse feed <span aria-hidden="true">→</span>
+                  Join free
                 </Link>
               </div>
             </div>
@@ -57,7 +57,7 @@ const Home = async () => {
           </Suspense>
           <section className="col-span-5 hidden lg:block">
             <div className="sticky top-20">
-              <NewsletterCTA isSubscribed={session?.user?.newsletter} />
+              <NewsletterCapture variant="compact" />
               <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
                 Popular topics
               </h4>
