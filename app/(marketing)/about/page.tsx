@@ -111,7 +111,7 @@ export default function AboutPage() {
                 href={item.href}
                 target={item.external ? "_blank" : undefined}
                 rel={item.external ? "noopener noreferrer" : undefined}
-                className="group rounded-xl border border-hairline bg-canvas p-6 transition-all hover:-translate-y-1 hover:border-accent/50"
+                className="group rounded-xl border border-hairline bg-canvas p-6 transition-colors hover:border-accent/50"
               >
                 <h3 className="font-display text-lg font-bold text-fg group-hover:text-accent">
                   {item.title}

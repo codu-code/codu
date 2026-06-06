@@ -123,21 +123,23 @@ export default async function HomePage() {
                 <Link
                   key={`${p.sourceSlug}-${p.slug}`}
                   href={`/${p.sourceSlug}/${p.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-accent/50"
+                  className="group flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors duration-200 hover:border-accent/50"
                 >
                   {/* Preview image (CSS bg — external domains aren't allowed by next/image) */}
-                  {p.coverImage ? (
-                    <div
-                      className="aspect-[16/9] bg-elevated bg-cover bg-center"
-                      style={{ backgroundImage: `url("${p.coverImage}")` }}
-                    />
-                  ) : (
-                    <div className="flex aspect-[16/9] items-center justify-center bg-elevated bg-grid-dots bg-[length:18px_18px]">
-                      <span className="px-4 text-center font-display text-lg font-bold text-faint">
-                        {p.sourceName}
-                      </span>
-                    </div>
-                  )}
+                  <div className="overflow-hidden">
+                    {p.coverImage ? (
+                      <div
+                        className="aspect-[16/9] bg-elevated bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-105"
+                        style={{ backgroundImage: `url("${p.coverImage}")` }}
+                      />
+                    ) : (
+                      <div className="flex aspect-[16/9] items-center justify-center bg-elevated bg-grid-dots bg-[length:18px_18px] transition-transform duration-500 ease-out group-hover:scale-105">
+                        <span className="px-4 text-center font-display text-lg font-bold text-faint">
+                          {p.sourceName}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex flex-1 flex-col p-5">
                     <span className="font-mono text-xs text-faint">

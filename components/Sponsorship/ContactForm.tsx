@@ -55,7 +55,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 <div
                   className={clsx(
                     "absolute right-1/2 h-1 w-1/2 rounded-l-full",
-                    step <= currentStep ? "bg-green-500" : "bg-neutral-800",
+                    step <= currentStep ? "bg-accent" : "bg-elevated",
                   )}
                 />
               )}
@@ -64,7 +64,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 <div
                   className={clsx(
                     "absolute left-1/2 h-1 w-1/2 rounded-r-full",
-                    step < currentStep ? "bg-green-500" : "bg-neutral-800",
+                    step < currentStep ? "bg-accent" : "bg-elevated",
                   )}
                 />
               )}
@@ -73,17 +73,17 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 className={clsx(
                   "relative z-10 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors",
                   step < currentStep
-                    ? "bg-green-500 text-white"
+                    ? "bg-accent text-black"
                     : step === currentStep
-                      ? "bg-gradient-to-r from-orange-400 to-pink-600 text-white"
-                      : "bg-neutral-800 text-neutral-400",
+                      ? "bg-accent text-black"
+                      : "bg-elevated text-faint",
                 )}
               >
                 {step < currentStep ? <CheckIcon className="h-5 w-5" /> : step}
               </div>
             </div>
             {/* Label */}
-            <span className="mt-3 text-xs text-neutral-500 sm:text-sm">
+            <span className="mt-3 text-xs text-faint sm:text-sm">
               {stepLabels[step - 1]}
             </span>
           </div>
@@ -105,8 +105,8 @@ function Step1Interests({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-bold text-white">What interests you?</h3>
-        <p className="mt-2 text-neutral-400">
+        <h3 className="text-xl font-bold text-fg">What interests you?</h3>
+        <p className="mt-2 text-muted">
           Select all the advertising options you&apos;d like to learn more
           about.
         </p>
@@ -125,22 +125,22 @@ function Step1Interests({
               className={clsx(
                 "flex items-start gap-4 rounded-xl border p-4 text-left transition-all",
                 isSelected
-                  ? "border-orange-400/50 bg-gradient-to-br from-orange-400/10 to-pink-600/10"
-                  : "border-neutral-700 bg-neutral-800/50 hover:border-neutral-600 hover:bg-neutral-800",
+                  ? "border-accent/50 bg-accent/10"
+                  : "border-hairline bg-elevated hover:border-accent/40 hover:bg-surface",
               )}
             >
               <div
                 className={clsx(
                   "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
                   isSelected
-                    ? "bg-gradient-to-br from-orange-400 to-pink-600"
+                    ? "bg-accent"
                     : "bg-neutral-700",
                 )}
               >
-                <Icon className="h-5 w-5 text-white" />
+                <Icon className={clsx("h-5 w-5", isSelected ? "text-black" : "text-fg")} />
               </div>
               <div className="flex-1">
-                <p className="font-medium text-white">
+                <p className="font-medium text-fg">
                   {sponsorInterestLabels[interest]}
                 </p>
               </div>
@@ -148,11 +148,11 @@ function Step1Interests({
                 className={clsx(
                   "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
                   isSelected
-                    ? "border-orange-400 bg-orange-400"
+                    ? "border-accent bg-accent"
                     : "border-neutral-600",
                 )}
               >
-                {isSelected && <CheckIcon className="h-4 w-4 text-white" />}
+                {isSelected && <CheckIcon className="h-4 w-4 text-fg" />}
               </div>
             </button>
           );
@@ -178,8 +178,8 @@ function Step2Details({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-bold text-white">Tell us more</h3>
-        <p className="mt-2 text-neutral-400">
+        <h3 className="text-xl font-bold text-fg">Tell us more</h3>
+        <p className="mt-2 text-muted">
           Help us understand your budget and goals so we can prepare the best
           options for you.
         </p>
@@ -221,8 +221,8 @@ function Step3Contact({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-bold text-white">Your details</h3>
-        <p className="mt-2 text-neutral-400">
+        <h3 className="text-xl font-bold text-fg">Your details</h3>
+        <p className="mt-2 text-muted">
           We&apos;ll reach out within 24 hours to discuss your options.
         </p>
       </div>
@@ -255,7 +255,7 @@ function Step3Contact({
         <Field>
           <Label>
             Company{" "}
-            <span className="font-normal text-neutral-500">(optional)</span>
+            <span className="font-normal text-faint">(optional)</span>
           </Label>
           <Input
             type="text"
@@ -267,7 +267,7 @@ function Step3Contact({
         <Field>
           <Label>
             Phone{" "}
-            <span className="font-normal text-neutral-500">(optional)</span>
+            <span className="font-normal text-faint">(optional)</span>
           </Label>
           <Input
             type="tel"
@@ -283,17 +283,17 @@ function Step3Contact({
 function SuccessState({ onReset }: { onReset: () => void }) {
   return (
     <div className="py-8 text-center">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
-        <CheckIcon className="h-10 w-10 text-green-500" />
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10">
+        <CheckIcon className="h-10 w-10 text-accent" />
       </div>
-      <h3 className="text-2xl font-bold text-white">Thank you!</h3>
-      <p className="mx-auto mt-3 max-w-md text-neutral-300">
+      <h3 className="text-2xl font-bold text-fg">Thank you!</h3>
+      <p className="mx-auto mt-3 max-w-md text-muted">
         We&apos;ve received your inquiry and will be in touch within 24 hours to
         discuss how we can help you reach our developer community.
       </p>
       <button
         onClick={onReset}
-        className="mt-8 text-sm text-orange-400 hover:underline"
+        className="mt-8 text-sm text-accent hover:underline"
       >
         Submit another inquiry
       </button>
@@ -433,7 +433,7 @@ export function ContactForm() {
       )}
 
       {/* Navigation */}
-      <div className="mt-8 flex items-center justify-between border-t border-neutral-800 pt-6">
+      <div className="mt-8 flex items-center justify-between border-t border-hairline pt-6">
         <button
           type="button"
           onClick={handleBack}
@@ -441,7 +441,7 @@ export function ContactForm() {
             "flex items-center gap-2 text-sm font-medium transition-colors",
             currentStep === 1
               ? "invisible"
-              : "text-neutral-400 hover:text-white",
+              : "text-muted hover:text-fg",
           )}
         >
           <ArrowLeftIcon className="h-4 w-4" />
