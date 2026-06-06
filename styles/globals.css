@@ -1,12 +1,41 @@
 @tailwind base;
 
+/* ───────────────────────────────────────────────────────────
+   Relaunch design tokens (consumed by tailwind.config.js).
+   Values are space-separated RGB so Tailwind opacity modifiers work
+   (e.g. bg-surface/60). Dark-first: .dark holds the canonical palette.
+   ─────────────────────────────────────────────────────────── */
+:root {
+  --color-canvas: 255 255 255;
+  --color-surface: 246 247 249;
+  --color-elevated: 255 255 255;
+  --color-hairline: 228 231 236;
+  --color-fg: 10 11 14;
+  --color-muted: 91 100 114;
+  --color-faint: 154 164 178;
+  --color-accent: 13 148 136; /* teal-600, darker for contrast on light */
+  --color-accent-soft: 20 184 166;
+}
+
+.dark {
+  --color-canvas: 10 11 14; /* #0a0b0e */
+  --color-surface: 18 20 25; /* #121419 */
+  --color-elevated: 24 27 34; /* #181b22 */
+  --color-hairline: 36 40 50; /* #242832 */
+  --color-fg: 243 246 249; /* #f3f6f9 */
+  --color-muted: 154 164 178; /* #9aa4b2 */
+  --color-faint: 91 100 114; /* #5b6472 */
+  --color-accent: 45 212 191; /* #2dd4bf mint */
+  --color-accent-soft: 94 234 212; /* #5eead4 */
+}
+
 html {
   /* Prevent layout shift when scrollbar appears/disappears */
   scrollbar-gutter: stable;
 }
 
 body {
-  @apply bg-neutral-100 text-neutral-900 dark:bg-black dark:text-white;
+  @apply bg-neutral-50 font-sans text-neutral-900 dark:bg-canvas dark:text-fg;
 }
 
 #__next {
@@ -48,15 +77,15 @@ body {
 }
 
 .focus-style {
-  @apply rounded-md focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600;
+  @apply rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
 }
 
 .primary-button {
-  @apply inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-white disabled:border-neutral-300 disabled:from-neutral-500 disabled:to-neutral-700 disabled:text-neutral-300 disabled:hover:text-neutral-300;
+  @apply inline-flex justify-center rounded-md bg-accent px-4 py-2 font-semibold text-black shadow-sm transition-colors hover:bg-accent-soft focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-canvas disabled:bg-neutral-600 disabled:text-neutral-300 disabled:hover:bg-neutral-600;
 }
 
 .secondary-button {
-  @apply inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white bg-gradient-to-r px-4 py-2 font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-800 shadow-sm transition-colors hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-hairline dark:bg-elevated dark:text-fg dark:hover:bg-surface;
 }
 
 .dropdown-button {
