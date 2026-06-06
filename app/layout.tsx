@@ -102,7 +102,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`h-full ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
+      className={`dark h-full ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
       suppressHydrationWarning
     >
       <link
