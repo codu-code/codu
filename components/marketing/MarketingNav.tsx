@@ -23,14 +23,15 @@ export function MarketingNav({ session }: { session: Session | null }) {
           />
         </Link>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-9 md:flex">
           {links.map((l) => (
             <Link
               key={l.name}
               href={l.href}
-              className="text-sm font-medium text-muted transition-colors hover:text-fg"
+              className="group relative text-sm font-medium text-muted transition-colors hover:text-fg"
             >
               {l.name}
+              <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-accent transition-all duration-200 group-hover:w-full" />
             </Link>
           ))}
         </div>
