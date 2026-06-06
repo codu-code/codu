@@ -1,5 +1,6 @@
 export const footerNav = [
   { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
   { name: "Articles", href: "/articles" },
   { name: "Feed", href: "/feed" },
   { name: "Events", href: "https://www.meetup.com/codu-community/" },
@@ -12,6 +13,7 @@ export const navigation = [
   { name: "Articles", href: "/articles" },
   { name: "Feed", href: "/feed" },
   { name: "Events", href: "https://www.meetup.com/codu-community/" },
+  { name: "About", href: "/about" },
 ];
 
 export const userSubNav = [
@@ -42,6 +44,8 @@ export const sidebarNavigation = [
     icon: "CalendarIcon",
     external: true,
   },
+  { name: "Jobs", href: "/jobs", icon: "BriefcaseIcon" },
+  { name: "About", href: "/about", icon: "InformationCircleIcon" },
 ] as const;
 
 export const sidebarUserNavigation = [

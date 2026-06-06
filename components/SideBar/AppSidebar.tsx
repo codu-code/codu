@@ -10,6 +10,8 @@ import {
   DocumentTextIcon,
   BookmarkIcon,
   Cog6ToothIcon,
+  InformationCircleIcon,
+  BriefcaseIcon,
 } from "@heroicons/react/24/outline";
 import {
   Sidebar,
@@ -31,6 +33,7 @@ import {
   linkedinUrl,
 } from "@/config/site_settings";
 import { useSidebar } from "@/context/SidebarContext";
+import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 import Twitter from "@/icons/x.svg";
 import Github from "@/icons/github.svg";
 import Linkedin from "@/icons/linkedin.svg";
@@ -43,6 +46,8 @@ const iconMap = {
   DocumentTextIcon,
   BookmarkIcon,
   Cog6ToothIcon,
+  InformationCircleIcon,
+  BriefcaseIcon,
 };
 
 const socialLinks = [
@@ -75,6 +80,12 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
   const pathname = usePathname();
   const { isCollapsed } = useSidebar();
 
+  // Jobs is flag-gated until launch (auto-on in dev).
+  const jobsEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
+  const navItems = sidebarNavigation.filter(
+    (item) => item.href !== "/jobs" || jobsEnabled,
+  );
+
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
@@ -91,7 +102,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
     <Sidebar className="bg-neutral-100 dark:bg-black">
       <SidebarBody>
         <SidebarSection>
-          {sidebarNavigation.map((item) => {
+          {navItems.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             return (
               <SidebarItem

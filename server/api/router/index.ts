@@ -10,6 +10,7 @@ import { feedRouter } from "./feed";
 import { sponsorRouter } from "./sponsor";
 import { volunteerRouter } from "./volunteer";
 import { speakerRouter } from "./speaker";
+import { jobRouter } from "./job";
 
 // Legacy routers (kept for backward compatibility during migration)
 import { discussionRouter } from "./discussion";
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
   sponsor: sponsorRouter,
   volunteer: volunteerRouter,
   speaker: speakerRouter,
+  job: jobRouter,
 
   // Legacy routers (for backward compatibility)
   // TODO: Remove once all frontend is migrated

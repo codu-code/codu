@@ -28,6 +28,37 @@ export const saveJobsSchema = z.object({
   relocation: z.boolean().optional().default(false),
   visa_sponsorship: z.boolean().optional().default(false),
   jobType: z.enum(["full-time", "part-time", "freelancer", "other"]),
+  aiNative: z.boolean().optional().default(false),
+  tags: z.array(z.string().max(30)).max(8).optional().default([]),
 });
 
 export type saveJobsInput = z.TypeOf<typeof saveJobsSchema>;
+
+export const GetJobsSchema = z.object({
+  limit: z.number().min(1).max(50).nullish(),
+  cursor: z
+    .object({ id: z.string().uuid(), publishedAt: z.string().optional() })
+    .nullish(),
+  remote: z.boolean().nullish(),
+  jobType: z.enum(["full-time", "part-time", "freelancer", "other"]).nullish(),
+  aiNative: z.boolean().nullish(),
+  tag: z.string().nullish(),
+});
+export type GetJobsInput = z.TypeOf<typeof GetJobsSchema>;
+
+export const GetJobBySlugSchema = z.object({
+  slug: z.string().min(1).max(300),
+});
+
+export const GetJobByIdSchema = z.object({ id: z.string().uuid() });
+
+export const ModerateJobSchema = z.object({
+  id: z.string().uuid(),
+  action: z.enum(["approve", "reject"]),
+  rejectionReason: z.string().max(500).optional(),
+});
+
+export const FeatureJobSchema = z.object({
+  id: z.string().uuid(),
+  featured: z.boolean(),
+});

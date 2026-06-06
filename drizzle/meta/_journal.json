@@ -141,6 +141,13 @@
       "when": 1768377165753,
       "tag": "0019_update-notification-fk",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1780779004573,
+      "tag": "0020_thick_nomad",
+      "breakpoints": true
     }
   ]
 }

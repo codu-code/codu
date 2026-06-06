@@ -61,6 +61,24 @@ export const reportStatus = pgEnum("report_status", [
   "actioned",
 ]);
 
+// Job board
+export const jobType = pgEnum("job_type", [
+  "full-time",
+  "part-time",
+  "freelancer",
+  "other",
+]);
+// Lifecycle: draft -> pending_payment -> pending (paid, awaiting moderation)
+// -> active -> expired. rejected is terminal.
+export const jobStatus = pgEnum("job_status", [
+  "draft",
+  "pending_payment",
+  "pending",
+  "active",
+  "expired",
+  "rejected",
+]);
+
 // Legacy enums (kept for backward compatibility during migration)
 export const legacyVoteType = pgEnum("VoteType", ["UP", "DOWN"]);
 
@@ -1901,3 +1919,115 @@ export const aggregatedArticleTagRelations = relations(
     }),
   }),
 );
+
+// ============================================
+// JOB BOARD
+// ============================================
+
+export const job = pgTable(
+  "job",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Poster relation. Keep the listing if the poster account is removed.
+    userId: text("user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+
+    companyName: varchar("company_name", { length: 100 }).notNull(),
+    companyLogo: text("company_logo"), // S3 fileLocation URL
+    jobTitle: varchar("job_title", { length: 100 }).notNull(),
+    slug: varchar("slug", { length: 300 }).notNull(),
+    jobDescription: text("job_description"), // markdown
+    jobLocation: varchar("job_location", { length: 60 }).notNull(),
+    applicationUrl: varchar("application_url", { length: 2000 }),
+    type: jobType("type").notNull(),
+
+    // Location / perk flags
+    remote: boolean("remote").default(false).notNull(),
+    relocation: boolean("relocation").default(false).notNull(),
+    visaSponsorship: boolean("visa_sponsorship").default(false).notNull(),
+
+    // AI-native tagging (positioning toward AI builders)
+    tags: text("tags")
+      .array()
+      .default(sql`ARRAY[]::text[]`)
+      .notNull(),
+    aiNative: boolean("ai_native").default(false).notNull(),
+
+    // Lifecycle / monetization
+    status: jobStatus("status").default("draft").notNull(),
+    featured: boolean("featured").default(false).notNull(),
+
+    // Payment hooks (provider wired later)
+    priceCents: integer("price_cents"),
+    currency: varchar("currency", { length: 3 }).default("EUR").notNull(),
+    paymentProvider: varchar("payment_provider", { length: 30 }),
+    paymentRef: varchar("payment_ref", { length: 255 }),
+    paidAt: timestamp("paid_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+
+    // Moderation
+    approvedById: text("approved_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    approvedAt: timestamp("approved_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    rejectionReason: text("rejection_reason"),
+
+    // Publishing window
+    publishedAt: timestamp("published_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    expiresAt: timestamp("expires_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .notNull()
+      .$onUpdate(() => new Date().toISOString())
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    slugKey: uniqueIndex("job_slug_idx").on(table.slug),
+    statusIdx: index("job_status_idx").on(table.status),
+    featuredIdx: index("job_featured_idx").on(table.featured),
+    typeIdx: index("job_type_idx").on(table.type),
+    userIdIdx: index("job_user_id_idx").on(table.userId),
+    publishedAtIdx: index("job_published_at_idx").on(table.publishedAt),
+    expiresAtIdx: index("job_expires_at_idx").on(table.expiresAt),
+  }),
+);
+
+export const jobRelations = relations(job, ({ one }) => ({
+  user: one(user, {
+    fields: [job.userId],
+    references: [user.id],
+    relationName: "job_poster",
+  }),
+  approvedBy: one(user, {
+    fields: [job.approvedById],
+    references: [user.id],
+    relationName: "job_approved_by",
+  }),
+}));
