@@ -40,8 +40,10 @@ import {
   isNotNull,
   count,
   exists,
+  inArray,
 } from "drizzle-orm";
 import { increment } from "./utils";
+import { isModerationEnabled, screenContent } from "@/server/lib/moderation";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -1065,6 +1067,7 @@ export const contentRouter = createTRPCRouter({
           title: posts.title,
           excerpt: posts.excerpt,
           slug: posts.slug,
+          status: posts.status,
           published: sql<boolean>`${posts.status} = 'published'`,
           publishedAt: posts.publishedAt,
           createdAt: posts.createdAt,
@@ -1075,7 +1078,8 @@ export const contentRouter = createTRPCRouter({
           and(
             eq(posts.authorId, userId),
             eq(posts.type, "article"),
-            eq(posts.status, "draft"),
+            // Drafts plus auto-moderation states the author should still see.
+            inArray(posts.status, ["draft", "in_review", "rejected"]),
           ),
         )
         .orderBy(desc(posts.updatedAt))
@@ -1176,6 +1180,7 @@ export const contentRouter = createTRPCRouter({
           id: posts.id,
           authorId: posts.authorId,
           title: posts.title,
+          body: posts.body,
           slug: posts.slug,
           status: posts.status,
         })
@@ -1203,6 +1208,33 @@ export const contentRouter = createTRPCRouter({
 
       // Set publishedAt when publishing
       if (input.published) {
+        // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
+        // and the author is publishing a post for the first time (it was a
+        // draft), route it to `in_review` instead of `published`: do NOT set
+        // publishedAt yet (admin approval handles that). When the flag is off
+        // this whole branch is skipped and behaviour is unchanged.
+        if (isModerationEnabled() && existing[0].status === "draft") {
+          // screenContent is advisory only — a failing screen still goes to
+          // in_review so a human reviewer makes the final call.
+          screenContent({
+            title: existing[0].title,
+            body: existing[0].body,
+          });
+          updateData.status = "in_review";
+          // Generate the slug now so the post has a stable URL once approved.
+          if (existing[0].title) {
+            updateData.slug = generateSlug(existing[0].title);
+          }
+
+          const [reviewed] = await ctx.db
+            .update(posts)
+            .set(updateData)
+            .where(eq(posts.id, input.id))
+            .returning();
+
+          return reviewed;
+        }
+
         if (input.publishTime) {
           updateData.publishedAt = input.publishTime.toISOString();
         } else {

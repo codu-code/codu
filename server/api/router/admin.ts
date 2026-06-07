@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { BanUserSchema, UnbanUserSchema } from "../../../schema/admin";
 import z from "zod";
+import crypto from "crypto";
+import * as Sentry from "@sentry/nextjs";
 
 import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
 import {
@@ -10,8 +12,23 @@ import {
   posts,
   content_report,
   feed_sources,
+  notification,
 } from "@/server/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { award } from "@/server/lib/engagement";
+import { POST_APPROVED } from "@/utils/notifications";
+
+// Mirror of the slug helper used by content/post publish so approved posts get
+// a stable URL when none was set yet.
+function generateSlug(title: string): string {
+  const baseSlug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 80);
+  const uniqueId = crypto.randomBytes(3).toString("hex");
+  return `${baseSlug}-${uniqueId}`;
+}
 
 export const adminRouter = createTRPCRouter({
   // Get dashboard stats
@@ -194,5 +211,105 @@ export const adminRouter = createTRPCRouter({
         );
 
       return { unbanned: true };
+    }),
+
+  // Auto-moderation queue: posts awaiting human review (status `in_review`).
+  listInReview: adminOnlyProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        authorId: posts.authorId,
+        authorUsername: user.username,
+        authorName: user.name,
+        createdAt: posts.createdAt,
+      })
+      .from(posts)
+      .leftJoin(user, eq(posts.authorId, user.id))
+      .where(eq(posts.status, "in_review"))
+      .orderBy(desc(posts.createdAt))
+      .limit(50);
+
+    return rows;
+  }),
+
+  // Approve or reject a post that is currently in review.
+  moderatePost: adminOnlyProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        decision: z.enum(["approve", "reject"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [existing] = await ctx.db
+        .select({
+          id: posts.id,
+          authorId: posts.authorId,
+          title: posts.title,
+          slug: posts.slug,
+          status: posts.status,
+        })
+        .from(posts)
+        .where(eq(posts.id, input.id))
+        .limit(1);
+
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" });
+      }
+
+      // Idempotent / guarded: only act on posts still awaiting review.
+      if (existing.status !== "in_review") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Post is not in review",
+        });
+      }
+
+      if (input.decision === "reject") {
+        const [rejected] = await ctx.db
+          .update(posts)
+          .set({ status: "rejected" })
+          .where(eq(posts.id, input.id))
+          .returning();
+        return rejected;
+      }
+
+      // Approve → publish now, mirroring the normal publish path.
+      const [approved] = await ctx.db
+        .update(posts)
+        .set({
+          status: "published",
+          publishedAt: new Date().toISOString(),
+          slug:
+            existing.slug ||
+            (existing.title ? generateSlug(existing.title) : existing.slug),
+        })
+        .where(eq(posts.id, input.id))
+        .returning();
+
+      // Award publish points, exactly as the normal publish flow does.
+      await award({
+        userId: existing.authorId,
+        action: "post_published",
+        sourceType: "post",
+        sourceId: existing.id,
+      });
+
+      // Notify the author their post was approved (notifier = author, so the
+      // existing notifier join in the notifications list resolves correctly).
+      try {
+        await ctx.db.insert(notification).values({
+          type: POST_APPROVED,
+          userId: existing.authorId,
+          notifierId: existing.authorId,
+          postId: existing.id,
+        });
+      } catch (error) {
+        Sentry.captureException(error);
+      }
+
+      return approved;
     }),
 });

@@ -41,6 +41,11 @@ export const postStatus = pgEnum("post_status", [
   "published",
   "scheduled",
   "unlisted",
+  // Auto-moderation flow (gated behind MODERATION_ENABLED): a post submitted
+  // by its author sits in `in_review` until an admin approves (→ published) or
+  // rejects (→ rejected).
+  "in_review",
+  "rejected",
 ]);
 export const voteType = pgEnum("vote_type", ["up", "down"]);
 export const feedSourceStatus = pgEnum("feed_source_status", [

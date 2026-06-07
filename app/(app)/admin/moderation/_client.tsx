@@ -37,8 +37,7 @@ const reasonColors: Record<ReportReason, string> = {
   SPAM: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
   HARASSMENT: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
   HATE_SPEECH: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  MISINFORMATION:
-    "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
+  MISINFORMATION: "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
   COPYRIGHT:
     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
   NSFW: "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
@@ -76,6 +75,22 @@ const ModerationQueue = () => {
       },
       onError: () => {
         toast.error("Failed to update report");
+      },
+    });
+
+  // Auto-moderation queue (posts awaiting review).
+  const inReview = api.admin.listInReview.useQuery();
+
+  const { mutate: moderatePost, isPending: isModerating } =
+    api.admin.moderatePost.useMutation({
+      onSuccess: (_data, variables) => {
+        toast.success(
+          variables.decision === "approve" ? "Post approved" : "Post rejected",
+        );
+        utils.admin.listInReview.invalidate();
+      },
+      onError: () => {
+        toast.error("Failed to update post");
       },
     });
 
@@ -172,6 +187,67 @@ const ModerationQueue = () => {
           All ({counts?.total ?? 0})
         </button>
       </div>
+
+      {/* In review — auto-moderation queue */}
+      <section className="card mb-8 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="eyebrow m-0">
+            <span className="slash">{"// "}</span>in review
+          </p>
+          <span className="bg-warning/12 rounded-full px-2 py-0.5 font-mono text-xs text-warning">
+            {inReview.data?.length ?? 0} awaiting
+          </span>
+        </div>
+
+        {inReview.isLoading && (
+          <p className="font-mono text-xs text-faint">Loading…</p>
+        )}
+
+        {!inReview.isLoading && (inReview.data?.length ?? 0) === 0 && (
+          <p className="font-mono text-xs text-faint">
+            {"// nothing waiting for review"}
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {inReview.data?.map((post) => (
+            <div
+              key={post.id}
+              className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3 last:border-0 last:pb-0"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-display font-semibold text-fg">
+                  {post.title || "Untitled"}
+                </p>
+                <p className="font-mono text-xs text-faint">
+                  @{post.authorUsername ?? "unknown"} ·{" "}
+                  {getRelativeTime(post.createdAt!)}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="primary-button"
+                  disabled={isModerating}
+                  onClick={() =>
+                    moderatePost({ id: post.id, decision: "approve" })
+                  }
+                >
+                  Approve
+                </button>
+                <button
+                  className="secondary-button"
+                  disabled={isModerating}
+                  onClick={() =>
+                    moderatePost({ id: post.id, decision: "reject" })
+                  }
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Reports List */}
       <div className="space-y-4">

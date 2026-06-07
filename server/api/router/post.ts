@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { award } from "@/server/lib/engagement";
+import { isModerationEnabled, screenContent } from "@/server/lib/moderation";
 import {
   GetFeedSchema,
   GetPostByIdSchema,
@@ -1072,6 +1073,7 @@ export const postRouter = createTRPCRouter({
           id: posts.id,
           authorId: posts.authorId,
           title: posts.title,
+          body: posts.body,
           slug: posts.slug,
           status: posts.status,
         })
@@ -1096,6 +1098,28 @@ export const postRouter = createTRPCRouter({
       const updateData: Record<string, unknown> = {};
 
       if (input.published) {
+        // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
+        // and the author publishes a draft for the first time, route it to
+        // `in_review` rather than `published`: no publishedAt and no points are
+        // set here — an admin approval handles both. When the flag is off this
+        // branch is skipped and behaviour is unchanged.
+        if (isModerationEnabled() && existing[0].status === "draft") {
+          // Advisory screen only — a failing screen still goes to in_review.
+          screenContent({ title: existing[0].title, body: existing[0].body });
+          updateData.status = "in_review";
+          if (existing[0].title) {
+            updateData.slug = generateSlug(existing[0].title);
+          }
+
+          const [reviewed] = await ctx.db
+            .update(posts)
+            .set(updateData)
+            .where(eq(posts.id, input.id))
+            .returning();
+
+          return reviewed;
+        }
+
         updateData.status = "published";
         if (input.publishTime) {
           updateData.publishedAt = input.publishTime.toISOString();

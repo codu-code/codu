@@ -341,31 +341,37 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
       // Use the saved post ID (not the one from URL params which might be stale)
       // Use mutateAsync pattern for proper await
-      const publishResult = await new Promise<{ slug: string }>(
-        (resolve, reject) => {
-          publish(
-            {
-              id: savedPostId,
-              published: true,
-              publishTime:
-                isPostScheduled && publishedTime
-                  ? new Date(publishedTime)
-                  : new Date(),
-            },
-            {
-              onSuccess: (data) => resolve(data),
-              onError: (error) => reject(error),
-            },
-          );
-        },
-      );
+      const publishResult = await new Promise<{
+        slug: string;
+        status?: string;
+      }>((resolve, reject) => {
+        publish(
+          {
+            id: savedPostId,
+            published: true,
+            publishTime:
+              isPostScheduled && publishedTime
+                ? new Date(publishedTime)
+                : new Date(),
+          },
+          {
+            onSuccess: (data) => resolve(data),
+            onError: (error) => reject(error),
+          },
+        );
+      });
 
       // Clear states immediately
       setUnsavedChanges(false);
       setShowPublishConfirm(false);
 
-      // Redirect based on scheduling
-      if (session?.user?.username && publishResult?.slug) {
+      // Auto-moderation: when the gate is on, the server returns the post with
+      // status `in_review` instead of publishing it. Surface that instead of
+      // the normal "Published!" redirect.
+      if (publishResult?.status === "in_review") {
+        toast.success("Sent for review — we'll notify you when it's approved");
+        router.push("/my-posts?tab=drafts");
+      } else if (session?.user?.username && publishResult?.slug) {
         if (isPostScheduled) {
           toast.success("Post scheduled!");
           router.push("/my-posts?tab=scheduled");
