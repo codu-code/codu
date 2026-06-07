@@ -4,6 +4,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { posts, feed_sources } from "@/server/db/schema";
 import { Eyebrow } from "@/components/ds";
+import { HeroBackdrop } from "@/components/marketing/HeroBackdrop";
 
 export const metadata: Metadata = {
   title: "Codú — The community for AI builders & indie hackers",
@@ -68,25 +69,20 @@ export default async function HomePage() {
     <>
       {/* ───────── Hero ───────── */}
       <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-grid-dots bg-[length:24px_24px] opacity-50 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,black,transparent)]"
-        />
-        <div
-          aria-hidden
-          className="absolute left-1/2 top-[-10%] h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px]"
-        />
+        <HeroBackdrop />
         <div className="relative mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 sm:py-36">
-          <Eyebrow className="!text-center">learn · build · ship · grow</Eyebrow>
-          <h1 className="mt-6 font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-fg sm:text-7xl">
+          <div className="motion-safe:animate-rise [animation-delay:0ms]">
+            <Eyebrow className="!text-center">learn · build · ship · grow</Eyebrow>
+          </div>
+          <h1 className="mt-6 font-display text-5xl font-extrabold leading-[0.98] tracking-tight text-fg motion-safe:animate-rise [animation-delay:90ms] sm:text-7xl">
             The community for{" "}
             <span className="text-accent">AI builders</span> &amp; indie hackers
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-muted sm:text-xl">
+          <p className="mx-auto mt-6 max-w-xl text-lg text-muted motion-safe:animate-rise [animation-delay:180ms] sm:text-xl">
             Learn to build with AI, share what you ship, and grow with people doing
             the same.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 motion-safe:animate-rise [animation-delay:270ms]">
             <Link href="/get-started" className="primary-button px-7 py-3 text-base">
               Join free
             </Link>

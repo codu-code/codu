@@ -40,6 +40,43 @@ module.exports = {
         "grid-dots":
           "radial-gradient(rgb(var(--color-hairline)) 1px, transparent 1px)",
       },
+      keyframes: {
+        twinkle: {
+          "0%, 100%": { opacity: "0.15" },
+          "50%": { opacity: "0.7" },
+        },
+        aurora: {
+          "0%, 100%": {
+            transform: "translate(-50%, 0) scale(1)",
+            opacity: "0.85",
+          },
+          "50%": {
+            transform: "translate(-47%, 14px) scale(1.08)",
+            opacity: "1",
+          },
+        },
+        drift: {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "50%": { transform: "translate(16px, -12px)" },
+        },
+        shoot: {
+          "0%": { transform: "translate(0, 0)", opacity: "0" },
+          "4%": { opacity: "1" },
+          "13%": { transform: "translate(280px, 160px)", opacity: "0" },
+          "100%": { transform: "translate(280px, 160px)", opacity: "0" },
+        },
+        rise: {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        twinkle: "twinkle 4s ease-in-out infinite",
+        aurora: "aurora 18s ease-in-out infinite",
+        drift: "drift 22s ease-in-out infinite",
+        shoot: "shoot 12s ease-in-out infinite",
+        rise: "rise 0.6s cubic-bezier(0.22,1,0.36,1) both",
+      },
     },
   },
   plugins: [require("@tailwindcss/typography"), require("@tailwindcss/forms")],
