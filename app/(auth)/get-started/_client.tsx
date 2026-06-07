@@ -1,6 +1,7 @@
 "use client";
 
 import type { NextPage } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -26,6 +27,11 @@ const GitLabIcon = () => (
 const oauthButton =
   "group inline-flex w-full items-center justify-center gap-3 rounded-lg border border-hairline bg-elevated px-4 py-3 text-sm font-semibold text-fg transition-all hover:-translate-y-0.5 hover:border-accent/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent";
 
+// Email magic-link is gated: only render in dev, or when explicitly enabled.
+const emailAuthEnabled =
+  process.env.NEXT_PUBLIC_EMAIL_AUTH === "true" ||
+  process.env.NODE_ENV !== "production";
+
 const GetStarted: NextPage = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl");
@@ -42,86 +48,140 @@ const GetStarted: NextPage = () => {
   }, [searchParams]);
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center">
-        <Eyebrow className="!text-center">join the community</Eyebrow>
-        <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg">
-          Start building with AI
-        </h1>
-        <p className="mt-2 text-sm text-muted">
-          Free forever. Create your account to read, write, save, and ship in
-          public with other builders.
-        </p>
-      </div>
-
-      <div className="mt-8 space-y-3">
-        {!!process?.env.NEXT_PUBLIC_ALPHA && (
-          <>
-            <input
-              className="w-full rounded-lg border border-hairline bg-canvas px-3.5 py-2.5 text-sm text-fg outline-none transition-colors focus:border-accent"
-              placeholder="you@example.com"
-              type="email"
-              value={userEmail}
-              onChange={(event) => setUserEmail(event.target.value)}
-            />
-            <button
-              type="button"
-              disabled={!userEmail}
-              onClick={async () => {
-                await signIn("email", { callbackUrl: redirectTo, email: userEmail });
-              }}
-              className="primary-button w-full py-3 disabled:cursor-not-allowed"
-            >
-              Continue with email
-            </button>
-            <div className="relative py-1">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-hairline" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-canvas px-3 font-mono text-xs uppercase tracking-widest text-faint">
-                  or
-                </span>
-              </div>
-            </div>
-          </>
-        )}
-
-        <button
-          data-testid="github-login-button"
-          type="button"
-          onClick={async () => {
-            await signIn("github", { callbackUrl: redirectTo });
-          }}
-          className={oauthButton}
+    <div className="grid min-h-screen w-full lg:grid-cols-2">
+      {/* Brand panel — slim header on mobile, full panel on desktop */}
+      <aside className="relative flex flex-col justify-between overflow-hidden border-b border-hairline bg-surface px-6 py-8 lg:border-b-0 lg:border-r lg:px-12 lg:py-16">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-grid-dots bg-[length:24px_24px] opacity-50 [mask-image:radial-gradient(90%_70%_at_20%_10%,black_30%,transparent_80%)]"
+        />
+        <Link
+          href="/"
+          aria-label="Codú home"
+          className="relative inline-flex w-fit"
         >
-          <GitHubIcon />
-          Continue with GitHub
-        </button>
-        <button
-          data-testid="gitlab-login-button"
-          type="button"
-          onClick={async () => {
-            await signIn("gitlab", { callbackUrl: redirectTo });
-          }}
-          className={oauthButton}
-        >
-          <GitLabIcon />
-          Continue with GitLab
-        </button>
-      </div>
-
-      <p className="mt-6 text-center text-xs text-faint">
-        By continuing you agree to our{" "}
-        <Link href="/tou" className="text-muted underline hover:text-fg">
-          terms
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="text-muted underline hover:text-fg">
-          privacy policy
+          <Image
+            src="/images/codu.png"
+            alt="Codú"
+            width={189}
+            height={60}
+            className="h-7 w-auto"
+            priority
+          />
         </Link>
-        .
-      </p>
+
+        <div className="relative mt-8 hidden lg:mt-0 lg:block">
+          <Eyebrow>the community for AI builders</Eyebrow>
+          <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-fg xl:text-5xl">
+            Learn to build with AI.
+            <br />
+            <span className="text-accent">Ship</span> what you make.
+          </h1>
+          <p className="mt-6 max-w-[34ch] text-lg leading-relaxed text-muted">
+            Less theory, more shipping. Join the builders posting what they
+            make.
+          </p>
+        </div>
+
+        {/* spacer keeps logo top-aligned on desktop */}
+        <div className="relative hidden lg:block" aria-hidden />
+      </aside>
+
+      {/* Form panel */}
+      <main className="flex items-center justify-center px-6 py-12 lg:px-12 lg:py-16">
+        <div className="w-full max-w-sm">
+          <div className="text-center lg:text-left">
+            <Eyebrow className="lg:hidden">join the community</Eyebrow>
+            <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg lg:mt-0">
+              Start building with AI
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Free forever. Create your account to read, write, save, and ship
+              in public with other builders.
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-3">
+            <button
+              data-testid="github-login-button"
+              type="button"
+              onClick={async () => {
+                await signIn("github", { callbackUrl: redirectTo });
+              }}
+              className="primary-button w-full justify-center gap-3 py-3"
+            >
+              <GitHubIcon />
+              Continue with GitHub
+            </button>
+            <button
+              data-testid="gitlab-login-button"
+              type="button"
+              onClick={async () => {
+                await signIn("gitlab", { callbackUrl: redirectTo });
+              }}
+              className="secondary-button w-full justify-center gap-3 py-3"
+            >
+              <GitLabIcon />
+              Continue with GitLab
+            </button>
+
+            {emailAuthEnabled && (
+              <>
+                <div className="relative py-1">
+                  <div
+                    className="absolute inset-0 flex items-center"
+                    aria-hidden="true"
+                  >
+                    <div className="w-full border-t border-hairline" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-canvas px-3 font-mono text-xs uppercase tracking-widest text-faint">
+                      or
+                    </span>
+                  </div>
+                </div>
+                <input
+                  className="w-full rounded-lg border border-hairline bg-canvas px-3.5 py-2.5 text-sm text-fg outline-none transition-colors focus:border-accent"
+                  placeholder="you@example.com"
+                  type="email"
+                  value={userEmail}
+                  onChange={(event) => setUserEmail(event.target.value)}
+                />
+                <button
+                  type="button"
+                  disabled={!userEmail}
+                  onClick={async () => {
+                    await signIn("email", {
+                      callbackUrl: redirectTo,
+                      email: userEmail,
+                    });
+                  }}
+                  className={`${oauthButton} disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  Continue with email
+                </button>
+              </>
+            )}
+          </div>
+
+          <p className="mt-4 text-xs text-muted">More sign-in options coming soon.</p>
+
+          <p className="mt-6 text-center text-xs text-faint lg:text-left">
+            By continuing you agree to our{" "}
+            <Link href="/tou" className="text-muted underline hover:text-fg">
+              terms
+            </Link>{" "}
+            and{" "}
+            <Link
+              href="/privacy"
+              className="text-muted underline hover:text-fg"
+            >
+              privacy policy
+            </Link>
+            .
+          </p>
+        </div>
+      </main>
     </div>
   );
 };

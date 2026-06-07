@@ -13,6 +13,11 @@ import { isAdminEmail } from "@/server/lib/adminConfig";
 import { eq } from "drizzle-orm";
 import * as Sentry from "@sentry/nextjs";
 
+// Passwordless email sign-in is gated: enabled in dev, or explicitly via env.
+const emailAuthEnabled =
+  process.env.EMAIL_AUTH_ENABLED === "true" ||
+  process.env.NODE_ENV !== "production";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // @ts-expect-error - DrizzleAdapter type mismatch with next-auth internal types
   adapter: DrizzleAdapter(db, {
@@ -28,32 +33,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.GITLAB_ID!,
       clientSecret: process.env.GITLAB_SECRET!,
     }),
-    Nodemailer({
-      server: {
-        // Using custom sendVerificationRequest, so this is not used
-        host: "",
-        port: 0,
-        auth: { user: "", pass: "" },
-      },
-      from: process.env.ADMIN_EMAIL,
-      async sendVerificationRequest({ identifier, url }) {
-        try {
-          if (!process.env.ADMIN_EMAIL) {
-            throw new Error("ADMIN_EMAIL not set");
-          }
-          await nodemailerSesTransporter.sendMail({
-            to: identifier,
+    ...(emailAuthEnabled
+      ? [
+          Nodemailer({
+            server: {
+              // Using custom sendVerificationRequest, so this is not used
+              host: "",
+              port: 0,
+              auth: { user: "", pass: "" },
+            },
             from: process.env.ADMIN_EMAIL,
-            subject: `Sign in to Codú 🚀`,
-            text: `Sign in to Codú 🚀\n\n`,
-            html: createPasswordLessEmailTemplate(url),
-          });
-        } catch (error) {
-          Sentry.captureException(error);
-          throw new Error(`Sign in email could not be sent`);
-        }
-      },
-    }),
+            async sendVerificationRequest({ identifier, url }) {
+              try {
+                if (!process.env.ADMIN_EMAIL) {
+                  throw new Error("ADMIN_EMAIL not set");
+                }
+                await nodemailerSesTransporter.sendMail({
+                  to: identifier,
+                  from: process.env.ADMIN_EMAIL,
+                  subject: `Sign in to Codú 🚀`,
+                  text: `Sign in to Codú 🚀\n\n`,
+                  html: createPasswordLessEmailTemplate(url),
+                });
+              } catch (error) {
+                Sentry.captureException(error);
+                throw new Error(`Sign in email could not be sent`);
+              }
+            },
+          }),
+        ]
+      : []),
   ],
   pages: {
     signIn: "/get-started",
