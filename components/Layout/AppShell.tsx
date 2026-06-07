@@ -7,6 +7,7 @@ import { LeftRail } from "./LeftRail";
 import { RightRail } from "./RightRail";
 import { SignInBar } from "./SignInBar";
 import { CommandPalette } from "@/components/CommandPalette/CommandPalette";
+import { ShellActionsProvider } from "@/components/Create/ShellActionsProvider";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -53,23 +54,25 @@ export function AppShell({ children, session, username }: AppShellProps) {
   }, [paletteOpen]);
 
   return (
-    <div
-      className="min-h-svh bg-canvas text-fg"
-      style={{ paddingBottom: session ? 0 : 56 }}
-    >
-      <TopBar
-        session={session}
-        username={username}
-        onOpenPalette={openPalette}
-      />
-      <main className="app-main">
-        <LeftRail session={session} username={username} />
-        <div className="min-w-0">{children}</div>
-        <RightRail session={session} />
-      </main>
+    <ShellActionsProvider authed={!!session}>
+      <div
+        className="min-h-svh bg-canvas text-fg"
+        style={{ paddingBottom: session ? 0 : 56 }}
+      >
+        <TopBar
+          session={session}
+          username={username}
+          onOpenPalette={openPalette}
+        />
+        <main className="app-main">
+          <LeftRail session={session} username={username} />
+          <div className="min-w-0">{children}</div>
+          <RightRail session={session} />
+        </main>
 
-      {paletteOpen && <CommandPalette onClose={closePalette} />}
-      {!session && <SignInBar />}
-    </div>
+        {paletteOpen && <CommandPalette onClose={closePalette} />}
+        {!session && <SignInBar />}
+      </div>
+    </ShellActionsProvider>
   );
 }

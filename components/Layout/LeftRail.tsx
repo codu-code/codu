@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { type Session } from "next-auth";
 import { api } from "@/server/trpc/react";
 import { Tag } from "@/components/ds";
+import { useShellActions } from "@/components/Create/ShellActionsProvider";
 
 const FOOTER = [
   { name: "Privacy", href: "/privacy" },
@@ -38,8 +39,13 @@ export function LeftRail({ session, username }: LeftRailProps) {
       : []),
   ];
 
+  const { openTopics } = useShellActions();
   const { data: popularData } = api.tag.getPopular.useQuery({ limit: 3 });
   const popular = popularData?.data ?? [];
+  const { data: interestsData } = api.profile.myInterests.useQuery(undefined, {
+    enabled: !!session,
+  });
+  const myTopics = interestsData?.topics ?? [];
 
   const isActive = (href: string) =>
     href === "/feed"
@@ -68,19 +74,49 @@ export function LeftRail({ session, username }: LeftRailProps) {
         })}
       </nav>
 
-      {popular && popular.length > 0 && (
+      {/* Your topics — the member's chosen topics (editable), or popular tags
+          for logged-out visitors. */}
+      {session ? (
         <div className="mt-5 px-3">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">
-            Your topics
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.18em] text-faint">
+              Your topics
+            </p>
+            <button
+              onClick={openTopics}
+              className="font-mono text-[10px] text-faint transition-colors hover:text-accent-soft"
+            >
+              Edit
+            </button>
+          </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {popular.map((t) => (
-              <Link key={t.slug} href={`/feed?tag=${t.slug}`}>
-                <Tag>{t.title}</Tag>
-              </Link>
-            ))}
+            {myTopics.length > 0 ? (
+              myTopics.slice(0, 6).map((t) => <Tag key={t}>{t}</Tag>)
+            ) : (
+              <button
+                onClick={openTopics}
+                className="font-mono text-xs text-accent-soft hover:underline"
+              >
+                + Add topics
+              </button>
+            )}
           </div>
         </div>
+      ) : (
+        popular.length > 0 && (
+          <div className="mt-5 px-3">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">
+              Popular topics
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {popular.map((t) => (
+                <Link key={t.slug} href={`/feed?tag=${t.slug}`}>
+                  <Tag>{t.title}</Tag>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )
       )}
 
       <div className="app-leftrail-footer flex flex-col items-start gap-1.5 px-3">

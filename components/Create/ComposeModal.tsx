@@ -1,0 +1,326 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import * as Sentry from "@sentry/nextjs";
+import { api } from "@/server/trpc/react";
+
+export type ComposeMode = "discussion" | "link" | "article";
+
+const TITLE_MAX = 300;
+const TAG_MAX = 4;
+
+function parseDomain(url: string): string | null {
+  try {
+    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
+    return u.hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reddit-style create modal: Discussion + Link publish immediately (after the
+ * automated pass); Article hands off to the full editor. Mirrors
+ * ui_kits/app/Compose.jsx → ComposeModal.
+ */
+export function ComposeModal({
+  mode,
+  onClose,
+}: {
+  mode: ComposeMode;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const utils = api.useUtils();
+  const [tab, setTab] = useState<ComposeMode>(mode);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [url, setUrl] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
+  const [done, setDone] = useState<{ href: string } | null>(null);
+
+  const { mutate: create, status: createStatus } =
+    api.content.create.useMutation({
+      onSuccess: (post) => {
+        void utils.content.getFeed.invalidate();
+        const href = post?.slug ? `/articles/${post.slug}` : "/feed";
+        setDone({ href });
+      },
+      onError: (err) => {
+        toast.error(err.message || "Couldn't post. Try again.");
+        Sentry.captureException(err);
+      },
+    });
+
+  const domain = parseDomain(url);
+  const canPost =
+    title.trim().length > 0 &&
+    (tab === "discussion" || (tab === "link" && !!domain));
+  const posting = createStatus === "pending";
+
+  const addTag = (t: string) => {
+    const v = t.trim().replace(/^#/, "");
+    if (v && tags.length < TAG_MAX && !tags.some((x) => x.toLowerCase() === v.toLowerCase())) {
+      setTags([...tags, v]);
+    }
+    setDraft("");
+  };
+
+  const submit = () => {
+    if (!canPost || posting) return;
+    create({
+      type: tab === "link" ? "LINK" : "DISCUSSION",
+      title: title.trim(),
+      body: body.trim() || null,
+      externalUrl: tab === "link" ? (url.startsWith("http") ? url : `https://${url}`) : null,
+      tags,
+      published: true,
+    });
+  };
+
+  const tabs: [ComposeMode, string][] = [
+    ["discussion", "Discussion"],
+    ["link", "Link"],
+    ["article", "Article"],
+  ];
+
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto px-6 pb-6 pt-[clamp(1rem,6vh,5rem)]"
+      style={{ background: "rgba(4,5,7,0.62)", backdropFilter: "blur(6px)" }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Create a post"
+        className="w-full max-w-[640px] overflow-hidden rounded-xl border border-strong bg-elevated shadow-lg"
+      >
+        {done ? (
+          <div className="p-6">
+            <p className="eyebrow">
+              <span className="slash">{"// "}</span>posted
+            </p>
+            <h3 className="mt-1.5 font-display text-2xl font-extrabold tracking-tight">
+              You&apos;re live.
+            </h3>
+            <p className="mt-3 font-mono text-xs leading-relaxed text-faint">
+              Your post is in the feed now. Be around to reply — the best threads
+              come from the author sticking around.
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                className="secondary-button"
+                onClick={() => {
+                  router.push(done.href);
+                  onClose();
+                }}
+              >
+                View post
+              </button>
+              <button className="primary-button" onClick={onClose}>
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between px-6 pt-5">
+              <p className="eyebrow">
+                <span className="slash">{"// "}</span>create a post
+              </p>
+              <button
+                onClick={onClose}
+                aria-label="Close"
+                className="text-base leading-none text-faint hover:text-muted"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex gap-2 px-6 pt-4">
+              {tabs.map(([id, label]) => {
+                const on = tab === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setTab(id)}
+                    className={`flex-1 rounded-md border px-2 py-2 text-sm font-semibold transition-colors ${
+                      on
+                        ? "border-accent bg-accent/10 text-accent-soft"
+                        : "border-hairline text-muted hover:text-fg"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {tab === "article" ? (
+              <div className="px-6 pb-6 pt-5">
+                <h3 className="font-display text-xl font-extrabold tracking-tight">
+                  Write a full article
+                </h3>
+                <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
+                  Articles open in a focused editor — cover image, headings, code
+                  blocks, the works. Here&apos;s how publishing works before you
+                  start:
+                </p>
+                <ul className="flex flex-col gap-3">
+                  {[
+                    ["Editors review first", "You submit a draft and a human editor reads it before it goes live — usually within a day."],
+                    ["Cross-posting is welcome", "Published it elsewhere? Add a canonical link in the editor and we'll point search engines to your original."],
+                    ["Your draft is always saved", "Step away whenever. It'll be waiting in your profile under drafts."],
+                  ].map(([h, d]) => (
+                    <li
+                      key={h}
+                      className="flex items-start gap-3 border-t border-hairline pt-3 text-sm leading-snug"
+                    >
+                      <span className="font-mono text-[13px] text-accent">→</span>
+                      <span>
+                        <span className="font-semibold text-fg">{h}.</span>{" "}
+                        <span className="text-muted">{d}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 px-6 pb-6 pt-5">
+                <textarea
+                  value={title}
+                  maxLength={TITLE_MAX}
+                  onChange={(e) => setTitle(e.target.value.replace(/\n/g, ""))}
+                  rows={1}
+                  autoFocus
+                  placeholder={
+                    tab === "link"
+                      ? "Title — what should people know before they click?"
+                      : "An honest, specific title"
+                  }
+                  className="w-full resize-none bg-transparent font-display text-xl font-bold leading-tight tracking-tight text-fg outline-none placeholder:text-faint"
+                />
+
+                {tab === "link" && (
+                  <div>
+                    <div className="flex items-center gap-2 rounded-md border border-hairline bg-canvas px-3.5 py-2.5">
+                      <span className="font-mono text-xs uppercase tracking-[0.1em] text-faint">
+                        URL
+                      </span>
+                      <input
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="https://…"
+                        className="flex-1 bg-transparent font-mono text-sm text-fg outline-none"
+                      />
+                      {url && !domain && (
+                        <span className="font-mono text-[10px] text-warning">
+                          check the url
+                        </span>
+                      )}
+                    </div>
+                    {domain && (
+                      <div className="mt-2 flex items-center gap-2 rounded-md border border-hairline bg-canvas px-3 py-2">
+                        <span className="h-3.5 w-3.5 shrink-0 rounded-sm bg-accent" />
+                        <span className="truncate font-mono text-[11px] text-faint">
+                          {domain} — we fetch the title, description &amp; preview
+                          image
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={tab === "link" ? 3 : 6}
+                  placeholder={
+                    tab === "link"
+                      ? "Add your take — why is this worth the click? (optional)"
+                      : "Body — context, what you tried, what you're asking. Markdown supported. (optional)"
+                  }
+                  className="w-full resize-y rounded-md border border-hairline bg-canvas p-3 text-sm leading-relaxed text-fg outline-none placeholder:text-faint"
+                />
+
+                {/* tags */}
+                <div className="flex flex-wrap items-center gap-2 rounded-md border border-hairline bg-canvas px-2.5 py-2">
+                  {tags.map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-2 py-0.5 font-mono text-xs text-accent-soft"
+                    >
+                      #{t}
+                      <button
+                        onClick={() => setTags(tags.filter((x) => x !== t))}
+                        aria-label={`Remove ${t}`}
+                        className="leading-none text-accent-soft"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  {tags.length < TAG_MAX && (
+                    <input
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === ",") {
+                          e.preventDefault();
+                          addTag(draft);
+                        } else if (e.key === "Backspace" && !draft && tags.length) {
+                          setTags(tags.slice(0, -1));
+                        }
+                      }}
+                      placeholder={tags.length ? "Add another…" : `Add up to ${TAG_MAX} tags…`}
+                      className="min-w-[120px] flex-1 bg-transparent font-mono text-xs text-fg outline-none placeholder:text-faint"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-hairline bg-surface px-6 py-4">
+              <span className="font-mono text-[10px] text-faint">
+                Be helpful · no spam ·{" "}
+                <Link href="/code-of-conduct" className="text-accent-soft">
+                  code of conduct
+                </Link>
+              </span>
+              <div className="ml-auto flex gap-3">
+                <button className="secondary-button" onClick={onClose}>
+                  Cancel
+                </button>
+                {tab === "article" ? (
+                  <button
+                    className="primary-button"
+                    onClick={() => {
+                      router.push("/create");
+                      onClose();
+                    }}
+                  >
+                    Open the editor →
+                  </button>
+                ) : (
+                  <button
+                    className="primary-button"
+                    disabled={!canPost || posting}
+                    onClick={submit}
+                  >
+                    {posting ? "Posting…" : "Post"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

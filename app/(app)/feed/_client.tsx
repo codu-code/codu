@@ -8,7 +8,6 @@ import { useSession } from "next-auth/react";
 import {
   FeedItemLoading,
   FeedFilters,
-  Composer,
   OnboardingBanner,
 } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
@@ -135,11 +134,11 @@ const FeedPage = () => {
         />
       </div>
 
-      {/* Onboarding + low-bar composer (signed-in) */}
+      {/* First-run onboarding nudge (signed-in). Posting now lives behind the
+          single "+ Create" entry point in the top bar. */}
       {session?.user && (
-        <div className="mt-4 space-y-4">
+        <div className="mt-4">
           <OnboardingBanner />
-          <Composer session={session} />
         </div>
       )}
 

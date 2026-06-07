@@ -3,7 +3,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import { type Session } from "next-auth";
 import {
@@ -14,12 +13,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import { api } from "@/server/trpc/react";
-
-const NAV = [
-  { name: "Feed", href: "/feed" },
-  { name: "Discussions", href: "/discussions" },
-  { name: "Jobs", href: "/jobs" },
-];
+import { useShellActions } from "@/components/Create/ShellActionsProvider";
 
 interface TopBarProps {
   session: Session | null;
@@ -33,60 +27,43 @@ interface TopBarProps {
  * free when logged out). Mirrors ui_kits/app/AppShell.jsx → TopBar.
  */
 export function TopBar({ session, username, onOpenPalette }: TopBarProps) {
-  const pathname = usePathname();
+  const { openCompose } = useShellActions();
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: !!session,
   });
   const hasNotifications = !!count && count > 0;
 
-  const isActive = (href: string) =>
-    href === "/feed"
-      ? pathname === "/feed" || pathname === "/"
-      : pathname?.startsWith(href);
-
   return (
     <header className="app-topbar">
-      <Link href="/feed" aria-label="Codú — home" className="flex shrink-0">
-        <Image
-          src="/images/codu.png"
-          alt="Codú"
-          height={16}
-          width={64}
-          className="dark:invert-0"
-        />
-      </Link>
+      {/* Left: logo */}
+      <div className="flex items-center justify-self-start">
+        <Link href="/feed" aria-label="Codú — home" className="flex shrink-0">
+          <Image
+            src="/images/codu.png"
+            alt="Codú"
+            height={16}
+            width={64}
+            className="dark:invert-0"
+          />
+        </Link>
+      </div>
 
-      {/* Search button styled like an input — opens the ⌘K palette */}
+      {/* Center: search button styled like an input — opens the ⌘K palette */}
       <button
         type="button"
         onClick={onOpenPalette}
-        className="flex max-w-[340px] flex-1 items-center gap-2 rounded-full border border-hairline bg-surface py-1.5 pl-3.5 pr-2.5 text-left transition-colors duration-base ease-out hover:border-strong"
+        className="flex w-[clamp(220px,38vw,440px)] items-center gap-2 justify-self-center rounded-full border border-hairline bg-surface py-1.5 pl-3.5 pr-2.5 text-left transition-colors duration-base ease-out hover:border-strong"
       >
-        <span className="text-[15px] leading-none text-faint">⌕</span>
+        <span className="text-sm leading-none text-faint">⌕</span>
         <span className="flex-1 text-sm text-faint">Search…</span>
         <kbd className="rounded-sm border border-hairline px-1.5 py-px font-mono text-[11px] leading-snug text-faint">
           ⌘K
         </kbd>
       </button>
 
-      <nav className="ml-auto hidden items-center gap-5 sm:flex">
-        {NAV.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={`text-sm transition-colors ${
-              isActive(item.href)
-                ? "font-semibold text-fg"
-                : "font-medium text-muted hover:text-fg"
-            }`}
-          >
-            {item.name}
-          </Link>
-        ))}
-      </nav>
-
+      {/* Right: notifications · Create · avatar (or auth) */}
       {session ? (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-self-end">
           <Link
             href="/notifications"
             aria-label="Notifications"
@@ -97,9 +74,12 @@ export function TopBar({ session, username, onOpenPalette }: TopBarProps) {
             )}
             <BellGlyph />
           </Link>
-          <Link href="/create" className="primary-button px-4 py-1.5">
-            Write
-          </Link>
+          <button
+            onClick={() => openCompose("discussion")}
+            className="primary-button px-3.5 py-1.5"
+          >
+            <span className="mr-0.5 text-[15px] leading-none">+</span> Create
+          </button>
           <Menu as="div" className="relative">
             <MenuButton
               className="flex rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
@@ -156,7 +136,7 @@ export function TopBar({ session, username, onOpenPalette }: TopBarProps) {
           </Menu>
         </div>
       ) : (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 justify-self-end">
           <button
             onClick={() => signIn()}
             className="whitespace-nowrap text-sm font-semibold text-fg"

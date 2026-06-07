@@ -3,11 +3,11 @@
 import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { api } from "@/server/trpc/react";
 import { FeedItemLoading } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
+import { useShellActions } from "@/components/Create/ShellActionsProvider";
 
 /**
  * Discussions — community threads (questions + discussions), same row style as
@@ -17,6 +17,7 @@ const DiscussionsPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session } = useSession();
+  const { openCompose } = useShellActions();
 
   const tag = searchParams?.get("tag") || null;
 
@@ -49,9 +50,12 @@ const DiscussionsPage = () => {
             Discussions
           </h1>
         </div>
-        <Link href="/create?kind=question" className="primary-button">
+        <button
+          onClick={() => (session ? openCompose("discussion") : signIn())}
+          className="primary-button"
+        >
           Start a discussion
-        </Link>
+        </button>
       </div>
       <p className="mt-3 max-w-[60ch] leading-snug text-muted">
         Ask questions, swap patterns, and get unstuck. The place to learn out
