@@ -3,7 +3,7 @@ import React from "react";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { user } from "@/server/db/schema";
-import { SidebarAppLayout } from "@/components/Layout/SidebarAppLayout";
+import { AppShell } from "@/components/Layout/AppShell";
 import { JsonLd } from "@/components/JsonLd";
 import { getOrganizationSchema } from "@/lib/structured-data";
 import { recordDailyActivity, ensureReferral } from "@/server/lib/engagement";
@@ -44,28 +44,6 @@ export const metadata = {
   },
 };
 
-const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID || "";
-const ALGOLIA_SEARCH_API = process.env.ALGOLIA_SEARCH_API || "";
-const ALGOLIA_SOURCE_IDX = process.env.ALGOLIA_SOURCE_IDX || "";
-
-if (!ALGOLIA_APP_ID || !ALGOLIA_SEARCH_API) {
-  console.error(
-    ".env values required for Algolia search (ALGOLIA_APP_ID and ALGOLIA_SEARCH_API). Visit https://www.algolia.com/ to create a free account and get your API keys.",
-  );
-}
-
-if (!ALGOLIA_SOURCE_IDX) {
-  console.error(
-    ".env value required for Algolia source ID (ALGOLIA_SOURCE_IDX). Create an index in your Algolia account and set the value to the index name.",
-  );
-}
-
-const algoliaSearchConfig = {
-  ALGOLIA_APP_ID,
-  ALGOLIA_SEARCH_API,
-  ALGOLIA_SOURCE_IDX,
-};
-
 export default async function RootLayout({
   children,
 }: {
@@ -91,13 +69,9 @@ export default async function RootLayout({
       {/* Organization JSON-LD for site-wide SEO */}
       <JsonLd data={getOrganizationSchema()} />
 
-      <SidebarAppLayout
-        session={session}
-        algoliaSearchConfig={algoliaSearchConfig}
-        username={userData?.username || null}
-      >
+      <AppShell session={session} username={userData?.username || null}>
         {children}
-      </SidebarAppLayout>
+      </AppShell>
     </>
   );
 }

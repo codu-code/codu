@@ -6,14 +6,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useSession } from "next-auth/react";
-import {
-  FeedItemLoading,
-  FeedFilters,
-  PopularTagsSidebar,
-} from "@/components/Feed";
+import { FeedItemLoading, FeedFilters } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
-import { SavedItemCard } from "@/components/SavedItemCard";
-import { NewsletterCapture, ConversionHub, BuildBoard } from "@/components/ds";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
@@ -118,24 +112,11 @@ const FeedPage = () => {
     router.push(`/feed${queryString ? `?${queryString}` : ""}`);
   };
 
-  const handleTagChange = (newTag: string | null) => {
-    const params = new URLSearchParams();
-    if (sort !== "recent") params.set("sort", sort);
-    if (category) params.set("category", category);
-    if (newTag) params.set("tag", newTag);
-    if (type) params.set("type", type.toLowerCase());
-    const queryString = params.toString();
-    router.push(`/feed${queryString ? `?${queryString}` : ""}`);
-  };
-
   return (
-    <div className="mx-2">
+    <div>
       {/* Header */}
-      <div className="mt-2 flex max-w-5xl items-center justify-between sm:mx-auto sm:mt-6 sm:max-w-2xl lg:max-w-5xl">
-        <h1 className="hidden text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50 sm:block">
-          Feed
-        </h1>
-        <span />
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-extrabold tracking-tight text-fg">Feed</h1>
         <FeedFilters
           sort={sort}
           type={type}
@@ -150,7 +131,7 @@ const FeedPage = () => {
 
       {/* For you / Following tabs (signed-in) */}
       {session?.user && (
-        <div className="mx-auto mt-4 flex max-w-5xl gap-5 border-b border-hairline sm:max-w-2xl lg:max-w-5xl">
+        <div className="mt-4 flex gap-5 border-b border-hairline">
           {[
             { label: "For you", href: "/feed", active: !following },
             {
@@ -175,10 +156,9 @@ const FeedPage = () => {
         </div>
       )}
 
-      {/* Main content grid */}
-      <div className="mx-auto grid-cols-12 gap-6 sm:max-w-2xl lg:grid lg:max-w-5xl">
-        {/* Feed items */}
-        <div className="relative md:col-span-7">
+      {/* Feed list (rails now live in the global app shell) */}
+      <div>
+        <div className="relative">
           <section>
             {/* Composer */}
             {session?.user && (
@@ -189,7 +169,7 @@ const FeedPage = () => {
                 <span className="flex-1 text-muted">
                   What are you building? Share a post…
                 </span>
-                <span className="rounded-lg bg-accent px-3.5 py-1.5 text-sm font-semibold text-black">
+                <span className="rounded-lg bg-accent px-3.5 py-1.5 text-sm font-semibold text-on-accent">
                   Write
                 </span>
               </Link>
@@ -279,115 +259,7 @@ const FeedPage = () => {
             </span>
           </section>
         </div>
-
-        {/* Sidebar */}
-        <section className="col-span-5 hidden lg:block">
-          <div className="sticky top-20">
-            {/* Conversion hub — contribute / monetise actions */}
-            <div className="mt-2">
-              <ConversionHub />
-            </div>
-
-            {/* Build Board — weekly leaderboard (flag-gated, hidden if empty) */}
-            <div className="mt-6">
-              <BuildBoard />
-            </div>
-
-            {/* About section */}
-            <div className="mt-6 rounded-lg border border-hairline bg-surface p-4">
-              <h3 className="mb-2 font-semibold text-fg">About the Feed</h3>
-              <p className="text-sm text-muted">
-                Curated content for AI builders &amp; indie hackers. Upvote what
-                you find helpful, save it for later, and discover what&apos;s
-                working with AI.
-              </p>
-            </div>
-
-            {/* Newsletter CTA */}
-            <div className="mt-6">
-              <NewsletterCapture variant="compact" />
-            </div>
-
-            {/* Popular Tags section */}
-            <div className="mt-6">
-              <PopularTagsSidebar
-                selectedTag={tag}
-                onTagClick={handleTagChange}
-              />
-            </div>
-
-            {/* Saved articles for logged in users */}
-            {session && (
-              <div className="mt-6">
-                <h3 className="mb-4 text-lg font-semibold leading-6 tracking-wide">
-                  Your Saved Articles
-                </h3>
-                <SavedArticlesPreview />
-              </div>
-            )}
-          </div>
-        </section>
       </div>
-    </div>
-  );
-};
-
-// Component to show saved articles preview in sidebar
-const SavedArticlesPreview = () => {
-  const { data, status } = api.post.myBookmarks.useQuery({ limit: 5 });
-
-  if (status === "pending") {
-    return (
-      <div className="space-y-2">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
-          />
-        ))}
-      </div>
-    );
-  }
-
-  if (status === "error" || !data?.items?.length) {
-    return (
-      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-        No saved articles yet. Save articles to read them later!
-      </p>
-    );
-  }
-
-  // Map DB type to frontend type
-  const toFrontendType = (dbType: string | null): "POST" | "LINK" => {
-    if (dbType === "article") return "POST";
-    return "LINK";
-  };
-
-  return (
-    <div className="space-y-2">
-      {data.items.slice(0, 3).map((item) => (
-        <SavedItemCard
-          key={item.id}
-          id={item.id}
-          title={item.title}
-          slug={item.slug}
-          publishedAt={item.publishedAt}
-          sourceName={item.sourceName}
-          sourceSlug={item.sourceSlug}
-          authorName={item.authorName}
-          authorUsername={item.authorUsername}
-          authorImage={item.authorImage}
-          type={toFrontendType(item.type)}
-        />
-      ))}
-      {data.items.length > 3 && (
-        <Link
-          href="/saved"
-          className="block text-center text-sm text-accent hover:text-accent dark:text-accent"
-        >
-          View all saved
-        </Link>
-      )}
     </div>
   );
 };
