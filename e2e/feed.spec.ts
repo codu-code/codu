@@ -85,11 +85,10 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // Vote buttons should be visible (using aria-label)
-    await expect(page.getByLabel("Upvote").first()).toBeVisible({
+    // The relaunch reaction bar is "▲ helpful" (supportive, upvote-only).
+    await expect(page.getByLabel("Helpful").first()).toBeVisible({
       timeout: 15000,
     });
-    await expect(page.getByLabel("Downvote").first()).toBeVisible();
   });
 
   test("Should show bookmark buttons on feed items", async ({ page }) => {
@@ -135,33 +134,22 @@ test.describe("Authenticated Feed Page", () => {
     await page.waitForSelector("article");
 
     if (!isMobile) {
-      // Sidebar should show topics or saved items
+      // Right rail shows discovery / progress on desktop.
       await expect(
-        page.getByRole("heading", { name: /topics|saved/i }).first(),
+        page.getByText(/Trending tags|Your progress/i).first(),
       ).toBeVisible({ timeout: 15000 });
     }
   });
 
-  test("Should allow upvoting content", async ({ page }) => {
+  test("Should allow marking content helpful (upvote)", async ({ page }) => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // Click upvote (using aria-label)
-    await page.getByLabel("Upvote").first().click();
+    // Click the helpful (upvote) control
+    await page.getByLabel("Helpful").first().click();
 
-    // Vote button should still be visible after interaction
-    await expect(page.getByLabel("Upvote").first()).toBeVisible();
-  });
-
-  test("Should allow downvoting content", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
-    await page.waitForSelector("article");
-
-    // Click downvote (using aria-label)
-    await page.getByLabel("Downvote").first().click();
-
-    // Vote button should still be visible after interaction
-    await expect(page.getByLabel("Downvote").first()).toBeVisible();
+    // Control should still be visible after interaction
+    await expect(page.getByLabel("Helpful").first()).toBeVisible();
   });
 
   test("Should allow bookmarking content", async ({ page }) => {

@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/server/trpc/react";
 
 interface CommandPaletteProps {
-  open: boolean;
   onClose: () => void;
 }
+
+type Item = {
+  id: string;
+  label: string;
+  href: string;
+  group: string;
+  sub?: string;
+  glyph: string;
+};
 
 const QUICK_ACTIONS: { label: string; href: string }[] = [
   { label: "Go to Feed", href: "/feed" },
@@ -21,34 +29,79 @@ const QUICK_ACTIONS: { label: string; href: string }[] = [
 
 /**
  * ⌘K command palette: site-wide search + quick nav. Grouped Quick actions
- * (filtered by query) + live Tag results. Mirrors ui_kits/app/AppShell.jsx →
- * CommandPalette. (Posts/People search via Algolia is a future enhancement.)
+ * (filtered by query) + live Tag results, with arrow-key navigation and
+ * Enter-to-select. Mounted only while open (by AppShell), which keeps state
+ * fresh without a reset effect; AppShell restores focus to the trigger on
+ * close. Mirrors ui_kits/app/AppShell.jsx → CommandPalette.
  */
-export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+export function CommandPalette({ onClose }: CommandPaletteProps) {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [active, setActive] = useState(0);
   const query = q.trim();
 
   const { data: tagData } = api.tag.search.useQuery(
     { query, limit: 5 },
-    { enabled: open && query.length > 0 },
+    { enabled: query.length > 0 },
   );
   const tags = tagData?.data ?? [];
 
-  if (!open) return null;
-
   const ql = query.toLowerCase();
-  const actions = ql
-    ? QUICK_ACTIONS.filter((a) => a.label.toLowerCase().includes(ql))
-    : QUICK_ACTIONS;
+  const items = useMemo<Item[]>(() => {
+    const actions = (
+      ql
+        ? QUICK_ACTIONS.filter((a) => a.label.toLowerCase().includes(ql))
+        : QUICK_ACTIONS
+    ).map((a) => ({
+      id: `a:${a.href}`,
+      label: a.label,
+      href: a.href,
+      group: ql ? "Actions" : "Quick actions",
+      glyph: "›",
+    }));
+    const tagItems: Item[] = tags.map((t) => ({
+      id: `t:${t.slug}`,
+      label: t.title,
+      href: `/feed?tag=${t.slug}`,
+      group: "Tags",
+      sub: `${t.postCount ?? 0} posts`,
+      glyph: "#",
+    }));
+    return [...actions, ...tagItems];
+  }, [ql, tags]);
+
+  // Clamp at render rather than in an effect.
+  const activeIndex = items.length ? Math.min(active, items.length - 1) : 0;
 
   const go = (href: string) => {
     router.push(href);
-    setQ("");
     onClose();
   };
 
-  const hasResults = actions.length > 0 || tags.length > 0;
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive(items.length ? (activeIndex + 1) % items.length : 0);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive(
+        items.length ? (activeIndex - 1 + items.length) % items.length : 0,
+      );
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const item = items[activeIndex];
+      if (item) go(item.href);
+    }
+  };
+
+  // Group consecutive items by group label for headers.
+  const groups: { label: string; items: Item[] }[] = [];
+  for (const item of items) {
+    const last = groups[groups.length - 1];
+    if (last && last.label === item.group) last.items.push(item);
+    else groups.push({ label: item.group, items: [item] });
+  }
+  let flatIndex = -1;
 
   return (
     <div
@@ -58,6 +111,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={onKeyDown}
         role="dialog"
         aria-modal="true"
         aria-label="Search Codú"
@@ -68,8 +122,15 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           <input
             autoFocus
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setActive(0);
+            }}
             placeholder="Search actions, tags…"
+            aria-label="Search"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="cmdk-list"
             className="flex-1 bg-transparent text-lg text-fg outline-none placeholder:text-faint"
           />
           <kbd className="rounded-sm border border-hairline px-1.5 py-0.5 font-mono text-[11px] text-faint">
@@ -77,87 +138,57 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           </kbd>
         </div>
 
-        <div className="max-h-[54vh] overflow-y-auto p-3">
-          {!hasResults && (
+        <div
+          id="cmdk-list"
+          role="listbox"
+          className="max-h-[54vh] overflow-y-auto p-3"
+        >
+          {items.length === 0 && (
             <div className="p-8 text-center font-mono text-sm text-faint">
               {"// "}no matches for “{query}”
             </div>
           )}
 
-          {actions.length > 0 && (
-            <Group label={ql ? "Actions" : "Quick actions"}>
-              {actions.map((a) => (
-                <Row key={a.label} onClick={() => go(a.href)} glyph="›">
-                  {a.label}
-                </Row>
-              ))}
-            </Group>
-          )}
-
-          {tags.length > 0 && (
-            <Group label="Tags">
-              {tags.map((t) => (
-                <Row
-                  key={t.slug}
-                  onClick={() => go(`/feed?tag=${t.slug}`)}
-                  glyph="#"
-                  sub={`${t.postCount ?? 0} posts`}
-                >
-                  {t.title}
-                </Row>
-              ))}
-            </Group>
-          )}
+          {groups.map((group) => (
+            <div key={group.label} className="mb-2">
+              <p className="mb-1 px-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
+                {group.label}
+              </p>
+              {group.items.map((item) => {
+                flatIndex += 1;
+                const isActive = flatIndex === activeIndex;
+                const idx = flatIndex;
+                return (
+                  <button
+                    key={item.id}
+                    role="option"
+                    aria-selected={isActive}
+                    onMouseEnter={() => setActive(idx)}
+                    onClick={() => go(item.href)}
+                    className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${
+                      isActive ? "bg-surface" : ""
+                    }`}
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-hairline font-mono text-[13px] text-faint">
+                      {item.glyph}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-fg">
+                        {item.label}
+                      </span>
+                      {item.sub && (
+                        <span className="block font-mono text-xs text-faint">
+                          {item.sub}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </div>
-  );
-}
-
-function Group({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="mb-2">
-      <p className="mb-1 px-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-faint">
-        {label}
-      </p>
-      {children}
-    </div>
-  );
-}
-
-function Row({
-  onClick,
-  glyph,
-  sub,
-  children,
-}: {
-  onClick: () => void;
-  glyph: string;
-  sub?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-surface"
-    >
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-hairline font-mono text-[13px] text-faint">
-        {glyph}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-fg">
-          {children}
-        </span>
-        {sub && (
-          <span className="block font-mono text-xs text-faint">{sub}</span>
-        )}
-      </span>
-    </button>
   );
 }

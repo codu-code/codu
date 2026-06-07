@@ -1,42 +1,30 @@
 import { test, expect } from "@playwright/test";
 import { loggedInAsUserOne } from "./utils";
 
-test.describe("Authenticated homepage", () => {
+// The relaunch removed the marketing homepage: "/" 308-redirects to the feed,
+// which is the landing surface for everyone (reading is free).
+
+test.describe("Authenticated home → feed", () => {
   test.beforeEach(async ({ page }) => {
     await loggedInAsUserOne(page);
   });
-  test("Homepage view", async ({ page, isMobile }) => {
+  test("Root redirects to the feed", async ({ page }) => {
     await page.goto("http://localhost:3000/");
-
-    // For authenticated users, check for "Trending" heading (h3) instead of h1
-    // h1 only exists for unauthenticated users in the Hero section
-    await expect(page.getByRole("heading", { name: "Trending" })).toBeVisible();
-
-    if (!isMobile) {
-      // Desktop should show "Your Posts" link in header/sidebar
-      await expect(
-        page.getByRole("link", {
-          name: "Your Posts",
-        }),
-      ).toBeVisible();
-    }
+    await expect(page).toHaveURL(/\/feed/);
+    await expect(page.locator("h1")).toContainText("Feed");
   });
 });
 
-test.describe("Unauthenticated homepage", () => {
-  test("Homepage view", async ({ page }) => {
+test.describe("Unauthenticated home → feed", () => {
+  test("Root redirects to the public feed with a join CTA", async ({
+    page,
+  }) => {
     await page.goto("http://localhost:3000/");
-
-    await expect(page.locator("h1")).not.toContainText("Unwanted text");
-
-    // Check for the main heading on homepage
-    await expect(page.locator("h1")).toContainText(
-      "The free web developer community",
-    );
-
-    // Check for sign up CTA (updated text from the new homepage)
+    await expect(page).toHaveURL(/\/feed/);
+    await expect(page.locator("h1")).toContainText("Feed");
+    // The shell offers a free account (top bar + sign-in bar).
     await expect(
-      page.getByRole("heading", { name: /Sign up today/i }),
+      page.getByRole("button", { name: "Join free" }).first(),
     ).toBeVisible();
   });
 });

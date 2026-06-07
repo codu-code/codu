@@ -304,6 +304,7 @@ const UnifiedContentCard = ({
             onClick={() => handleVote(userVote === "up" ? null : "up")}
             disabled={voteStatus === "pending"}
             title="Helpful"
+            aria-label="Helpful"
             className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 font-mono text-xs transition-colors disabled:opacity-50 ${
               userVote === "up"
                 ? "bg-accent/10 text-accent-soft"

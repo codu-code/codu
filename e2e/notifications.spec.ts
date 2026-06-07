@@ -35,8 +35,8 @@ test.describe("Notifications Page", () => {
       await expect(
         page.getByRole("heading", { name: "Notifications" }),
       ).toBeVisible();
-      // Should show empty state message
-      await expect(page.getByText(/No new notifications/)).toBeVisible();
+      // Should show empty state message (copy is lower-case in the relaunch)
+      await expect(page.getByText(/no new notifications/i)).toBeVisible();
     });
   });
 

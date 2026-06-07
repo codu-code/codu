@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Session } from "next-auth";
 import { TopBar } from "./TopBar";
 import { LeftRail } from "./LeftRail";
@@ -22,19 +22,35 @@ interface AppShellProps {
  */
 export function AppShell({ children, session, username }: AppShellProps) {
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // Remember the element that opened the palette so focus can be restored.
+  const paletteTrigger = useRef<HTMLElement | null>(null);
+
+  const openPalette = () => {
+    paletteTrigger.current = document.activeElement as HTMLElement;
+    setPaletteOpen(true);
+  };
+  const closePalette = () => {
+    setPaletteOpen(false);
+    paletteTrigger.current?.focus?.();
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
-        setPaletteOpen((o) => !o);
-      } else if (e.key === "Escape") {
-        setPaletteOpen(false);
+        if (paletteOpen) {
+          closePalette();
+        } else {
+          paletteTrigger.current = document.activeElement as HTMLElement;
+          setPaletteOpen(true);
+        }
+      } else if (e.key === "Escape" && paletteOpen) {
+        closePalette();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [paletteOpen]);
 
   return (
     <div
@@ -44,7 +60,7 @@ export function AppShell({ children, session, username }: AppShellProps) {
       <TopBar
         session={session}
         username={username}
-        onOpenPalette={() => setPaletteOpen(true)}
+        onOpenPalette={openPalette}
       />
       <main className="app-main">
         <LeftRail session={session} username={username} />
@@ -52,10 +68,7 @@ export function AppShell({ children, session, username }: AppShellProps) {
         <RightRail session={session} />
       </main>
 
-      <CommandPalette
-        open={paletteOpen}
-        onClose={() => setPaletteOpen(false)}
-      />
+      {paletteOpen && <CommandPalette onClose={closePalette} />}
       {!session && <SignInBar />}
     </div>
   );

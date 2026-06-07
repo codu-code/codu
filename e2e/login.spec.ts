@@ -9,9 +9,11 @@ test.describe("Unauthenticated Login Page", () => {
   });
   test("Sign up page contains sign up links", async ({ page }) => {
     await expect(
-      page.getByRole("heading", { name: "Sign in or create your account" }),
+      page.getByRole("heading", { name: "Start building with AI" }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "return home" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Codú home" }),
+    ).toBeVisible();
     // Check for OAuth provider buttons
     await expect(
       page.getByRole("button", { name: "Continue with GitHub" }),
@@ -33,15 +35,12 @@ test.describe("Authenticated Login Page", () => {
   test.beforeEach(async ({ page }) => {
     await loggedInAsUserOne(page);
   });
-  test("Sign up page contains sign up links", async ({ page }) => {
-    // authenticated users are kicked back to the homepage if they try to go to /get-started
+  test("Authenticated users are redirected away from get-started", async ({
+    page,
+  }) => {
+    // Authenticated users are bounced off /get-started → "/" → /feed.
     await page.goto("http://localhost:3000/get-started");
-    expect(page.url()).toEqual("http://localhost:3000/");
-    await expect(
-      page.getByRole("heading", { name: "Sign in or create your account" }),
-    ).toBeHidden();
-    await expect(page.getByRole("link", { name: "return home" })).toBeHidden();
-    // OAuth provider buttons should be hidden on homepage
+    await expect(page).toHaveURL(/\/feed/);
     await expect(
       page.getByRole("button", { name: "Continue with GitHub" }),
     ).toBeHidden();
