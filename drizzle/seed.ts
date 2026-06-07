@@ -8,6 +8,14 @@ import {
   session,
   feed_sources,
   comments,
+  follow,
+  bookmarks,
+  post_votes,
+  job,
+  point_event,
+  user_streak,
+  badge,
+  user_badge,
 } from "../server/db/schema";
 import { sql, eq } from "drizzle-orm";
 
@@ -55,7 +63,45 @@ const main = async () => {
     "PYTHON",
     "TIPS",
     "BACKEND",
+    // Relaunch / AI-builder oriented tags
+    "AI",
+    "RAG",
+    "AGENTS",
+    "PROMPTING",
+    "LLM APPS",
+    "INDIE HACKING",
+    "STARTUPS",
+    "CAREER",
+    "TYPESCRIPT",
+    "REACT",
   ];
+
+  // Onboarding topic pool ("Your topics") used to populate user.topics and to
+  // tag relaunch posts. Mirrors the relaunch positioning toward AI builders /
+  // indie hackers.
+  const topicPool = [
+    "AI patterns",
+    "RAG",
+    "Agents",
+    "Prompting",
+    "LLM apps",
+    "Product",
+    "Frontend",
+    "Career",
+    "Indie hacking",
+    "Startups",
+  ];
+
+  const experienceLevels = [
+    "beginner",
+    "intermediate",
+    "advanced",
+    "professional",
+  ];
+
+  // Pick `n` distinct topics from the pool.
+  const pickTopics = (n: number) =>
+    chance.pickset(topicPool, Math.min(n, topicPool.length));
 
   // Generate posts for the new posts table
   const randomPosts = (count = 10) => {
@@ -112,11 +158,340 @@ ${chance.paragraph()}
       });
   };
 
+  const slugify = (title: string, shortId: string) =>
+    `${title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .substring(0, 100)}-${shortId}`;
+
+  // Curated relaunch posts exercising EVERY post type + a spread of statuses,
+  // dates and vote/comment counts so feed filters (type) and sorts (Latest /
+  // Most helpful / Most discussed) all differ. `tagTitles` are matched to
+  // seeded tags by title; `coreAuthor` indexes into coreUsers.
+  const buildRelaunchPosts = () => {
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+    // daysAgo helper → ISO string.
+    const ago = (d: number) => new Date(now - d * day).toISOString();
+
+    type Seed = {
+      type: "article" | "discussion" | "link" | "resource" | "til" | "question";
+      title: string;
+      excerpt: string;
+      body?: string;
+      externalUrl?: string;
+      status: "published" | "in_review" | "draft";
+      coreAuthor: number;
+      daysAgo: number;
+      upvotes: number;
+      tagTitles: string[];
+      featured?: boolean;
+    };
+
+    const seeds: Seed[] = [
+      // ── Articles (published, body + tags) ────────────────────────────────
+      {
+        type: "article",
+        title: "Patterns for production RAG that actually retrieve the right thing",
+        excerpt:
+          "Chunking, hybrid search and reranking — the three levers that moved our retrieval quality the most.",
+        body: "## The problem\nMost RAG demos look great until real documents hit them.\n\n## What worked\n- Smaller, semantically-coherent chunks\n- Hybrid (keyword + vector) retrieval\n- A cross-encoder reranker on the top 50\n\nWe went from ~60% to ~88% answer relevance with these three changes alone.",
+        status: "published",
+        coreAuthor: 1,
+        daysAgo: 2,
+        upvotes: 142,
+        tagTitles: ["RAG", "AI", "BACKEND"],
+        featured: true,
+      },
+      {
+        type: "article",
+        title: "Evals before vibes: how we stopped shipping broken agents",
+        excerpt:
+          "A practical eval harness you can build in an afternoon that catches regressions before users do.",
+        body: "## Why\nWithout evals, every prompt tweak is a coin flip.\n\n## The harness\nWe log every agent run, label a golden set, and gate deploys on a pass threshold. Cheap, boring, effective.",
+        status: "published",
+        coreAuthor: 6,
+        daysAgo: 9,
+        upvotes: 97,
+        tagTitles: ["AGENTS", "AI", "LLM APPS"],
+      },
+      {
+        type: "article",
+        title: "From frontend dev to LLM apps without losing your mind",
+        excerpt:
+          "The mental-model shifts that helped me go from React components to streaming LLM UIs.",
+        body: "## Streaming changes everything\nYour UI is now a function of a token stream, not a request/response.\n\n## Keep your DX\nGood TypeScript types around the model boundary save you constantly.",
+        status: "published",
+        coreAuthor: 2,
+        daysAgo: 15,
+        upvotes: 64,
+        tagTitles: ["FRONTEND", "LLM APPS", "TYPESCRIPT"],
+      },
+      {
+        type: "article",
+        title: "Distribution is the hard part: 90 days of building in public",
+        excerpt:
+          "What moved the needle for an indie SaaS — and what was a total waste of time.",
+        body: "## TL;DR\nBuilding was easy. Getting anyone to care was the job.\n\nProof-of-work posts beat launch posts. Boring consistency beat viral spikes.",
+        status: "published",
+        coreAuthor: 5,
+        daysAgo: 22,
+        upvotes: 118,
+        tagTitles: ["INDIE HACKING", "STARTUPS", "PRODUCTIVITY"],
+      },
+
+      // ── Discussions ──────────────────────────────────────────────────────
+      {
+        type: "discussion",
+        title: "What's your actual agent stack in production right now?",
+        excerpt:
+          "Framework, model, eval setup, hosting — curious what's holding up under real load.",
+        body: "Mine: a thin custom loop, Sonnet for planning, Haiku for the cheap steps, and a homemade eval gate. What are you running?",
+        status: "published",
+        coreAuthor: 0,
+        daysAgo: 1,
+        upvotes: 38,
+        tagTitles: ["AGENTS", "AI"],
+      },
+      {
+        type: "discussion",
+        title: "Is 'prompt engineering' still a real skill in 2026?",
+        excerpt: "Or have the models gotten good enough that it barely matters?",
+        body: "I keep going back and forth. For simple tasks it's noise; for agents it's still load-bearing. Where do you land?",
+        status: "published",
+        coreAuthor: 3,
+        daysAgo: 4,
+        upvotes: 51,
+        tagTitles: ["PROMPTING", "AI"],
+      },
+
+      // ── Questions ────────────────────────────────────────────────────────
+      {
+        type: "question",
+        title: "How do you handle PDF tables in a RAG pipeline?",
+        excerpt:
+          "Vanilla extraction mangles them and the model gives confidently wrong numbers.",
+        body: "Tried a few parsers, all of them flatten the structure. Anyone solved this cleanly without going full vision model?",
+        status: "published",
+        coreAuthor: 4,
+        daysAgo: 3,
+        upvotes: 27,
+        tagTitles: ["RAG", "AI"],
+      },
+      {
+        type: "question",
+        title: "First ML eng role — is a portfolio or a degree worth more?",
+        excerpt: "Career-switching and trying to spend my limited hours wisely.",
+        body: "Recruiters seem to want both. If you hire, what actually makes you click 'interview'?",
+        status: "published",
+        coreAuthor: 4,
+        daysAgo: 11,
+        upvotes: 19,
+        tagTitles: ["CAREER"],
+      },
+
+      // ── TIL (today I learned) ────────────────────────────────────────────
+      {
+        type: "til",
+        title: "TIL you can cache the system prompt and cut token cost ~80%",
+        excerpt: "Prompt caching on long, stable system prompts is basically free money.",
+        body: "If your system prompt is big and rarely changes, caching it slashes cost and latency. Wish I'd done this months ago.",
+        status: "published",
+        coreAuthor: 6,
+        daysAgo: 2,
+        upvotes: 73,
+        tagTitles: ["LLM APPS", "TIPS", "AI"],
+      },
+      {
+        type: "til",
+        title: "TIL `structuredClone` is built into every modern runtime",
+        excerpt: "No more JSON.parse(JSON.stringify(...)) hacks for deep copies.",
+        body: "Works in Node, Deno, Bun and browsers. Handles Maps, Sets and Dates too.",
+        status: "published",
+        coreAuthor: 7,
+        daysAgo: 6,
+        upvotes: 45,
+        tagTitles: ["JAVASCRIPT", "TIPS"],
+      },
+
+      // ── User-authored links (externalUrl, no curated source) ─────────────
+      {
+        type: "link",
+        title: "A great write-up on building eval-driven agents",
+        excerpt: "Sharing this — closest thing to how I actually work day to day.",
+        externalUrl: "https://example.com/eval-driven-agents",
+        status: "published",
+        coreAuthor: 0,
+        daysAgo: 5,
+        upvotes: 31,
+        tagTitles: ["AGENTS", "AI"],
+      },
+      {
+        type: "link",
+        title: "The indie hacker's guide to first 100 customers",
+        excerpt: "Tactical, not motivational. Bookmarking for later.",
+        externalUrl: "https://example.com/first-100-customers",
+        status: "published",
+        coreAuthor: 5,
+        daysAgo: 8,
+        upvotes: 22,
+        tagTitles: ["INDIE HACKING", "STARTUPS"],
+      },
+
+      // ── Resource ─────────────────────────────────────────────────────────
+      {
+        type: "resource",
+        title: "Open-source prompt library for common app tasks",
+        excerpt: "Battle-tested prompts for summarisation, extraction and classification.",
+        externalUrl: "https://example.com/prompt-library",
+        status: "published",
+        coreAuthor: 3,
+        daysAgo: 12,
+        upvotes: 40,
+        tagTitles: ["PROMPTING", "LLM APPS"],
+      },
+
+      // ── Moderation / profile states ──────────────────────────────────────
+      {
+        type: "article",
+        title: "Draft: notes on multi-agent orchestration (WIP)",
+        excerpt: "Still messy — parking my thoughts before I forget them.",
+        body: "Rough notes only. Coordination overhead seems to dominate once you pass ~3 agents.",
+        status: "draft",
+        coreAuthor: 1,
+        daysAgo: 1,
+        upvotes: 0,
+        tagTitles: ["AGENTS"],
+      },
+      {
+        type: "article",
+        title: "Submitted: a beginner-friendly intro to vector databases",
+        excerpt: "Awaiting review — feedback welcome once it's live.",
+        body: "Covers embeddings, similarity search and when you actually need a dedicated vector DB.",
+        status: "in_review",
+        coreAuthor: 4,
+        daysAgo: 1,
+        upvotes: 0,
+        tagTitles: ["RAG", "BACKEND"],
+      },
+      {
+        type: "question",
+        title: "Submitted: anyone using Bun in production for an LLM gateway?",
+        excerpt: "Pending review — wondering about stability at scale.",
+        body: "Tempted by the speed but nervous about edge cases. Real-world reports appreciated.",
+        status: "in_review",
+        coreAuthor: 7,
+        daysAgo: 1,
+        upvotes: 0,
+        tagTitles: ["BACKEND", "JAVASCRIPT"],
+      },
+    ];
+
+    return seeds.map((s) => {
+      const shortId = generateShortId();
+      const published = s.status === "published";
+      return {
+        row: {
+          type: s.type,
+          title: s.title,
+          slug: slugify(s.title, shortId),
+          excerpt: s.excerpt,
+          body: s.body ?? null,
+          externalUrl: s.externalUrl ?? null,
+          readingTime: chance.integer({ min: 1, max: 12 }),
+          status: s.status,
+          publishedAt: published ? ago(s.daysAgo) : null,
+          createdAt: ago(s.daysAgo),
+          upvotesCount: s.upvotes,
+          downvotesCount: published
+            ? chance.integer({ min: 0, max: 6 })
+            : 0,
+          viewsCount: published ? s.upvotes * chance.integer({ min: 3, max: 12 }) : 0,
+          featured: s.featured ?? false,
+          showComments: true,
+        },
+        coreAuthor: s.coreAuthor,
+        tagTitles: s.tagTitles,
+      };
+    });
+  };
+
+  // Hand-authored core users with realistic names, bios and topics so the
+  // relaunch feed/profiles look alive (search, "Your topics", follows, etc.).
+  const coreUsersRaw = [
+    {
+      name: "Amara Okafor",
+      bio: "Building AI agents that actually ship. Ex-platform eng, now indie.",
+      topics: ["Agents", "LLM apps", "Indie hacking"],
+      experienceLevel: "advanced",
+    },
+    {
+      name: "Diego Fernández",
+      bio: "RAG nerd. Turning messy docs into useful answers for SMBs.",
+      topics: ["RAG", "AI patterns", "Startups"],
+      experienceLevel: "professional",
+    },
+    {
+      name: "Priya Natarajan",
+      bio: "Frontend engineer who fell down the LLM rabbit hole. React + DX.",
+      topics: ["Frontend", "LLM apps", "Product"],
+      experienceLevel: "intermediate",
+    },
+    {
+      name: "Tom Whelan",
+      bio: "Solo founder shipping a prompt-ops tool. Learning in public.",
+      topics: ["Prompting", "Indie hacking", "Product"],
+      experienceLevel: "intermediate",
+    },
+    {
+      name: "Lina Haddad",
+      bio: "Career-switcher into ML eng. Writing the guides I wish I'd had.",
+      topics: ["Career", "AI patterns", "RAG"],
+      experienceLevel: "beginner",
+    },
+    {
+      name: "Marcus Bell",
+      bio: "Startups, distribution, and the unglamorous work of getting users.",
+      topics: ["Startups", "Indie hacking", "Product"],
+      experienceLevel: "professional",
+    },
+    {
+      name: "Yuki Tanaka",
+      bio: "Building eval harnesses so agents stop hallucinating in prod.",
+      topics: ["Agents", "AI patterns", "LLM apps"],
+      experienceLevel: "advanced",
+    },
+    {
+      name: "Grace Mwangi",
+      bio: "Full-stack dev. Big on TypeScript, small on meetings.",
+      topics: ["Frontend", "Career", "Product"],
+      experienceLevel: "intermediate",
+    },
+  ];
+
+  const coreUsers = coreUsersRaw.map((u, i) => ({
+    username: `${u.name.split(" ").join("-").toLowerCase()}-${100 + i}`,
+    name: u.name,
+    email: `${u.name.split(" ").join(".").toLowerCase()}@example.com`,
+    image: `https://robohash.org/${encodeURIComponent(u.name)}?bgset=bg1`,
+    location: chance.country({ full: true }),
+    bio: u.bio,
+    websiteUrl: chance.url(),
+    topics: u.topics,
+    experienceLevel: u.experienceLevel,
+    // Core users have all completed onboarding.
+    onboardedAt: new Date(chance.date({ year: 2025 })).toISOString(),
+  }));
+
   const generateUserData = (count = 100) => {
     const users = Array(count)
       .fill(null)
-      .map(() => {
+      .map((_, i) => {
         const name = chance.name();
+        // ~70% of generated users have finished onboarding (topics + level set).
+        const onboarded = chance.bool({ likelihood: 70 });
         return {
           username: `${name.split(" ").join("-").toLowerCase()}-${chance.integer(
             {
@@ -130,13 +505,19 @@ ${chance.paragraph()}
           location: chance.country({ full: true }),
           bio: chance.sentence({ words: 10 }),
           websiteUrl: chance.url(),
+          topics: onboarded ? pickTopics(chance.integer({ min: 2, max: 4 })) : [],
+          experienceLevel: onboarded ? chance.pickone(experienceLevels) : null,
+          onboardedAt: onboarded
+            ? new Date(chance.date({ year: 2025 })).toISOString()
+            : null,
         };
       });
 
     return users;
   };
 
-  const userData = generateUserData();
+  // Core named users first (stable indices), then a pool of generated ones.
+  const userData = [...coreUsers, ...generateUserData()];
 
   const addUserData = async () => {
     const tagsData = sampleTags.map((title) => ({ title }));
@@ -162,10 +543,56 @@ ${chance.paragraph()}
       .returning();
 
     console.log(
-      `Added ${usersResponse.length} users and ${postResponse.length} posts`,
+      `Added ${usersResponse.length} users and ${postResponse.length} random posts`,
     );
 
-    return { users: usersResponse, posts: postResponse, tags: tagResponse };
+    // ── Curated relaunch posts (all types, varied status/dates/counts) ──────
+    const tagByTitle = new Map(tagResponse.map((t) => [t.title, t.id]));
+    const relaunchSeeds = buildRelaunchPosts();
+    const relaunchToInsert = relaunchSeeds.map((s) => ({
+      ...s.row,
+      authorId: usersResponse[s.coreAuthor].id,
+    }));
+
+    const relaunchResponse = await db
+      .insert(posts)
+      .values(relaunchToInsert)
+      .onConflictDoNothing()
+      .returning();
+
+    console.log(`Added ${relaunchResponse.length} curated relaunch posts`);
+
+    // Link curated posts to seeded tags via post_tags, keeping tag.postCount
+    // roughly consistent.
+    const postTagRows: { postId: string; tagId: number }[] = [];
+    const tagCounts = new Map<number, number>();
+    relaunchResponse.forEach((post, i) => {
+      const seed = relaunchSeeds[i];
+      for (const title of seed.tagTitles) {
+        const tagId = tagByTitle.get(title);
+        if (!tagId) continue;
+        postTagRows.push({ postId: post.id, tagId });
+        tagCounts.set(tagId, (tagCounts.get(tagId) ?? 0) + 1);
+      }
+    });
+
+    if (postTagRows.length > 0) {
+      await db.insert(post_tags).values(postTagRows).onConflictDoNothing();
+      // Bump denormalized postCount per tag.
+      for (const [tagId, count] of tagCounts) {
+        await db
+          .update(tag)
+          .set({ postCount: count })
+          .where(eq(tag.id, tagId));
+      }
+      console.log(`Linked ${postTagRows.length} post_tags`);
+    }
+
+    return {
+      users: usersResponse,
+      posts: [...postResponse, ...relaunchResponse],
+      tags: tagResponse,
+    };
   };
 
   // Initial RSS feed sources for content aggregator
@@ -791,6 +1218,355 @@ ${chance.paragraph()}
     }
   };
 
+  // Follow graph — wire core users together so the Following feed,
+  // followers/following lists and follow notifications have data.
+  const addFollows = async (users: { id: string }[]) => {
+    if (users.length < 2) return;
+    const coreCount = Math.min(coreUsers.length, users.length);
+    const pairs = new Set<string>();
+    const rows: { followerId: string; followingId: string }[] = [];
+
+    // Each core user follows 3–5 others (core + a few random).
+    for (let i = 0; i < coreCount; i++) {
+      const followerId = users[i].id;
+      const targets = chance.pickset(
+        users.filter((u) => u.id !== followerId),
+        chance.integer({ min: 3, max: 5 }),
+      );
+      for (const t of targets) {
+        const key = `${followerId}:${t.id}`;
+        if (pairs.has(key)) continue;
+        pairs.add(key);
+        rows.push({ followerId, followingId: t.id });
+      }
+    }
+
+    // A handful of random users follow the core (gives them followers).
+    for (let i = coreCount; i < Math.min(coreCount + 20, users.length); i++) {
+      const followerId = users[i].id;
+      const followingId = users[chance.integer({ min: 0, max: coreCount - 1 })].id;
+      const key = `${followerId}:${followingId}`;
+      if (pairs.has(key) || followerId === followingId) continue;
+      pairs.add(key);
+      rows.push({ followerId, followingId });
+    }
+
+    if (rows.length === 0) return;
+    const res = await db
+      .insert(follow)
+      .values(rows)
+      .onConflictDoNothing()
+      .returning();
+    console.log(`Added ${res.length} follows`);
+  };
+
+  // Bookmarks + post votes on published posts (exercises saved/voted states).
+  const addBookmarksAndVotes = async (
+    users: { id: string }[],
+    publishedPosts: { id: string }[],
+  ) => {
+    if (users.length === 0 || publishedPosts.length === 0) return;
+
+    const bookmarkRows: { postId: string; userId: string }[] = [];
+    const bookmarkSeen = new Set<string>();
+    const voteRows: {
+      postId: string;
+      userId: string;
+      voteType: "up" | "down";
+    }[] = [];
+    const voteSeen = new Set<string>();
+
+    for (const post of publishedPosts.slice(0, 25)) {
+      // 1–3 bookmarks per post.
+      const bookmarkers = chance.pickset(
+        users,
+        chance.integer({ min: 1, max: 3 }),
+      );
+      for (const u of bookmarkers) {
+        const key = `${post.id}:${u.id}`;
+        if (bookmarkSeen.has(key)) continue;
+        bookmarkSeen.add(key);
+        bookmarkRows.push({ postId: post.id, userId: u.id });
+      }
+
+      // 2–5 votes per post (mostly up).
+      const voters = chance.pickset(users, chance.integer({ min: 2, max: 5 }));
+      for (const u of voters) {
+        const key = `${post.id}:${u.id}`;
+        if (voteSeen.has(key)) continue;
+        voteSeen.add(key);
+        voteRows.push({
+          postId: post.id,
+          userId: u.id,
+          voteType: chance.bool({ likelihood: 85 }) ? "up" : "down",
+        });
+      }
+    }
+
+    if (bookmarkRows.length > 0) {
+      const res = await db
+        .insert(bookmarks)
+        .values(bookmarkRows)
+        .onConflictDoNothing()
+        .returning();
+      console.log(`Added ${res.length} bookmarks`);
+    }
+    if (voteRows.length > 0) {
+      const res = await db
+        .insert(post_votes)
+        .values(voteRows)
+        .onConflictDoNothing()
+        .returning();
+      console.log(`Added ${res.length} post votes`);
+    }
+  };
+
+  // Job board listings with varied type / remote / tags.
+  const addJobs = async (users: { id: string }[]) => {
+    if (users.length === 0) return;
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+    const jobsRaw = [
+      {
+        companyName: "Latent Labs",
+        jobTitle: "Founding AI Engineer",
+        jobLocation: "Remote (EU)",
+        type: "full-time" as const,
+        remote: true,
+        aiNative: true,
+        tags: ["AI", "Agents", "TypeScript"],
+        jobDescription:
+          "Build and ship LLM-powered features end to end. You'll own evals, retrieval and the agent loop.",
+      },
+      {
+        companyName: "Harbor",
+        jobTitle: "Senior Frontend Engineer",
+        jobLocation: "Dublin, Ireland",
+        type: "full-time" as const,
+        remote: false,
+        aiNative: false,
+        tags: ["React", "TypeScript", "Frontend"],
+        jobDescription:
+          "Craft delightful product UI for a fast-growing SaaS. Strong React + design sense required.",
+      },
+      {
+        companyName: "RAGtime",
+        jobTitle: "ML Engineer (Contract)",
+        jobLocation: "Remote (Global)",
+        type: "freelancer" as const,
+        remote: true,
+        aiNative: true,
+        tags: ["RAG", "Python", "AI"],
+        jobDescription:
+          "3-month contract to harden our retrieval pipeline. Chunking, reranking and eval experience a must.",
+      },
+      {
+        companyName: "Indie Collective",
+        jobTitle: "Part-time DevRel",
+        jobLocation: "Remote",
+        type: "part-time" as const,
+        remote: true,
+        aiNative: false,
+        tags: ["Career", "Community"],
+        jobDescription:
+          "Help a small indie team grow its developer community. Writing + Discord wrangling.",
+      },
+      {
+        companyName: "Vector & Co",
+        jobTitle: "Backend Engineer, Inference",
+        jobLocation: "Berlin, Germany",
+        type: "full-time" as const,
+        remote: false,
+        aiNative: true,
+        tags: ["Backend", "LLM apps", "Python"],
+        jobDescription:
+          "Own the inference gateway: latency, cost, and reliability at scale.",
+      },
+      {
+        companyName: "Sidequest",
+        jobTitle: "Generalist (Founding)",
+        jobLocation: "Remote (Americas)",
+        type: "other" as const,
+        remote: true,
+        aiNative: true,
+        tags: ["Startups", "Indie hacking", "AI"],
+        jobDescription:
+          "Do a bit of everything at a pre-seed startup. Comfort with ambiguity essential.",
+      },
+    ];
+
+    const jobRows = jobsRaw.map((j, i) => {
+      const shortId = generateShortId();
+      const publishedAt = new Date(now - (i + 1) * day).toISOString();
+      return {
+        ...j,
+        userId: users[i % Math.min(coreUsers.length, users.length)].id,
+        slug: slugify(`${j.companyName} ${j.jobTitle}`, shortId),
+        applicationUrl: `https://example.com/jobs/apply/${shortId}`,
+        status: "active" as const,
+        publishedAt,
+        approvedAt: publishedAt,
+        expiresAt: new Date(now + 30 * day).toISOString(),
+        priceCents: 9900,
+      };
+    });
+
+    const res = await db
+      .insert(job)
+      .values(jobRows)
+      .onConflictDoNothing()
+      .returning();
+    console.log(`Added ${res.length} jobs`);
+  };
+
+  // Engagement: badges (idempotent), point events, streaks, and a few awards
+  // so profiles show achievements.
+  const addEngagement = async (users: { id: string }[]) => {
+    if (users.length === 0) return;
+
+    const BADGES = [
+      {
+        key: "first_post",
+        name: "First Post",
+        description: "Published your first post on Codú.",
+        emoji: "🚀",
+      },
+      {
+        key: "streak_7",
+        name: "Week Warrior",
+        description: "Kept a 7-day activity streak.",
+        emoji: "🔥",
+      },
+      {
+        key: "streak_30",
+        name: "Regular",
+        description: "Kept a 30-day activity streak.",
+        emoji: "⚡",
+      },
+      {
+        key: "points_100",
+        name: "Contributor",
+        description: "Earned 100 points.",
+        emoji: "✨",
+      },
+      {
+        key: "points_500",
+        name: "Builder",
+        description: "Earned 500 points.",
+        emoji: "🏆",
+      },
+      {
+        key: "connector",
+        name: "Connector",
+        description: "Invited a new builder to the community.",
+        emoji: "🤝",
+      },
+    ];
+
+    const badgeRows = await db
+      .insert(badge)
+      .values(BADGES)
+      .onConflictDoNothing()
+      .returning({ id: badge.id, key: badge.key });
+    // onConflictDoNothing may return nothing on re-run; re-select to be safe.
+    const allBadges =
+      badgeRows.length > 0
+        ? badgeRows
+        : await db.select({ id: badge.id, key: badge.key }).from(badge);
+    const badgeByKey = new Map(allBadges.map((b) => [b.key, b.id]));
+    console.log(`Ensured ${allBadges.length} badges`);
+
+    const coreCount = Math.min(coreUsers.length, users.length);
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+
+    const pointRows: {
+      userId: string;
+      action:
+        | "post_published"
+        | "comment_created"
+        | "upvote_received"
+        | "daily_active"
+        | "shipped"
+        | "referral";
+      points: number;
+      sourceType?: string;
+      sourceId?: string;
+      createdAt: string;
+    }[] = [];
+    const streakRows: {
+      userId: string;
+      currentStreak: number;
+      longestStreak: number;
+      lastActiveOn: string;
+    }[] = [];
+    const badgeAwards: { userId: string; badgeId: number }[] = [];
+
+    for (let i = 0; i < coreCount; i++) {
+      const userId = users[i].id;
+      // A spread of point events over the last ~30 days. Use a unique sourceId
+      // per event to satisfy the dedupe unique index.
+      const numEvents = chance.integer({ min: 3, max: 8 });
+      let total = 0;
+      for (let e = 0; e < numEvents; e++) {
+        const action = chance.pickone([
+          "post_published",
+          "comment_created",
+          "upvote_received",
+          "daily_active",
+          "shipped",
+        ] as const);
+        const points = chance.integer({ min: 5, max: 40 });
+        total += points;
+        pointRows.push({
+          userId,
+          action,
+          points,
+          sourceType: "seed",
+          sourceId: `${userId}-${e}-${generateShortId()}`,
+          createdAt: new Date(
+            now - chance.integer({ min: 0, max: 30 }) * day,
+          ).toISOString(),
+        });
+      }
+
+      const longest = chance.integer({ min: 3, max: 21 });
+      streakRows.push({
+        userId,
+        currentStreak: chance.integer({ min: 1, max: longest }),
+        longestStreak: longest,
+        lastActiveOn: new Date(now).toISOString(),
+      });
+
+      // Award badges consistent with the (rough) earned state.
+      const award = (key: string) => {
+        const id = badgeByKey.get(key);
+        if (id) badgeAwards.push({ userId, badgeId: id });
+      };
+      award("first_post"); // core users all have posts
+      if (total >= 100) award("points_100");
+      if (longest >= 7) award("streak_7");
+      if (i % 3 === 0) award("connector");
+    }
+
+    if (pointRows.length > 0) {
+      await db.insert(point_event).values(pointRows).onConflictDoNothing();
+      console.log(`Added ${pointRows.length} point events`);
+    }
+    if (streakRows.length > 0) {
+      await db.insert(user_streak).values(streakRows).onConflictDoNothing();
+      console.log(`Added ${streakRows.length} user streaks`);
+    }
+    if (badgeAwards.length > 0) {
+      const res = await db
+        .insert(user_badge)
+        .values(badgeAwards)
+        .onConflictDoNothing()
+        .returning();
+      console.log(`Awarded ${res.length} badges`);
+    }
+  };
+
   async function addSeedDataToDb() {
     console.log(`Start seeding, please wait... `);
 
@@ -811,6 +1587,12 @@ ${chance.paragraph()}
           (p) => p.status === "published",
         );
         await addSampleComments(userData.users, publishedPosts);
+
+        // Social graph, engagement signals and supporting data for relaunch.
+        await addFollows(userData.users);
+        await addBookmarksAndVotes(userData.users, publishedPosts);
+        await addJobs(userData.users);
+        await addEngagement(userData.users);
       }
     } catch (error) {
       console.log("Error:", error);
