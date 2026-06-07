@@ -141,14 +141,14 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
 
   if (status === "pending") {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-8">
         <div className="animate-pulse">
-          <div className="mb-4 h-6 w-24 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-4 h-4 w-48 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-2 h-8 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-4 h-8 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-6 h-20 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="h-12 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
+          <div className="mb-4 h-6 w-24 rounded bg-elevated" />
+          <div className="mb-4 h-4 w-48 rounded bg-elevated" />
+          <div className="mb-2 h-8 w-full rounded bg-elevated" />
+          <div className="mb-4 h-8 w-3/4 rounded bg-elevated" />
+          <div className="mb-6 h-20 w-full rounded bg-elevated" />
+          <div className="h-12 w-full rounded bg-elevated" />
         </div>
       </div>
     );
@@ -156,18 +156,18 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
 
   if (status === "error" || !article) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className="mx-auto max-w-prose px-4 py-8">
         <Link
           href="/feed"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+          className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
         >
-          Back to Feed
+          ‹ Back to feed
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <h1 className="text-lg font-semibold text-red-700 dark:text-red-300">
+        <div className="card text-center">
+          <h1 className="font-display text-lg font-extrabold text-danger">
             Post Not Found
           </h1>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-2 text-sm text-muted">
             This post may have been removed or the link is invalid.
           </p>
         </div>
@@ -195,244 +195,240 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
   const score = article.upvotes - article.downvotes;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-        <Link
-          href="/feed"
-          className="hover:text-neutral-700 dark:hover:text-neutral-200"
-        >
-          Feed
-        </Link>
-        <span aria-hidden="true">/</span>
-        <Link
-          href={`/${sourceSlug}`}
-          className="hover:text-neutral-700 dark:hover:text-neutral-200"
-        >
-          {article.source?.name || sourceSlug}
-        </Link>
-      </nav>
+    <article className="mx-auto max-w-prose px-4 py-8">
+      {/* Back to feed */}
+      <Link
+        href="/feed"
+        className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
+      >
+        ‹ Back to feed
+      </Link>
 
-      {/* Article card */}
-      <article className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
-        {/* Source info */}
-        <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+      {/* Eyebrow */}
+      <p className="eyebrow">
+        <span className="slash">{"// "}</span>
+        {article.source?.name || "Article"}
+        {readableDate ? ` · ${readableDate}` : ""}
+      </p>
+
+      {/* Title */}
+      <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">
+        {article.title}
+      </h1>
+
+      {/* Excerpt */}
+      {article.excerpt && (
+        <p className="mt-4 text-lg leading-relaxed text-muted">
+          {article.excerpt}
+        </p>
+      )}
+
+      {/* Source / author row */}
+      <div className="mt-6 flex items-center gap-3">
+        <Link href={`/${sourceSlug}`} className="flex-shrink-0">
+          {article.source?.logoUrl ? (
+            <img
+              src={article.source.logoUrl}
+              alt=""
+              className="h-11 w-11 rounded-full border border-hairline object-cover"
+            />
+          ) : faviconUrl ? (
+            <img
+              src={faviconUrl}
+              alt=""
+              className="h-11 w-11 rounded-full border border-hairline"
+            />
+          ) : (
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+              {article.source?.name?.charAt(0).toUpperCase() || "?"}
+            </div>
+          )}
+        </Link>
+        <div className="min-w-0 flex-1">
           <Link
             href={`/${sourceSlug}`}
-            className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
+            className="block text-sm font-semibold text-fg hover:text-accent"
           >
-            {article.source?.logoUrl ? (
-              <img
-                src={article.source.logoUrl}
-                alt=""
-                className="h-5 w-5 rounded object-cover"
-              />
-            ) : faviconUrl ? (
-              <img src={faviconUrl} alt="" className="h-5 w-5 rounded" />
-            ) : (
-              <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
-                {article.source?.name?.charAt(0).toUpperCase() || "?"}
-              </div>
-            )}
-            <span className="font-medium">
-              {article.source?.name || "Unknown Source"}
-            </span>
+            {article.source?.name || "Unknown Source"}
           </Link>
-          {article.sourceAuthor &&
+          <div className="font-mono text-xs text-faint">
+            @{sourceSlug}
+            {article.sourceAuthor &&
             article.sourceAuthor.trim() &&
             !["by", "by,", "by ,"].includes(
               article.sourceAuthor.trim().toLowerCase(),
-            ) && (
-              <>
-                <span aria-hidden="true">·</span>
-                <span>
-                  {article.sourceAuthor.replace(/^by\s+/i, "").trim()}
-                </span>
-              </>
-            )}
-          {readableDate && (
-            <>
-              <span aria-hidden="true">·</span>
-              <time dateTime={dateTime?.toString()}>{readableDate}</time>
-            </>
-          )}
+            )
+              ? ` · ${article.sourceAuthor.replace(/^by\s+/i, "").trim()}`
+              : ""}
+          </div>
         </div>
+      </div>
 
-        {/* Title */}
-        <h1 className="mb-3 text-2xl font-bold leading-tight text-neutral-900 dark:text-neutral-100 md:text-3xl">
-          {article.title}
-        </h1>
+      {/* Cover image */}
+      {ensureHttps(article.imageUrl) && article.externalUrl ? (
+        <a
+          href={article.externalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleExternalClick}
+          className="relative mt-8 block overflow-hidden rounded-lg border border-hairline"
+        >
+          <img
+            src={ensureHttps(article.imageUrl)!}
+            alt=""
+            className="w-full object-cover transition-opacity hover:opacity-90"
+            style={{ maxHeight: "400px" }}
+          />
+          <div className="absolute bottom-2 right-2 rounded-md bg-canvas/70 px-2 py-1 font-mono text-xs text-fg backdrop-blur">
+            <ArrowTopRightOnSquareIcon className="mr-1 inline h-3.5 w-3.5" />
+            {hostname}
+          </div>
+        </a>
+      ) : (
+        <div className="mt-8 h-48 rounded-lg border border-hairline bg-elevated bg-grid-dots bg-[length:22px_22px]" />
+      )}
 
-        {/* Excerpt */}
-        {article.excerpt && (
-          <p className="mb-4 text-neutral-600 dark:text-neutral-400">
-            {article.excerpt}
-          </p>
-        )}
+      {/* Read article CTA */}
+      {article.externalUrl && (
+        <a
+          href={article.externalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleExternalClick}
+          className="primary-button mt-8 w-full"
+        >
+          <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+          Read Full Article at {hostname}
+        </a>
+      )}
 
-        {/* Thumbnail image */}
-        {ensureHttps(article.imageUrl) && article.externalUrl && (
-          <a
-            href={article.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleExternalClick}
-            className="relative mb-4 block overflow-hidden rounded-lg"
-          >
-            <img
-              src={ensureHttps(article.imageUrl)!}
-              alt=""
-              className="w-full object-cover transition-opacity hover:opacity-90"
-              style={{ maxHeight: "400px" }}
-            />
-            <div className="absolute bottom-2 right-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
-              <ArrowTopRightOnSquareIcon className="mr-1 inline h-3.5 w-3.5" />
-              {hostname}
-            </div>
-          </a>
-        )}
-
-        {/* Read article CTA */}
-        {article.externalUrl && (
-          <a
-            href={article.externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleExternalClick}
-            className="flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent"
-          >
-            <ArrowTopRightOnSquareIcon className="h-5 w-5" />
-            Read Full Article at {hostname}
-          </a>
-        )}
-
-        {/* Inline source info - styled like author bio */}
-        {article.source && (
-          <div className="mt-8 flex items-center gap-3">
-            <Link href={`/${sourceSlug}`} className="flex-shrink-0">
-              {article.source.logoUrl ? (
-                <img
-                  src={article.source.logoUrl}
-                  alt=""
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-              ) : faviconUrl ? (
-                <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
-              ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent dark:bg-accent/15 dark:text-accent">
-                  {article.source.name?.charAt(0).toUpperCase() || "?"}
-                </div>
-              )}
-            </Link>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/${sourceSlug}`}
-                  className="font-medium text-neutral-900 hover:underline dark:text-neutral-100"
-                >
-                  {article.source.name}
-                </Link>
-                <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                  @{sourceSlug}
-                </span>
+      {/* Inline source info - styled like author bio */}
+      {article.source && (
+        <div className="mt-8 flex items-center gap-3 rounded-lg border border-hairline bg-surface p-4">
+          <Link href={`/${sourceSlug}`} className="flex-shrink-0">
+            {article.source.logoUrl ? (
+              <img
+                src={article.source.logoUrl}
+                alt=""
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : faviconUrl ? (
+              <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+                {article.source.name?.charAt(0).toUpperCase() || "?"}
               </div>
-              {article.source.description && (
-                <p className="truncate text-sm text-neutral-500 dark:text-neutral-400">
-                  {article.source.description}
-                </p>
-              )}
+            )}
+          </Link>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/${sourceSlug}`}
+                className="font-medium text-fg hover:text-accent"
+              >
+                {article.source.name}
+              </Link>
+              <span className="font-mono text-xs text-faint">@{sourceSlug}</span>
             </div>
+            {article.source.description && (
+              <p className="truncate text-sm text-muted">
+                {article.source.description}
+              </p>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Action bar - just above discussion */}
-        <div className="mt-8 flex flex-wrap items-center gap-2">
-          {/* Vote buttons */}
-          <div className="flex items-center rounded-full bg-neutral-100 dark:bg-neutral-800">
-            <button
-              onClick={() =>
-                handleVote(article.userVote === "up" ? null : "up")
-              }
-              disabled={voteStatus === "pending"}
-              className={`rounded-l-full p-2 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
-                article.userVote === "up"
-                  ? "text-green-500"
-                  : "text-neutral-500 dark:text-neutral-400"
-              }`}
-              aria-label="Upvote"
-            >
-              <ChevronUpIcon className="h-5 w-5" />
-            </button>
-            <span
-              className={`min-w-[2.5rem] text-center font-bold ${
-                score > 0
-                  ? "text-green-500"
-                  : score < 0
-                    ? "text-red-500"
-                    : "text-neutral-500 dark:text-neutral-400"
-              }`}
-            >
-              {score}
-            </span>
-            <button
-              onClick={() =>
-                handleVote(article.userVote === "down" ? null : "down")
-              }
-              disabled={voteStatus === "pending"}
-              className={`rounded-r-full p-2 transition-colors hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700 ${
-                article.userVote === "down"
-                  ? "text-red-500"
-                  : "text-neutral-500 dark:text-neutral-400"
-              }`}
-              aria-label="Downvote"
-            >
-              <ChevronDownIcon className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Comments count */}
-          <a
-            href="#discussion"
-            className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-          >
-            <ChatBubbleLeftIcon className="h-4 w-4" />
-            <span>{discussionCount ?? 0} comments</span>
-          </a>
-
-          {/* Save button */}
+      {/* Reaction footer */}
+      <footer className="mt-6 flex flex-wrap items-center gap-4 border-t border-hairline pt-5">
+        {/* Vote buttons */}
+        <div className="flex items-center gap-1 rounded-md border border-hairline bg-surface">
           <button
-            onClick={handleBookmark}
-            disabled={bookmarkStatus === "pending"}
-            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-              article.isBookmarked
-                ? "bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+            onClick={() => handleVote(article.userVote === "up" ? null : "up")}
+            disabled={voteStatus === "pending"}
+            className={`rounded-l-md p-2 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
+              article.userVote === "up" ? "text-success" : "text-faint"
+            }`}
+            aria-label="Upvote"
+          >
+            <ChevronUpIcon className="h-5 w-5" />
+          </button>
+          <span
+            className={`min-w-[2.5rem] text-center font-mono text-sm font-bold ${
+              score > 0
+                ? "text-success"
+                : score < 0
+                  ? "text-danger"
+                  : "text-faint"
             }`}
           >
-            {article.isBookmarked ? (
-              <BookmarkIcon className="h-4 w-4" />
-            ) : (
-              <BookmarkOutlineIcon className="h-4 w-4" />
-            )}
-            {article.isBookmarked ? "Saved" : "Save"}
-          </button>
-
-          {/* Share button */}
+            {score}
+          </span>
           <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+            onClick={() =>
+              handleVote(article.userVote === "down" ? null : "down")
+            }
+            disabled={voteStatus === "pending"}
+            className={`rounded-r-md p-2 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
+              article.userVote === "down" ? "text-danger" : "text-faint"
+            }`}
+            aria-label="Downvote"
           >
-            <ShareIcon className="h-4 w-4" />
-            Share
+            <ChevronDownIcon className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Discussion section - inside the card */}
-        <section id="discussion" className="mt-8">
-          <DiscussionArea contentId={article.id} noWrapper />
-        </section>
-      </article>
-    </div>
+        {/* Comments count */}
+        <a
+          href="#discussion"
+          className="flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
+        >
+          <ChatBubbleLeftIcon className="h-4 w-4" />
+          <span>{discussionCount ?? 0} comments</span>
+        </a>
+
+        {/* Save button */}
+        <button
+          onClick={handleBookmark}
+          disabled={bookmarkStatus === "pending"}
+          className={`flex items-center gap-1.5 font-mono text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            article.isBookmarked
+              ? "text-accent-soft"
+              : "text-muted hover:text-fg"
+          }`}
+        >
+          {article.isBookmarked ? (
+            <BookmarkIcon className="h-4 w-4" />
+          ) : (
+            <BookmarkOutlineIcon className="h-4 w-4" />
+          )}
+          {article.isBookmarked ? "Saved" : "Save"}
+        </button>
+
+        {/* Share button */}
+        <button
+          onClick={handleShare}
+          className="ml-auto flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
+        >
+          <ShareIcon className="h-4 w-4" />
+          Share
+        </button>
+      </footer>
+
+      {/* Discussion section */}
+      <section
+        id="discussion"
+        className="mt-10 border-t border-hairline pt-8"
+      >
+        <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
+          Discussion{" "}
+          <span className="font-sans font-medium text-faint">
+            {discussionCount ?? 0}
+          </span>
+        </h2>
+        <DiscussionArea contentId={article.id} noWrapper />
+      </section>
+    </article>
   );
 };
 
