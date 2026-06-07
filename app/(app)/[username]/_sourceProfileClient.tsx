@@ -61,13 +61,15 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
   if (sourceStatus === "pending") {
     return (
       <div className="mx-auto max-w-2xl px-4 text-black dark:text-white">
-        <div className="pt-6 sm:flex">
-          <div className="mr-4 flex-shrink-0 self-center">
-            <div className="mb-2 h-20 w-20 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700 sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32" />
-          </div>
-          <div className="flex flex-col justify-center">
-            <div className="mb-2 h-6 w-48 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-            <div className="h-4 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+        <div
+          aria-hidden
+          className="mt-2 h-32 animate-pulse rounded-2xl bg-elevated sm:h-40"
+        />
+        <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end">
+          <div className="-mt-[52px] h-24 w-24 flex-shrink-0 animate-pulse rounded-full bg-inset ring-4 ring-canvas" />
+          <div className="flex flex-col justify-center gap-2 sm:pb-1.5">
+            <div className="h-6 w-48 animate-pulse rounded bg-inset" />
+            <div className="h-4 w-32 animate-pulse rounded bg-inset" />
           </div>
         </div>
       </div>
@@ -77,16 +79,16 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
   if (sourceStatus === "error" || !source) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8 text-black dark:text-white">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <h1 className="text-lg font-semibold text-red-700 dark:text-red-300">
+        <div className="rounded-lg border border-danger/30 bg-danger/12 p-6 text-center">
+          <h1 className="text-lg font-semibold text-danger">
             Source Not Found
           </h1>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-2 text-sm text-muted">
             This source may have been removed or the link is invalid.
           </p>
           <Link
             href="/feed"
-            className="mt-4 inline-block text-sm text-blue-500 hover:underline"
+            className="mt-4 inline-block text-sm text-accent-soft hover:text-accent"
           >
             Back to Feed
           </Link>
@@ -101,51 +103,59 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
   return (
     <>
       <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
-        {/* Profile header - matching user profile pattern exactly */}
-        <div className="pt-6 sm:flex">
-          <div className="mr-4 flex-shrink-0 self-center">
+        {/* Gradient banner - matching user profile */}
+        <div
+          aria-hidden
+          className="relative mt-2 h-32 overflow-hidden rounded-2xl bg-gradient-to-r from-elevated via-accent/20 to-elevated sm:h-40"
+        >
+          <div className="absolute inset-0 bg-grid-dots bg-[length:22px_22px] opacity-40" />
+        </div>
+
+        {/* Profile header - matching user profile pattern */}
+        <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end">
+          <div className="-mt-[52px] flex-shrink-0">
             {source.logoUrl ? (
               <img
-                className="mb-2 h-20 w-20 rounded-full object-cover sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32"
+                className="h-24 w-24 rounded-full object-cover ring-4 ring-canvas"
                 alt={`Avatar for ${source.name}`}
                 src={source.logoUrl}
               />
             ) : faviconUrl ? (
               <img
-                className="mb-2 h-20 w-20 rounded-full sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32"
+                className="h-24 w-24 rounded-full ring-4 ring-canvas"
                 alt={`Avatar for ${source.name}`}
                 src={faviconUrl}
               />
             ) : (
-              <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent text-3xl font-bold text-white sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32 lg:text-4xl">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-accent text-3xl font-bold text-on-accent ring-4 ring-canvas">
                 {source.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
           </div>
-          <div className="flex flex-col justify-center">
-            <h1 className="mb-0 text-lg font-bold md:text-xl">{source.name}</h1>
-            <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
-              @{sourceSlug}
-            </h2>
-            <p className="mt-1">{source.description || ""}</p>
+          <div className="min-w-0 flex-1 sm:pb-1.5">
+            <h1 className="mb-0 font-display text-2xl font-extrabold tracking-tight text-fg">
+              {source.name}
+            </h1>
+            <p className="mt-0.5 font-mono text-sm text-faint">@{sourceSlug}</p>
+            {source.description && (
+              <p className="mt-2 text-muted">{source.description}</p>
+            )}
             {source.websiteUrl && (
               <Link
                 href={source.websiteUrl}
-                className="flex flex-row items-center"
+                className="mt-2 flex flex-row items-center text-accent-soft transition-colors hover:text-accent"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <LinkIcon className="mr-2 h-5 text-neutral-500 dark:text-neutral-400" />
-                <p className="mt-1 text-blue-500">
-                  {getDomainFromUrl(source.websiteUrl)}
-                </p>
+                <LinkIcon className="mr-2 h-5 text-faint" />
+                <span>{getDomainFromUrl(source.websiteUrl)}</span>
               </Link>
             )}
           </div>
         </div>
 
         {/* Articles header - matching user profile */}
-        <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
+        <div className="mx-auto mt-8 sm:max-w-2xl lg:max-w-5xl">
           <Heading level={1}>{`Articles (${source.articleCount})`}</Heading>
         </div>
 
@@ -156,16 +166,18 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="animate-pulse rounded-lg border border-neutral-200 p-3 dark:border-neutral-700"
+                  className="animate-pulse rounded-lg border border-hairline p-3"
                 >
-                  <div className="mb-2 h-4 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-                  <div className="mb-2 h-5 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-                  <div className="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="mb-2 h-4 w-1/4 rounded bg-inset" />
+                  <div className="mb-2 h-5 w-3/4 rounded bg-inset" />
+                  <div className="h-4 w-1/2 rounded bg-inset" />
                 </div>
               ))}
             </div>
           ) : articles.length === 0 ? (
-            <p className="py-4 font-medium">Nothing published yet... 🥲</p>
+            <p className="py-4 font-medium text-muted">
+              Nothing published yet... 🥲
+            </p>
           ) : (
             <>
               {articles.map((article) => {
@@ -202,14 +214,12 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
               {/* Load more trigger */}
               <div ref={loadMoreRef} className="py-4 text-center">
                 {isFetchingNextPage && (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="text-sm text-muted">
                     Loading more articles...
                   </div>
                 )}
                 {!hasNextPage && articles.length > 0 && (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                    No more articles
-                  </div>
+                  <div className="text-sm text-muted">No more articles</div>
                 )}
               </div>
             </>
