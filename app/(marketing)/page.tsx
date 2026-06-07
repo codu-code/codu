@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { posts, feed_sources } from "@/server/db/schema";
+import { getServerAuthSession } from "@/server/auth";
 import { Eyebrow } from "@/components/ds";
 import { GradientBlinds } from "@/components/marketing/GradientBlinds";
 
@@ -63,6 +65,10 @@ const valueProps = [
 ];
 
 export default async function HomePage() {
+  // Members get their feed as home; the marketing landing is for logged-out + SEO.
+  const session = await getServerAuthSession();
+  if (session) redirect("/feed");
+
   const feed = await getRecentFeed();
 
   return (

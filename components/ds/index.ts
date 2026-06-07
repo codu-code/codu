@@ -5,3 +5,4 @@ export { ConversionHub } from "./ConversionHub";
 export { BuildBoard } from "./BuildBoard";
 export { StreakBadge } from "./StreakBadge";
 export { ReferralCard } from "./ReferralCard";
+export { FollowButton } from "./FollowButton";

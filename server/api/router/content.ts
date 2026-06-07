@@ -25,6 +25,7 @@ import {
   bookmarks,
   post_tags,
   feed_sources,
+  follow,
   tag as dbTag,
   user,
   comments,
@@ -102,7 +103,7 @@ export const contentRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 25;
-      const { cursor, sort, type, sourceId, category, tag } = input;
+      const { cursor, sort, type, sourceId, category, tag, following } = input;
 
       // Build the vote subquery for current user
       const userVotes = userId
@@ -157,6 +158,23 @@ export const contentRouter = createTRPCRouter({
               .from(post_tags)
               .innerJoin(dbTag, eq(post_tags.tagId, dbTag.id))
               .where(and(eq(post_tags.postId, posts.id), eq(dbTag.slug, tag))),
+          ),
+        );
+      }
+
+      // Following filter — only authors the current user follows.
+      if (following && userId) {
+        conditions.push(
+          exists(
+            ctx.db
+              .select({ one: sql`1` })
+              .from(follow)
+              .where(
+                and(
+                  eq(follow.followingId, posts.authorId),
+                  eq(follow.followerId, userId),
+                ),
+              ),
           ),
         );
       }

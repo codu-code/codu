@@ -169,6 +169,13 @@
       "when": 1780826471537,
       "tag": "0023_needy_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1780830001951,
+      "tag": "0024_amazing_chamber",
+      "breakpoints": true
     }
   ]
 }

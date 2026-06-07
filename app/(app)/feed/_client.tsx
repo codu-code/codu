@@ -58,6 +58,9 @@ const FeedPage = () => {
     ? (typeParam?.toUpperCase() as ContentType)
     : null;
 
+  // "Following" view (signed-in only)
+  const following = !!session?.user && searchParams?.get("view") === "following";
+
   // Fetch feed data with infinite scroll using the unified content API
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     api.content.getFeed.useInfiniteQuery(
@@ -66,6 +69,8 @@ const FeedPage = () => {
         sort,
         type,
         category,
+        tag,
+        following,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -143,11 +148,66 @@ const FeedPage = () => {
         />
       </div>
 
+      {/* For you / Following tabs (signed-in) */}
+      {session?.user && (
+        <div className="mx-auto mt-4 flex max-w-5xl gap-5 border-b border-hairline sm:max-w-2xl lg:max-w-5xl">
+          {[
+            { label: "For you", href: "/feed", active: !following },
+            {
+              label: "Following",
+              href: "/feed?view=following",
+              active: following,
+            },
+          ].map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              onClick={() => router.push(t.href)}
+              className={`-mb-px border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
+                t.active
+                  ? "border-accent text-fg"
+                  : "border-transparent text-muted hover:text-fg"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Main content grid */}
       <div className="mx-auto grid-cols-12 gap-6 sm:max-w-2xl lg:grid lg:max-w-5xl">
         {/* Feed items */}
         <div className="relative md:col-span-7">
           <section>
+            {/* Composer */}
+            {session?.user && (
+              <Link
+                href="/create"
+                className="mb-6 mt-4 flex items-center gap-3 rounded-xl border border-hairline bg-surface p-4 transition-colors hover:border-accent/50"
+              >
+                <span className="flex-1 text-muted">
+                  What are you building? Share a post…
+                </span>
+                <span className="rounded-lg bg-accent px-3.5 py-1.5 text-sm font-semibold text-black">
+                  Write
+                </span>
+              </Link>
+            )}
+
+            {following &&
+              status === "success" &&
+              data.pages.every((p) => p.items.length === 0) && (
+                <div className="mt-4 rounded-xl border border-dashed border-hairline p-10 text-center">
+                  <p className="font-medium text-fg">
+                    Your Following feed is empty.
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    Follow builders and sources to see their posts here.
+                  </p>
+                </div>
+              )}
+
             {status === "error" && (
               <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
                 Something went wrong loading the feed. Please refresh the page.

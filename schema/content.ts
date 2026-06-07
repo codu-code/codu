@@ -29,6 +29,7 @@ export const GetUnifiedFeedSchema = z.object({
   tag: z.string().nullish(),
   sourceId: z.number().nullish(),
   userId: z.string().nullish(), // Filter by author
+  following: z.boolean().nullish(), // Only authors the current user follows
 });
 
 export type GetUnifiedFeedInput = z.TypeOf<typeof GetUnifiedFeedSchema>;

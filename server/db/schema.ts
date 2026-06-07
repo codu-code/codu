@@ -2188,3 +2188,45 @@ export const userBadgeRelations = relations(user_badge, ({ one }) => ({
   user: one(user, { fields: [user_badge.userId], references: [user.id] }),
   badge: one(badge, { fields: [user_badge.badgeId], references: [badge.id] }),
 }));
+
+// Social graph — follows
+export const follow = pgTable(
+  "follow",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    followerId: text("follower_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    followingId: text("following_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pairKey: uniqueIndex("follow_pair_idx").on(
+      table.followerId,
+      table.followingId,
+    ),
+    followerIdx: index("follow_follower_idx").on(table.followerId),
+    followingIdx: index("follow_following_idx").on(table.followingId),
+  }),
+);
+
+export const followRelations = relations(follow, ({ one }) => ({
+  follower: one(user, {
+    fields: [follow.followerId],
+    references: [user.id],
+    relationName: "follow_follower",
+  }),
+  following: one(user, {
+    fields: [follow.followingId],
+    references: [user.id],
+    relationName: "follow_following",
+  }),
+}));

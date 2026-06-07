@@ -9,6 +9,7 @@ import { api } from "@/server/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Heading } from "@/components/ui-components/heading";
+import { FollowButton } from "@/components/ds";
 import { toast } from "sonner";
 
 type Props = {
@@ -58,6 +59,10 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     },
   });
 
+  const { data: followCounts } = api.follow.counts.useQuery({
+    userId: profile.id,
+  });
+
   const {
     name,
     username,
@@ -104,10 +109,25 @@ const Profile = ({ profile, isOwner, session }: Props) => {
             )}
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="mb-0 text-lg font-bold md:text-xl">{name}</h1>
-            <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
-              @{username}
-            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="mb-0 text-lg font-bold md:text-xl">{name}</h1>
+              {session && !isOwner && !accountLocked && (
+                <FollowButton userId={id} />
+              )}
+            </div>
+            <h2 className="text-sm font-bold text-muted">@{username}</h2>
+            {!accountLocked && (
+              <p className="mt-1 text-sm text-muted">
+                <span className="font-semibold text-fg">
+                  {followCounts?.followers ?? 0}
+                </span>{" "}
+                followers ·{" "}
+                <span className="font-semibold text-fg">
+                  {followCounts?.following ?? 0}
+                </span>{" "}
+                following
+              </p>
+            )}
             <p className="mt-1">{bio}</p>
             {websiteUrl && !accountLocked && (
               <Link
