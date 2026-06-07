@@ -31,9 +31,11 @@ export function useShellActions(): ShellActions {
  */
 export function ShellActionsProvider({
   authed,
+  username,
   children,
 }: {
   authed: boolean;
+  username: string | null;
   children: React.ReactNode;
 }) {
   const [compose, setCompose] = useState<ComposeMode | null>(null);
@@ -77,7 +79,11 @@ export function ShellActionsProvider({
         />
       )}
       {compose && (
-        <ComposeModal mode={compose} onClose={() => setCompose(null)} />
+        <ComposeModal
+          mode={compose}
+          username={username}
+          onClose={() => setCompose(null)}
+        />
       )}
       {topicsOpen && <TopicsModal onClose={() => setTopicsOpen(false)} />}
     </ShellActionsContext.Provider>

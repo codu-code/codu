@@ -40,7 +40,10 @@ export const searchRouter = createTRPCRouter({
         });
       }
 
-      const like = `%${query}%`;
+      // Escape LIKE metacharacters so a query of "%"/"_" can't broaden into an
+      // expensive full scan (Postgres treats backslash as the default escape).
+      const escaped = query.replace(/[\\%_]/g, "\\$&");
+      const like = `%${escaped}%`;
       const limit = input.limit;
 
       const [postRows, peopleRows, tagRows] = await Promise.all([

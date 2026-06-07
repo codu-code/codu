@@ -20,7 +20,7 @@ import type { JSONContent } from "@tiptap/core";
 import NotFound from "@/components/NotFound/NotFound";
 import { db } from "@/server/db";
 import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
-import { eq, and, lte } from "drizzle-orm";
+import { eq, and, lte, inArray } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
@@ -73,7 +73,9 @@ async function getUserPost(username: string, postSlug: string) {
         eq(posts.slug, postSlug),
         eq(posts.authorId, userRecord.id),
         eq(posts.status, "published"),
-        eq(posts.type, "article"),
+        // Text-content kinds all render via the article reader (title + body +
+        // discussion). Links have their own resolver below.
+        inArray(posts.type, ["article", "discussion", "question", "til", "resource"]),
         lte(posts.publishedAt, new Date().toISOString()),
       ),
     )

@@ -28,9 +28,11 @@ function parseDomain(url: string): string | null {
  */
 export function ComposeModal({
   mode,
+  username,
   onClose,
 }: {
   mode: ComposeMode;
+  username: string | null;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -47,7 +49,10 @@ export function ComposeModal({
     api.content.create.useMutation({
       onSuccess: (post) => {
         void utils.content.getFeed.invalidate();
-        const href = post?.slug ? `/articles/${post.slug}` : "/feed";
+        // New posts live in the `posts` table; the canonical URL is
+        // /{username}/{slug}. Fall back to the feed if we lack the username.
+        const href =
+          post?.slug && username ? `/${username}/${post.slug}` : "/feed";
         setDone({ href });
       },
       onError: (err) => {

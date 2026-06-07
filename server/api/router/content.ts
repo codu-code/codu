@@ -48,6 +48,7 @@ import {
   screenContent,
   notifyAdminOfReview,
 } from "@/server/lib/moderation";
+import { rateLimit } from "@/server/lib/rateLimit";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -561,6 +562,18 @@ export const contentRouter = createTRPCRouter({
     .input(CreateContentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+
+      // Throttle publishing so the quick-compose path can't be scripted to
+      // flood the feed (drafts are unmetered). 10 published posts / 5 min.
+      if (input.published) {
+        const { success } = rateLimit(`create:${userId}`, 10, 5 * 60_000);
+        if (!success) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "You're posting too fast. Take a breather and try again.",
+          });
+        }
+      }
 
       // Validate based on content type
       if (input.type === "POST" && !input.body) {

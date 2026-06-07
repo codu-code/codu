@@ -6,6 +6,7 @@ import { TopBar } from "./TopBar";
 import { LeftRail } from "./LeftRail";
 import { RightRail } from "./RightRail";
 import { SignInBar } from "./SignInBar";
+import { MobileNav } from "./MobileNav";
 import { CommandPalette } from "@/components/CommandPalette/CommandPalette";
 import { ShellActionsProvider } from "@/components/Create/ShellActionsProvider";
 
@@ -54,7 +55,7 @@ export function AppShell({ children, session, username }: AppShellProps) {
   }, [paletteOpen]);
 
   return (
-    <ShellActionsProvider authed={!!session}>
+    <ShellActionsProvider authed={!!session} username={username}>
       <div
         className="min-h-svh bg-canvas text-fg"
         style={{ paddingBottom: session ? 0 : 56 }}
@@ -72,6 +73,7 @@ export function AppShell({ children, session, username }: AppShellProps) {
 
         {paletteOpen && <CommandPalette onClose={closePalette} />}
         {!session && <SignInBar />}
+        <MobileNav session={session} username={username} />
       </div>
     </ShellActionsProvider>
   );
