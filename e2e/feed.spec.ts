@@ -13,9 +13,9 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // Type filter should be visible
+    // Type filter should be visible with the default "All types" label
     await expect(page.getByTestId("type-filter")).toBeVisible();
-    await expect(page.getByText("All Types")).toBeVisible();
+    await expect(page.getByText("All types")).toBeVisible();
   });
 
   test("Should show sort filter dropdown", async ({ page }) => {
@@ -31,12 +31,12 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // Click type filter to open dropdown
+    // Click type filter to open the listbox
     await page.getByTestId("type-filter").click();
     await page.waitForTimeout(300);
 
-    // Select Articles from the dropdown menu
-    await page.getByRole("menuitem", { name: "Articles" }).click();
+    // Select Articles from the listbox options
+    await page.getByRole("option", { name: "Articles" }).click();
 
     // URL should update
     await expect(page).toHaveURL(/type=article/i);
@@ -49,12 +49,12 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // Click sort filter to open dropdown
+    // Click sort filter to open the listbox
     await page.getByTestId("sort-filter").click();
     await page.waitForTimeout(300);
 
-    // Select Trending from the dropdown menu
-    await page.getByRole("menuitem", { name: "Trending" }).click();
+    // Select Trending from the listbox options
+    await page.getByRole("option", { name: "Trending" }).click();
 
     // URL should update
     await expect(page).toHaveURL(/sort=trending/);
@@ -67,12 +67,12 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // Click sort filter to open dropdown
+    // Click sort filter to open the listbox
     await page.getByTestId("sort-filter").click();
     await page.waitForTimeout(300);
 
-    // Select Popular from the dropdown menu
-    await page.getByRole("menuitem", { name: "Popular" }).click();
+    // Select Popular from the listbox options
+    await page.getByRole("option", { name: "Popular" }).click();
 
     // URL should update
     await expect(page).toHaveURL(/sort=popular/);
@@ -170,7 +170,7 @@ test.describe("Authenticated Feed Page", () => {
     // Set type filter to Articles
     await page.getByTestId("type-filter").click();
     await page.waitForTimeout(300);
-    await page.getByRole("menuitem", { name: "Articles" }).click();
+    await page.getByRole("option", { name: "Articles" }).click();
 
     // Wait for URL to update
     await expect(page).toHaveURL(/type=article/i);
@@ -181,7 +181,7 @@ test.describe("Authenticated Feed Page", () => {
     // Set sort to Trending
     await page.getByTestId("sort-filter").click();
     await page.waitForTimeout(300);
-    await page.getByRole("menuitem", { name: "Trending" }).click();
+    await page.getByRole("option", { name: "Trending" }).click();
 
     // URL should have both params
     await expect(page).toHaveURL(/sort=trending/);
