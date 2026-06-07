@@ -55,15 +55,13 @@ export function LinkTab({
     <div className={`flex flex-col gap-6 p-6 ${className}`}>
       {/* URL Input */}
       <div>
-        <label
-          htmlFor="link-url"
-          className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-        >
-          Link URL <span className="text-accent">*</span>
+        <label htmlFor="link-url" className="eyebrow mb-2 block">
+          <span className="slash">{"// "}</span>Link URL{" "}
+          <span className="text-accent">*</span>
         </label>
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <LinkIcon className="h-5 w-5 text-neutral-400" />
+            <LinkIcon className="h-5 w-5 text-faint" />
           </div>
           <input
             id="link-url"
@@ -71,10 +69,10 @@ export function LinkTab({
             value={url}
             onChange={(e) => onUrlChange(e.target.value)}
             placeholder={urlPlaceholder}
-            className="w-full rounded-lg border border-neutral-300 bg-white py-3 pl-10 pr-4 text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 dark:focus:border-accent"
+            className="w-full rounded-md border border-hairline bg-canvas py-3 pl-10 pr-4 text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
-        <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mt-1.5 text-sm text-faint">
           Paste a URL and we&apos;ll automatically fetch the title, description,
           and preview image.
         </p>
@@ -83,8 +81,8 @@ export function LinkTab({
       {/* Metadata Preview */}
       {(url.length > 10 || isLoading || error || metadata) && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Link Preview
+          <label className="eyebrow mb-2 block">
+            <span className="slash">{"// "}</span>Link Preview
           </label>
           <UrlMetadataPreview
             metadata={metadata}
@@ -98,11 +96,9 @@ export function LinkTab({
 
       {/* Title Input */}
       <div>
-        <label
-          htmlFor="link-title"
-          className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
-        >
-          Title <span className="text-accent">*</span>
+        <label htmlFor="link-title" className="eyebrow mb-2 block">
+          <span className="slash">{"// "}</span>Title{" "}
+          <span className="text-accent">*</span>
         </label>
         <input
           id="link-title"
@@ -110,18 +106,18 @@ export function LinkTab({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder={titlePlaceholder}
-          className="w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder:text-neutral-500 dark:focus:border-accent"
+          className="w-full rounded-md border border-hairline bg-canvas px-4 py-3 text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
         />
-        <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mt-1.5 text-sm text-faint">
           Edit the title or use the auto-populated one from the link.
         </p>
       </div>
 
       {/* Info Box */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+      <div className="rounded-md border border-hairline bg-inset p-4">
         <div className="flex gap-3">
           <svg
-            className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400"
+            className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -132,10 +128,8 @@ export function LinkTab({
             <path d="M12 8h.01" />
           </svg>
           <div className="text-sm">
-            <p className="font-medium text-blue-800 dark:text-blue-200">
-              Sharing a link
-            </p>
-            <p className="mt-1 text-blue-700 dark:text-blue-300">
+            <p className="font-medium text-fg">Sharing a link</p>
+            <p className="mt-1 text-muted">
               Link posts are great for sharing interesting articles, resources,
               or tools you&apos;ve found. The community can discuss and comment
               on the shared content.

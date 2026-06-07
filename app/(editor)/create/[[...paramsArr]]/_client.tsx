@@ -582,18 +582,18 @@ const CreateContent = ({ session }: { session: Session | null }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <DialogPanel className="mx-auto max-w-md rounded-xl bg-white p-8 text-center shadow-xl dark:bg-neutral-900">
+              <DialogPanel className="mx-auto max-w-md rounded-xl border border-hairline bg-elevated p-8 text-center shadow-xl">
                 <div className="mb-3 text-5xl">
                   {isPostScheduled ? "⏰" : activeTab === "link" ? "🔗" : "🚀"}
                 </div>
-                <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-white">
+                <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-fg">
                   {isPostScheduled
                     ? "Time travel activated!"
                     : activeTab === "link"
                       ? "Spread the word!"
                       : "Ready to launch?"}
                 </DialogTitle>
-                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mt-3 text-sm text-muted">
                   {isPostScheduled
                     ? `"${title || "Untitled"}" will appear on ${new Date(publishedTime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at ${new Date(publishedTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`
                     : activeTab === "link"
@@ -604,7 +604,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                   <button
                     type="button"
                     onClick={() => setShowPublishConfirm(false)}
-                    className="rounded-lg border border-neutral-300 px-5 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="secondary-button"
                   >
                     {isPostScheduled
                       ? "Change my mind"
@@ -616,7 +616,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     type="button"
                     onClick={onSubmit}
                     disabled={hasLoadingState}
-                    className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent disabled:opacity-50"
+                    className="primary-button disabled:cursor-not-allowed"
                   >
                     {hasLoadingState
                       ? "Working on it..."
@@ -635,15 +635,15 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
       {/* Loading state */}
       {dataStatus === "pending" && postId && (
-        <div className="bg-gray fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
-          <div className="z-50 flex flex-col items-center border-2 border-black bg-white px-5 py-2 opacity-100">
+        <div className="fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
+          <div className="z-50 flex flex-col items-center rounded-lg border border-hairline bg-elevated px-5 py-2 opacity-100">
             <div className="loader-dots relative mt-2 block h-5 w-20">
               <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
               <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
               <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
               <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
             </div>
-            <div className="mt-2 text-center text-xs font-medium text-neutral-400">
+            <div className="mt-2 text-center font-mono text-xs text-faint">
               Fetching post data.
             </div>
           </div>
@@ -653,9 +653,9 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
       {/* Main content area - single card layout */}
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
-        <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-          {/* Tab Bar with pink underline */}
-          <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
+        <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
+          {/* Tab Bar with mint underline */}
+          <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
             <LayoutGroup id="editor-tabs">
               <div className="flex gap-1">
                 {TAB_CONFIG.map((tab) => {
@@ -679,8 +679,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                         isDisabledTab
                           ? "cursor-not-allowed opacity-50"
                           : isActive
-                            ? "text-neutral-900 dark:text-white"
-                            : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+                            ? "text-fg"
+                            : "text-muted hover:text-fg"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -712,7 +712,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     navigator.clipboard.writeText(draftUrl);
                     toast.success("Draft link copied!");
                   }}
-                  className="flex items-center gap-1.5 text-sm text-neutral-500 transition-colors hover:text-accent dark:text-neutral-400 dark:hover:text-accent"
+                  className="flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-accent"
                 >
                   <Share2 className="h-4 w-4" />
                   Share Draft
@@ -722,7 +722,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                 <button
                   type="button"
                   onClick={() => setViewPreview((current) => !current)}
-                  className="flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                  className="flex items-center gap-2 rounded-md border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
                 >
                   {viewPreview ? (
                     <>
@@ -788,7 +788,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
           )}
 
           {/* Tags section - with divider */}
-          <div className="border-t border-neutral-200 p-4 dark:border-neutral-700">
+          <div className="border-t border-hairline p-4">
             <TagInput
               tags={tags}
               onChange={setTags}
@@ -803,27 +803,27 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             <Disclosure>
               {({ open: disclosureOpen }) => (
                 <>
-                  <DisclosureButton className="flex w-full items-center justify-between border-t border-neutral-200 px-4 py-3 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800">
+                  <DisclosureButton className="flex w-full items-center justify-between border-t border-hairline px-4 py-3 text-left text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg">
                     <span className="flex items-center gap-2">
                       <Settings2 className="h-4 w-4" />
                       More Options
-                      <span className="text-xs font-normal text-neutral-500">
+                      <span className="font-mono text-xs font-normal uppercase tracking-label text-faint">
                         (SEO, scheduling)
                       </span>
                     </span>
                     <ChevronDownIcon
-                      className={`${disclosureOpen ? "rotate-180" : ""} h-5 w-5 text-neutral-400 transition-transform`}
+                      className={`${disclosureOpen ? "rotate-180" : ""} h-5 w-5 text-faint transition-transform`}
                     />
                   </DisclosureButton>
-                  <DisclosurePanel className="border-t border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+                  <DisclosurePanel className="border-t border-hairline bg-inset p-4">
                     <div className="space-y-6">
                       {/* Excerpt */}
                       <div>
                         <label
                           htmlFor="excerpt"
-                          className="mb-1 block text-sm font-medium text-neutral-800 dark:text-white"
+                          className="eyebrow mb-1.5 block"
                         >
-                          Excerpt
+                          <span className="slash">{"// "}</span>Excerpt
                         </label>
                         <textarea
                           maxLength={156}
@@ -835,9 +835,9 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                             removeMarkdown(body, {}).substring(0, 155) ||
                             "Brief description of your post..."
                           }
-                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
+                          className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                         />
-                        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                        <p className="mt-1 text-xs text-faint">
                           What readers will see before clicking. Good SEO
                           descriptions are 140-156 characters.
                         </p>
@@ -850,9 +850,9 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                           <div className="mb-2 flex items-center gap-2">
                             <label
                               htmlFor="schedule-switch"
-                              className="text-sm font-medium text-neutral-800 dark:text-white"
+                              className="eyebrow"
                             >
-                              Schedule post
+                              <span className="slash">{"// "}</span>Schedule post
                             </label>
                             <Switch
                               id="schedule-switch"
@@ -866,10 +866,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                               value={publishedTime}
                               onChange={(e) => setPublishedTime(e.target.value)}
                               min={new Date().toISOString().slice(0, 16)}
-                              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
+                              className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                             />
                           )}
-                          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                          <p className="mt-1 text-xs text-faint">
                             Publish your post at a later time.
                           </p>
                         </div>
@@ -879,9 +879,9 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                       <div>
                         <label
                           htmlFor="canonicalUrl"
-                          className="mb-1 block text-sm font-medium text-neutral-800 dark:text-white"
+                          className="eyebrow mb-1.5 block"
                         >
-                          Canonical URL
+                          <span className="slash">{"// "}</span>Canonical URL
                         </label>
                         <input
                           id="canonicalUrl"
@@ -889,9 +889,9 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                           placeholder="https://www.somesite.com/i-posted-here-first"
                           value={canonicalUrl}
                           onChange={(e) => setCanonicalUrl(e.target.value)}
-                          className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500"
+                          className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                         />
-                        <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                        <p className="mt-1 text-xs text-faint">
                           Add this if the post was originally published
                           elsewhere.
                         </p>
@@ -900,25 +900,25 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                       {/* Draft preview link */}
                       {postId && (
                         <div>
-                          <label className="mb-1 block text-sm font-medium text-neutral-800 dark:text-white">
-                            Draft Preview Link
+                          <label className="eyebrow mb-1.5 block">
+                            <span className="slash">{"// "}</span>Draft Preview Link
                           </label>
                           <div className="flex gap-2">
                             <input
                               type="text"
                               readOnly
                               value={PREVIEW_URL}
-                              className="flex-1 rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-sm text-neutral-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-400"
+                              className="flex-1 rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-muted"
                             />
                             <button
                               onClick={handleCopyToClipboard}
                               type="button"
-                              className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                              className="rounded-md border border-hairline bg-surface px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
                             >
                               {copied ? "Copied!" : "Copy"}
                             </button>
                           </div>
-                          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                          <p className="mt-1 text-xs text-faint">
                             Share this link with others to preview your draft.
                           </p>
                         </div>
@@ -931,7 +931,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
           )}
 
           {/* Action Bar */}
-          <div className="flex items-center justify-end gap-3 border-t border-neutral-200 px-4 py-3 dark:border-neutral-700">
+          <div className="flex items-center justify-end gap-3 border-t border-hairline px-4 py-3">
             {activeTab === "write" && (
               <button
                 type="button"
@@ -941,10 +941,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                   toast.success("Draft saved!");
                 }}
                 disabled={!unsavedChanges || isDisabled}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                   unsavedChanges && !isDisabled
-                    ? "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
-                    : "cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-500"
+                    ? "border-hairline bg-surface text-muted hover:bg-elevated hover:text-fg"
+                    : "cursor-not-allowed border-hairline bg-inset text-faint"
                 }`}
               >
                 {unsavedChanges ? "Save Draft" : "Saved"}
@@ -954,7 +954,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
               type="button"
               onClick={handlePublish}
               disabled={isDisabled}
-              className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+              className="primary-button disabled:cursor-not-allowed"
             >
               {currentPostStatus === status.PUBLISHED
                 ? "Save Changes"

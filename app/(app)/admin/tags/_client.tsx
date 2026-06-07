@@ -28,7 +28,7 @@ const SortIcon = ({
 }) => (
   <ChevronUpDownIcon
     className={`ml-1 inline h-4 w-4 ${
-      sortField === field ? "text-accent" : "text-neutral-400"
+      sortField === field ? "text-accent" : "text-faint"
     }`}
   />
 );
@@ -212,17 +212,20 @@ const TagsAdmin = () => {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+          <p className="eyebrow">
+            <span className="slash">{"// "}</span>admin
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-fg">
             Tag Management
           </h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">
+          <p className="mt-1 text-muted">
             Manage, merge, and curate tags across the platform
           </p>
         </div>
         <button
           onClick={() => recalculateCounts.mutate()}
           disabled={recalculateCounts.status === "pending"}
-          className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          className="secondary-button disabled:opacity-50"
         >
           <ArrowPathIcon
             className={`h-5 w-5 ${recalculateCounts.status === "pending" ? "animate-spin" : ""}`}
@@ -234,27 +237,27 @@ const TagsAdmin = () => {
       {/* Stats Cards */}
       {data?.stats && (
         <div className="mb-6 grid grid-cols-3 gap-4">
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          <div className="rounded-lg border border-hairline bg-surface p-4">
+            <p className="font-mono text-xs uppercase tracking-label text-faint">
               Total Tags
             </p>
-            <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+            <p className="font-display text-2xl font-extrabold tracking-tight text-fg">
               {data.stats.totalTags}
             </p>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          <div className="rounded-lg border border-hairline bg-surface p-4">
+            <p className="font-mono text-xs uppercase tracking-label text-faint">
               Total Tagged Posts
             </p>
-            <p className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+            <p className="font-display text-2xl font-extrabold tracking-tight text-fg">
               {data.stats.totalPosts.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          <div className="rounded-lg border border-hairline bg-surface p-4">
+            <p className="font-mono text-xs uppercase tracking-label text-faint">
               Unused Tags
             </p>
-            <p className="text-2xl font-bold text-accent dark:text-accent">
+            <p className="font-display text-2xl font-extrabold tracking-tight text-accent">
               {data.stats.tagsWithNoPosts}
             </p>
           </div>
@@ -263,10 +266,10 @@ const TagsAdmin = () => {
 
       {/* Merge Suggestions */}
       {mergeSuggestions?.data && mergeSuggestions.data.length > 0 && (
-        <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-950">
+        <div className="bg-warning/8 mb-6 rounded-lg border border-warning/40 p-4">
           <div className="mb-3 flex items-center gap-2">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-            <h3 className="font-semibold text-yellow-800 dark:text-yellow-200">
+            <ExclamationTriangleIcon className="h-5 w-5 text-warning" />
+            <h3 className="font-display font-semibold text-warning">
               AI Merge Suggestions ({mergeSuggestions.data.length})
             </h3>
           </div>
@@ -274,24 +277,24 @@ const TagsAdmin = () => {
             {mergeSuggestions.data.slice(0, 5).map((suggestion) => (
               <div
                 key={suggestion.id}
-                className="flex items-center justify-between rounded-lg bg-white p-3 dark:bg-neutral-800"
+                className="flex items-center justify-between rounded-lg border border-hairline bg-surface p-3"
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                  <span className="font-medium text-fg">
                     {suggestion.sourceTag?.title}
                   </span>
-                  <span className="text-xs text-neutral-500">
+                  <span className="font-mono text-xs text-faint">
                     ({suggestion.sourceTag?.postCount} posts)
                   </span>
-                  <ArrowsRightLeftIcon className="h-4 w-4 text-neutral-400" />
-                  <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                  <ArrowsRightLeftIcon className="h-4 w-4 text-faint" />
+                  <span className="font-medium text-fg">
                     {suggestion.targetTag?.title}
                   </span>
-                  <span className="text-xs text-neutral-500">
+                  <span className="font-mono text-xs text-faint">
                     ({suggestion.targetTag?.postCount} posts)
                   </span>
                   {suggestion.reason && (
-                    <span className="ml-2 text-xs text-neutral-500">
+                    <span className="ml-2 text-xs text-muted">
                       - {suggestion.reason}
                     </span>
                   )}
@@ -303,7 +306,7 @@ const TagsAdmin = () => {
                       reviewSuggestion.status === "pending" ||
                       mergeTags.status === "pending"
                     }
-                    className="rounded p-1 text-green-600 hover:bg-green-100 dark:hover:bg-green-900"
+                    className="hover:bg-success/12 rounded p-1 text-success"
                     title="Approve & Merge"
                   >
                     <CheckIcon className="h-5 w-5" />
@@ -311,7 +314,7 @@ const TagsAdmin = () => {
                   <button
                     onClick={() => handleRejectSuggestion(suggestion.id)}
                     disabled={reviewSuggestion.status === "pending"}
-                    className="rounded p-1 text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+                    className="hover:bg-danger/12 rounded p-1 text-danger"
                     title="Reject"
                   >
                     <XCircleIcon className="h-5 w-5" />
@@ -325,59 +328,57 @@ const TagsAdmin = () => {
 
       {/* Merge Panel */}
       {showMergePanel && (
-        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+        <div className="bg-info/8 mb-6 rounded-lg border border-info/40 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-semibold text-blue-800 dark:text-blue-200">
-              Merge Tags
-            </h3>
+            <h3 className="font-display font-semibold text-info">Merge Tags</h3>
             <button
               onClick={() => {
                 setShowMergePanel(false);
                 setMergeSource(null);
                 setMergeTarget(null);
               }}
-              className="rounded p-1 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900"
+              className="rounded p-1 text-muted transition-colors hover:bg-elevated hover:text-fg"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <p className="mb-1 text-sm text-blue-700 dark:text-blue-300">
+              <p className="mb-1 font-mono text-xs uppercase tracking-label text-faint">
                 Source (will be deleted)
               </p>
-              <div className="rounded-lg border border-blue-200 bg-white p-3 dark:border-blue-700 dark:bg-neutral-800">
+              <div className="rounded-lg border border-hairline bg-surface p-3">
                 {mergeSource ? (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{mergeSource.title}</span>
-                    <span className="text-sm text-neutral-500">
+                    <span className="font-medium text-fg">
+                      {mergeSource.title}
+                    </span>
+                    <span className="font-mono text-sm text-faint">
                       {mergeSource.postCount} posts
                     </span>
                   </div>
                 ) : (
-                  <span className="text-neutral-400">
-                    Click a tag below to select
-                  </span>
+                  <span className="text-faint">Click a tag below to select</span>
                 )}
               </div>
             </div>
-            <ArrowsRightLeftIcon className="h-6 w-6 text-blue-400" />
+            <ArrowsRightLeftIcon className="h-6 w-6 text-info" />
             <div className="flex-1">
-              <p className="mb-1 text-sm text-blue-700 dark:text-blue-300">
+              <p className="mb-1 font-mono text-xs uppercase tracking-label text-faint">
                 Target (will keep)
               </p>
-              <div className="rounded-lg border border-blue-200 bg-white p-3 dark:border-blue-700 dark:bg-neutral-800">
+              <div className="rounded-lg border border-hairline bg-surface p-3">
                 {mergeTarget ? (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{mergeTarget.title}</span>
-                    <span className="text-sm text-neutral-500">
+                    <span className="font-medium text-fg">
+                      {mergeTarget.title}
+                    </span>
+                    <span className="font-mono text-sm text-faint">
                       {mergeTarget.postCount} posts
                     </span>
                   </div>
                 ) : (
-                  <span className="text-neutral-400">
-                    Click a tag below to select
-                  </span>
+                  <span className="text-faint">Click a tag below to select</span>
                 )}
               </div>
             </div>
@@ -386,7 +387,7 @@ const TagsAdmin = () => {
               disabled={
                 !mergeSource || !mergeTarget || mergeTags.status === "pending"
               }
-              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              className="primary-button disabled:opacity-50"
             >
               {mergeTags.status === "pending" ? "Merging..." : "Merge"}
             </button>
@@ -397,22 +398,22 @@ const TagsAdmin = () => {
       {/* Search and Filters */}
       <div className="mb-4 flex items-center gap-4">
         <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-faint" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tags..."
-            className="w-full rounded-lg border border-neutral-300 py-2 pl-10 pr-4 dark:border-neutral-600 dark:bg-neutral-800"
+            className="w-full rounded-md border border-hairline bg-transparent py-2 pl-10 pr-4 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
         <button
           onClick={() => setShowMergePanel(!showMergePanel)}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors ${
+          className={
             showMergePanel
-              ? "bg-blue-600 text-white"
-              : "border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300"
-          }`}
+              ? "primary-button"
+              : "secondary-button"
+          }
         >
           <ArrowsRightLeftIcon className="h-5 w-5" />
           Merge Mode
@@ -422,21 +423,21 @@ const TagsAdmin = () => {
       {/* Edit Modal */}
       {editingTag && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-lg rounded-lg bg-white p-6 dark:bg-neutral-800">
+          <div className="mx-4 w-full max-w-lg rounded-lg border border-hairline bg-surface p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              <h2 className="font-display text-lg font-semibold text-fg">
                 Edit Tag
               </h2>
               <button
                 onClick={() => setEditingTag(null)}
-                className="rounded p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                className="rounded p-1 text-muted transition-colors hover:bg-elevated hover:text-fg"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Title
                 </label>
                 <input
@@ -445,11 +446,11 @@ const TagsAdmin = () => {
                   onChange={(e) =>
                     setEditingTag({ ...editingTag, title: e.target.value })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Slug
                 </label>
                 <input
@@ -458,11 +459,11 @@ const TagsAdmin = () => {
                   onChange={(e) =>
                     setEditingTag({ ...editingTag, slug: e.target.value })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Description
                 </label>
                 <textarea
@@ -474,28 +475,30 @@ const TagsAdmin = () => {
                     })
                   }
                   rows={3}
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="Optional description for this tag..."
                 />
               </div>
-              <div className="rounded-lg bg-neutral-50 p-3 dark:bg-neutral-900">
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              <div className="rounded-lg bg-inset p-3">
+                <p className="text-sm text-muted">
                   Post count:{" "}
-                  <span className="font-medium">{editingTag.postCount}</span>
+                  <span className="font-mono font-medium text-fg">
+                    {editingTag.postCount}
+                  </span>
                 </p>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setEditingTag(null)}
-                  className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                  className="secondary-button"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateTag.status === "pending"}
-                  className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition-colors hover:bg-accent disabled:opacity-50"
+                  className="primary-button disabled:opacity-50"
                 >
                   {updateTag.status === "pending"
                     ? "Saving..."
@@ -510,87 +513,87 @@ const TagsAdmin = () => {
       {/* Tags Table */}
       {status === "pending" && (
         <div className="flex items-center justify-center py-12">
-          <ArrowPathIcon className="h-8 w-8 animate-spin text-neutral-400" />
+          <ArrowPathIcon className="h-8 w-8 animate-spin text-faint" />
         </div>
       )}
 
       {status === "error" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+        <div className="bg-danger/8 rounded-lg border border-danger/40 p-4 text-danger">
           Failed to load tags. Please refresh the page.
         </div>
       )}
 
       {status === "success" && (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-700">
-          <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-            <thead className="bg-neutral-50 dark:bg-neutral-800">
+        <div className="overflow-hidden rounded-lg border border-hairline">
+          <table className="min-w-full divide-y divide-hairline">
+            <thead className="bg-elevated">
               <tr>
                 <th
                   onClick={() => handleSort("title")}
-                  className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  className="cursor-pointer px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint transition-colors hover:text-fg"
                 >
                   Tag
                   <SortIcon field="title" sortField={sortField} />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Slug
                 </th>
                 <th
                   onClick={() => handleSort("postCount")}
-                  className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  className="cursor-pointer px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint transition-colors hover:text-fg"
                 >
                   Posts
                   <SortIcon field="postCount" sortField={sortField} />
                 </th>
                 <th
                   onClick={() => handleSort("createdAt")}
-                  className="cursor-pointer px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  className="cursor-pointer px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint transition-colors hover:text-fg"
                 >
                   Created
                   <SortIcon field="createdAt" sortField={sortField} />
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-right font-mono text-xs uppercase tracking-label text-faint">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-900">
+            <tbody className="divide-y divide-hairline bg-surface">
               {filteredTags?.map((tagItem) => (
                 <tr
                   key={tagItem.id}
-                  className={`${
+                  className={
                     mergeSource?.id === tagItem.id
-                      ? "bg-red-50 dark:bg-red-950"
+                      ? "bg-danger/8"
                       : mergeTarget?.id === tagItem.id
-                        ? "bg-green-50 dark:bg-green-950"
-                        : ""
-                  }`}
+                        ? "bg-success/8"
+                        : "transition-colors hover:bg-elevated"
+                  }
                 >
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <TagIcon className="h-4 w-4 text-neutral-400" />
-                      <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                      <TagIcon className="h-4 w-4 text-faint" />
+                      <span className="font-medium text-fg">
                         {tagItem.title}
                       </span>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                  <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-faint">
                     {tagItem.slug || "-"}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
                     <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      className={`inline-flex rounded-full px-2.5 py-0.5 font-mono text-xs ${
                         tagItem.postCount === 0
-                          ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                          ? "bg-danger/12 text-danger"
                           : tagItem.postCount < 5
-                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                            : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                            ? "bg-warning/12 text-warning"
+                            : "bg-success/12 text-success"
                       }`}
                     >
                       {tagItem.postCount}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                  <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-faint">
                     {new Date(tagItem.createdAt).toLocaleDateString()}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
@@ -608,10 +611,10 @@ const TagsAdmin = () => {
                                 "source",
                               )
                             }
-                            className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                            className={`rounded px-2 py-1 font-mono text-xs uppercase tracking-label transition-colors ${
                               mergeSource?.id === tagItem.id
-                                ? "bg-red-500 text-white"
-                                : "border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:hover:bg-red-950"
+                                ? "bg-danger text-on-accent"
+                                : "hover:bg-danger/12 border border-danger/40 text-danger"
                             }`}
                           >
                             Source
@@ -627,10 +630,10 @@ const TagsAdmin = () => {
                                 "target",
                               )
                             }
-                            className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                            className={`rounded px-2 py-1 font-mono text-xs uppercase tracking-label transition-colors ${
                               mergeTarget?.id === tagItem.id
-                                ? "bg-green-500 text-white"
-                                : "border border-green-300 text-green-600 hover:bg-green-50 dark:border-green-700 dark:hover:bg-green-950"
+                                ? "bg-success text-on-accent"
+                                : "hover:bg-success/12 border border-success/40 text-success"
                             }`}
                           >
                             Target
@@ -647,7 +650,7 @@ const TagsAdmin = () => {
                             postCount: tagItem.postCount,
                           })
                         }
-                        className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                        className="rounded p-1 text-muted transition-colors hover:bg-elevated hover:text-fg"
                         title="Edit"
                       >
                         <PencilSquareIcon className="h-5 w-5" />
@@ -659,7 +662,7 @@ const TagsAdmin = () => {
             </tbody>
           </table>
           {filteredTags?.length === 0 && (
-            <div className="py-12 text-center text-neutral-500 dark:text-neutral-400">
+            <div className="py-12 text-center text-muted">
               {searchQuery ? "No tags match your search." : "No tags yet."}
             </div>
           )}

@@ -33,24 +33,25 @@ const reasonLabels: Record<ReportReason, string> = {
   OTHER: "Other",
 };
 
+const chipBase =
+  "rounded-full px-2 py-0.5 font-mono text-xs uppercase tracking-label";
+
 const reasonColors: Record<ReportReason, string> = {
-  SPAM: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  HARASSMENT: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  HATE_SPEECH: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-  MISINFORMATION: "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
-  COPYRIGHT:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  NSFW: "bg-accent/10 text-accent dark:bg-accent/15 dark:text-accent",
-  OFF_TOPIC: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-  OTHER: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+  SPAM: "bg-warning/12 text-warning",
+  HARASSMENT: "bg-danger/12 text-danger",
+  HATE_SPEECH: "bg-danger/12 text-danger",
+  MISINFORMATION: "bg-accent/10 text-accent",
+  COPYRIGHT: "bg-info/12 text-info",
+  NSFW: "bg-accent/10 text-accent",
+  OFF_TOPIC: "border border-hairline text-muted",
+  OTHER: "border border-hairline text-muted",
 };
 
 const statusColors: Record<ReportStatus, string> = {
-  PENDING:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  REVIEWED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  DISMISSED: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-  ACTIONED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  PENDING: "bg-warning/12 text-warning",
+  REVIEWED: "bg-info/12 text-info",
+  DISMISSED: "border border-hairline text-muted",
+  ACTIONED: "bg-danger/12 text-danger",
 };
 
 const ModerationQueue = () => {
@@ -130,62 +131,43 @@ const ModerationQueue = () => {
       <div className="mb-6 flex items-center gap-4">
         <Link
           href="/admin"
-          className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          className="rounded-lg p-2 text-muted transition-colors hover:bg-elevated hover:text-fg"
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-white">
+          <p className="eyebrow">
+            <span className="slash">{"// "}</span>admin
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-fg">
             Moderation Queue
           </h1>
-          <p className="mt-1 text-neutral-500 dark:text-neutral-400">
-            Review and manage reported content
-          </p>
+          <p className="mt-1 text-muted">Review and manage reported content</p>
         </div>
       </div>
 
       {/* Status Tabs */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setStatusFilter("PENDING")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            statusFilter === "PENDING"
-              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-          }`}
-        >
-          Pending ({counts?.pending ?? 0})
-        </button>
-        <button
-          onClick={() => setStatusFilter("ACTIONED")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            statusFilter === "ACTIONED"
-              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-          }`}
-        >
-          Actioned ({counts?.actioned ?? 0})
-        </button>
-        <button
-          onClick={() => setStatusFilter("DISMISSED")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            statusFilter === "DISMISSED"
-              ? "bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200"
-              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-          }`}
-        >
-          Dismissed ({counts?.dismissed ?? 0})
-        </button>
-        <button
-          onClick={() => setStatusFilter(undefined)}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            statusFilter === undefined
-              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-          }`}
-        >
-          All ({counts?.total ?? 0})
-        </button>
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-hairline">
+        {(
+          [
+            ["PENDING", `Pending (${counts?.pending ?? 0})`],
+            ["ACTIONED", `Actioned (${counts?.actioned ?? 0})`],
+            ["DISMISSED", `Dismissed (${counts?.dismissed ?? 0})`],
+            [undefined, `All (${counts?.total ?? 0})`],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={label}
+            onClick={() => setStatusFilter(value)}
+            className={`-mb-px border-b-2 px-4 py-2 font-mono text-sm uppercase tracking-label transition-colors ${
+              statusFilter === value
+                ? "border-accent text-accent"
+                : "border-transparent text-muted hover:text-fg"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* In review — auto-moderation queue */}
@@ -256,23 +238,23 @@ const ModerationQueue = () => {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="animate-pulse rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800"
+                className="animate-pulse rounded-lg border border-hairline bg-surface p-4"
               >
-                <div className="mb-3 h-4 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-                <div className="mb-2 h-6 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-                <div className="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700" />
+                <div className="mb-3 h-4 w-1/4 rounded bg-elevated" />
+                <div className="mb-2 h-6 w-3/4 rounded bg-elevated" />
+                <div className="h-4 w-1/2 rounded bg-elevated" />
               </div>
             ))}
           </div>
         )}
 
         {!isLoading && data?.reports.length === 0 && (
-          <div className="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
-            <FlagIcon className="mx-auto h-12 w-12 text-neutral-400" />
-            <h3 className="mt-4 text-lg font-medium text-neutral-900 dark:text-white">
+          <div className="rounded-lg border border-hairline bg-surface p-8 text-center">
+            <FlagIcon className="mx-auto h-12 w-12 text-faint" />
+            <h3 className="mt-4 font-display text-lg font-semibold text-fg">
               No reports found
             </h3>
-            <p className="mt-2 text-neutral-500 dark:text-neutral-400">
+            <p className="mt-2 text-muted">
               {statusFilter
                 ? `No ${statusFilter.toLowerCase()} reports`
                 : "All caught up!"}
@@ -283,21 +265,21 @@ const ModerationQueue = () => {
         {data?.reports.map((report) => (
           <div
             key={report.id}
-            className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800"
+            className="rounded-lg border border-hairline bg-surface p-4"
           >
             {/* Header */}
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${reasonColors[report.reason as ReportReason]}`}
+                className={`${chipBase} ${reasonColors[report.reason as ReportReason]}`}
               >
                 {reasonLabels[report.reason as ReportReason]}
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColors[report.status as ReportStatus]}`}
+                className={`${chipBase} ${statusColors[report.status as ReportStatus]}`}
               >
                 {report.status}
               </span>
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="font-mono text-xs text-faint">
                 {getRelativeTime(report.createdAt!)}
               </span>
             </div>
@@ -305,21 +287,19 @@ const ModerationQueue = () => {
             {/* Content Preview */}
             <div className="mb-3">
               {report.content && (
-                <div className="rounded border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-900">
-                  <p className="mb-1 text-xs font-medium uppercase text-neutral-500 dark:text-neutral-400">
+                <div className="rounded border border-hairline bg-inset p-3">
+                  <p className="mb-1 font-mono text-xs uppercase tracking-label text-faint">
                     {report.content.type} by @{report.content.user?.username}
                   </p>
-                  <p className="font-medium text-neutral-900 dark:text-white">
-                    {report.content.title}
-                  </p>
+                  <p className="font-medium text-fg">{report.content.title}</p>
                 </div>
               )}
               {report.discussion && (
-                <div className="rounded border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-700 dark:bg-neutral-900">
-                  <p className="mb-1 text-xs font-medium uppercase text-neutral-500 dark:text-neutral-400">
+                <div className="rounded border border-hairline bg-inset p-3">
+                  <p className="mb-1 font-mono text-xs uppercase tracking-label text-faint">
                     Comment by @{report.discussion.user?.username}
                   </p>
-                  <p className="line-clamp-2 text-neutral-900 dark:text-white">
+                  <p className="line-clamp-2 text-fg">
                     {report.discussion.body}
                   </p>
                 </div>
@@ -329,14 +309,15 @@ const ModerationQueue = () => {
             {/* Reporter Details */}
             {report.details && (
               <div className="mb-3">
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                  <span className="font-medium">Details:</span> {report.details}
+                <p className="text-sm text-muted">
+                  <span className="font-medium text-fg">Details:</span>{" "}
+                  {report.details}
                 </p>
               </div>
             )}
 
             <div className="flex items-center justify-between">
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="text-sm text-muted">
                 Reported by @{report.reporter?.username || "unknown"}
               </p>
 
@@ -346,7 +327,7 @@ const ModerationQueue = () => {
                   <button
                     onClick={() => handleDismiss(report.id)}
                     disabled={isReviewing}
-                    className="flex items-center gap-1 rounded-lg border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                    className="secondary-button px-3 py-1.5 text-sm disabled:opacity-50"
                   >
                     <XCircleIcon className="h-4 w-4" />
                     Dismiss
@@ -354,7 +335,7 @@ const ModerationQueue = () => {
                   <button
                     onClick={() => handleAction(report.id)}
                     disabled={isReviewing}
-                    className="flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                    className="secondary-button px-3 py-1.5 text-sm text-danger disabled:opacity-50"
                   >
                     <ExclamationTriangleIcon className="h-4 w-4" />
                     Take Action
@@ -363,7 +344,7 @@ const ModerationQueue = () => {
               )}
 
               {report.status !== "PENDING" && report.reviewedBy && (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="text-sm text-muted">
                   Reviewed by @{report.reviewedBy.username}
                 </p>
               )}

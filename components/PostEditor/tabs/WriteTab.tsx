@@ -65,13 +65,13 @@ export function WriteTab({
   return (
     <div className={`flex flex-col ${className}`}>
       {/* Title Input */}
-      <div className="border-b border-neutral-200 dark:border-neutral-700">
+      <div className="border-b border-hairline">
         <input
           type="text"
           value={title}
           onChange={(e) => onTitleChange?.(e.target.value)}
           placeholder={titlePlaceholder}
-          className="w-full border-none bg-transparent px-4 py-4 text-2xl font-bold text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder:text-neutral-500"
+          className="w-full border-none bg-transparent px-4 py-4 font-display text-3xl font-extrabold tracking-tight text-fg placeholder:text-faint focus:outline-none focus:ring-0 sm:text-4xl"
         />
       </div>
 
@@ -86,7 +86,7 @@ export function WriteTab({
           />
 
           {/* TipTap Editor */}
-          <div className="flex-1 overflow-y-auto bg-white dark:bg-neutral-900">
+          <div className="flex-1 overflow-y-auto bg-surface">
             <EditorContent
               editor={editor}
               className="min-h-[300px] [&_.ProseMirror]:min-h-[300px] [&_.ProseMirror]:focus:outline-none"
@@ -96,12 +96,12 @@ export function WriteTab({
       ) : (
         <div className="flex flex-1 flex-col">
           {/* Markdown Mode Header */}
-          <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+          <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
             <div className="flex items-center gap-3">
               {/* Image Upload for Markdown Mode */}
               <label
                 htmlFor="markdown-image-upload"
-                className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                className="flex cursor-pointer items-center gap-1.5 rounded-md border border-hairline bg-surface px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
               >
                 <ImageUp className="h-4 w-4" />
                 Upload Image
@@ -120,7 +120,7 @@ export function WriteTab({
                 href="https://www.markdownguide.org/cheat-sheet/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300"
+                className="flex items-center gap-1 text-sm text-muted transition-colors hover:text-fg"
               >
                 <svg
                   className="h-4 w-4"
@@ -141,7 +141,7 @@ export function WriteTab({
             <button
               type="button"
               onClick={toggleMode}
-              className="flex items-center gap-1.5 text-sm text-accent hover:text-accent dark:text-accent dark:hover:text-accent"
+              className="flex items-center gap-1.5 text-sm text-accent transition-colors hover:text-accent-soft"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12.9 6.858l4.242 4.243L7.242 21H3v-4.243l9.9-9.9Zm1.414-1.414l2.121-2.122a1 1 0 0 1 1.414 0l2.829 2.829a1 1 0 0 1 0 1.414l-2.122 2.121-4.242-4.242Z" />
@@ -151,13 +151,13 @@ export function WriteTab({
           </div>
 
           {/* Markdown Textarea */}
-          <div className="flex-1 bg-white dark:bg-neutral-900">
+          <div className="flex-1 bg-surface">
             <TextareaAutosize
               value={markdownContent}
               onChange={(e) => setMarkdownContent(e.target.value)}
               placeholder={editorPlaceholder}
               minRows={20}
-              className="w-full resize-none border-none bg-transparent px-4 py-4 font-mono text-base text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder:text-neutral-500"
+              className="w-full resize-none border-none bg-transparent px-4 py-4 font-mono text-base text-fg placeholder:text-faint focus:outline-none focus:ring-0"
             />
           </div>
         </div>

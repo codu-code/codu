@@ -63,7 +63,7 @@ const EditorNav = ({
   return (
     <nav
       aria-label="Editor navigation"
-      className="sticky top-0 z-50 bg-white shadow-sm dark:bg-black"
+      className="sticky top-0 z-50 border-b border-hairline bg-canvas"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
@@ -79,7 +79,7 @@ const EditorNav = ({
             </Link>
 
             {statusText && (
-              <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <span className="font-mono text-xs uppercase tracking-label text-muted">
                 {statusText}
               </span>
             )}
@@ -87,14 +87,14 @@ const EditorNav = ({
 
           <div className="flex items-center space-x-4">
             {savedTime && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              <span className="font-mono text-xs text-faint">
                 {isSaving ? "Saving..." : `Saved ${savedTime}`}
               </span>
             )}
             <button
               onClick={onPublish}
               disabled={isDisabled}
-              className="rounded-md bg-accent px-2.5 py-1 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+              className="primary-button px-3 py-1.5 disabled:cursor-not-allowed"
             >
               {postStatus === status.PUBLISHED ? "Save changes" : "Publish"}
             </button>
@@ -103,7 +103,7 @@ const EditorNav = ({
               <>
                 <Link
                   href="/notifications"
-                  className="focus-style relative rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
+                  className="focus-style relative rounded-full p-1 text-muted transition-colors hover:bg-elevated hover:text-fg"
                 >
                   <span className="sr-only">View notifications</span>
                   {hasNotifications && (
@@ -113,7 +113,7 @@ const EditorNav = ({
                 </Link>
                 <Menu as="div" className="relative ml-3">
                   <div>
-                    <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
+                    <Menu.Button className="flex rounded-full text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas">
                       <span className="sr-only">Open user menu</span>
                       {session.user?.image ? (
                         <img
@@ -122,7 +122,7 @@ const EditorNav = ({
                           alt={`${session.user.name}'s avatar`}
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-300">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-inset font-mono text-fg">
                           {session.user?.name?.[0] || "U"}
                         </div>
                       )}
@@ -137,20 +137,20 @@ const EditorNav = ({
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-zinc-800 dark:ring-white/10">
+                    <Menu.Items className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-lg border border-hairline bg-elevated px-1 py-1 shadow-lg focus:outline-none">
                       {userNavigation.map((item) => (
                         <Menu.Item key={item.name}>
                           {item.onClick ? (
                             <button
                               onClick={item.onClick}
-                              className="flex w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-zinc-700"
+                              className="flex w-full rounded px-4 py-2 text-left text-sm text-muted transition-colors hover:bg-surface hover:text-fg"
                             >
                               {item.name}
                             </button>
                           ) : (
                             <Link
                               href={item.href}
-                              className="block rounded px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-zinc-700"
+                              className="block rounded px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-fg"
                             >
                               {item.name}
                             </Link>

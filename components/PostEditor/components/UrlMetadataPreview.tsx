@@ -26,8 +26,8 @@ export function UrlMetadataPreview({
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-700 dark:bg-neutral-800">
-        <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400">
+      <div className="flex items-center justify-center rounded-md border border-hairline bg-inset p-6">
+        <div className="flex items-center gap-3 text-muted">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span>Fetching link preview...</span>
         </div>
@@ -77,10 +77,10 @@ export function UrlMetadataPreview({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800">
+    <div className="overflow-hidden rounded-md border border-hairline bg-elevated">
       {/* Cover Image */}
       {metadata.image && (
-        <div className="relative aspect-video w-full overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+        <div className="relative aspect-video w-full overflow-hidden bg-inset">
           {}
           <img
             src={metadata.image}
@@ -97,12 +97,12 @@ export function UrlMetadataPreview({
       {/* Content */}
       <div className="p-4">
         {/* Site name / Domain */}
-        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex items-center gap-2 text-sm text-muted">
           <ExternalLink className="h-3.5 w-3.5" />
           <span>{metadata.siteName || domain}</span>
           {metadata.readTime && (
             <>
-              <span className="text-neutral-300 dark:text-neutral-600">•</span>
+              <span className="text-faint">•</span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
                 {metadata.readTime} min read
@@ -113,14 +113,14 @@ export function UrlMetadataPreview({
 
         {/* Title */}
         {metadata.title && (
-          <h3 className="mt-2 text-lg font-semibold text-neutral-900 dark:text-white">
+          <h3 className="mt-2 text-lg font-semibold text-fg">
             {metadata.title}
           </h3>
         )}
 
         {/* Description */}
         {metadata.description && (
-          <p className="mt-2 line-clamp-3 text-sm text-neutral-600 dark:text-neutral-300">
+          <p className="mt-2 line-clamp-3 text-sm text-muted">
             {metadata.description}
           </p>
         )}
