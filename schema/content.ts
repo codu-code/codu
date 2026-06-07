@@ -6,6 +6,7 @@ import z from "zod";
 export const ContentTypeSchema = z.enum([
   "POST",
   "LINK",
+  "TIL",
   "QUESTION",
   "VIDEO",
   "DISCUSSION",

@@ -18,6 +18,7 @@ import {
   QuestionMarkCircleIcon,
   VideoCameraIcon,
   ChatBubbleLeftRightIcon,
+  LightBulbIcon,
   Squares2X2Icon,
 } from "@heroicons/react/20/solid";
 
@@ -25,6 +26,7 @@ type SortOption = "recent" | "trending" | "popular";
 type ContentType =
   | "ARTICLE"
   | "LINK"
+  | "TIL"
   | "QUESTION"
   | "VIDEO"
   | "DISCUSSION"
@@ -58,6 +60,7 @@ const typeOptions: {
 }[] = [
   { value: null, label: "All Types", icon: Squares2X2Icon },
   { value: "ARTICLE", label: "Articles", icon: DocumentTextIcon },
+  { value: "TIL", label: "TIL", icon: LightBulbIcon },
   { value: "LINK", label: "Links", icon: LinkIcon },
   { value: "QUESTION", label: "Questions", icon: QuestionMarkCircleIcon },
   { value: "VIDEO", label: "Videos", icon: VideoCameraIcon },

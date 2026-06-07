@@ -3,16 +3,21 @@
 import { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useSession } from "next-auth/react";
-import { FeedItemLoading, FeedFilters } from "@/components/Feed";
+import {
+  FeedItemLoading,
+  FeedFilters,
+  Composer,
+  OnboardingBanner,
+} from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
   | "ARTICLE"
   | "LINK"
+  | "TIL"
   | "QUESTION"
   | "VIDEO"
   | "DISCUSSION"
@@ -23,6 +28,7 @@ const validSorts: SortOption[] = ["recent", "trending", "popular"];
 const validTypesLower: string[] = [
   "article",
   "link",
+  "til",
   "question",
   "video",
   "discussion",
@@ -129,6 +135,14 @@ const FeedPage = () => {
         />
       </div>
 
+      {/* Onboarding + low-bar composer (signed-in) */}
+      {session?.user && (
+        <div className="mt-4 space-y-4">
+          <OnboardingBanner />
+          <Composer session={session} />
+        </div>
+      )}
+
       {/* For you / Following tabs (signed-in) */}
       {session?.user && (
         <div className="mt-4 flex gap-5 border-b border-hairline">
@@ -159,22 +173,7 @@ const FeedPage = () => {
       {/* Feed list (rails now live in the global app shell) */}
       <div>
         <div className="relative">
-          <section>
-            {/* Composer */}
-            {session?.user && (
-              <Link
-                href="/create"
-                className="mb-6 mt-4 flex items-center gap-3 rounded-xl border border-hairline bg-surface p-4 transition-colors hover:border-accent/50"
-              >
-                <span className="flex-1 text-muted">
-                  What are you building? Share a post…
-                </span>
-                <span className="rounded-lg bg-accent px-3.5 py-1.5 text-sm font-semibold text-on-accent">
-                  Write
-                </span>
-              </Link>
-            )}
-
+          <section className="space-y-3">
             {following &&
               status === "success" &&
               data.pages.every((p) => p.items.length === 0) && (
@@ -204,6 +203,7 @@ const FeedPage = () => {
                     <UnifiedContentCard
                       key={item.id}
                       type={item.type as "POST" | "LINK"}
+                      kind={item.type}
                       id={item.id}
                       title={item.title}
                       excerpt={item.excerpt}

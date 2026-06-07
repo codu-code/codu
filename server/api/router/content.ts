@@ -63,24 +63,30 @@ function calculateReadTime(body: string | null | undefined): number {
   return Math.max(1, Math.ceil(words / wordsPerMinute));
 }
 
+type DbPostType =
+  | "article"
+  | "discussion"
+  | "link"
+  | "resource"
+  | "til"
+  | "question";
+
 // Helper to convert frontend type (POST, LINK, ARTICLE) to DB type (article, link)
-function toDbType(
-  frontendType: string,
-): "article" | "discussion" | "link" | "resource" {
-  const typeMap: Record<
-    string,
-    "article" | "discussion" | "link" | "resource"
-  > = {
+function toDbType(frontendType: string): DbPostType {
+  const typeMap: Record<string, DbPostType> = {
     POST: "article",
     ARTICLE: "article", // Alias for POST
     LINK: "link",
-    QUESTION: "discussion",
+    TIL: "til",
+    QUESTION: "question",
     VIDEO: "link",
     DISCUSSION: "discussion",
     article: "article",
     link: "link",
     discussion: "discussion",
     resource: "resource",
+    til: "til",
+    question: "question",
   };
   return typeMap[frontendType] || "article";
 }
@@ -92,6 +98,8 @@ function toFrontendType(dbType: string): string {
     link: "LINK",
     discussion: "DISCUSSION",
     resource: "LINK",
+    til: "TIL",
+    question: "QUESTION",
   };
   return typeMap[dbType] || dbType.toUpperCase();
 }

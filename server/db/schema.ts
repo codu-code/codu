@@ -31,6 +31,10 @@ export const postType = pgEnum("post_type", [
   "discussion",
   "link",
   "resource",
+  // Relaunch low-bar contribution kinds (handoff): TIL = "today I learned"
+  // tips, question = ask-the-community posts.
+  "til",
+  "question",
 ]);
 export const postStatus = pgEnum("post_status", [
   "draft",

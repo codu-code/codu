@@ -3,20 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
-import {
-  BookmarkIcon,
-  ArrowTopRightOnSquareIcon,
-  ChatBubbleLeftIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/20/solid";
-import { BookmarkIcon as BookmarkOutlineIcon } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { Temporal } from "@js-temporal/polyfill";
 
 export type ContentType = "POST" | "LINK";
+
+// Display kind → chip label + tone. The card's behavior still keys off `type`
+// (POST vs LINK); `kind` only drives the editorial chip.
+const KIND: Record<string, { label: string; className: string }> = {
+  POST: { label: "Article", className: "bg-accent/10 text-accent-soft" },
+  ARTICLE: { label: "Article", className: "bg-accent/10 text-accent-soft" },
+  TIL: { label: "TIL", className: "bg-success/12 text-success" },
+  QUESTION: { label: "Question", className: "bg-info/12 text-info" },
+  DISCUSSION: { label: "Discussion", className: "bg-info/12 text-info" },
+  LINK: { label: "Link", className: "border border-hairline text-muted" },
+};
 
 type AuthorInfo = {
   name: string;
@@ -33,6 +35,8 @@ type SourceInfo = {
 
 export interface UnifiedContentCardProps {
   type: ContentType;
+  /** Editorial kind for the chip (POST/ARTICLE/TIL/QUESTION/DISCUSSION/LINK). Defaults to `type`. */
+  kind?: string;
   id: string | number;
   title: string;
   excerpt?: string | null;
@@ -51,19 +55,6 @@ export interface UnifiedContentCardProps {
   linkAuthor?: string | null;
   tags?: string[];
 }
-
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-  } catch {
-    return null;
-  }
-};
 
 // Get relative time string
 const getRelativeTime = (dateStr: string): string => {
@@ -89,38 +80,14 @@ const ensureHttps = (url: string | null | undefined): string | null => {
   return url;
 };
 
-// Get display hostname
-const getHostname = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    return url.hostname;
-  } catch {
-    return urlString;
-  }
-};
-
-// Get display URL (hostname + truncated path)
-const getDisplayUrl = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    const path =
-      url.pathname.length > 20
-        ? url.pathname.slice(0, 20) + "..."
-        : url.pathname;
-    return url.hostname + (path !== "/" ? path : "");
-  } catch {
-    return urlString.slice(0, 40) + "...";
-  }
-};
-
 const UnifiedContentCard = ({
   type,
+  kind,
   id,
   title,
   excerpt,
   slug,
   imageUrl: rawImageUrl,
-  externalUrl,
   publishedAt,
   readTimeMins,
   upvotes,
@@ -130,12 +97,13 @@ const UnifiedContentCard = ({
   discussionCount = 0,
   author,
   source,
-  linkAuthor,
+  tags,
 }: UnifiedContentCardProps) => {
   const [imageError, setImageError] = useState(false);
   const [userVote, setUserVote] = useState(initialUserVote);
   const [votes, setVotes] = useState({ upvotes, downvotes });
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+  const [shared, setShared] = useState(false);
 
   const { data: session } = useSession();
   const utils = api.useUtils();
@@ -219,270 +187,163 @@ const UnifiedContentCard = ({
     }
   };
 
-  const dateTime = publishedAt
-    ? Temporal.Instant.from(new Date(publishedAt).toISOString())
-    : null;
-  const relativeTime = publishedAt ? getRelativeTime(publishedAt) : null;
-  const readableDate = dateTime
-    ? dateTime.toLocaleString(["en-IE"], {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
+  const handleShare = () => {
+    const url =
+      typeof window !== "undefined"
+        ? new URL(cardUrl, window.location.origin).toString()
+        : cardUrl;
+    void navigator.clipboard?.writeText(url).then(() => {
+      setShared(true);
+      setTimeout(() => setShared(false), 1200);
+    });
+  };
 
-  const faviconUrl = getFaviconUrl(source?.websiteUrl || externalUrl);
+  const relativeTime = publishedAt ? getRelativeTime(publishedAt) : null;
+
   const showThumbnail = imageUrl && !imageError;
-  const score = votes.upvotes - votes.downvotes;
-  const hostname = externalUrl ? getHostname(externalUrl) : null;
+  const chip = KIND[(kind || type).toUpperCase()] ?? KIND.LINK;
+  const authorName = author?.name ?? source?.name ?? null;
+  const handle = author?.username ?? source?.slug ?? null;
+  const avatarImg = author?.image ?? source?.logo ?? null;
 
   return (
     <article
-      className="group my-2 rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-hairline border-hairline bg-surface hover:border-accent/50"
+      className="group rounded-lg border border-hairline bg-surface p-5 transition-colors duration-base ease-out hover:border-strong"
       data-testid="content-card"
     >
-      {/* Meta info row */}
-      <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
-        {/* Author/Source info - show author for content with valid author username */}
-        {author?.username ? (
-          <Link
-            href={`/${author.username}`}
-            className="flex items-center gap-1.5 hover:text-fg"
-          >
-            {author.image ? (
-              <img
-                src={author.image}
-                alt=""
-                className="h-4 w-4 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-4 w-4 items-center justify-center rounded-full bg-accent/10 text-[10px] font-bold text-accent dark:bg-accent/15 dark:text-accent">
-                {author.name?.charAt(0).toUpperCase() || "?"}
-              </div>
-            )}
-            <span className="font-medium">{author.name}</span>
-          </Link>
-        ) : source ? (
-          source.slug ? (
+      {/* Header: kind chip + author + @handle · time (· via source for links) */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-mono text-xs ${chip.className}`}
+        >
+          {chip.label}
+        </span>
+        {avatarImg ? (
+          <img
+            src={avatarImg}
+            alt=""
+            className="h-5 w-5 rounded-full object-cover"
+          />
+        ) : authorName ? (
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-[10px] font-bold text-accent">
+            {authorName.charAt(0).toUpperCase()}
+          </span>
+        ) : null}
+        {authorName &&
+          (handle ? (
             <Link
-              href={`/${source.slug}`}
-              className="flex items-center gap-1.5 hover:text-fg"
+              href={`/${handle}`}
+              className="whitespace-nowrap text-sm font-semibold text-fg hover:underline"
             >
-              {source.logo ? (
-                <img
-                  src={source.logo}
-                  alt=""
-                  className="h-4 w-4 rounded object-cover"
-                />
-              ) : faviconUrl ? (
-                <img src={faviconUrl} alt="" className="h-4 w-4 rounded" />
-              ) : (
-                <div className="flex h-4 w-4 items-center justify-center rounded bg-accent/10 text-[10px] font-bold text-accent dark:bg-accent/15 dark:text-accent">
-                  {source.name?.charAt(0).toUpperCase() || "?"}
-                </div>
-              )}
-              <span className="font-medium">{source.name}</span>
+              {authorName}
             </Link>
           ) : (
-            <span className="flex items-center gap-1.5">
-              {source.logo ? (
-                <img
-                  src={source.logo}
-                  alt=""
-                  className="h-4 w-4 rounded object-cover"
-                />
-              ) : faviconUrl ? (
-                <img src={faviconUrl} alt="" className="h-4 w-4 rounded" />
-              ) : (
-                <div className="flex h-4 w-4 items-center justify-center rounded bg-accent/10 text-[10px] font-bold text-accent dark:bg-accent/15 dark:text-accent">
-                  {source.name?.charAt(0).toUpperCase() || "?"}
-                </div>
-              )}
-              <span className="font-medium">{source.name}</span>
+            <span className="whitespace-nowrap text-sm font-semibold text-fg">
+              {authorName}
             </span>
-          )
-        ) : null}
-
-        {/* Link author (if different from source) */}
-        {type === "LINK" &&
-          linkAuthor &&
-          linkAuthor.trim() &&
-          !["by", "by,", "by ,"].includes(linkAuthor.trim().toLowerCase()) && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="max-w-[120px] truncate">
-                {linkAuthor.replace(/^by\s+/i, "").trim()}
-              </span>
-            </>
-          )}
-
-        {/* Time */}
-        {relativeTime && (
-          <>
-            <span aria-hidden="true">·</span>
-            <time
-              dateTime={dateTime?.toString()}
-              title={readableDate || undefined}
-            >
-              {relativeTime}
-            </time>
-          </>
-        )}
-
-        {/* Read time for all content types */}
-        {readTimeMins && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>{readTimeMins} min</span>
-          </>
-        )}
-
-        {/* External link indicator */}
-        {type === "LINK" && hostname && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span className="text-faint">{hostname}</span>
-          </>
-        )}
+          ))}
+        <span className="whitespace-nowrap font-mono text-xs text-faint">
+          {handle ? `@${handle}` : ""}
+          {relativeTime ? `${handle ? " · " : ""}${relativeTime}` : ""}
+          {type === "LINK" && source?.name ? ` · via ${source.name}` : ""}
+          {readTimeMins ? ` · ${readTimeMins} min` : ""}
+        </span>
       </div>
 
-      {/* Main content area */}
-      <div className="flex gap-3">
-        {/* Text content */}
+      {/* Title + excerpt + optional thumbnail */}
+      <div className="mt-3 flex gap-4">
         <div className="min-w-0 flex-1">
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
             className="block"
           >
-            <h2 className="mb-1 line-clamp-2 text-base font-semibold leading-tight text-fg hover:underline">
+            <h3 className="font-display text-lg font-bold leading-tight tracking-tight text-fg group-hover:text-accent">
               {title}
-            </h2>
+              {type === "LINK" && (
+                <span className="font-normal text-faint"> ↗</span>
+              )}
+            </h3>
           </Link>
-          {/* External URL display for LINK types */}
-          {type === "LINK" && externalUrl && (
-            <a
-              href={externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleExternalClick}
-              className="mb-1 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline dark:text-blue-400"
-            >
-              {getDisplayUrl(externalUrl)}
-              <ArrowTopRightOnSquareIcon className="h-3 w-3" />
-            </a>
-          )}
           {excerpt && (
-            <p className="line-clamp-2 text-sm text-muted">
+            <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-muted">
               {excerpt}
             </p>
           )}
         </div>
-
-        {/* Thumbnail */}
-        {showThumbnail && (
+        {showThumbnail ? (
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
-            className="relative w-[80px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:w-[120px]"
+            className="relative h-[68px] w-[104px] flex-shrink-0 self-start overflow-hidden rounded-sm border border-hairline"
           >
             <img
               src={imageUrl}
               alt=""
-              className="aspect-video w-full object-cover hover:opacity-90"
+              className="h-full w-full object-cover"
               onError={() => setImageError(true)}
             />
-            {type === "LINK" && (
-              <div className="absolute bottom-1 right-1 rounded bg-black/60 p-0.5">
-                <ArrowTopRightOnSquareIcon className="h-3 w-3 text-white" />
-              </div>
-            )}
           </Link>
+        ) : (
+          type === "LINK" && (
+            <div className="relative h-[68px] w-[104px] flex-shrink-0 self-start overflow-hidden rounded-sm border border-hairline bg-elevated bg-grid-dots bg-[length:9px_9px]" />
+          )
         )}
       </div>
 
-      {/* Action bar */}
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        {/* Vote buttons */}
-        <div className="flex items-center rounded-full border border-hairline">
+      {/* Footer: mono #tags + reaction bar */}
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        {tags && tags.length > 0 && (
+          <span className="min-w-0 truncate font-mono text-xs text-faint">
+            {tags.map((t) => `#${t}`).join("  ")}
+          </span>
+        )}
+        <div className="ml-auto flex items-center gap-3">
+          {/* ▲ helpful (upvote) */}
           <button
             onClick={() => handleVote(userVote === "up" ? null : "up")}
             disabled={voteStatus === "pending"}
-            className={`rounded-l-full p-1 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
+            title="Helpful"
+            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 font-mono text-xs transition-colors disabled:opacity-50 ${
               userVote === "up"
-                ? "text-green-500"
-                : "text-faint"
+                ? "bg-accent/10 text-accent-soft"
+                : "border border-hairline text-muted hover:text-fg"
             }`}
-            aria-label="Upvote"
+            aria-pressed={userVote === "up"}
           >
-            <ChevronUpIcon className="h-4 w-4" />
+            <span className="text-[11px]">▲</span>
+            {votes.upvotes} helpful
           </button>
-          <span
-            className={`min-w-[1.5rem] text-center text-xs font-bold ${
-              score > 0
-                ? "text-green-500"
-                : score < 0
-                  ? "text-red-500"
-                  : "text-faint"
-            }`}
+          {/* replies */}
+          <Link
+            href={`${cardUrl}#discussion`}
+            className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-xs text-faint hover:text-muted"
           >
-            {score}
-          </span>
+            {discussionCount} replies
+          </Link>
+          {/* Save (bookmark) */}
           <button
-            onClick={() => handleVote(userVote === "down" ? null : "down")}
-            disabled={voteStatus === "pending"}
-            className={`rounded-r-full p-1 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
-              userVote === "down"
-                ? "text-red-500"
-                : "text-faint"
+            onClick={handleBookmark}
+            disabled={bookmarkStatus === "pending"}
+            title="Save"
+            data-testid="bookmark-button"
+            className={`whitespace-nowrap font-mono text-xs transition-colors disabled:opacity-50 ${
+              isBookmarked ? "text-accent-soft" : "text-faint hover:text-muted"
             }`}
-            aria-label="Downvote"
           >
-            <ChevronDownIcon className="h-4 w-4" />
+            {isBookmarked ? "Saved" : "Save"}
+          </button>
+          {/* Share (copy link) */}
+          <button
+            onClick={handleShare}
+            title="Copy link"
+            className={`whitespace-nowrap font-mono text-xs transition-colors ${
+              shared ? "text-accent-soft" : "text-faint hover:text-muted"
+            }`}
+          >
+            {shared ? "Copied" : "Share"}
           </button>
         </div>
-
-        {/* Comments */}
-        <Link
-          href={`${cardUrl}#discussion`}
-          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-muted transition-colors hover:bg-elevated dark:text-faint"
-        >
-          <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
-          <span>{discussionCount}</span>
-        </Link>
-
-        {/* Bookmark */}
-        <button
-          onClick={handleBookmark}
-          disabled={bookmarkStatus === "pending"}
-          className={`flex items-center gap-1 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-            isBookmarked
-              ? "text-blue-500"
-              : "text-faint hover:bg-elevated dark:text-muted"
-          }`}
-          aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"}
-          data-testid="bookmark-button"
-        >
-          {isBookmarked ? (
-            <BookmarkIcon className="h-4 w-4" />
-          ) : (
-            <BookmarkOutlineIcon className="h-4 w-4" />
-          )}
-        </button>
-
-        {/* External link button for LINKs */}
-        {type === "LINK" && externalUrl && (
-          <a
-            href={externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleExternalClick}
-            className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-xs text-muted transition-colors hover:bg-elevated dark:text-faint"
-          >
-            <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Open</span>
-          </a>
-        )}
       </div>
     </article>
   );
