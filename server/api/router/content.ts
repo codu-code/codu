@@ -113,7 +113,8 @@ export const contentRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
       const limit = input?.limit ?? 25;
-      const { cursor, sort, type, sourceId, category, tag, following } = input;
+      const { cursor, sort, type, kinds, sourceId, category, tag, following } =
+        input;
 
       // Build the vote subquery for current user
       const userVotes = userId
@@ -148,6 +149,12 @@ export const contentRouter = createTRPCRouter({
         // Convert frontend type (POST, LINK) to db type (article, link)
         const dbType = toDbType(type);
         conditions.push(eq(posts.type, dbType));
+      }
+
+      // Multi-kind filter (e.g. Discussions = discussion + question)
+      if (kinds && kinds.length > 0) {
+        const dbKinds = [...new Set(kinds.map(toDbType))];
+        conditions.push(inArray(posts.type, dbKinds));
       }
 
       if (sourceId) {

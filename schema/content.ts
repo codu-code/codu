@@ -26,6 +26,7 @@ export const GetUnifiedFeedSchema = z.object({
     .nullish(),
   sort: z.enum(["recent", "trending", "popular"]).default("recent"),
   type: ContentTypeSchema.nullish(), // Filter by content type
+  kinds: z.array(ContentTypeSchema).nullish(), // Filter by multiple kinds (e.g. Discussions = discussion + question)
   category: z.string().nullish(),
   tag: z.string().nullish(),
   sourceId: z.number().nullish(),
