@@ -1,12 +1,14 @@
 import { z } from "zod";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
-import { follow } from "@/server/db/schema";
+import { follow, notification, user } from "@/server/db/schema";
+import { NEW_FOLLOWER } from "@/utils/notifications";
+import * as Sentry from "@sentry/nextjs";
 
 export const followRouter = createTRPCRouter({
   follow: protectedProcedure
@@ -18,13 +20,27 @@ export const followRouter = createTRPCRouter({
           message: "You can't follow yourself.",
         });
       }
-      await ctx.db
+      const inserted = await ctx.db
         .insert(follow)
         .values({
           followerId: ctx.session.user.id,
           followingId: input.userId,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: follow.id });
+
+      // Notify the followed user (only on a genuinely new follow).
+      if (inserted.length > 0) {
+        try {
+          await ctx.db.insert(notification).values({
+            type: NEW_FOLLOWER,
+            userId: input.userId,
+            notifierId: ctx.session.user.id,
+          });
+        } catch (error) {
+          Sentry.captureException(error);
+        }
+      }
       return { following: true };
     }),
 
@@ -73,5 +89,43 @@ export const followRouter = createTRPCRouter({
         followers: Number(followers?.c ?? 0),
         following: Number(following?.c ?? 0),
       };
+    }),
+
+  // Users who follow `userId`
+  getFollowers: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+          bio: user.bio,
+        })
+        .from(follow)
+        .innerJoin(user, eq(follow.followerId, user.id))
+        .where(eq(follow.followingId, input.userId))
+        .orderBy(desc(follow.createdAt))
+        .limit(100);
+    }),
+
+  // Users `userId` follows
+  getFollowing: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+          bio: user.bio,
+        })
+        .from(follow)
+        .innerJoin(user, eq(follow.followingId, user.id))
+        .where(eq(follow.followerId, input.userId))
+        .orderBy(desc(follow.createdAt))
+        .limit(100);
     }),
 });

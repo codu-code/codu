@@ -66,8 +66,7 @@ export const notificationRouter = createTRPCRouter({
         where: (notifications, { eq, and, lte }) =>
           and(
             eq(notifications.userId, userId),
-            inArray(notifications.type, [0, 1]),
-            isNotNull(notifications.postId),
+            inArray(notifications.type, [0, 1, 2]),
             isNotNull(notifications.notifierId),
             cursor ? lte(notifications.id, cursor) : undefined,
           ),
@@ -94,8 +93,7 @@ export const notificationRouter = createTRPCRouter({
       .where(
         and(
           eq(notification.userId, userId),
-          inArray(notification.type, [0, 1]),
-          isNotNull(notification.postId),
+          inArray(notification.type, [0, 1, 2]),
           isNotNull(notification.notifierId),
         ),
       );

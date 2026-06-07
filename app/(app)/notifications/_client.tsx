@@ -8,6 +8,7 @@ import Link from "next/link";
 import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
+  NEW_FOLLOWER,
 } from "@/utils/notifications";
 import PageHeading from "@/components/PageHeading/PageHeading";
 import { api } from "@/server/trpc/react";
@@ -103,7 +104,10 @@ const Notifications = () => {
               return (
                 <Fragment key={page.nextCursor ?? "lastPage"}>
                   {page.data.map(({ id, createdAt, type, post, notifier }) => {
-                    if (!post || !notifier) return null;
+                    if (!notifier) return null;
+                    const isFollow = type === NEW_FOLLOWER;
+                    // Comment notifications need a post; follows don't.
+                    if (!isFollow && !post) return null;
 
                     const dateTime = Temporal.Instant.from(
                       new Date(createdAt).toISOString(),
@@ -133,6 +137,7 @@ const Notifications = () => {
                       ![
                         NEW_COMMENT_ON_YOUR_POST,
                         NEW_REPLY_TO_YOUR_COMMENT,
+                        NEW_FOLLOWER,
                       ].includes(type)
                     )
                       return null;
@@ -164,15 +169,18 @@ const Notifications = () => {
                                     "started a discussion on your post:"}
                                   {type === NEW_REPLY_TO_YOUR_COMMENT &&
                                     "replied to your comment on:"}
+                                  {isFollow && "started following you."}
                                 </p>
-                                <p>
-                                  <Link
-                                    className="text-lg font-semibold underline"
-                                    href={`articles/${post.slug}`}
-                                  >
-                                    {post.title}
-                                  </Link>
-                                </p>
+                                {!isFollow && post && (
+                                  <p>
+                                    <Link
+                                      className="text-lg font-semibold underline"
+                                      href={`articles/${post.slug}`}
+                                    >
+                                      {post.title}
+                                    </Link>
+                                  </p>
+                                )}
                                 <time className="text-sm text-neutral-500">
                                   {readableDate}
                                 </time>

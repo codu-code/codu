@@ -2,8 +2,8 @@ import { z } from "zod";
 import { nanoid } from "nanoid";
 import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-import { point_event, user } from "@/server/db/schema";
-import { getStreak } from "@/server/lib/engagement";
+import { point_event, user, badge } from "@/server/db/schema";
+import { getStreak, getUserBadges } from "@/server/lib/engagement";
 
 export const engagementRouter = createTRPCRouter({
   // The signed-in user's streak + total points (personal, never empty-feeling).
@@ -21,6 +21,41 @@ export const engagementRouter = createTRPCRouter({
       points: Number(pts?.total ?? 0),
     };
   }),
+
+  // Public achievements for a profile: streak, points, earned + locked badges.
+  profileEngagement: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const [pts] = await ctx.db
+        .select({
+          total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
+        })
+        .from(point_event)
+        .where(eq(point_event.userId, input.userId));
+      const streak = await getStreak(input.userId);
+      const earned = await getUserBadges(input.userId);
+      const all = await ctx.db
+        .select({
+          key: badge.key,
+          name: badge.name,
+          description: badge.description,
+          emoji: badge.emoji,
+        })
+        .from(badge)
+        .orderBy(badge.id);
+      const earnedMap = new Map(earned.map((e) => [e.key, e.awardedAt]));
+      const badges = all.map((b) => ({
+        ...b,
+        earned: earnedMap.has(b.key),
+        awardedAt: earnedMap.get(b.key) ?? null,
+      }));
+      return {
+        points: Number(pts?.total ?? 0),
+        currentStreak: streak?.currentStreak ?? 0,
+        longestStreak: streak?.longestStreak ?? 0,
+        badges,
+      };
+    }),
 
   // The signed-in user's referral code + how many they've brought in.
   myReferral: protectedProcedure.query(async ({ ctx }) => {
