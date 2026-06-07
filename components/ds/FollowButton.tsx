@@ -38,7 +38,7 @@ export function FollowButton({ userId }: { userId: string }) {
         "rounded-full px-5 py-1.5 text-sm font-semibold transition-colors disabled:opacity-60",
         isFollowing
           ? "border border-hairline text-fg hover:border-accent/50"
-          : "bg-accent text-black hover:bg-accent-soft",
+          : "bg-accent text-on-accent hover:bg-accent-soft",
       )}
     >
       {isFollowing ? "Following" : "Follow"}

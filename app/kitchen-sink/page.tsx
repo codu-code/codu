@@ -80,18 +80,52 @@ export default function DesignSystemPage() {
 
         {/* ═══ FOUNDATIONS ═══ */}
         <Section n="01" title="Color">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <p className="-mt-3 mb-4 font-mono text-xs uppercase tracking-[0.18em] text-faint">
+            Surface ladder
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <Swatch name="canvas" value="#0a0b0e" />
             <Swatch name="surface" value="#121419" />
             <Swatch name="elevated" value="#181b22" />
+            <Swatch name="hover" value="#1d212a" />
+            <Swatch name="inset" value="#08090c" />
             <Swatch name="hairline" value="#242832" />
+          </div>
+          <p className="mb-4 mt-8 font-mono text-xs uppercase tracking-[0.18em] text-faint">
+            Accent &amp; text
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <Swatch name="accent · mint" value="#2dd4bf" />
+            <Swatch name="accent-soft" value="#6ee7d6" />
+            <Swatch name="on-accent" value="#04221d" />
+            <Swatch name="fg" value="#f4f6f8" />
+            <Swatch name="muted" value="#9aa3b0" />
+            <Swatch name="faint (AA)" value="#757e8c" />
+          </div>
+          <p className="mb-4 mt-8 font-mono text-xs uppercase tracking-[0.18em] text-faint">
+            Status (low-chroma) — wash via opacity modifier
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              ["success", "bg-success", "text-success"],
+              ["warning", "bg-warning", "text-warning"],
+              ["danger", "bg-danger", "text-danger"],
+              ["info", "bg-info", "text-info"],
+            ].map(([name, bg, fg]) => (
+              <div key={name} className="flex flex-col gap-2">
+                <div className={`flex h-20 items-center justify-center rounded-lg ${bg}/12`}>
+                  <span className={`h-6 w-6 rounded-full ${bg}`} />
+                </div>
+                <div className={`font-mono text-xs ${fg}`}>{name}</div>
+              </div>
+            ))}
           </div>
           <p className="mt-6 text-sm text-muted">
             Used via theme classes: <code className="font-mono text-accent-soft">bg-surface</code>,{" "}
             <code className="font-mono text-accent-soft">text-fg</code>,{" "}
             <code className="font-mono text-accent-soft">text-accent</code>,{" "}
-            <code className="font-mono text-accent-soft">border-hairline</code> — no
+            <code className="font-mono text-accent-soft">border-hairline</code>,{" "}
+            <code className="font-mono text-accent-soft">bg-success/12</code> — no
             inline colors.
           </p>
         </Section>
@@ -169,7 +203,7 @@ export default function DesignSystemPage() {
         <Section n="06" title="Card — job listing">
           <div className="rounded-xl border border-hairline bg-surface p-5">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-lg font-bold text-black">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-lg font-bold text-on-accent">
                 A
               </div>
               <div className="flex-1">
@@ -214,6 +248,58 @@ export default function DesignSystemPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </Section>
+
+        <Section n="08" title="Elevation & radii">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              ["shadow-sm", "shadow-sm"],
+              ["shadow-md", "shadow-md"],
+              ["shadow-lg", "shadow-lg"],
+              ["shadow-glow", "shadow-glow"],
+            ].map(([name, cls]) => (
+              <div
+                key={name}
+                className={`flex h-24 items-center justify-center rounded-lg border border-hairline bg-surface font-mono text-xs text-muted ${cls}`}
+              >
+                {name}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap items-end gap-4">
+            {[
+              ["sm·6", "rounded-sm"],
+              ["md·8", "rounded-md"],
+              ["lg·12", "rounded-lg"],
+              ["xl·16", "rounded-xl"],
+              ["2xl·22", "rounded-2xl"],
+            ].map(([name, cls]) => (
+              <div key={name} className="flex flex-col items-center gap-2">
+                <div className={`h-16 w-16 border border-strong bg-elevated ${cls}`} />
+                <span className="font-mono text-xs text-faint">{name}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section n="09" title="Toggle (mint switch)">
+          <div className="flex items-center gap-6">
+            <span
+              role="switch"
+              aria-checked="true"
+              className="relative inline-flex h-[23px] w-10 items-center rounded-full bg-accent"
+            >
+              <span className="absolute left-5 top-[3px] h-[17px] w-[17px] rounded-full bg-on-accent" />
+            </span>
+            <span
+              role="switch"
+              aria-checked="false"
+              className="relative inline-flex h-[23px] w-10 items-center rounded-full bg-elevated"
+            >
+              <span className="absolute left-[3px] top-[3px] h-[17px] w-[17px] rounded-full bg-faint" />
+            </span>
+            <span className="font-mono text-xs text-faint">on / off</span>
           </div>
         </Section>
 

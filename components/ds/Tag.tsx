@@ -4,7 +4,7 @@ type TagVariant = "default" | "accent" | "soft";
 
 const variants: Record<TagVariant, string> = {
   default: "border border-hairline text-muted",
-  accent: "bg-accent text-black font-semibold",
+  accent: "bg-accent text-on-accent font-semibold",
   soft: "bg-accent/10 text-accent-soft",
 };
 

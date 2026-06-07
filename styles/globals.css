@@ -6,27 +6,61 @@
    (e.g. bg-surface/60). Dark-first: .dark holds the canonical palette.
    ─────────────────────────────────────────────────────────── */
 :root {
+  /* Surfaces */
   --color-canvas: 255 255 255;
   --color-surface: 246 247 249;
   --color-elevated: 255 255 255;
+  --color-hover: 240 242 245;
+  --color-inset: 244 246 248;
+  /* Borders */
   --color-hairline: 228 231 236;
+  --color-strong: 203 208 216;
+  /* Text */
   --color-fg: 10 11 14;
   --color-muted: 91 100 114;
-  --color-faint: 154 164 178;
-  --color-accent: 13 148 136; /* teal-600, darker for contrast on light */
+  --color-faint: 117 126 140;
+  /* Accent (teal-600, darker for contrast on light) */
+  --color-accent: 13 148 136;
   --color-accent-soft: 20 184 166;
+  --color-on-accent: 4 34 29;
+  /* Status */
+  --color-success: 5 150 105;
+  --color-warning: 217 119 6;
+  --color-danger: 220 38 38;
+  --color-info: 37 99 235;
+
+  /* Composed, theme-independent (mint glow halo + soft/sparse shadow ladder) */
+  --ring-focus: 0 0 0 3px rgb(var(--color-accent) / 0.16);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --shadow-lg: 0 24px 60px -20px rgb(0 0 0 / 0.7);
+  --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.65);
+  --shadow-glow: 0 0 0 1px rgb(45 212 191 / 0.4), 0 8px 32px -8px rgb(45 212 191 / 0.35);
 }
 
 .dark {
+  /* Surfaces — the cool near-black canvas ladder */
   --color-canvas: 10 11 14; /* #0a0b0e */
   --color-surface: 18 20 25; /* #121419 */
   --color-elevated: 24 27 34; /* #181b22 */
+  --color-hover: 29 33 42; /* #1d212a */
+  --color-inset: 8 9 12; /* #08090c — darker than canvas: wells, code blocks */
+  /* Borders */
   --color-hairline: 36 40 50; /* #242832 */
-  --color-fg: 243 246 249; /* #f3f6f9 */
-  --color-muted: 154 164 178; /* #9aa4b2 */
-  --color-faint: 91 100 114; /* #5b6472 */
-  --color-accent: 45 212 191; /* #2dd4bf mint */
-  --color-accent-soft: 94 234 212; /* #5eead4 */
+  --color-strong: 47 52 64; /* #2f3440 */
+  /* Text */
+  --color-fg: 244 246 248; /* #f4f6f8 — cool white, never pure #fff */
+  --color-muted: 154 163 176; /* #9aa3b0 */
+  --color-faint: 117 126 140; /* #757e8c — set for WCAG AA (>=4.5:1) on canvas & surface */
+  /* Accent: Mint */
+  --color-accent: 45 212 191; /* #2dd4bf */
+  --color-accent-soft: 110 231 214; /* #6ee7d6 — mint text on dark */
+  --color-on-accent: 4 34 29; /* #04221d — near-black text on a mint fill */
+  /* Status — low-chroma to sit calmly on dark */
+  --color-success: 52 211 153; /* #34d399 */
+  --color-warning: 245 181 68; /* #f5b544 */
+  --color-danger: 244 115 107; /* #f4736b */
+  --color-info: 95 168 245; /* #5fa8f5 */
 }
 
 html {
@@ -46,30 +80,43 @@ body {
 @tailwind utilities;
 
 @layer base {
-  .old-input [type="text"]:not(#article-title),
-  .old-input [type="email"],
-  .old-input [type="url"],
-  .old-input [type="password"],
-  .old-input [type="number"],
-  .old-input [type="date"],
-  .old-input [type="datetime-local"],
-  .old-input [type="month"],
-  .old-input [type="tel"],
-  .old-input [type="time"],
-  .old-input [type="week"],
-  .old-input [multiple],
-  .old-input textarea:not(#article-content),
-  .old-input select {
-    @apply mt-1 block w-full border px-2 py-2 text-black shadow-sm ring-offset-1 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:border-white dark:bg-black dark:text-white sm:text-sm;
+  /* Headlines use the display family by default (Bricolage Grotesque). */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-extrabold tracking-tight;
+    text-wrap: balance;
   }
 
-  .old-input a {
-    @apply focus-style;
+  /* Keyboard focus — a visible mint ring on every interactive element.
+     :where() keeps specificity 0; the dark canvas offset matches the shell. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-canvas;
   }
 
-  .old-input label {
-    @apply block text-sm font-medium text-neutral-900 dark:text-white;
+  ::selection {
+    background: rgb(var(--color-accent) / 0.16);
   }
+
+  /* Placeholders use faint, not the browser's muddy grey. */
+  ::placeholder {
+    color: rgb(var(--color-faint));
+    opacity: 1;
+  }
+}
+
+/* ── Eyebrow / kicker: the signature mono "// label" device ── */
+.eyebrow {
+  @apply font-mono text-xs uppercase tracking-label text-accent;
+}
+.eyebrow .slash {
+  @apply text-faint;
+}
+
+/* ── Workhorse card: surface fill, hairline border, no shadow by default ── */
+.card {
+  @apply rounded-lg border border-hairline bg-surface p-5;
 }
 
 .nav-button {
@@ -81,11 +128,15 @@ body {
 }
 
 .primary-button {
-  @apply inline-flex justify-center rounded-md bg-accent px-4 py-2 font-semibold text-black shadow-sm transition-colors hover:bg-accent-soft focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-canvas disabled:bg-neutral-600 disabled:text-neutral-300 disabled:hover:bg-neutral-600;
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-[1.125rem] py-2.5 text-sm font-semibold text-on-accent transition-colors duration-base ease-out hover:bg-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px disabled:bg-neutral-600 disabled:text-neutral-300 disabled:hover:bg-neutral-600;
 }
 
 .secondary-button {
-  @apply inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-800 shadow-sm transition-colors hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 dark:border-hairline dark:bg-elevated dark:text-fg dark:hover:bg-surface;
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-strong bg-transparent px-[1.125rem] py-2.5 text-sm font-semibold text-fg transition-colors duration-base ease-out hover:border-faint hover:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px;
+}
+
+.ghost-button {
+  @apply inline-flex items-center gap-1.5 whitespace-nowrap bg-transparent font-mono text-sm font-semibold text-accent transition-colors duration-base ease-out hover:text-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
 }
 
 .dropdown-button {
