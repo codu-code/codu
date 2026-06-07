@@ -87,7 +87,7 @@ const FeedFilters = ({
       {/* Content Type Dropdown */}
       {showTypeFilter && onTypeChange && (
         <Menu as="div" className="relative" data-testid="type-filter">
-          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 sm:px-3">
+          <MenuButton className="flex items-center gap-1 rounded-lg border border-hairline bg-surface px-2 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated sm:px-3">
             <currentType.icon className="h-4 w-4" />
             <span>{currentType.label}</span>
             <ChevronDownIcon className="h-4 w-4" />
@@ -101,7 +101,7 @@ const FeedFilters = ({
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <MenuItems className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
+            <MenuItems className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-surface shadow-lg ring-1 ring-hairline focus:outline-none">
               <div className="py-1">
                 {typeOptions.map((option) => (
                   <MenuItem key={option.value || "all"}>
@@ -110,8 +110,8 @@ const FeedFilters = ({
                         onClick={() => onTypeChange(option.value)}
                         className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm ${
                           focus
-                            ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                            : "text-neutral-700 dark:text-neutral-200"
+                            ? "bg-elevated text-fg"
+                            : "text-muted"
                         } ${
                           type === option.value
                             ? "font-medium text-accent dark:text-accent"
@@ -132,7 +132,7 @@ const FeedFilters = ({
 
       {/* Sort Dropdown */}
       <Menu as="div" className="relative" data-testid="sort-filter">
-        <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 sm:px-3">
+        <MenuButton className="flex items-center gap-1 rounded-lg border border-hairline bg-surface px-2 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated sm:px-3">
           <currentSort.icon className="h-4 w-4" />
           <span>{currentSort.label}</span>
           <ChevronDownIcon className="h-4 w-4" />
@@ -146,7 +146,7 @@ const FeedFilters = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <MenuItems className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
+          <MenuItems className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-surface shadow-lg ring-1 ring-hairline focus:outline-none">
             <div className="py-1">
               {sortOptions.map((option) => (
                 <MenuItem key={option.value}>
@@ -155,8 +155,8 @@ const FeedFilters = ({
                       onClick={() => onSortChange(option.value)}
                       className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm ${
                         focus
-                          ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                          : "text-neutral-700 dark:text-neutral-200"
+                          ? "bg-elevated text-fg"
+                          : "text-muted"
                       } ${
                         sort === option.value
                           ? "font-medium text-accent dark:text-accent"
@@ -177,8 +177,8 @@ const FeedFilters = ({
       {/* Category Dropdown */}
       {categories.length > 0 && (
         <Menu as="div" className="relative" data-testid="topic-filter">
-          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 sm:px-3">
-            <span>{category || "All Topics"}</span>
+          <MenuButton className="flex items-center gap-1 rounded-lg border border-hairline bg-surface px-2 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated sm:px-3">
+            <span>{category || "Topics"}</span>
             <ChevronDownIcon className="h-4 w-4" />
           </MenuButton>
           <Transition
@@ -190,7 +190,7 @@ const FeedFilters = ({
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <MenuItems className="absolute right-0 z-10 mt-2 max-h-60 w-44 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
+            <MenuItems className="absolute right-0 z-10 mt-2 max-h-60 w-44 origin-top-right overflow-y-auto rounded-md bg-surface shadow-lg ring-1 ring-hairline focus:outline-none">
               <div className="py-1">
                 <MenuItem>
                   {({ focus }) => (
@@ -198,8 +198,8 @@ const FeedFilters = ({
                       onClick={() => onCategoryChange(null)}
                       className={`block w-full px-4 py-2 text-left text-sm ${
                         focus
-                          ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                          : "text-neutral-700 dark:text-neutral-200"
+                          ? "bg-elevated text-fg"
+                          : "text-muted"
                       } ${!category ? "font-medium text-accent dark:text-accent" : ""}`}
                     >
                       All Topics
@@ -213,8 +213,8 @@ const FeedFilters = ({
                         onClick={() => onCategoryChange(cat)}
                         className={`block w-full px-4 py-2 text-left text-sm capitalize ${
                           focus
-                            ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                            : "text-neutral-700 dark:text-neutral-200"
+                            ? "bg-elevated text-fg"
+                            : "text-muted"
                         } ${
                           category === cat
                             ? "font-medium text-accent dark:text-accent"

@@ -85,10 +85,10 @@ const SavedItemCard = ({
   const displayInitial = displayName?.charAt(0).toUpperCase() || "?";
 
   return (
-    <article className="group relative rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600">
+    <article className="group relative rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-hairline border-hairline bg-surface hover:border-accent/50">
       <Link href={cardUrl} className="block">
         {/* Attribution row */}
-        <div className="mb-1.5 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+        <div className="mb-1.5 flex items-center gap-1.5 text-xs text-muted">
           {displayImage ? (
             <img
               src={displayImage}
@@ -102,16 +102,16 @@ const SavedItemCard = ({
           )}
           {type === "POST" ? (
             <span>
-              <span className="font-medium text-neutral-700 dark:text-neutral-300">
+              <span className="font-medium text-muted">
                 {authorName}
               </span>
             </span>
           ) : (
             <span>
-              <span className="text-neutral-400 dark:text-neutral-500">
+              <span className="text-faint">
                 In{" "}
               </span>
-              <span className="font-medium text-neutral-700 dark:text-neutral-300">
+              <span className="font-medium text-muted">
                 {sourceName}
               </span>
             </span>
@@ -130,7 +130,7 @@ const SavedItemCard = ({
         </div>
 
         {/* Title */}
-        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-neutral-900 group-hover:text-neutral-700 dark:text-neutral-100 dark:group-hover:text-neutral-200">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-fg group-hover:text-muted">
           {title}
         </h3>
       </Link>
@@ -143,7 +143,7 @@ const SavedItemCard = ({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute right-2 top-2 rounded p-1 text-neutral-400 opacity-0 transition-opacity hover:bg-neutral-100 hover:text-neutral-600 group-hover:opacity-100 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+          className="absolute right-2 top-2 rounded p-1 text-faint opacity-0 transition-opacity hover:bg-elevated hover:text-muted group-hover:opacity-100"
           aria-label="Remove saved item"
         >
           <svg

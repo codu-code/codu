@@ -19,7 +19,7 @@ export function PopularTagsSidebar({
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="h-8 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
+            className="h-8 animate-pulse rounded bg-elevated"
           />
         ))}
       </div>
@@ -56,7 +56,7 @@ export function PopularTagsSidebar({
             className={`group flex items-center gap-1.5 rounded border px-3 py-1.5 text-sm transition-colors ${
               selectedTag === tag.slug
                 ? "border-accent bg-accent/10 text-accent dark:border-accent dark:bg-accent/15 dark:text-accent"
-                : "border-neutral-300 bg-white text-neutral-700 hover:border-neutral-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:border-neutral-500"
+                : "border-hairline bg-surface text-muted hover:border-accent/50"
             }`}
           >
             <span>{tag.title}</span>
@@ -65,7 +65,7 @@ export function PopularTagsSidebar({
                 className={`text-xs ${
                   selectedTag === tag.slug
                     ? "text-accent dark:text-accent"
-                    : "text-neutral-400 dark:text-neutral-500"
+                    : "text-faint"
                 }`}
               >
                 {formatCount(tag.postCount)}

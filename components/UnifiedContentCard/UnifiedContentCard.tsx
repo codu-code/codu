@@ -238,16 +238,16 @@ const UnifiedContentCard = ({
 
   return (
     <article
-      className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
+      className="group my-2 rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-hairline border-hairline bg-surface hover:border-accent/50"
       data-testid="content-card"
     >
       {/* Meta info row */}
-      <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
         {/* Author/Source info - show author for content with valid author username */}
         {author?.username ? (
           <Link
             href={`/${author.username}`}
-            className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
+            className="flex items-center gap-1.5 hover:text-fg"
           >
             {author.image ? (
               <img
@@ -266,7 +266,7 @@ const UnifiedContentCard = ({
           source.slug ? (
             <Link
               href={`/${source.slug}`}
-              className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
+              className="flex items-center gap-1.5 hover:text-fg"
             >
               {source.logo ? (
                 <img
@@ -341,7 +341,7 @@ const UnifiedContentCard = ({
         {type === "LINK" && hostname && (
           <>
             <span aria-hidden="true">·</span>
-            <span className="text-neutral-400">{hostname}</span>
+            <span className="text-faint">{hostname}</span>
           </>
         )}
       </div>
@@ -355,7 +355,7 @@ const UnifiedContentCard = ({
             onClick={type === "LINK" ? handleExternalClick : undefined}
             className="block"
           >
-            <h2 className="mb-1 line-clamp-2 text-base font-semibold leading-tight text-neutral-900 hover:underline dark:text-neutral-100">
+            <h2 className="mb-1 line-clamp-2 text-base font-semibold leading-tight text-fg hover:underline">
               {title}
             </h2>
           </Link>
@@ -373,7 +373,7 @@ const UnifiedContentCard = ({
             </a>
           )}
           {excerpt && (
-            <p className="line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="line-clamp-2 text-sm text-muted">
               {excerpt}
             </p>
           )}
@@ -404,14 +404,14 @@ const UnifiedContentCard = ({
       {/* Action bar */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {/* Vote buttons */}
-        <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
+        <div className="flex items-center rounded-full border border-hairline">
           <button
             onClick={() => handleVote(userVote === "up" ? null : "up")}
             disabled={voteStatus === "pending"}
-            className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
+            className={`rounded-l-full p-1 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
               userVote === "up"
                 ? "text-green-500"
-                : "text-neutral-400 dark:text-neutral-500"
+                : "text-faint"
             }`}
             aria-label="Upvote"
           >
@@ -423,7 +423,7 @@ const UnifiedContentCard = ({
                 ? "text-green-500"
                 : score < 0
                   ? "text-red-500"
-                  : "text-neutral-400 dark:text-neutral-500"
+                  : "text-faint"
             }`}
           >
             {score}
@@ -431,10 +431,10 @@ const UnifiedContentCard = ({
           <button
             onClick={() => handleVote(userVote === "down" ? null : "down")}
             disabled={voteStatus === "pending"}
-            className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
+            className={`rounded-r-full p-1 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
               userVote === "down"
                 ? "text-red-500"
-                : "text-neutral-400 dark:text-neutral-500"
+                : "text-faint"
             }`}
             aria-label="Downvote"
           >
@@ -445,7 +445,7 @@ const UnifiedContentCard = ({
         {/* Comments */}
         <Link
           href={`${cardUrl}#discussion`}
-          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-neutral-500 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-muted transition-colors hover:bg-elevated dark:text-faint"
         >
           <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
           <span>{discussionCount}</span>
@@ -458,7 +458,7 @@ const UnifiedContentCard = ({
           className={`flex items-center gap-1 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
             isBookmarked
               ? "text-blue-500"
-              : "text-neutral-400 hover:bg-neutral-100 dark:text-neutral-500 dark:hover:bg-neutral-800"
+              : "text-faint hover:bg-elevated dark:text-muted"
           }`}
           aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"}
           data-testid="bookmark-button"
@@ -477,7 +477,7 @@ const UnifiedContentCard = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleExternalClick}
-            className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-xs text-neutral-500 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-xs text-muted transition-colors hover:bg-elevated dark:text-faint"
           >
             <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Open</span>

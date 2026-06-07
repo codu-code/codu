@@ -171,12 +171,12 @@ const ArticleCard = ({
   const score = votes.upvotes - votes.downvotes;
 
   return (
-    <article className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600">
+    <article className="group my-2 rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-hairline border-hairline bg-surface hover:border-accent/50">
       {/* Header row - author and metadata */}
-      <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
+      <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted">
         <Link
           href={`/${username}`}
-          className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
+          className="flex items-center gap-1.5 hover:text-fg"
         >
           <img
             src={image}
@@ -199,7 +199,7 @@ const ArticleCard = ({
       <h2 className="mb-1">
         <Link
           href={`/${username}/${slug}`}
-          className="text-lg font-semibold leading-snug text-neutral-900 hover:underline dark:text-neutral-100 sm:text-xl"
+          className="text-lg font-semibold leading-snug text-fg hover:underline sm:text-xl"
         >
           {title}
         </Link>
@@ -207,7 +207,7 @@ const ArticleCard = ({
 
       {/* Excerpt */}
       {excerpt && (
-        <p className="mb-3 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mb-3 line-clamp-2 text-sm text-muted">
           {excerpt}
         </p>
       )}
@@ -215,14 +215,14 @@ const ArticleCard = ({
       {/* Action bar */}
       <div className="flex items-center gap-1.5">
         {/* Vote buttons */}
-        <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
+        <div className="flex items-center rounded-full border border-hairline">
           <button
             onClick={() => handleVote(userVote === "up" ? null : "up")}
             disabled={voteStatus === "pending"}
-            className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
+            className={`rounded-l-full p-1 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
               userVote === "up"
                 ? "text-green-500"
-                : "text-neutral-400 dark:text-neutral-500"
+                : "text-faint"
             }`}
             aria-label="Upvote"
           >
@@ -234,7 +234,7 @@ const ArticleCard = ({
                 ? "text-green-500"
                 : score < 0
                   ? "text-red-500"
-                  : "text-neutral-400 dark:text-neutral-500"
+                  : "text-faint"
             }`}
           >
             {score}
@@ -242,10 +242,10 @@ const ArticleCard = ({
           <button
             onClick={() => handleVote(userVote === "down" ? null : "down")}
             disabled={voteStatus === "pending"}
-            className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
+            className={`rounded-r-full p-1 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
               userVote === "down"
                 ? "text-red-500"
-                : "text-neutral-400 dark:text-neutral-500"
+                : "text-faint"
             }`}
             aria-label="Downvote"
           >
@@ -256,7 +256,7 @@ const ArticleCard = ({
         {/* Comments button */}
         <Link
           href={`/${username}/${slug}#comments`}
-          className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex items-center gap-1 rounded-full border border-hairline px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-elevated border-hairline dark:text-faint"
         >
           <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
           <span>{discussionCount}</span>
@@ -269,7 +269,7 @@ const ArticleCard = ({
           className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
             isBookmarked
               ? "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
-              : "border-neutral-200 text-neutral-500 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+              : "border-hairline text-muted hover:bg-elevated border-hairline dark:text-faint"
           }`}
         >
           {isBookmarked ? (
@@ -285,7 +285,7 @@ const ArticleCard = ({
         {/* Share button */}
         <button
           onClick={handleShare}
-          className="flex items-center gap-1 rounded-full border border-neutral-200 px-2 py-1 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex items-center gap-1 rounded-full border border-hairline px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-elevated border-hairline dark:text-faint"
         >
           <ShareIcon className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Share</span>
@@ -293,7 +293,7 @@ const ArticleCard = ({
 
         {/* Triple-dot menu */}
         <Menu as="div" className="relative">
-          <MenuButton className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300">
+          <MenuButton className="rounded-full p-1 text-faint hover:bg-elevated hover:text-muted">
             <span className="sr-only">More options</span>
             <EllipsisHorizontalIcon className="h-4 w-4" />
           </MenuButton>
@@ -306,11 +306,11 @@ const ArticleCard = ({
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <MenuItems className="absolute bottom-8 right-0 z-10 mt-2 w-40 origin-bottom-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
+            <MenuItems className="absolute bottom-8 right-0 z-10 mt-2 w-40 origin-bottom-right rounded-md bg-surface py-1 shadow-lg ring-1 ring-hairline focus:outline-none">
               <MenuItem>
                 <button
                   onClick={handleShare}
-                  className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                  className="block w-full px-4 py-2 text-left text-sm text-muted hover:bg-elevated"
                 >
                   Copy link
                 </button>
@@ -318,7 +318,7 @@ const ArticleCard = ({
               <MenuItem>
                 <button
                   onClick={handleReport}
-                  className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                  className="block w-full px-4 py-2 text-left text-sm text-muted hover:bg-elevated"
                 >
                   Report
                 </button>
@@ -333,18 +333,18 @@ const ArticleCard = ({
 
 // Loading skeleton
 const ArticleCardLoading = () => (
-  <article className="my-2 rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+  <article className="my-2 rounded-lg border border-hairline bg-surface p-3 border-hairline bg-surface">
     <div className="mb-1.5 flex items-center gap-1.5">
-      <div className="h-5 w-5 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
-      <div className="h-3 w-24 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-      <div className="h-3 w-12 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+      <div className="h-5 w-5 animate-pulse rounded-full bg-elevated" />
+      <div className="h-3 w-24 animate-pulse rounded bg-elevated" />
+      <div className="h-3 w-12 animate-pulse rounded bg-elevated" />
     </div>
-    <div className="mb-1 h-6 w-3/4 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-    <div className="mb-3 h-4 w-full animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+    <div className="mb-1 h-6 w-3/4 animate-pulse rounded bg-elevated" />
+    <div className="mb-3 h-4 w-full animate-pulse rounded bg-elevated" />
     <div className="flex items-center gap-1.5">
-      <div className="h-6 w-20 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
-      <div className="h-6 w-14 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
-      <div className="h-6 w-14 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
+      <div className="h-6 w-20 animate-pulse rounded-full bg-elevated" />
+      <div className="h-6 w-14 animate-pulse rounded-full bg-elevated" />
+      <div className="h-6 w-14 animate-pulse rounded-full bg-elevated" />
     </div>
   </article>
 );
@@ -425,10 +425,10 @@ const ArticlesPage = () => {
     <>
       <div className="mx-2">
         <div className="mt-2 flex max-w-5xl items-center justify-between sm:mx-auto sm:mt-6 sm:max-w-2xl lg:max-w-5xl">
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50">
+          <h1 className="text-2xl font-bold tracking-tight text-fg">
             {typeof tag === "string" ? (
               <div className="flex items-center justify-center">
-                <TagIcon className="mr-3 h-6 w-6 text-neutral-800 dark:text-neutral-200" />
+                <TagIcon className="mr-3 h-6 w-6 text-fg" />
                 {getCamelCaseFromLower(tag)}
               </div>
             ) : (
@@ -499,11 +499,11 @@ const ArticlesPage = () => {
                   );
                 })}
               {status === "success" && !data.pages[0].posts.length && (
-                <div className="mt-8 rounded-lg border border-neutral-200 bg-neutral-50 p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
-                  <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+                <div className="mt-8 rounded-lg border border-hairline bg-surface p-8 text-center">
+                  <h2 className="text-lg font-medium text-fg">
                     No articles found
                   </h2>
-                  <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-2 text-sm text-muted">
                     Check back later for new content.
                   </p>
                 </div>
@@ -526,7 +526,7 @@ const ArticlesPage = () => {
                   <Link
                     key={title}
                     href={`/articles?tag=${title.toLowerCase()}`}
-                    className="rounded border border-neutral-300 bg-white px-6 py-2 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50"
+                    className="rounded border border-hairline bg-surface px-6 py-2 text-fg"
                   >
                     {getCamelCaseFromLower(title)}
                   </Link>
