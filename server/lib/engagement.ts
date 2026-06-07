@@ -1,14 +1,23 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { nanoid } from "nanoid";
 import * as Sentry from "@sentry/nextjs";
 import { db } from "@/server/db";
-import { point_event, user_streak, badge, user_badge } from "@/server/db/schema";
+import {
+  point_event,
+  user_streak,
+  badge,
+  user_badge,
+  user,
+} from "@/server/db/schema";
 
 type PointAction =
   | "post_published"
   | "comment_created"
   | "upvote_received"
   | "daily_active"
-  | "shipped";
+  | "shipped"
+  | "referral";
 
 export const POINTS: Record<PointAction, number> = {
   post_published: 20,
@@ -16,6 +25,7 @@ export const POINTS: Record<PointAction, number> = {
   upvote_received: 2,
   daily_active: 1,
   shipped: 25,
+  referral: 30,
 };
 
 interface AwardInput {
@@ -96,11 +106,16 @@ export async function checkBadges(userId: string): Promise<void> {
         ),
       );
 
+    const [refRow] = await db
+      .select({ c: sql<number>`count(*)` })
+      .from(user)
+      .where(eq(user.invitedBy, userId));
+
     const stats: BadgeStats = {
       points: Number(pts?.total ?? 0),
       longestStreak: streak?.longest ?? 0,
       posts: Number(postRow?.c ?? 0),
-      referrals: 0, // wired in the referral step
+      referrals: Number(refRow?.c ?? 0),
     };
 
     const earnedKeys = BADGE_RULES.filter((r) => r.test(stats)).map(
@@ -137,6 +152,57 @@ export async function getUserBadges(userId: string) {
     .innerJoin(badge, eq(user_badge.badgeId, badge.id))
     .where(eq(user_badge.userId, userId))
     .orderBy(desc(user_badge.awardedAt));
+}
+
+// ── Referrals ──────────────────────────────────────────────────────────────
+/**
+ * Ensure the user has a referral code, and attribute a pending referral from the
+ * `codu_ref` cookie (set on /get-started?ref=). Idempotent + never throws. Call
+ * from a request-scoped server component (the app layout).
+ */
+export async function ensureReferral(userId: string): Promise<void> {
+  try {
+    if (!userId) return;
+    const [u] = await db
+      .select({ referralCode: user.referralCode, invitedBy: user.invitedBy })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+    if (!u) return;
+
+    if (!u.referralCode) {
+      await db
+        .update(user)
+        .set({ referralCode: nanoid(8) })
+        .where(eq(user.id, userId));
+    }
+
+    if (!u.invitedBy) {
+      const ref = (await cookies()).get("codu_ref")?.value;
+      if (ref) {
+        const [referrer] = await db
+          .select({ id: user.id })
+          .from(user)
+          .where(eq(user.referralCode, ref))
+          .limit(1);
+        if (referrer && referrer.id !== userId) {
+          await db
+            .update(user)
+            .set({ invitedBy: referrer.id })
+            .where(eq(user.id, userId));
+          await award({
+            userId: referrer.id,
+            action: "referral",
+            sourceType: "user",
+            sourceId: userId,
+          });
+          await checkBadges(referrer.id);
+        }
+      }
+    }
+  } catch (error) {
+    Sentry.captureException(error);
+  }
 }
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);

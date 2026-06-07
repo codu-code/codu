@@ -4,7 +4,7 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eyebrow } from "@/components/ds";
 
 const GitHubIcon = () => (
@@ -32,6 +32,14 @@ const GetStarted: NextPage = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const redirectTo =
     typeof callbackUrl === "string" ? callbackUrl : "/articles";
+
+  // Capture a referral code (?ref=) so the referrer gets credited on signup.
+  useEffect(() => {
+    const ref = searchParams?.get("ref");
+    if (ref) {
+      document.cookie = `codu_ref=${encodeURIComponent(ref)}; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`;
+    }
+  }, [searchParams]);
 
   return (
     <div className="w-full max-w-sm">

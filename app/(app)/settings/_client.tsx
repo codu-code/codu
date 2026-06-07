@@ -24,6 +24,7 @@ import {
 import { Textarea } from "@/components/ui-components/textarea";
 import { Switch } from "@/components/ui-components/switch";
 import { Divider } from "@/components/ui-components/divider";
+import { ReferralCard } from "@/components/ds";
 import { Text } from "@/components/ui-components/text";
 import { useTheme } from "next-themes";
 
@@ -430,6 +431,21 @@ const Settings = ({ profile }: { profile: User }) => {
             checked={weeklyNewsletter}
             onChange={setWeeklyNewsletter}
           />
+        </Field>
+      </section>
+
+      <Divider className="my-10" soft />
+
+      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Subheading level={2}>Invite friends</Subheading>
+          <Text>
+            Share Codú and earn points + the Connector badge for every builder
+            who joins.
+          </Text>
+        </div>
+        <Field>
+          <ReferralCard />
         </Field>
       </section>
 

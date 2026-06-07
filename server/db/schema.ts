@@ -86,6 +86,7 @@ export const pointAction = pgEnum("point_action", [
   "upvote_received",
   "daily_active",
   "shipped",
+  "referral",
 ]);
 
 // Legacy enums (kept for backward compatibility during migration)
@@ -185,6 +186,9 @@ export const user = pgTable(
     levelOfStudy: text("levelOfStudy"),
     course: text("course"),
     role: role("role").default("USER").notNull(),
+    // Referral loop
+    referralCode: varchar("referral_code", { length: 16 }),
+    invitedBy: text("invited_by"),
   },
   (table) => {
     return {
@@ -192,6 +196,10 @@ export const user = pgTable(
       emailKey: uniqueIndex("User_email_key").on(table.email),
       usernameIdIdx: index("User_username_id_idx").on(table.id, table.username),
       usernameIndex: index("User_username_index").on(table.username),
+      referralCodeKey: uniqueIndex("User_referral_code_key").on(
+        table.referralCode,
+      ),
+      invitedByIdx: index("User_invited_by_idx").on(table.invitedBy),
     };
   },
 );

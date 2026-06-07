@@ -6,7 +6,7 @@ import { user } from "@/server/db/schema";
 import { SidebarAppLayout } from "@/components/Layout/SidebarAppLayout";
 import { JsonLd } from "@/components/JsonLd";
 import { getOrganizationSchema } from "@/lib/structured-data";
-import { recordDailyActivity } from "@/server/lib/engagement";
+import { recordDailyActivity, ensureReferral } from "@/server/lib/engagement";
 
 export const metadata = {
   title: "Codú — Build and ship with AI, together",
@@ -79,9 +79,11 @@ export default async function RootLayout({
       })
     : null;
 
-  // Roll the daily-activity streak forward (idempotent per day, never throws).
+  // Roll the daily-activity streak forward + ensure/attribute referral
+  // (both idempotent, never throw).
   if (session?.user?.id) {
     await recordDailyActivity(session.user.id);
+    await ensureReferral(session.user.id);
   }
 
   return (

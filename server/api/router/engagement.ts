@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nanoid } from "nanoid";
 import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { point_event, user } from "@/server/db/schema";
@@ -19,6 +20,29 @@ export const engagementRouter = createTRPCRouter({
       longestStreak: streak?.longestStreak ?? 0,
       points: Number(pts?.total ?? 0),
     };
+  }),
+
+  // The signed-in user's referral code + how many they've brought in.
+  myReferral: protectedProcedure.query(async ({ ctx }) => {
+    const uid = ctx.session.user.id;
+    const [u] = await ctx.db
+      .select({ code: user.referralCode })
+      .from(user)
+      .where(eq(user.id, uid))
+      .limit(1);
+    let code = u?.code ?? null;
+    if (!code) {
+      code = nanoid(8);
+      await ctx.db
+        .update(user)
+        .set({ referralCode: code })
+        .where(eq(user.id, uid));
+    }
+    const [cnt] = await ctx.db
+      .select({ c: sql<number>`count(*)` })
+      .from(user)
+      .where(eq(user.invitedBy, uid));
+    return { code, count: Number(cnt?.c ?? 0) };
   }),
 
   // Build Board — ranked builders by points over a window.
