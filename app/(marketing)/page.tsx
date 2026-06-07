@@ -4,7 +4,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { posts, feed_sources } from "@/server/db/schema";
 import { Eyebrow } from "@/components/ds";
-import { HeroBackdrop } from "@/components/marketing/HeroBackdrop";
+import { GradientBlinds } from "@/components/marketing/GradientBlinds";
 
 export const metadata: Metadata = {
   title: "Codú — The community for AI builders & indie hackers",
@@ -68,8 +68,25 @@ export default async function HomePage() {
   return (
     <>
       {/* ───────── Hero ───────── */}
-      <section className="relative overflow-hidden">
-        <HeroBackdrop />
+      <section className="relative overflow-hidden border-b border-hairline">
+        <GradientBlinds
+          className="opacity-60"
+          gradientColors={["#0a0b0e", "#134e48", "#2dd4bf"]}
+          angle={20}
+          noise={0.1}
+          blindCount={10}
+          blindMinWidth={90}
+          spotlightRadius={0.6}
+          spotlightSoftness={1.2}
+          spotlightOpacity={0.5}
+          mouseDampening={0.15}
+          mixBlendMode="screen"
+        />
+        {/* readability scrim */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-b from-canvas/50 via-canvas/20 to-canvas"
+        />
         <div className="relative mx-auto max-w-4xl px-5 py-28 text-center sm:px-8 sm:py-36">
           <div className="motion-safe:animate-rise [animation-delay:0ms]">
             <Eyebrow className="!text-center">learn · build · ship · grow</Eyebrow>
