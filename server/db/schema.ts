@@ -2128,3 +2128,55 @@ export const userStreakRelations = relations(user_streak, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+// Badges / achievements
+export const badge = pgTable("badge", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 60 }).notNull(),
+  description: text("description").notNull(),
+  emoji: varchar("emoji", { length: 8 }),
+  createdAt: timestamp("created_at", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const user_badge = pgTable(
+  "user_badge",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    badgeId: integer("badge_id")
+      .notNull()
+      .references(() => badge.id, { onDelete: "cascade" }),
+    awardedAt: timestamp("awarded_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    uniq: uniqueIndex("user_badge_user_badge_idx").on(
+      table.userId,
+      table.badgeId,
+    ),
+    userIdx: index("user_badge_user_idx").on(table.userId),
+  }),
+);
+
+export const badgeRelations = relations(badge, ({ many }) => ({
+  userBadges: many(user_badge),
+}));
+
+export const userBadgeRelations = relations(user_badge, ({ one }) => ({
+  user: one(user, { fields: [user_badge.userId], references: [user.id] }),
+  badge: one(badge, { fields: [user_badge.badgeId], references: [badge.id] }),
+}));

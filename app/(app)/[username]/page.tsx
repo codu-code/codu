@@ -9,6 +9,7 @@ import { feed_sources } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { JsonLd } from "@/components/JsonLd";
 import { getPersonSchema } from "@/lib/structured-data";
+import { getUserBadges } from "@/server/lib/engagement";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -129,9 +130,12 @@ export default async function Page(props: {
     const session = await getServerAuthSession();
     const isOwner = session?.user?.id === profile.id;
 
+    const badges = accountLocked ? [] : await getUserBadges(profile.id);
+
     const shapedProfile = {
       ...profile,
       posts: accountLocked ? [] : profile.posts,
+      badges,
       accountLocked,
     };
 

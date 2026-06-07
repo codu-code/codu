@@ -30,6 +30,13 @@ type Props = {
     image: string;
     bio: string;
     websiteUrl: string;
+    badges: {
+      key: string;
+      name: string;
+      description: string;
+      emoji: string | null;
+      awardedAt: string;
+    }[];
   };
 };
 
@@ -51,8 +58,17 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     },
   });
 
-  const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
-    profile;
+  const {
+    name,
+    username,
+    image,
+    bio,
+    posts,
+    websiteUrl,
+    id,
+    accountLocked,
+    badges,
+  } = profile;
 
   const handleBanSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -104,6 +120,19 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   {getDomainFromUrl(websiteUrl)}
                 </p>
               </Link>
+            )}
+            {!accountLocked && badges.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {badges.map((b) => (
+                  <span
+                    key={b.key}
+                    title={b.description}
+                    className="inline-flex items-center gap-1 rounded-full border border-hairline bg-surface px-2.5 py-1 text-xs font-medium text-fg"
+                  >
+                    <span aria-hidden>{b.emoji}</span> {b.name}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         </div>

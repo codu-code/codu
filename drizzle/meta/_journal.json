@@ -155,6 +155,13 @@
       "when": 1780789400625,
       "tag": "0021_clear_rockslide",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1780825783160,
+      "tag": "0022_bumpy_robbie_robertson",
+      "breakpoints": true
     }
   ]
 }
