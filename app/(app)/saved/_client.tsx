@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@/server/trpc/react";
-import PageHeading from "@/components/PageHeading/PageHeading";
 import { SavedItemCard } from "@/components/SavedItemCard";
 
 // Map DB type to frontend type
@@ -34,17 +33,26 @@ const SavedPosts = () => {
 
   return (
     <div className="relative mx-4 max-w-2xl sm:mx-auto">
-      <PageHeading>Saved items</PageHeading>
+      {/* Header */}
+      <div className="mb-6">
+        <p className="eyebrow">
+          <span className="slash">{"// "}</span>
+          {bookmarks.length} saved
+        </p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-fg">
+          Saved
+        </h1>
+      </div>
       <div className="space-y-2">
         {bookmarkStatus === "pending" &&
           Array.from({ length: 7 }, (_, i) => (
             <div
               key={i}
-              className="h-16 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700"
+              className="h-16 animate-pulse rounded-lg bg-elevated"
             />
           ))}
         {bookmarkStatus === "error" && (
-          <p className="py-4 font-medium">
+          <p className="py-4 font-medium text-danger">
             Something went wrong fetching your saved posts... Refresh the page.
           </p>
         )}
@@ -68,9 +76,9 @@ const SavedPosts = () => {
           ))}
 
         {bookmarkStatus === "success" && bookmarks?.length === 0 && (
-          <p className="py-4 font-medium">
-            Your saved posts will show up here.
-          </p>
+          <div className="rounded-lg border border-dashed border-hairline p-12 text-center font-mono text-sm text-faint">
+            {"// "}nothing saved yet — your saved posts will show up here
+          </div>
         )}
       </div>
     </div>

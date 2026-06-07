@@ -11,22 +11,17 @@ import {
   NEW_FOLLOWER,
   POST_APPROVED,
 } from "@/utils/notifications";
-import PageHeading from "@/components/PageHeading/PageHeading";
 import { api } from "@/server/trpc/react";
 
 // Moved outside to avoid "cannot create components during render" error
 const Placeholder = () => (
-  <div className="my-2 w-full rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
+  <div className="flex items-start gap-3 px-5 py-4">
     <div className="animate-pulse">
-      <div className="flex space-x-4">
-        <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-neutral-800"></div>
-        <div className="flex-1 space-y-2 py-1">
-          <div className="grid grid-cols-8 gap-4">
-            <div className="col-span-6 h-4 rounded bg-gray-300 dark:bg-neutral-800"></div>
-            <div className="col-span-3 h-2 rounded bg-gray-300 dark:bg-neutral-800"></div>
-          </div>
-        </div>
-      </div>
+      <div className="h-9 w-9 rounded-full bg-elevated"></div>
+    </div>
+    <div className="flex-1 animate-pulse space-y-2 py-1">
+      <div className="h-3 w-3/4 rounded bg-elevated"></div>
+      <div className="h-2 w-1/3 rounded bg-elevated"></div>
     </div>
   </div>
 );
@@ -74,149 +69,166 @@ const Notifications = () => {
   const noNotifications = !data?.pages[0].data.length;
 
   return (
-    <>
-      <div className="relative mx-4 max-w-2xl sm:mx-auto">
-        <div className="relative mb-4">
-          <PageHeading>Notifications</PageHeading>
-          {!!count && count > 0 && (
-            <button
-              onClick={() => deleteAll()}
-              className="secondary-button absolute right-0 top-0 px-1 py-2 text-sm"
-            >
-              Mark all as read
-            </button>
-          )}
+    <div className="relative mx-4 max-w-2xl sm:mx-auto">
+      {/* Header */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">
+            <span className="slash">{"// "}</span>
+            {count && count > 0 ? `${count} new` : "all caught up"}
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-fg">
+            Notifications
+          </h1>
         </div>
-
-        <section>
-          {status === "error" && (
-            <div>Something went wrong... Please refresh your page.</div>
-          )}
-          {status === "pending" &&
-            Array.from({ length: 7 }, (_, i) => <Placeholder key={i} />)}
-          {status !== "pending" && noNotifications && (
-            <p className="text-lg font-semibold text-neutral-900 dark:text-neutral-50">
-              No new notifications. ✅{" "}
-            </p>
-          )}
-
-          {status === "success" &&
-            data.pages.map((page) => {
-              return (
-                <Fragment key={page.nextCursor ?? "lastPage"}>
-                  {page.data.map(({ id, createdAt, type, post, notifier }) => {
-                    if (!notifier) return null;
-                    const isFollow = type === NEW_FOLLOWER;
-                    // Comment notifications need a post; follows don't.
-                    if (!isFollow && !post) return null;
-
-                    const dateTime = Temporal.Instant.from(
-                      new Date(createdAt).toISOString(),
-                    );
-                    const isCurrentYear =
-                      new Date().getFullYear() ===
-                      new Date(createdAt).getFullYear();
-
-                    const readableDate = dateTime.toLocaleString(
-                      ["en-IE"],
-                      isCurrentYear
-                        ? {
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "numeric",
-                          }
-                        : {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          },
-                    );
-                    const { username, name, image } = notifier;
-                    // Check that we handle the notifications
-                    if (
-                      ![
-                        NEW_COMMENT_ON_YOUR_POST,
-                        NEW_REPLY_TO_YOUR_COMMENT,
-                        NEW_FOLLOWER,
-                        POST_APPROVED,
-                      ].includes(type)
-                    )
-                      return null;
-                    return (
-                      <div key={id}>
-                        <div className="my-2 flex justify-between rounded-lg border border-neutral-200 bg-white p-4 text-neutral-800 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600">
-                          <div>
-                            <div className="flex gap-3 sm:gap-5">
-                              <div>
-                                {image && (
-                                  <Link className="flex" href={`/${username}`}>
-                                    <img
-                                      className="h-10 w-10 rounded-full"
-                                      src={image}
-                                      alt={`${name}'s avatar`}
-                                    />
-                                  </Link>
-                                )}
-                              </div>
-                              <div>
-                                <p className="mb-1">
-                                  <Link
-                                    className="font-semibold underline"
-                                    href={`/${username}`}
-                                  >
-                                    {name}
-                                  </Link>{" "}
-                                  {type === NEW_COMMENT_ON_YOUR_POST &&
-                                    "started a discussion on your post:"}
-                                  {type === NEW_REPLY_TO_YOUR_COMMENT &&
-                                    "replied to your comment on:"}
-                                  {type === POST_APPROVED &&
-                                    "approved your post — it's now live:"}
-                                  {isFollow && "started following you."}
-                                </p>
-                                {!isFollow && post && (
-                                  <p>
-                                    <Link
-                                      className="text-lg font-semibold underline"
-                                      href={`articles/${post.slug}`}
-                                    >
-                                      {post.title}
-                                    </Link>
-                                  </p>
-                                )}
-                                <time className="text-sm text-neutral-500">
-                                  {readableDate}
-                                </time>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="ml-2 flex w-10 flex-col justify-center border-l border-neutral-300 pl-3 dark:border-neutral-700">
-                            <button
-                              title="Mark as read"
-                              className="h-8 w-8 fill-neutral-600 hover:fill-neutral-500 dark:text-white"
-                              onClick={() => mutate({ id })}
-                            >
-                              <CheckCircleIcon
-                                className="h-full w-full fill-inherit"
-                                aria-hidden="true"
-                              />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </Fragment>
-              );
-            })}
-          {isFetchingNextPage ? <Placeholder /> : null}
-          <span className="invisible" ref={ref}>
-            intersection observer marker
-          </span>
-        </section>
+        {!!count && count > 0 && (
+          <button
+            onClick={() => deleteAll()}
+            className="secondary-button text-sm"
+          >
+            Mark all as read
+          </button>
+        )}
       </div>
-    </>
+
+      <section className="mt-6">
+        {status === "error" && (
+          <div className="rounded-lg border border-hairline bg-surface p-4 text-danger">
+            Something went wrong... Please refresh your page.
+          </div>
+        )}
+
+        {status === "pending" && (
+          <div className="divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
+            {Array.from({ length: 7 }, (_, i) => (
+              <Placeholder key={i} />
+            ))}
+          </div>
+        )}
+
+        {status !== "pending" && noNotifications && (
+          <div className="rounded-lg border border-dashed border-hairline p-12 text-center font-mono text-sm text-faint">
+            {"// "}no new notifications — you&apos;re all caught up
+          </div>
+        )}
+
+        {status === "success" && !noNotifications && (
+          <div className="divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
+            {data.pages.map((page) => (
+              <Fragment key={page.nextCursor ?? "lastPage"}>
+                {page.data.map(({ id, createdAt, type, post, notifier }) => {
+                  if (!notifier) return null;
+                  const isFollow = type === NEW_FOLLOWER;
+                  // Comment notifications need a post; follows don't.
+                  if (!isFollow && !post) return null;
+
+                  const dateTime = Temporal.Instant.from(
+                    new Date(createdAt).toISOString(),
+                  );
+                  const isCurrentYear =
+                    new Date().getFullYear() ===
+                    new Date(createdAt).getFullYear();
+
+                  const readableDate = dateTime.toLocaleString(
+                    ["en-IE"],
+                    isCurrentYear
+                      ? {
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "numeric",
+                        }
+                      : {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        },
+                  );
+                  const { username, name, image } = notifier;
+                  // Check that we handle the notifications
+                  if (
+                    ![
+                      NEW_COMMENT_ON_YOUR_POST,
+                      NEW_REPLY_TO_YOUR_COMMENT,
+                      NEW_FOLLOWER,
+                      POST_APPROVED,
+                    ].includes(type)
+                  )
+                    return null;
+
+                  const action =
+                    type === NEW_COMMENT_ON_YOUR_POST
+                      ? "started a discussion on your post"
+                      : type === NEW_REPLY_TO_YOUR_COMMENT
+                        ? "replied to your comment"
+                        : type === POST_APPROVED
+                          ? "approved your post — it's now live"
+                          : "started following you";
+
+                  return (
+                    <div
+                      key={id}
+                      className="flex items-start gap-3 bg-surface px-5 py-4 transition-colors"
+                    >
+                      {image ? (
+                        <Link
+                          className="flex shrink-0"
+                          href={`/${username}`}
+                        >
+                          <img
+                            className="h-9 w-9 rounded-full"
+                            src={image}
+                            alt={`${name}'s avatar`}
+                          />
+                        </Link>
+                      ) : (
+                        <div className="h-9 w-9 shrink-0 rounded-full bg-elevated" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-muted">
+                          <Link
+                            className="font-semibold text-fg hover:text-accent"
+                            href={`/${username}`}
+                          >
+                            {name}
+                          </Link>{" "}
+                          {action}{" "}
+                          <span className="font-mono text-xs text-faint">
+                            · {readableDate}
+                          </span>
+                        </p>
+                        {!isFollow && post && (
+                          <Link
+                            className="mt-1 block text-sm font-semibold text-fg hover:text-accent"
+                            href={`articles/${post.slug}`}
+                          >
+                            {post.title}
+                          </Link>
+                        )}
+                      </div>
+                      <button
+                        title="Mark as read"
+                        className="shrink-0 text-faint transition-colors hover:text-accent"
+                        onClick={() => mutate({ id })}
+                      >
+                        <CheckCircleIcon
+                          className="h-6 w-6"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </Fragment>
+            ))}
+            {isFetchingNextPage ? <Placeholder /> : null}
+          </div>
+        )}
+        <span className="invisible" ref={ref}>
+          intersection observer marker
+        </span>
+      </section>
+    </div>
   );
 };
 
