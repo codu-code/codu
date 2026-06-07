@@ -3,14 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type Session } from "next-auth";
-import {
-  HomeIcon,
-  ChatBubbleLeftRightIcon,
-  BriefcaseIcon,
-  BellIcon,
-  BookmarkIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 import { Tag } from "@/components/ds";
 
@@ -34,18 +26,14 @@ export function LeftRail({ session, username }: LeftRailProps) {
   const pathname = usePathname();
 
   const nav = [
-    { name: "Home", href: "/feed", icon: HomeIcon },
-    { name: "Discussions", href: "/discussions", icon: ChatBubbleLeftRightIcon },
-    { name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
+    { name: "Home", href: "/feed" },
+    { name: "Discussions", href: "/discussions" },
+    { name: "Jobs", href: "/jobs" },
     ...(session
       ? [
-          { name: "Notifications", href: "/notifications", icon: BellIcon },
-          { name: "Saved", href: "/saved", icon: BookmarkIcon },
-          {
-            name: "Profile",
-            href: `/${username || "settings"}`,
-            icon: UserIcon,
-          },
+          { name: "Notifications", href: "/notifications" },
+          { name: "Saved", href: "/saved" },
+          { name: "Profile", href: `/${username || "settings"}` },
         ]
       : []),
   ];
@@ -67,13 +55,13 @@ export function LeftRail({ session, username }: LeftRailProps) {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              aria-current={active ? "page" : undefined}
+              className={`block rounded-md px-3 py-2 text-sm transition-colors duration-base ease-out ${
                 active
                   ? "bg-surface font-semibold text-fg"
                   : "font-medium text-muted hover:bg-elevated hover:text-fg"
               }`}
             >
-              <item.icon className="h-[18px] w-[18px] shrink-0" />
               {item.name}
             </Link>
           );

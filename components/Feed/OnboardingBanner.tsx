@@ -69,7 +69,7 @@ export function OnboardingBanner() {
             ✕
           </button>
         </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {STEPS.map((s, i) => (
             <Link
               key={s.label}

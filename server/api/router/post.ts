@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { award } from "@/server/lib/engagement";
-import { isModerationEnabled, screenContent } from "@/server/lib/moderation";
+import {
+  isModerationEnabled,
+  screenContent,
+  notifyAdminOfReview,
+} from "@/server/lib/moderation";
 import {
   GetFeedSchema,
   GetPostByIdSchema,
@@ -1116,6 +1120,12 @@ export const postRouter = createTRPCRouter({
             .set(updateData)
             .where(eq(posts.id, input.id))
             .returning();
+
+          void notifyAdminOfReview({
+            postId: input.id,
+            title: existing[0].title,
+            authorName: ctx.session.user.name,
+          });
 
           return reviewed;
         }

@@ -7,9 +7,41 @@
  * `in_review` and an admin approves it to flip it to `published`.
  */
 
+import sendEmail from "@/utils/sendEmail";
+
 /** True only when MODERATION_ENABLED is explicitly the string "true". */
 export function isModerationEnabled(): boolean {
   return process.env.MODERATION_ENABLED === "true";
+}
+
+/**
+ * Email the admin that a post has entered the review queue. Fire-and-forget:
+ * never throws, so it can't block publishing. No-op if ADMIN_EMAIL is unset.
+ */
+export async function notifyAdminOfReview(opts: {
+  postId: string;
+  title?: string | null;
+  authorName?: string | null;
+}): Promise<void> {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+  const base =
+    process.env.NEXTAUTH_URL || process.env.AUTH_URL || "https://www.codu.co";
+  const title = opts.title?.trim() || "Untitled post";
+  const by = opts.authorName ? ` by ${opts.authorName}` : "";
+  try {
+    await sendEmail({
+      recipient: adminEmail,
+      subject: `Codú: post awaiting review — ${title}`,
+      htmlMessage: `
+        <p>A post is awaiting moderation.</p>
+        <p><strong>${title}</strong>${by}</p>
+        <p><a href="${base}/admin/moderation">Review it in the moderation queue →</a></p>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to email admin about a post in review:", err);
+  }
 }
 
 export interface ScreenResult {

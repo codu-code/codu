@@ -43,7 +43,11 @@ import {
   inArray,
 } from "drizzle-orm";
 import { increment } from "./utils";
-import { isModerationEnabled, screenContent } from "@/server/lib/moderation";
+import {
+  isModerationEnabled,
+  screenContent,
+  notifyAdminOfReview,
+} from "@/server/lib/moderation";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -1238,6 +1242,13 @@ export const contentRouter = createTRPCRouter({
             .set(updateData)
             .where(eq(posts.id, input.id))
             .returning();
+
+          // Notify the admin there's something to review (fire-and-forget).
+          void notifyAdminOfReview({
+            postId: input.id,
+            title: existing[0].title,
+            authorName: ctx.session.user.name,
+          });
 
           return reviewed;
         }
