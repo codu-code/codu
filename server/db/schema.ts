@@ -198,6 +198,18 @@ export const user = pgTable(
     // Referral loop
     referralCode: varchar("referral_code", { length: 16 }),
     invitedBy: text("invited_by"),
+    // Relaunch onboarding: chosen topics ("Your topics") that tune the feed.
+    topics: text("topics")
+      .array()
+      .default(sql`'{}'::text[]`)
+      .notNull(),
+    // Experience level + focus captured in onboarding (free-form keys).
+    experienceLevel: text("experience_level"),
+    onboardedAt: timestamp("onboarded_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
   },
   (table) => {
     return {

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { user } from "@/server/db/schema";
 import {
   saveSettingsSchema,
@@ -22,6 +23,49 @@ import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
 import { emailChangeRequest } from "@/server/db/schema";
 
 export const profileRouter = createTRPCRouter({
+  // The signed-in user's chosen topics ("Your topics" / onboarding).
+  myInterests: protectedProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.db
+      .select({
+        topics: user.topics,
+        onboardedAt: user.onboardedAt,
+        experienceLevel: user.experienceLevel,
+      })
+      .from(user)
+      .where(eq(user.id, ctx.session.user.id))
+      .limit(1);
+    return {
+      topics: row?.topics ?? [],
+      onboardedAt: row?.onboardedAt ?? null,
+      experienceLevel: row?.experienceLevel ?? null,
+    };
+  }),
+
+  // Save the user's topics (and optional onboarding fields). Topics are capped
+  // and trimmed so the column can't be stuffed.
+  updateInterests: protectedProcedure
+    .input(
+      z.object({
+        topics: z.array(z.string().min(1).max(40)).max(24),
+        experienceLevel: z.string().max(40).optional(),
+        markOnboarded: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const topics = Array.from(
+        new Set(input.topics.map((t) => t.trim()).filter(Boolean)),
+      ).slice(0, 24);
+      const set: Record<string, unknown> = { topics };
+      if (input.experienceLevel) set.experienceLevel = input.experienceLevel;
+      if (input.markOnboarded) set.onboardedAt = new Date().toISOString();
+      const [row] = await ctx.db
+        .update(user)
+        .set(set)
+        .where(eq(user.id, ctx.session.user.id))
+        .returning({ topics: user.topics, onboardedAt: user.onboardedAt });
+      return { topics: row?.topics ?? topics, onboardedAt: row?.onboardedAt ?? null };
+    }),
+
   edit: protectedProcedure
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
