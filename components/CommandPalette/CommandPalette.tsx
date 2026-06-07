@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/server/trpc/react";
 
@@ -28,47 +28,68 @@ const QUICK_ACTIONS: { label: string; href: string }[] = [
 ];
 
 /**
- * ⌘K command palette: site-wide search + quick nav. Grouped Quick actions
- * (filtered by query) + live Tag results, with arrow-key navigation and
- * Enter-to-select. Mounted only while open (by AppShell), which keeps state
- * fresh without a reset effect; AppShell restores focus to the trigger on
- * close. Mirrors ui_kits/app/AppShell.jsx → CommandPalette.
+ * ⌘K command palette: site-wide search + quick nav. With a query it shows live
+ * results from `api.search.everything` — Posts, People, Tags — debounced ~300ms;
+ * with an empty query it falls back to Quick actions. Arrow-key navigation and
+ * Enter-to-select run over the combined flat list. Mounted only while open (by
+ * AppShell), which keeps state fresh without a reset effect; AppShell restores
+ * focus to the trigger on close. Mirrors ui_kits/app/AppShell.jsx → CommandPalette.
  */
 export function CommandPalette({ onClose }: CommandPaletteProps) {
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [debounced, setDebounced] = useState("");
   const [active, setActive] = useState(0);
-  const query = q.trim();
 
-  const { data: tagData } = api.tag.search.useQuery(
-    { query, limit: 5 },
-    { enabled: query.length > 0 },
+  // Debounce the raw input into `debounced` ~300ms after the user stops typing.
+  // setState lives inside the timeout (async), satisfying set-state-in-effect.
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(q.trim()), 300);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const hasQuery = debounced.length >= 2;
+  const { data: results, isFetching } = api.search.everything.useQuery(
+    { query: debounced, limit: 5 },
+    { enabled: hasQuery },
   );
-  const tags = tagData?.data ?? [];
 
-  const ql = query.toLowerCase();
   const items = useMemo<Item[]>(() => {
-    const actions = (
-      ql
-        ? QUICK_ACTIONS.filter((a) => a.label.toLowerCase().includes(ql))
-        : QUICK_ACTIONS
-    ).map((a) => ({
+    if (hasQuery) {
+      const postItems: Item[] = (results?.posts ?? []).map((p) => ({
+        id: `p:${p.id}`,
+        label: p.title,
+        href: p.href,
+        group: "Posts",
+        sub: `${p.upvotes ?? 0} upvotes`,
+        glyph: "▲",
+      }));
+      const peopleItems: Item[] = (results?.people ?? []).map((u) => ({
+        id: `u:${u.username}`,
+        label: u.name ?? u.username,
+        href: `/${u.username}`,
+        group: "People",
+        sub: `@${u.username}`,
+        glyph: "@",
+      }));
+      const tagItems: Item[] = (results?.tags ?? []).map((t) => ({
+        id: `t:${t.slug}`,
+        label: t.title,
+        href: `/feed?tag=${t.slug}`,
+        group: "Tags",
+        sub: `${t.postCount ?? 0} posts`,
+        glyph: "#",
+      }));
+      return [...postItems, ...peopleItems, ...tagItems];
+    }
+    return QUICK_ACTIONS.map((a) => ({
       id: `a:${a.href}`,
       label: a.label,
       href: a.href,
-      group: ql ? "Actions" : "Quick actions",
+      group: "Quick actions",
       glyph: "›",
     }));
-    const tagItems: Item[] = tags.map((t) => ({
-      id: `t:${t.slug}`,
-      label: t.title,
-      href: `/feed?tag=${t.slug}`,
-      group: "Tags",
-      sub: `${t.postCount ?? 0} posts`,
-      glyph: "#",
-    }));
-    return [...actions, ...tagItems];
-  }, [ql, tags]);
+  }, [hasQuery, results]);
 
   // Clamp at render rather than in an effect.
   const activeIndex = items.length ? Math.min(active, items.length - 1) : 0;
@@ -126,7 +147,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
               setQ(e.target.value);
               setActive(0);
             }}
-            placeholder="Search actions, tags…"
+            placeholder="Search posts, people, tags…"
             aria-label="Search"
             role="combobox"
             aria-expanded="true"
@@ -143,11 +164,16 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
           role="listbox"
           className="max-h-[54vh] overflow-y-auto p-3"
         >
-          {items.length === 0 && (
-            <div className="p-8 text-center font-mono text-sm text-faint">
-              {"// "}no matches for “{query}”
-            </div>
-          )}
+          {items.length === 0 &&
+            (hasQuery && isFetching ? (
+              <div className="p-8 text-center font-mono text-sm text-faint">
+                {"// "}searching…
+              </div>
+            ) : (
+              <div className="p-8 text-center font-mono text-sm text-faint">
+                {"// "}no matches for “{debounced}”
+              </div>
+            ))}
 
           {groups.map((group) => (
             <div key={group.label} className="mb-2">

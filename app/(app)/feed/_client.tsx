@@ -76,8 +76,11 @@ const FeedPage = () => {
       },
     );
 
-  // Fetch categories for filter dropdown
-  const { data: categoriesData } = api.content.getCategories.useQuery();
+  // Popular tags power the "Topic" filter pill.
+  const { data: popularTags } = api.tag.getPopular.useQuery({ limit: 8 });
+  const topics = (popularTags?.data ?? []).flatMap((t) =>
+    t.slug ? [{ slug: t.slug, title: t.title }] : [],
+  );
 
   // Intersection observer for infinite scroll
   const { ref, inView } = useInView();
@@ -88,50 +91,67 @@ const FeedPage = () => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  // Handle filter changes
-  const handleSortChange = (newSort: SortOption) => {
+  // Handle filter changes. Each handler keeps the other active filters
+  // (and the For-you/Following view) intact while writing clean URL params.
+  const pushFilters = (next: {
+    sort?: SortOption;
+    type?: ContentType;
+    category?: string | null;
+    tag?: string | null;
+  }) => {
+    const nextSort = next.sort ?? sort;
+    const nextType = next.type !== undefined ? next.type : type;
+    const nextCategory =
+      next.category !== undefined ? next.category : category;
+    const nextTag = next.tag !== undefined ? next.tag : tag;
+
     const params = new URLSearchParams();
-    if (newSort !== "recent") params.set("sort", newSort);
-    if (category) params.set("category", category);
+    if (following) params.set("view", "following");
+    if (nextSort !== "recent") params.set("sort", nextSort);
+    // Lowercase in URL params for cleaner URLs.
+    if (nextType) params.set("type", nextType.toLowerCase());
+    if (nextCategory) params.set("category", nextCategory);
+    if (nextTag) params.set("tag", nextTag);
+
     const queryString = params.toString();
     router.push(`/feed${queryString ? `?${queryString}` : ""}`);
   };
 
-  const handleCategoryChange = (newCategory: string | null) => {
+  const handleSortChange = (newSort: SortOption) =>
+    pushFilters({ sort: newSort });
+
+  const handleTagChange = (newTag: string | null) =>
+    pushFilters({ tag: newTag });
+
+  const handleTypeChange = (newType: ContentType) =>
+    pushFilters({ type: newType });
+
+  const handleClearFilters = () => {
     const params = new URLSearchParams();
-    if (sort !== "recent") params.set("sort", sort);
-    if (newCategory) params.set("category", newCategory);
-    if (type) params.set("type", type);
+    if (following) params.set("view", "following");
     const queryString = params.toString();
     router.push(`/feed${queryString ? `?${queryString}` : ""}`);
   };
 
-  const handleTypeChange = (newType: ContentType) => {
-    const params = new URLSearchParams();
-    if (sort !== "recent") params.set("sort", sort);
-    if (category) params.set("category", category);
-    if (tag) params.set("tag", tag);
-    // Use lowercase in URL params for cleaner URLs
-    if (newType) params.set("type", newType.toLowerCase());
-    const queryString = params.toString();
-    router.push(`/feed${queryString ? `?${queryString}` : ""}`);
-  };
+  const filterCluster = (
+    <FeedFilters
+      sort={sort}
+      type={type}
+      tag={tag}
+      topics={topics}
+      onSortChange={handleSortChange}
+      onTypeChange={handleTypeChange}
+      onTagChange={handleTagChange}
+      onClear={handleClearFilters}
+      showTypeFilter={true}
+    />
+  );
 
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-extrabold tracking-tight text-fg">Feed</h1>
-        <FeedFilters
-          sort={sort}
-          type={type}
-          category={category}
-          categories={categoriesData || []}
-          onSortChange={handleSortChange}
-          onTypeChange={handleTypeChange}
-          onCategoryChange={handleCategoryChange}
-          showTypeFilter={true}
-        />
       </div>
 
       {/* First-run onboarding nudge (signed-in). Posting now lives behind the
@@ -142,9 +162,11 @@ const FeedPage = () => {
         </div>
       )}
 
-      {/* For you / Following tabs (signed-in) */}
-      {session?.user && (
-        <div className="mt-4 flex gap-5 border-b border-hairline">
+      {/* For you / Following tabs (signed-in) with the flat filter cluster
+          pushed to the right of the same row. Signed-out users get the
+          filters in a matching row without the tabs. */}
+      {session?.user ? (
+        <div className="mt-4 flex items-center gap-5 border-b border-hairline">
           {[
             { label: "For you", href: "/feed", active: !following },
             {
@@ -166,6 +188,11 @@ const FeedPage = () => {
               {t.label}
             </button>
           ))}
+          <div className="ml-auto">{filterCluster}</div>
+        </div>
+      ) : (
+        <div className="mt-4 flex items-center border-b border-hairline pb-2">
+          <div className="ml-auto">{filterCluster}</div>
         </div>
       )}
 

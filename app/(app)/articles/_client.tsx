@@ -419,7 +419,6 @@ const ArticlesPage = () => {
   };
 
   // Get tags list for the filter dropdown
-  const tagsList = tagsData?.data.map((t) => t.title.toLowerCase()) || [];
 
   return (
     <>
@@ -437,10 +436,14 @@ const ArticlesPage = () => {
           </h1>
           <FeedFilters
             sort={uiSort}
-            category={tag}
-            categories={tagsList}
+            tag={tag}
+            topics={(tagsData?.data ?? []).map((t) => ({
+              slug: t.title.toLowerCase(),
+              title: t.title,
+            }))}
             onSortChange={handleSortChange}
-            onCategoryChange={handleTagChange}
+            onTagChange={handleTagChange}
+            onClear={() => router.push("/articles")}
             showTypeFilter={false}
           />
         </div>
