@@ -71,15 +71,15 @@ const GetStarted: NextPage = () => {
         </Link>
 
         <div className="relative mt-8 hidden lg:mt-0 lg:block">
-          <Eyebrow>the community for AI builders</Eyebrow>
+          <Eyebrow>where coders become product engineers</Eyebrow>
           <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-fg xl:text-5xl">
-            Learn to build with AI.
+            Build the right thing.
             <br />
-            <span className="text-accent">Ship</span> what you make.
+            <span className="text-accent">And build it well.</span>
           </h1>
           <p className="mt-6 max-w-[34ch] text-lg leading-relaxed text-muted">
-            Less theory, more shipping. Join the builders posting what they
-            make.
+            A place to get genuinely good — real skill, real product sense, and
+            builders who sharpen your work.
           </p>
         </div>
 
