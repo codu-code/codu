@@ -60,14 +60,14 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
 
   if (sourceStatus === "pending") {
     return (
-      <div className="mx-auto max-w-2xl px-4 text-black dark:text-white">
+      <div className="mx-auto max-w-2xl px-4 text-fg">
         <div className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
-            <div className="mb-2 h-20 w-20 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700 sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32" />
+            <div className="mb-2 h-20 w-20 animate-pulse rounded-full bg-inset sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32" />
           </div>
           <div className="flex flex-col justify-center">
-            <div className="mb-2 h-6 w-48 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-            <div className="h-4 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+            <div className="mb-2 h-6 w-48 animate-pulse rounded bg-inset" />
+            <div className="h-4 w-32 animate-pulse rounded bg-inset" />
           </div>
         </div>
       </div>
@@ -76,17 +76,17 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
 
   if (sourceStatus === "error" || !source) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-8 text-black dark:text-white">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <h1 className="text-lg font-semibold text-red-700 dark:text-red-300">
+      <div className="mx-auto max-w-2xl px-4 py-8 text-fg">
+        <div className="rounded-lg border border-danger/30 bg-danger/12 p-6 text-center">
+          <h1 className="text-lg font-semibold text-danger">
             Source Not Found
           </h1>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-2 text-sm text-danger">
             This source may have been removed or the link is invalid.
           </p>
           <Link
             href="/feed"
-            className="mt-4 inline-block text-sm text-blue-500 hover:underline"
+            className="mt-4 inline-block text-sm text-accent-soft hover:text-accent"
           >
             Back to Feed
           </Link>
@@ -100,7 +100,7 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
 
   return (
     <>
-      <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
+      <div className="mx-auto max-w-2xl px-4 text-fg">
         {/* Profile header - matching user profile pattern exactly */}
         <div className="pt-6 sm:flex">
           <div className="mr-4 flex-shrink-0 self-center">
@@ -117,16 +117,16 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
                 src={faviconUrl}
               />
             ) : (
-              <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent text-3xl font-bold text-white sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32 lg:text-4xl">
+              <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent text-3xl font-bold text-on-accent sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32 lg:text-4xl">
                 {source.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
           </div>
           <div className="flex flex-col justify-center">
-            <h1 className="mb-0 text-lg font-bold md:text-xl">{source.name}</h1>
-            <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
-              @{sourceSlug}
-            </h2>
+            <h1 className="mb-0 font-display text-lg font-extrabold tracking-tight text-fg md:text-xl">
+              {source.name}
+            </h1>
+            <h2 className="text-sm font-bold text-muted">@{sourceSlug}</h2>
             <p className="mt-1">{source.description || ""}</p>
             {source.websiteUrl && (
               <Link
@@ -135,8 +135,8 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <LinkIcon className="mr-2 h-5 text-neutral-500 dark:text-neutral-400" />
-                <p className="mt-1 text-blue-500">
+                <LinkIcon className="mr-2 h-5 text-muted" />
+                <p className="mt-1 text-accent-soft hover:text-accent">
                   {getDomainFromUrl(source.websiteUrl)}
                 </p>
               </Link>
@@ -156,11 +156,11 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="animate-pulse rounded-lg border border-neutral-200 p-3 dark:border-neutral-700"
+                  className="animate-pulse rounded-lg border border-hairline p-3"
                 >
-                  <div className="mb-2 h-4 w-1/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-                  <div className="mb-2 h-5 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-                  <div className="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700" />
+                  <div className="mb-2 h-4 w-1/4 rounded bg-inset" />
+                  <div className="mb-2 h-5 w-3/4 rounded bg-inset" />
+                  <div className="h-4 w-1/2 rounded bg-inset" />
                 </div>
               ))}
             </div>
@@ -202,12 +202,12 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
               {/* Load more trigger */}
               <div ref={loadMoreRef} className="py-4 text-center">
                 {isFetchingNextPage && (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="text-sm text-muted">
                     Loading more articles...
                   </div>
                 )}
                 {!hasNextPage && articles.length > 0 && (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="text-sm text-muted">
                     No more articles
                   </div>
                 )}

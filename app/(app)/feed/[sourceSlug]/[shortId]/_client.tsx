@@ -60,12 +60,12 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8">
         <div className="animate-pulse">
-          <div className="mb-4 h-6 w-24 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-4 h-4 w-48 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-2 h-8 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-4 h-8 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="mb-6 h-20 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
-          <div className="h-12 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
+          <div className="mb-4 h-6 w-24 rounded bg-inset" />
+          <div className="mb-4 h-4 w-48 rounded bg-inset" />
+          <div className="mb-2 h-8 w-full rounded bg-inset" />
+          <div className="mb-4 h-8 w-3/4 rounded bg-inset" />
+          <div className="mb-6 h-20 w-full rounded bg-inset" />
+          <div className="h-12 w-full rounded bg-inset" />
         </div>
       </div>
     );
@@ -76,15 +76,15 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
       <div className="mx-auto max-w-3xl px-4 py-8">
         <Link
           href="/feed"
-          className="mb-4 inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+          className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-fg"
         >
           Back to Feed
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-950">
-          <h1 className="text-lg font-semibold text-red-700 dark:text-red-300">
+        <div className="rounded-lg border border-danger/30 bg-danger/12 p-6 text-center">
+          <h1 className="text-lg font-semibold text-danger">
             Post Not Found
           </h1>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+          <p className="mt-2 text-sm text-danger">
             This post may have been removed or the link is invalid.
           </p>
         </div>
@@ -158,13 +158,13 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
       />
 
       {/* Title */}
-      <h1 className="mb-3 text-2xl font-bold leading-tight text-neutral-900 dark:text-neutral-100 md:text-3xl">
+      <h1 className="mb-3 font-display text-2xl font-extrabold leading-tight tracking-tight text-fg md:text-3xl">
         {article.title}
       </h1>
 
       {/* Excerpt */}
       {article.excerpt && (
-        <p className="mb-4 text-neutral-600 dark:text-neutral-400">
+        <p className="mb-4 text-muted">
           {article.excerpt}
         </p>
       )}
@@ -198,7 +198,7 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleExternalClick}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white transition-colors hover:bg-accent"
+          className="primary-button flex items-center justify-center gap-2"
         >
           <ArrowTopRightOnSquareIcon className="h-5 w-5" />
           Read Full Article at {hostname}

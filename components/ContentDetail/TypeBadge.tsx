@@ -10,18 +10,18 @@ const badgeStyles: Record<
   { bg: string; text: string; label: string }
 > = {
   article: {
-    bg: "bg-gradient-to-r from-accent to-accent",
-    text: "text-white",
+    bg: "bg-accent",
+    text: "text-on-accent",
     label: "Article",
   },
   link: {
-    bg: "bg-blue-100 dark:bg-blue-900",
-    text: "text-blue-700 dark:text-blue-300",
+    bg: "bg-accent/12",
+    text: "text-accent-soft",
     label: "Link",
   },
   community: {
-    bg: "bg-green-100 dark:bg-green-900",
-    text: "text-green-700 dark:text-green-300",
+    bg: "bg-success/12",
+    text: "text-success",
     label: "Community",
   },
 };

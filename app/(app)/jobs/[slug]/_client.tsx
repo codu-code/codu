@@ -29,7 +29,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-3xl p-3 pt-8 sm:px-4">
-        <p className="text-neutral-500 dark:text-neutral-400">Loading…</p>
+        <p className="text-muted">Loading…</p>
       </div>
     );
   }
@@ -38,7 +38,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
     return (
       <div className="mx-auto max-w-3xl p-3 pt-8 text-center sm:px-4">
         <Heading level={1}>Job not found</Heading>
-        <p className="mt-2 text-neutral-500 dark:text-neutral-400">
+        <p className="mt-2 text-muted">
           This listing may have expired or been removed.
         </p>
         <Link href="/jobs" className="primary-button mt-6 inline-block">
@@ -52,7 +52,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
     <div className="mx-auto max-w-3xl p-3 pt-8 sm:px-4">
       <Link
         href="/jobs"
-        className="text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+        className="text-sm text-muted hover:text-fg"
       >
         ← All jobs
       </Link>
@@ -69,12 +69,12 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           <div className="flex flex-wrap items-center gap-2">
             <Heading level={1}>{job.jobTitle}</Heading>
             {job.featured && (
-              <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-white">
+              <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-on-accent">
                 Featured
               </span>
             )}
           </div>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">
+          <p className="mt-1 text-muted">
             {job.companyName} · {job.jobLocation}
             {job.remote ? " · Remote" : ""}
           </p>
@@ -83,7 +83,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
 
       {/* Meta badges */}
       <div className="mt-4 flex flex-wrap gap-2">
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-sm text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+        <span className="rounded-full bg-inset px-3 py-1 text-sm text-muted">
           {TYPE_LABELS[job.type] ?? job.type}
         </span>
         {job.aiNative && (
@@ -92,19 +92,19 @@ export default function JobDetailClient({ slug }: { slug: string }) {
           </span>
         )}
         {job.relocation && (
-          <span className="rounded-full bg-neutral-100 px-3 py-1 text-sm text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+          <span className="rounded-full bg-inset px-3 py-1 text-sm text-muted">
             Relocation
           </span>
         )}
         {job.visaSponsorship && (
-          <span className="rounded-full bg-neutral-100 px-3 py-1 text-sm text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+          <span className="rounded-full bg-inset px-3 py-1 text-sm text-muted">
             Visa sponsorship
           </span>
         )}
         {job.tags.map((t) => (
           <span
             key={t}
-            className="rounded-full bg-neutral-100 px-3 py-1 text-sm text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
+            className="rounded-full bg-inset px-3 py-1 text-sm text-muted"
           >
             {t}
           </span>
@@ -127,7 +127,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
 
       {/* Description */}
       {job.jobDescription && (
-        <div className="mt-8 whitespace-pre-wrap leading-relaxed text-neutral-800 dark:text-neutral-200">
+        <div className="mt-8 whitespace-pre-wrap leading-relaxed text-muted">
           {job.jobDescription}
         </div>
       )}

@@ -195,23 +195,23 @@ export function ReportModalProvider() {
       initialFocus={textAreaRef}
       className="relative z-50"
     >
-      <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
+      <div className="fixed inset-0 bg-canvas/70" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="relative w-full max-w-md rounded-lg border border-neutral-200 bg-white p-6 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+        <DialogPanel className="relative w-full max-w-md rounded-lg border border-hairline bg-elevated p-6 shadow-xl">
           <button
             onClick={closeReport}
             aria-label="Close modal"
-            className="absolute right-4 top-4 rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="absolute right-4 top-4 rounded-full p-1 text-faint hover:bg-hover hover:text-fg"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
 
-          <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-50">
+          <DialogTitle className="font-display text-xl font-bold text-fg">
             Report {contentLabel}
           </DialogTitle>
 
           <Description as="div" className="mt-4">
-            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="text-sm text-muted">
               Is something inappropriate? Help us keep the community safe by
               reporting content that violates our guidelines.
             </p>
@@ -220,7 +220,7 @@ export function ReportModalProvider() {
           <form onSubmit={handleSubmit} className="mt-6">
             <label
               htmlFor="report-comment"
-              className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="block text-sm font-medium text-fg"
             >
               What&apos;s the issue? (optional)
             </label>
@@ -231,7 +231,7 @@ export function ReportModalProvider() {
               placeholder="Describe the issue..."
               onChange={(e) => setReportBody(e.target.value)}
               value={reportBody}
-              className="mt-2 block w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-neutral-900 placeholder:text-neutral-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+              className="mt-2 block w-full rounded-md border border-hairline bg-inset px-3 py-2 text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               ref={textAreaRef}
             />
 
@@ -239,13 +239,13 @@ export function ReportModalProvider() {
               <button
                 type="button"
                 onClick={closeReport}
-                className="rounded-md px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                className="rounded-md px-4 py-2 text-sm font-medium text-muted hover:bg-hover"
               >
                 Cancel
               </button>
               <button
                 disabled={loading}
-                className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-on-accent hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
                 type="submit"
               >
                 {loading ? "Submitting..." : "Submit Report"}
@@ -290,7 +290,7 @@ export function ReportButton({
       <button
         aria-label="Report content"
         onClick={handleClick}
-        className={`rounded-full p-1.5 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 ${className}`}
+        className={`rounded-full p-1.5 text-faint hover:bg-hover hover:text-fg ${className}`}
       >
         <FlagIcon className="h-5 w-5" />
       </button>
@@ -301,7 +301,7 @@ export function ReportButton({
     return (
       <button
         onClick={handleClick}
-        className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800 ${className}`}
+        className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-fg hover:bg-hover ${className}`}
       >
         <FlagIcon className="h-4 w-4" />
         Report
@@ -312,7 +312,7 @@ export function ReportButton({
   return (
     <button
       onClick={handleClick}
-      className={`flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200 ${className}`}
+      className={`flex items-center gap-2 text-sm text-muted hover:text-fg ${className}`}
     >
       <FlagIcon className="h-4 w-4" />
       Report
@@ -345,9 +345,9 @@ export const ReportModal = ({
       <button
         aria-label="Flag comment"
         onClick={handleClick}
-        className="mr-4 flex rounded-full p-1.5 hover:bg-neutral-300 dark:hover:bg-neutral-800"
+        className="mr-4 flex rounded-full p-1.5 hover:bg-hover"
       >
-        <FlagIcon className="h-5 fill-neutral-400 dark:fill-neutral-600" />
+        <FlagIcon className="h-5 fill-faint" />
       </button>
     );
   }
@@ -355,7 +355,7 @@ export const ReportModal = ({
   return (
     <button
       onClick={handleClick}
-      className="w-full rounded px-2 py-1 text-left text-neutral-900 hover:bg-neutral-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+      className="w-full rounded px-2 py-1 text-left text-fg hover:bg-hover"
     >
       Report Article
     </button>

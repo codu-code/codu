@@ -73,10 +73,10 @@ const ContentMetaHeader = ({
   // Render author info (for user posts)
   if (author) {
     return (
-      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
         <Link
           href={`/${author.username}`}
-          className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
+          className="flex items-center gap-2 hover:text-fg"
         >
           {author.image ? (
             <img
@@ -85,7 +85,7 @@ const ContentMetaHeader = ({
               className="h-5 w-5 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/12 text-xs font-bold text-accent">
               {author.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -111,10 +111,10 @@ const ContentMetaHeader = ({
   if (source) {
     const sourceLink = source.slug ? `/feed/${source.slug}` : "#";
     return (
-      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
         <Link
           href={sourceLink}
-          className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
+          className="flex items-center gap-2 hover:text-fg"
         >
           {source.logo ? (
             <img
@@ -125,7 +125,7 @@ const ContentMetaHeader = ({
           ) : faviconUrl ? (
             <img src={faviconUrl} alt="" className="h-5 w-5 rounded" />
           ) : (
-            <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
+            <div className="flex h-5 w-5 items-center justify-center rounded bg-accent/12 text-xs font-bold text-accent">
               {source.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -150,9 +150,7 @@ const ContentMetaHeader = ({
         {hostname && (
           <>
             <span aria-hidden="true">·</span>
-            <span className="text-neutral-400 dark:text-neutral-500">
-              {hostname}
-            </span>
+            <span className="text-faint">{hostname}</span>
           </>
         )}
       </div>
@@ -161,7 +159,7 @@ const ContentMetaHeader = ({
 
   // Fallback - just date
   return readableDate ? (
-    <div className="mb-3 text-sm text-neutral-500 dark:text-neutral-400">
+    <div className="mb-3 text-sm text-muted">
       <time dateTime={dateTime?.toString()}>{readableDate}</time>
     </div>
   ) : null;
