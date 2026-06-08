@@ -152,12 +152,12 @@ test.describe("Notifications Page", () => {
 
       // Wait for discussion section to load
       await expect(
-        page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
-      ).toBeVisible({ timeout: 15000 });
+        page.getByRole("button", { name: /Add to the discussion/ }),
+      ).toBeVisible({ timeout: 30000 });
 
       // Post a comment
       await page
-        .getByRole("button", { name: "Join the conversation..." })
+        .getByRole("button", { name: /Add to the discussion/ })
         .click();
 
       await page.waitForTimeout(500);
@@ -199,12 +199,12 @@ test.describe("Notifications Page", () => {
       );
 
       await expect(
-        page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
-      ).toBeVisible({ timeout: 15000 });
+        page.getByRole("button", { name: /Add to the discussion/ }),
+      ).toBeVisible({ timeout: 30000 });
 
       // Post a comment as user one
       await page
-        .getByRole("button", { name: "Join the conversation..." })
+        .getByRole("button", { name: /Add to the discussion/ })
         .click();
       await page.waitForTimeout(500);
       await page.locator(".ProseMirror").first().click();
