@@ -215,7 +215,7 @@ const FeedPage = () => {
               )}
 
             {status === "error" && (
-              <div className="mt-8 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+              <div className="mt-8 rounded-lg border border-hairline bg-surface p-4 text-sm text-danger">
                 Something went wrong loading the feed. Please refresh the page.
               </div>
             )}
@@ -269,11 +269,11 @@ const FeedPage = () => {
               ))}
 
             {status === "success" && !data.pages[0].items.length && (
-              <div className="mt-8 rounded-lg border border-neutral-200 bg-neutral-50 p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
-                <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+              <div className="mt-8 rounded-lg border border-dashed border-hairline bg-surface p-8 text-center">
+                <h2 className="font-display text-lg font-bold text-fg">
                   No content yet
                 </h2>
-                <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="mt-2 text-sm text-muted">
                   Check back soon for curated developer content.
                 </p>
               </div>
