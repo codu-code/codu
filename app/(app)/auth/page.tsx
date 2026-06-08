@@ -27,7 +27,7 @@ export const PostAuthPage = (content: {
   if (!mounted) return null;
 
   return (
-    <div className="flex w-full flex-grow flex-col justify-center bg-neutral-100 px-4 py-20 dark:bg-black sm:px-6 lg:py-40">
+    <div className="flex w-full flex-grow flex-col justify-center bg-canvas px-4 py-20 sm:px-6 lg:py-40">
       <div className="flex flex-shrink-0 justify-center">
         <Link href="/">
           <span className="sr-only">Codú</span>
@@ -49,7 +49,7 @@ export const PostAuthPage = (content: {
           <p className="bg-gradient-to-r from-accent to-accent bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
             {content.heading}{" "}
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black dark:text-white sm:text-5xl">
+          <h1 className="mt-2 font-display text-4xl text-fg sm:text-5xl">
             {content.subHeading}{" "}
           </h1>
           <div className="mt-6">

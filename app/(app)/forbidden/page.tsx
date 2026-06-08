@@ -4,12 +4,12 @@ import Image from "next/image";
 
 const Forbidden: NextPage = () => {
   return (
-    <div className="flex w-full flex-grow flex-col justify-center bg-white px-4 py-20 sm:px-6 lg:py-40">
+    <div className="flex w-full flex-grow flex-col justify-center bg-canvas px-4 py-20 sm:px-6 lg:py-40">
       <div className="flex flex-shrink-0 justify-center">
         <Link href="/">
           <span className="sr-only">Codú</span>
           <Image
-            src="/images/codu-black.png"
+            src="/images/codu.png"
             alt="Codú logo"
             height={60}
             width={189}
@@ -21,10 +21,10 @@ const Forbidden: NextPage = () => {
           <p className="bg-gradient-to-r from-accent to-accent bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
             403 error
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black sm:text-5xl">
+          <h1 className="mt-2 font-display text-4xl text-fg sm:text-5xl">
             Forbidden
           </h1>
-          <p className="mt-2 text-base text-neutral-500">
+          <p className="mt-2 text-base text-muted">
             Sorry, are not allowed to access the page you&apos;re looking for.
           </p>
           <div className="mt-6">

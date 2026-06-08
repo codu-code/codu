@@ -108,7 +108,7 @@ const MyPosts = () => {
           cancelText="Cancel"
         />
       )}
-      <div className="relative mx-4 max-w-2xl bg-neutral-100 dark:bg-black sm:mx-auto">
+      <div className="relative mx-4 max-w-2xl bg-canvas sm:mx-auto">
         <div className="mb-4 mt-8">
           <Tabs tabs={tabs} />
         </div>
@@ -137,7 +137,7 @@ const MyPosts = () => {
                 : status.DRAFT;
               return (
                 <article
-                  className="mb-4 border border-neutral-300 bg-white p-4 dark:bg-neutral-900"
+                  className="mb-4 border border-hairline bg-surface p-4"
                   key={id}
                 >
                   {selectedTab === PUBLISHED ? (
@@ -211,15 +211,15 @@ const MyPosts = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-neutral-100 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right divide-y divide-hairline bg-surface shadow-lg ring-1 ring-hairline focus:outline-none">
                           <div className="dropdown-bg py-1">
                             <MenuItem>
                               <Link
-                                className="dropdown-item group flex items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:text-neutral-500"
+                                className="dropdown-item group flex items-center px-4 py-2 text-sm text-fg data-[focus]:text-muted"
                                 href={`/create/${id}`}
                               >
                                 <PencilIcon
-                                  className="mr-3 h-5 w-5 text-neutral-500 group-hover:text-neutral-400"
+                                  className="mr-3 h-5 w-5 text-muted group-hover:text-faint"
                                   aria-hidden="true"
                                 />
                                 Edit
@@ -229,10 +229,10 @@ const MyPosts = () => {
                             <MenuItem>
                               <button
                                 onClick={() => setSelectedArticleToDelete(id)}
-                                className="dropdown-item group flex w-full items-center px-4 py-2 text-sm text-neutral-700 data-[focus]:text-neutral-500"
+                                className="dropdown-item group flex w-full items-center px-4 py-2 text-sm text-fg data-[focus]:text-muted"
                               >
                                 <TrashIcon
-                                  className="mr-3 h-5 w-5 text-neutral-400 group-hover:text-neutral-400"
+                                  className="mr-3 h-5 w-5 text-faint group-hover:text-muted"
                                   aria-hidden="true"
                                 />
                                 Delete
