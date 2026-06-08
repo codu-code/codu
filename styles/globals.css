@@ -534,3 +534,41 @@ table div {
     transform: translate(24px, 0);
   }
 }
+
+/* Onboarding celebration — badge unlock pop + halo ring. Motion is gated on
+   prefers-reduced-motion: no-preference, so reduced-motion users see the static
+   dialog with no animation. */
+@keyframes codu-badge-pop {
+  0% {
+    transform: scale(0.6) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes codu-ring-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .codu-badge-pop {
+    animation: codu-badge-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .codu-ring-pulse {
+    animation: codu-ring-pulse 1100ms ease-out 120ms infinite;
+  }
+}

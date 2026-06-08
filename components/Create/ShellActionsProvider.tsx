@@ -13,6 +13,8 @@ interface ShellActions {
   openCompose: (mode?: ComposeMode) => void;
   /** Open the "edit your topics" modal. */
   openTopics: () => void;
+  /** Current user's username (for profile-linked UI), or null when unknown. */
+  username: string | null;
 }
 
 const ShellActionsContext = createContext<ShellActions | null>(null);
@@ -20,7 +22,9 @@ const ShellActionsContext = createContext<ShellActions | null>(null);
 export function useShellActions(): ShellActions {
   const ctx = useContext(ShellActionsContext);
   // Tolerate consumers rendered outside the provider (e.g. tests) with no-ops.
-  return ctx ?? { openCompose: () => {}, openTopics: () => {} };
+  return (
+    ctx ?? { openCompose: () => {}, openTopics: () => {}, username: null }
+  );
 }
 
 /**
@@ -69,7 +73,7 @@ export function ShellActionsProvider({
 
   return (
     <ShellActionsContext.Provider
-      value={{ openCompose, openTopics: () => setTopicsOpen(true) }}
+      value={{ openCompose, openTopics: () => setTopicsOpen(true), username }}
     >
       {children}
       {pendingInfo && (

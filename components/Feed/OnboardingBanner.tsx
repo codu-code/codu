@@ -1,11 +1,14 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useShellActions } from "@/components/Create/ShellActionsProvider";
+import { Confetti } from "@/components/Celebrate/Confetti";
+import { BadgeUnlock } from "@/components/Celebrate/BadgeUnlock";
 
 const KEY = "codu.onboarding.dismissed";
+const CELEBRATED_KEY = "codu.onboarding.celebrated";
 
 // Tiny external store so dismissal is read without setState-in-effect and stays
 // SSR-safe (server snapshot = not dismissed → banner renders, client reads
@@ -18,6 +21,10 @@ const subscribe = (cb: () => void) => {
 const isDismissed = () =>
   typeof window !== "undefined" && localStorage.getItem(KEY) === "1";
 
+const hasCelebrated = () =>
+  typeof window !== "undefined" &&
+  localStorage.getItem(CELEBRATED_KEY) === "1";
+
 /**
  * First-run guidance: a dismissible "first win in 3 steps" banner. Steps reflect
  * REAL completion (topics picked / 3 follows / first post) via
@@ -26,7 +33,7 @@ const isDismissed = () =>
  */
 export function OnboardingBanner() {
   const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
-  const { openTopics, openCompose } = useShellActions();
+  const { openTopics, openCompose, username } = useShellActions();
   const { data: wins } = api.engagement.onboardingWins.useQuery();
 
   // A step is { label, done, action }. Actions reuse the shell modals so they
@@ -53,7 +60,46 @@ export function OnboardingBanner() {
   ];
 
   const allDone = wins ? steps.every((s) => s.done) : false;
-  if (dismissed || allDone) return null;
+
+  // Celebration single-fire. We never want this to show twice:
+  //  - across visits: a localStorage flag (read via an external store, so it's
+  //    SSR-safe and stays in sync without setState-in-effect);
+  //  - within a session: once the user closes it, `closed` stays true.
+  // `closed` only ever flips from the onClose event handler — never from an
+  // effect — so there's no cascading-render loop. The effect below is a pure
+  // external-system sync (it writes localStorage, no setState).
+  const celebrated = useSyncExternalStore(
+    subscribe,
+    hasCelebrated,
+    () => true, // server snapshot: assume celebrated so SSR renders nothing
+  );
+  const [closed, setClosed] = useState(false);
+  const celebrating = allDone && !celebrated && !closed;
+
+  useEffect(() => {
+    if (!celebrating) return;
+    try {
+      localStorage.setItem(CELEBRATED_KEY, "1");
+    } catch {
+      // ignore storage failures
+    }
+  }, [celebrating]);
+
+  if (allDone) {
+    return celebrating ? (
+      <>
+        <Confetti />
+        <BadgeUnlock
+          badgeName="First Post"
+          points={20}
+          username={username}
+          onClose={() => setClosed(true)}
+        />
+      </>
+    ) : null;
+  }
+
+  if (dismissed) return null;
 
   const doneCount = steps.filter((s) => s.done).length;
 
