@@ -74,7 +74,5 @@ export default React.memo(function SideBarSavedPosts() {
 });
 
 function LoadingSkeleton() {
-  return (
-    <div className="h-16 animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-700" />
-  );
+  return <div className="h-16 animate-pulse rounded-lg bg-hover" />;
 }

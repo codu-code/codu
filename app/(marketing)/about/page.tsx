@@ -76,10 +76,7 @@ export default function AboutPage() {
             people doing the same. We care about two things.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-3">
-            <Link
-              href="/get-started"
-              className="primary-button px-7 py-3 text-base"
-            >
+            <Link href="/get-started" className="primary-button btn-jumbo">
               Join free
             </Link>
             <Link
@@ -217,10 +214,7 @@ export default function AboutPage() {
             <h2 className="max-w-[18ch] font-display text-3xl font-extrabold tracking-tight text-fg sm:text-4xl">
               If you&apos;re building something with AI, this is your community.
             </h2>
-            <Link
-              href="/get-started"
-              className="primary-button px-7 py-3 text-base"
-            >
+            <Link href="/get-started" className="primary-button btn-jumbo">
               Join free
             </Link>
           </div>

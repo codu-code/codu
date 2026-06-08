@@ -25,8 +25,6 @@ module.exports = {
       },
       colors: {
         black: "#040404",
-        twitter: "#282828",
-        github: "#f17f06",
         // Relaunch design tokens — driven by CSS vars (see styles/globals.css)
         // so they theme cleanly across dark/light. Use like bg-surface,
         // text-fg, text-accent, border-hairline, etc. Opacity modifiers give
@@ -101,8 +99,6 @@ module.exports = {
         slow: "320ms",
       },
       backgroundImage: {
-        discord: "linear-gradient(to bottom, #4b83fb, #734df8)",
-        youtube: "linear-gradient(to top, #6d0202 22%, #c90000 61%)",
         // Subtle dotted grid for editorial atmosphere.
         // Pair with an arbitrary size, e.g. bg-grid-dots bg-[length:22px_22px]
         "grid-dots":

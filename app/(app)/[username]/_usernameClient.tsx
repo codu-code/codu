@@ -136,7 +136,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   return (
     <>
-      <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
+      <div className="mx-auto max-w-2xl px-4 text-fg">
         <div className="mt-2 flex flex-col gap-4 px-1 sm:flex-row sm:items-start">
           <div className="flex-shrink-0">
             {image && (

@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function NotFound() {
   return (
-    <div className="flex w-full flex-grow flex-col justify-center bg-white px-4 py-20 sm:px-6 lg:py-40">
+    <div className="flex w-full flex-grow flex-col justify-center bg-surface px-4 py-20 sm:px-6 lg:py-40">
       <div className="flex flex-shrink-0 justify-center">
         <Link href="/">
           <span className="sr-only">Codú</span>
@@ -22,10 +22,10 @@ export default function NotFound() {
           <p className="bg-gradient-to-r from-accent to-accent bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
             Well this is embarrassing
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black sm:text-5xl">
+          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-fg sm:text-5xl">
             Something went wrong.
           </h1>
-          <p className="mt-2 text-base text-neutral-500">
+          <p className="mt-2 text-base text-muted">
             Something unexpected happened, we will look into it!
           </p>
           <div className="mt-6">
@@ -36,7 +36,7 @@ export default function NotFound() {
               Return home<span aria-hidden="true"> &rarr;</span>
             </Link>
           </div>
-          <div className="mt-6 text-base text-neutral-500">
+          <div className="mt-6 text-base text-muted">
             Or <span className="font-semibold">if you are feeling helpful</span>
             , send us more details by opening an issue{" "}
             <a

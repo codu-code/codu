@@ -101,7 +101,7 @@ export function TopBar({
           </Link>
           <button
             onClick={() => openCompose("discussion")}
-            className="primary-button py-1.5"
+            className="primary-button"
           >
             <span className="mr-0.5 text-[15px] leading-none">+</span> Create
           </button>

@@ -19,25 +19,25 @@ const navigation = {
   social: [
     {
       name: "Twitter",
-      customStyle: "hover:bg-twitter focus:bg-twitter",
+      customStyle: "hover:bg-elevated focus:bg-elevated",
       href: twitterUrl,
       icon: Twitter,
     },
     {
       name: "GitHub",
-      customStyle: "hover:bg-github focus:bg-github",
+      customStyle: "hover:bg-elevated focus:bg-elevated",
       href: githubUrl,
       icon: Github,
     },
     {
       name: "Discord",
-      customStyle: "hover:bg-discord focus:bg-discord",
+      customStyle: "hover:bg-elevated focus:bg-elevated",
       href: discordInviteUrl,
       icon: Discord,
     },
     {
       name: "Youtube",
-      customStyle: "hover:bg-youtube focus:bg-youtube",
+      customStyle: "hover:bg-elevated focus:bg-elevated",
       href: youtubeUrl,
       icon: Youtube,
     },
@@ -46,7 +46,7 @@ const navigation = {
 
 const Footer = () => {
   return (
-    <footer className="bg-neutral-100 dark:bg-black">
+    <footer className="bg-surface">
       <div className="mx-auto max-w-7xl overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
         <nav
           className="-mx-5 -my-2 flex flex-wrap justify-center"
@@ -59,13 +59,13 @@ const Footer = () => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="focus-style p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
+                  className="focus-style p-1 text-base text-muted hover:text-fg"
                 >
                   {item.name}
                 </a>
               ) : (
                 <Link
-                  className="focus-style p-1 text-base text-neutral-600 hover:text-neutral-500 dark:text-neutral-500 dark:hover:text-neutral-400"
+                  className="focus-style p-1 text-base text-muted hover:text-fg"
                   href={item.href}
                 >
                   {item.name}
@@ -81,14 +81,14 @@ const Footer = () => {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`focus-style rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.customStyle.toLowerCase()}`}
+              className={`focus-style rounded-md p-1 transition-all duration-300 hover:scale-105 hover:text-fg hover:brightness-110 focus:scale-105 focus:text-fg focus:brightness-110 ${item.customStyle.toLowerCase()}`}
             >
               <span className="sr-only">{item.name}</span>
               <item.icon className="h-6 w-6" aria-hidden="true" />
             </a>
           ))}
         </div>
-        <p className="mt-8 text-center text-xs text-neutral-600 dark:text-neutral-500">
+        <p className="mt-8 text-center text-xs text-muted">
           &copy; {Temporal.Now.plainDateISO().year} Codú Limited
         </p>
       </div>

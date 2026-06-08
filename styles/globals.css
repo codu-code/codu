@@ -34,7 +34,8 @@
   --shadow-lg: 0 24px 60px -20px rgb(0 0 0 / 0.7);
   --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.65);
   --shadow-glow:
-    0 0 0 1px rgb(45 212 191 / 0.4), 0 8px 32px -8px rgb(45 212 191 / 0.35);
+    0 0 0 1px rgb(var(--color-accent) / 0.4),
+    0 8px 32px -8px rgb(var(--color-accent) / 0.35);
 }
 
 .dark {
@@ -68,7 +69,7 @@ html {
 }
 
 body {
-  @apply bg-neutral-50 font-sans text-neutral-900 dark:bg-canvas dark:text-fg;
+  @apply bg-canvas font-sans text-fg;
 }
 
 #__next {
@@ -145,10 +146,10 @@ body {
   transition: border-color 120ms ease;
 }
 .accent-mint:checked {
-  border-color: #2dd4bf;
+  border-color: rgb(var(--color-accent));
   background-image: radial-gradient(
     circle at center,
-    #2dd4bf 0 42%,
+    rgb(var(--color-accent)) 0 42%,
     transparent 46%
   );
 }
@@ -156,7 +157,7 @@ body {
   outline: none;
 }
 .accent-mint:focus-visible {
-  outline: 2px solid #2dd4bf;
+  outline: 2px solid rgb(var(--color-accent));
   outline-offset: 2px;
 }
 
@@ -174,7 +175,7 @@ body {
 }
 
 .nav-button {
-  @apply focus-style rounded-md px-2 py-2 text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white dark:focus:text-white;
+  @apply focus-style rounded-md px-2 py-2 text-muted transition-colors hover:bg-elevated hover:text-fg focus:text-fg;
 }
 
 .focus-style {
@@ -182,15 +183,22 @@ body {
 }
 
 .primary-button {
-  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-[1.125rem] py-2.5 text-sm font-semibold text-on-accent transition-colors duration-base ease-out hover:bg-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px disabled:bg-neutral-600 disabled:text-neutral-300 disabled:hover:bg-neutral-600;
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-3.5 py-1.5 text-sm font-semibold text-on-accent transition-colors duration-base ease-out hover:bg-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px disabled:bg-strong disabled:text-faint disabled:hover:bg-strong;
 }
 
 .secondary-button {
-  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-strong bg-transparent px-[1.125rem] py-2.5 text-sm font-semibold text-fg transition-colors duration-base ease-out hover:border-faint hover:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px;
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-strong bg-transparent px-3.5 py-1.5 text-sm font-semibold text-fg transition-colors duration-base ease-out hover:border-faint hover:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px;
 }
 
 .ghost-button {
   @apply inline-flex items-center gap-1.5 whitespace-nowrap bg-transparent font-mono text-sm font-semibold text-accent transition-colors duration-base ease-out hover:text-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+}
+
+/* Jumbo modifier — opt-in larger CTA for hero / marketing. Combine with a
+   button class, e.g. `primary-button btn-jumbo`. The compact size above is the
+   app default; this is the deliberate exception. */
+.btn-jumbo {
+  @apply px-6 py-3 text-base;
 }
 
 /* App shell — sticky top bar + 3-column rail grid. Breakpoints (1080 / 720) are
@@ -276,15 +284,15 @@ body {
 }
 
 .dropdown-button {
-  @apply inline-flex items-center justify-center border border-neutral-300 bg-white bg-gradient-to-r px-4 py-2 font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply focus-style inline-flex items-center justify-center rounded-md border border-strong bg-elevated px-4 py-2 font-medium text-fg shadow-sm transition-colors hover:bg-hover;
 }
 
 .dropdown-item {
-  @apply rounded-none bg-white bg-gradient-to-r font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply rounded-none bg-elevated font-medium text-fg transition-colors hover:bg-hover focus:outline-none;
 }
 
 .dropdown-bg {
-  @apply bg-white bg-gradient-to-r text-neutral-800 dark:bg-neutral-900 dark:text-white;
+  @apply bg-elevated text-fg;
 }
 
 .prose {
@@ -353,7 +361,7 @@ body {
 .tiptap .is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: #ced4da;
+  color: rgb(var(--color-faint));
   pointer-events: none;
   height: 0;
 }

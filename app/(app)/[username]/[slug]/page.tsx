@@ -498,18 +498,12 @@ const UnifiedPostPage = async (props: Props) => {
         <JsonLd data={breadcrumbSchema} />
 
         <div className="mx-auto max-w-3xl px-4 py-8">
-          <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-            <Link
-              href="/"
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
+          <nav className="mb-6 flex items-center gap-2 text-sm text-muted">
+            <Link href="/" className="hover:text-fg">
               Feed
             </Link>
             <span aria-hidden="true">/</span>
-            <Link
-              href={`/${userPost.user.username}`}
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
+            <Link href={`/${userPost.user.username}`} className="hover:text-fg">
               {userPost.user.name}
             </Link>
           </nav>
@@ -620,7 +614,7 @@ const UnifiedPostPage = async (props: Props) => {
                 <DiscussionArea contentId={userPost.id} noWrapper />
               ) : (
                 <div className="py-4">
-                  <p className="italic text-neutral-500 dark:text-neutral-400">
+                  <p className="italic text-muted">
                     Comments are disabled for this post
                   </p>
                 </div>
@@ -690,17 +684,14 @@ const UnifiedPostPage = async (props: Props) => {
         <JsonLd data={breadcrumbSchema} />
 
         <div className="mx-auto max-w-3xl px-4 py-8">
-          <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-            <Link
-              href="/"
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
+          <nav className="mb-6 flex items-center gap-2 text-sm text-muted">
+            <Link href="/" className="hover:text-fg">
               Feed
             </Link>
             <span aria-hidden="true">/</span>
             <Link
               href={`/${userArticle.user.username}`}
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
+              className="hover:text-fg"
             >
               {userArticle.user.name}
             </Link>
@@ -815,7 +806,7 @@ const UnifiedPostPage = async (props: Props) => {
                 <DiscussionArea contentId={userArticle.id} noWrapper />
               ) : (
                 <div className="py-4">
-                  <p className="italic text-neutral-500 dark:text-neutral-400">
+                  <p className="italic text-muted">
                     Comments are disabled for this article
                   </p>
                 </div>

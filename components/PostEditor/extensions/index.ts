@@ -47,14 +47,12 @@ export const getArticleExtensions = (
     },
     blockquote: {
       HTMLAttributes: {
-        class:
-          "border-l-4 border-neutral-300 dark:border-neutral-600 pl-4 my-4 italic text-neutral-600 dark:text-neutral-400",
+        class: "border-l-4 border-hairline pl-4 my-4 italic text-muted",
       },
     },
     code: {
       HTMLAttributes: {
-        class:
-          "rounded bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 font-mono text-sm text-neutral-800 dark:text-neutral-200",
+        class: "rounded bg-inset px-1.5 py-0.5 font-mono text-sm text-fg",
       },
     },
     dropcursor: {
@@ -107,7 +105,7 @@ export const getArticleExtensions = (
     },
   }).configure({
     HTMLAttributes: {
-      class: "my-8 border-t border-neutral-200 dark:border-neutral-700",
+      class: "my-8 border-t border-hairline",
     },
   }),
 
@@ -144,8 +142,7 @@ export const getArticleExtensions = (
   CodeBlockLowlight.configure({
     lowlight,
     HTMLAttributes: {
-      class:
-        "rounded-lg bg-neutral-900 dark:bg-neutral-950 p-4 font-mono text-sm overflow-x-auto my-4",
+      class: "rounded-lg bg-inset p-4 font-mono text-sm overflow-x-auto my-4",
     },
   }),
 
@@ -167,7 +164,7 @@ export const getArticleExtensions = (
     },
     showOnlyWhenEditable: true,
     emptyEditorClass:
-      "before:content-[attr(data-placeholder)] before:text-neutral-400 dark:before:text-neutral-500 before:float-left before:h-0 before:pointer-events-none",
+      "before:content-[attr(data-placeholder)] before:text-faint before:float-left before:h-0 before:pointer-events-none",
   }),
 
   // Markdown support for copy/paste and conversion

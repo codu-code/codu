@@ -88,10 +88,7 @@ function JoinCard() {
         Learn to build with AI, share what you ship, and grow with people doing
         the same. Free to upvote, save, follow, and post — reading stays free.
       </p>
-      <button
-        onClick={() => signIn()}
-        className="primary-button w-full justify-center py-2.5"
-      >
+      <button onClick={() => signIn()} className="primary-button w-full">
         Join free
       </button>
     </div>

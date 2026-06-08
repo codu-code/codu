@@ -63,10 +63,7 @@ export default function Hero() {
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-          <Link
-            href="/get-started"
-            className="primary-button px-6 py-3 text-base"
-          >
+          <Link href="/get-started" className="primary-button btn-jumbo">
             Join free
           </Link>
           <Link

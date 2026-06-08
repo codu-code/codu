@@ -71,14 +71,14 @@ export default function Code({ children, language }: Props) {
         {children}
       </pre>
       <button
-        className="absolute flex h-8 w-8 items-center justify-center rounded-lg border border-gray-400 bg-gray-300 opacity-100 shadow-md transition-all ease-in-out group-hover:scale-100 group-hover:opacity-100 dark:border-gray-500 dark:bg-gray-700 md:scale-0 md:opacity-0"
+        className="absolute flex h-8 w-8 items-center justify-center rounded-lg border border-hairline bg-inset opacity-100 shadow-md transition-all ease-in-out group-hover:scale-100 group-hover:opacity-100 md:scale-0 md:opacity-0"
         type="button"
         onClick={() => setCopied(true)}
       >
         {copied ? (
-          <CheckIcon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          <CheckIcon className="h-5 w-5 text-muted" />
         ) : (
-          <DocumentDuplicateIcon className="h-5 w-5 bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-300" />
+          <DocumentDuplicateIcon className="h-5 w-5 bg-inset text-muted" />
         )}
       </button>
       <style jsx>

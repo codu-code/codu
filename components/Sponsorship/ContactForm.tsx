@@ -72,9 +72,9 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 className={clsx(
                   "relative z-10 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors",
                   step < currentStep
-                    ? "bg-accent text-black"
+                    ? "bg-accent text-on-accent"
                     : step === currentStep
-                      ? "bg-accent text-black"
+                      ? "bg-accent text-on-accent"
                       : "bg-elevated text-faint",
                 )}
               >
@@ -130,13 +130,13 @@ function Step1Interests({
               <div
                 className={clsx(
                   "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
-                  isSelected ? "bg-accent" : "bg-neutral-700",
+                  isSelected ? "bg-accent" : "bg-inset",
                 )}
               >
                 <Icon
                   className={clsx(
                     "h-5 w-5",
-                    isSelected ? "text-black" : "text-fg",
+                    isSelected ? "text-on-accent" : "text-fg",
                   )}
                 />
               </div>
@@ -148,7 +148,7 @@ function Step1Interests({
               <div
                 className={clsx(
                   "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  isSelected ? "border-accent bg-accent" : "border-neutral-600",
+                  isSelected ? "border-accent bg-accent" : "border-strong",
                 )}
               >
                 {isSelected && <CheckIcon className="h-4 w-4 text-fg" />}

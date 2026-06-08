@@ -94,7 +94,7 @@ const EditorNav = ({
             <button
               onClick={onPublish}
               disabled={isDisabled}
-              className="primary-button px-3 py-1.5 disabled:cursor-not-allowed"
+              className="primary-button disabled:cursor-not-allowed"
             >
               {postStatus === status.PUBLISHED ? "Save changes" : "Publish"}
             </button>

@@ -55,19 +55,19 @@ const socialLinks = [
     name: "Twitter",
     href: twitterUrl,
     Icon: Twitter,
-    customStyle: "hover:bg-twitter focus:bg-twitter",
+    customStyle: "hover:bg-elevated focus:bg-elevated",
   },
   {
     name: "GitHub",
     href: githubUrl,
     Icon: Github,
-    customStyle: "hover:bg-github focus:bg-github",
+    customStyle: "hover:bg-elevated focus:bg-elevated",
   },
   {
     name: "LinkedIn",
     href: linkedinUrl,
     Icon: Linkedin,
-    customStyle: "hover:bg-[#0A66C2] focus:bg-[#0A66C2]",
+    customStyle: "hover:bg-elevated focus:bg-elevated",
   },
 ];
 

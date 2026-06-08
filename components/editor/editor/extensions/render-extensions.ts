@@ -43,19 +43,19 @@ export const RenderExtensions = [
     },
     blockquote: {
       HTMLAttributes: {
-        class: "border-l-4 border-stone-700",
+        class: "border-l-4 border-hairline",
       },
     },
     codeBlock: {
       HTMLAttributes: {
         class:
-          "rounded-sm bg-stone-100 p-5 font-mono font-medium text-stone-800",
+          "rounded-sm bg-inset p-5 font-mono font-medium text-fg",
       },
     },
     code: {
       HTMLAttributes: {
         class:
-          "rounded-md bg-stone-200 px-1.5 py-1 font-mono font-medium text-stone-900",
+          "rounded-md bg-inset px-1.5 py-1 font-mono font-medium text-fg",
         spellcheck: "false",
       },
     },
@@ -86,25 +86,25 @@ export const RenderExtensions = [
     },
   }).configure({
     HTMLAttributes: {
-      class: "mt-4 mb-6 border-t border-stone-300",
+      class: "mt-4 mb-6 border-t border-hairline",
     },
   }),
   TiptapLink.configure({
     HTMLAttributes: {
       class:
-        "text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer",
+        "text-accent underline underline-offset-[3px] hover:text-accent-soft transition-colors cursor-pointer",
     },
   }),
   UpdatedImage.configure({
     HTMLAttributes: {
-      class: "rounded-lg border border-stone-200",
+      class: "rounded-lg border border-hairline",
     },
   }),
   TextStyle,
   Link.configure({
     HTMLAttributes: {
       class:
-        "text-stone-400 underline underline-offset-[3px] hover:text-stone-600 transition-colors cursor-pointer",
+        "text-accent underline underline-offset-[3px] hover:text-accent-soft transition-colors cursor-pointer",
     },
   }),
   Markdown.configure({

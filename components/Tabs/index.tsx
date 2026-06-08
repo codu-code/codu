@@ -29,7 +29,7 @@ export function Tabs(props: Props) {
         <select
           id="tabs"
           name="tabs"
-          className="block w-full rounded-md border-neutral-300 bg-white focus:border-neutral-500 focus:ring-neutral-500 dark:bg-neutral-950"
+          className="block w-full rounded-md border-hairline bg-canvas focus:border-accent focus:ring-accent"
           defaultValue={tabs.find((tab) => tab.current)?.name || tabs[0].name}
           onChange={(e) => {
             router.push(e.target.value);
@@ -43,7 +43,7 @@ export function Tabs(props: Props) {
         </select>
       </div>
       <div className="hidden sm:block">
-        <div className="border-b border-neutral-300 dark:border-neutral-800">
+        <div className="border-b border-hairline">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             {tabs.map((tab) => (
               <Link
@@ -51,8 +51,8 @@ export function Tabs(props: Props) {
                 href={tab.href}
                 className={classNames(
                   tab.current
-                    ? "border-neutral-500 text-neutral-600 dark:border-neutral-300 dark:text-neutral-200"
-                    : "border-transparent text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 hover:dark:text-neutral-300",
+                    ? "border-hairline text-fg"
+                    : "border-transparent text-faint hover:text-muted",
                   "whitespace-nowrap rounded-none border-b-2 px-1 py-3 font-medium",
                 )}
                 aria-current={tab.current ? "page" : undefined}
