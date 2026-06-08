@@ -58,10 +58,10 @@ const base = [
   // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
   "dark:before:hidden",
   // Background color applied to control in dark mode
-  "dark:bg-white/5 dark:group-data-[checked]:bg-[--radio-checked-bg]",
+  "dark:bg-inset dark:group-data-[checked]:bg-[--radio-checked-bg]",
   // Border
   "border border-zinc-950/15 group-data-[checked]:border-transparent group-data-[checked]:group-data-[hover]:border-transparent group-data-[hover]:border-zinc-950/30 group-data-[checked]:bg-[--radio-checked-border]",
-  "dark:border-white/15 dark:group-data-[checked]:border-white/5 dark:group-data-[checked]:group-data-[hover]:border-white/5 dark:group-data-[hover]:border-white/30",
+  "dark:border-hairline dark:group-data-[checked]:border-white/5 dark:group-data-[checked]:group-data-[hover]:border-white/5 dark:group-data-[hover]:border-strong",
   // Inner highlight shadow
   "after:absolute after:inset-0 after:rounded-full after:shadow-[inset_0_1px_theme(colors.white/15%)]",
   "dark:after:-inset-px dark:after:hidden dark:after:rounded-full dark:group-data-[checked]:after:block",
@@ -79,8 +79,7 @@ const base = [
 
 const colors = {
   "dark/zinc": [
-    "[--radio-checked-bg:theme(colors.zinc.900)] [--radio-checked-border:theme(colors.zinc.950/90%)] [--radio-checked-indicator:theme(colors.white)]",
-    "dark:[--radio-checked-bg:theme(colors.zinc.600)]",
+    "[--radio-checked-bg:rgb(var(--color-accent))] [--radio-checked-border:rgb(var(--color-accent))] [--radio-checked-indicator:rgb(var(--color-on-accent))]",
   ],
   "dark/white": [
     "[--radio-checked-bg:theme(colors.zinc.900)] [--radio-checked-border:theme(colors.zinc.950/90%)] [--radio-checked-indicator:theme(colors.white)]",

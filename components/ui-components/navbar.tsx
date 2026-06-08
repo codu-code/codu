@@ -28,7 +28,7 @@ export function NavbarDivider({
     <div
       aria-hidden="true"
       {...props}
-      className={clsx(className, "h-6 w-px bg-zinc-950/10 dark:bg-white/10")}
+      className={clsx(className, "h-6 w-px bg-hairline")}
     />
   );
 }
@@ -73,21 +73,17 @@ export const NavbarItem = forwardRef(function NavbarItem(
 ) {
   const classes = clsx(
     // Base
-    "relative flex min-w-0 items-center gap-3 rounded-lg p-2 text-left text-base/6 font-medium text-zinc-950 sm:text-sm/5",
+    "relative flex min-w-0 items-center gap-3 rounded-lg p-2 text-left text-base/6 font-medium text-fg sm:text-sm/5",
     // Leading icon/icon-only
-    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:fill-zinc-500 sm:data-[slot=icon]:*:size-5",
+    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:fill-muted sm:data-[slot=icon]:*:size-5",
     // Trailing icon (down chevron or similar)
     "data-[slot=icon]:last:[&:not(:nth-child(2))]:*:ml-auto data-[slot=icon]:last:[&:not(:nth-child(2))]:*:size-5 sm:data-[slot=icon]:last:[&:not(:nth-child(2))]:*:size-4",
     // Avatar
     "data-[slot=avatar]:*:-m-0.5 data-[slot=avatar]:*:size-7 data-[slot=avatar]:*:[--avatar-radius:theme(borderRadius.DEFAULT)] data-[slot=avatar]:*:[--ring-opacity:10%] sm:data-[slot=avatar]:*:size-6",
     // Hover
-    "data-[hover]:bg-zinc-950/5 data-[slot=icon]:*:data-[hover]:fill-zinc-950",
+    "data-[hover]:bg-hover data-[slot=icon]:*:data-[hover]:fill-fg",
     // Active
-    "data-[active]:bg-zinc-950/5 data-[slot=icon]:*:data-[active]:fill-zinc-950",
-    // Dark mode
-    "dark:text-white dark:data-[slot=icon]:*:fill-zinc-400",
-    "dark:data-[hover]:bg-white/5 dark:data-[slot=icon]:*:data-[hover]:fill-white",
-    "dark:data-[active]:bg-white/5 dark:data-[slot=icon]:*:data-[active]:fill-white",
+    "data-[active]:bg-hover data-[slot=icon]:*:data-[active]:fill-fg",
   );
 
   return (
@@ -95,7 +91,7 @@ export const NavbarItem = forwardRef(function NavbarItem(
       {current && (
         <motion.span
           layoutId="current-indicator"
-          className="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white"
+          className="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-accent"
         />
       )}
       {"href" in props ? (

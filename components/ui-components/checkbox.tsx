@@ -56,10 +56,10 @@ const base = [
   // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
   "dark:before:hidden",
   // Background color applied to control in dark mode
-  "dark:bg-white/5 dark:group-data-[checked]:bg-[--checkbox-checked-bg]",
+  "dark:bg-inset dark:group-data-[checked]:bg-[--checkbox-checked-bg]",
   // Border
   "border border-zinc-950/15 group-data-[checked]:border-transparent group-data-[checked]:group-data-[hover]:border-transparent group-data-[hover]:border-zinc-950/30 group-data-[checked]:bg-[--checkbox-checked-border]",
-  "dark:border-white/15 dark:group-data-[checked]:border-white/5 dark:group-data-[checked]:group-data-[hover]:border-white/5 dark:group-data-[hover]:border-white/30",
+  "dark:border-hairline dark:group-data-[checked]:border-white/5 dark:group-data-[checked]:group-data-[hover]:border-white/5 dark:group-data-[hover]:border-strong",
   // Inner highlight shadow
   "after:absolute after:inset-0 after:rounded-[calc(0.3125rem-1px)] after:shadow-[inset_0_1px_theme(colors.white/15%)]",
   "dark:after:-inset-px dark:after:hidden dark:after:rounded-[0.3125rem] dark:group-data-[checked]:after:block",
@@ -76,8 +76,7 @@ const base = [
 
 const colors = {
   "dark/zinc": [
-    "[--checkbox-check:theme(colors.white)] [--checkbox-checked-bg:theme(colors.zinc.900)] [--checkbox-checked-border:theme(colors.zinc.950/90%)]",
-    "dark:[--checkbox-checked-bg:theme(colors.zinc.600)]",
+    "[--checkbox-check:rgb(var(--color-on-accent))] [--checkbox-checked-bg:rgb(var(--color-accent))] [--checkbox-checked-border:rgb(var(--color-accent))]",
   ],
   "dark/white": [
     "[--checkbox-check:theme(colors.white)] [--checkbox-checked-bg:theme(colors.zinc.900)] [--checkbox-checked-border:theme(colors.zinc.950/90%)]",

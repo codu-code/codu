@@ -53,7 +53,7 @@ export function Table({
               !bleed && "sm:px-[--gutter]",
             )}
           >
-            <table className="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">
+            <table className="min-w-full text-left text-sm/6 text-fg">
               {children}
             </table>
           </div>
@@ -70,7 +70,7 @@ export function TableHead({
   return (
     <thead
       {...props}
-      className={clsx(className, "text-zinc-500 dark:text-zinc-400")}
+      className={clsx(className, "text-muted")}
     />
   );
 }
@@ -113,12 +113,10 @@ export function TableRow({
         className={clsx(
           className,
           href &&
-            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-accent dark:focus-within:bg-white/[2.5%]",
-          striped && "even:bg-zinc-950/[2.5%] dark:even:bg-white/[2.5%]",
-          href && striped && "hover:bg-zinc-950/5 dark:hover:bg-white/5",
-          href &&
-            !striped &&
-            "hover:bg-zinc-950/[2.5%] dark:hover:bg-white/[2.5%]",
+            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-accent focus-within:bg-hover/50",
+          striped && "even:bg-hover/50",
+          href && striped && "hover:bg-hover",
+          href && !striped && "hover:bg-hover/50",
         )}
       />
     </TableRowContext.Provider>
@@ -136,9 +134,8 @@ export function TableHeader({
       {...props}
       className={clsx(
         className,
-        "border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] dark:border-b-white/10",
-        grid &&
-          "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
+        "border-b border-b-hairline px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))]",
+        grid && "border-l border-l-hairline first:border-l-0",
         !bleed && "sm:first:pl-1 sm:last:pr-1",
       )}
     />
@@ -161,9 +158,8 @@ export function TableCell({
       className={clsx(
         className,
         "relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))]",
-        !striped && "border-b border-zinc-950/5 dark:border-white/5",
-        grid &&
-          "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
+        !striped && "border-b border-hairline",
+        grid && "border-l border-l-hairline first:border-l-0",
         dense ? "py-2.5" : "py-4",
         !bleed && "sm:first:pl-1 sm:last:pr-1",
       )}

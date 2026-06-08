@@ -28,7 +28,9 @@ export function Avatar({
         className,
         // Basic layout
         "inline-grid shrink-0 align-middle *:col-start-1 *:row-start-1",
-        "outline outline-1 -outline-offset-1 outline-black/[--ring-opacity] dark:outline-white/[--ring-opacity]",
+        // Brand mint fallback for initials; image covers it when src is present
+        "bg-accent text-on-accent",
+        "outline outline-1 -outline-offset-1 outline-hairline/[--ring-opacity]",
         // Add the correct border radius
         square
           ? "rounded-[--avatar-radius] *:rounded-[--avatar-radius]"
