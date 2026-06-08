@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { EditorContent } from "@tiptap/react";
-import TextareaAutosize from "react-textarea-autosize";
-import { InformationCircleIcon } from "@heroicons/react/20/solid";
-import { useDiscussionEditor } from "./hooks/useEditor";
-import { DiscussionEditorToolbar } from "./Toolbar";
-import { MarkdownHelpModal } from "./MarkdownHelpModal";
+import { useEffect, useState } from "react";
+import {
+  AaToggle,
+  MdTextarea,
+  RichToolbar,
+  useRichText,
+} from "@/components/RichText";
 import type { DiscussionEditorProps } from "./types";
 
+/**
+ * Markdown-first discussion composer. Storage is always markdown; the toolbar
+ * wraps markdown tokens around the textarea selection. Keeps the collapsed
+ * trigger behaviour and the onSubmit(markdown) + submitLabel contract so
+ * DiscussionArea works unchanged.
+ */
 export function DiscussionEditor({
   onSubmit,
   onCancel,
@@ -18,34 +24,40 @@ export function DiscussionEditor({
   submitLabel = "Comment",
   disabled = false,
 }: DiscussionEditorProps) {
-  const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
-  const [showToolbar, setShowToolbar] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(autoExpand);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { text, setText, toolbar, setToolbar, ref, exec } =
+    useRichText(initialContent);
 
-  const {
-    editor,
-    isExpanded,
-    mode,
-    markdownContent,
-    isSubmitting,
-    setMarkdownContent,
-    toggleMode,
-    expand,
-    handleSubmit,
-    handleCancel,
-    isEmpty,
-  } = useDiscussionEditor({
-    initialContent,
-    autoExpand,
-    placeholder: "What are your thoughts?",
-    onSubmit,
-  });
+  // Focus the textarea once expanded.
+  useEffect(() => {
+    if (isExpanded) ref.current?.focus();
+  }, [isExpanded, ref]);
 
-  // Collapsed state
+  const reset = () => {
+    setText(initialContent);
+    setToolbar(false);
+    if (!autoExpand) setIsExpanded(false);
+  };
+
+  const handleSubmit = async () => {
+    const markdown = text.trim();
+    if (!markdown || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmit(markdown);
+      reset();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Collapsed state — the trigger keeps the existing label text.
   if (!isExpanded) {
     return (
       <button
         type="button"
-        onClick={expand}
+        onClick={() => setIsExpanded(true)}
         disabled={disabled}
         className="w-full rounded-lg border border-hairline bg-inset px-4 py-3 text-left text-muted transition-colors hover:border-strong disabled:cursor-not-allowed disabled:opacity-50"
       >
@@ -54,95 +66,36 @@ export function DiscussionEditor({
     );
   }
 
-  // Expanded state
+  const isEmpty = text.trim().length === 0;
+
   return (
     <div className="overflow-hidden rounded-lg border border-hairline bg-surface focus-within:border-strong">
-      {mode === "rich" && (
-        <>
-          {/* Toolbar row - only show when showToolbar is true */}
-          {showToolbar && (
-            <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
-              <DiscussionEditorToolbar editor={editor} />
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="ml-2 whitespace-nowrap text-xs text-accent-soft hover:text-accent hover:underline"
-              >
-                Switch to Markdown
-              </button>
-            </div>
-          )}
-
-          <EditorContent
-            editor={editor}
-            className="min-h-[60px] text-fg [&_.ProseMirror:focus]:outline-none [&_.ProseMirror]:min-h-[60px] [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-1.5 [&_.ProseMirror]:text-sm [&_.ProseMirror]:outline-none"
+      <div className="flex flex-col gap-2 p-2.5">
+        {toolbar && (
+          <RichToolbar
+            exec={exec}
+            onSwitchToMarkdown={() => setToolbar(false)}
+            compact
           />
-        </>
-      )}
-
-      {mode === "markdown" && (
-        <>
-          <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted">
-                Markdown Editor
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowMarkdownHelp(true)}
-                className="text-faint transition-colors hover:text-fg"
-                aria-label="Markdown help"
-              >
-                <InformationCircleIcon className="h-4 w-4" />
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={toggleMode}
-              className="text-xs text-accent-soft hover:text-accent hover:underline"
-            >
-              Switch to Rich Text Editor
-            </button>
-          </div>
-
-          <TextareaAutosize
-            value={markdownContent}
-            onChange={(e) => setMarkdownContent(e.target.value)}
-            placeholder="What are your thoughts?"
-            minRows={2}
-            className="w-full resize-y border-none bg-transparent px-3 py-1.5 text-sm text-fg placeholder:text-faint focus:outline-none focus:ring-0"
-          />
-        </>
-      )}
+        )}
+        <MdTextarea
+          ref={ref}
+          value={text}
+          onValueChange={setText}
+          placeholder="What are your thoughts?"
+          minRows={2}
+          className="px-1"
+        />
+      </div>
 
       <div className="flex items-center justify-between border-t border-hairline bg-inset px-3 py-2">
-        {/* Format toggle button (Aa) - only in rich text mode */}
-        {mode === "rich" ? (
-          <button
-            type="button"
-            onClick={() => setShowToolbar(!showToolbar)}
-            className={`font-serif text-lg transition-colors ${
-              showToolbar
-                ? "text-accent-soft"
-                : "text-faint hover:text-fg"
-            }`}
-            title={
-              showToolbar
-                ? "Hide formatting toolbar"
-                : "Show formatting toolbar"
-            }
-          >
-            Aa
-          </button>
-        ) : (
-          <div />
-        )}
+        <AaToggle on={toolbar} onToggle={() => setToolbar(!toolbar)} />
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => {
-              handleCancel();
+              reset();
               onCancel?.();
             }}
             disabled={isSubmitting}
@@ -153,18 +106,13 @@ export function DiscussionEditor({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting || isEmpty()}
+            disabled={isSubmitting || isEmpty}
             className="primary-button px-4 py-1.5 text-sm"
           >
             {isSubmitting ? "Submitting..." : submitLabel}
           </button>
         </div>
       </div>
-
-      <MarkdownHelpModal
-        open={showMarkdownHelp}
-        onClose={() => setShowMarkdownHelp(false)}
-      />
     </div>
   );
 }

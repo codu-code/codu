@@ -162,10 +162,12 @@ test.describe("Authenticated Article Flows", () => {
       .getByRole("button", { name: "Add to the discussion…" })
       .click();
 
-    // The expanded editor is a TipTap editor - click into it then type
+    // The expanded editor is a markdown textarea - fill it directly.
     await page.waitForTimeout(500); // Wait for editor to expand
-    await page.locator(".ProseMirror").first().click();
-    await page.keyboard.type(commentContent);
+    await page
+      .getByPlaceholder("What are your thoughts?")
+      .first()
+      .fill(commentContent);
     // exact: true to avoid matching "Comment options"
     await page.getByRole("button", { name: "Comment", exact: true }).click();
 
@@ -190,9 +192,11 @@ test.describe("Authenticated Article Flows", () => {
 
     // Wait for the reply editor to expand
     await page.waitForTimeout(500);
-    await page.locator(".ProseMirror").last().click();
     const replyText = `Test reply ${Date.now()}`;
-    await page.keyboard.type(replyText);
+    await page
+      .getByPlaceholder("What are your thoughts?")
+      .last()
+      .fill(replyText);
 
     // Submit the reply
     await page

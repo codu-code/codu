@@ -161,9 +161,11 @@ test.describe("Notifications Page", () => {
         .click();
 
       await page.waitForTimeout(500);
-      await page.locator(".ProseMirror").first().click();
       const commentText = `E2E notification test comment ${randomUUID()}`;
-      await page.keyboard.type(commentText);
+      await page
+        .getByPlaceholder("What are your thoughts?")
+        .first()
+        .fill(commentText);
       await page.getByRole("button", { name: "Comment", exact: true }).click();
 
       // Verify comment was posted - this confirms the mutation completed and notification was created
@@ -207,9 +209,11 @@ test.describe("Notifications Page", () => {
         .getByRole("button", { name: /Add to the discussion/ })
         .click();
       await page.waitForTimeout(500);
-      await page.locator(".ProseMirror").first().click();
       const originalComment = `Original comment for reply test ${randomUUID()}`;
-      await page.keyboard.type(originalComment);
+      await page
+        .getByPlaceholder("What are your thoughts?")
+        .first()
+        .fill(originalComment);
       await page.getByRole("button", { name: "Comment", exact: true }).click();
 
       // Verify comment was posted
@@ -241,12 +245,13 @@ test.describe("Notifications Page", () => {
       // Wait for reply editor to expand
       await page.waitForTimeout(500);
 
-      // The reply editor appears within the same comment section
-      // Find the ProseMirror editor that appeared after clicking Reply
-      const replyEditor = commentSection.locator(".ProseMirror").first();
-      await replyEditor.click();
+      // The reply editor appears within the same comment section — type into
+      // its markdown textarea.
       const replyText = `Reply to trigger notification ${randomUUID()}`;
-      await page.keyboard.type(replyText);
+      await commentSection
+        .getByPlaceholder("What are your thoughts?")
+        .first()
+        .fill(replyText);
 
       // Submit the reply - click the Reply button within the reply form
       // The submit button has the same text "Reply" as the expand button, but it's the last one

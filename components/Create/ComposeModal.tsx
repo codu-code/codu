@@ -7,6 +7,12 @@ import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { api } from "@/server/trpc/react";
 import { useLinkMetadata } from "@/components/PostEditor/hooks/useLinkMetadata";
+import {
+  AaToggle,
+  MdTextarea,
+  RichToolbar,
+  useRichText,
+} from "@/components/RichText";
 
 export type ComposeMode = "discussion" | "link" | "article";
 
@@ -40,7 +46,14 @@ export function ComposeModal({
   const utils = api.useUtils();
   const [tab, setTab] = useState<ComposeMode>(mode);
   const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const {
+    text: body,
+    setText: setBody,
+    toolbar: bodyToolbar,
+    setToolbar: setBodyToolbar,
+    ref: bodyRef,
+    exec: bodyExec,
+  } = useRichText("");
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
@@ -285,17 +298,34 @@ export function ComposeModal({
                   </div>
                 )}
 
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={tab === "link" ? 3 : 6}
-                  placeholder={
-                    tab === "link"
-                      ? "Add your take — why is this worth the click? (optional)"
-                      : "Body — context, what you tried, what you're asking. Markdown supported. (optional)"
-                  }
-                  className="w-full resize-y rounded-md border border-hairline bg-inset p-3 text-sm leading-relaxed text-fg outline-none focus:outline-none placeholder:text-faint"
-                />
+                <div className="overflow-hidden rounded-md border border-hairline bg-canvas focus-within:border-strong">
+                  <div className="flex flex-col gap-2 p-2.5">
+                    {bodyToolbar && (
+                      <RichToolbar
+                        exec={bodyExec}
+                        onSwitchToMarkdown={() => setBodyToolbar(false)}
+                      />
+                    )}
+                    <MdTextarea
+                      ref={bodyRef}
+                      value={body}
+                      onValueChange={setBody}
+                      minRows={tab === "link" ? 3 : 6}
+                      placeholder={
+                        tab === "link"
+                          ? "Add your take — why is this worth the click? (optional)"
+                          : "Body — context, what you tried, what you're asking. Markdown supported. (optional)"
+                      }
+                      className="px-1"
+                    />
+                  </div>
+                  <div className="flex items-center border-t border-hairline bg-inset px-2.5 py-2">
+                    <AaToggle
+                      on={bodyToolbar}
+                      onToggle={() => setBodyToolbar(!bodyToolbar)}
+                    />
+                  </div>
+                </div>
 
                 <div className="flex flex-wrap items-center gap-2 rounded-md border border-hairline bg-inset px-2.5 py-2">
                   {tags.map((t) => (
