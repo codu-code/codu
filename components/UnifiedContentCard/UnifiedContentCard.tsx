@@ -249,7 +249,24 @@ const UnifiedContentCard = ({
             <span className="whitespace-nowrap font-mono text-xs text-faint">
               {handle ? `@${handle}` : ""}
               {relativeTime ? `${handle ? " · " : ""}${relativeTime}` : ""}
-              {type === "LINK" && source?.name ? ` · via ${source.name}` : ""}
+              {type === "LINK" && source?.name ? (
+                <>
+                  {" · in "}
+                  {source.slug ? (
+                    <Link
+                      href={`/${source.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-accent-soft hover:text-accent"
+                    >
+                      {source.name}
+                    </Link>
+                  ) : (
+                    <span className="text-accent-soft">{source.name}</span>
+                  )}
+                </>
+              ) : (
+                ""
+              )}
               {readTimeMins ? ` · ${readTimeMins} min` : ""}
             </span>
           </div>

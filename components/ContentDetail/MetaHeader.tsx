@@ -109,12 +109,13 @@ const ContentMetaHeader = ({
 
   // Render source info (for feed articles)
   if (source) {
-    const sourceLink = source.slug ? `/feed/${source.slug}` : "#";
+    const sourceLink = source.slug ? `/${source.slug}` : "#";
     return (
       <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
         <Link
           href={sourceLink}
-          className="flex items-center gap-2 hover:text-fg"
+          className="flex items-center gap-2"
+          onClick={(e) => e.stopPropagation()}
         >
           {source.logo ? (
             <img
@@ -129,7 +130,9 @@ const ContentMetaHeader = ({
               {source.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
-          <span className="font-medium">{source.name || "Unknown Source"}</span>
+          <span className="whitespace-nowrap font-mono text-accent-soft hover:text-accent">
+            in {source.name || "Unknown Source"}
+          </span>
         </Link>
         {source.author &&
           source.author.trim() &&

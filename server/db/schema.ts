@@ -2211,3 +2211,46 @@ export const followRelations = relations(follow, ({ one }) => ({
     relationName: "follow_following",
   }),
 }));
+
+// PUBLICATION FOLLOW (users following a feed source / "publication")
+
+export const publication_follow = pgTable(
+  "publication_follow",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sourceId: integer("source_id")
+      .notNull()
+      .references(() => feed_sources.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pairKey: uniqueIndex("publication_follow_pair_idx").on(
+      table.userId,
+      table.sourceId,
+    ),
+    sourceIdx: index("publication_follow_source_idx").on(table.sourceId),
+  }),
+);
+
+export const publicationFollowRelations = relations(
+  publication_follow,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [publication_follow.userId],
+      references: [user.id],
+    }),
+    source: one(feed_sources, {
+      fields: [publication_follow.sourceId],
+      references: [feed_sources.id],
+    }),
+  }),
+);
