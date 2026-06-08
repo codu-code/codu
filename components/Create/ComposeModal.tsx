@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { api } from "@/server/trpc/react";
+import { useLinkMetadata } from "@/components/PostEditor/hooks/useLinkMetadata";
 
 export type ComposeMode = "discussion" | "link" | "article";
 
@@ -62,6 +63,19 @@ export function ComposeModal({
     });
 
   const domain = parseDomain(url);
+
+  // Normalised URL we feed to the OG metadata fetcher (only when it looks valid).
+  const normalisedUrl =
+    tab === "link" && domain
+      ? url.startsWith("http")
+        ? url
+        : `https://${url}`
+      : "";
+  const { metadata: linkMeta, isLoading: linkMetaLoading } =
+    useLinkMetadata(normalisedUrl);
+  const previewImage = linkMeta?.image ?? null;
+  const previewTitle = title.trim() || linkMeta?.title || "";
+
   const canPost =
     title.trim().length > 0 &&
     (tab === "discussion" || (tab === "link" && !!domain));
@@ -209,12 +223,12 @@ export function ComposeModal({
                       ? "Title — what should people know before they click?"
                       : "An honest, specific title"
                   }
-                  className="w-full resize-none bg-transparent font-display text-xl font-bold leading-tight tracking-tight text-fg outline-none placeholder:text-faint"
+                  className="w-full resize-none border-0 bg-transparent font-display text-xl font-bold leading-tight tracking-tight text-fg outline-none placeholder:text-faint focus:outline-none focus:ring-0"
                 />
 
                 {tab === "link" && (
                   <div>
-                    <div className="flex items-center gap-2 rounded-md border border-hairline bg-canvas px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 rounded-md border border-hairline bg-inset px-3.5 py-2.5">
                       <span className="font-mono text-xs uppercase tracking-[0.1em] text-faint">
                         URL
                       </span>
@@ -222,7 +236,7 @@ export function ComposeModal({
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://…"
-                        className="flex-1 bg-transparent font-mono text-sm text-fg outline-none"
+                        className="flex-1 border-0 bg-transparent font-mono text-sm text-fg outline-none focus:outline-none focus:ring-0 placeholder:text-faint"
                       />
                       {url && !domain && (
                         <span className="font-mono text-[10px] text-warning">
@@ -230,13 +244,42 @@ export function ComposeModal({
                         </span>
                       )}
                     </div>
+
+                    {/* Feed-card-style preview: header image OVER the title */}
                     {domain && (
-                      <div className="mt-2 flex items-center gap-2 rounded-md border border-hairline bg-canvas px-3 py-2">
-                        <span className="h-3.5 w-3.5 shrink-0 rounded-sm bg-accent" />
-                        <span className="truncate font-mono text-[11px] text-faint">
-                          {domain} — we fetch the title, description &amp; preview
-                          image
-                        </span>
+                      <div className="mt-3 overflow-hidden rounded-lg border border-hairline bg-surface">
+                        {previewImage ? (
+                          <img
+                            src={previewImage}
+                            alt={previewTitle || "Link preview"}
+                            className="aspect-video w-full bg-inset object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <div className="flex aspect-video w-full items-center justify-center bg-inset">
+                            <span className="font-mono text-[11px] text-faint">
+                              {linkMetaLoading
+                                ? "fetching preview…"
+                                : "preview image"}
+                            </span>
+                          </div>
+                        )}
+                        <div className="p-4">
+                          <h4 className="font-display text-base font-bold leading-snug tracking-tight text-fg">
+                            {previewTitle || "Your title will appear here"}
+                          </h4>
+                          <div className="mt-1.5 flex items-center gap-2 font-mono text-[11px] text-faint">
+                            <span className="h-2.5 w-2.5 shrink-0 rounded-sm bg-accent" />
+                            <span className="truncate">{domain}</span>
+                          </div>
+                          {body.trim() && (
+                            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">
+                              {body.trim()}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -251,11 +294,11 @@ export function ComposeModal({
                       ? "Add your take — why is this worth the click? (optional)"
                       : "Body — context, what you tried, what you're asking. Markdown supported. (optional)"
                   }
-                  className="w-full resize-y rounded-md border border-hairline bg-canvas p-3 text-sm leading-relaxed text-fg outline-none placeholder:text-faint"
+                  className="w-full resize-y rounded-md border border-hairline bg-inset p-3 text-sm leading-relaxed text-fg outline-none focus:outline-none placeholder:text-faint"
                 />
 
                 {/* tags */}
-                <div className="flex flex-wrap items-center gap-2 rounded-md border border-hairline bg-canvas px-2.5 py-2">
+                <div className="flex flex-wrap items-center gap-2 rounded-md border border-hairline bg-inset px-2.5 py-2">
                   {tags.map((t) => (
                     <span
                       key={t}
@@ -284,7 +327,7 @@ export function ComposeModal({
                         }
                       }}
                       placeholder={tags.length ? "Add another…" : `Add up to ${TAG_MAX} tags…`}
-                      className="min-w-[120px] flex-1 bg-transparent font-mono text-xs text-fg outline-none placeholder:text-faint"
+                      className="min-w-[120px] flex-1 border-0 bg-transparent font-mono text-xs text-fg outline-none focus:outline-none focus:ring-0 placeholder:text-faint"
                     />
                   )}
                 </div>

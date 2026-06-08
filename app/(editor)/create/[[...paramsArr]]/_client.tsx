@@ -30,12 +30,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import Markdoc from "@markdoc/markdoc";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
-import {
-  notFound,
-  useParams,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
 import { Switch } from "@/components/Switch/Switch";
 import copy from "copy-to-clipboard";
@@ -45,63 +40,20 @@ import {
   isValidScheduleTime,
   status,
 } from "@/utils/post";
-import {
-  PenLine,
-  Link as LinkIcon,
-  Eye,
-  EyeOff,
-  Settings2,
-  Share2,
-} from "lucide-react";
+import { Eye, EyeOff, Settings2, Share2 } from "lucide-react";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
-import { motion, LayoutGroup } from "framer-motion";
 
 // Import new PostEditor components
 import { WriteTab } from "@/components/PostEditor/tabs/WriteTab";
-import { LinkTab } from "@/components/PostEditor/tabs/LinkTab";
 import { TagInput } from "@/components/PostEditor/components/TagInput";
-import type { LinkMetadata } from "@/components/PostEditor/hooks/useLinkMetadata";
-
-type PostType = "write" | "link";
-
-const TAB_CONFIG = [
-  {
-    id: "write" as const,
-    label: "Write",
-    icon: PenLine,
-    description: "Write an article",
-  },
-  {
-    id: "link" as const,
-    label: "Link",
-    icon: LinkIcon,
-    description: "Share a link",
-  },
-];
 
 // Inner component that uses useSearchParams
 const CreateContent = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const postId = params?.paramsArr?.[0] || "";
-
-  // Tab state from URL
-  const initialTab = (searchParams.get("tab") as PostType) || "write";
-  const [activeTab, setActiveTab] = useState<PostType>(initialTab);
-
-  // Handle tab change with URL update
-  const handleTabChange = useCallback(
-    (tab: PostType) => {
-      setActiveTab(tab);
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.set("tab", tab);
-      router.replace(`?${newParams.toString()}`, { scroll: false });
-    },
-    [searchParams, router],
-  );
 
   // Form state
   const [title, setTitle] = useState("");
@@ -110,11 +62,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const [excerpt, setExcerpt] = useState("");
   const [canonicalUrl, setCanonicalUrl] = useState("");
   const [publishedTime, setPublishedTime] = useState("");
-
-  // Link tab state
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkTitle, setLinkTitle] = useState("");
-  const [linkMetadata, setLinkMetadata] = useState<LinkMetadata | null>(null);
 
   // UI state
   const [viewPreview, setViewPreview] = useState(false);
@@ -126,12 +73,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const formPopulatedRef = useRef(false);
   const [copied, setCopied] = useState(false);
   const [postStatus, setPostStatus] = useState<PostStatus | null>(null);
-
-  // Tab locking - disable switching when content exists
-  const hasWriteContent = body.trim().length > 0;
-  const hasLinkContent = linkUrl.trim().length > 0;
-  const isWriteTabDisabled = hasLinkContent && activeTab === "link";
-  const isLinkTabDisabled = hasWriteContent && activeTab === "write";
 
   const { setUnsavedChanges: _setUnsaved } = usePrompt();
 
@@ -230,15 +171,11 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     if (!postId) {
       // Create new content
       const result = await create({
-        type: activeTab === "link" ? "LINK" : "POST",
-        title: activeTab === "link" ? linkTitle || title : formData.title,
-        body: activeTab === "link" ? "" : formData.body,
-        excerpt:
-          activeTab === "link"
-            ? linkMetadata?.description || ""
-            : formData.excerpt,
-        canonicalUrl: activeTab === "write" ? formData.canonicalUrl : undefined,
-        externalUrl: activeTab === "link" ? linkUrl : undefined,
+        type: "POST",
+        title: formData.title,
+        body: formData.body,
+        excerpt: formData.excerpt,
+        canonicalUrl: formData.canonicalUrl,
         tags: formData.tags,
         published: false,
       });
@@ -253,14 +190,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     } else {
       await save({
         id: postId,
-        title: activeTab === "link" ? linkTitle || title : formData.title,
-        body: activeTab === "link" ? "" : formData.body,
-        excerpt:
-          activeTab === "link"
-            ? linkMetadata?.description || ""
-            : formData.excerpt,
-        canonicalUrl: activeTab === "write" ? formData.canonicalUrl : undefined,
-        externalUrl: activeTab === "link" ? linkUrl : undefined,
+        title: formData.title,
+        body: formData.body,
+        excerpt: formData.excerpt,
+        canonicalUrl: formData.canonicalUrl,
         tags: formData.tags,
       });
       setSavedTime(
@@ -272,17 +205,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       setUnsavedChanges(false);
       return postId;
     }
-  }, [
-    getFormData,
-    postId,
-    create,
-    save,
-    activeTab,
-    linkTitle,
-    title,
-    linkUrl,
-    linkMetadata,
-  ]);
+  }, [getFormData, postId, create, save]);
 
   const hasLoadingState =
     publishStatus === "pending" ||
@@ -295,27 +218,18 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
   // Handle publish/submit
   const onSubmit = async () => {
-    // Validate content BEFORE saving
-    if (activeTab === "write") {
-      // For write tab, validate markdoc syntax
-      const ast = Markdoc.parse(body);
-      const errors = Markdoc.validate(ast, config).filter(
-        (e) => e.error.level === "critical",
-      );
+    // Validate markdoc syntax before saving
+    const ast = Markdoc.parse(body);
+    const errors = Markdoc.validate(ast, config).filter(
+      (e) => e.error.level === "critical",
+    );
 
-      if (errors.length > 0) {
-        console.error(errors);
-        errors.forEach((err) => {
-          toast.error(err.error.message);
-        });
-        return;
-      }
-    } else {
-      // For link tab, validate URL and title
-      if (!linkUrl || !linkTitle) {
-        toast.error("URL and title are required for link posts");
-        return;
-      }
+    if (errors.length > 0) {
+      console.error(errors);
+      errors.forEach((err) => {
+        toast.error(err.error.message);
+      });
+      return;
     }
 
     try {
@@ -334,10 +248,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
       const formData = getFormData();
 
-      // Additional content validation for write tab
-      if (activeTab === "write") {
-        ConfirmContentSchema.parse(formData);
-      }
+      // Additional content validation
+      ConfirmContentSchema.parse(formData);
 
       // Use the saved post ID (not the one from URL params which might be stale)
       // Use mutateAsync pattern for proper await
@@ -403,20 +315,13 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       tags: existingTags,
       publishedAt,
       canonicalUrl: existingCanonical,
-      type: postType,
-      externalUrl,
     } = data;
 
-    // Handle link posts vs article posts (case-insensitive check)
-    if (postType?.toLowerCase() === "link") {
-      setLinkTitle(existingTitle || "");
-      setLinkUrl(externalUrl || "");
-      setActiveTab("link");
-    } else {
-      setTitle(existingTitle || "");
-      setBody(existingBody || "");
-      setCanonicalUrl(existingCanonical || "");
-    }
+    // The editor is article-only now (links are created from the compose
+    // modal). Load whatever title/body exists into the article fields.
+    setTitle(existingTitle || "");
+    setBody(existingBody || "");
+    setCanonicalUrl(existingCanonical || "");
 
     setExcerpt(existingExcerpt || "");
     setTags(existingTags.map(({ tag }) => tag.title.toUpperCase()));
@@ -446,12 +351,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   // Auto-save for drafts - use queueMicrotask to defer the mutation call
   useEffect(() => {
     if (currentPostStatus !== status.DRAFT) return;
-    // For write tab, require both title and body; for link tab, require url and title
-    if (activeTab === "write") {
-      if (title.length < 5 || body.length < 10) return;
-    } else {
-      if (!linkUrl || !linkTitle) return;
-    }
+    if (title.length < 5 || body.length < 10) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     if (unsavedChanges) {
       // Defer the save call to avoid synchronous setState in effect
@@ -466,41 +366,25 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     savePost,
     title,
     body,
-    activeTab,
-    linkUrl,
-    linkTitle,
   ]);
 
-  // Redirect after creating new post - preserve tab parameter
+  // Redirect after creating new post
   useEffect(() => {
     if (!createData?.id) return;
-    const tabParam = activeTab !== "write" ? `?tab=${activeTab}` : "";
-    router.push(`create/${createData.id}${tabParam}`);
-  }, [createData, router, activeTab]);
+    router.push(`create/${createData.id}`);
+  }, [createData, router]);
 
   // Check if form has enough content
-  const hasContent =
-    activeTab === "write"
-      ? title.length >= 5 && body.length >= 10
-      : linkUrl.length > 0 && linkTitle.length > 0;
+  const hasContent = title.length >= 5 && body.length >= 10;
 
   const isDisabled = hasLoadingState || !hasContent;
 
-  // Track unsaved changes for write tab
+  // Track unsaved changes
   useEffect(() => {
-    if (activeTab !== "write") return;
     if ((title + body).length < 5) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnsavedChanges(true);
-  }, [title, body, activeTab]);
-
-  // Track unsaved changes for link tab
-  useEffect(() => {
-    if (activeTab !== "link") return;
-    if (!linkUrl && !linkTitle) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUnsavedChanges(true);
-  }, [linkUrl, linkTitle, activeTab]);
+  }, [title, body]);
 
   // Note: Redirect after publish is now handled directly in onSubmit for better flow control
 
@@ -517,17 +401,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const handleBodyChange = useCallback((newBody: string) => {
     setBody(newBody);
   }, []);
-
-  // Handle link metadata
-  const handleMetadataFetched = useCallback(
-    (metadata: LinkMetadata) => {
-      setLinkMetadata(metadata);
-      if (metadata.title && !linkTitle) {
-        setLinkTitle(metadata.title);
-      }
-    },
-    [linkTitle],
-  );
 
   // Get publish button text
   const getPublishButtonText = () => {
@@ -584,21 +457,17 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             >
               <DialogPanel className="mx-auto max-w-md rounded-xl border border-hairline bg-elevated p-8 text-center shadow-xl">
                 <div className="mb-3 text-5xl">
-                  {isPostScheduled ? "⏰" : activeTab === "link" ? "🔗" : "🚀"}
+                  {isPostScheduled ? "⏰" : "🚀"}
                 </div>
                 <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-fg">
                   {isPostScheduled
                     ? "Time travel activated!"
-                    : activeTab === "link"
-                      ? "Spread the word!"
-                      : "Ready to launch?"}
+                    : "Ready to launch?"}
                 </DialogTitle>
                 <p className="mt-3 text-sm text-muted">
                   {isPostScheduled
                     ? `"${title || "Untitled"}" will appear on ${new Date(publishedTime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at ${new Date(publishedTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`
-                    : activeTab === "link"
-                      ? "Share this gem with the community?"
-                      : `Your masterpiece "${title || "Untitled"}" is about to go live!`}
+                    : `Your masterpiece "${title || "Untitled"}" is about to go live!`}
                 </p>
                 <div className="mt-8 flex justify-center gap-3">
                   <button
@@ -606,11 +475,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     onClick={() => setShowPublishConfirm(false)}
                     className="secondary-button"
                   >
-                    {isPostScheduled
-                      ? "Change my mind"
-                      : activeTab === "link"
-                        ? "Not yet"
-                        : "Maybe later"}
+                    {isPostScheduled ? "Change my mind" : "Maybe later"}
                   </button>
                   <button
                     type="button"
@@ -622,9 +487,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                       ? "Working on it..."
                       : isPostScheduled
                         ? "Set it and forget it!"
-                        : activeTab === "link"
-                          ? "Share it!"
-                          : "Let's do this!"}
+                        : "Let's do this!"}
                   </button>
                 </div>
               </DialogPanel>
@@ -654,57 +517,15 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       {/* Main content area - single card layout */}
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
         <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
-          {/* Tab Bar with mint underline */}
+          {/* Editor toolbar */}
           <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-            <LayoutGroup id="editor-tabs">
-              <div className="flex gap-1">
-                {TAB_CONFIG.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  const isDisabledTab =
-                    tab.id === "write" ? isWriteTabDisabled : isLinkTabDisabled;
-
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => !isDisabledTab && handleTabChange(tab.id)}
-                      disabled={isDisabledTab}
-                      title={
-                        isDisabledTab
-                          ? `Clear ${tab.id === "write" ? "link URL" : "article content"} to switch tabs`
-                          : tab.description
-                      }
-                      className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-                        isDisabledTab
-                          ? "cursor-not-allowed opacity-50"
-                          : isActive
-                            ? "text-fg"
-                            : "text-muted hover:text-fg"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {tab.label}
-                      {isActive && (
-                        <motion.div
-                          layoutId="active-tab-indicator"
-                          className="absolute inset-x-0 -bottom-3 h-0.5 bg-accent"
-                          transition={{
-                            type: "spring",
-                            bounce: 0.2,
-                            duration: 0.5,
-                          }}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </LayoutGroup>
+            <span className="font-mono text-xs uppercase tracking-label text-faint">
+              Article
+            </span>
 
             {/* Share Draft & Preview toggle */}
             <div className="flex items-center gap-4">
-              {activeTab === "write" && (createData?.id || postId) && (
+              {(createData?.id || postId) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -718,72 +539,57 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                   Share Draft
                 </button>
               )}
-              {activeTab === "write" && (
-                <button
-                  type="button"
-                  onClick={() => setViewPreview((current) => !current)}
-                  className="flex items-center gap-2 rounded-md border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
-                >
-                  {viewPreview ? (
-                    <>
-                      <EyeOff className="h-4 w-4" />
-                      Edit
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-4 w-4" />
-                      Preview
-                    </>
-                  )}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setViewPreview((current) => !current)}
+                className="flex items-center gap-2 rounded-md border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
+              >
+                {viewPreview ? (
+                  <>
+                    <EyeOff className="h-4 w-4" />
+                    Edit
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
           {/* Editor Content */}
-          {activeTab === "write" ? (
-            viewPreview ? (
-              // Preview mode - matches published article width
-              <section className="px-6 py-8">
-                <article
-                  className="prose prose-neutral mx-auto max-w-none dark:prose-invert lg:prose-lg"
-                  style={{
-                    whiteSpace: "pre-wrap",
-                    overflowWrap: "anywhere",
-                  }}
-                >
-                  <h1>{title || "Untitled"}</h1>
-                  {Markdoc.renderers.react(
-                    Markdoc.transform(Markdoc.parse(body), config),
-                    React,
-                    {
-                      components: markdocComponents,
-                    },
-                  )}
-                </article>
-              </section>
-            ) : (
-              // Edit mode - TipTap Editor
-              <WriteTab
-                initialContent={body}
-                title={title}
-                onTitleChange={handleTitleChange}
-                onBodyChange={handleBodyChange}
-                titlePlaceholder="Article title"
-                editorPlaceholder="Start writing your article..."
-                className="min-h-[500px]"
-              />
-            )
+          {viewPreview ? (
+            // Preview mode - matches published article width
+            <section className="px-6 py-8">
+              <article
+                className="prose prose-neutral mx-auto max-w-none dark:prose-invert lg:prose-lg"
+                style={{
+                  whiteSpace: "pre-wrap",
+                  overflowWrap: "anywhere",
+                }}
+              >
+                <h1>{title || "Untitled"}</h1>
+                {Markdoc.renderers.react(
+                  Markdoc.transform(Markdoc.parse(body), config),
+                  React,
+                  {
+                    components: markdocComponents,
+                  },
+                )}
+              </article>
+            </section>
           ) : (
-            // Link tab
-            <LinkTab
-              url={linkUrl}
-              onUrlChange={setLinkUrl}
-              title={linkTitle}
-              onTitleChange={setLinkTitle}
-              onMetadataFetched={handleMetadataFetched}
-              urlPlaceholder="https://example.com/interesting-article"
-              titlePlaceholder="Link title (auto-populated from URL)"
+            // Edit mode - TipTap Editor
+            <WriteTab
+              initialContent={body}
+              title={title}
+              onTitleChange={handleTitleChange}
+              onBodyChange={handleBodyChange}
+              titlePlaceholder="Article title"
+              editorPlaceholder="Start writing your article..."
+              className="min-h-[500px]"
             />
           )}
 
@@ -798,9 +604,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             />
           </div>
 
-          {/* More Options - collapsible accordion (Write tab only) */}
-          {activeTab === "write" && (
-            <Disclosure>
+          {/* More Options - collapsible accordion */}
+          <Disclosure>
               {({ open: disclosureOpen }) => (
                 <>
                   <DisclosureButton className="flex w-full items-center justify-between border-t border-hairline px-4 py-3 text-left text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg">
@@ -928,28 +733,25 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                 </>
               )}
             </Disclosure>
-          )}
 
           {/* Action Bar */}
           <div className="flex items-center justify-end gap-3 border-t border-hairline px-4 py-3">
-            {activeTab === "write" && (
-              <button
-                type="button"
-                onClick={async () => {
-                  if (isDisabled) return;
-                  await savePost();
-                  toast.success("Draft saved!");
-                }}
-                disabled={!unsavedChanges || isDisabled}
-                className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                  unsavedChanges && !isDisabled
-                    ? "border-hairline bg-surface text-muted hover:bg-elevated hover:text-fg"
-                    : "cursor-not-allowed border-hairline bg-inset text-faint"
-                }`}
-              >
-                {unsavedChanges ? "Save Draft" : "Saved"}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={async () => {
+                if (isDisabled) return;
+                await savePost();
+                toast.success("Draft saved!");
+              }}
+              disabled={!unsavedChanges || isDisabled}
+              className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
+                unsavedChanges && !isDisabled
+                  ? "border-hairline bg-surface text-muted hover:bg-elevated hover:text-fg"
+                  : "cursor-not-allowed border-hairline bg-inset text-faint"
+              }`}
+            >
+              {unsavedChanges ? "Save Draft" : "Saved"}
+            </button>
             <button
               type="button"
               onClick={handlePublish}
