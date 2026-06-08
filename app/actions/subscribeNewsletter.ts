@@ -1,8 +1,10 @@
 "use server";
 
 import { z } from "zod";
+import { headers } from "next/headers";
 import * as Sentry from "@sentry/nextjs";
 import { manageNewsletterSubscription } from "@/server/lib/newsletter";
+import { rateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 
 const emailSchema = z.string().email();
 
@@ -17,6 +19,21 @@ export async function subscribeToNewsletter(
   const parsed = emailSchema.safeParse(email.trim());
   if (!parsed.success) {
     return { ok: false, message: "Please enter a valid email address." };
+  }
+
+  // Public, unauthenticated endpoint — throttle per client IP so it can't be
+  // scripted to exhaust the beehiiv quota or email-bomb addresses.
+  const ip = clientIpFromHeaders(await headers());
+  const { success } = await rateLimit({
+    key: `newsletter-subscribe:${ip}`,
+    limit: 3,
+    windowMs: 3_600_000,
+  });
+  if (!success) {
+    return {
+      ok: false,
+      message: "Too many attempts. Please try again later.",
+    };
   }
 
   try {

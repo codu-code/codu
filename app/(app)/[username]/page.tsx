@@ -152,7 +152,8 @@ export default async function Page(props: {
         {/* Person JSON-LD for profile SEO */}
         <JsonLd data={personSchema} />
 
-        <h1 className="sr-only">{`${shapedProfile.name || shapedProfile.username}'s Coding Profile`}</h1>
+        {/* The visible profile name (rendered as <h1> in _usernameClient) is the
+            single page h1 — no separate sr-only h1 to avoid duplicate headings. */}
         <Content profile={shapedProfile} isOwner={isOwner} session={session} />
       </>
     );

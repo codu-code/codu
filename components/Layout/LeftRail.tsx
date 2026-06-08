@@ -6,6 +6,7 @@ import { type Session } from "next-auth";
 import { api } from "@/server/trpc/react";
 import { Tag } from "@/components/ds";
 import { useShellActions } from "@/components/Create/ShellActionsProvider";
+import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 
 const FOOTER = [
   { name: "Privacy", href: "/privacy" },
@@ -26,10 +27,13 @@ interface LeftRailProps {
 export function LeftRail({ session, username }: LeftRailProps) {
   const pathname = usePathname();
 
+  // Jobs is flag-gated until launch (auto-on in dev).
+  const jobsEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
+
   const nav = [
     { name: "Home", href: "/" },
     { name: "Discussions", href: "/discussions" },
-    { name: "Jobs", href: "/jobs" },
+    ...(jobsEnabled ? [{ name: "Jobs", href: "/jobs" }] : []),
     ...(session
       ? [
           { name: "Notifications", href: "/notifications" },

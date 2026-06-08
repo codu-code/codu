@@ -19,8 +19,15 @@ import sanitizeHtml from "sanitize-html";
 import type { JSONContent } from "@tiptap/core";
 import NotFound from "@/components/NotFound/NotFound";
 import { db } from "@/server/db";
-import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
-import { eq, and, lte, inArray } from "drizzle-orm";
+import {
+  posts,
+  user,
+  feed_sources,
+  post_tags,
+  tag,
+  comments,
+} from "@/server/db/schema";
+import { eq, and, lte, inArray, count, isNull } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
@@ -264,6 +271,17 @@ async function getUserArticleContent(username: string, contentSlug: string) {
   return getUserPost(username, contentSlug);
 }
 
+// Server-side comment count for a piece of content. Mirrors
+// discussion.getContentDiscussionCount so the user-post reader can render the
+// same "Discussion {N}" heading as the source-content reader.
+async function getDiscussionCount(contentId: string) {
+  const [result] = await db
+    .select({ count: count() })
+    .from(comments)
+    .where(and(eq(comments.postId, contentId), isNull(comments.deletedAt)));
+  return result?.count ?? 0;
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const { username, slug } = params;
@@ -493,6 +511,8 @@ const UnifiedPostPage = async (props: Props) => {
       { name: userPost.title },
     ]);
 
+    const discussionCount = await getDiscussionCount(userPost.id);
+
     return (
       <>
         <JsonLd data={articleSchema} />
@@ -607,7 +627,16 @@ const UnifiedPostPage = async (props: Props) => {
               />
             </div>
 
-            <section id="discussion" className="mt-8">
+            <section
+              id="discussion"
+              className="mt-10 border-t border-hairline pt-8"
+            >
+              <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
+                Discussion{" "}
+                <span className="font-sans font-medium text-faint">
+                  {discussionCount}
+                </span>
+              </h2>
               {userPost.showComments ? (
                 <DiscussionArea contentId={userPost.id} noWrapper />
               ) : (
@@ -676,6 +705,8 @@ const UnifiedPostPage = async (props: Props) => {
       },
       { name: userArticle.title },
     ]);
+
+    const discussionCount = await getDiscussionCount(userArticle.id);
 
     return (
       <>
@@ -794,7 +825,16 @@ const UnifiedPostPage = async (props: Props) => {
               />
             </div>
 
-            <section id="discussion" className="mt-8">
+            <section
+              id="discussion"
+              className="mt-10 border-t border-hairline pt-8"
+            >
+              <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
+                Discussion{" "}
+                <span className="font-sans font-medium text-faint">
+                  {discussionCount}
+                </span>
+              </h2>
               {userArticle.showComments ? (
                 <DiscussionArea contentId={userArticle.id} noWrapper />
               ) : (

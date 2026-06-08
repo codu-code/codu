@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/server/trpc/react";
+import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 
 interface CommandPaletteProps {
   onClose: () => void;
@@ -17,10 +18,14 @@ type Item = {
   glyph: string;
 };
 
-const QUICK_ACTIONS: { label: string; href: string }[] = [
+type QuickAction = { label: string; href: string };
+
+// Jobs is flag-gated until launch (auto-on in dev), so the jobs quick action is
+// only included when the flag is enabled.
+const buildQuickActions = (jobsEnabled: boolean): QuickAction[] => [
   { label: "Go to Feed", href: "/" },
   { label: "Browse Discussions", href: "/discussions" },
-  { label: "Find a job", href: "/jobs" },
+  ...(jobsEnabled ? [{ label: "Find a job", href: "/jobs" }] : []),
   { label: "Write a post", href: "/create" },
   { label: "Saved", href: "/saved" },
   { label: "Notifications", href: "/notifications" },
@@ -82,7 +87,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
       }));
       return [...postItems, ...peopleItems, ...tagItems];
     }
-    return QUICK_ACTIONS.map((a) => ({
+    return buildQuickActions(!!isFlagEnabled(FEATURE_FLAGS.JOBS)).map((a) => ({
       id: `a:${a.href}`,
       label: a.label,
       href: a.href,

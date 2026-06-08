@@ -50,6 +50,7 @@ import {
   isNull,
 } from "drizzle-orm";
 import { increment } from "./utils";
+import { enforceRateLimit } from "@/server/lib/rateLimit";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -492,6 +493,16 @@ export const postRouter = createTRPCRouter({
       const slug = generateSlug(input.title);
       const readingTime = calculateReadTime(input.body);
 
+      // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
+      // and this create would go live directly, route it to `in_review` instead
+      // of `published` so a client can't self-publish around review. Mirrors the
+      // publish mutation's gate. When the flag is off, behaviour is unchanged.
+      const moderated = input.status === "published" && isModerationEnabled();
+      if (moderated) {
+        screenContent({ title: input.title, body: input.body });
+      }
+      const dbStatus = moderated ? "in_review" : input.status;
+
       const [newPost] = await ctx.db
         .insert(posts)
         .values({
@@ -505,15 +516,28 @@ export const postRouter = createTRPCRouter({
           authorId,
           slug,
           readingTime,
-          status: input.status,
+          status: dbStatus,
+          // No publishedAt while in review — admin approval sets it.
           publishedAt:
-            input.status === "published" ? new Date().toISOString() : null,
+            input.status === "published" && !moderated
+              ? new Date().toISOString()
+              : null,
           showComments: input.showComments,
         })
         .returning();
 
-      // Engagement: award points for publishing (safe — never throws).
-      if (newPost && input.status === "published") {
+      // Notify the admin there's something to review (fire-and-forget).
+      if (newPost && moderated) {
+        void notifyAdminOfReview({
+          postId: newPost.id,
+          title: input.title,
+          authorName: ctx.session.user.name,
+        });
+      }
+
+      // Engagement: award points for publishing. Skipped under moderation —
+      // the admin-approval path awards on publish. Safe — never throws.
+      if (newPost && input.status === "published" && !moderated) {
         await award({
           userId: authorId,
           action: "post_published",
@@ -563,7 +587,13 @@ export const postRouter = createTRPCRouter({
 
       // Check ownership
       const existing = await ctx.db
-        .select({ authorId: posts.authorId, type: posts.type })
+        .select({
+          authorId: posts.authorId,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          status: posts.status,
+        })
         .from(posts)
         .where(eq(posts.id, input.id))
         .limit(1);
@@ -593,12 +623,29 @@ export const postRouter = createTRPCRouter({
       if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
       if (input.canonicalUrl !== undefined)
         updateData.canonicalUrl = input.canonicalUrl || null;
+
+      // Auto-moderation gate (DEFAULT OFF). A draft→live transition via update
+      // must go through review too, otherwise a client could self-publish by
+      // setting status:"published" here instead of calling publish. Mirrors the
+      // publish mutation's gate.
+      const goingLive =
+        input.status === "published" && existing[0].status !== "published";
+      const moderated = goingLive && isModerationEnabled();
       if (input.status !== undefined) {
-        updateData.status = input.status;
-        if (input.status === "published" && input.publishedAt) {
-          updateData.publishedAt = input.publishedAt;
-        } else if (input.status === "published") {
-          updateData.publishedAt = new Date().toISOString();
+        if (moderated) {
+          screenContent({
+            title: input.title ?? existing[0].title,
+            body: input.body ?? existing[0].body,
+          });
+          updateData.status = "in_review";
+          // No publishedAt while in review — admin approval sets it.
+        } else {
+          updateData.status = input.status;
+          if (input.status === "published" && input.publishedAt) {
+            updateData.publishedAt = input.publishedAt;
+          } else if (input.status === "published") {
+            updateData.publishedAt = new Date().toISOString();
+          }
         }
       }
 
@@ -607,6 +654,15 @@ export const postRouter = createTRPCRouter({
         .set(updateData)
         .where(eq(posts.id, input.id))
         .returning();
+
+      // Notify the admin there's something to review (fire-and-forget).
+      if (updated && moderated) {
+        void notifyAdminOfReview({
+          postId: input.id,
+          title: input.title ?? existing[0].title,
+          authorName: ctx.session.user.name,
+        });
+      }
 
       // Update tags if provided
       if (input.tags !== undefined) {
@@ -1102,6 +1158,15 @@ export const postRouter = createTRPCRouter({
       const updateData: Record<string, unknown> = {};
 
       if (input.published) {
+        // Throttle publishing so a user can't mass-create drafts then
+        // publish-loop to flood the feed. 10 / 5 min, keyed per author.
+        await enforceRateLimit({
+          key: `create:${authorId}`,
+          limit: 10,
+          windowMs: 5 * 60_000,
+          message: "You're posting too fast. Take a breather and try again.",
+        });
+
         // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
         // and the author publishes a draft for the first time, route it to
         // `in_review` rather than `published`: no publishedAt and no points are

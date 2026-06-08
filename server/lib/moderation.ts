@@ -9,6 +9,16 @@
 
 import sendEmail from "@/utils/sendEmail";
 
+/** Escape user-controlled text before interpolating into email HTML. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /** True only when MODERATION_ENABLED is explicitly the string "true". */
 export function isModerationEnabled(): boolean {
   return process.env.MODERATION_ENABLED === "true";
@@ -27,8 +37,8 @@ export async function notifyAdminOfReview(opts: {
   if (!adminEmail) return;
   const base =
     process.env.NEXTAUTH_URL || process.env.AUTH_URL || "https://www.codu.co";
-  const title = opts.title?.trim() || "Untitled post";
-  const by = opts.authorName ? ` by ${opts.authorName}` : "";
+  const title = escapeHtml(opts.title?.trim() || "Untitled post");
+  const by = opts.authorName ? ` by ${escapeHtml(opts.authorName)}` : "";
   try {
     await sendEmail({
       recipient: adminEmail,

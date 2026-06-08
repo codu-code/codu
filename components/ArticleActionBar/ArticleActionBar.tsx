@@ -152,13 +152,13 @@ const ArticleActionBar = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <MenuItems className="absolute bottom-12 left-0 z-10 mt-2 w-48 origin-bottom-left rounded-md bg-elevated py-1 shadow-lg ring-1 ring-hairline focus:outline-none">
+          <MenuItems className="absolute bottom-12 left-0 z-10 mt-2 w-48 origin-bottom-left rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
             <MenuItem>
               <a
                 href={`https://twitter.com/intent/tweet?text="${postTitle}", by ${postUsername}&hashtags=coducommunity,codu&url=${postUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-4 py-2 text-sm text-fg hover:bg-hover"
+                className="block rounded-md px-2 py-2 text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
               >
                 Share to X
               </a>
@@ -168,7 +168,7 @@ const ArticleActionBar = ({
                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${postUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-4 py-2 text-sm text-fg hover:bg-hover"
+                className="block rounded-md px-2 py-2 text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
               >
                 Share to LinkedIn
               </a>
@@ -176,7 +176,7 @@ const ArticleActionBar = ({
             <MenuItem>
               <button
                 onClick={handleCopyLink}
-                className="block w-full px-4 py-2 text-left text-sm text-fg hover:bg-hover"
+                className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
               >
                 Copy link
               </button>
@@ -199,9 +199,9 @@ const ArticleActionBar = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <MenuItems className="absolute bottom-12 right-0 z-10 mt-2 w-40 origin-bottom-right rounded-md bg-elevated py-1 shadow-lg ring-1 ring-hairline focus:outline-none">
+          <MenuItems className="absolute bottom-12 right-0 z-10 mt-2 w-40 origin-bottom-right rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
             <MenuItem>
-              <div className="block w-full px-4 py-2 text-left text-sm text-fg hover:bg-hover">
+              <div className="block w-full rounded-md px-2 py-2 text-left text-sm text-danger transition-colors hover:bg-surface data-[focus]:bg-surface">
                 <ReportModal type="post" title={postTitle} id={postId} />
               </div>
             </MenuItem>

@@ -150,9 +150,7 @@ export default function Welcome() {
       ? interests.length >= 1
       : step === 1
         ? !!exp
-        : step === 2
-          ? focus.length >= 1
-          : true;
+        : true;
 
   const finish = () => {
     if (saving) return;
@@ -285,8 +283,8 @@ export default function Welcome() {
                 What are you here for?
               </h1>
               <p className="mb-6 mt-3 text-lg leading-relaxed text-muted">
-                Pick whatever fits — we&rsquo;ll prioritise the stuff that
-                matches.
+                Pick whatever fits — this just helps us get to know you.
+                Optional, and you can skip it.
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {ONB_FOCUS.map(([id, title, sub]) => (

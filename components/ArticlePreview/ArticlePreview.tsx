@@ -195,12 +195,12 @@ const ArticlePreview: NextPage<Props> = ({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-surface px-1 py-1 shadow-lg ring-1 ring-hairline focus:outline-none">
+                  <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
                     {menuOptions.map((item) => (
                       <MenuItem key={item.label}>
                         {"href" in item ? (
                           <Link
-                            className="block w-full rounded px-4 py-2 text-left text-muted hover:bg-elevated"
+                            className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
                             key={item.label}
                             href={item.href}
                           >
@@ -208,7 +208,7 @@ const ArticlePreview: NextPage<Props> = ({
                           </Link>
                         ) : (
                           <button
-                            className="block w-full rounded px-4 py-2 text-left text-muted hover:bg-elevated"
+                            className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
                             onClick={item.onClick}
                           >
                             {item.label}

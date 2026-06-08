@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { nanoid } from "nanoid";
 import * as Sentry from "@sentry/nextjs";
@@ -155,6 +155,9 @@ export async function getUserBadges(userId: string) {
 }
 
 // ── Referrals ──────────────────────────────────────────────────────────────
+/** Max `referral` point awards a single referrer can earn in a rolling 24h. */
+const REFERRAL_DAILY_CAP = 5;
+
 /**
  * Ensure the user has a referral code, and attribute a pending referral from the
  * `codu_ref` cookie (set on /get-started?ref=). Idempotent + never throws. Call
@@ -190,12 +193,32 @@ export async function ensureReferral(userId: string): Promise<void> {
             .update(user)
             .set({ invitedBy: referrer.id })
             .where(eq(user.id, userId));
-          await award({
-            userId: referrer.id,
-            action: "referral",
-            sourceType: "user",
-            sourceId: userId,
-          });
+
+          // Per-referrer cap: count this referrer's `referral` awards in the
+          // last 24h. Beyond the cap we still attribute the invite (invitedBy
+          // above) but skip the points, so one person spinning up N accounts
+          // each carrying the cookie can't farm unlimited points. Badges are
+          // still re-checked so legitimate progress isn't lost.
+          const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+          const [recent] = await db
+            .select({ c: sql<number>`count(*)` })
+            .from(point_event)
+            .where(
+              and(
+                eq(point_event.userId, referrer.id),
+                eq(point_event.action, "referral"),
+                gte(point_event.createdAt, since),
+              ),
+            );
+
+          if (Number(recent?.c ?? 0) < REFERRAL_DAILY_CAP) {
+            await award({
+              userId: referrer.id,
+              action: "referral",
+              sourceType: "user",
+              sourceId: userId,
+            });
+          }
           await checkBadges(referrer.id);
         }
       }

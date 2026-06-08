@@ -29,6 +29,7 @@ import {
   tag as dbTag,
   user,
   comments,
+  point_event,
 } from "@/server/db/schema";
 import {
   and,
@@ -597,6 +598,20 @@ export const contentRouter = createTRPCRouter({
       const readingTime = calculateReadTime(input.body);
       const dbType = toDbType(input.type);
 
+      // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
+      // and this create would go live directly, route it to `in_review` instead
+      // of `published` so a client can't self-publish around review. Mirrors the
+      // publish mutation's gate. When the flag is off, behaviour is unchanged.
+      const moderated = input.published && isModerationEnabled();
+      if (moderated) {
+        screenContent({ title: input.title, body: input.body });
+      }
+      const dbStatus = moderated
+        ? "in_review"
+        : input.published
+          ? "published"
+          : "draft";
+
       const [newContent] = await ctx.db
         .insert(posts)
         .values({
@@ -610,11 +625,22 @@ export const contentRouter = createTRPCRouter({
           authorId: userId,
           slug,
           readingTime,
-          status: input.published ? "published" : "draft",
-          publishedAt: input.published ? new Date().toISOString() : null,
+          status: dbStatus,
+          // No publishedAt while in review — admin approval sets it.
+          publishedAt:
+            input.published && !moderated ? new Date().toISOString() : null,
           showComments: input.showComments ?? true,
         })
         .returning();
+
+      // Notify the admin there's something to review (fire-and-forget).
+      if (newContent && moderated) {
+        void notifyAdminOfReview({
+          postId: newContent.id,
+          title: input.title,
+          authorName: ctx.session.user.name,
+        });
+      }
 
       // Add tags if provided
       if (input.tags && input.tags.length > 0) {
@@ -651,8 +677,9 @@ export const contentRouter = createTRPCRouter({
       }
 
       // Engagement: award points + check badges when a post goes live directly
-      // (the quick-compose Discussion/Link path). Never throws.
-      if (newContent && input.published) {
+      // (the quick-compose Discussion/Link path). Skipped under moderation —
+      // the admin-approval path awards on publish. Never throws.
+      if (newContent && input.published && !moderated) {
         await award({
           userId,
           action: "post_published",
@@ -672,7 +699,13 @@ export const contentRouter = createTRPCRouter({
 
       // Check ownership
       const existing = await ctx.db
-        .select({ authorId: posts.authorId, type: posts.type })
+        .select({
+          authorId: posts.authorId,
+          type: posts.type,
+          title: posts.title,
+          body: posts.body,
+          status: posts.status,
+        })
         .from(posts)
         .where(eq(posts.id, input.id))
         .limit(1);
@@ -707,10 +740,26 @@ export const contentRouter = createTRPCRouter({
         updateData.canonicalUrl = input.canonicalUrl;
       if (input.showComments !== undefined)
         updateData.showComments = input.showComments;
+
+      // Auto-moderation gate (DEFAULT OFF). A draft→live transition via update
+      // must go through review too, otherwise a client could self-publish by
+      // setting published:true here instead of calling publish. Mirrors the
+      // publish mutation's gate.
+      const goingLive = input.published === true && existing[0].status !== "published";
+      const moderated = goingLive && isModerationEnabled();
       if (input.published !== undefined) {
-        updateData.status = input.published ? "published" : "draft";
-        if (input.published) {
-          updateData.publishedAt = new Date().toISOString();
+        if (moderated) {
+          screenContent({
+            title: input.title ?? existing[0].title,
+            body: input.body ?? existing[0].body,
+          });
+          updateData.status = "in_review";
+          // No publishedAt while in review — admin approval sets it.
+        } else {
+          updateData.status = input.published ? "published" : "draft";
+          if (input.published) {
+            updateData.publishedAt = new Date().toISOString();
+          }
         }
       }
 
@@ -719,6 +768,15 @@ export const contentRouter = createTRPCRouter({
         .set(updateData)
         .where(eq(posts.id, input.id))
         .returning();
+
+      // Notify the admin there's something to review (fire-and-forget).
+      if (updated && moderated) {
+        void notifyAdminOfReview({
+          postId: input.id,
+          title: input.title ?? existing[0].title,
+          authorName: ctx.session.user.name,
+        });
+      }
 
       // Update tags if provided
       if (input.tags !== undefined) {
@@ -826,6 +884,14 @@ export const contentRouter = createTRPCRouter({
         )
         .limit(1);
 
+      // Whether this voter previously had an "up" vote that is now going away
+      // (removed entirely, or switched to "down"). Used to revoke the author's
+      // upvote_received points so a ring can't upvote→unvote to inflate.
+      const revokingUpvote =
+        existingVote.length > 0 &&
+        existingVote[0].voteType === "up" &&
+        voteType !== "up";
+
       // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
         // Remove vote
@@ -847,6 +913,21 @@ export const contentRouter = createTRPCRouter({
           .update(post_votes)
           .set({ voteType: voteType as "up" | "down" })
           .where(eq(post_votes.id, existingVote[0].id));
+      }
+
+      // Revoke the author's awarded point when an upvote is removed/downgraded,
+      // matching the exact (action, sourceId, actorId) tuple awarded below.
+      // Without this an upvote→unvote loop permanently inflates the author.
+      if (revokingUpvote) {
+        await ctx.db
+          .delete(point_event)
+          .where(
+            and(
+              eq(point_event.action, "upvote_received"),
+              eq(point_event.sourceId, contentId),
+              eq(point_event.actorId, userId),
+            ),
+          );
       }
 
       // Award the author points for an upvote (idempotent per voter+post via
@@ -1274,6 +1355,15 @@ export const contentRouter = createTRPCRouter({
 
       // Set publishedAt when publishing
       if (input.published) {
+        // Throttle the same as create's published path — otherwise a user can
+        // mass-create drafts then publish-loop to flood the feed. 10 / 5 min.
+        await enforceRateLimit({
+          key: `create:${userId}`,
+          limit: 10,
+          windowMs: 5 * 60_000,
+          message: "You're posting too fast. Take a breather and try again.",
+        });
+
         // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
         // and the author is publishing a post for the first time (it was a
         // draft), route it to `in_review` instead of `published`: do NOT set

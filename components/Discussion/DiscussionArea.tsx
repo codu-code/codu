@@ -23,6 +23,7 @@ import { EditDiscussionSchema } from "@/schema/discussion";
 import { api } from "@/server/trpc/react";
 import { useReportModal } from "@/components/ReportModal/ReportModal";
 import VoteControl from "@/components/Vote/VoteControl";
+import { FilterPill, type Option } from "@/components/Feed/Filters";
 import { DiscussionEditor } from "./DiscussionEditor";
 
 interface Props {
@@ -30,7 +31,13 @@ interface Props {
   noWrapper?: boolean;
 }
 
-type SortOrder = "top" | "new";
+type SortOrder = "top" | "new" | "oldest";
+
+const sortOptions: Option[] = [
+  { value: "top", label: "Top" },
+  { value: "new", label: "New" },
+  { value: "oldest", label: "Oldest" },
+];
 
 const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   const [showCommentBoxId, setShowCommentBoxId] = useState<string | null>(null);
@@ -103,6 +110,12 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     const sorted = [...items].sort((a, b) => {
       if (sortOrder === "top") {
         return b.score - a.score;
+      }
+      if (sortOrder === "oldest") {
+        // ascending by createdAt
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
       }
       // "new" - sort by createdAt descending
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -275,12 +288,12 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <MenuItems className="absolute right-0 top-8 z-10 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800">
+                        <MenuItems className="absolute right-0 top-8 z-10 w-44 origin-top-right rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
                           {isCurrentUser ? (
                             <>
                               <MenuItem>
                                 <button
-                                  className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black dark:text-neutral-200 dark:hover:bg-neutral-700 dark:data-[focus]:bg-neutral-700 dark:data-[focus]:text-white"
+                                  className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
                                   onClick={() => {
                                     setEditContent(body);
                                     setEditCommentBoxId(id);
@@ -292,7 +305,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                               </MenuItem>
                               <MenuItem>
                                 <button
-                                  className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black dark:text-neutral-200 dark:hover:bg-neutral-700 dark:data-[focus]:bg-neutral-700 dark:data-[focus]:text-white"
+                                  className="block w-full rounded-md px-2 py-2 text-left text-sm text-danger transition-colors hover:bg-surface data-[focus]:bg-surface"
                                   onClick={() => {
                                     deleteDiscussion({ id });
                                   }}
@@ -304,7 +317,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                           ) : (
                             <MenuItem>
                               <button
-                                className="block w-full rounded px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-200 data-[focus]:bg-neutral-100 data-[focus]:text-black dark:text-neutral-200 dark:hover:bg-neutral-700 dark:data-[focus]:bg-neutral-700 dark:data-[focus]:text-white"
+                                className="block w-full rounded-md px-2 py-2 text-left text-sm text-danger transition-colors hover:bg-surface data-[focus]:bg-surface"
                                 onClick={() => {
                                   if (!session) {
                                     signIn();
@@ -341,7 +354,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                     />
                     {depth < 6 && (
                       <button
-                        className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-sm font-medium text-neutral-500 transition-colors hover:border-neutral-300 hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                        className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1 text-sm font-medium text-muted transition-colors hover:border-strong hover:bg-hover hover:text-fg"
                         onClick={() => {
                           if (!session) return signIn();
                           setShowCommentBoxId((currentId) =>
@@ -388,7 +401,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                                 {/* Vertical line from parent avatar area down to this curved connector */}
                                 {isFirst && (
                                   <div
-                                    className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                    className="absolute w-px bg-strong"
                                     style={{
                                       left: "-29px",
                                       top: "-90px",
@@ -398,7 +411,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                                 )}
                                 {/* Curved connector from thread line to this reply */}
                                 <div
-                                  className="absolute border-b border-l border-neutral-400 dark:border-neutral-600"
+                                  className="absolute border-b border-l border-strong"
                                   style={{
                                     left: "-29px",
                                     top: "0px",
@@ -410,7 +423,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                                 {/* Vertical line continues to next reply (if not last) */}
                                 {!isLast && (
                                   <div
-                                    className="absolute w-px bg-neutral-400 dark:bg-neutral-600"
+                                    className="absolute w-px bg-strong"
                                     style={{
                                       left: "-29px",
                                       top: "15px",
@@ -465,28 +478,16 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
       )}
       {/* Sort control (the canonical "Discussion {N}" header is owned by the reader) */}
       {initiallyLoaded && (discussionsResponse?.count ?? 0) > 1 && (
-        <div className="mb-4 flex items-center justify-end gap-2 font-mono text-xs text-faint">
-          <span>{"// "}sort</span>
-          <button
-            onClick={() => setSortOrder("top")}
-            className={`rounded-full px-2.5 py-1 transition-colors ${
-              sortOrder === "top"
-                ? "bg-accent/10 text-accent-soft"
-                : "text-muted hover:text-fg"
-            }`}
-          >
-            Top
-          </button>
-          <button
-            onClick={() => setSortOrder("new")}
-            className={`rounded-full px-2.5 py-1 transition-colors ${
-              sortOrder === "new"
-                ? "bg-accent/10 text-accent-soft"
-                : "text-muted hover:text-fg"
-            }`}
-          >
-            New
-          </button>
+        <div className="mb-4 flex items-center justify-end">
+          <FilterPill
+            testId="discussion-sort"
+            label="Sort comments"
+            value={sortOrder}
+            options={sortOptions}
+            isDefault={sortOrder === "top"}
+            align="right"
+            onChange={(next) => setSortOrder(next as SortOrder)}
+          />
         </div>
       )}
       <div className={discussions?.length ? "mb-8" : ""}>
@@ -548,7 +549,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
 
   return (
     <section
-      className="relative w-full rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900"
+      className="relative w-full rounded-lg border border-hairline bg-surface p-6"
       data-testid="discussion-section"
     >
       {content}

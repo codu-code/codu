@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-type Option = { value: string; label: string };
+export type Option = { value: string; label: string };
 
 type FilterPillProps = {
   /** Currently-selected option value. */
@@ -21,7 +21,7 @@ type FilterPillProps = {
  * Flat, borderless filter trigger that opens a small listbox popover.
  * No icons, no boxed trigger — matches the relaunch filter style.
  */
-function FilterPill({
+export function FilterPill({
   value,
   options,
   onChange,

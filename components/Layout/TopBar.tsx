@@ -127,7 +127,7 @@ export function TopBar({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <MenuItems className="absolute right-0 z-50 mt-2.5 w-44 origin-top-right rounded-lg border border-strong bg-elevated p-2 shadow-lg focus:outline-none">
+              <MenuItems className="absolute right-0 z-50 mt-2.5 w-44 origin-top-right rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
                 <div className="mb-1 border-b border-hairline px-2 pb-2">
                   <div className="text-sm font-semibold text-fg">
                     {session.user?.name}

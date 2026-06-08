@@ -42,6 +42,22 @@ export interface RateLimitOptions {
 type Hit = { count: number; resetAt: number };
 const buckets = new Map<string, Hit>();
 let lastSweep = 0;
+let warnedInMemoryInProd = false;
+
+/**
+ * Warn (once) when we silently fall back to the per-process in-memory limiter
+ * in production — it's ineffective across serverless/multi-instance deploys, so
+ * operators need to notice the missing RATE_LIMIT_TABLE.
+ */
+function warnInMemoryFallback() {
+  if (warnedInMemoryInProd) return;
+  if (process.env.NODE_ENV !== "production") return;
+  warnedInMemoryInProd = true;
+  Sentry.captureMessage(
+    "Rate limiting fell back to in-memory store in production (RATE_LIMIT_TABLE unset) — ineffective on serverless/multi-instance.",
+    "warning",
+  );
+}
 
 function sweep(now: number) {
   if (now - lastSweep < 60_000) return;
@@ -150,7 +166,10 @@ export async function rateLimit(
 ): Promise<RateLimitResult> {
   const { key, limit, windowMs } = opts;
   const table = process.env.RATE_LIMIT_TABLE;
-  if (!table) return rateLimitInMemory(key, limit, windowMs);
+  if (!table) {
+    warnInMemoryFallback();
+    return rateLimitInMemory(key, limit, windowMs);
+  }
   try {
     return await rateLimitDynamo(table, key, limit, windowMs);
   } catch (err) {
