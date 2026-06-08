@@ -1,10 +1,5 @@
-// Main component
-export { PostEditor } from "./PostEditor";
-export type { PostEditorData, PostType } from "./PostEditor";
-
 // Tab components
 export { WriteTab } from "./tabs/WriteTab";
-export { LinkTab } from "./tabs/LinkTab";
 
 // Hooks
 export { useArticleEditor } from "./hooks/useArticleEditor";
@@ -14,7 +9,6 @@ export type { LinkMetadata } from "./hooks/useLinkMetadata";
 
 // Components
 export { TagInput } from "./components/TagInput";
-export { UrlMetadataPreview } from "./components/UrlMetadataPreview";
 export { ArticleToolbar } from "./toolbar/ArticleToolbar";
 
 // Extensions (for advanced usage)
