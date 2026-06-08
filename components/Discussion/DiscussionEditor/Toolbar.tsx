@@ -126,7 +126,6 @@ export function DiscussionEditorToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-0.5">
-      {/* Bold */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         isActive={editor.isActive("bold")}
@@ -137,7 +136,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Italic */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         isActive={editor.isActive("italic")}
@@ -148,7 +146,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Strikethrough */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         isActive={editor.isActive("strike")}
@@ -159,7 +156,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Superscript */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleSuperscript().run()}
         isActive={editor.isActive("superscript")}
@@ -170,7 +166,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Link */}
       <ToolbarButton
         onClick={() => {
           if (editor.isActive("link")) {
@@ -189,7 +184,6 @@ export function DiscussionEditorToolbar({
 
       <ToolbarDivider />
 
-      {/* Bullet List */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         isActive={editor.isActive("bulletList")}
@@ -200,7 +194,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Numbered List */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         isActive={editor.isActive("orderedList")}
@@ -213,7 +206,6 @@ export function DiscussionEditorToolbar({
 
       <ToolbarDivider />
 
-      {/* Blockquote */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         isActive={editor.isActive("blockquote")}
@@ -224,7 +216,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Code */}
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCode().run()}
         isActive={editor.isActive("code")}
@@ -235,7 +226,6 @@ export function DiscussionEditorToolbar({
         </svg>
       </ToolbarButton>
 
-      {/* Table */}
       <ToolbarButton
         onClick={insertTable}
         isActive={editor.isActive("table")}

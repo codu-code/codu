@@ -87,7 +87,6 @@ const SavedItemCard = ({
   return (
     <article className="group relative rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-hairline border-hairline bg-surface hover:border-accent/50">
       <Link href={cardUrl} className="block">
-        {/* Attribution row */}
         <div className="mb-1.5 flex items-center gap-1.5 text-xs text-muted">
           {displayImage ? (
             <img
@@ -129,13 +128,11 @@ const SavedItemCard = ({
           )}
         </div>
 
-        {/* Title */}
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-fg group-hover:text-muted">
           {title}
         </h3>
       </Link>
 
-      {/* Remove button (optional) */}
       {onRemove && (
         <button
           onClick={(e) => {

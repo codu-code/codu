@@ -1,10 +1,8 @@
 @tailwind base;
 
-/* ───────────────────────────────────────────────────────────
-   Relaunch design tokens (consumed by tailwind.config.js).
-   Values are space-separated RGB so Tailwind opacity modifiers work
-   (e.g. bg-surface/60). Dark-first: .dark holds the canonical palette.
-   ─────────────────────────────────────────────────────────── */
+/* Relaunch design tokens (consumed by tailwind.config.js). Values are
+   space-separated RGB so Tailwind opacity modifiers work (e.g. bg-surface/60).
+   Dark-first: .dark holds the canonical palette. */
 :root {
   /* Surfaces */
   --color-canvas: 255 255 255;
@@ -186,11 +184,9 @@ body {
   @apply inline-flex items-center gap-1.5 whitespace-nowrap bg-transparent font-mono text-sm font-semibold text-accent transition-colors duration-base ease-out hover:text-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
 }
 
-/* ============================================================
-   App shell — sticky top bar + 3-column rail grid.
-   Breakpoints (1080 / 720) are bespoke to the handoff, so they're
-   raw media queries rather than Tailwind's lg/md.
-   ============================================================ */
+/* App shell — sticky top bar + 3-column rail grid. Breakpoints (1080 / 720) are
+   bespoke to the handoff, so they're raw media queries rather than Tailwind's
+   lg/md. */
 .app-topbar {
   position: sticky;
   top: 0;

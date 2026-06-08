@@ -203,7 +203,6 @@ export function TagInput({
           error ? "border-red-500" : "border-hairline"
         } ${disabled ? "opacity-50" : ""}`}
       >
-        {/* Existing Tags */}
         {tags.map((tag) => (
           <span
             key={tag}
@@ -222,7 +221,6 @@ export function TagInput({
           </span>
         ))}
 
-        {/* Input */}
         {!isMaxReached && (
           <div className="relative flex-1">
             <input
@@ -238,7 +236,6 @@ export function TagInput({
               autoComplete="off"
             />
 
-            {/* Autocomplete Dropdown */}
             {isOpen && inputValue.length >= 1 && (
               <div
                 ref={dropdownRef}
@@ -302,10 +299,8 @@ export function TagInput({
         )}
       </div>
 
-      {/* Error Message */}
       {error && <p className="mt-1.5 text-sm text-red-500">{error}</p>}
 
-      {/* Help Text / Counter */}
       <div className="mt-1.5 flex items-center justify-between">
         {helpText && <p className="text-sm text-faint">{helpText}</p>}
         <span

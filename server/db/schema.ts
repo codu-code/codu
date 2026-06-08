@@ -19,9 +19,7 @@ import {
 import { relations, sql } from "drizzle-orm";
 import { type AdapterAccount } from "next-auth/adapters";
 
-// ============================================
 // ENUMS - Lowercase values
-// ============================================
 
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
@@ -101,9 +99,7 @@ export const pointAction = pgEnum("point_action", [
 // Legacy enums (kept for backward compatibility during migration)
 export const legacyVoteType = pgEnum("VoteType", ["UP", "DOWN"]);
 
-// ============================================
 // USER & AUTH TABLES
-// ============================================
 
 export const session = pgTable("session", {
   sessionToken: text("sessionToken").notNull().primaryKey(),
@@ -261,9 +257,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
   }),
 }));
 
-// ============================================
 // FEED SOURCES (RSS)
-// ============================================
 
 export const feed_sources = pgTable(
   "feed_sources",
@@ -322,9 +316,7 @@ export const feedSourcesRelations = relations(
   }),
 );
 
-// ============================================
 // POSTS TABLE
-// ============================================
 
 export const posts = pgTable(
   "posts",
@@ -424,9 +416,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   reports: many(reports),
 }));
 
-// ============================================
 // COMMENTS TABLE
-// ============================================
 
 export const comments = pgTable(
   "comments",
@@ -507,9 +497,7 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   reports: many(reports),
 }));
 
-// ============================================
 // POST VOTES
-// ============================================
 
 export const post_votes = pgTable(
   "post_votes",
@@ -544,9 +532,7 @@ export const postVotesRelations = relations(post_votes, ({ one }) => ({
   user: one(user, { fields: [post_votes.userId], references: [user.id] }),
 }));
 
-// ============================================
 // COMMENT VOTES
-// ============================================
 
 export const comment_votes = pgTable(
   "comment_votes",
@@ -584,9 +570,7 @@ export const commentVotesRelations = relations(comment_votes, ({ one }) => ({
   user: one(user, { fields: [comment_votes.userId], references: [user.id] }),
 }));
 
-// ============================================
 // BOOKMARKS
-// ============================================
 
 export const bookmarks = pgTable(
   "bookmarks",
@@ -621,9 +605,7 @@ export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
   user: one(user, { fields: [bookmarks.userId], references: [user.id] }),
 }));
 
-// ============================================
 // POST TAGS
-// ============================================
 
 export const post_tags = pgTable(
   "post_tags",
@@ -651,9 +633,7 @@ export const postTagsRelations = relations(post_tags, ({ one }) => ({
   tag: one(tag, { fields: [post_tags.tagId], references: [tag.id] }),
 }));
 
-// ============================================
 // REPORTS
-// ============================================
 
 export const reports = pgTable(
   "reports",
@@ -712,9 +692,7 @@ export const reportsRelations = relations(reports, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // TAGS (shared between legacy and new system)
-// ============================================
 
 export const tag = pgTable(
   "Tag",
@@ -753,9 +731,7 @@ export const tagRelations = relations(tag, ({ many }) => ({
   legacyContentTag: many(content_tag),
 }));
 
-// ============================================
 // TAG MERGE SUGGESTIONS (for AI-powered tag cleanup)
-// ============================================
 
 export const tagMergeSuggestionStatus = pgEnum("tag_merge_suggestion_status", [
   "pending",
@@ -827,9 +803,7 @@ export const tagMergeSuggestionsRelations = relations(
   }),
 );
 
-// ============================================
 // SPONSOR INQUIRY
-// ============================================
 
 export const sponsorInquiryStatus = pgEnum("SponsorInquiryStatus", [
   "PENDING",
@@ -872,9 +846,7 @@ export const sponsor_inquiry = pgTable(
   }),
 );
 
-// ============================================
 // EMAIL CHANGE TABLES
-// ============================================
 
 export const emailChangeRequest = pgTable("EmailChangeRequest", {
   id: serial("id").primaryKey(),
@@ -919,9 +891,7 @@ export const emailChangeHistoryRelations = relations(
   }),
 );
 
-// ============================================
 // BANNED USERS
-// ============================================
 
 export const banned_users = pgTable(
   "BannedUsers",
@@ -969,9 +939,7 @@ export const banned_usersRelations = relations(banned_users, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // NOTIFICATION
-// ============================================
 
 export const notification = pgTable(
   "Notification",
@@ -1034,11 +1002,9 @@ export const notificationRelations = relations(notification, ({ one }) => ({
   }),
 }));
 
-// ============================================================================
 // LEGACY TABLES (kept for backward compatibility during migration)
 // These tables are preserved from the old schema.
 // After migration verification, they can be removed.
-// ============================================================================
 
 export const post_tag = pgTable(
   "PostTag",
@@ -1791,10 +1757,8 @@ export const contentReportRelations = relations(content_report, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // Legacy Tables for Backward Compatibility
 // (RSS Aggregated Articles - to be migrated to posts table)
-// ============================================
 
 // Alias exports for new tables (camelCase naming convention)
 export {
@@ -1958,9 +1922,7 @@ export const aggregatedArticleTagRelations = relations(
   }),
 );
 
-// ============================================
 // JOB BOARD
-// ============================================
 
 export const job = pgTable(
   "job",
@@ -2070,9 +2032,7 @@ export const jobRelations = relations(job, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // ENGAGEMENT — points + streaks (Build Board)
-// ============================================
 
 // Append-only event log so any window (7-day, all-time) can be recomputed.
 export const point_event = pgTable(

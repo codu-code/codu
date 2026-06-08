@@ -48,7 +48,6 @@ const tiers: {
 export default function AdvertisePage() {
   return (
     <>
-      {/* Hero */}
       <section className="relative overflow-hidden border-b border-hairline">
         <div
           aria-hidden
@@ -67,7 +66,6 @@ export default function AdvertisePage() {
         </div>
       </section>
 
-      {/* Placement tiers */}
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-container px-5 py-20 sm:px-8">
           <AdvertiseTiers tiers={tiers} />

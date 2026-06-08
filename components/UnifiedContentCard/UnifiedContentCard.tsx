@@ -254,7 +254,6 @@ const UnifiedContentCard = ({
             </span>
           </div>
 
-          {/* Title + excerpt */}
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
@@ -316,14 +315,12 @@ const UnifiedContentCard = ({
             <span className="text-[11px]">▲</span>
             {votes.upvotes} helpful
           </button>
-          {/* replies */}
           <Link
             href={`${cardUrl}#discussion`}
             className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-xs text-faint hover:text-muted"
           >
             {discussionCount} replies
           </Link>
-          {/* Save (bookmark) */}
           <button
             onClick={handleBookmark}
             disabled={bookmarkStatus === "pending"}
@@ -335,7 +332,6 @@ const UnifiedContentCard = ({
           >
             {isBookmarked ? "Saved" : "Save"}
           </button>
-          {/* Share (copy link) */}
           <button
             onClick={handleShare}
             title="Copy link"

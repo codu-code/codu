@@ -114,7 +114,6 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Search and Filters */}
       <div className="mb-6 flex flex-wrap gap-4">
         <div className="relative flex-1">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-faint" />
@@ -140,7 +139,6 @@ const UserManagement = () => {
         </button>
       </div>
 
-      {/* Users List */}
       <div className="space-y-3">
         {isLoading && (
           <div className="space-y-3">

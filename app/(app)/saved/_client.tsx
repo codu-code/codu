@@ -33,7 +33,6 @@ const SavedPosts = () => {
 
   return (
     <div className="relative mx-4 max-w-2xl sm:mx-auto">
-      {/* Header */}
       <div className="mb-6">
         <p className="eyebrow">
           <span className="slash">{"// "}</span>

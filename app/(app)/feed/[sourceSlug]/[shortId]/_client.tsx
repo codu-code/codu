@@ -135,12 +135,10 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
       }
       discussion={<DiscussionArea contentId={article.id} />}
     >
-      {/* Content type badge */}
       <div className="mb-3">
         <ContentTypeBadge type="link" />
       </div>
 
-      {/* Source/author info */}
       <ContentMetaHeader
         publishedAt={article.publishedAt}
         externalUrl={article.externalUrl}
@@ -157,19 +155,16 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
         }
       />
 
-      {/* Title */}
       <h1 className="mb-3 font-display text-2xl font-extrabold leading-tight tracking-tight text-fg md:text-3xl">
         {article.title}
       </h1>
 
-      {/* Excerpt */}
       {article.excerpt && (
         <p className="mb-4 text-muted">
           {article.excerpt}
         </p>
       )}
 
-      {/* Thumbnail image */}
       {ensureHttps(article.imageUrl) && (
         <a
           href={article.externalUrl ?? undefined}
@@ -191,7 +186,6 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
         </a>
       )}
 
-      {/* Read article CTA */}
       {article.externalUrl && (
         <a
           href={article.externalUrl}

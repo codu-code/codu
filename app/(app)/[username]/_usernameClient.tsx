@@ -130,7 +130,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
   return (
     <>
       <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
-        {/* Header */}
         <div className="mt-2 flex flex-col gap-4 px-1 sm:flex-row sm:items-start">
           <div className="flex-shrink-0">
             {image && (
@@ -161,14 +160,12 @@ const Profile = ({ profile, isOwner, session }: Props) => {
           )}
         </div>
 
-        {/* Bio */}
         {bio && (
           <p className="mt-5 max-w-[60ch] px-1 leading-relaxed text-muted">
             {bio}
           </p>
         )}
 
-        {/* Meta row */}
         {(joinedLabel || location || websiteUrl) && (
           <div className="mt-4 flex flex-wrap gap-4 px-1 font-mono text-xs text-faint">
             {joinedLabel && (
@@ -194,7 +191,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
           </div>
         )}
 
-        {/* Interests */}
         {topics && topics.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2 px-1">
             {topics.map((t) => (
@@ -203,7 +199,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
           </div>
         )}
 
-        {/* Stats row */}
         {!accountLocked && (
           <div className="mt-6 flex flex-wrap gap-8 px-1">
             <div>
@@ -296,7 +291,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
           </div>
         ) : (
           <>
-            {/* Tabs */}
             <div className="mt-8 flex gap-5 border-b border-hairline">
               {TABS.map((t) => (
                 <button
@@ -314,7 +308,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               ))}
             </div>
 
-            {/* Posts tab */}
             {tab === "Posts" && (
               <div className="mt-6">
                 {posts.length ? (
@@ -366,7 +359,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               </div>
             )}
 
-            {/* Achievements tab */}
             {tab === "Achievements" && (
               <div className="mt-6">
                 {engagement ? (

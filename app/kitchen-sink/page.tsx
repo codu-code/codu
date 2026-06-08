@@ -62,7 +62,7 @@ export default function DesignSystemPage() {
       />
 
       <div className="mx-auto max-w-5xl px-6 py-16">
-        {/* ───────── Header ───────── */}
+        {/* Header */}
         <header className="pb-4">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-faint">
             codu · living design system · dev only
@@ -78,7 +78,7 @@ export default function DesignSystemPage() {
           </p>
         </header>
 
-        {/* ═══ FOUNDATIONS ═══ */}
+        {/* FOUNDATIONS */}
         <Section n="01" title="Color">
           <p className="-mt-3 mb-4 font-mono text-xs uppercase tracking-[0.18em] text-faint">
             Surface ladder
@@ -159,7 +159,7 @@ export default function DesignSystemPage() {
           </div>
         </Section>
 
-        {/* ═══ COMPONENTS ═══ */}
+        {/* COMPONENTS */}
         <Section n="03" title="Buttons">
           <div className="flex flex-wrap items-center gap-4">
             <button className="primary-button">Primary — Join free</button>
@@ -224,7 +224,7 @@ export default function DesignSystemPage() {
           </div>
         </Section>
 
-        {/* ═══ PATTERNS ═══ */}
+        {/* PATTERNS */}
         <Section n="07" title="Pattern — hero (editorial, no bento/blob)">
           <div className="relative overflow-hidden rounded-2xl border border-hairline bg-surface p-10 sm:p-16">
             <div

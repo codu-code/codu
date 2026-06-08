@@ -146,7 +146,6 @@ const ModerationQueue = () => {
         </div>
       </div>
 
-      {/* Status Tabs */}
       <div className="mb-6 flex flex-wrap gap-2 border-b border-hairline">
         {(
           [
@@ -231,7 +230,6 @@ const ModerationQueue = () => {
         </div>
       </section>
 
-      {/* Reports List */}
       <div className="space-y-4">
         {isLoading && (
           <div className="space-y-4">
@@ -267,7 +265,6 @@ const ModerationQueue = () => {
             key={report.id}
             className="rounded-lg border border-hairline bg-surface p-4"
           >
-            {/* Header */}
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span
                 className={`${chipBase} ${reasonColors[report.reason as ReportReason]}`}
@@ -284,7 +281,6 @@ const ModerationQueue = () => {
               </span>
             </div>
 
-            {/* Content Preview */}
             <div className="mb-3">
               {report.content && (
                 <div className="rounded border border-hairline bg-inset p-3">
@@ -306,7 +302,6 @@ const ModerationQueue = () => {
               )}
             </div>
 
-            {/* Reporter Details */}
             {report.details && (
               <div className="mb-3">
                 <p className="text-sm text-muted">
@@ -321,7 +316,6 @@ const ModerationQueue = () => {
                 Reported by @{report.reporter?.username || "unknown"}
               </p>
 
-              {/* Actions */}
               {report.status === "PENDING" && (
                 <div className="flex gap-2">
                   <button

@@ -91,7 +91,6 @@ export function OnboardingBanner() {
           </button>
         </div>
 
-        {/* progress rail */}
         <div className="mt-4 flex gap-1.5">
           {steps.map((s, i) => (
             <span

@@ -246,7 +246,6 @@ export function ArticleToolbar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline bg-inset px-3 py-2">
       <div className="flex flex-wrap items-center gap-0.5">
-        {/* Headings */}
         <ToolbarButton
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
@@ -277,7 +276,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Text formatting */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
@@ -302,7 +300,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Link */}
         <ToolbarButton
           onClick={() => {
             if (editor.isActive("link")) {
@@ -317,7 +314,6 @@ export function ArticleToolbar({
           {icons.link}
         </ToolbarButton>
 
-        {/* Image */}
         <ToolbarButton
           onClick={() => fileInputRef.current?.click()}
           title="Insert Image"
@@ -334,7 +330,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Lists */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive("bulletList")}
@@ -352,7 +347,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Block elements */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           isActive={editor.isActive("blockquote")}
@@ -377,7 +371,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Special elements */}
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           title="Horizontal Rule"
@@ -392,7 +385,6 @@ export function ArticleToolbar({
         </ToolbarButton>
       </div>
 
-      {/* Switch to Markdown */}
       {onSwitchToMarkdown && (
         <button
           type="button"

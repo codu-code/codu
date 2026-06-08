@@ -259,7 +259,6 @@ const Settings = ({ profile }: { profile: User }) => {
       className="mx-auto max-w-[620px] p-3 pt-8 sm:px-4"
       onSubmit={handleSubmit(onSubmit)}
     >
-      {/* Header */}
       <div>
         <p className="eyebrow">
           <span className="slash">{"// "}</span>your account
@@ -269,7 +268,6 @@ const Settings = ({ profile }: { profile: User }) => {
         </h1>
       </div>
 
-      {/* Tabs */}
       <div className="mb-2 mt-8 flex gap-5 border-b border-hairline">
         {TABS.map((t) => (
           <button
@@ -287,7 +285,7 @@ const Settings = ({ profile }: { profile: User }) => {
         ))}
       </div>
 
-      {/* ---------- profile ---------- */}
+      {/* profile */}
       <div className={tab === "Profile" ? "" : "hidden"}>
       <div className="flex items-center gap-4 border-b border-hairline py-4">
         <Avatar
@@ -428,7 +426,7 @@ const Settings = ({ profile }: { profile: User }) => {
       </FieldBlock>
       </div>
 
-      {/* ---------- notifications ---------- */}
+      {/* notifications */}
       <div className={tab === "Notifications" ? "" : "hidden"}>
       <SettingsRow
         title="Allow notifications from the platform"
@@ -448,7 +446,7 @@ const Settings = ({ profile }: { profile: User }) => {
       </SettingsRow>
       </div>
 
-      {/* ---------- account ---------- */}
+      {/* account */}
       <div className={tab === "Account" ? "" : "hidden"}>
       <FieldBlock
         title="Current email"

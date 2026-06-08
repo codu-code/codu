@@ -297,7 +297,6 @@ export function ComposeModal({
                   className="w-full resize-y rounded-md border border-hairline bg-inset p-3 text-sm leading-relaxed text-fg outline-none focus:outline-none placeholder:text-faint"
                 />
 
-                {/* tags */}
                 <div className="flex flex-wrap items-center gap-2 rounded-md border border-hairline bg-inset px-2.5 py-2">
                   {tags.map((t) => (
                     <span

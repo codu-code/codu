@@ -70,7 +70,6 @@ const Notifications = () => {
 
   return (
     <div className="relative mx-4 max-w-2xl sm:mx-auto">
-      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">

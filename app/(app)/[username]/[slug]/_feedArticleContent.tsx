@@ -196,7 +196,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
 
   return (
     <article className="mx-auto max-w-prose px-4 py-8">
-      {/* Back to feed */}
       <Link
         href="/"
         className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -204,26 +203,22 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         ‹ Back to feed
       </Link>
 
-      {/* Eyebrow */}
       <p className="eyebrow">
         <span className="slash">{"// "}</span>
         {article.source?.name || "Article"}
         {readableDate ? ` · ${readableDate}` : ""}
       </p>
 
-      {/* Title */}
       <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">
         {article.title}
       </h1>
 
-      {/* Excerpt */}
       {article.excerpt && (
         <p className="mt-4 text-lg leading-relaxed text-muted">
           {article.excerpt}
         </p>
       )}
 
-      {/* Source / author row */}
       <div className="mt-6 flex items-center gap-3">
         <Link href={`/${sourceSlug}`} className="flex-shrink-0">
           {article.source?.logoUrl ? (
@@ -264,7 +259,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         </div>
       </div>
 
-      {/* Cover image */}
       {ensureHttps(article.imageUrl) && article.externalUrl ? (
         <a
           href={article.externalUrl}
@@ -288,7 +282,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         <div className="mt-8 h-48 rounded-lg border border-hairline bg-elevated bg-grid-dots bg-[length:22px_22px]" />
       )}
 
-      {/* Read article CTA */}
       {article.externalUrl && (
         <a
           href={article.externalUrl}
@@ -339,9 +332,7 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         </div>
       )}
 
-      {/* Reaction footer */}
       <footer className="mt-6 flex flex-wrap items-center gap-4 border-t border-hairline pt-5">
-        {/* Vote buttons */}
         <div className="flex items-center gap-1 rounded-md border border-hairline bg-surface">
           <button
             onClick={() => handleVote(article.userVote === "up" ? null : "up")}
@@ -378,7 +369,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
           </button>
         </div>
 
-        {/* Comments count */}
         <a
           href="#discussion"
           className="flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -387,7 +377,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
           <span>{discussionCount ?? 0} comments</span>
         </a>
 
-        {/* Save button */}
         <button
           onClick={handleBookmark}
           disabled={bookmarkStatus === "pending"}
@@ -405,7 +394,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
           {article.isBookmarked ? "Saved" : "Save"}
         </button>
 
-        {/* Share button */}
         <button
           onClick={handleShare}
           className="ml-auto flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -415,7 +403,6 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         </button>
       </footer>
 
-      {/* Discussion section */}
       <section
         id="discussion"
         className="mt-10 border-t border-hairline pt-8"

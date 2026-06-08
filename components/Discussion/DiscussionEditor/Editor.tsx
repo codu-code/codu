@@ -57,7 +57,6 @@ export function DiscussionEditor({
   // Expanded state
   return (
     <div className="overflow-hidden rounded-lg border border-hairline bg-surface focus-within:border-strong">
-      {/* Rich text mode */}
       {mode === "rich" && (
         <>
           {/* Toolbar row - only show when showToolbar is true */}
@@ -74,7 +73,6 @@ export function DiscussionEditor({
             </div>
           )}
 
-          {/* Editor content */}
           <EditorContent
             editor={editor}
             className="min-h-[60px] text-fg [&_.ProseMirror:focus]:outline-none [&_.ProseMirror]:min-h-[60px] [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-1.5 [&_.ProseMirror]:text-sm [&_.ProseMirror]:outline-none"
@@ -82,10 +80,8 @@ export function DiscussionEditor({
         </>
       )}
 
-      {/* Markdown mode */}
       {mode === "markdown" && (
         <>
-          {/* Header row */}
           <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-muted">
@@ -109,7 +105,6 @@ export function DiscussionEditor({
             </button>
           </div>
 
-          {/* Textarea */}
           <TextareaAutosize
             value={markdownContent}
             onChange={(e) => setMarkdownContent(e.target.value)}
@@ -120,7 +115,6 @@ export function DiscussionEditor({
         </>
       )}
 
-      {/* Action buttons row */}
       <div className="flex items-center justify-between border-t border-hairline bg-inset px-3 py-2">
         {/* Format toggle button (Aa) - only in rich text mode */}
         {mode === "rich" ? (
@@ -144,7 +138,6 @@ export function DiscussionEditor({
           <div />
         )}
 
-        {/* Cancel and Submit buttons */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -168,7 +161,6 @@ export function DiscussionEditor({
         </div>
       </div>
 
-      {/* Markdown help modal */}
       <MarkdownHelpModal
         open={showMarkdownHelp}
         onClose={() => setShowMarkdownHelp(false)}

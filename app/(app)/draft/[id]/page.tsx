@@ -49,7 +49,6 @@ const PreviewPage = async (props: Props) => {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      {/* Draft indicator */}
       <nav className="mb-6 flex items-center gap-2 text-sm">
         <span className="bg-accent/15 rounded-full px-3 py-1 font-medium text-accent">
           Draft Preview
@@ -58,7 +57,6 @@ const PreviewPage = async (props: Props) => {
 
       {/* Article card - matches published article layout */}
       <article className="rounded-lg border border-hairline bg-surface p-6">
-        {/* Author info */}
         <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
           <Link
             href={`/${post.user.username}`}
@@ -85,7 +83,6 @@ const PreviewPage = async (props: Props) => {
           )}
         </div>
 
-        {/* Article content */}
         <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
           <h1>{post.title}</h1>
           {Markdoc.renderers.react(content, React, {
@@ -93,7 +90,6 @@ const PreviewPage = async (props: Props) => {
           })}
         </div>
 
-        {/* Tags */}
         {post.tags.length > 0 && (
           <section className="mt-6 flex flex-wrap gap-3">
             {post.tags.map(({ tag }) => (
@@ -108,7 +104,6 @@ const PreviewPage = async (props: Props) => {
           </section>
         )}
 
-        {/* Compact inline author bio */}
         <div className="mt-8">
           <InlineAuthorBio
             name={post.user.name || "Unknown"}

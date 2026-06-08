@@ -40,7 +40,6 @@ const DiscussionsPage = () => {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">
@@ -62,7 +61,6 @@ const DiscussionsPage = () => {
         loud with other builders working with AI.
       </p>
 
-      {/* Topic chips */}
       {topics.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-2">
           <button
@@ -94,7 +92,6 @@ const DiscussionsPage = () => {
         </div>
       )}
 
-      {/* List */}
       <section className="mt-6 space-y-3">
         {status === "pending" &&
           Array.from({ length: 6 }, (_, i) => <FeedItemLoading key={i} />)}

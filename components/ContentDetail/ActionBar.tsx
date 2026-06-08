@@ -207,7 +207,6 @@ const UnifiedActionBar = ({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Vote buttons */}
       <div className="flex items-center rounded-full bg-inset">
         <button
           onClick={() => handleVote(userVote === "up" ? null : "up")}
@@ -242,7 +241,6 @@ const UnifiedActionBar = ({
         </button>
       </div>
 
-      {/* Comments count */}
       <a
         href="#discussion"
         className="flex items-center gap-1.5 rounded-full bg-inset px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-hover"
@@ -251,7 +249,6 @@ const UnifiedActionBar = ({
         <span>{discussionCount} comments</span>
       </a>
 
-      {/* Bookmark button */}
       <button
         onClick={handleBookmark}
         disabled={bookmarkStatus === "pending"}
@@ -269,7 +266,6 @@ const UnifiedActionBar = ({
         {isBookmarked ? "Saved" : "Save"}
       </button>
 
-      {/* Share button */}
       <Menu as="div" className="relative">
         <MenuButton className="flex items-center gap-1.5 rounded-full bg-inset px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-hover">
           <ShareIcon className="h-4 w-4" />
@@ -317,7 +313,6 @@ const UnifiedActionBar = ({
         </Transition>
       </Menu>
 
-      {/* More options menu */}
       <Menu as="div" className="relative ml-auto">
         <MenuButton className="rounded-full p-2 text-faint hover:bg-hover hover:text-fg">
           <span className="sr-only">More options</span>

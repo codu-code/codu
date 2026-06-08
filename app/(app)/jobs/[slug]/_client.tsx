@@ -81,7 +81,6 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         </div>
       </div>
 
-      {/* Meta badges */}
       <div className="mt-4 flex flex-wrap gap-2">
         <span className="rounded-full bg-inset px-3 py-1 text-sm text-muted">
           {TYPE_LABELS[job.type] ?? job.type}
@@ -111,7 +110,6 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         ))}
       </div>
 
-      {/* Apply */}
       {job.applicationUrl && (
         <div className="mt-6">
           <Link
@@ -125,7 +123,6 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         </div>
       )}
 
-      {/* Description */}
       {job.jobDescription && (
         <div className="mt-8 whitespace-pre-wrap leading-relaxed text-muted">
           {job.jobDescription}

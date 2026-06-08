@@ -361,7 +361,6 @@ const AdminSourcesPage = () => {
         </div>
       </div>
 
-      {/* Add Source Form */}
       {showAddForm && (
         <div className="mb-8 rounded-lg border border-hairline bg-surface p-6">
           <h2 className="mb-4 font-display text-lg font-semibold text-fg">
@@ -460,7 +459,6 @@ const AdminSourcesPage = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
       {editingSource && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="mx-4 w-full max-w-lg rounded-lg border border-hairline bg-surface p-6">
@@ -522,7 +520,6 @@ const AdminSourcesPage = () => {
                   Logo
                 </label>
                 <div className="flex items-start gap-4">
-                  {/* Logo preview */}
                   <div className="flex-shrink-0">
                     {editingSource.logoUrl ? (
                       <img
@@ -540,7 +537,6 @@ const AdminSourcesPage = () => {
                       </div>
                     )}
                   </div>
-                  {/* Upload controls */}
                   <div className="flex-1 space-y-2">
                     <input
                       type="file"
@@ -643,7 +639,6 @@ const AdminSourcesPage = () => {
         </div>
       )}
 
-      {/* Sources Table */}
       {status === "pending" && (
         <div className="flex items-center justify-center py-12">
           <ArrowPathIcon className="h-8 w-8 animate-spin text-faint" />

@@ -6,11 +6,8 @@ import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { api } from "@/server/trpc/react";
 
-/* ===================================================================
-   Codú — new-member onboarding
-   Short & breezy: interests → experience → focus → done.
-   The picks tune the feed / left-rail "Your topics".
-   =================================================================== */
+// New-member onboarding: interests → experience → focus. The picks tune the
+// feed / left-rail "Your topics".
 
 const ONB_TOPICS = [
   "AI patterns",
@@ -203,7 +200,6 @@ export default function Welcome() {
 
       <div className="flex flex-1 items-center justify-center px-6 pb-20 pt-6 sm:pt-12">
         <div className="w-full max-w-[640px]">
-          {/* progress */}
           {step < STEPS && (
             <div className="mb-10 flex gap-1.5">
               {Array.from({ length: STEPS }).map((_, i) => (
@@ -341,7 +337,6 @@ export default function Welcome() {
             </>
           )}
 
-          {/* footer nav */}
           <div className="mt-12 flex items-center justify-between gap-4">
             {step > 0 && step < STEPS ? (
               <button

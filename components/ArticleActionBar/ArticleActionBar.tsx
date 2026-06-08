@@ -128,7 +128,6 @@ const ArticleActionBar = ({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Vote buttons */}
       <div className="flex items-center rounded-full border border-hairline">
         <button
           onClick={() => handleVote(userVote === "up" ? null : "up")}
@@ -163,7 +162,6 @@ const ArticleActionBar = ({
         </button>
       </div>
 
-      {/* Comments button */}
       <a
         href="#comments"
         className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-hover"
@@ -172,7 +170,6 @@ const ArticleActionBar = ({
         <span>{discussionCount} Comments</span>
       </a>
 
-      {/* Bookmark button */}
       <button
         onClick={handleBookmark}
         disabled={bookmarkStatus === "pending"}
@@ -190,7 +187,6 @@ const ArticleActionBar = ({
         <span>{isBookmarked ? "Saved" : "Save"}</span>
       </button>
 
-      {/* Share button */}
       <Menu as="div" className="relative">
         <MenuButton className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-hover">
           <ShareIcon className="h-4 w-4" />
@@ -238,7 +234,6 @@ const ArticleActionBar = ({
         </Transition>
       </Menu>
 
-      {/* More options menu */}
       <Menu as="div" className="relative ml-auto">
         <MenuButton className="rounded-full p-2 text-faint hover:bg-hover hover:text-fg">
           <span className="sr-only">More options</span>

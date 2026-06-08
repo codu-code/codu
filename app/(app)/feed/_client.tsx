@@ -149,7 +149,6 @@ const FeedPage = () => {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-extrabold tracking-tight text-fg">Feed</h1>
       </div>

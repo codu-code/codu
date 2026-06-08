@@ -44,7 +44,6 @@ import { Eye, EyeOff, Settings2, Share2 } from "lucide-react";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
 
-// Import new PostEditor components
 import { WriteTab } from "@/components/PostEditor/tabs/WriteTab";
 import { TagInput } from "@/components/PostEditor/components/TagInput";
 
@@ -252,7 +251,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       ConfirmContentSchema.parse(formData);
 
       // Use the saved post ID (not the one from URL params which might be stale)
-      // Use mutateAsync pattern for proper await
       const publishResult = await new Promise<{
         slug: string;
         status?: string;
@@ -302,8 +300,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     }
   };
 
-  // Load existing data - only populate form once when data first arrives
-  // Using a callback pattern to batch state updates and avoid cascading renders
+  // Populate the form once when data first arrives; batches state updates to avoid cascading renders.
   const populateFormFromData = useCallback(() => {
     if (!data || formPopulatedRef.current) return;
     formPopulatedRef.current = true;
@@ -339,8 +336,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     queueMicrotask(populateFormFromData);
   }, [populateFormFromData]);
 
-  // Update post status based on content
-  // This is intentional - we need to track draft status based on content length
+  // Intentional: track draft status based on content length.
   const computedPostStatus = useMemo(() => {
     if ((title + body).length < 5) {
       return null;
@@ -427,7 +423,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         isSaving={saveStatus === "pending"}
       />
 
-      {/* Whimsical Pre-Publish Dialog */}
       <Transition show={showPublishConfirm} as={Fragment}>
         <Dialog
           onClose={() => setShowPublishConfirm(false)}
@@ -496,7 +491,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         </Dialog>
       </Transition>
 
-      {/* Loading state */}
       {dataStatus === "pending" && postId && (
         <div className="fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center">
           <div className="z-50 flex flex-col items-center rounded-lg border border-hairline bg-elevated px-5 py-2 opacity-100">
@@ -514,16 +508,13 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         </div>
       )}
 
-      {/* Main content area - single card layout */}
       <div className="mx-auto w-full max-w-3xl px-4 py-6">
         <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
-          {/* Editor toolbar */}
           <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
             <span className="font-mono text-xs uppercase tracking-label text-faint">
               Article
             </span>
 
-            {/* Share Draft & Preview toggle */}
             <div className="flex items-center gap-4">
               {(createData?.id || postId) && (
                 <button
@@ -559,7 +550,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             </div>
           </div>
 
-          {/* Editor Content */}
           {viewPreview ? (
             // Preview mode - matches published article width
             <section className="px-6 py-8">
@@ -593,7 +583,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             />
           )}
 
-          {/* Tags section - with divider */}
           <div className="border-t border-hairline p-4">
             <TagInput
               tags={tags}
@@ -604,7 +593,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             />
           </div>
 
-          {/* More Options - collapsible accordion */}
           <Disclosure>
               {({ open: disclosureOpen }) => (
                 <>
@@ -622,7 +610,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                   </DisclosureButton>
                   <DisclosurePanel className="border-t border-hairline bg-inset p-4">
                     <div className="space-y-6">
-                      {/* Excerpt */}
                       <div>
                         <label
                           htmlFor="excerpt"
@@ -648,7 +635,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                         </p>
                       </div>
 
-                      {/* Schedule post - show for new drafts and unpublished posts */}
                       {(!data?.publishedAt ||
                         new Date(data.publishedAt) > new Date()) && (
                         <div>
@@ -680,7 +666,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                         </div>
                       )}
 
-                      {/* Canonical URL */}
                       <div>
                         <label
                           htmlFor="canonicalUrl"
@@ -702,7 +687,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                         </p>
                       </div>
 
-                      {/* Draft preview link */}
                       {postId && (
                         <div>
                           <label className="eyebrow mb-1.5 block">
@@ -734,7 +718,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
               )}
             </Disclosure>
 
-          {/* Action Bar */}
           <div className="flex items-center justify-end gap-3 border-t border-hairline px-4 py-3">
             <button
               type="button"

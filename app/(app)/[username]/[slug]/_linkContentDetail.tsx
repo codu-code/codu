@@ -198,7 +198,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
 
   return (
     <article className="mx-auto max-w-prose px-4 py-8">
-      {/* Back to feed */}
       <Link
         href="/"
         className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -206,26 +205,22 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         ‹ Back to feed
       </Link>
 
-      {/* Eyebrow */}
       <p className="eyebrow">
         <span className="slash">{"// "}</span>
         Link
         {readableDate ? ` · ${readableDate}` : ""}
       </p>
 
-      {/* Title */}
       <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">
         {linkContent.title}
       </h1>
 
-      {/* Excerpt */}
       {linkContent.excerpt && (
         <p className="mt-4 text-lg leading-relaxed text-muted">
           {linkContent.excerpt}
         </p>
       )}
 
-      {/* Source row */}
       <div className="mt-6 flex items-center gap-3">
         <Link href={`/${sourceSlug}`} className="flex-shrink-0">
           {linkContent.source?.logoUrl ? (
@@ -262,7 +257,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         </div>
       </div>
 
-      {/* Cover image */}
       {ensureHttps(linkContent.imageUrl) && externalUrl ? (
         <a
           href={externalUrl}
@@ -287,7 +281,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         <div className="mt-8 h-48 rounded-lg border border-hairline bg-elevated bg-grid-dots bg-[length:22px_22px]" />
       )}
 
-      {/* Visit link CTA */}
       {externalUrl && hostname && (
         <a
           href={externalUrl}
@@ -337,9 +330,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         </div>
       )}
 
-      {/* Reaction footer */}
       <footer className="mt-6 flex flex-wrap items-center gap-4 border-t border-hairline pt-5">
-        {/* Vote buttons */}
         <div className="flex items-center gap-1 rounded-md border border-hairline bg-surface">
           <button
             onClick={() => handleVote(userVote === "up" ? null : "up")}
@@ -374,7 +365,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
           </button>
         </div>
 
-        {/* Comments count */}
         <a
           href="#discussion"
           className="flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -383,7 +373,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
           <span>{discussionCount ?? 0} comments</span>
         </a>
 
-        {/* Share button */}
         <button
           onClick={handleShare}
           className="ml-auto flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -393,7 +382,6 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         </button>
       </footer>
 
-      {/* Discussion section */}
       <section id="discussion" className="mt-10 border-t border-hairline pt-8">
         <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
           Discussion{" "}

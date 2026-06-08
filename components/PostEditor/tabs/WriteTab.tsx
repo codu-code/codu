@@ -64,7 +64,6 @@ export function WriteTab({
 
   return (
     <div className={`flex flex-col ${className}`}>
-      {/* Title Input */}
       <div className="border-b border-hairline">
         <input
           type="text"
@@ -75,17 +74,14 @@ export function WriteTab({
         />
       </div>
 
-      {/* Editor */}
       {mode === "rich" ? (
         <div className="flex flex-1 flex-col">
-          {/* Toolbar */}
           <ArticleToolbar
             editor={editor}
             onImageUpload={uploadImage}
             onSwitchToMarkdown={toggleMode}
           />
 
-          {/* TipTap Editor */}
           <div className="flex-1 overflow-y-auto bg-surface">
             <EditorContent
               editor={editor}
@@ -95,10 +91,8 @@ export function WriteTab({
         </div>
       ) : (
         <div className="flex flex-1 flex-col">
-          {/* Markdown Mode Header */}
           <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
             <div className="flex items-center gap-3">
-              {/* Image Upload for Markdown Mode */}
               <label
                 htmlFor="markdown-image-upload"
                 className="flex cursor-pointer items-center gap-1.5 rounded-md border border-hairline bg-surface px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
@@ -115,7 +109,6 @@ export function WriteTab({
                 className="hidden"
               />
 
-              {/* Markdown Help Link */}
               <a
                 href="https://www.markdownguide.org/cheat-sheet/"
                 target="_blank"
@@ -137,7 +130,6 @@ export function WriteTab({
               </a>
             </div>
 
-            {/* Switch to Rich Text */}
             <button
               type="button"
               onClick={toggleMode}
@@ -150,7 +142,6 @@ export function WriteTab({
             </button>
           </div>
 
-          {/* Markdown Textarea */}
           <div className="flex-1 bg-surface">
             <TextareaAutosize
               value={markdownContent}

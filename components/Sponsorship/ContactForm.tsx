@@ -68,7 +68,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                   )}
                 />
               )}
-              {/* Circle */}
               <div
                 className={clsx(
                   "relative z-10 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors",
@@ -82,7 +81,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 {step < currentStep ? <CheckIcon className="h-5 w-5" /> : step}
               </div>
             </div>
-            {/* Label */}
             <span className="mt-3 text-xs text-faint sm:text-sm">
               {stepLabels[step - 1]}
             </span>
@@ -432,7 +430,6 @@ export function ContactForm() {
         </div>
       )}
 
-      {/* Navigation */}
       <div className="mt-8 flex items-center justify-between border-t border-hairline pt-6">
         <button
           type="button"

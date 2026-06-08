@@ -209,7 +209,6 @@ const TagsAdmin = () => {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
           <p className="eyebrow">
@@ -234,7 +233,6 @@ const TagsAdmin = () => {
         </button>
       </div>
 
-      {/* Stats Cards */}
       {data?.stats && (
         <div className="mb-6 grid grid-cols-3 gap-4">
           <div className="rounded-lg border border-hairline bg-surface p-4">
@@ -264,7 +262,6 @@ const TagsAdmin = () => {
         </div>
       )}
 
-      {/* Merge Suggestions */}
       {mergeSuggestions?.data && mergeSuggestions.data.length > 0 && (
         <div className="bg-warning/8 mb-6 rounded-lg border border-warning/40 p-4">
           <div className="mb-3 flex items-center gap-2">
@@ -326,7 +323,6 @@ const TagsAdmin = () => {
         </div>
       )}
 
-      {/* Merge Panel */}
       {showMergePanel && (
         <div className="bg-info/8 mb-6 rounded-lg border border-info/40 p-4">
           <div className="mb-3 flex items-center justify-between">
@@ -395,7 +391,6 @@ const TagsAdmin = () => {
         </div>
       )}
 
-      {/* Search and Filters */}
       <div className="mb-4 flex items-center gap-4">
         <div className="relative flex-1">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-faint" />
@@ -420,7 +415,6 @@ const TagsAdmin = () => {
         </button>
       </div>
 
-      {/* Edit Modal */}
       {editingTag && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="mx-4 w-full max-w-lg rounded-lg border border-hairline bg-surface p-6">
@@ -510,7 +504,6 @@ const TagsAdmin = () => {
         </div>
       )}
 
-      {/* Tags Table */}
       {status === "pending" && (
         <div className="flex items-center justify-center py-12">
           <ArrowPathIcon className="h-8 w-8 animate-spin text-faint" />

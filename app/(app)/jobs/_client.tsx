@@ -52,7 +52,6 @@ export default function JobsClient() {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">
@@ -134,7 +133,6 @@ export default function JobsClient() {
         </div>
       </div>
 
-      {/* Listings */}
       <div className="mt-8 space-y-8">
         {isLoading && (
           <p className="font-mono text-sm text-faint">{"// "}loading jobs…</p>

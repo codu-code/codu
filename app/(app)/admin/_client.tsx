@@ -82,7 +82,6 @@ const AdminDashboard = () => {
         <p className="mt-1 text-muted">Manage and monitor the Codú platform</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
@@ -117,7 +116,6 @@ const AdminDashboard = () => {
         />
       </div>
 
-      {/* Moderation Stats */}
       <div className="mb-8">
         <h2 className="mb-4 font-display text-xl font-extrabold tracking-tight text-fg">
           Moderation
@@ -156,7 +154,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Quick Links */}
       <div className="mb-8">
         <h2 className="mb-4 font-display text-xl font-extrabold tracking-tight text-fg">
           Quick Actions

@@ -234,9 +234,7 @@ export const tagRouter = createTRPCRouter({
       }
     }),
 
-  // ============================================
-  // ADMIN ENDPOINTS
-  // ============================================
+  // Admin endpoints
 
   /**
    * Get all tags with statistics for admin dashboard

@@ -59,7 +59,6 @@ export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) 
 
   return (
     <div className="fixed inset-0 z-[60]">
-      {/* Backdrop */}
       <button
         type="button"
         aria-label="Close navigation"
@@ -68,7 +67,6 @@ export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) 
         style={{ background: "rgba(4,5,7,0.6)" }}
       />
 
-      {/* Panel */}
       <aside
         role="dialog"
         aria-modal="true"

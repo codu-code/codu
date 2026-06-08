@@ -495,12 +495,10 @@ const UnifiedPostPage = async (props: Props) => {
 
     return (
       <>
-        {/* JSON-LD Structured Data for SEO */}
         <JsonLd data={articleSchema} />
         <JsonLd data={breadcrumbSchema} />
 
         <div className="mx-auto max-w-3xl px-4 py-8">
-          {/* Breadcrumb navigation */}
           <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
             <Link
               href="/"
@@ -517,9 +515,7 @@ const UnifiedPostPage = async (props: Props) => {
             </Link>
           </nav>
 
-          {/* Article card - contains everything in one cohesive unit */}
           <article className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
-            {/* Author info */}
             <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
               <Link
                 href={`/${userPost.user.username}`}
@@ -558,7 +554,6 @@ const UnifiedPostPage = async (props: Props) => {
               )}
             </div>
 
-            {/* Article content */}
             <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
               {!isTiptapContent && <h1>{userPost.title}</h1>}
 
@@ -578,7 +573,6 @@ const UnifiedPostPage = async (props: Props) => {
               )}
             </div>
 
-            {/* Tags */}
             {userPost.tags.length > 0 && (
               <section className="mt-6 flex flex-wrap gap-3">
                 {userPost.tags.map(({ tag }) => (
@@ -593,7 +587,6 @@ const UnifiedPostPage = async (props: Props) => {
               </section>
             )}
 
-            {/* Compact inline author bio */}
             <div className="mt-8">
               <InlineAuthorBio
                 name={userPost.user.name || "Unknown"}
@@ -603,7 +596,6 @@ const UnifiedPostPage = async (props: Props) => {
               />
             </div>
 
-            {/* Action bar - just above discussion */}
             <div className="mt-8">
               <ArticleActionBarWrapper
                 postId={userPost.id}
@@ -615,7 +607,6 @@ const UnifiedPostPage = async (props: Props) => {
               />
             </div>
 
-            {/* Discussion section - inside the card */}
             <section id="discussion" className="mt-8">
               {userPost.showComments ? (
                 <DiscussionArea contentId={userPost.id} noWrapper />
@@ -688,12 +679,10 @@ const UnifiedPostPage = async (props: Props) => {
 
     return (
       <>
-        {/* JSON-LD Structured Data for SEO */}
         <JsonLd data={articleSchema} />
         <JsonLd data={breadcrumbSchema} />
 
         <div className="mx-auto max-w-3xl px-4 py-8">
-          {/* Breadcrumb navigation */}
           <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
             <Link
               href="/"
@@ -710,9 +699,7 @@ const UnifiedPostPage = async (props: Props) => {
             </Link>
           </nav>
 
-          {/* Article card - contains everything in one cohesive unit */}
           <article className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
-            {/* Author info */}
             <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
               <Link
                 href={`/${userArticle.user.username}`}
@@ -754,7 +741,6 @@ const UnifiedPostPage = async (props: Props) => {
               )}
             </div>
 
-            {/* Article content */}
             <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
               {!isTiptapContent && <h1>{userArticle.title}</h1>}
 
@@ -774,7 +760,6 @@ const UnifiedPostPage = async (props: Props) => {
               )}
             </div>
 
-            {/* Tags */}
             {userArticle.tags && userArticle.tags.length > 0 && (
               <section className="mt-6 flex flex-wrap gap-3">
                 {userArticle.tags.map(({ tag }) => (
@@ -789,7 +774,6 @@ const UnifiedPostPage = async (props: Props) => {
               </section>
             )}
 
-            {/* Compact inline author bio */}
             <div className="mt-8">
               <InlineAuthorBio
                 name={userArticle.user.name || "Unknown"}
@@ -799,7 +783,6 @@ const UnifiedPostPage = async (props: Props) => {
               />
             </div>
 
-            {/* Action bar - just above discussion */}
             <div className="mt-8">
               <ArticleActionBarWrapper
                 postId={userArticle.id}
@@ -811,7 +794,6 @@ const UnifiedPostPage = async (props: Props) => {
               />
             </div>
 
-            {/* Discussion section - inside the card */}
             <section id="discussion" className="mt-8">
               {userArticle.showComments ? (
                 <DiscussionArea contentId={userArticle.id} noWrapper />

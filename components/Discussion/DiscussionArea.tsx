@@ -235,7 +235,6 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
           <section key={id} className="group/comment">
             {editCommentBoxId !== id ? (
               <div className="flex gap-3">
-                {/* Avatar column */}
                 <div className="flex-shrink-0">
                   <Link href={`/${username}`}>
                     <img
@@ -246,9 +245,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                   </Link>
                 </div>
 
-                {/* Content column */}
                 <div className="min-w-0 flex-1">
-                  {/* Header row */}
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <Link
@@ -328,16 +325,13 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                     </Menu>
                   </div>
 
-                  {/* Comment body */}
                   <div className="prose-sm overflow-x-hidden text-sm dark:prose-invert">
                     {Markdoc.renderers.react(content, React, {
                       components: markdocComponents,
                     })}
                   </div>
 
-                  {/* Action bar */}
                   <div className="mt-2 flex items-center gap-2">
-                    {/* Vote buttons */}
                     <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
                       <button
                         onClick={() =>
@@ -398,7 +392,6 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                     )}
                   </div>
 
-                  {/* Reply editor */}
                   {showCommentBoxId === id && (
                     <div className="mt-4">
                       <DiscussionEditor
