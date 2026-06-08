@@ -398,6 +398,11 @@ export const createPasswordLessEmailTemplate = (url: string | null) =>
                                         "
                                       >
                                        Dia dhuit! (Hello in Irish)<br /><br />
+                                        Here's your link to get back to building
+                                        on Codú — the community for AI builders
+                                        and indie hackers. Tap the button below
+                                        to sign in. It expires shortly, so use it
+                                        soon.<br /><br />
                                       </p>
                                     </td>
                                   </tr>
@@ -439,7 +444,7 @@ export const createPasswordLessEmailTemplate = (url: string | null) =>
                                                 mso-text-raise: 1px;
                                               "
                                             >
-                                              Sign In to Codú
+                                              Sign in to Codú
                                             </center>
                                           </v:roundrect></a
                                         > <!
@@ -481,9 +486,41 @@ export const createPasswordLessEmailTemplate = (url: string | null) =>
                                             padding: 10px 20px;
                                             border-color: #db2777;
                                           "
-                                          >Click here to sign into Codú</a
+                                          >Sign in to Codú</a
                                         ></span
                                       ><!--<![endif]-->
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td
+                                      align="left"
+                                      style="padding: 0; margin: 0"
+                                    >
+                                      <p
+                                        style="
+                                          margin: 0;
+                                          padding-top: 16px;
+                                          -webkit-text-size-adjust: none;
+                                          -ms-text-size-adjust: none;
+                                          mso-line-height-rule: exactly;
+                                          font-family: arial, 'helvetica neue',
+                                            helvetica, sans-serif;
+                                          line-height: 21px;
+                                          color: #555555;
+                                          font-size: 14px;
+                                        "
+                                      >
+                                        Button not working? Copy and paste this
+                                        URL into your browser:<br />
+                                        <a
+                                          href="${url}"
+                                          style="
+                                            color: #db2777;
+                                            word-break: break-all;
+                                          "
+                                          >${url}</a
+                                        >
+                                      </p>
                                     </td>
                                   </tr>
                                   <tr>
@@ -504,7 +541,7 @@ export const createPasswordLessEmailTemplate = (url: string | null) =>
                                           font-size: 18px;
                                         "
                                       >
-                                     <br /><br />Happy coding! 😊<br /><br /><em
+                                     <br /><br />Now go ship something.<br /><br /><em
                                           >Niall &amp; the Codú community</em
                                         ><br />
                                       </p>

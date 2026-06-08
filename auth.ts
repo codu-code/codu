@@ -51,8 +51,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 await nodemailerSesTransporter.sendMail({
                   to: identifier,
                   from: process.env.ADMIN_EMAIL,
-                  subject: `Sign in to Codú 🚀`,
-                  text: `Sign in to Codú 🚀\n\n`,
+                  subject: `Your link to get back to building on Codú`,
+                  text: `Your link to get back to building on Codú\n\nClick to sign in: ${url}\n\nThis link expires soon. If you didn't request it, you can ignore this email.\n\n`,
                   html: createPasswordLessEmailTemplate(url),
                 });
               } catch (error) {

@@ -188,7 +188,15 @@ ${chance.paragraph()}
       upvotes: number;
       tagTitles: string[];
       featured?: boolean;
+      // When false, deliberately skip a cover image so the striped placeholder
+      // is still exercised in the feed. Defaults to true for article/link posts.
+      cover?: boolean;
     };
+
+    // Stable, deterministic, key-free public images (plain <img>, no next/image
+    // domain config needed). Seed slug varies per post so previews differ.
+    const coverFor = (title: string) =>
+      `https://picsum.photos/seed/${slugify(title, "codu")}/640/360`;
 
     const seeds: Seed[] = [
       // ── Articles (published, body + tags) ────────────────────────────────
@@ -240,6 +248,8 @@ ${chance.paragraph()}
         daysAgo: 22,
         upvotes: 118,
         tagTitles: ["INDIE HACKING", "STARTUPS", "PRODUCTIVITY"],
+        // No cover → exercises the striped placeholder on a published article.
+        cover: false,
       },
 
       // ── Discussions ──────────────────────────────────────────────────────
@@ -364,6 +374,7 @@ ${chance.paragraph()}
         daysAgo: 1,
         upvotes: 0,
         tagTitles: ["AGENTS"],
+        cover: false,
       },
       {
         type: "article",
@@ -392,6 +403,11 @@ ${chance.paragraph()}
     return seeds.map((s) => {
       const shortId = generateShortId();
       const published = s.status === "published";
+      // Give article/link/resource posts a cover by default (the feed maps it to
+      // the card image). `cover: false` opts out so the placeholder still shows.
+      const wantsCover =
+        s.cover ??
+        (s.type === "article" || s.type === "link" || s.type === "resource");
       return {
         row: {
           type: s.type,
@@ -400,6 +416,7 @@ ${chance.paragraph()}
           excerpt: s.excerpt,
           body: s.body ?? null,
           externalUrl: s.externalUrl ?? null,
+          coverImage: wantsCover ? coverFor(s.title) : null,
           readingTime: chance.integer({ min: 1, max: 12 }),
           status: s.status,
           publishedAt: published ? ago(s.daysAgo) : null,
@@ -520,7 +537,12 @@ ${chance.paragraph()}
   const userData = [...coreUsers, ...generateUserData()];
 
   const addUserData = async () => {
-    const tagsData = sampleTags.map((title) => ({ title }));
+    // Every tag MUST have a non-null slug: trending links + React keys rely on
+    // it. Slugify the title (lowercase, non-alphanumerics → "-", trim "-").
+    const tagsData = sampleTags.map((title) => ({
+      title,
+      slug: generateSlug(title),
+    }));
 
     const tagResponse = await db
       .insert(tag)
@@ -1114,10 +1136,19 @@ ${chance.paragraph()}
           .replace(/\s+/g, "-")
           .substring(0, 100)}-${shortId}`;
 
+        // Most links get a deterministic, key-free cover (plain <img> in the
+        // card). Skip every 5th so the striped placeholder is still exercised.
+        const linkIndex = i * 3 + j;
+        const coverImage =
+          linkIndex % 5 === 0
+            ? null
+            : `https://picsum.photos/seed/${slug}/640/360`;
+
         sampleLinks.push({
           type: "link" as const,
           title,
           excerpt: chance.paragraph(),
+          coverImage,
           externalUrl: `${source.websiteUrl}/posts/${chance.word()}-${chance.word()}-${chance.integer({ min: 1000, max: 9999 })}`,
           sourceId: source.id,
           sourceAuthor: chance.name(),

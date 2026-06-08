@@ -17,7 +17,7 @@ export const generateEmailToken = () => {
 
 export const sendVerificationEmail = async (email: string, token: string) => {
   const verificationLink = `${getBaseUrl()}/verify-email?token=${token}`;
-  const subject = "Verify Your Email Address";
+  const subject = "Confirm your email — one tap and you're in";
   const htmlMessage = `
     <!DOCTYPE html>
     <html lang="en">
@@ -71,13 +71,15 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     </head>
     <body>
         <div class="container">
-            <h1>Confirm Your Email Address</h1>
-            <p>Hello,</p>
-            <p>Thank you for registering with us! To complete your registration, please verify your email address by clicking the button below:</p>
-            <a href="${verificationLink}" class="btn">Verify Email</a>
-            <p>Please note that this link is valid for 1 hour only. If it expires, you will need to request a new one.</p>
-            <p>If you did not create an account, please ignore this email.</p>
-            <p>Best regards, <br>The Codú Team</p>
+            <h1>Confirm your email</h1>
+            <p>Welcome to Codú — the community for AI builders and indie hackers. Less theory, more shipping.</p>
+            <p>Tap the button below to confirm your email and finish setting up your account:</p>
+            <a href="${verificationLink}" class="btn">Confirm my email</a>
+            <p>This link expires in 1 hour. If it does, just request a new one.</p>
+            <p>If the button doesn't work, copy and paste this URL into your browser:</p>
+            <p style="word-break: break-all; font-size: 14px; color: #555;">${verificationLink}</p>
+            <p>If you didn't sign up for Codú, you can safely ignore this email.</p>
+            <p>See you in the build,<br>The Codú team</p>
             <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} Codú. All rights reserved.</p>
             </div>
