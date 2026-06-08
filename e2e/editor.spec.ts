@@ -9,20 +9,14 @@ const CREATE_URL = `${BASE_URL}/create`;
 const MOD_KEY = process.platform === "darwin" ? "Meta" : "Control";
 
 // Selectors
+//
+// NOTE (post-relaunch): the editor no longer has Write/Link tabs. It opens
+// straight into the article editor (title + TipTap body + tags + canonical +
+// publish). Links are created from the compose modal, not here.
 const SELECTORS = {
-  // Tabs
-  writeTab: 'button:has-text("Write")',
-  linkTab: 'button:has-text("Link")',
-
-  // Write tab
+  // Article editor
   titleInput: 'input[placeholder="Article title"]',
   editorContent: ".ProseMirror",
-
-  // Link tab
-  linkUrlInput: "#link-url",
-  linkTitleInput: "#link-title",
-  linkPreview: 'label:has-text("Link Preview")',
-  linkInfoBox: 'text="Sharing a link"',
 
   // Tags
   tagInput: 'input[placeholder*="Add tags"], input[placeholder*="Add more"]',
@@ -44,17 +38,12 @@ const SELECTORS = {
 
   // Modal buttons
   letsDoThisButton: 'button:has-text("Let\'s do this!")',
-  shareItButton: 'button:has-text("Share it!")',
   maybeLaterButton: 'button:has-text("Maybe later")',
-  notYetButton: 'button:has-text("Not yet")',
 
-  // Toolbar buttons (Write tab)
+  // Toolbar buttons
   boldButton: 'button[title*="Bold"]',
   italicButton: 'button[title*="Italic"]',
-  headingButton: 'button[title*="Heading"]',
-  linkButton: 'button[title*="Link"]',
-  codeBlockButton: 'button[title*="Code"]',
-  markdownModeButton: 'button:has-text("Markdown")',
+  markdownModeButton: 'button:has-text("Switch to Markdown")',
   switchToRichTextButton: 'button:has-text("Switch to Rich Text")',
 };
 
@@ -88,23 +77,17 @@ test.describe("Unauthenticated Editor Access", () => {
 });
 
 // ============================================
-// WRITE TAB EDITOR TESTS
+// ARTICLE EDITOR TESTS
 // ============================================
-test.describe("Write Tab Editor", () => {
+test.describe("Article Editor", () => {
   test.beforeEach(async ({ page }) => {
     await loggedInAsUserOne(page);
   });
 
   test.describe("Basic Functionality", () => {
-    test("Should load write tab by default", async ({ page }) => {
+    test("Should load the article editor by default", async ({ page }) => {
       await page.goto(CREATE_URL);
-      await expect(page.locator(SELECTORS.writeTab)).toBeVisible();
-      await expect(page.locator(SELECTORS.titleInput)).toBeVisible();
-      await expect(page.locator(SELECTORS.editorContent)).toBeVisible();
-    });
-
-    test("Should load write tab via ?tab=write URL param", async ({ page }) => {
-      await page.goto(`${CREATE_URL}?tab=write`);
+      // No tabs anymore — the editor opens straight into the article.
       await expect(page.locator(SELECTORS.titleInput)).toBeVisible();
       await expect(page.locator(SELECTORS.editorContent)).toBeVisible();
     });
@@ -265,120 +248,6 @@ test.describe("Write Tab Editor", () => {
 });
 
 // ============================================
-// LINK TAB EDITOR TESTS
-// ============================================
-test.describe("Link Tab Editor", () => {
-  test.beforeEach(async ({ page }) => {
-    await loggedInAsUserOne(page);
-  });
-
-  test.describe("UI Elements", () => {
-    test("Should load link tab via ?tab=link URL param", async ({ page }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-      await expect(page.locator(SELECTORS.linkUrlInput)).toBeVisible();
-      await expect(page.locator(SELECTORS.linkTitleInput)).toBeVisible();
-    });
-
-    test("Should switch to link tab by clicking tab button", async ({
-      page,
-    }) => {
-      await page.goto(CREATE_URL);
-      await page.locator(SELECTORS.linkTab).click();
-
-      await expect(page.locator(SELECTORS.linkUrlInput)).toBeVisible();
-      await expect(page.locator(SELECTORS.linkTitleInput)).toBeVisible();
-    });
-
-    test("Should show info box about sharing links", async ({ page }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-      await expect(page.locator(SELECTORS.linkInfoBox)).toBeVisible();
-    });
-  });
-
-  test.describe("URL & Title Input", () => {
-    test("Should allow entering URL", async ({ page }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-      const testUrl = "https://github.com/codu-code/codu";
-
-      await page.locator(SELECTORS.linkUrlInput).fill(testUrl);
-      await expect(page.locator(SELECTORS.linkUrlInput)).toHaveValue(testUrl);
-    });
-
-    test("Should allow manual title entry", async ({ page }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-      const testTitle = "My Custom Link Title";
-
-      await page.locator(SELECTORS.linkTitleInput).fill(testTitle);
-      await expect(page.locator(SELECTORS.linkTitleInput)).toHaveValue(
-        testTitle,
-      );
-    });
-
-    test("Should show link preview section when URL is entered", async ({
-      page,
-    }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-
-      // Enter a URL long enough to trigger preview
-      await page
-        .locator(SELECTORS.linkUrlInput)
-        .fill("https://github.com/codu-code/codu");
-
-      // Wait for preview section to appear
-      await expect(page.locator(SELECTORS.linkPreview)).toBeVisible({
-        timeout: 10000,
-      });
-    });
-  });
-});
-
-// ============================================
-// TAB SWITCHING & LOCKING TESTS
-// ============================================
-test.describe("Tab Switching & Locking", () => {
-  test.beforeEach(async ({ page }) => {
-    await loggedInAsUserOne(page);
-  });
-
-  test("Should allow switching tabs when no content", async ({ page }) => {
-    await page.goto(CREATE_URL);
-
-    // Switch to Link tab
-    await page.locator(SELECTORS.linkTab).click();
-    await expect(page.locator(SELECTORS.linkUrlInput)).toBeVisible();
-
-    // Switch back to Write tab
-    await page.locator(SELECTORS.writeTab).click();
-    await expect(page.locator(SELECTORS.editorContent)).toBeVisible();
-  });
-
-  test("Should disable Write tab when Link has content", async ({ page }) => {
-    await page.goto(`${CREATE_URL}?tab=link`);
-
-    // Enter URL in link tab
-    await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
-
-    // Write tab should be disabled
-    const writeTab = page.locator(SELECTORS.writeTab);
-    await expect(writeTab).toHaveAttribute("disabled", "");
-    await expect(writeTab).toHaveClass(/opacity-50/);
-  });
-
-  test("Should disable Link tab when Write has content", async ({ page }) => {
-    await page.goto(CREATE_URL);
-
-    // Enter content in write tab
-    await page.locator(SELECTORS.editorContent).click();
-    await page.keyboard.type("Some article content here");
-
-    // Link tab should be disabled
-    const linkTab = page.locator(SELECTORS.linkTab);
-    await expect(linkTab).toHaveAttribute("disabled", "");
-    await expect(linkTab).toHaveClass(/opacity-50/);
-  });
-});
-
-// ============================================
 // TAGS INPUT TESTS
 // ============================================
 test.describe("Tags Input", () => {
@@ -527,13 +396,6 @@ test.describe("More Options Accordion", () => {
     // Date picker should appear
     await expect(page.locator(SELECTORS.datetimeInput)).toBeVisible();
   });
-
-  test("More Options should not be visible on Link tab", async ({ page }) => {
-    await page.goto(`${CREATE_URL}?tab=link`);
-
-    // More Options should not be visible for link posts
-    await expect(page.locator(SELECTORS.moreOptionsButton)).toBeHidden();
-  });
 });
 
 // ============================================
@@ -544,7 +406,7 @@ test.describe("Publish Button Validation", () => {
     await loggedInAsUserOne(page);
   });
 
-  test.describe("Write Tab Validation", () => {
+  test.describe("Article Validation", () => {
     test("Publish button should be disabled when title is empty", async ({
       page,
     }) => {
@@ -620,83 +482,6 @@ test.describe("Publish Button Validation", () => {
       // Nav Publish button should be enabled
       const navPublishButton = page.locator('nav button:has-text("Publish")');
       await expect(navPublishButton).toBeEnabled();
-    });
-  });
-
-  test.describe("Link Tab Validation", () => {
-    test("Publish button should be disabled when URL is empty", async ({
-      page,
-    }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-
-      // Add only title
-      await page.locator(SELECTORS.linkTitleInput).fill("Link Title");
-
-      // Wait a moment for state to update
-      await page.waitForTimeout(500);
-
-      // Nav Publish button should be disabled
-      const navPublishButton = page.locator('nav button:has-text("Publish")');
-      await expect(navPublishButton).toBeDisabled();
-    });
-
-    test("Publish button should be disabled when title is empty", async ({
-      page,
-    }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-
-      // Add only URL
-      await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
-
-      // Wait a moment for state to update
-      await page.waitForTimeout(500);
-
-      // Nav Publish button should be disabled (needs title)
-      const navPublishButton = page.locator('nav button:has-text("Publish")');
-      await expect(navPublishButton).toBeDisabled();
-    });
-
-    test("Publish button should be enabled when URL and title are provided", async ({
-      page,
-    }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-
-      // Add URL and title
-      await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
-      await page.locator(SELECTORS.linkTitleInput).fill("Example Link Title");
-
-      // Wait a moment for state to update
-      await page.waitForTimeout(500);
-
-      // Nav Publish button should be enabled
-      const navPublishButton = page.locator('nav button:has-text("Publish")');
-      await expect(navPublishButton).toBeEnabled();
-    });
-
-    test("Should disable publish button when title is cleared after being filled", async ({
-      page,
-    }) => {
-      await page.goto(`${CREATE_URL}?tab=link`);
-
-      // Add URL and title
-      await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
-      await page.locator(SELECTORS.linkTitleInput).fill("Temp Title");
-
-      // Wait for button to be enabled
-      await page.waitForTimeout(500);
-      const navPublishButton = page.locator('nav button:has-text("Publish")');
-      await expect(navPublishButton).toBeEnabled();
-
-      // Clear the title field using Select All + Delete
-      await page.locator(SELECTORS.linkTitleInput).focus();
-      await page.keyboard.press(`${MOD_KEY}+a`);
-      await page.keyboard.press("Backspace");
-
-      // Verify the field is empty
-      await expect(page.locator(SELECTORS.linkTitleInput)).toHaveValue("");
-
-      // Publish button should now be disabled
-      await expect(navPublishButton).toBeDisabled();
     });
   });
 });
@@ -793,7 +578,7 @@ test.describe("Publish Flow", () => {
     await loggedInAsUserOne(page);
   });
 
-  test("Should show confirmation modal for write tab", async ({ page }) => {
+  test("Should show confirmation modal for article", async ({ page }) => {
     await page.goto(CREATE_URL);
     await page.waitForLoadState("domcontentloaded");
 
@@ -860,76 +645,6 @@ test.describe("Publish Flow", () => {
     await expect(page.locator('text="Ready to launch?"')).toBeHidden();
   });
 
-  test("Should show link-specific modal for Link tab", async ({ page }) => {
-    await page.goto(`${CREATE_URL}?tab=link`);
-
-    // Enter link content
-    await page.locator(SELECTORS.linkUrlInput).fill("https://github.com");
-    await page.locator(SELECTORS.linkTitleInput).fill("GitHub Link");
-
-    // Wait for auto-save to complete before opening modal
-    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
-      timeout: 15000,
-    });
-    await page.waitForTimeout(300); // Allow state to settle
-
-    // Click Publish button in nav
-    await page.locator('nav button:has-text("Publish")').click();
-
-    // Should show link-specific modal text
-    await expect(page.locator('text="Spread the word!"')).toBeVisible();
-    await expect(page.locator(SELECTORS.shareItButton)).toBeVisible();
-  });
-
-  test("Should publish link with auto-populated title from URL metadata", async ({
-    page,
-  }) => {
-    await page.goto(`${CREATE_URL}?tab=link`);
-    await page.waitForLoadState("domcontentloaded");
-
-    // Enter a URL and wait for metadata to auto-populate title
-    await page.locator(SELECTORS.linkUrlInput).fill("https://example.com");
-
-    // Wait for metadata to be fetched and title to auto-populate
-    const titleInput = page.locator(SELECTORS.linkTitleInput);
-    await expect(titleInput).not.toHaveValue("", { timeout: 15000 });
-
-    // Verify the title was auto-populated
-    const titleValue = await titleInput.inputValue();
-    expect(titleValue.length).toBeGreaterThan(0);
-
-    // Wait for auto-save to complete (check nav "Saved" timestamp)
-    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
-      timeout: 15000,
-    });
-
-    // Additional wait for any pending state updates to settle
-    await page.waitForTimeout(1000);
-
-    // Wait for Publish button to be enabled (requires valid title + URL)
-    const publishButton = page.locator('nav button:has-text("Publish")');
-    await expect(publishButton).toBeEnabled({ timeout: 10000 });
-    await publishButton.click();
-
-    // Should show link-specific modal text (not an error)
-    const spreadTheWordText = page.locator('text="Spread the word!"');
-    await expect(spreadTheWordText).toBeVisible({ timeout: 10000 });
-
-    // Click Share it! to publish
-    const shareBtn = page.locator(SELECTORS.shareItButton);
-    await expect(shareBtn).toBeVisible({ timeout: 5000 });
-    await shareBtn.click();
-
-    // Wait for publish to complete - should redirect to post page
-    // The redirect URL pattern is /{username}/{slug}
-    await page.waitForURL((url) => !url.pathname.includes("/create"), {
-      timeout: 15000,
-    });
-
-    // Verify we're on the published post page
-    await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
-  });
-
   test("Should publish and redirect to article page", async ({ page }) => {
     await page.goto(CREATE_URL);
 
@@ -954,15 +669,28 @@ test.describe("Publish Flow", () => {
     });
     await page.locator(SELECTORS.letsDoThisButton).click();
 
-    // Should redirect to article page
-    await page.waitForURL(/.*e2e-test-user-one-111\/e2e-publish-test.*/, {
-      timeout: 20000,
-    });
+    // After confirming, the editor redirects. The e2e env runs with the
+    // auto-moderation gate ON (MODERATION_ENABLED=true), so a freshly
+    // published draft is routed to `in_review` and the author is sent to
+    // their drafts ("Sent for review"). When the gate is OFF the post goes
+    // live and redirects to the published article. Accept either terminal
+    // state so the publish flow is exercised end-to-end regardless of env.
+    await page.waitForURL(
+      (url) =>
+        /\/e2e-test-user-one-111\/e2e-publish-test/.test(url.pathname) ||
+        url.pathname.startsWith("/my-posts"),
+      { timeout: 20000 },
+    );
 
-    // Article should be visible
-    await expect(page.getByRole("heading", { name: title })).toBeVisible({
-      timeout: 10000,
-    });
+    if (page.url().includes("/my-posts")) {
+      // Moderation gate ON — post went to review.
+      await expect(page).toHaveURL(/my-posts/);
+    } else {
+      // Moderation gate OFF — post is live, article heading is shown.
+      await expect(page.getByRole("heading", { name: title })).toBeVisible({
+        timeout: 10000,
+      });
+    }
   });
 
   test("Should show schedule-specific modal text when scheduling", async ({
@@ -1032,19 +760,6 @@ test.describe("Mobile Responsive Tests", () => {
 
     // Editor should be visible
     await expect(page.locator(SELECTORS.titleInput)).toBeVisible();
-    await expect(page.locator(SELECTORS.editorContent)).toBeVisible();
-  });
-
-  test("Tab switching should work on mobile", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto(CREATE_URL);
-
-    // Switch to Link tab
-    await page.locator(SELECTORS.linkTab).click();
-    await expect(page.locator(SELECTORS.linkUrlInput)).toBeVisible();
-
-    // Switch back to Write
-    await page.locator(SELECTORS.writeTab).click();
     await expect(page.locator(SELECTORS.editorContent)).toBeVisible();
   });
 

@@ -2,206 +2,95 @@ import { test, expect } from "playwright/test";
 import { randomUUID } from "crypto";
 import { articleContent, articleExcerpt, loggedInAsUserOne } from "./utils";
 
-// Tests for the unified feed with article type filter (replaces old /articles page)
-test.describe("Unauthenticated Feed Page (Articles)", () => {
-  test("Should show feed page with articles filter", async ({ page }) => {
-    // /articles now redirects to /feed?type=article
-    await page.goto("http://localhost:3000/feed?type=article");
-    await expect(page.locator("h1")).toContainText("Feed");
-    // Wait for articles to load
-    await page.waitForSelector("article");
-    expect(await page.locator("article").count()).toBeGreaterThan(0);
-  });
+// Post-relaunch: the feed is the homepage at "/". The old /articles and
+// /feed?type=article routes 308-redirect to "/?type=article". Basic feed
+// display / filtering / sorting / bookmark-button presence is covered by
+// e2e/feed.spec.ts, so the tests here focus on what's unique to articles:
+// article-detail navigation, commenting, and the write+publish flow.
+const PUBLISHED_ARTICLE_URL =
+  "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published";
 
+test.describe("Unauthenticated Article Detail", () => {
   test("Should be able to navigate directly to an article via user profile URL", async ({
     page,
   }) => {
-    // New URL pattern: /[username]/[slug]
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
-    );
+    // URL pattern: /[username]/[slug]
+    await page.goto(PUBLISHED_ARTICLE_URL);
     await expect(page.getByText(articleExcerpt)).toBeVisible();
     // Article title is shown in the content
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();
-    // Author name is shown in the metadata/breadcrumb (use .first() since name appears multiple times)
+    // Author name is shown in the metadata/breadcrumb (appears multiple times)
     await expect(
       page.getByRole("link", { name: "E2E Test User One" }).first(),
     ).toBeVisible();
-    // Wait for action bar to load - use .first() since there are multiple Upvote buttons (action bar + comments)
+    // Action bar Upvote control (multiple on page: reader + comments)
     await expect(page.getByLabel("Upvote").first()).toBeVisible({
       timeout: 15000,
     });
-    // Bookmark button has text "Save"
-    await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
-  });
-
-  test("Should show bookmark article icon on feed", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed?type=article");
-    // Wait for articles to fully hydrate
-    await page.waitForSelector("article");
-
-    // Feed items should have bookmark buttons
+    // Bookmark button reads "Save" (or "Saved") in the reader action bar.
+    // exact: true so "Save" doesn't also match "Saved".
     await expect(
       page
-        .locator("article")
-        .first()
-        .getByRole("button", { name: /bookmark/i }),
-    ).toBeVisible({ timeout: 15000 });
-  });
-
-  test("Should load more articles when scrolling to the end of the page", async ({
-    page,
-    isMobile,
-  }) => {
-    await page.goto("http://localhost:3000/feed?type=article");
-    // Waits for articles to be loaded
-    await page.waitForSelector("article");
-
-    const initialArticleCount = await page.$$eval(
-      "article",
-      (articles) => articles.length,
-    );
-
-    if (!isMobile) {
-      await page.getByText("Code Of Conduct").scrollIntoViewIfNeeded();
-      await page.waitForTimeout(5000);
-      const finalArticleCount = await page.$$eval(
-        "article",
-        (articles) => articles.length,
-      );
-      expect(finalArticleCount).toBeGreaterThanOrEqual(initialArticleCount);
-    }
-
-    // Footer links should be visible - use footer nav for specific items
-    await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Advertise" })).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Code Of Conduct" }),
+        .getByRole("button", { name: "Save", exact: true })
+        .or(page.getByRole("button", { name: "Saved", exact: true })),
     ).toBeVisible();
   });
 
   test("Should not be able to post a comment on an article", async ({
     page,
   }) => {
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
-    );
+    await page.goto(PUBLISHED_ARTICLE_URL);
 
-    // Wait for discussion section to load
-    await expect(
-      page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
-    ).toBeVisible({ timeout: 15000 });
-
-    // Comment editor button should not be visible (not authenticated)
-    await expect(
-      page.getByRole("button", { name: "Join the conversation..." }),
-    ).toBeHidden();
-
-    // Should show sign in prompt
-    await expect(page.getByText("Hey! 👋")).toBeVisible();
-    await expect(page.getByText("Got something to say?")).toBeVisible();
-    await expect(page.getByText("to leave a comment.")).toBeVisible();
-  });
-
-  test("Should sort articles by Recent (default)", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed?type=article&sort=recent");
-
-    // Wait for articles to fully render
-    await page.waitForSelector("article");
-    await expect(page.locator("article").first()).toBeVisible();
-
-    // Wait for time elements to be present (they render after hydration)
-    await page
-      .waitForSelector("article time", { timeout: 10000 })
-      .catch(() => {});
-
-    const articles = await page.$$eval("article", (articles) => {
-      return articles.map((article) => ({
-        date: article.querySelector("time")?.dateTime || null,
-      }));
+    // The reader has no "Discussion N" heading. Wait for the discussion area
+    // to hydrate via the signed-out sign-in prompt.
+    await expect(page.getByText("Got something to say?")).toBeVisible({
+      timeout: 15000,
     });
 
-    // Filter out articles without dates before checking sort
-    const articlesWithDates = articles.filter((a) => a.date !== null);
+    // The composer trigger button is not shown when signed out
+    await expect(
+      page.getByRole("button", { name: "Add to the discussion…" }),
+    ).toBeHidden();
 
-    // If we have articles with dates, verify they're sorted
-    if (articlesWithDates.length > 1) {
-      const isSortedNewest = articlesWithDates.every((article, index, arr) => {
-        if (index === arr.length - 1) return true;
-        return new Date(article.date!) >= new Date(arr[index + 1].date!);
-      });
-      expect(isSortedNewest).toBeTruthy();
-    } else {
-      // At minimum, verify articles loaded
-      expect(articles.length).toBeGreaterThan(0);
-    }
-  });
-
-  test("Should sort articles by Popular (score-based)", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed?type=article&sort=popular");
-    await page.waitForSelector("article");
-
-    // Just verify the page loads with popular sort - exact ordering depends on vote counts
-    expect(await page.locator("article").count()).toBeGreaterThan(0);
+    await expect(page.getByText("to join the conversation.")).toBeVisible();
   });
 });
 
-test.describe("Authenticated Feed Page (Articles)", () => {
+test.describe("Authenticated Article Flows", () => {
   test.beforeEach(async ({ page }) => {
     await loggedInAsUserOne(page);
-  });
-
-  test("Should show feed with filters and sidebar", async ({
-    page,
-    isMobile,
-  }) => {
-    await page.goto("http://localhost:3000/feed?type=article");
-    await expect(page.locator("h1")).toContainText("Feed");
-
-    // Wait for content to load
-    await page.waitForSelector("article");
-    expect(await page.locator("article").count()).toBeGreaterThan(0);
-
-    // Sidebar elements should be visible on desktop
-    if (!isMobile) {
-      // Check for sidebar content (topics, saved items, etc.)
-      await expect(
-        page.getByRole("heading", { name: /topics|saved/i }).first(),
-      ).toBeVisible({ timeout: 15000 });
-    }
-  });
-
-  test("Should show bookmark article icon on feed", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed?type=article");
-
-    // Wait for content to load
-    await page.waitForSelector("article");
-
-    // Feed items should have bookmark buttons
-    await expect(
-      page
-        .locator("article")
-        .first()
-        .getByRole("button", { name: /bookmark/i }),
-    ).toBeVisible({ timeout: 15000 });
   });
 
   test("Should write and publish an article", async ({ page, isMobile }) => {
     test.slow();
     const articleTitle = "Lorem Ipsum";
     await page.goto("http://localhost:3000");
-    // Waits for articles to be loaded
+    // Waits for the feed to load
     await page.waitForSelector("article");
 
-    // Desktop: Use the Create button in the header
-    // Mobile: Navigate directly to /create
+    // Desktop: Create is a top-bar button that opens the compose modal. The
+    // Article tab hands off to the full editor at /create. Mobile: the modal
+    // path is awkward, so navigate to the editor directly.
     if (isMobile) {
       await page.goto("http://localhost:3000/create");
     } else {
-      await expect(page.getByRole("link", { name: "Create" })).toBeVisible();
-      await page.getByRole("link", { name: "Create" }).click();
+      await page.getByRole("button", { name: "Create" }).click();
+
+      // First-use dos-&-don'ts gate (localStorage). Acknowledge if shown.
+      const gateButton = page.getByRole("button", {
+        name: /Got it/,
+      });
+      if (await gateButton.isVisible().catch(() => false)) {
+        await gateButton.click();
+      }
+
+      // Compose dialog → Article tab → open the editor.
+      const dialog = page.getByRole("dialog", { name: "Create a post" });
+      await expect(dialog).toBeVisible({ timeout: 10000 });
+      await dialog.getByRole("button", { name: "Article" }).click();
+      await dialog.getByRole("button", { name: "Open the editor" }).click();
     }
     await page.waitForURL("http://localhost:3000/create");
 
@@ -215,91 +104,92 @@ test.describe("Authenticated Feed Page (Articles)", () => {
     // Wait for auto-save to complete - URL should update with post ID
     await page.waitForURL(/.*create\/[a-z0-9]+/, { timeout: 20000 });
 
-    // Click the Publish button in the navigation
+    // Click the Publish button in the editor navigation
     const navPublishButton = page
       .getByLabel("Editor navigation")
       .getByRole("button", { name: "Publish" });
     await expect(navPublishButton).toBeEnabled({ timeout: 5000 });
     await navPublishButton.click();
 
-    // Modal should appear with "Let's do this!" button for articles
+    // Confirm in the modal ("Let's do this!" for articles)
     await expect(
       page.getByRole("button", { name: "Let's do this!" }),
     ).toBeVisible({ timeout: 10000 });
     await page.getByRole("button", { name: "Let's do this!" }).click();
-    // New URL pattern: /[username]/[slug]
+
+    // The e2e env runs with the auto-moderation gate ON
+    // (MODERATION_ENABLED=true), so a freshly published draft is routed to
+    // `in_review` and the author is sent to their drafts. When the gate is
+    // OFF the post goes live at /[username]/[slug]. Accept either terminal
+    // state so the flow is exercised end-to-end regardless of env.
     await page.waitForURL(
-      /^http:\/\/localhost:3000\/e2e-test-user-one-111\/lorem-ipsum-.*$/,
+      (url) =>
+        /^\/e2e-test-user-one-111\/lorem-ipsum-/.test(url.pathname) ||
+        url.pathname.startsWith("/my-posts"),
+      { timeout: 20000 },
     );
 
-    await expect(
-      page.getByRole("heading", { name: "Lorem Ipsum" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "E2E Test User One" }).first(),
-    ).toBeVisible();
-    // Wait for discussion section to finish loading
-    await expect(
-      page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
-    ).toBeVisible({ timeout: 15000 });
-    // Wait for action bar to load - use .first() since there are multiple Upvote buttons
-    await expect(page.getByLabel("Upvote").first()).toBeVisible({
-      timeout: 15000,
-    });
-    await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+    if (page.url().includes("/my-posts")) {
+      // Moderation gate ON — post went to review.
+      await expect(page).toHaveURL(/my-posts/);
+    } else {
+      // Moderation gate OFF — published article is shown.
+      await expect(
+        page.getByRole("heading", { name: "Lorem Ipsum" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "E2E Test User One" }).first(),
+      ).toBeVisible();
+      await expect(page.getByLabel("Upvote").first()).toBeVisible({
+        timeout: 15000,
+      });
+      await expect(
+        page.getByRole("button", { name: "Save", exact: true }),
+      ).toBeVisible();
+    }
   });
 
   test("Should post a comment on an article", async ({ page }, workerInfo) => {
     const commentContent = `This is a great read. Thanks for posting! Sent from ${workerInfo.project.name} + ${randomUUID()}`;
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
-    );
+    await page.goto(PUBLISHED_ARTICLE_URL);
 
-    // Wait for discussion section to load
+    // Wait for the discussion section to hydrate (no heading on this reader) —
+    // the collapsed composer trigger is our anchor.
     await expect(
-      page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
+      page.getByRole("button", { name: "Add to the discussion…" }),
     ).toBeVisible({ timeout: 15000 });
-
-    // Click the collapsed comment editor button to expand it
-    await expect(
-      page.getByRole("button", { name: "Join the conversation..." }),
-    ).toBeVisible();
     await page
-      .getByRole("button", { name: "Join the conversation..." })
+      .getByRole("button", { name: "Add to the discussion…" })
       .click();
 
-    // Now the editor is expanded - fill in the content
-    // The expanded editor uses a tiptap editor, we need to click into it first
+    // The expanded editor is a TipTap editor - click into it then type
     await page.waitForTimeout(500); // Wait for editor to expand
-    // Focus the editor by clicking in it
     await page.locator(".ProseMirror").first().click();
     await page.keyboard.type(commentContent);
-    // Use exact: true to avoid matching "Comment options"
+    // exact: true to avoid matching "Comment options"
     await page.getByRole("button", { name: "Comment", exact: true }).click();
 
     await expect(page.getByText(commentContent)).toBeVisible();
   });
 
   test("Should be able reply to a comment", async ({ page }) => {
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
-    );
+    await page.goto(PUBLISHED_ARTICLE_URL);
 
     await expect(page.getByText(articleExcerpt)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Published Article" }),
     ).toBeVisible();
-    // Wait for discussion section to finish loading
+    // Wait for the discussion to hydrate — the seed comment's Reply button
+    // is our anchor.
     await expect(
-      page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
+      page.getByRole("button", { name: "Reply" }).first(),
     ).toBeVisible({ timeout: 15000 });
 
     // Click reply on the first comment
     await page.getByRole("button", { name: "Reply" }).first().click();
 
-    // Wait for reply editor to expand
+    // Wait for the reply editor to expand
     await page.waitForTimeout(500);
-    // Focus the reply editor and type
     await page.locator(".ProseMirror").last().click();
     const replyText = `Test reply ${Date.now()}`;
     await page.keyboard.type(replyText);
@@ -310,45 +200,39 @@ test.describe("Authenticated Feed Page (Articles)", () => {
       .nth(1)
       .click();
 
-    // Wait for the reply text to appear (this indicates the reply was successful)
+    // Reply text should appear
     await expect(page.getByText(replyText)).toBeVisible({ timeout: 15000 });
   });
 
   test("Should show vote buttons on article detail", async ({ page }) => {
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
-    );
+    await page.goto(PUBLISHED_ARTICLE_URL);
 
-    // Wait for the article action bar to load - use .first() since there are multiple Upvote buttons
+    // Wait for the article action bar to load (multiple Upvote controls)
     await expect(page.getByLabel("Upvote").first()).toBeVisible({
       timeout: 15000,
     });
 
-    // Should be able to interact with vote button
+    // Should be able to interact with the vote button
     await page.getByLabel("Upvote").first().click();
-
-    // Vote button should show active state
     await expect(page.getByLabel("Upvote").first()).toBeVisible();
   });
 
   test("Should be able to bookmark an article", async ({ page }) => {
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
-    );
-
-    // Wait for page to be fully loaded including all network requests
+    await page.goto(PUBLISHED_ARTICLE_URL);
     await page.waitForLoadState("domcontentloaded");
 
-    // Wait for action bar to load - bookmark button shows either "Save" or "Saved"
-    // depending on whether another parallel test has already bookmarked it
-    const saveButton = page.getByRole("button", { name: "Save" });
-    const savedButton = page.getByRole("button", { name: "Saved" });
+    // Reader action bar bookmark button toggles between "Save" and "Saved".
+    // Another parallel test may have already saved it, so handle both states.
+    const saveButton = page.getByRole("button", { name: "Save", exact: true });
+    const savedButton = page.getByRole("button", {
+      name: "Saved",
+      exact: true,
+    });
 
-    // Check which state the button is currently in
     const isSaved = await savedButton.isVisible().catch(() => false);
 
     if (isSaved) {
-      // Article is already bookmarked - unbookmark then rebookmark to test the flow
+      // Already bookmarked - unbookmark then rebookmark to test the flow
       await savedButton.scrollIntoViewIfNeeded();
       await Promise.all([
         page.waitForResponse(
@@ -372,7 +256,7 @@ test.describe("Authenticated Feed Page (Articles)", () => {
       saveButton.click(),
     ]);
 
-    // Wait for button text to change to "Saved" after React state update
+    // Button text should change to "Saved"
     await expect(savedButton).toBeVisible({ timeout: 30000 });
   });
 });
