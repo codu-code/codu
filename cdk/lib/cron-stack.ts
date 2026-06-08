@@ -30,28 +30,6 @@ export class CronStack extends cdk.Stack {
 
     lambdaRole.addToPolicy(policy);
 
-    const lambdaFn = new NodejsFunction(this, "AlgoliaLambda", {
-      timeout: cdk.Duration.seconds(120),
-      runtime: lambda.Runtime.NODEJS_20_X,
-      entry: path.join(__dirname, "/../lambdas/algoliaIndex/index.ts"),
-      depsLockFilePath: path.join(
-        __dirname,
-        "/../lambdas/algoliaIndex/package-lock.json",
-      ),
-      role: lambdaRole,
-      bundling: {
-        nodeModules: ["@aws-sdk/client-ssm", "algoliasearch", "pg"],
-      },
-    });
-
-    // 6:00 (am) every day
-    // See https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html
-    const algoliaRule = new events.Rule(this, "AlgoliaRule", {
-      schedule: events.Schedule.expression("cron(0 6 * * ? *)"),
-    });
-
-    algoliaRule.addTarget(new targets.LambdaFunction(lambdaFn));
-
     // RSS Feed Fetcher Lambda
     const rssFetcherFn = new NodejsFunction(this, "RSSFetcherLambda", {
       timeout: cdk.Duration.seconds(300), // 5 minutes for processing multiple feeds
@@ -89,7 +67,7 @@ export class CronStack extends cdk.Stack {
       },
     });
 
-    // Run daily at 5:00 AM UTC (before Algolia at 6 AM)
+    // Run daily at 5:00 AM UTC
     const voteReconcileRule = new events.Rule(this, "VoteReconcileRule", {
       schedule: events.Schedule.expression("cron(0 5 * * ? *)"),
     });
