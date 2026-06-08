@@ -38,9 +38,9 @@ test.describe("Authenticated Login Page", () => {
   test("Authenticated users are redirected away from get-started", async ({
     page,
   }) => {
-    // Authenticated users are bounced off /get-started → "/" → /feed.
+    // Authenticated users are bounced off /get-started → "/" (the feed).
     await page.goto("http://localhost:3000/get-started");
-    await expect(page).toHaveURL(/\/feed/);
+    await expect(page).toHaveURL("http://localhost:3000/");
     await expect(
       page.getByRole("button", { name: "Continue with GitHub" }),
     ).toBeHidden();

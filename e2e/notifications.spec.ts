@@ -71,7 +71,7 @@ test.describe("Notifications Page", () => {
 
       // Verify notification card styling (rounded corners, proper borders)
       const notificationCard = page
-        .locator('[class*="rounded-lg"][class*="border-neutral-200"]')
+        .locator('[class*="rounded-lg"][class*="border-hairline"]')
         .first();
       await expect(notificationCard).toBeVisible({ timeout: 10000 });
     });

@@ -23,7 +23,7 @@ test.describe("Create flow", () => {
   test("Opens the info gate then the compose modal with tabs, and closes", async ({
     page,
   }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Open the create flow from the top bar.
@@ -70,7 +70,7 @@ test.describe("Create flow", () => {
       }
     });
 
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     await page.getByRole("button", { name: /Create/ }).click();

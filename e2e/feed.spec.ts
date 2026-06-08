@@ -3,14 +3,14 @@ import { loggedInAsUserOne } from "./utils";
 
 test.describe("Unauthenticated Feed Page", () => {
   test("Should display feed page with content", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await expect(page.locator("h1")).toContainText("Feed");
     await page.waitForSelector("article");
     expect(await page.locator("article").count()).toBeGreaterThan(0);
   });
 
   test("Should show type filter dropdown", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Type filter should be visible with the default "All types" label
@@ -19,7 +19,7 @@ test.describe("Unauthenticated Feed Page", () => {
   });
 
   test("Should show sort filter dropdown", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Sort filter should be visible with default "Recent"
@@ -28,7 +28,7 @@ test.describe("Unauthenticated Feed Page", () => {
   });
 
   test("Should filter content by type (articles only)", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Click type filter to open the listbox
@@ -46,7 +46,7 @@ test.describe("Unauthenticated Feed Page", () => {
   });
 
   test("Should sort content by Trending", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Click sort filter to open the listbox
@@ -64,7 +64,7 @@ test.describe("Unauthenticated Feed Page", () => {
   });
 
   test("Should sort content by Popular", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Click sort filter to open the listbox
@@ -82,7 +82,7 @@ test.describe("Unauthenticated Feed Page", () => {
   });
 
   test("Should show vote buttons on feed items", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // The relaunch reaction bar is "▲ helpful" (supportive, upvote-only).
@@ -92,7 +92,7 @@ test.describe("Unauthenticated Feed Page", () => {
   });
 
   test("Should show bookmark buttons on feed items", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Bookmark buttons should be visible
@@ -104,7 +104,7 @@ test.describe("Unauthenticated Feed Page", () => {
   test("Should navigate to content detail when clicking title", async ({
     page,
   }) => {
-    await page.goto("http://localhost:3000/feed?type=article");
+    await page.goto("http://localhost:3000/?type=article");
     await page.waitForSelector("article");
 
     // Click on the first article title
@@ -116,7 +116,7 @@ test.describe("Unauthenticated Feed Page", () => {
     await firstArticleLink.click();
 
     // Should navigate to article detail page
-    await expect(page).not.toHaveURL("http://localhost:3000/feed");
+    await expect(page).not.toHaveURL("http://localhost:3000/");
   });
 });
 
@@ -129,7 +129,7 @@ test.describe("Authenticated Feed Page", () => {
     page,
     isMobile,
   }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await expect(page.locator("h1")).toContainText("Feed");
     await page.waitForSelector("article");
 
@@ -142,7 +142,7 @@ test.describe("Authenticated Feed Page", () => {
   });
 
   test("Should allow marking content helpful (upvote)", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Click the helpful (upvote) control
@@ -153,7 +153,7 @@ test.describe("Authenticated Feed Page", () => {
   });
 
   test("Should allow bookmarking content", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Click bookmark on first item
@@ -164,7 +164,7 @@ test.describe("Authenticated Feed Page", () => {
   });
 
   test("Should combine filters - type and sort", async ({ page }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     // Set type filter to Articles
@@ -194,7 +194,7 @@ test.describe("Authenticated Feed Page", () => {
     page,
     isMobile,
   }) => {
-    await page.goto("http://localhost:3000/feed");
+    await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
     const initialCount = await page.locator("article").count();

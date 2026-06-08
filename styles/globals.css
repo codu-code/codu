@@ -119,9 +119,38 @@ body {
 }
 
 /* Native form controls (radio/checkbox) tinted mint — Tailwind's arbitrary
-   accent-[...] inference is unreliable for accent-color, so this is explicit. */
+   accent-[...] inference is unreliable for accent-color, so this is explicit.
+   Also recolour the focus ring: kill the browser's blue outline on pointer
+   focus, and show a mint outline for keyboard focus-visible. */
 .accent-mint {
-  accent-color: rgb(var(--color-accent));
+  /* Fully custom radio. accent-color is unreliable under `color-scheme: dark`
+     (Chrome keeps painting the UA blue regardless of the value), so we paint
+     our own mint control with appearance:none. */
+  -webkit-appearance: none;
+  appearance: none;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid rgb(var(--color-strong));
+  border-radius: 9999px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+.accent-mint:checked {
+  border-color: #2dd4bf;
+  background-image: radial-gradient(
+    circle at center,
+    #2dd4bf 0 42%,
+    transparent 46%
+  );
+}
+.accent-mint:focus {
+  outline: none;
+}
+.accent-mint:focus-visible {
+  outline: 2px solid #2dd4bf;
+  outline-offset: 2px;
 }
 
 /* ── Eyebrow / kicker: the signature mono "// label" device ── */
