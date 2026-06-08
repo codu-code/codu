@@ -25,7 +25,7 @@ interface NavDrawerProps {
  * Slide-out left drawer that replaces the left rail on ≤720px (opened by the
  * top-bar hamburger). Mirrors LeftRail's nav + info-page footer, and closes on
  * backdrop click, Esc, or any nav action. ("Your topics" lives in Settings on
- * mobile.) Mirrors ui_kits/app/AppShell.jsx → NavDrawer.
+ * mobile.)
  */
 export function NavDrawer({
   open,
@@ -35,7 +35,6 @@ export function NavDrawer({
 }: NavDrawerProps) {
   const pathname = usePathname();
 
-  // Close on Escape while open.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {

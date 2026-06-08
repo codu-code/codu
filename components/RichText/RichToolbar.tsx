@@ -50,7 +50,6 @@ function TBtn({
       type="button"
       title={label}
       aria-label={label}
-      // Keep the textarea selection alive across the click.
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={`flex shrink-0 items-center justify-center rounded-sm bg-transparent text-muted transition-colors hover:bg-hover hover:text-fg ${

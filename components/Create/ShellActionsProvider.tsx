@@ -26,10 +26,8 @@ export function useShellActions(): ShellActions {
 }
 
 /**
- * Provides create + topics actions to the whole app shell and renders their
- * modals. The "Create" entry point is gated, on first use, by a one-time
- * dos-&-don'ts info modal (localStorage). Mirrors the AppShell wiring in
- * ui_kits/app/AppShell.jsx.
+ * Provides create + topics actions to the app shell and renders their modals.
+ * Create is gated on first use by a one-time dos-&-don'ts modal (localStorage).
  */
 export function ShellActionsProvider({
   authed,

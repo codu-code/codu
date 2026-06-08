@@ -7,8 +7,7 @@ import { TOPIC_POOL } from "./topics";
 
 /**
  * Edit "Your topics" — add/remove the topics that tune the feed. Reads + writes
- * via profile.myInterests / profile.updateInterests. Mirrors
- * ui_kits/app/AppShell.jsx → TopicsModal.
+ * via profile.myInterests / profile.updateInterests.
  */
 export function TopicsModal({ onClose }: { onClose: () => void }) {
   const utils = api.useUtils();

@@ -22,7 +22,7 @@ interface LeftRailProps {
 
 /**
  * The left rail: primary nav, "Your topics" tags, and a bottom-pinned footer of
- * mono info-page links. Mirrors ui_kits/app/AppShell.jsx → LeftRail.
+ * mono info-page links.
  */
 export function LeftRail({ session, username }: LeftRailProps) {
   const pathname = usePathname();
@@ -76,8 +76,7 @@ export function LeftRail({ session, username }: LeftRailProps) {
         })}
       </nav>
 
-      {/* Your topics — the member's chosen topics (editable), or popular tags
-          for logged-out visitors. */}
+      {/* Member's chosen topics (editable), or popular tags when logged out. */}
       {session ? (
         <div className="mt-5 px-3">
           <div className="flex items-center justify-between gap-2">

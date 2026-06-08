@@ -54,7 +54,6 @@ import { increment } from "./utils";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import crypto from "crypto";
 
-// Helper to generate slug from title
 function generateSlug(title: string): string {
   const baseSlug = title
     .toLowerCase()
@@ -65,7 +64,6 @@ function generateSlug(title: string): string {
   return `${baseSlug}-${uniqueId}`;
 }
 
-// Helper to calculate read time
 function calculateReadTime(body: string | null | undefined): number {
   if (!body) return 1;
   const wordsPerMinute = 200;
@@ -74,7 +72,6 @@ function calculateReadTime(body: string | null | undefined): number {
 }
 
 export const postRouter = createTRPCRouter({
-  // Get unified feed with optional type filtering
   getFeed: publicProcedure
     .input(GetFeedSchema)
     .query(async ({ ctx, input }) => {
@@ -82,7 +79,6 @@ export const postRouter = createTRPCRouter({
       const limit = input?.limit ?? 25;
       const { cursor, sort, type, sourceId, authorId } = input;
 
-      // Build the vote subquery for current user
       const userVotesSubquery = userId
         ? ctx.db
             .select({
@@ -94,7 +90,6 @@ export const postRouter = createTRPCRouter({
             .as("userVotes")
         : null;
 
-      // Build the bookmark subquery for current user
       const userBookmarksSubquery = userId
         ? ctx.db
             .select({
@@ -105,10 +100,8 @@ export const postRouter = createTRPCRouter({
             .as("userBookmarks")
         : null;
 
-      // Calculate score for trending
       const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
-      // Build conditions
       const conditions = [
         eq(posts.status, "published"),
         isNull(banned_users.userId),
@@ -126,7 +119,6 @@ export const postRouter = createTRPCRouter({
         conditions.push(eq(posts.authorId, authorId));
       }
 
-      // Build order by and cursor conditions based on sort type
       const getOrderAndCursor = () => {
         switch (sort) {
           case "recent":
@@ -166,7 +158,6 @@ export const postRouter = createTRPCRouter({
         conditions.push(cursorCondition);
       }
 
-      // Build query
       let query;
       if (userVotesSubquery && userBookmarksSubquery) {
         query = ctx.db
@@ -191,17 +182,14 @@ export const postRouter = createTRPCRouter({
             featured: posts.featured,
             pinnedUntil: posts.pinnedUntil,
             createdAt: posts.createdAt,
-            // Source info
             sourceName: feedSources.name,
             sourceSlug: feedSources.slug,
             sourceLogo: feedSources.logoUrl,
             sourceWebsite: feedSources.websiteUrl,
             sourceCategory: feedSources.category,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User-specific
             userVote: userVotesSubquery.voteType,
             isBookmarked: sql<boolean>`${userBookmarksSubquery.postId} IS NOT NULL`,
           })
@@ -240,17 +228,15 @@ export const postRouter = createTRPCRouter({
             featured: posts.featured,
             pinnedUntil: posts.pinnedUntil,
             createdAt: posts.createdAt,
-            // Source info
             sourceName: feedSources.name,
             sourceSlug: feedSources.slug,
             sourceLogo: feedSources.logoUrl,
             sourceWebsite: feedSources.websiteUrl,
             sourceCategory: feedSources.category,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User-specific (null when not logged in)
+            // null when not logged in
             userVote: sql<"up" | "down" | null>`NULL`,
             isBookmarked: sql<boolean>`FALSE`,
           })
@@ -265,7 +251,6 @@ export const postRouter = createTRPCRouter({
 
       const results = await query;
 
-      // Check if there's a next page
       let nextCursor:
         | { id: string; publishedAt?: string; score?: number }
         | undefined;
@@ -285,7 +270,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get post by ID
   getById: publicProcedure
     .input(GetPostByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -317,13 +301,11 @@ export const postRouter = createTRPCRouter({
           pinnedUntil: posts.pinnedUntil,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Source info
           sourceName: feedSources.name,
           sourceSlug: feedSources.slug,
           sourceLogo: feedSources.logoUrl,
           sourceWebsite: feedSources.websiteUrl,
           sourceCategory: feedSources.category,
-          // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
@@ -343,7 +325,6 @@ export const postRouter = createTRPCRouter({
 
       const item = results[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
@@ -376,7 +357,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get post by slug
   getBySlug: publicProcedure
     .input(GetPostBySlugSchema)
     .query(async ({ ctx, input }) => {
@@ -408,13 +388,11 @@ export const postRouter = createTRPCRouter({
           pinnedUntil: posts.pinnedUntil,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Source info
           sourceName: feedSources.name,
           sourceSlug: feedSources.slug,
           sourceLogo: feedSources.logoUrl,
           sourceWebsite: feedSources.websiteUrl,
           sourceCategory: feedSources.category,
-          // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
@@ -434,7 +412,6 @@ export const postRouter = createTRPCRouter({
 
       const item = results[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
@@ -467,13 +444,11 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Create new post
   create: protectedProcedure
     .input(CreatePostSchema)
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.session.user.id;
 
-      // Validate based on post type
       if (input.type === "article" && !input.body) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -494,10 +469,7 @@ export const postRouter = createTRPCRouter({
       const slug = generateSlug(input.title);
       const readingTime = calculateReadTime(input.body);
 
-      // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
-      // and this create would go live directly, route it to `in_review` instead
-      // of `published` so a client can't self-publish around review. Mirrors the
-      // publish mutation's gate. When the flag is off, behaviour is unchanged.
+      // Moderation gate (default off): route would-be-live creates to in_review so a client can't self-publish around review.
       const moderated = input.status === "published" && isModerationEnabled();
       if (moderated) {
         screenContent({ title: input.title, body: input.body });
@@ -527,7 +499,6 @@ export const postRouter = createTRPCRouter({
         })
         .returning();
 
-      // Notify the admin there's something to review (fire-and-forget).
       if (newPost && moderated) {
         void notifyAdminOfReview({
           postId: newPost.id,
@@ -536,8 +507,7 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Engagement: award points for publishing. Skipped under moderation —
-      // the admin-approval path awards on publish. Safe — never throws.
+      // Skipped under moderation — the admin-approval path awards on publish instead.
       if (newPost && input.status === "published" && !moderated) {
         await award({
           userId: authorId,
@@ -547,10 +517,8 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Add tags if provided
       if (input.tags && input.tags.length > 0) {
         for (const tagName of input.tags) {
-          // Try to find existing tag
           const existingTags = await ctx.db
             .select({ id: tag.id })
             .from(tag)
@@ -561,7 +529,6 @@ export const postRouter = createTRPCRouter({
           if (existingTags.length > 0) {
             tagId = existingTags[0].id;
           } else {
-            // Create new tag
             const [newTag] = await ctx.db
               .insert(tag)
               .values({ title: tagName.toLowerCase() })
@@ -569,7 +536,6 @@ export const postRouter = createTRPCRouter({
             tagId = newTag.id;
           }
 
-          // Link tag to post
           await ctx.db
             .insert(postTags)
             .values({ postId: newPost.id, tagId })
@@ -580,13 +546,11 @@ export const postRouter = createTRPCRouter({
       return newPost;
     }),
 
-  // Update/save post
   update: protectedProcedure
     .input(SavePostSchema)
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.session.user.id;
 
-      // Check ownership
       const existing = await ctx.db
         .select({
           authorId: posts.authorId,
@@ -625,10 +589,7 @@ export const postRouter = createTRPCRouter({
       if (input.canonicalUrl !== undefined)
         updateData.canonicalUrl = input.canonicalUrl || null;
 
-      // Auto-moderation gate (DEFAULT OFF). A draft→live transition via update
-      // must go through review too, otherwise a client could self-publish by
-      // setting status:"published" here instead of calling publish. Mirrors the
-      // publish mutation's gate.
+      // Moderation gate (default off): a draft→live transition via update must go through review too, else a client self-publishes by setting status here instead of calling publish.
       const goingLive =
         input.status === "published" && existing[0].status !== "published";
       const moderated = goingLive && isModerationEnabled();
@@ -656,7 +617,6 @@ export const postRouter = createTRPCRouter({
         .where(eq(posts.id, input.id))
         .returning();
 
-      // Notify the admin there's something to review (fire-and-forget).
       if (updated && moderated) {
         void notifyAdminOfReview({
           postId: input.id,
@@ -665,12 +625,9 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Update tags if provided
       if (input.tags !== undefined) {
-        // Remove existing tags
         await ctx.db.delete(postTags).where(eq(postTags.postId, input.id));
 
-        // Add new tags
         for (const tagName of input.tags) {
           const existingTags = await ctx.db
             .select({ id: tag.id })
@@ -699,14 +656,12 @@ export const postRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Delete post
   delete: protectedProcedure
     .input(DeletePostSchema)
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.session.user.id;
       const isAdmin = ctx.session.user.role === "ADMIN";
 
-      // Check ownership
       const existing = await ctx.db
         .select({ authorId: posts.authorId })
         .from(posts)
@@ -732,7 +687,6 @@ export const postRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Vote on post (Reddit-style)
   vote: protectedProcedure
     .input(VotePostSchema)
     .mutation(async ({ ctx, input }) => {
@@ -753,7 +707,6 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Get existing vote
       const existingVote = await ctx.db
         .select({ id: postVotes.id, voteType: postVotes.voteType })
         .from(postVotes)
@@ -769,21 +722,18 @@ export const postRouter = createTRPCRouter({
 
       // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
-        // Remove vote
         if (existingVote.length > 0) {
           await ctx.db
             .delete(postVotes)
             .where(eq(postVotes.id, existingVote[0].id));
         }
       } else if (existingVote.length === 0) {
-        // New vote
         await ctx.db.insert(postVotes).values({
           postId,
           userId,
           voteType,
         });
       } else if (existingVote[0].voteType !== voteType) {
-        // Change vote
         await ctx.db
           .update(postVotes)
           .set({ voteType })
@@ -822,14 +772,12 @@ export const postRouter = createTRPCRouter({
       return { voteType };
     }),
 
-  // Bookmark post
   bookmark: protectedProcedure
     .input(BookmarkPostSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { postId, setBookmarked } = input;
 
-      // Check if post exists
       const postItem = await ctx.db
         .select({ id: posts.id })
         .from(posts)
@@ -859,7 +807,6 @@ export const postRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Get sidebar data for a post
   sidebarData: publicProcedure
     .input(GetByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -902,7 +849,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get user's posts
   getUserPosts: publicProcedure
     .input(GetUserPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -958,7 +904,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get bookmarked posts for current user
   myBookmarks: protectedProcedure
     .input(GetBookmarkedPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -1013,7 +958,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Edit Draft - get user's own post by ID for editing
   editDraft: protectedProcedure
     .input(GetByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -1048,7 +992,6 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Get tags for this post
       const postTagsResult = await ctx.db
         .select({
           tag: {
@@ -1066,7 +1009,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // My Drafts - get user's draft posts (articles)
   myDrafts: protectedProcedure.query(async ({ ctx }) => {
     const authorId = ctx.session.user.id;
 
@@ -1093,7 +1035,6 @@ export const postRouter = createTRPCRouter({
       .orderBy(desc(posts.updatedAt));
   }),
 
-  // My Published - get user's published posts (articles)
   myPublished: protectedProcedure.query(async ({ ctx }) => {
     const authorId = ctx.session.user.id;
     const now = new Date().toISOString();
@@ -1125,7 +1066,6 @@ export const postRouter = createTRPCRouter({
       .orderBy(desc(posts.publishedAt));
   }),
 
-  // My Scheduled - get user's scheduled posts (publishedAt > now)
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
     const authorId = ctx.session.user.id;
     const now = new Date().toISOString();
@@ -1154,13 +1094,11 @@ export const postRouter = createTRPCRouter({
       .orderBy(asc(posts.publishedAt));
   }),
 
-  // Publish - publish/unpublish/schedule a post
   publish: protectedProcedure
     .input(PublishPostSchema)
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.session.user.id;
 
-      // Check ownership
       const existing = await ctx.db
         .select({
           id: posts.id,
@@ -1191,8 +1129,7 @@ export const postRouter = createTRPCRouter({
       const updateData: Record<string, unknown> = {};
 
       if (input.published) {
-        // Throttle publishing so a user can't mass-create drafts then
-        // publish-loop to flood the feed. 10 / 5 min, keyed per author.
+        // Throttle so a user can't mass-create drafts then publish-loop to flood the feed.
         await enforceRateLimit({
           key: `create:${authorId}`,
           limit: 10,
@@ -1200,11 +1137,7 @@ export const postRouter = createTRPCRouter({
           message: "You're posting too fast. Take a breather and try again.",
         });
 
-        // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
-        // and the author publishes a draft for the first time, route it to
-        // `in_review` rather than `published`: no publishedAt and no points are
-        // set here — an admin approval handles both. When the flag is off this
-        // branch is skipped and behaviour is unchanged.
+        // Moderation gate (default off): first-time publish of a draft routes to in_review with no publishedAt/points — admin approval handles both.
         if (isModerationEnabled() && existing[0].status === "draft") {
           // Advisory screen only — a failing screen still goes to in_review.
           screenContent({ title: existing[0].title, body: existing[0].body });
@@ -1231,7 +1164,6 @@ export const postRouter = createTRPCRouter({
         updateData.status = "published";
         if (input.publishTime) {
           updateData.publishedAt = input.publishTime.toISOString();
-          // If publish time is in the future, mark as scheduled
           if (input.publishTime > new Date()) {
             updateData.status = "scheduled";
           }
@@ -1239,7 +1171,6 @@ export const postRouter = createTRPCRouter({
           updateData.publishedAt = new Date().toISOString();
         }
 
-        // Generate new slug if this is the first time publishing
         if (existing[0].status === "draft" && existing[0].title) {
           updateData.slug = generateSlug(existing[0].title);
         }
@@ -1256,7 +1187,6 @@ export const postRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Get categories (from sources)
   getCategories: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .selectDistinct({ category: feedSources.category })
@@ -1269,7 +1199,6 @@ export const postRouter = createTRPCRouter({
       .sort();
   }),
 
-  // Get post types count
   getTypeCounts: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .select({
@@ -1283,13 +1212,10 @@ export const postRouter = createTRPCRouter({
     return results;
   }),
 
-  // Track view on a post
   trackView: publicProcedure
     .input(GetByIdSchema)
     .mutation(async ({ ctx, input }) => {
-      // Unauthenticated counter that feeds trending/popular sort — throttle per
-      // client+post so it can't be scripted to inflate a post's view count, and
-      // only count published posts.
+      // Feeds trending/popular sort — throttle per client+post so it can't be scripted to inflate view counts.
       const identifier =
         ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`;
       await enforceRateLimit({
@@ -1306,7 +1232,6 @@ export const postRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Feature a post (admin only)
   feature: protectedProcedure
     .input(FeaturePostSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1328,7 +1253,6 @@ export const postRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Pin a post (admin only)
   pin: protectedProcedure
     .input(PinPostSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1350,7 +1274,6 @@ export const postRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Get featured posts
   getFeatured: publicProcedure
     .input(GetLimitSidePosts)
     .query(async ({ ctx, input }) => {
@@ -1378,7 +1301,6 @@ export const postRouter = createTRPCRouter({
         .limit(limit);
     }),
 
-  // Get comment count for a post
   getCommentCount: publicProcedure
     .input(GetByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -1390,7 +1312,7 @@ export const postRouter = createTRPCRouter({
       return result.count;
     }),
 
-  // Legacy: Get published posts (for backwards compatibility)
+  // Legacy: kept for backwards compatibility.
   published: publicProcedure
     .input(GetPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -1498,7 +1420,6 @@ export const postRouter = createTRPCRouter({
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 
-      // Calculate hotScore for each post
       const calculateHotScore = (
         upvotes: number,
         downvotes: number,
@@ -1527,7 +1448,6 @@ export const postRouter = createTRPCRouter({
           currentUserBookmarkedPost,
           userVote: elem.userVote?.voteType ?? null,
           hotScore,
-          // Legacy field mappings
           likes: elem.post.upvotes,
         };
       });

@@ -20,11 +20,9 @@ interface AppShellProps {
 /**
  * The relaunch app shell: a sticky top bar over a 3-column rail grid (left rail
  * / center / right rail), with the ⌘K command palette and the logged-out
- * sign-in bar. Replaces the old single-sidebar layout.
- * Mirrors ui_kits/app/AppShell.jsx.
+ * sign-in bar.
  */
-// Standalone pages that drop the 3-column rails for a centered single column
-// (forms / info-style pages that aren't part of the feed reading experience).
+// Pages that drop the 3-column rails for a centered single column.
 const BARE_ROUTES = ["/speakers", "/volunteer"];
 
 export function AppShell({ children, session, username }: AppShellProps) {

@@ -26,7 +26,7 @@ interface TopBarProps {
 /**
  * The sticky top bar: logo → feed, a search button styled like an input that
  * opens the ⌘K palette, primary nav, and Write + avatar menu (or Log in / Join
- * free when logged out). Mirrors ui_kits/app/AppShell.jsx → TopBar.
+ * free when logged out).
  */
 export function TopBar({
   session,

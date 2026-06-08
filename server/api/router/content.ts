@@ -53,7 +53,6 @@ import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import crypto from "crypto";
 
-// Helper to generate slug from title
 function generateSlug(title: string): string {
   const baseSlug = title
     .toLowerCase()
@@ -64,7 +63,6 @@ function generateSlug(title: string): string {
   return `${baseSlug}-${uniqueId}`;
 }
 
-// Helper to calculate read time
 function calculateReadTime(body: string | null | undefined): number {
   if (!body) return 1;
   const wordsPerMinute = 200;
@@ -80,11 +78,10 @@ type DbPostType =
   | "til"
   | "question";
 
-// Helper to convert frontend type (POST, LINK, ARTICLE) to DB type (article, link)
 function toDbType(frontendType: string): DbPostType {
   const typeMap: Record<string, DbPostType> = {
     POST: "article",
-    ARTICLE: "article", // Alias for POST
+    ARTICLE: "article",
     LINK: "link",
     TIL: "til",
     QUESTION: "question",
@@ -100,7 +97,6 @@ function toDbType(frontendType: string): DbPostType {
   return typeMap[frontendType] || "article";
 }
 
-// Helper to convert DB type to frontend type (for backwards compatibility)
 function toFrontendType(dbType: string): string {
   const typeMap: Record<string, string> = {
     article: "POST",
@@ -114,7 +110,6 @@ function toFrontendType(dbType: string): string {
 }
 
 export const contentRouter = createTRPCRouter({
-  // Get unified feed with optional type filtering
   getFeed: publicProcedure
     .input(GetUnifiedFeedSchema)
     .query(async ({ ctx, input }) => {
@@ -123,7 +118,6 @@ export const contentRouter = createTRPCRouter({
       const { cursor, sort, type, kinds, sourceId, category, tag, following } =
         input;
 
-      // Build the vote subquery for current user
       const userVotes = userId
         ? ctx.db
             .select({
@@ -135,7 +129,6 @@ export const contentRouter = createTRPCRouter({
             .as("userVotes")
         : null;
 
-      // Build the bookmark subquery for current user
       const userBookmarks = userId
         ? ctx.db
             .select({
@@ -146,14 +139,11 @@ export const contentRouter = createTRPCRouter({
             .as("userBookmarks")
         : null;
 
-      // Calculate score for trending
       const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
-      // Build conditions - status = 'published'
       const conditions = [eq(posts.status, "published")];
 
       if (type) {
-        // Convert frontend type (POST, LINK) to db type (article, link)
         const dbType = toDbType(type);
         conditions.push(eq(posts.type, dbType));
       }
@@ -168,12 +158,10 @@ export const contentRouter = createTRPCRouter({
         conditions.push(eq(posts.sourceId, sourceId));
       }
 
-      // Filter by category (matches source category)
       if (category) {
         conditions.push(eq(feed_sources.category, category));
       }
 
-      // Filter by tag (matches tag slug via post_tags junction)
       if (tag) {
         conditions.push(
           exists(
@@ -186,7 +174,6 @@ export const contentRouter = createTRPCRouter({
         );
       }
 
-      // Following filter — only authors the current user follows.
       if (following && userId) {
         conditions.push(
           exists(
@@ -203,7 +190,6 @@ export const contentRouter = createTRPCRouter({
         );
       }
 
-      // Build order by and cursor conditions based on sort type
       const getOrderAndCursor = () => {
         switch (sort) {
           case "recent":
@@ -243,7 +229,6 @@ export const contentRouter = createTRPCRouter({
         conditions.push(cursorCondition);
       }
 
-      // Build query
       let query;
       if (userVotes && userBookmarks) {
         query = ctx.db
@@ -266,17 +251,14 @@ export const contentRouter = createTRPCRouter({
             sourceId: posts.sourceId,
             sourceAuthor: posts.sourceAuthor,
             createdAt: posts.createdAt,
-            // Source info
             sourceName: feed_sources.name,
             sourceSlug: feed_sources.slug,
             sourceLogo: feed_sources.logoUrl,
             sourceWebsite: feed_sources.websiteUrl,
             sourceCategory: feed_sources.category,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User-specific
             userVote: userVotes.voteType,
             isBookmarked: sql<boolean>`${userBookmarks.postId} IS NOT NULL`,
           })
@@ -309,17 +291,14 @@ export const contentRouter = createTRPCRouter({
             sourceId: posts.sourceId,
             sourceAuthor: posts.sourceAuthor,
             createdAt: posts.createdAt,
-            // Source info
             sourceName: feed_sources.name,
             sourceSlug: feed_sources.slug,
             sourceLogo: feed_sources.logoUrl,
             sourceWebsite: feed_sources.websiteUrl,
             sourceCategory: feed_sources.category,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User-specific (null when not logged in)
             userVote: sql<"up" | "down" | null>`NULL`,
             isBookmarked: sql<boolean>`FALSE`,
           })
@@ -333,7 +312,6 @@ export const contentRouter = createTRPCRouter({
 
       const results = await query;
 
-      // Check if there's a next page
       let nextCursor:
         | { id: string; publishedAt?: string; score?: number }
         | undefined;
@@ -347,7 +325,6 @@ export const contentRouter = createTRPCRouter({
         };
       }
 
-      // Map types from DB format (article, link) to frontend format (POST, LINK)
       const mappedItems = results.map((item) => ({
         ...item,
         type: toFrontendType(item.type),
@@ -359,7 +336,6 @@ export const contentRouter = createTRPCRouter({
       };
     }),
 
-  // Get content by ID
   getById: publicProcedure
     .input(GetContentByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -389,13 +365,11 @@ export const contentRouter = createTRPCRouter({
           sourceAuthor: posts.sourceAuthor,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Source info
           sourceName: feed_sources.name,
           sourceSlug: feed_sources.slug,
           sourceLogo: feed_sources.logoUrl,
           sourceWebsite: feed_sources.websiteUrl,
           sourceCategory: feed_sources.category,
-          // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
@@ -415,7 +389,6 @@ export const contentRouter = createTRPCRouter({
 
       const item = results[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
@@ -444,7 +417,6 @@ export const contentRouter = createTRPCRouter({
         isBookmarked = bookmarkResult.length > 0;
       }
 
-      // Get comments count
       const commentsCountResult = await ctx.db
         .select({ count: count() })
         .from(comments)
@@ -459,7 +431,6 @@ export const contentRouter = createTRPCRouter({
       };
     }),
 
-  // Get content by slug
   getBySlug: publicProcedure
     .input(GetContentBySlugSchema)
     .query(async ({ ctx, input }) => {
@@ -489,13 +460,11 @@ export const contentRouter = createTRPCRouter({
           sourceAuthor: posts.sourceAuthor,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Source info
           sourceName: feed_sources.name,
           sourceSlug: feed_sources.slug,
           sourceLogo: feed_sources.logoUrl,
           sourceWebsite: feed_sources.websiteUrl,
           sourceCategory: feed_sources.category,
-          // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
@@ -515,7 +484,6 @@ export const contentRouter = createTRPCRouter({
 
       const item = results[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
@@ -544,7 +512,6 @@ export const contentRouter = createTRPCRouter({
         isBookmarked = bookmarkResult.length > 0;
       }
 
-      // Get comments count
       const commentsCountResult = await ctx.db
         .select({ count: count() })
         .from(comments)
@@ -559,7 +526,6 @@ export const contentRouter = createTRPCRouter({
       };
     }),
 
-  // Create new content
   create: protectedProcedure
     .input(CreateContentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -576,7 +542,6 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Validate based on content type
       if (input.type === "POST" && !input.body) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -598,10 +563,8 @@ export const contentRouter = createTRPCRouter({
       const readingTime = calculateReadTime(input.body);
       const dbType = toDbType(input.type);
 
-      // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
-      // and this create would go live directly, route it to `in_review` instead
-      // of `published` so a client can't self-publish around review. Mirrors the
-      // publish mutation's gate. When the flag is off, behaviour is unchanged.
+      // Auto-moderation gate (DEFAULT OFF): a direct go-live is routed to
+      // `in_review` so a client can't self-publish around review. Mirrors publish.
       const moderated = input.published && isModerationEnabled();
       if (moderated) {
         screenContent({ title: input.title, body: input.body });
@@ -642,7 +605,6 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Add tags if provided
       if (input.tags && input.tags.length > 0) {
         for (const tagName of input.tags) {
           const existingTags = await ctx.db
@@ -676,9 +638,8 @@ export const contentRouter = createTRPCRouter({
         }
       }
 
-      // Engagement: award points + check badges when a post goes live directly
-      // (the quick-compose Discussion/Link path). Skipped under moderation —
-      // the admin-approval path awards on publish. Never throws.
+      // Award points when a post goes live directly; skipped under moderation
+      // (the admin-approval path awards on publish instead). Never throws.
       if (newContent && input.published && !moderated) {
         await award({
           userId,
@@ -691,13 +652,11 @@ export const contentRouter = createTRPCRouter({
       return newContent;
     }),
 
-  // Update content
   update: protectedProcedure
     .input(UpdateContentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
-      // Check ownership
       const existing = await ctx.db
         .select({
           authorId: posts.authorId,
@@ -741,10 +700,9 @@ export const contentRouter = createTRPCRouter({
       if (input.showComments !== undefined)
         updateData.showComments = input.showComments;
 
-      // Auto-moderation gate (DEFAULT OFF). A draft→live transition via update
-      // must go through review too, otherwise a client could self-publish by
-      // setting published:true here instead of calling publish. Mirrors the
-      // publish mutation's gate.
+      // Auto-moderation gate (DEFAULT OFF): a draft→live transition via update
+      // must go through review too, else a client self-publishes by setting
+      // published:true here instead of calling publish. Mirrors publish.
       const goingLive =
         input.published === true && existing[0].status !== "published";
       const moderated = goingLive && isModerationEnabled();
@@ -779,7 +737,6 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Update tags if provided
       if (input.tags !== undefined) {
         await ctx.db.delete(post_tags).where(eq(post_tags.postId, input.id));
 
@@ -818,13 +775,11 @@ export const contentRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Delete content
   delete: protectedProcedure
     .input(DeleteContentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
-      // Check ownership
       const existing = await ctx.db
         .select({ authorId: posts.authorId })
         .from(posts)
@@ -850,14 +805,12 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Vote on content
   vote: protectedProcedure
     .input(VoteContentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { contentId, voteType } = input;
 
-      // Check if content exists
       const contentItem = await ctx.db
         .select({
           id: posts.id,
@@ -876,7 +829,6 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Get existing vote
       const existingVote = await ctx.db
         .select({ id: post_votes.id, voteType: post_votes.voteType })
         .from(post_votes)
@@ -895,21 +847,18 @@ export const contentRouter = createTRPCRouter({
 
       // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
-        // Remove vote
         if (existingVote.length > 0) {
           await ctx.db
             .delete(post_votes)
             .where(eq(post_votes.id, existingVote[0].id));
         }
       } else if (existingVote.length === 0) {
-        // New vote
         await ctx.db.insert(post_votes).values({
           postId: contentId,
           userId,
           voteType: voteType as "up" | "down",
         });
       } else if (existingVote[0].voteType !== voteType) {
-        // Change vote
         await ctx.db
           .update(post_votes)
           .set({ voteType: voteType as "up" | "down" })
@@ -950,14 +899,12 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Bookmark content
   bookmark: protectedProcedure
     .input(BookmarkContentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { contentId, setBookmarked } = input;
 
-      // Check if content exists
       const contentItem = await ctx.db
         .select({ id: posts.id })
         .from(posts)
@@ -987,7 +934,6 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Track click on external content
   trackClick: publicProcedure
     .input(TrackClickContentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1012,7 +958,6 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Get user's content
   getUserContent: publicProcedure
     .input(GetUserContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1062,7 +1007,6 @@ export const contentRouter = createTRPCRouter({
         };
       }
 
-      // Map types from DB format to frontend format
       const mappedItems = results.map((item) => ({
         ...item,
         type: toFrontendType(item.type),
@@ -1074,7 +1018,6 @@ export const contentRouter = createTRPCRouter({
       };
     }),
 
-  // Get saved content for current user
   mySavedContent: protectedProcedure
     .input(GetSavedContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1121,7 +1064,6 @@ export const contentRouter = createTRPCRouter({
         };
       }
 
-      // Map types from DB format to frontend format
       const mappedItems = results.map((item) => ({
         ...item,
         type: toFrontendType(item.type),
@@ -1133,7 +1075,6 @@ export const contentRouter = createTRPCRouter({
       };
     }),
 
-  // Get categories (from sources)
   getCategories: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .selectDistinct({ category: feed_sources.category })
@@ -1146,7 +1087,6 @@ export const contentRouter = createTRPCRouter({
       .sort();
   }),
 
-  // Get content types count
   getTypeCounts: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .select({
@@ -1160,7 +1100,6 @@ export const contentRouter = createTRPCRouter({
     return results;
   }),
 
-  // Edit Draft - get user's own content by ID for editing
   editDraft: protectedProcedure
     .input(EditDraftContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1196,7 +1135,6 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Get tags for this content
       const contentTags = await ctx.db
         .select({
           tag: {
@@ -1215,7 +1153,6 @@ export const contentRouter = createTRPCRouter({
       };
     }),
 
-  // My Drafts - get user's unpublished ARTICLE content
   myDrafts: protectedProcedure
     .input(MyDraftsContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1246,14 +1183,12 @@ export const contentRouter = createTRPCRouter({
         .orderBy(desc(posts.updatedAt))
         .limit(input.limit);
 
-      // Map types from DB format to frontend format
       return results.map((item) => ({
         ...item,
         type: toFrontendType(item.type),
       }));
     }),
 
-  // My Published - get user's published ARTICLE content
   myPublished: protectedProcedure
     .input(MyPublishedContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1286,14 +1221,12 @@ export const contentRouter = createTRPCRouter({
         .orderBy(desc(posts.publishedAt))
         .limit(input.limit);
 
-      // Map types from DB format to frontend format
       return results.map((item) => ({
         ...item,
         type: toFrontendType(item.type),
       }));
     }),
 
-  // My Scheduled - get user's scheduled ARTICLE content
   myScheduled: protectedProcedure
     .input(MyScheduledContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1322,20 +1255,17 @@ export const contentRouter = createTRPCRouter({
         .orderBy(desc(posts.publishedAt))
         .limit(input.limit);
 
-      // Map types from DB format to frontend format
       return results.map((item) => ({
         ...item,
         type: toFrontendType(item.type),
       }));
     }),
 
-  // Publish - separate mutation to publish/unpublish content
   publish: protectedProcedure
     .input(PublishContentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
-      // Check ownership
       const existing = await ctx.db
         .select({
           id: posts.id,
@@ -1367,7 +1297,6 @@ export const contentRouter = createTRPCRouter({
         status: input.published ? "published" : "draft",
       };
 
-      // Set publishedAt when publishing
       if (input.published) {
         // Throttle the same as create's published path — otherwise a user can
         // mass-create drafts then publish-loop to flood the feed. 10 / 5 min.
@@ -1378,11 +1307,9 @@ export const contentRouter = createTRPCRouter({
           message: "You're posting too fast. Take a breather and try again.",
         });
 
-        // Auto-moderation gate (DEFAULT OFF). When MODERATION_ENABLED is "true"
-        // and the author is publishing a post for the first time (it was a
-        // draft), route it to `in_review` instead of `published`: do NOT set
-        // publishedAt yet (admin approval handles that). When the flag is off
-        // this whole branch is skipped and behaviour is unchanged.
+        // Auto-moderation gate (DEFAULT OFF): a first-time publish (draft→live)
+        // is routed to `in_review` and publishedAt is left unset (admin approval
+        // sets it).
         if (isModerationEnabled() && existing[0].status === "draft") {
           // screenContent is advisory only — a failing screen still goes to
           // in_review so a human reviewer makes the final call.
@@ -1418,7 +1345,7 @@ export const contentRouter = createTRPCRouter({
           updateData.publishedAt = new Date().toISOString();
         }
 
-        // Generate new slug if this is the first time publishing
+        // Regenerate the slug on first publish (draft → published).
         if (existing[0].status === "draft" && existing[0].title) {
           updateData.slug = generateSlug(existing[0].title);
         }
@@ -1444,13 +1371,11 @@ export const contentRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Get user-created link post by username and slug
   getUserLinkBySlug: publicProcedure
     .input(GetContentBySlugSchema.extend({ username: z.string() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id;
 
-      // Find the user
       const userResult = await ctx.db
         .select({ id: user.id })
         .from(user)
@@ -1466,7 +1391,6 @@ export const contentRouter = createTRPCRouter({
 
       const authorId = userResult[0].id;
 
-      // Find the link post
       const linkPostResults = await ctx.db
         .select({
           id: posts.id,
@@ -1483,7 +1407,6 @@ export const contentRouter = createTRPCRouter({
           showComments: posts.showComments,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Author info
           authorId: user.id,
           authorName: user.name,
           authorUsername: user.username,
@@ -1512,7 +1435,6 @@ export const contentRouter = createTRPCRouter({
 
       const linkPost = linkPostResults[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 

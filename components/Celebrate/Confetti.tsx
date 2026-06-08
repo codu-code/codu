@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-// Design-token celebration palette (dark theme literals — pragmatic for canvas,
-// where CSS vars aren't directly paintable): mint accent + accent-soft, warning,
-// info, and white.
+// Dark-theme literals: canvas can't paint CSS vars directly.
 const COLORS = ["#2dd4bf", "#6ee7d6", "#f5b544", "#5fa8f5", "#ffffff"];
 
 interface Particle {

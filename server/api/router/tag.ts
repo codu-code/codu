@@ -145,7 +145,6 @@ export const tagRouter = createTRPCRouter({
       try {
         const { title } = input;
 
-        // Check if tag already exists
         const existing = await ctx.db
           .select({
             id: tag.id,
@@ -161,10 +160,8 @@ export const tagRouter = createTRPCRouter({
           return { data: existing[0], created: false };
         }
 
-        // Create new tag
         const slug = generateSlug(title);
 
-        // Check for slug conflicts
         const slugExists = await ctx.db
           .select({ id: tag.id })
           .from(tag)
@@ -234,13 +231,10 @@ export const tagRouter = createTRPCRouter({
       }
     }),
 
-  // Admin endpoints
-
   /**
    * Get all tags with statistics for admin dashboard
    */
   getAdminStats: protectedProcedure.query(async ({ ctx }) => {
-    // Check admin role
     if (ctx.session.user.role !== "ADMIN") {
       throw new TRPCError({
         code: "FORBIDDEN",
@@ -261,7 +255,6 @@ export const tagRouter = createTRPCRouter({
         .from(tag)
         .orderBy(desc(tag.postCount));
 
-      // Get total counts
       const totalTags = results.length;
       const totalPosts = results.reduce((sum, t) => sum + t.postCount, 0);
       const tagsWithNoPosts = results.filter((t) => t.postCount === 0).length;
@@ -305,12 +298,11 @@ export const tagRouter = createTRPCRouter({
       try {
         const { id, ...updates } = input;
 
-        // Normalize title to lowercase if provided
         if (updates.title) {
           updates.title = updates.title.toLowerCase().trim();
         }
 
-        // Generate slug from title if title changed and slug not provided
+        // Derive slug from title only when title changed and no slug was given
         if (updates.title && !updates.slug) {
           updates.slug = generateSlug(updates.title);
         }
@@ -373,7 +365,6 @@ export const tagRouter = createTRPCRouter({
       }
 
       try {
-        // Get both tags to verify they exist
         const [sourceTag, targetTag] = await Promise.all([
           ctx.db.select().from(tag).where(eq(tag.id, sourceTagId)).limit(1),
           ctx.db.select().from(tag).where(eq(tag.id, targetTagId)).limit(1),
@@ -386,8 +377,7 @@ export const tagRouter = createTRPCRouter({
           });
         }
 
-        // Move all post_tags associations from source to target
-        // Use ON CONFLICT to handle duplicates (posts that already have both tags)
+        // ON CONFLICT handles posts that already carry both tags
         await ctx.db.execute(sql`
           INSERT INTO "post_tags" ("post_id", "tag_id")
           SELECT "post_id", ${targetTagId}
@@ -396,10 +386,9 @@ export const tagRouter = createTRPCRouter({
           ON CONFLICT ("post_id", "tag_id") DO NOTHING
         `);
 
-        // Delete the source tag (cascade will delete remaining post_tags)
+        // cascade deletes any remaining post_tags rows for the source tag
         await ctx.db.delete(tag).where(eq(tag.id, sourceTagId));
 
-        // Recalculate post count for target tag
         const [countResult] = await ctx.db
           .select({ count: count() })
           .from(post_tags)
@@ -449,7 +438,6 @@ export const tagRouter = createTRPCRouter({
         .where(eq(tag_merge_suggestions.status, "pending"))
         .orderBy(desc(tag_merge_suggestions.similarityScore));
 
-      // Get tag details for each suggestion
       const tagIds = new Set<number>();
       for (const s of suggestions) {
         tagIds.add(s.sourceTagId);
@@ -550,7 +538,6 @@ export const tagRouter = createTRPCRouter({
     }
 
     try {
-      // Get actual counts from post_tags
       const actualCounts = await ctx.db
         .select({
           tagId: post_tags.tagId,
@@ -561,7 +548,6 @@ export const tagRouter = createTRPCRouter({
 
       const countMap = new Map(actualCounts.map((c) => [c.tagId, c.count]));
 
-      // Get all tags
       const allTags = await ctx.db.select({ id: tag.id }).from(tag);
 
       let updated = 0;

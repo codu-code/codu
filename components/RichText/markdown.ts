@@ -1,5 +1,4 @@
-// Selection-aware markdown transforms shared by the rich-text composer.
-// Storage is ALWAYS markdown — every tool here returns a new value plus the
+// Selection-aware markdown transforms: each tool returns the new value plus the
 // selection range to restore, so the textarea can re-select the right text.
 
 export interface MdSelection {

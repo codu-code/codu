@@ -40,7 +40,6 @@ import {
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
-// Helper to fetch user article by username and slug (uses new posts table)
 async function getUserPost(username: string, postSlug: string) {
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
@@ -49,7 +48,6 @@ async function getUserPost(username: string, postSlug: string) {
 
   if (!userRecord) return null;
 
-  // Then find published article by slug that belongs to this user - using explicit JOIN
   const postResults = await db
     .select({
       id: posts.id,
@@ -66,7 +64,6 @@ async function getUserPost(username: string, postSlug: string) {
       upvotesCount: posts.upvotesCount,
       downvotesCount: posts.downvotesCount,
       type: posts.type,
-      // Author info via JOIN
       authorId: user.id,
       authorName: user.name,
       authorImage: user.image,
@@ -98,14 +95,12 @@ async function getUserPost(username: string, postSlug: string) {
 
   const postRecord = postResults[0];
 
-  // Fetch tags separately using explicit JOIN
   const tagsResult = await db
     .select({ title: tag.title })
     .from(post_tags)
     .innerJoin(tag, eq(post_tags.tagId, tag.id))
     .where(eq(post_tags.postId, postRecord.id));
 
-  // Map to expected shape for backwards compatibility
   return {
     ...postRecord,
     published: postRecord.publishedAt,
@@ -123,7 +118,6 @@ async function getUserPost(username: string, postSlug: string) {
   };
 }
 
-// Helper to fetch user-created link post by username and slug (user shared a link)
 async function getUserLinkPost(username: string, postSlug: string) {
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
@@ -132,7 +126,6 @@ async function getUserLinkPost(username: string, postSlug: string) {
 
   if (!userRecord) return null;
 
-  // Find published link post by slug that belongs to this user (no sourceId)
   const linkPostResults = await db
     .select({
       id: posts.id,
@@ -150,7 +143,6 @@ async function getUserLinkPost(username: string, postSlug: string) {
       upvotesCount: posts.upvotesCount,
       downvotesCount: posts.downvotesCount,
       type: posts.type,
-      // Author info via JOIN
       authorId: user.id,
       authorName: user.name,
       authorImage: user.image,
@@ -174,14 +166,12 @@ async function getUserLinkPost(username: string, postSlug: string) {
 
   const linkPost = linkPostResults[0];
 
-  // Fetch tags separately using explicit JOIN
   const tagsResult = await db
     .select({ title: tag.title })
     .from(post_tags)
     .innerJoin(tag, eq(post_tags.tagId, tag.id))
     .where(eq(post_tags.postId, linkPost.id));
 
-  // Map to expected shape
   return {
     ...linkPost,
     published: linkPost.publishedAt,
@@ -199,7 +189,6 @@ async function getUserLinkPost(username: string, postSlug: string) {
   };
 }
 
-// Helper to fetch link post by source slug and article slug (uses new posts table)
 async function getFeedArticle(
   sourceSlug: string,
   articleSlugOrShortId: string,
@@ -210,7 +199,6 @@ async function getFeedArticle(
 
   if (!source) return null;
 
-  // Find link post by slug that belongs to this source - using explicit JOIN
   const linkPostResults = await db
     .select({
       id: posts.id,
@@ -226,7 +214,6 @@ async function getFeedArticle(
       createdAt: posts.createdAt,
       updatedAt: posts.updatedAt,
       showComments: posts.showComments,
-      // Source info
       sourceName: feed_sources.name,
       sourceSlug: feed_sources.slug,
       sourceLogo: feed_sources.logoUrl,
@@ -248,7 +235,6 @@ async function getFeedArticle(
 
   const linkPost = linkPostResults[0];
 
-  // Map to expected shape for backwards compatibility
   return {
     ...linkPost,
     shortId: linkPost.slug.split("-").pop() || "",
@@ -265,21 +251,16 @@ async function getFeedArticle(
   };
 }
 
-// Helper to fetch link content (uses new posts table - same as getFeedArticle)
 async function getLinkContent(sourceSlug: string, contentSlug: string) {
-  // Delegate to getFeedArticle since they query the same table now
   return getFeedArticle(sourceSlug, contentSlug);
 }
 
-// Helper to fetch user article content (uses new posts table - same as getUserPost)
 async function getUserArticleContent(username: string, contentSlug: string) {
-  // Delegate to getUserPost since they query the same table now
   return getUserPost(username, contentSlug);
 }
 
-// Server-side comment count for a piece of content. Mirrors
-// discussion.getContentDiscussionCount so the user-post reader can render the
-// same "Discussion {N}" heading as the source-content reader.
+// Mirrors discussion.getContentDiscussionCount so the user-post reader renders
+// the same "Discussion {N}" heading as the source-content reader.
 async function getDiscussionCount(contentId: string) {
   const [result] = await db
     .select({ count: count() })
@@ -292,7 +273,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const { username, slug } = params;
 
-  // First try user post (legacy Post table)
   const userPost = await getUserPost(username, slug);
   if (userPost) {
     const tags = userPost.tags.map((tag) => tag.tag.title);
@@ -329,7 +309,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Then try user ARTICLE content (new unified Content table)
   const userArticle = await getUserArticleContent(username, slug);
   if (userArticle && userArticle.user) {
     const tags = userArticle.tags?.map((t) => t.tag.title) || [];
@@ -366,7 +345,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Try user-created link post (user shared a link)
   const userLinkPost = await getUserLinkPost(username, slug);
   if (userLinkPost && userLinkPost.user) {
     const host = (await headers()).get("host") || "";
@@ -388,7 +366,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Then try feed article (legacy aggregated_article table)
   const feedArticle = await getFeedArticle(username, slug);
   if (feedArticle) {
     return {
@@ -407,7 +384,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Try unified content table (new LINK type items)
   const linkContent = await getLinkContent(username, slug);
   if (linkContent) {
     return {
@@ -467,11 +443,9 @@ const UnifiedPostPage = async (props: Props) => {
 
   const host = (await headers()).get("host") || "";
 
-  // First try user post
   const userPost = await getUserPost(username, slug);
 
   if (userPost) {
-    // Render user article
     const bodyContent = userPost.body ?? "";
     const parsedBody = parseJSON(bodyContent);
     const isTiptapContent = parsedBody?.type === "doc";
@@ -489,7 +463,6 @@ const UnifiedPostPage = async (props: Props) => {
       }) as unknown as string;
     }
 
-    // Prepare JSON-LD structured data
     const articleSchema = getArticleSchema({
       title: userPost.title,
       excerpt: userPost.excerpt,
@@ -663,11 +636,9 @@ const UnifiedPostPage = async (props: Props) => {
     );
   }
 
-  // Then try user ARTICLE content (new unified Content table)
   const userArticle = await getUserArticleContent(username, slug);
 
   if (userArticle && userArticle.user && userArticle.body) {
-    // Render user article from Content table
     const parsedBody = parseJSON(userArticle.body);
     const isTiptapContent = parsedBody?.type === "doc";
 
@@ -684,7 +655,6 @@ const UnifiedPostPage = async (props: Props) => {
       }) as unknown as string;
     }
 
-    // Prepare JSON-LD structured data
     const articleSchema = getArticleSchema({
       title: userArticle.title,
       excerpt: userArticle.excerpt,
@@ -861,19 +831,15 @@ const UnifiedPostPage = async (props: Props) => {
     );
   }
 
-  // Try user-created link post (user shared a link)
   const userLinkPost = await getUserLinkPost(username, slug);
 
   if (userLinkPost && userLinkPost.user) {
-    // Render user link post
     return <UserLinkDetail username={username} contentSlug={slug} />;
   }
 
-  // Then try feed article (legacy aggregated_article table)
   const feedArticle = await getFeedArticle(username, slug);
 
   if (feedArticle) {
-    // Prepare JSON-LD structured data for feed article
     const newsArticleSchema = getNewsArticleSchema({
       title: feedArticle.title,
       excerpt: feedArticle.excerpt,
@@ -898,7 +864,6 @@ const UnifiedPostPage = async (props: Props) => {
       { name: feedArticle.title },
     ]);
 
-    // Render feed article with JSON-LD
     return (
       <>
         <JsonLd data={newsArticleSchema} />
@@ -908,11 +873,9 @@ const UnifiedPostPage = async (props: Props) => {
     );
   }
 
-  // Try unified content table (new LINK type items)
   const linkContent = await getLinkContent(username, slug);
 
   if (linkContent) {
-    // Prepare JSON-LD structured data for link content
     const newsArticleSchema = getNewsArticleSchema({
       title: linkContent.title,
       excerpt: linkContent.excerpt,
@@ -937,7 +900,6 @@ const UnifiedPostPage = async (props: Props) => {
       { name: linkContent.title },
     ]);
 
-    // Render link content with JSON-LD
     return (
       <>
         <JsonLd data={newsArticleSchema} />
@@ -947,7 +909,6 @@ const UnifiedPostPage = async (props: Props) => {
     );
   }
 
-  // Nothing found
   return notFound();
 };
 

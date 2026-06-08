@@ -11,11 +11,9 @@ import { ensureHttps } from "@/utils/url";
 
 export type ContentType = "POST" | "LINK";
 
-// Display kind → chip label + tone. Behavior keys off `type` (POST vs LINK);
-// `kind` only drives the editorial chip. Every chip is the same shape: an opaque
-// bg-elevated pill with a colored border + colored label, so they read as
-// anchored pills (not floating text) — only the color varies. Mirrored in
-// components/ContentDetail/TypeBadge.tsx.
+// Display kind → chip label + tone (`kind` only drives the chip; behavior keys
+// off `type`). Chips share one opaque bordered-pill shape, only color varies.
+// Mirrored in components/ContentDetail/TypeBadge.tsx.
 const KIND: Record<string, { label: string; className: string }> = {
   POST: { label: "Article", className: "border-accent/40 text-accent-soft" },
   ARTICLE: { label: "Article", className: "border-accent/40 text-accent-soft" },
@@ -117,7 +115,6 @@ const UnifiedContentCard = ({
         ? `/${source.slug}/${slug}` // Aggregated content with source
         : `/feed/${id}`; // Fallback
 
-  // Unified content voting mutation
   const { mutate: voteContent } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {
       const oldVote = userVote;
@@ -143,7 +140,6 @@ const UnifiedContentCard = ({
     },
   });
 
-  // Unified content bookmark mutation
   const { mutate: bookmarkContent, status: bookmarkStatus } =
     api.content.bookmark.useMutation({
       onMutate: async ({ setBookmarked }) => {
@@ -159,7 +155,6 @@ const UnifiedContentCard = ({
       },
     });
 
-  // Click tracking for external links
   const { mutate: trackClick } = api.content.trackClick.useMutation();
 
   const handleVote = (voteType: "up" | "down" | null) => {
@@ -284,8 +279,7 @@ const UnifiedContentCard = ({
           )}
         </div>
 
-        {/* Preview image — top-right. Only when a real image loads (no grey
-            placeholder box when missing or failed). */}
+        {/* Only render when a real image loads — no grey placeholder box. */}
         {showThumbnail && (
           <Link
             href={cardUrl}

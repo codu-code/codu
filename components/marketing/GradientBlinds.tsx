@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 
-// Adapted from reactbits.dev GradientBlinds (ogl). Themed for Codú (mint on dark),
-// reduced-motion aware. Animated gradient "blinds" with a cursor spotlight.
+// Adapted from reactbits.dev GradientBlinds (ogl). Themed for Codú, reduced-motion aware.
 
 const MAX_COLORS = 8;
 

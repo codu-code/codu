@@ -47,14 +47,12 @@ import { type Session } from "next-auth";
 import { WriteTab } from "@/components/PostEditor/tabs/WriteTab";
 import { TagInput } from "@/components/PostEditor/components/TagInput";
 
-// Inner component that uses useSearchParams
 const CreateContent = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
 
   const postId = params?.paramsArr?.[0] || "";
 
-  // Form state
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -62,7 +60,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const [canonicalUrl, setCanonicalUrl] = useState("");
   const [publishedTime, setPublishedTime] = useState("");
 
-  // UI state
   const [viewPreview, setViewPreview] = useState(false);
   const [savedTime, setSavedTime] = useState("");
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
@@ -79,10 +76,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     _setUnsaved(unsavedChanges);
   }, [unsavedChanges, _setUnsaved]);
 
-  // Debounce for auto-save
   const debouncedValue = useDebounce(title + body, 1500);
 
-  // TRPC mutations
   const { mutate: publish, status: publishStatus } =
     api.content.publish.useMutation({
       onError(error) {
@@ -104,7 +99,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     isError,
   } = api.content.create.useMutation();
 
-  // Fetch existing draft for editing
   const {
     data,
     status: dataStatus,
@@ -124,7 +118,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     setCopied(true);
   };
 
-  // Error handling
   useEffect(() => {
     if (isError) {
       toast.error("Error saving");
@@ -134,7 +127,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     }
   }, [draftFetchError, isError]);
 
-  // Track when data has been successfully loaded
   useEffect(() => {
     if (dataStatus === "success" && !dataLoaded) {
       queueMicrotask(() => setDataLoaded(true));
@@ -146,7 +138,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     return () => clearTimeout(to);
   }, [copied]);
 
-  // Get form data for saving
   const getFormData = useCallback(() => {
     const currentExcerpt =
       excerpt || removeMarkdown(body, {}).substring(0, 155);
@@ -160,12 +151,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     };
   }, [title, body, tags, excerpt, canonicalUrl, publishedTime]);
 
-  // Save post - returns the post ID (either new or existing)
   const savePost = useCallback(async (): Promise<string> => {
     const formData = getFormData();
 
     if (!postId) {
-      // Create new content
       const result = await create({
         type: "POST",
         title: formData.title,
@@ -212,7 +201,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     ? getPostStatus(new Date(data.publishedAt))
     : status.DRAFT;
 
-  // Handle publish/submit
   const onSubmit = async () => {
     // Validate markdoc syntax before saving
     const ast = Markdoc.parse(body);
@@ -229,7 +217,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     }
 
     try {
-      // Save the post and get the ID (important for new posts)
       const savedPostId = await savePost();
 
       // If already published, just redirect
@@ -244,7 +231,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
       const formData = getFormData();
 
-      // Additional content validation
       ConfirmContentSchema.parse(formData);
 
       // Use the saved post ID (not the one from URL params which might be stale)
@@ -268,7 +254,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         );
       });
 
-      // Clear states immediately
       setUnsavedChanges(false);
       setShowPublishConfirm(false);
 
@@ -297,7 +282,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     }
   };
 
-  // Populate the form once when data first arrives; batches state updates to avoid cascading renders.
+  // Populate once when data first arrives; batched to avoid cascading renders.
   const populateFormFromData = useCallback(() => {
     if (!data || formPopulatedRef.current) return;
     formPopulatedRef.current = true;
@@ -328,7 +313,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     );
   }, [data]);
 
-  // Call populateFormFromData when data changes - defer to avoid sync setState
+  // Defer to avoid synchronous setState during render.
   useEffect(() => {
     queueMicrotask(populateFormFromData);
   }, [populateFormFromData]);
@@ -341,13 +326,12 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     return postStatus ?? status.DRAFT;
   }, [title, body, postStatus]);
 
-  // Auto-save for drafts - use queueMicrotask to defer the mutation call
+  // Defer the mutation call via queueMicrotask to avoid sync setState in effect.
   useEffect(() => {
     if (currentPostStatus !== status.DRAFT) return;
     if (title.length < 5 || body.length < 10) return;
     if (debouncedValue === (data?.title || "") + data?.body) return;
     if (unsavedChanges) {
-      // Defer the save call to avoid synchronous setState in effect
       queueMicrotask(() => savePost());
     }
   }, [
@@ -361,32 +345,27 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     body,
   ]);
 
-  // Redirect after creating new post
+  // Redirect to the new post's edit URL once it has an id.
   useEffect(() => {
     if (!createData?.id) return;
     router.push(`create/${createData.id}`);
   }, [createData, router]);
 
-  // Check if form has enough content
   const hasContent = title.length >= 5 && body.length >= 10;
 
   const isDisabled = hasLoadingState || !hasContent;
 
-  // Track unsaved changes
   useEffect(() => {
     if ((title + body).length < 5) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnsavedChanges(true);
   }, [title, body]);
 
-  // Note: Redirect after publish is now handled directly in onSubmit for better flow control
-
   const handlePublish = () => {
     if (isDisabled) return;
     setShowPublishConfirm(true);
   };
 
-  // Handle content changes from WriteTab
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
   }, []);
@@ -395,7 +374,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     setBody(newBody);
   }, []);
 
-  // Get publish button text
   const getPublishButtonText = () => {
     if (currentPostStatus === status.PUBLISHED) return "Save changes";
     if (currentPostStatus === status.DRAFT) {
@@ -743,7 +721,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   );
 };
 
-// Wrapper component with Suspense for useSearchParams
 const Create = ({ session }: { session: Session | null }) => {
   return (
     <Suspense

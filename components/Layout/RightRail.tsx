@@ -13,7 +13,6 @@ interface RightRailProps {
 /**
  * The right rail, consistent on every page: your progress (logged in) or a join
  * card (logged out) → trending tags → contribute hub / newsletter.
- * Mirrors ui_kits/app/AppShell.jsx → RightRail.
  */
 export function RightRail({ session }: RightRailProps) {
   return (

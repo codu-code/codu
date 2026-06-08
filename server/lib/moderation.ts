@@ -1,10 +1,7 @@
 /**
- * Auto-moderation helpers for the "write → auto-moderation → In review" flow.
- *
- * The whole flow is gated behind a server env flag (MODERATION_ENABLED),
- * DEFAULT OFF. When off, publishing behaves exactly as before (straight to
- * published + points). When on, a user's first publish sets the post to
- * `in_review` and an admin approves it to flip it to `published`.
+ * Auto-moderation helpers, gated behind MODERATION_ENABLED (default OFF). When
+ * off, publishing goes straight to published; when on, a user's first publish
+ * sets the post to `in_review` until an admin approves it to `published`.
  */
 
 import sendEmail from "@/utils/sendEmail";

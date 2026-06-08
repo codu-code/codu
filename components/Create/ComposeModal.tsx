@@ -63,8 +63,7 @@ export function ComposeModal({
     api.content.create.useMutation({
       onSuccess: (post) => {
         void utils.content.getFeed.invalidate();
-        // New posts live in the `posts` table; the canonical URL is
-        // /{username}/{slug}. Fall back to the feed if we lack the username.
+        // Fall back to the feed if we lack the username for the /{username}/{slug} URL.
         const href = post?.slug && username ? `/${username}/${post.slug}` : "/";
         setDone({ href });
       },
@@ -277,7 +276,6 @@ export function ComposeModal({
                       )}
                     </div>
 
-                    {/* Feed-card-style preview: header image OVER the title */}
                     {domain && (
                       <div className="mt-3 overflow-hidden rounded-lg border border-hairline bg-surface">
                         {previewImage ? (

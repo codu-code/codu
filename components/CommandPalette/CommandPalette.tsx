@@ -46,8 +46,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
   const [debounced, setDebounced] = useState("");
   const [active, setActive] = useState(0);
 
-  // Debounce the raw input into `debounced` ~300ms after the user stops typing.
-  // setState lives inside the timeout (async), satisfying set-state-in-effect.
+  // Debounce input ~300ms; setState in the timeout satisfies set-state-in-effect.
   useEffect(() => {
     const t = setTimeout(() => setDebounced(q.trim()), 300);
     return () => clearTimeout(t);
@@ -96,7 +95,6 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
     }));
   }, [hasQuery, results]);
 
-  // Clamp at render rather than in an effect.
   const activeIndex = items.length ? Math.min(active, items.length - 1) : 0;
 
   const go = (href: string) => {
@@ -120,7 +118,6 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
     }
   };
 
-  // Group consecutive items by group label for headers.
   const groups: { label: string; items: Item[] }[] = [];
   for (const item of items) {
     const last = groups[groups.length - 1];

@@ -74,7 +74,6 @@ async function notifyPostFollowers({
   }
 }
 
-// Helper to generate ltree path
 function generatePath(parentPath: string | null, id: string): string {
   const cleanId = id.replace(/-/g, "");
   if (parentPath) {
@@ -90,7 +89,6 @@ export const discussionRouter = createTRPCRouter({
       const { body, contentId, parentId } = input;
       const userId = ctx.session.user.id;
 
-      // Validate post exists (using new posts table)
       const postData = await ctx.db
         .select({ id: posts.id, authorId: posts.authorId })
         .from(posts)
@@ -104,7 +102,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Get parent comment if replying
       let parentPath: string | null = null;
       let parentAuthorId: string | null = null;
 
@@ -123,7 +120,7 @@ export const discussionRouter = createTRPCRouter({
 
       const now = new Date().toISOString();
 
-      // First insert the comment without the path (we need the generated ID for the path)
+      // Insert without path first; the path needs the generated comment ID.
       const [createdComment] = await ctx.db
         .insert(comments)
         .values({
@@ -131,25 +128,22 @@ export const discussionRouter = createTRPCRouter({
           body,
           postId: contentId,
           parentId: parentId || null,
-          path: "temp", // Will update after we have the ID
+          path: "temp",
           depth: parentPath ? parentPath.split(".").length : 0,
           createdAt: now,
           updatedAt: now,
         })
         .returning();
 
-      // Now update with the correct path. Pin updatedAt back to createdAt so the
-      // path write (which trips the updatedAt $onUpdate) doesn't make a
-      // brand-new comment render as "edited".
+      // Pin updatedAt to createdAt so the path write (which trips updatedAt's $onUpdate) doesn't make a brand-new comment render as "edited".
       const finalPath = generatePath(parentPath, createdComment.id);
       await ctx.db
         .update(comments)
         .set({ path: finalPath, updatedAt: createdComment.createdAt })
         .where(eq(comments.id, createdComment.id));
 
-      // Note: Comment count is updated via trigger (tr_post_comments_count) on INSERT
+      // Comment count is updated via trigger (tr_post_comments_count) on INSERT.
 
-      // Send notifications for replies
       if (parentId && parentAuthorId && parentAuthorId !== userId) {
         await ctx.db.insert(notification).values({
           notifierId: userId,
@@ -160,7 +154,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Send notification for new top-level comment on user's post
       if (
         !parentId &&
         postData[0].authorId &&
@@ -175,8 +168,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Notify followers of this discussion — minus the commenter, the post
-      // author, and the replied-to comment's author (they get their own).
       await notifyPostFollowers({
         postId: contentId,
         commentId: createdComment.id,
@@ -236,7 +227,6 @@ export const discussionRouter = createTRPCRouter({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
-      // Soft delete: set deletedAt timestamp
       await ctx.db
         .update(comments)
         .set({ deletedAt: new Date().toISOString() })
@@ -251,14 +241,12 @@ export const discussionRouter = createTRPCRouter({
       return id;
     }),
 
-  // Reddit-style voting (upvote/downvote)
   vote: protectedProcedure
     .input(VoteDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { discussionId: commentId, voteType } = input;
       const userId = ctx.session.user.id;
 
-      // Check if comment exists
       const commentItem = await ctx.db
         .select({
           id: comments.id,
@@ -276,7 +264,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Get existing vote
       const existingVote = await ctx.db
         .select({ id: comment_votes.id, voteType: comment_votes.voteType })
         .from(comment_votes)
@@ -288,9 +275,8 @@ export const discussionRouter = createTRPCRouter({
         )
         .limit(1);
 
-      // Database triggers handle vote count updates automatically (tr_comment_vote_counts)
+      // Vote counts are kept in sync by trigger (tr_comment_vote_counts).
       if (voteType === null) {
-        // Remove vote
         if (existingVote.length > 0) {
           await ctx.db
             .delete(comment_votes)
@@ -298,7 +284,6 @@ export const discussionRouter = createTRPCRouter({
         }
         return { voteType: null };
       } else if (existingVote.length === 0) {
-        // New vote
         await ctx.db.insert(comment_votes).values({
           commentId,
           userId,
@@ -306,7 +291,6 @@ export const discussionRouter = createTRPCRouter({
         });
         return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
-        // Change vote
         await ctx.db
           .update(comment_votes)
           .set({ voteType: voteType as "up" | "down" })
@@ -314,7 +298,6 @@ export const discussionRouter = createTRPCRouter({
         return { voteType };
       }
 
-      // Same vote, no change needed
       return { voteType };
     }),
 
@@ -324,13 +307,13 @@ export const discussionRouter = createTRPCRouter({
       const { contentId } = input;
       const userId = ctx?.session?.user?.id;
 
-      // Get total count (excluding soft-deleted)
+      // Total count excludes soft-deleted.
       const [commentCount] = await db
         .select({ count: count() })
         .from(comments)
         .where(and(eq(comments.postId, contentId), isNull(comments.deletedAt)));
 
-      // Fetch all comments for this post (flat list, we'll build tree in JS)
+      // Fetch flat; the tree is built in JS below.
       const allComments = await db
         .select({
           id: comments.id,
@@ -354,9 +337,7 @@ export const discussionRouter = createTRPCRouter({
         .where(eq(comments.postId, contentId))
         .orderBy(comments.path); // Order by path for tree structure
 
-      // Get this user's votes on *these* comments only. Filtering by the
-      // post's comment ids avoids loading every vote the user has ever cast
-      // across the whole site.
+      // Scope the user-vote lookup to this post's comments, not every vote the user has ever cast.
       let userVotes: Map<string, string> = new Map();
       const commentIds = allComments.map((c) => c.id);
       if (userId && commentIds.length > 0) {
@@ -376,11 +357,10 @@ export const discussionRouter = createTRPCRouter({
         userVotes = new Map(votes.map((v) => [v.commentId, v.voteType]));
       }
 
-      // Build tree structure
       const commentMap = new Map<string, any>();
       const rootComments: any[] = [];
 
-      // First pass: create all comment objects
+      // First pass: create all comment objects.
       for (const comment of allComments) {
         const shaped = {
           id: comment.id,
@@ -419,7 +399,6 @@ export const discussionRouter = createTRPCRouter({
       return { data: rootComments, count: commentCount.count };
     }),
 
-  // Get comment count for content (useful for feed display)
   getContentDiscussionCount: publicProcedure
     .input(z.object({ contentId: z.string() }))
     .query(async ({ input }) => {
@@ -432,8 +411,6 @@ export const discussionRouter = createTRPCRouter({
 
       return result.count;
     }),
-
-  // ── Discussion (post) following ──────────────────────────────────────────
 
   // Follow a discussion to be notified of new comments. Idempotent.
   follow: protectedProcedure
@@ -476,8 +453,6 @@ export const discussionRouter = createTRPCRouter({
       return !!row;
     }),
 
-  // List discussions for the Discussions page. `view: "following"` returns only
-  // discussions the current user follows; sort controls ordering.
   list: publicProcedure
     .input(
       z.object({

@@ -57,14 +57,12 @@ export async function award(input: AwardInput): Promise<void> {
         actorId: input.actorId ?? null,
       })
       .onConflictDoNothing();
-    // Check for newly-earned badges (safe — never throws).
     await checkBadges(input.userId);
   } catch (error) {
     Sentry.captureException(error);
   }
 }
 
-// ── Badges ───────────────────────────────────────────────────────────────
 interface BadgeStats {
   points: number;
   longestStreak: number;
@@ -154,7 +152,6 @@ export async function getUserBadges(userId: string) {
     .orderBy(desc(user_badge.awardedAt));
 }
 
-// ── Referrals ──────────────────────────────────────────────────────────────
 /** Max `referral` point awards a single referrer can earn in a rolling 24h. */
 const REFERRAL_DAILY_CAP = 5;
 
@@ -194,11 +191,9 @@ export async function ensureReferral(userId: string): Promise<void> {
             .set({ invitedBy: referrer.id })
             .where(eq(user.id, userId));
 
-          // Per-referrer cap: count this referrer's `referral` awards in the
-          // last 24h. Beyond the cap we still attribute the invite (invitedBy
-          // above) but skip the points, so one person spinning up N accounts
-          // each carrying the cookie can't farm unlimited points. Badges are
-          // still re-checked so legitimate progress isn't lost.
+          // Beyond the cap we still attribute the invite but skip the points,
+          // so one person spinning up N cookie-carrying accounts can't farm
+          // points; badges are still re-checked so real progress isn't lost.
           const since = new Date(
             Date.now() - 24 * 60 * 60 * 1000,
           ).toISOString();
@@ -267,7 +262,7 @@ export async function recordDailyActivity(userId: string): Promise<void> {
     const last = existing.lastActiveOn
       ? existing.lastActiveOn.slice(0, 10)
       : null;
-    if (last === today) return; // already counted today
+    if (last === today) return;
 
     const yesterday = dayKey(new Date(now.getTime() - 86400000));
     const current = last === yesterday ? existing.currentStreak + 1 : 1;

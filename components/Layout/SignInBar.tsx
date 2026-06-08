@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 
 /**
  * Slim, dismissible bottom bar for logged-out sessions. Reading is free; this is
- * a soft nudge, not a wall. Mirrors ui_kits/app/AppShell.jsx → SignInBar.
+ * a soft nudge, not a wall.
  */
 export function SignInBar() {
   const [dismissed, setDismissed] = useState(false);

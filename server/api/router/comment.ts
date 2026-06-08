@@ -40,31 +40,28 @@ import {
 import { db } from "@/server/db";
 import { increment, decrement } from "./utils";
 
-// Helper to generate ltree-safe ID (no dashes, alphanumeric only)
+// ltree paths must be alphanumeric — strip dashes from UUIDs.
 function generateLtreeId(): string {
   return crypto.randomUUID().replace(/-/g, "");
 }
 
-// Helper to build child ltree path from parent path
 function buildChildPath(parentPath: string | null, childId: string): string {
   const safeChildId = childId.replace(/-/g, "");
   return parentPath ? `${parentPath}.${safeChildId}` : safeChildId;
 }
 
-// Calculate depth from path
 function calculateDepth(path: string): number {
   return path.split(".").length - 1;
 }
 
 export const commentRouter = createTRPCRouter({
-  // Create a new comment
   create: protectedProcedure
     .input(CreateCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, postId, parentId } = input;
       const authorId = ctx.session.user.id;
 
-      // Throttle comment creation (anti-spam / anti-farm).
+      // Anti-spam: throttle comment creation.
       await enforceRateLimit({
         key: `comment:${authorId}`,
         limit: 10,
@@ -72,7 +69,6 @@ export const commentRouter = createTRPCRouter({
         message: "You're commenting too fast. Take a breather and try again.",
       });
 
-      // Validate post exists
       const postData = await ctx.db
         .select({ id: posts.id, authorId: posts.authorId })
         .from(posts)
@@ -86,7 +82,6 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      // Get parent comment info if this is a reply
       let parentPath: string | null = null;
       let parentAuthorId: string | null = null;
 
@@ -114,10 +109,9 @@ export const commentRouter = createTRPCRouter({
         parentAuthorId = parentComment[0].authorId;
       }
 
-      // Calculate depth from parent path
       const depth = parentPath ? parentPath.split(".").length : 0;
 
-      // Insert the comment first to get the generated ID
+      // Insert first to get the generated ID for the ltree path.
       const [insertedComment] = await ctx.db
         .insert(comments)
         .values({
@@ -130,21 +124,17 @@ export const commentRouter = createTRPCRouter({
         })
         .returning();
 
-      // Build the ltree path using the returned ID
       const ltreeSafeId = insertedComment.id.replace(/-/g, "");
       const newPath = parentPath ? `${parentPath}.${ltreeSafeId}` : ltreeSafeId;
 
-      // Update the path with the correct ltree value. Pin updatedAt back to
-      // createdAt so this internal path-write (which would otherwise trip the
-      // updatedAt $onUpdate) doesn't make a brand-new comment render as "edited".
+      // Pin updatedAt to createdAt so this internal path-write doesn't trip the updatedAt $onUpdate and render a brand-new comment as "edited".
       const [createdComment] = await ctx.db
         .update(comments)
         .set({ path: newPath, updatedAt: insertedComment.createdAt })
         .where(eq(comments.id, insertedComment.id))
         .returning();
 
-      // Engagement: award points for commenting — but not for commenting on
-      // your own post (anti-farm). Safe — never throws.
+      // Anti-farm: don't award points for commenting on your own post.
       if (postData[0].authorId !== authorId) {
         await award({
           userId: authorId,
@@ -154,15 +144,12 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      // Update post comment count
       await ctx.db
         .update(posts)
         .set({ commentsCount: increment(posts.commentsCount) })
         .where(eq(posts.id, postId));
 
-      // Send notifications
       if (parentId && parentAuthorId && parentAuthorId !== authorId) {
-        // Notification for reply to comment
         await ctx.db.insert(notification).values({
           notifierId: authorId,
           type: NEW_REPLY_TO_YOUR_COMMENT,
@@ -177,7 +164,6 @@ export const commentRouter = createTRPCRouter({
         postData[0].authorId &&
         postData[0].authorId !== authorId
       ) {
-        // Notification for new top-level comment on post
         await ctx.db.insert(notification).values({
           notifierId: authorId,
           type: NEW_COMMENT_ON_YOUR_POST,
@@ -187,9 +173,7 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      // Notify followers of this post of the new comment — excluding the
-      // commenter, the post author, and the replied-to comment's author (they
-      // already get their own notification above). Never throws.
+      // Notify post followers, excluding anyone already notified above (commenter, post author, replied-to author) to avoid duplicate notifications.
       try {
         const exclude = new Set(
           [authorId, postData[0].authorId, parentAuthorId].filter(
@@ -221,7 +205,6 @@ export const commentRouter = createTRPCRouter({
       return createdComment;
     }),
 
-  // Edit a comment
   edit: protectedProcedure
     .input(EditCommentSchema)
     .mutation(async ({ input, ctx }) => {
@@ -276,7 +259,6 @@ export const commentRouter = createTRPCRouter({
       return updatedComment;
     }),
 
-  // Soft delete a comment
   delete: protectedProcedure
     .input(DeleteCommentSchema)
     .mutation(async ({ input, ctx }) => {
@@ -316,8 +298,7 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      // Soft delete - set deletedAt timestamp
-      // This preserves the tree structure for replies
+      // Soft delete preserves the tree structure for replies.
       const [deletedComment] = await ctx.db
         .update(comments)
         .set({
@@ -326,7 +307,6 @@ export const commentRouter = createTRPCRouter({
         .where(eq(comments.id, id))
         .returning();
 
-      // Decrement post comment count
       await ctx.db
         .update(posts)
         .set({ commentsCount: decrement(posts.commentsCount) })
@@ -335,14 +315,12 @@ export const commentRouter = createTRPCRouter({
       return { id: deletedComment.id, deletedAt: deletedComment.deletedAt };
     }),
 
-  // Vote on a comment (Reddit-style)
   vote: protectedProcedure
     .input(VoteCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { commentId, voteType } = input;
       const userId = ctx.session.user.id;
 
-      // Check if comment exists and is not deleted
       const commentItem = await ctx.db
         .select({
           id: comments.id,
@@ -366,7 +344,6 @@ export const commentRouter = createTRPCRouter({
         });
       }
 
-      // Get existing vote
       const existingVote = await ctx.db
         .select({ id: commentVotes.id, voteType: commentVotes.voteType })
         .from(commentVotes)
@@ -379,14 +356,12 @@ export const commentRouter = createTRPCRouter({
         .limit(1);
 
       if (voteType === null) {
-        // Remove vote
         if (existingVote.length > 0) {
           const oldVoteType = existingVote[0].voteType;
           await ctx.db
             .delete(commentVotes)
             .where(eq(commentVotes.id, existingVote[0].id));
 
-          // Update vote counts
           if (oldVoteType === "up") {
             await ctx.db
               .update(comments)
@@ -401,14 +376,12 @@ export const commentRouter = createTRPCRouter({
         }
         return { voteType: null };
       } else if (existingVote.length === 0) {
-        // New vote
         await ctx.db.insert(commentVotes).values({
           commentId,
           userId,
           voteType,
         });
 
-        // Update vote counts
         if (voteType === "up") {
           await ctx.db
             .update(comments)
@@ -422,13 +395,12 @@ export const commentRouter = createTRPCRouter({
         }
         return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
-        // Change vote
         await ctx.db
           .update(commentVotes)
           .set({ voteType })
           .where(eq(commentVotes.id, existingVote[0].id));
 
-        // Update vote counts (flip both)
+        // Flip both counts.
         if (voteType === "up") {
           await ctx.db
             .update(comments)
@@ -449,24 +421,21 @@ export const commentRouter = createTRPCRouter({
         return { voteType };
       }
 
-      // Same vote, no change needed
+      // Same vote, no change needed.
       return { voteType };
     }),
 
-  // Get comments for a post with tree structure
   get: publicProcedure
     .input(GetCommentsSchema)
     .query(async ({ ctx, input }) => {
       const { postId, sort = "best", limit = 50 } = input;
       const userId = ctx?.session?.user?.id;
 
-      // Get total count (excluding deleted)
       const [commentCount] = await db
         .select({ count: count() })
         .from(comments)
         .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)));
 
-      // Build user votes subquery if logged in
       const userVotesSubquery = userId
         ? db
             .select({
@@ -478,12 +447,10 @@ export const commentRouter = createTRPCRouter({
             .as("userVotes")
         : null;
 
-      // Order by clause based on sort
       const getOrderBy = () => {
         switch (sort) {
           case "best":
           case "top":
-            // Score = upvotes - downvotes
             return desc(
               sql`${comments.upvotesCount} - ${comments.downvotesCount}`,
             );
@@ -492,7 +459,7 @@ export const commentRouter = createTRPCRouter({
           case "old":
             return asc(comments.createdAt);
           case "controversial":
-            // More votes but close to 50/50 ratio
+            // Ranks high-volume votes that are close to a 50/50 split.
             return desc(sql`
               ${comments.upvotesCount} + ${comments.downvotesCount} -
               ABS(${comments.upvotesCount} - ${comments.downvotesCount})
@@ -502,7 +469,7 @@ export const commentRouter = createTRPCRouter({
         }
       };
 
-      // Get top-level comments only (parentId is null)
+      // Top-level comments only (parentId is null).
       let query;
       if (userVotesSubquery) {
         query = db
@@ -519,11 +486,9 @@ export const commentRouter = createTRPCRouter({
             createdAt: comments.createdAt,
             updatedAt: comments.updatedAt,
             deletedAt: comments.deletedAt,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User vote
             userVote: userVotesSubquery.voteType,
           })
           .from(comments)
@@ -550,11 +515,9 @@ export const commentRouter = createTRPCRouter({
             createdAt: comments.createdAt,
             updatedAt: comments.updatedAt,
             deletedAt: comments.deletedAt,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User vote (null when not logged in)
             userVote: sql<"up" | "down" | null>`NULL`,
           })
           .from(comments)
@@ -566,11 +529,9 @@ export const commentRouter = createTRPCRouter({
 
       const topLevelComments = await query;
 
-      // For each top-level comment, fetch all children using ltree path prefix
       const commentsWithChildren = await Promise.all(
         topLevelComments.map(async (topComment) => {
-          // Get all descendants using path prefix matching
-          // Use SQL LIKE for path matching since ltree might not be available in Drizzle
+          // Match descendants by ltree path prefix via SQL LIKE, since ltree isn't available in Drizzle.
           const pathPrefix = `${topComment.path}.%`;
 
           let childrenQuery;
@@ -640,7 +601,6 @@ export const commentRouter = createTRPCRouter({
 
           const children = await childrenQuery;
 
-          // Build tree structure from flat list
           return buildCommentTree(topComment, children);
         }),
       );
@@ -651,7 +611,6 @@ export const commentRouter = createTRPCRouter({
       };
     }),
 
-  // Get comment count for a post
   getPostCommentCount: publicProcedure
     .input(z.object({ postId: z.string() }))
     .query(async ({ input }) => {
@@ -665,7 +624,7 @@ export const commentRouter = createTRPCRouter({
       return result.count;
     }),
 
-  // Get direct replies to a comment (for lazy loading)
+  // Direct replies to a comment, for lazy loading.
   getReplies: publicProcedure
     .input(GetRepliesSchema)
     .query(async ({ ctx, input }) => {
@@ -750,8 +709,6 @@ export const commentRouter = createTRPCRouter({
     }),
 });
 
-// Shape a single comment for API response
-
 function shapeComment(comment: any) {
   const isDeleted = !!comment.deletedAt;
 
@@ -760,7 +717,7 @@ function shapeComment(comment: any) {
     postId: comment.postId,
     parentId: comment.parentId,
     depth: comment.depth,
-    // If deleted, hide body and author info
+    // Hide body and author for deleted comments.
     body: isDeleted ? null : comment.body,
     author: isDeleted
       ? null
@@ -781,21 +738,15 @@ function shapeComment(comment: any) {
   };
 }
 
-// Build tree structure from flat list of comments
-
 function buildCommentTree(rootComment: any, descendants: any[]) {
-  // Create a map of id -> comment with children array
-
   const commentMap = new Map<string, any>();
 
-  // Initialize root
   const shapedRoot = {
     ...shapeComment(rootComment),
     children: [] as ReturnType<typeof shapeComment>[],
   };
   commentMap.set(rootComment.id, shapedRoot);
 
-  // Add all descendants to map
   for (const comment of descendants) {
     const shapedComment = {
       ...shapeComment(comment),
@@ -804,7 +755,6 @@ function buildCommentTree(rootComment: any, descendants: any[]) {
     commentMap.set(comment.id, shapedComment);
   }
 
-  // Build tree by connecting children to parents
   for (const comment of descendants) {
     if (comment.parentId && commentMap.has(comment.parentId)) {
       const parent = commentMap.get(comment.parentId);

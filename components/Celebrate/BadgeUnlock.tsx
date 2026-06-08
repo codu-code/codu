@@ -43,7 +43,6 @@ export function BadgeUnlock({
         aria-label="Badge unlocked"
         className="w-full max-w-[420px] overflow-hidden rounded-xl border border-strong bg-elevated p-8 text-center shadow-pop"
       >
-        {/* Badge tile + halo */}
         <div className="relative mx-auto flex h-28 w-28 items-center justify-center">
           <span
             aria-hidden

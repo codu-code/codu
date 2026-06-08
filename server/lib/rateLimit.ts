@@ -4,19 +4,9 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import * as Sentry from "@sentry/nextjs";
 
 /**
- * Rate limiting.
- *
- * Two backends behind one async API:
- *  - DynamoDB (production): atomic fixed-window counters with native TTL. Used
- *    when `RATE_LIMIT_TABLE` is set. AWS-native, matches the rest of the stack
- *    (SES etc.). Create the table with a string partition key `pk` and enable
- *    TTL on the `ttl` attribute — nothing else to run.
- *  - In-memory (local dev / fallback): per-process sliding window. Used when no
- *    table is configured, or if a DynamoDB call errors (fail-open so a
- *    misconfigured table can't take the site down).
- *
- * Use `enforceRateLimit()` in procedures for the throw-on-exceed path, or
- * `rateLimit()` if you want the result object.
+ * Rate limiting. Two backends behind one async API: DynamoDB (when
+ * `RATE_LIMIT_TABLE` is set) and an in-memory window for local dev / fallback.
+ * A DynamoDB error fails open so a misconfigured table can't take the site down.
  */
 
 export interface RateLimitResult {
@@ -33,8 +23,6 @@ export interface RateLimitOptions {
   /** Window length in milliseconds. */
   windowMs: number;
 }
-
-// ─────────────────────────────── in-memory ───────────────────────────────
 
 type Hit = { count: number; resetAt: number };
 const buckets = new Map<string, Hit>();
@@ -87,8 +75,6 @@ function rateLimitInMemory(
     resetAt: existing.resetAt,
   };
 }
-
-// ─────────────────────────────── DynamoDB ────────────────────────────────
 
 let docClient: DynamoDBDocumentClient | null = null;
 function getDocClient(): DynamoDBDocumentClient {
@@ -150,8 +136,6 @@ async function rateLimitDynamo(
     resetAt,
   };
 }
-
-// ──────────────────────────────── public ─────────────────────────────────
 
 /**
  * Check (and consume) one unit against the limit for `key`. Uses DynamoDB when

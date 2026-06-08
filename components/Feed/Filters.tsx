@@ -36,7 +36,6 @@ export function FilterPill({
 
   const current = options.find((o) => o.value === value) ?? options[0];
 
-  // Close on outside click / Escape.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent) => {

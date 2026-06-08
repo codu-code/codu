@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 
-/**
- * First-visit dos & don'ts gate, shown once before the create hub.
- * Mirrors ui_kits/app/Compose.jsx → CreateInfoModal. The "seen once" state is
- * owned by the provider (localStorage), so this is a pure presentational modal.
- */
+// Pure presentational modal; the "seen once" state is owned by the provider.
 const DOS = [
   "Share what you learned, built, or broke — specifics help.",
   "Ask real questions, and show what you already tried.",
