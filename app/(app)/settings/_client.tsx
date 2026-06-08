@@ -17,7 +17,8 @@ import { Avatar } from "@/components/ui-components/avatar";
 import { Input } from "@/components/ui-components/input";
 import { ErrorMessage } from "@/components/ui-components/fieldset";
 import { Textarea } from "@/components/ui-components/textarea";
-import { ReferralCard } from "@/components/ds";
+import { ReferralCard, Tag } from "@/components/ds";
+import { useShellActions } from "@/components/Create/ShellActionsProvider";
 import { useTheme } from "next-themes";
 
 /** Mint switch — rounded-full track, knob slides left→right when on. */
@@ -144,6 +145,10 @@ const Settings = ({ profile }: { profile: User }) => {
     status: "idle",
     url: profile.image,
   });
+
+  const { openTopics } = useShellActions();
+  const { data: interestsData } = api.profile.myInterests.useQuery();
+  const myTopics = interestsData?.topics ?? [];
 
   const { mutate, isError, isSuccess } = api.profile.edit.useMutation();
   const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
@@ -397,6 +402,29 @@ const Settings = ({ profile }: { profile: User }) => {
         {errors?.websiteUrl && (
           <ErrorMessage>{errors.websiteUrl.message}</ErrorMessage>
         )}
+      </FieldBlock>
+
+      <FieldBlock
+        title="Topics"
+        desc="The topics you follow shape your feed. Edit them anytime."
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          {myTopics.length > 0 ? (
+            myTopics.map((t) => <Tag key={t}>{t}</Tag>)
+          ) : (
+            <p className="text-sm text-muted">
+              You haven&apos;t chosen any topics yet.
+            </p>
+          )}
+        </div>
+        <Button
+          color="dark/white"
+          type="button"
+          className="mt-3 h-[30px] rounded-md text-xs"
+          onClick={openTopics}
+        >
+          Edit topics
+        </Button>
       </FieldBlock>
 
       <FieldBlock

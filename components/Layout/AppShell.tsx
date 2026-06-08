@@ -6,7 +6,7 @@ import { TopBar } from "./TopBar";
 import { LeftRail } from "./LeftRail";
 import { RightRail } from "./RightRail";
 import { SignInBar } from "./SignInBar";
-import { MobileNav } from "./MobileNav";
+import { NavDrawer } from "./NavDrawer";
 import { CommandPalette } from "@/components/CommandPalette/CommandPalette";
 import { ShellActionsProvider } from "@/components/Create/ShellActionsProvider";
 
@@ -24,6 +24,7 @@ interface AppShellProps {
  */
 export function AppShell({ children, session, username }: AppShellProps) {
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   // Remember the element that opened the palette so focus can be restored.
   const paletteTrigger = useRef<HTMLElement | null>(null);
 
@@ -64,6 +65,7 @@ export function AppShell({ children, session, username }: AppShellProps) {
           session={session}
           username={username}
           onOpenPalette={openPalette}
+          onOpenMenu={() => setDrawerOpen(true)}
         />
         <main className="app-main">
           <LeftRail session={session} username={username} />
@@ -73,7 +75,12 @@ export function AppShell({ children, session, username }: AppShellProps) {
 
         {paletteOpen && <CommandPalette onClose={closePalette} />}
         {!session && <SignInBar />}
-        <MobileNav session={session} username={username} />
+        <NavDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          session={session}
+          username={username}
+        />
       </div>
     </ShellActionsProvider>
   );

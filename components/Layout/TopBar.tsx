@@ -19,6 +19,8 @@ interface TopBarProps {
   session: Session | null;
   username: string | null;
   onOpenPalette: () => void;
+  /** Open the slide-out nav drawer (hamburger, shown ≤720px). */
+  onOpenMenu?: () => void;
 }
 
 /**
@@ -26,7 +28,12 @@ interface TopBarProps {
  * opens the ⌘K palette, primary nav, and Write + avatar menu (or Log in / Join
  * free when logged out). Mirrors ui_kits/app/AppShell.jsx → TopBar.
  */
-export function TopBar({ session, username, onOpenPalette }: TopBarProps) {
+export function TopBar({
+  session,
+  username,
+  onOpenPalette,
+  onOpenMenu,
+}: TopBarProps) {
   const { openCompose } = useShellActions();
   const { data: count } = api.notification.getCount.useQuery(undefined, {
     enabled: !!session,
@@ -35,8 +42,27 @@ export function TopBar({ session, username, onOpenPalette }: TopBarProps) {
 
   return (
     <header className="app-topbar">
-      {/* Left: logo */}
-      <div className="flex items-center justify-self-start">
+      {/* Left: hamburger (≤720px) + logo */}
+      <div className="flex items-center gap-2 justify-self-start">
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          aria-label="Open navigation"
+          className="nav-burger items-center justify-center rounded-md p-1 text-fg hover:bg-elevated"
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        </button>
         <Link href="/feed" aria-label="Codú — home" className="flex shrink-0">
           <Image
             src="/images/codu.png"
@@ -52,11 +78,13 @@ export function TopBar({ session, username, onOpenPalette }: TopBarProps) {
       <button
         type="button"
         onClick={onOpenPalette}
-        className="flex w-[clamp(220px,38vw,440px)] items-center gap-2 justify-self-center rounded-full border border-hairline bg-surface py-1.5 pl-3.5 pr-2.5 text-left transition-colors duration-base ease-out hover:border-strong"
+        className="flex w-full min-w-0 max-w-[440px] items-center gap-2 justify-self-center rounded-full border border-hairline bg-surface py-1.5 pl-3.5 pr-2.5 text-left transition-colors duration-base ease-out hover:border-strong"
       >
         <span className="text-sm leading-none text-faint">⌕</span>
-        <span className="flex-1 text-sm text-faint">Search…</span>
-        <kbd className="rounded-sm border border-hairline px-1.5 py-px font-mono text-[11px] leading-snug text-faint">
+        <span className="min-w-0 flex-1 truncate text-sm text-faint">
+          Search…
+        </span>
+        <kbd className="rounded-sm border border-hairline px-1.5 py-px font-mono text-[11px] leading-snug text-faint max-[560px]:hidden">
           ⌘K
         </kbd>
       </button>

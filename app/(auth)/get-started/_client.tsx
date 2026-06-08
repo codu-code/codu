@@ -48,9 +48,10 @@ const GetStarted: NextPage = () => {
   }, [searchParams]);
 
   return (
-    <div className="grid min-h-screen w-full lg:mx-auto lg:max-w-[1080px] lg:grid-cols-2">
-      {/* Brand panel — slim header on mobile, full panel on desktop */}
-      <aside className="relative flex flex-col justify-between overflow-hidden border-b border-hairline bg-surface px-6 py-8 lg:border-b-0 lg:border-r lg:px-12 lg:py-16">
+    <div className="grid min-h-screen w-full min-[861px]:mx-auto min-[861px]:max-w-[1080px] min-[861px]:grid-cols-2">
+      {/* Brand panel — full split panel ≥861px; hidden entirely on narrow
+          screens (a small logo shows above the form instead). */}
+      <aside className="relative hidden flex-col justify-between overflow-hidden border-hairline bg-surface px-12 py-16 min-[861px]:flex min-[861px]:border-r">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-grid-dots bg-[length:24px_24px] opacity-50 [mask-image:radial-gradient(90%_70%_at_20%_10%,black_30%,transparent_80%)]"
@@ -70,7 +71,7 @@ const GetStarted: NextPage = () => {
           />
         </Link>
 
-        <div className="relative mt-8 hidden lg:mt-0 lg:block">
+        <div className="relative mt-0">
           <Eyebrow>where coders become product engineers</Eyebrow>
           <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-fg xl:text-5xl">
             Build the right thing.
@@ -84,15 +85,30 @@ const GetStarted: NextPage = () => {
         </div>
 
         {/* spacer keeps logo top-aligned on desktop */}
-        <div className="relative hidden lg:block" aria-hidden />
+        <div className="relative" aria-hidden />
       </aside>
 
       {/* Form panel */}
-      <main className="flex items-center justify-center px-6 py-12 lg:px-12 lg:py-16">
+      <main className="flex items-center justify-center px-6 py-12 min-[861px]:px-12 min-[861px]:py-16">
         <div className="w-full max-w-sm">
-          <div className="text-center lg:text-left">
-            <Eyebrow className="lg:hidden">join the community</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg lg:mt-0">
+          {/* Small logo above the form when the brand panel is hidden */}
+          <Link
+            href="/"
+            aria-label="Codú home"
+            className="mb-8 inline-flex w-full justify-center min-[861px]:hidden"
+          >
+            <Image
+              src="/images/codu.png"
+              alt="Codú"
+              width={189}
+              height={60}
+              className="h-6 w-auto"
+              priority
+            />
+          </Link>
+          <div className="text-center min-[861px]:text-left">
+            <Eyebrow className="min-[861px]:hidden">join the community</Eyebrow>
+            <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg min-[861px]:mt-0">
               Start building with AI
             </h2>
             <p className="mt-2 text-sm text-muted">
@@ -166,7 +182,7 @@ const GetStarted: NextPage = () => {
 
           <p className="mt-4 text-xs text-muted">More sign-in options coming soon.</p>
 
-          <p className="mt-6 text-center text-xs text-faint lg:text-left">
+          <p className="mt-6 text-center text-xs text-faint min-[861px]:text-left">
             By continuing you agree to our{" "}
             <Link href="/tou" className="text-muted underline hover:text-fg">
               terms

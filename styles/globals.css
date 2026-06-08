@@ -161,7 +161,7 @@ body {
   top: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   height: 56px;
@@ -224,22 +224,14 @@ body {
   }
 }
 
-/* Bottom nav for ≤720px (top-bar nav is gone, left rail hidden). */
-.app-mobilenav {
+/* Hamburger (left of logo) — opens the slide-out NavDrawer; shown ≤720px
+   where the left rail is hidden. */
+.nav-burger {
   display: none;
 }
 @media (max-width: 720px) {
-  .app-mobilenav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 40;
-    display: flex;
-    align-items: stretch;
-    border-top: 1px solid rgb(var(--color-hairline));
-    background: color-mix(in srgb, rgb(var(--color-canvas)) 92%, transparent);
-    backdrop-filter: blur(12px);
+  .nav-burger {
+    display: inline-flex;
   }
 }
 
