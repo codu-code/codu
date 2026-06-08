@@ -204,6 +204,13 @@
       "when": 1780938706325,
       "tag": "0028_pale_king_cobra",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1780941652495,
+      "tag": "0029_blue_nicolaos",
+      "breakpoints": true
     }
   ]
 }

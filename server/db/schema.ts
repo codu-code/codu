@@ -2066,12 +2066,13 @@ export const point_event = pgTable(
     ),
     createdIdx: index("point_event_created_idx").on(table.createdAt),
     // Idempotency / anti-gaming: one award per (user, action, source, actor).
-    dedupeKey: uniqueIndex("point_event_dedupe_idx").on(
-      table.userId,
-      table.action,
-      table.sourceId,
-      table.actorId,
-    ),
+    // NULLS NOT DISTINCT so self-actions (actorId NULL — post_published,
+    // comment_created, daily_active, referral) actually dedupe; a plain unique
+    // index treats NULLs as distinct, which silently disabled idempotency for
+    // every action except upvotes.
+    dedupeKey: unique("point_event_dedupe_idx")
+      .on(table.userId, table.action, table.sourceId, table.actorId)
+      .nullsNotDistinct(),
   }),
 );
 
