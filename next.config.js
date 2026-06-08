@@ -11,6 +11,10 @@ const REMOTE_PATTERNS = [
   "images.unsplash.com",
   "avatars.githubusercontent.com",
   "www.gravatar.com",
+  // Seed/placeholder avatars + cover images used by dev/e2e fixtures.
+  "robohash.org",
+  "picsum.photos",
+  "i.pravatar.cc",
   // Temporary wildcard
   "*.s3.eu-west-1.amazonaws.com",
   "s3.eu-west-1.amazonaws.com",

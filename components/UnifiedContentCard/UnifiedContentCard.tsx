@@ -12,13 +12,17 @@ export type ContentType = "POST" | "LINK";
 
 // Display kind → chip label + tone. The card's behavior still keys off `type`
 // (POST vs LINK); `kind` only drives the editorial chip.
+// Every chip uses the SAME shape (see chip <span> below) and an opaque token
+// wash background so none look offset/unanchored — only the color varies by
+// kind. Mirrored in components/ContentDetail/TypeBadge.tsx for consistency.
 const KIND: Record<string, { label: string; className: string }> = {
-  POST: { label: "Article", className: "bg-accent/10 text-accent-soft" },
-  ARTICLE: { label: "Article", className: "bg-accent/10 text-accent-soft" },
-  TIL: { label: "TIL", className: "bg-success/12 text-success" },
+  POST: { label: "Article", className: "bg-accent/15 text-accent-soft" },
+  ARTICLE: { label: "Article", className: "bg-accent/15 text-accent-soft" },
+  DISCUSSION: { label: "Discussion", className: "bg-accent/12 text-accent-soft" },
   QUESTION: { label: "Question", className: "bg-info/12 text-info" },
-  DISCUSSION: { label: "Discussion", className: "bg-info/12 text-info" },
-  LINK: { label: "Link", className: "border border-hairline text-muted" },
+  TIL: { label: "TIL", className: "bg-success/12 text-success" },
+  RESOURCE: { label: "Resource", className: "bg-warning/12 text-warning" },
+  LINK: { label: "Link", className: "bg-elevated text-muted" },
 };
 
 type AuthorInfo = {
@@ -218,7 +222,7 @@ const UnifiedContentCard = ({
           {/* Header: kind chip + author + @handle · time (· via source for links) */}
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-mono text-xs ${chip.className}`}
+              className={`inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 font-mono text-xs ${chip.className}`}
             >
               {chip.label}
             </span>

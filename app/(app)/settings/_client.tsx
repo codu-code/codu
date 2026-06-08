@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -122,9 +123,27 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const { emailNotifications: eNotifications, newsletter } = profile;
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const TABS = ["Profile", "Notifications", "Account"] as const;
   type Tab = (typeof TABS)[number];
-  const [tab, setTab] = useState<Tab>("Profile");
+
+  // URL is the source of truth: ?tab=profile|notifications|account (lower-case).
+  const tabParam = searchParams?.get("tab")?.toLowerCase();
+  const tab: Tab =
+    tabParam === "notifications"
+      ? "Notifications"
+      : tabParam === "account"
+        ? "Account"
+        : "Profile";
+
+  const setTab = (value: Tab) => {
+    const params = new URLSearchParams(searchParams?.toString());
+    params.set("tab", value.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);

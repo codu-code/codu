@@ -31,7 +31,7 @@ const ContentTypeBadge = ({ type, className = "" }: ContentTypeBadgeProps) => {
 
   return (
     <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold ${styles.bg} ${styles.text} ${className}`}
+      className={`inline-flex items-center rounded-sm px-2 py-0.5 font-mono text-xs ${styles.bg} ${styles.text} ${className}`}
     >
       {styles.label}
     </span>

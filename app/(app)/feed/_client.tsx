@@ -149,23 +149,12 @@ const FeedPage = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold tracking-tight text-fg">Feed</h1>
-      </div>
-
-      {/* First-run onboarding nudge (signed-in). Posting now lives behind the
-          single "+ Create" entry point in the top bar. */}
-      {session?.user && (
-        <div className="mt-4">
-          <OnboardingBanner />
-        </div>
-      )}
-
       {/* For you / Following tabs (signed-in) with the flat filter cluster
           pushed to the right of the same row. Signed-out users get the
-          filters in a matching row without the tabs. */}
+          filters in a matching row without the tabs. The feed opens straight
+          into this row (no page heading). */}
       {session?.user ? (
-        <div className="mt-4 flex flex-wrap items-center gap-x-7 gap-y-2 border-b border-hairline">
+        <div className="flex flex-wrap items-center gap-x-7 gap-y-2 border-b border-hairline">
           {[
             { label: "For you", href: "/", active: !following },
             {
@@ -191,8 +180,16 @@ const FeedPage = () => {
           <div className="ml-auto pl-4">{filterCluster}</div>
         </div>
       ) : (
-        <div className="mt-4 flex items-center border-b border-hairline pb-2">
+        <div className="flex items-center border-b border-hairline pb-2">
           <div className="ml-auto">{filterCluster}</div>
+        </div>
+      )}
+
+      {/* First-run onboarding nudge (signed-in). Posting now lives behind the
+          single "+ Create" entry point in the top bar. */}
+      {session?.user && (
+        <div className="mt-4">
+          <OnboardingBanner />
         </div>
       )}
 

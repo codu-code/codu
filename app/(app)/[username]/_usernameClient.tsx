@@ -6,7 +6,7 @@ import Link from "next/link";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Heading } from "@/components/ui-components/heading";
 import { FollowButton, Tag } from "@/components/ds";
@@ -39,9 +39,8 @@ type Props = {
 
 const Profile = ({ profile, isOwner, session }: Props) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const tabFromParams = searchParams?.get("tab");
 
   const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
@@ -117,9 +116,16 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 
   const TABS = ["Posts", "Achievements"] as const;
   type Tab = (typeof TABS)[number];
-  const initialTab: Tab =
-    tabFromParams === "achievements" ? "Achievements" : "Posts";
-  const [tab, setTab] = React.useState<Tab>(initialTab);
+
+  // URL is the source of truth: ?tab=posts|achievements (lower-case).
+  const tabParam = searchParams?.get("tab")?.toLowerCase();
+  const tab: Tab = tabParam === "achievements" ? "Achievements" : "Posts";
+
+  const setTab = (value: Tab) => {
+    const params = new URLSearchParams(searchParams?.toString());
+    params.set("tab", value.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   // Show a "Top helper" chip when the user is clearly engaged: a high point
   // total or any earned badge. Uses existing profileEngagement data only.

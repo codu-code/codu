@@ -12,8 +12,10 @@ test.describe("Authenticated home → feed", () => {
   test("Root renders the feed", async ({ page }) => {
     await page.goto("http://localhost:3000/");
     await expect(page).toHaveURL("http://localhost:3000/");
+    // The feed opens straight into the For-you / Following tabs (the page
+    // heading was removed to reclaim vertical space).
     await expect(
-      page.getByRole("heading", { name: "Feed", level: 1 }),
+      page.getByRole("button", { name: "For you" }),
     ).toBeVisible();
   });
 
@@ -26,9 +28,9 @@ test.describe("Authenticated home → feed", () => {
 test.describe("Unauthenticated home → feed", () => {
   test("Root renders the public feed with a join CTA", async ({ page }) => {
     await page.goto("http://localhost:3000/");
-    await expect(
-      page.getByRole("heading", { name: "Feed", level: 1 }),
-    ).toBeVisible();
+    // The feed renders content cards directly (the page heading was removed);
+    // logged-out users get the filter cluster but no tabs.
+    await expect(page.getByTestId("content-card").first()).toBeVisible();
     // The shell offers a free account (top bar + sign-in bar).
     await expect(
       page.getByRole("button", { name: "Join free" }).first(),
