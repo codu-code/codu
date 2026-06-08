@@ -45,12 +45,9 @@ const Toggle = ({
   </button>
 );
 
-/** Mono "// label" section eyebrow. */
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="eyebrow mb-2 mt-8">
-    <span className="slash">{"// "}</span>
-    {children}
-  </p>
+/** A lighter in-tab group label (replaces the old mono "// " section eyebrows). */
+const GroupLabel = ({ children }: { children: React.ReactNode }) => (
+  <p className="mb-1 mt-8 text-sm font-bold text-fg">{children}</p>
 );
 
 /** A labelled settings row: title + description on the left, control on the right. */
@@ -130,6 +127,10 @@ const Settings = ({ profile }: { profile: User }) => {
 
   const { setTheme, resolvedTheme } = useTheme();
   const { emailNotifications: eNotifications, newsletter } = profile;
+
+  const TABS = ["Profile", "Notifications", "Account"] as const;
+  type Tab = (typeof TABS)[number];
+  const [tab, setTab] = useState<Tab>("Profile");
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
@@ -270,9 +271,26 @@ const Settings = ({ profile }: { profile: User }) => {
         </h1>
       </div>
 
-      {/* ---------- profile ---------- */}
-      <SectionLabel>profile</SectionLabel>
+      {/* Tabs */}
+      <div className="mb-2 mt-8 flex gap-5 border-b border-hairline">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={`-mb-px border-b-2 pb-2 pt-1 text-sm transition-colors ${
+              t === tab
+                ? "border-accent font-semibold text-fg"
+                : "border-transparent font-medium text-muted hover:text-fg"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
 
+      {/* ---------- profile ---------- */}
+      <div className={tab === "Profile" ? "" : "hidden"}>
       <div className="flex items-center gap-4 border-b border-hairline py-4">
         <Avatar
           square
@@ -387,10 +405,10 @@ const Settings = ({ profile }: { profile: User }) => {
       >
         <ReferralCard />
       </FieldBlock>
+      </div>
 
       {/* ---------- notifications ---------- */}
-      <SectionLabel>notifications</SectionLabel>
-
+      <div className={tab === "Notifications" ? "" : "hidden"}>
       <SettingsRow
         title="Allow notifications from the platform"
         desc="Send an email when a user interacts with you on the platform"
@@ -409,7 +427,7 @@ const Settings = ({ profile }: { profile: User }) => {
       </SettingsRow>
 
       {/* ---------- appearance ---------- */}
-      <SectionLabel>appearance</SectionLabel>
+      <GroupLabel>Display</GroupLabel>
 
       <SettingsRow
         title="Theme"
@@ -424,10 +442,10 @@ const Settings = ({ profile }: { profile: User }) => {
           <Moon className="h-4 w-4 text-muted" />
         </div>
       </SettingsRow>
+      </div>
 
       {/* ---------- account ---------- */}
-      <SectionLabel>account</SectionLabel>
-
+      <div className={tab === "Account" ? "" : "hidden"}>
       <FieldBlock
         title="Current email"
         desc="This is where we will send all communications"
@@ -488,9 +506,10 @@ const Settings = ({ profile }: { profile: User }) => {
           Delete account
         </a>
       </div>
+      </div>
 
-      {/* ---------- actions ---------- */}
-      <div className="mt-8 flex justify-end gap-4">
+      {/* ---------- actions (sticky save bar) ---------- */}
+      <div className="sticky bottom-0 mt-8 flex justify-end gap-4 border-t border-hairline bg-gradient-to-t from-canvas via-canvas py-4">
         <Button color="dark/white" onClick={() => reset()}>
           Reset
         </Button>

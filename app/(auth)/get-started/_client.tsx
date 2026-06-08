@@ -48,7 +48,7 @@ const GetStarted: NextPage = () => {
   }, [searchParams]);
 
   return (
-    <div className="grid min-h-screen w-full lg:grid-cols-2">
+    <div className="grid min-h-screen w-full lg:mx-auto lg:max-w-[1080px] lg:grid-cols-2">
       {/* Brand panel — slim header on mobile, full panel on desktop */}
       <aside className="relative flex flex-col justify-between overflow-hidden border-b border-hairline bg-surface px-6 py-8 lg:border-b-0 lg:border-r lg:px-12 lg:py-16">
         <div
@@ -127,18 +127,18 @@ const GetStarted: NextPage = () => {
 
             {emailAuthEnabled && (
               <>
-                <div className="relative py-1">
-                  <div
-                    className="absolute inset-0 flex items-center"
+                <div className="flex items-center gap-3 py-1">
+                  <span
                     aria-hidden="true"
-                  >
-                    <div className="w-full border-t border-hairline" />
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-canvas px-3 font-mono text-xs uppercase tracking-widest text-faint">
-                      or
-                    </span>
-                  </div>
+                    className="h-px min-w-0 flex-1 shrink bg-hairline"
+                  />
+                  <span className="whitespace-nowrap font-mono text-xs uppercase tracking-widest text-faint">
+                    or with email
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="h-px min-w-0 flex-1 shrink bg-hairline"
+                  />
                 </div>
                 <input
                   className="w-full rounded-lg border border-hairline bg-canvas px-3.5 py-2.5 text-sm text-fg outline-none transition-colors focus:border-accent"

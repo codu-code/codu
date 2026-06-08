@@ -98,6 +98,9 @@ export default async function Page(props: {
       image: true,
       id: true,
       websiteUrl: true,
+      location: true,
+      topics: true,
+      createdAt: true,
     },
     with: {
       posts: {

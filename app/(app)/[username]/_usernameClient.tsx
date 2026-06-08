@@ -9,7 +9,7 @@ import { api } from "@/server/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Heading } from "@/components/ui-components/heading";
-import { FollowButton } from "@/components/ds";
+import { FollowButton, Tag } from "@/components/ds";
 import { toast } from "sonner";
 
 type Props = {
@@ -31,6 +31,9 @@ type Props = {
     image: string;
     bio: string;
     websiteUrl: string;
+    location: string;
+    topics: string[];
+    createdAt: string;
   };
 };
 
@@ -69,8 +72,26 @@ const Profile = ({ profile, isOwner, session }: Props) => {
   );
   const listData = listView === "followers" ? followersList : followingList;
 
-  const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
-    profile;
+  const {
+    name,
+    username,
+    image,
+    bio,
+    posts,
+    websiteUrl,
+    location,
+    topics,
+    createdAt,
+    id,
+    accountLocked,
+  } = profile;
+
+  const joinedLabel = createdAt
+    ? `Joined ${new Date(createdAt).toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      })}`
+    : null;
 
   const { data: engagement } = api.engagement.profileEngagement.useQuery(
     { userId: id },
@@ -94,14 +115,10 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     }
   };
 
-  const TABS = ["Posts", "Achievements", "About"] as const;
+  const TABS = ["Posts", "Achievements"] as const;
   type Tab = (typeof TABS)[number];
   const initialTab: Tab =
-    tabFromParams === "achievements"
-      ? "Achievements"
-      : tabFromParams === "about"
-        ? "About"
-        : "Posts";
+    tabFromParams === "achievements" ? "Achievements" : "Posts";
   const [tab, setTab] = React.useState<Tab>(initialTab);
 
   // Show a "Top helper" chip when the user is clearly engaged: a high point
@@ -113,17 +130,9 @@ const Profile = ({ profile, isOwner, session }: Props) => {
   return (
     <>
       <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
-        {/* Gradient banner */}
-        <div
-          aria-hidden
-          className="relative mt-2 h-32 overflow-hidden rounded-2xl bg-gradient-to-r from-elevated via-accent/20 to-elevated sm:h-40"
-        >
-          <div className="absolute inset-0 bg-grid-dots bg-[length:22px_22px] opacity-40" />
-        </div>
-
         {/* Header */}
-        <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end">
-          <div className="-mt-[52px] flex-shrink-0">
+        <div className="mt-2 flex flex-col gap-4 px-1 sm:flex-row sm:items-start">
+          <div className="flex-shrink-0">
             {image && (
               <img
                 className="h-24 w-24 rounded-full object-cover ring-4 ring-canvas"
@@ -132,7 +141,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               />
             )}
           </div>
-          <div className="min-w-0 flex-1 sm:pb-1.5">
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="mb-0 font-display text-2xl font-extrabold tracking-tight text-fg">
                 {name}
@@ -144,14 +153,55 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               )}
             </div>
             <p className="mt-0.5 font-mono text-sm text-faint">@{username}</p>
-            {bio && <p className="mt-2 text-muted">{bio}</p>}
           </div>
           {session && !isOwner && !accountLocked && (
-            <div className="flex-shrink-0 sm:pb-1.5">
+            <div className="flex-shrink-0">
               <FollowButton userId={id} />
             </div>
           )}
         </div>
+
+        {/* Bio */}
+        {bio && (
+          <p className="mt-5 max-w-[60ch] px-1 leading-relaxed text-muted">
+            {bio}
+          </p>
+        )}
+
+        {/* Meta row */}
+        {(joinedLabel || location || websiteUrl) && (
+          <div className="mt-4 flex flex-wrap gap-4 px-1 font-mono text-xs text-faint">
+            {joinedLabel && (
+              <span className="inline-flex items-center gap-1">
+                ◷ {joinedLabel}
+              </span>
+            )}
+            {location && (
+              <span className="inline-flex items-center gap-1">
+                ◉ {location}
+              </span>
+            )}
+            {websiteUrl && (
+              <Link
+                href={websiteUrl}
+                target="blank"
+                className="inline-flex items-center gap-1 text-accent-soft transition-colors hover:text-accent"
+              >
+                <LinkIcon className="h-4" />
+                {getDomainFromUrl(websiteUrl)}
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* Interests */}
+        {topics && topics.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2 px-1">
+            {topics.map((t) => (
+              <Tag key={t}>{t}</Tag>
+            ))}
+          </div>
+        )}
 
         {/* Stats row */}
         {!accountLocked && (
@@ -253,18 +303,13 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   key={t}
                   type="button"
                   onClick={() => setTab(t)}
-                  className={`relative py-2.5 text-sm transition-colors ${
+                  className={`-mb-px border-b-2 pb-2 pt-1 text-sm transition-colors ${
                     t === tab
-                      ? "font-semibold text-fg"
-                      : "font-medium text-muted hover:text-fg"
+                      ? "border-accent font-semibold text-fg"
+                      : "border-transparent font-medium text-muted hover:text-fg"
                   }`}
                 >
                   {t}
-                  <span
-                    className={`absolute inset-x-0 -bottom-px h-0.5 rounded-t ${
-                      t === tab ? "bg-accent" : "bg-transparent"
-                    }`}
-                  />
                 </button>
               ))}
             </div>
@@ -404,29 +449,6 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   <p className="py-4 font-medium text-muted">
                     No achievements yet.
                   </p>
-                )}
-              </div>
-            )}
-
-            {/* About tab */}
-            {tab === "About" && (
-              <div className="mt-6 max-w-[60ch] space-y-4 text-muted">
-                {bio ? (
-                  <p className="leading-relaxed">{bio}</p>
-                ) : (
-                  <p className="leading-relaxed text-faint">
-                    No bio yet.
-                  </p>
-                )}
-                {websiteUrl && (
-                  <Link
-                    href={websiteUrl}
-                    className="flex flex-row items-center text-accent-soft transition-colors hover:text-accent"
-                    target="blank"
-                  >
-                    <LinkIcon className="mr-2 h-5 text-faint" />
-                    <span>{getDomainFromUrl(websiteUrl)}</span>
-                  </Link>
                 )}
               </div>
             )}
