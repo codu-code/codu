@@ -15,7 +15,8 @@ export function SignInBar() {
     <div
       className="fixed inset-x-0 bottom-0 z-[45] border-t border-strong"
       style={{
-        background: "color-mix(in srgb, rgb(var(--color-elevated)) 92%, transparent)",
+        background:
+          "color-mix(in srgb, rgb(var(--color-elevated)) 92%, transparent)",
         backdropFilter: "blur(12px)",
       }}
     >

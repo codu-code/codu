@@ -202,7 +202,8 @@ ${chance.paragraph()}
       // ── Articles (published, body + tags) ────────────────────────────────
       {
         type: "article",
-        title: "Patterns for production RAG that actually retrieve the right thing",
+        title:
+          "Patterns for production RAG that actually retrieve the right thing",
         excerpt:
           "Chunking, hybrid search and reranking — the three levers that moved our retrieval quality the most.",
         body: "## The problem\nMost RAG demos look great until real documents hit them.\n\n## What worked\n- Smaller, semantically-coherent chunks\n- Hybrid (keyword + vector) retrieval\n- A cross-encoder reranker on the top 50\n\nWe went from ~60% to ~88% answer relevance with these three changes alone.",
@@ -268,7 +269,8 @@ ${chance.paragraph()}
       {
         type: "discussion",
         title: "Is 'prompt engineering' still a real skill in 2026?",
-        excerpt: "Or have the models gotten good enough that it barely matters?",
+        excerpt:
+          "Or have the models gotten good enough that it barely matters?",
         body: "I keep going back and forth. For simple tasks it's noise; for agents it's still load-bearing. Where do you land?",
         status: "published",
         coreAuthor: 3,
@@ -293,7 +295,8 @@ ${chance.paragraph()}
       {
         type: "question",
         title: "First ML eng role — is a portfolio or a degree worth more?",
-        excerpt: "Career-switching and trying to spend my limited hours wisely.",
+        excerpt:
+          "Career-switching and trying to spend my limited hours wisely.",
         body: "Recruiters seem to want both. If you hire, what actually makes you click 'interview'?",
         status: "published",
         coreAuthor: 4,
@@ -306,7 +309,8 @@ ${chance.paragraph()}
       {
         type: "til",
         title: "TIL you can cache the system prompt and cut token cost ~80%",
-        excerpt: "Prompt caching on long, stable system prompts is basically free money.",
+        excerpt:
+          "Prompt caching on long, stable system prompts is basically free money.",
         body: "If your system prompt is big and rarely changes, caching it slashes cost and latency. Wish I'd done this months ago.",
         status: "published",
         coreAuthor: 6,
@@ -317,7 +321,8 @@ ${chance.paragraph()}
       {
         type: "til",
         title: "TIL `structuredClone` is built into every modern runtime",
-        excerpt: "No more JSON.parse(JSON.stringify(...)) hacks for deep copies.",
+        excerpt:
+          "No more JSON.parse(JSON.stringify(...)) hacks for deep copies.",
         body: "Works in Node, Deno, Bun and browsers. Handles Maps, Sets and Dates too.",
         status: "published",
         coreAuthor: 7,
@@ -330,7 +335,8 @@ ${chance.paragraph()}
       {
         type: "link",
         title: "A great write-up on building eval-driven agents",
-        excerpt: "Sharing this — closest thing to how I actually work day to day.",
+        excerpt:
+          "Sharing this — closest thing to how I actually work day to day.",
         externalUrl: "https://example.com/eval-driven-agents",
         status: "published",
         coreAuthor: 0,
@@ -354,7 +360,8 @@ ${chance.paragraph()}
       {
         type: "resource",
         title: "Open-source prompt library for common app tasks",
-        excerpt: "Battle-tested prompts for summarisation, extraction and classification.",
+        excerpt:
+          "Battle-tested prompts for summarisation, extraction and classification.",
         externalUrl: "https://example.com/prompt-library",
         status: "published",
         coreAuthor: 3,
@@ -422,10 +429,10 @@ ${chance.paragraph()}
           publishedAt: published ? ago(s.daysAgo) : null,
           createdAt: ago(s.daysAgo),
           upvotesCount: s.upvotes,
-          downvotesCount: published
-            ? chance.integer({ min: 0, max: 6 })
+          downvotesCount: published ? chance.integer({ min: 0, max: 6 }) : 0,
+          viewsCount: published
+            ? s.upvotes * chance.integer({ min: 3, max: 12 })
             : 0,
-          viewsCount: published ? s.upvotes * chance.integer({ min: 3, max: 12 }) : 0,
           featured: s.featured ?? false,
           showComments: true,
         },
@@ -522,7 +529,9 @@ ${chance.paragraph()}
           location: chance.country({ full: true }),
           bio: chance.sentence({ words: 10 }),
           websiteUrl: chance.url(),
-          topics: onboarded ? pickTopics(chance.integer({ min: 2, max: 4 })) : [],
+          topics: onboarded
+            ? pickTopics(chance.integer({ min: 2, max: 4 }))
+            : [],
           experienceLevel: onboarded ? chance.pickone(experienceLevels) : null,
           onboardedAt: onboarded
             ? new Date(chance.date({ year: 2025 })).toISOString()
@@ -602,10 +611,7 @@ ${chance.paragraph()}
       await db.insert(post_tags).values(postTagRows).onConflictDoNothing();
       // Bump denormalized postCount per tag.
       for (const [tagId, count] of tagCounts) {
-        await db
-          .update(tag)
-          .set({ postCount: count })
-          .where(eq(tag.id, tagId));
+        await db.update(tag).set({ postCount: count }).where(eq(tag.id, tagId));
       }
       console.log(`Linked ${postTagRows.length} post_tags`);
     }
@@ -1275,7 +1281,8 @@ ${chance.paragraph()}
     // A handful of random users follow the core (gives them followers).
     for (let i = coreCount; i < Math.min(coreCount + 20, users.length); i++) {
       const followerId = users[i].id;
-      const followingId = users[chance.integer({ min: 0, max: coreCount - 1 })].id;
+      const followingId =
+        users[chance.integer({ min: 0, max: coreCount - 1 })].id;
       const key = `${followerId}:${followingId}`;
       if (pairs.has(key) || followerId === followingId) continue;
       pairs.add(key);

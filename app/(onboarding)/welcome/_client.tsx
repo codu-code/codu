@@ -140,17 +140,11 @@ export default function Welcome() {
     value: string,
   ) =>
     set(
-      list.includes(value)
-        ? list.filter((x) => x !== value)
-        : [...list, value],
+      list.includes(value) ? list.filter((x) => x !== value) : [...list, value],
     );
 
   const canNext =
-    step === 0
-      ? interests.length >= 1
-      : step === 1
-        ? !!exp
-        : true;
+    step === 0 ? interests.length >= 1 : step === 1 ? !!exp : true;
 
   const finish = () => {
     if (saving) return;
@@ -220,8 +214,8 @@ export default function Welcome() {
                 What are you into?
               </h1>
               <p className="mb-6 mt-3 text-lg leading-relaxed text-muted">
-                Pick a few topics and we&rsquo;ll tune your feed around them. You
-                can change these anytime.
+                Pick a few topics and we&rsquo;ll tune your feed around them.
+                You can change these anytime.
               </p>
               <div className="flex flex-wrap gap-2">
                 {ONB_TOPICS.map((t) => (

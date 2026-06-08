@@ -174,10 +174,7 @@ const Notifications = () => {
                       className="flex items-start gap-3 bg-surface px-5 py-4 transition-colors"
                     >
                       {image ? (
-                        <Link
-                          className="flex shrink-0"
-                          href={`/${username}`}
-                        >
+                        <Link className="flex shrink-0" href={`/${username}`}>
                           <img
                             className="h-9 w-9 rounded-full"
                             src={image}

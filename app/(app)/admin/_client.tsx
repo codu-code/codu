@@ -11,7 +11,13 @@ import {
 } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 
-type StatTone = "accent" | "success" | "warning" | "danger" | "info" | "neutral";
+type StatTone =
+  | "accent"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "neutral";
 
 const toneClasses: Record<StatTone, string> = {
   accent: "bg-accent/10 text-accent",

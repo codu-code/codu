@@ -156,9 +156,7 @@ test.describe("Notifications Page", () => {
       ).toBeVisible({ timeout: 30000 });
 
       // Post a comment
-      await page
-        .getByRole("button", { name: /Add to the discussion/ })
-        .click();
+      await page.getByRole("button", { name: /Add to the discussion/ }).click();
 
       await page.waitForTimeout(500);
       const commentText = `E2E notification test comment ${randomUUID()}`;
@@ -205,9 +203,7 @@ test.describe("Notifications Page", () => {
       ).toBeVisible({ timeout: 30000 });
 
       // Post a comment as user one
-      await page
-        .getByRole("button", { name: /Add to the discussion/ })
-        .click();
+      await page.getByRole("button", { name: /Add to the discussion/ }).click();
       await page.waitForTimeout(500);
       const originalComment = `Original comment for reply test ${randomUUID()}`;
       await page

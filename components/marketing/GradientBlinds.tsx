@@ -201,7 +201,10 @@ void main(){ vec4 color; mainImage(color, vUv * iResolution.xy); gl_FragColor = 
         1,
       ];
       if (blindMinWidth && blindMinWidth > 0) {
-        const maxByMinWidth = Math.max(1, Math.floor(rect.width / blindMinWidth));
+        const maxByMinWidth = Math.max(
+          1,
+          Math.floor(rect.width / blindMinWidth),
+        );
         const effective = blindCount
           ? Math.min(blindCount, maxByMinWidth)
           : maxByMinWidth;
@@ -299,7 +302,12 @@ void main(){ vec4 color; mainImage(color, vUv * iResolution.xy); gl_FragColor = 
       ref={containerRef}
       aria-hidden
       className={className}
-      style={{ position: "absolute", inset: 0, overflow: "hidden", mixBlendMode: mixBlendMode as React.CSSProperties["mixBlendMode"] }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        overflow: "hidden",
+        mixBlendMode: mixBlendMode as React.CSSProperties["mixBlendMode"],
+      }}
     />
   );
 }

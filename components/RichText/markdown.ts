@@ -63,7 +63,8 @@ function prefixLines(
 
 export const md = {
   bold: (t: string, s: number, e: number) => wrap(t, s, e, "**", "bold text"),
-  italic: (t: string, s: number, e: number) => wrap(t, s, e, "*", "italic text"),
+  italic: (t: string, s: number, e: number) =>
+    wrap(t, s, e, "*", "italic text"),
   strike: (t: string, s: number, e: number) =>
     wrap(t, s, e, "~~", "struck text"),
 

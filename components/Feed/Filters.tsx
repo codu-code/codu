@@ -76,11 +76,7 @@ export function FilterPill({
           strokeWidth="1.75"
           aria-hidden="true"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M6 8l4 4 4-4"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
         </svg>
       </button>
       {open && (

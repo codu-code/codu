@@ -89,10 +89,7 @@ export function SidebarDivider({
   return (
     <hr
       {...props}
-      className={clsx(
-        className,
-        "-mx-3 my-4 border-t border-hairline",
-      )}
+      className={clsx(className, "-mx-3 my-4 border-t border-hairline")}
     />
   );
 }
@@ -117,10 +114,7 @@ export function SidebarHeading({
   return (
     <h3
       {...props}
-      className={clsx(
-        className,
-        "mb-1 px-2 text-xs/6 font-medium text-muted",
-      )}
+      className={clsx(className, "mb-1 px-2 text-xs/6 font-medium text-muted")}
     />
   );
 }

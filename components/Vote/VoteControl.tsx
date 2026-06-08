@@ -66,9 +66,7 @@ const VoteControl = ({
   const pad = "px-1.5 py-0.5";
 
   const upColor =
-    vote === "up"
-      ? "text-accent-soft"
-      : "text-faint hover:text-accent-soft";
+    vote === "up" ? "text-accent-soft" : "text-faint hover:text-accent-soft";
   const downColor =
     vote === "down" ? "text-danger" : "text-faint hover:text-danger";
   const scoreColor =
@@ -93,7 +91,7 @@ const VoteControl = ({
         <Chevron direction="up" size={arrowSize} />
       </button>
       <span
-        className={`tabular-nums text-center text-xs font-semibold transition-colors ${scoreColor}`}
+        className={`text-center text-xs font-semibold tabular-nums transition-colors ${scoreColor}`}
       >
         {score}
       </span>

@@ -190,7 +190,7 @@ export function SpeakerForm() {
                 type="radio"
                 value={f}
                 {...register("format")}
-                className="h-4 w-4 accent-mint"
+                className="accent-mint h-4 w-4"
               />
               <span className="text-sm">{speakerFormatLabels[f]}</span>
             </label>
@@ -266,7 +266,7 @@ export function SpeakerForm() {
                           type="radio"
                           value={l}
                           {...register(`talks.${idx}.length` as const)}
-                          className="h-4 w-4 accent-mint"
+                          className="accent-mint h-4 w-4"
                         />
                         <span className="text-sm">{talkLengthLabels[l]}</span>
                       </label>
@@ -337,7 +337,7 @@ export function SpeakerForm() {
                 type="radio"
                 value={e}
                 {...register("experience")}
-                className="h-4 w-4 accent-mint"
+                className="accent-mint h-4 w-4"
               />
               <span>{speakerExperienceLabels[e]}</span>
             </label>

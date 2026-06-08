@@ -80,10 +80,8 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
         >
           Back to Feed
         </Link>
-        <div className="rounded-lg border border-danger/30 bg-danger/12 p-6 text-center">
-          <h1 className="text-lg font-semibold text-danger">
-            Post Not Found
-          </h1>
+        <div className="bg-danger/12 rounded-lg border border-danger/30 p-6 text-center">
+          <h1 className="text-lg font-semibold text-danger">Post Not Found</h1>
           <p className="mt-2 text-sm text-danger">
             This post may have been removed or the link is invalid.
           </p>
@@ -159,11 +157,7 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
         {article.title}
       </h1>
 
-      {article.excerpt && (
-        <p className="mb-4 text-muted">
-          {article.excerpt}
-        </p>
-      )}
+      {article.excerpt && <p className="mb-4 text-muted">{article.excerpt}</p>}
 
       {ensureHttps(article.imageUrl) && (
         <a

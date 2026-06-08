@@ -16,9 +16,9 @@ test.describe("Command palette search", () => {
     await page.getByRole("button").filter({ hasText: "Search" }).click();
 
     // The palette dialog should appear.
-    await expect(
-      page.getByRole("dialog", { name: "Search Codú" }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("dialog", { name: "Search Codú" })).toBeVisible(
+      { timeout: 10000 },
+    );
   });
 
   test("Typing a query surfaces results (or a no-matches message)", async ({
@@ -28,9 +28,9 @@ test.describe("Command palette search", () => {
     await page.waitForSelector("article");
 
     await page.getByRole("button").filter({ hasText: "Search" }).click();
-    await expect(
-      page.getByRole("dialog", { name: "Search Codú" }),
-    ).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("dialog", { name: "Search Codú" })).toBeVisible(
+      { timeout: 10000 },
+    );
 
     // The search input is a combobox labelled "Search".
     const input = page.getByRole("combobox", { name: "Search" });

@@ -190,9 +190,7 @@ export const jobRouter = createTRPCRouter({
     return ctx.db
       .select()
       .from(job)
-      .where(
-        or(eq(job.status, "pending"), eq(job.status, "pending_payment")),
-      )
+      .where(or(eq(job.status, "pending"), eq(job.status, "pending_payment")))
       .orderBy(desc(job.createdAt));
   }),
 

@@ -14,9 +14,7 @@ test.describe("Authenticated home → feed", () => {
     await expect(page).toHaveURL("http://localhost:3000/");
     // The feed opens straight into the For-you / Following tabs (the page
     // heading was removed to reclaim vertical space).
-    await expect(
-      page.getByRole("button", { name: "For you" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "For you" })).toBeVisible();
   });
 
   test("Legacy /feed redirects to the homepage", async ({ page }) => {

@@ -17,7 +17,10 @@ export type ContentType = "POST" | "LINK";
 const KIND: Record<string, { label: string; className: string }> = {
   POST: { label: "Article", className: "bg-accent/15 text-accent-soft" },
   ARTICLE: { label: "Article", className: "bg-accent/15 text-accent-soft" },
-  DISCUSSION: { label: "Discussion", className: "bg-accent/12 text-accent-soft" },
+  DISCUSSION: {
+    label: "Discussion",
+    className: "bg-accent/12 text-accent-soft",
+  },
   QUESTION: { label: "Question", className: "bg-info/12 text-info" },
   TIL: { label: "TIL", className: "bg-success/12 text-success" },
   RESOURCE: { label: "Resource", className: "bg-warning/12 text-warning" },
@@ -122,29 +125,29 @@ const UnifiedContentCard = ({
 
   // Unified content voting mutation
   const { mutate: voteContent } = api.content.vote.useMutation({
-      onMutate: async ({ voteType }) => {
-        const oldVote = userVote;
-        setUserVote(voteType);
-        setVotes((prev) => {
-          let newUpvotes = prev.upvotes;
-          let newDownvotes = prev.downvotes;
-          if (oldVote === "up") newUpvotes--;
-          if (oldVote === "down") newDownvotes--;
-          if (voteType === "up") newUpvotes++;
-          if (voteType === "down") newDownvotes++;
-          return { upvotes: newUpvotes, downvotes: newDownvotes };
-        });
-      },
-      onError: (error) => {
-        setUserVote(initialUserVote);
-        setVotes({ upvotes, downvotes });
-        toast.error("Failed to update vote");
-        Sentry.captureException(error);
-      },
-      onSettled: () => {
-        utils.content.getFeed.invalidate();
-      },
-    });
+    onMutate: async ({ voteType }) => {
+      const oldVote = userVote;
+      setUserVote(voteType);
+      setVotes((prev) => {
+        let newUpvotes = prev.upvotes;
+        let newDownvotes = prev.downvotes;
+        if (oldVote === "up") newUpvotes--;
+        if (oldVote === "down") newDownvotes--;
+        if (voteType === "up") newUpvotes++;
+        if (voteType === "down") newDownvotes++;
+        return { upvotes: newUpvotes, downvotes: newDownvotes };
+      });
+    },
+    onError: (error) => {
+      setUserVote(initialUserVote);
+      setVotes({ upvotes, downvotes });
+      toast.error("Failed to update vote");
+      Sentry.captureException(error);
+    },
+    onSettled: () => {
+      utils.content.getFeed.invalidate();
+    },
+  });
 
   // Unified content bookmark mutation
   const { mutate: bookmarkContent, status: bookmarkStatus } =

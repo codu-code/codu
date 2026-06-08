@@ -199,7 +199,9 @@ export async function ensureReferral(userId: string): Promise<void> {
           // above) but skip the points, so one person spinning up N accounts
           // each carrying the cookie can't farm unlimited points. Badges are
           // still re-checked so legitimate progress isn't lost.
-          const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+          const since = new Date(
+            Date.now() - 24 * 60 * 60 * 1000,
+          ).toISOString();
           const [recent] = await db
             .select({ c: sql<number>`count(*)` })
             .from(point_event)

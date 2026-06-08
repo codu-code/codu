@@ -107,11 +107,7 @@ export function RichToolbar({
 
       <Divider />
 
-      <TBtn
-        label="Bulleted list"
-        onClick={() => exec("ul")}
-        compact={compact}
-      >
+      <TBtn label="Bulleted list" onClick={() => exec("ul")} compact={compact}>
         <Icon>
           <path d="M8 6h12" />
           <path d="M8 12h12" />
@@ -121,11 +117,7 @@ export function RichToolbar({
           <path d="M4 18h.01" />
         </Icon>
       </TBtn>
-      <TBtn
-        label="Numbered list"
-        onClick={() => exec("ol")}
-        compact={compact}
-      >
+      <TBtn label="Numbered list" onClick={() => exec("ol")} compact={compact}>
         <Icon>
           <path d="M10 6h10" />
           <path d="M10 12h10" />

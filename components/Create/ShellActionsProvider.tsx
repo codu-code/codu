@@ -22,9 +22,7 @@ const ShellActionsContext = createContext<ShellActions | null>(null);
 export function useShellActions(): ShellActions {
   const ctx = useContext(ShellActionsContext);
   // Tolerate consumers rendered outside the provider (e.g. tests) with no-ops.
-  return (
-    ctx ?? { openCompose: () => {}, openTopics: () => {}, username: null }
-  );
+  return ctx ?? { openCompose: () => {}, openTopics: () => {}, username: null };
 }
 
 /**

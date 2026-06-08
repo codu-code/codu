@@ -22,8 +22,7 @@ const isDismissed = () =>
   typeof window !== "undefined" && localStorage.getItem(KEY) === "1";
 
 const hasCelebrated = () =>
-  typeof window !== "undefined" &&
-  localStorage.getItem(CELEBRATED_KEY) === "1";
+  typeof window !== "undefined" && localStorage.getItem(CELEBRATED_KEY) === "1";
 
 /**
  * First-run guidance: a dismissible "first win in 3 steps" banner. Steps reflect
@@ -186,9 +185,7 @@ export function OnboardingBanner() {
             );
           })}
         </div>
-        <p className="mt-3 font-mono text-xs text-faint">
-          {doneCount}/3 done
-        </p>
+        <p className="mt-3 font-mono text-xs text-faint">{doneCount}/3 done</p>
       </div>
     </div>
   );

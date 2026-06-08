@@ -3,8 +3,7 @@
 import Link from "next/link";
 
 // Regular hexagon (flat-top) clip-path — matches the kit's badge tile shape.
-const HEX_CLIP =
-  "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)";
+const HEX_CLIP = "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)";
 
 interface BadgeUnlockProps {
   /** Display name of the unlocked badge, e.g. "First Post". */

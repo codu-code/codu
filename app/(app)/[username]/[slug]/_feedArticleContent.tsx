@@ -234,7 +234,7 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
               className="h-11 w-11 rounded-full border border-hairline"
             />
           ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+            <div className="bg-accent/12 flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-accent">
               {article.source?.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -308,7 +308,7 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
             ) : faviconUrl ? (
               <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+              <div className="bg-accent/12 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-accent">
                 {article.source.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -321,7 +321,9 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
               >
                 {article.source.name}
               </Link>
-              <span className="font-mono text-xs text-faint">@{sourceSlug}</span>
+              <span className="font-mono text-xs text-faint">
+                @{sourceSlug}
+              </span>
             </div>
             {article.source.description && (
               <p className="truncate text-sm text-muted">
@@ -403,10 +405,7 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         </button>
       </footer>
 
-      <section
-        id="discussion"
-        className="mt-10 border-t border-hairline pt-8"
-      >
+      <section id="discussion" className="mt-10 border-t border-hairline pt-8">
         <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
           Discussion{" "}
           <span className="font-sans font-medium text-faint">

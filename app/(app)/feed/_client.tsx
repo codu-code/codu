@@ -58,7 +58,8 @@ const FeedPage = () => {
     : null;
 
   // "Following" view (signed-in only)
-  const following = !!session?.user && searchParams?.get("view") === "following";
+  const following =
+    !!session?.user && searchParams?.get("view") === "following";
 
   // Fetch feed data with infinite scroll using the unified content API
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
@@ -101,8 +102,7 @@ const FeedPage = () => {
   }) => {
     const nextSort = next.sort ?? sort;
     const nextType = next.type !== undefined ? next.type : type;
-    const nextCategory =
-      next.category !== undefined ? next.category : category;
+    const nextCategory = next.category !== undefined ? next.category : category;
     const nextTag = next.tag !== undefined ? next.tag : tag;
 
     const params = new URLSearchParams();

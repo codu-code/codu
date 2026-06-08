@@ -85,7 +85,7 @@ const SavedItemCard = ({
   const displayInitial = displayName?.charAt(0).toUpperCase() || "?";
 
   return (
-    <article className="group relative rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-hairline border-hairline bg-surface hover:border-accent/50">
+    <article className="group relative rounded-lg border border-hairline bg-surface p-3 transition-colors hover:border-accent/50 hover:border-hairline">
       <Link href={cardUrl} className="block">
         <div className="mb-1.5 flex items-center gap-1.5 text-xs text-muted">
           {displayImage ? (
@@ -101,18 +101,12 @@ const SavedItemCard = ({
           )}
           {type === "POST" ? (
             <span>
-              <span className="font-medium text-muted">
-                {authorName}
-              </span>
+              <span className="font-medium text-muted">{authorName}</span>
             </span>
           ) : (
             <span>
-              <span className="text-faint">
-                In{" "}
-              </span>
-              <span className="font-medium text-muted">
-                {sourceName}
-              </span>
+              <span className="text-faint">In </span>
+              <span className="font-medium text-muted">{sourceName}</span>
             </span>
           )}
           {relativeTime && (

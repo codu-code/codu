@@ -50,7 +50,7 @@ const PreviewPage = async (props: Props) => {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <nav className="mb-6 flex items-center gap-2 text-sm">
-        <span className="bg-accent/15 rounded-full px-3 py-1 font-medium text-accent">
+        <span className="rounded-full bg-accent/15 px-3 py-1 font-medium text-accent">
           Draft Preview
         </span>
       </nav>
@@ -69,7 +69,7 @@ const PreviewPage = async (props: Props) => {
                 className="h-5 w-5 rounded-full object-cover"
               />
             ) : (
-              <div className="bg-accent/15 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-accent">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
                 {post.user.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}

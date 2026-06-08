@@ -130,12 +130,15 @@ function Step1Interests({
               <div
                 className={clsx(
                   "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg",
-                  isSelected
-                    ? "bg-accent"
-                    : "bg-neutral-700",
+                  isSelected ? "bg-accent" : "bg-neutral-700",
                 )}
               >
-                <Icon className={clsx("h-5 w-5", isSelected ? "text-black" : "text-fg")} />
+                <Icon
+                  className={clsx(
+                    "h-5 w-5",
+                    isSelected ? "text-black" : "text-fg",
+                  )}
+                />
               </div>
               <div className="flex-1">
                 <p className="font-medium text-fg">
@@ -145,9 +148,7 @@ function Step1Interests({
               <div
                 className={clsx(
                   "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  isSelected
-                    ? "border-accent bg-accent"
-                    : "border-neutral-600",
+                  isSelected ? "border-accent bg-accent" : "border-neutral-600",
                 )}
               >
                 {isSelected && <CheckIcon className="h-4 w-4 text-fg" />}
@@ -252,8 +253,7 @@ function Step3Contact({
       <div className="grid gap-6 sm:grid-cols-2">
         <Field>
           <Label>
-            Company{" "}
-            <span className="font-normal text-faint">(optional)</span>
+            Company <span className="font-normal text-faint">(optional)</span>
           </Label>
           <Input
             type="text"
@@ -264,8 +264,7 @@ function Step3Contact({
 
         <Field>
           <Label>
-            Phone{" "}
-            <span className="font-normal text-faint">(optional)</span>
+            Phone <span className="font-normal text-faint">(optional)</span>
           </Label>
           <Input
             type="tel"
@@ -436,9 +435,7 @@ export function ContactForm() {
           onClick={handleBack}
           className={clsx(
             "flex items-center gap-2 text-sm font-medium transition-colors",
-            currentStep === 1
-              ? "invisible"
-              : "text-muted hover:text-fg",
+            currentStep === 1 ? "invisible" : "text-muted hover:text-fg",
           )}
         >
           <ArrowLeftIcon className="h-4 w-4" />

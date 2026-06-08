@@ -65,8 +65,7 @@ export function ComposeModal({
         void utils.content.getFeed.invalidate();
         // New posts live in the `posts` table; the canonical URL is
         // /{username}/{slug}. Fall back to the feed if we lack the username.
-        const href =
-          post?.slug && username ? `/${username}/${post.slug}` : "/";
+        const href = post?.slug && username ? `/${username}/${post.slug}` : "/";
         setDone({ href });
       },
       onError: (err) => {
@@ -96,7 +95,11 @@ export function ComposeModal({
 
   const addTag = (t: string) => {
     const v = t.trim().replace(/^#/, "");
-    if (v && tags.length < TAG_MAX && !tags.some((x) => x.toLowerCase() === v.toLowerCase())) {
+    if (
+      v &&
+      tags.length < TAG_MAX &&
+      !tags.some((x) => x.toLowerCase() === v.toLowerCase())
+    ) {
       setTags([...tags, v]);
     }
     setDraft("");
@@ -108,7 +111,12 @@ export function ComposeModal({
       type: tab === "link" ? "LINK" : "DISCUSSION",
       title: title.trim(),
       body: body.trim() || null,
-      externalUrl: tab === "link" ? (url.startsWith("http") ? url : `https://${url}`) : null,
+      externalUrl:
+        tab === "link"
+          ? url.startsWith("http")
+            ? url
+            : `https://${url}`
+          : null,
       tags,
       published: true,
     });
@@ -142,8 +150,8 @@ export function ComposeModal({
               You&apos;re live.
             </h3>
             <p className="mt-3 font-mono text-xs leading-relaxed text-faint">
-              Your post is in the feed now. Be around to reply — the best threads
-              come from the author sticking around.
+              Your post is in the feed now. Be around to reply — the best
+              threads come from the author sticking around.
             </p>
             <div className="mt-5 flex justify-end gap-3">
               <button
@@ -200,21 +208,32 @@ export function ComposeModal({
                   Write a full article
                 </h3>
                 <p className="mb-5 mt-2 text-sm leading-relaxed text-muted">
-                  Articles open in a focused editor — cover image, headings, code
-                  blocks, the works. Here&apos;s how publishing works before you
-                  start:
+                  Articles open in a focused editor — cover image, headings,
+                  code blocks, the works. Here&apos;s how publishing works
+                  before you start:
                 </p>
                 <ul className="flex flex-col gap-3">
                   {[
-                    ["Editors review first", "You submit a draft and a human editor reads it before it goes live — usually within a day."],
-                    ["Cross-posting is welcome", "Published it elsewhere? Add a canonical link in the editor and we'll point search engines to your original."],
-                    ["Your draft is always saved", "Step away whenever. It'll be waiting in your profile under drafts."],
+                    [
+                      "Editors review first",
+                      "You submit a draft and a human editor reads it before it goes live — usually within a day.",
+                    ],
+                    [
+                      "Cross-posting is welcome",
+                      "Published it elsewhere? Add a canonical link in the editor and we'll point search engines to your original.",
+                    ],
+                    [
+                      "Your draft is always saved",
+                      "Step away whenever. It'll be waiting in your profile under drafts.",
+                    ],
                   ].map(([h, d]) => (
                     <li
                       key={h}
                       className="flex items-start gap-3 border-t border-hairline pt-3 text-sm leading-snug"
                     >
-                      <span className="font-mono text-[13px] text-accent">→</span>
+                      <span className="font-mono text-[13px] text-accent">
+                        →
+                      </span>
                       <span>
                         <span className="font-semibold text-fg">{h}.</span>{" "}
                         <span className="text-muted">{d}</span>
@@ -249,7 +268,7 @@ export function ComposeModal({
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://…"
-                        className="flex-1 border-0 bg-transparent font-mono text-sm text-fg outline-none focus:outline-none focus:ring-0 placeholder:text-faint"
+                        className="flex-1 border-0 bg-transparent font-mono text-sm text-fg outline-none placeholder:text-faint focus:outline-none focus:ring-0"
                       />
                       {url && !domain && (
                         <span className="font-mono text-[10px] text-warning">
@@ -351,12 +370,20 @@ export function ComposeModal({
                         if (e.key === "Enter" || e.key === ",") {
                           e.preventDefault();
                           addTag(draft);
-                        } else if (e.key === "Backspace" && !draft && tags.length) {
+                        } else if (
+                          e.key === "Backspace" &&
+                          !draft &&
+                          tags.length
+                        ) {
                           setTags(tags.slice(0, -1));
                         }
                       }}
-                      placeholder={tags.length ? "Add another…" : `Add up to ${TAG_MAX} tags…`}
-                      className="min-w-[120px] flex-1 border-0 bg-transparent font-mono text-xs text-fg outline-none focus:outline-none focus:ring-0 placeholder:text-faint"
+                      placeholder={
+                        tags.length
+                          ? "Add another…"
+                          : `Add up to ${TAG_MAX} tags…`
+                      }
+                      className="min-w-[120px] flex-1 border-0 bg-transparent font-mono text-xs text-fg outline-none placeholder:text-faint focus:outline-none focus:ring-0"
                     />
                   )}
                 </div>

@@ -306,227 +306,228 @@ const Settings = ({ profile }: { profile: User }) => {
 
       {/* profile */}
       <div className={tab === "Profile" ? "" : "hidden"}>
-      <div className="flex items-center gap-4 border-b border-hairline py-4">
-        <Avatar
-          square
-          src={
-            profilePhoto.status === "error" || profilePhoto.status === "pending"
-              ? undefined
-              : `${profilePhoto.url}`
-          }
-          alt="Profile photo upload section"
-          className="h-16 w-16 shrink-0 overflow-hidden rounded-full"
-        />
-        <div>
+        <div className="flex items-center gap-4 border-b border-hairline py-4">
+          <Avatar
+            square
+            src={
+              profilePhoto.status === "error" ||
+              profilePhoto.status === "pending"
+                ? undefined
+                : `${profilePhoto.url}`
+            }
+            alt="Profile photo upload section"
+            className="h-16 w-16 shrink-0 overflow-hidden rounded-full"
+          />
+          <div>
+            <Button
+              color="dark/white"
+              type="button"
+              className="h-[30px] rounded-md text-xs"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Change avatar
+            </Button>
+            <Input
+              type="file"
+              id="file-input"
+              name="user-photo"
+              accept="image/png, image/gif, image/jpeg"
+              onChange={imageChange}
+              className="hidden"
+              ref={fileInputRef}
+            />
+            <p className="mt-1 text-xs text-faint">JPG, GIF or PNG. 1MB max.</p>
+          </div>
+        </div>
+
+        <FieldBlock
+          title="Full name"
+          desc="This will be displayed on your public profile"
+        >
+          <Input
+            id="name"
+            type="text"
+            autoComplete="given-name"
+            invalid={!!errors?.name}
+            {...register("name")}
+          />
+          {errors?.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
+        </FieldBlock>
+
+        <FieldBlock
+          title="Username"
+          desc="This will be how you share your profile"
+        >
+          <Input
+            id="username"
+            type="text"
+            autoComplete="username"
+            invalid={!!errors?.username}
+            {...register("username")}
+          />
+          {errors?.username && (
+            <ErrorMessage>{errors.username.message}</ErrorMessage>
+          )}
+        </FieldBlock>
+
+        <FieldBlock
+          title="Bio"
+          desc="This will be displayed on your public profile. Maximum 200 characters."
+        >
+          <Textarea
+            id="bio"
+            rows={3}
+            maxLength={200}
+            invalid={!!errors?.bio}
+            {...register("bio")}
+          />
+          {errors?.bio && <ErrorMessage>{errors.bio.message}</ErrorMessage>}
+        </FieldBlock>
+
+        <FieldBlock title="Location" desc="This is where you live">
+          <Input
+            id="location"
+            type="text"
+            placeholder="The moon 🌙"
+            autoComplete="country-name"
+            invalid={!!errors?.location}
+            {...register("location")}
+          />
+          {errors?.location && (
+            <ErrorMessage>{errors.location.message}</ErrorMessage>
+          )}
+        </FieldBlock>
+
+        <FieldBlock
+          title="Website URL"
+          desc="A link to your website (optional)"
+        >
+          <Input
+            id="websiteUrl"
+            type="text"
+            placeholder="https://example.com"
+            autoComplete="url"
+            invalid={!!errors?.websiteUrl}
+            {...register("websiteUrl")}
+          />
+          {errors?.websiteUrl && (
+            <ErrorMessage>{errors.websiteUrl.message}</ErrorMessage>
+          )}
+        </FieldBlock>
+
+        <FieldBlock
+          title="Topics"
+          desc="The topics you follow shape your feed. Edit them anytime."
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            {myTopics.length > 0 ? (
+              myTopics.map((t) => <Tag key={t}>{t}</Tag>)
+            ) : (
+              <p className="text-sm text-muted">
+                You haven&apos;t chosen any topics yet.
+              </p>
+            )}
+          </div>
           <Button
             color="dark/white"
             type="button"
-            className="h-[30px] rounded-md text-xs"
-            onClick={() => fileInputRef.current?.click()}
+            className="mt-3 h-[30px] rounded-md text-xs"
+            onClick={openTopics}
           >
-            Change avatar
+            Edit topics
           </Button>
-          <Input
-            type="file"
-            id="file-input"
-            name="user-photo"
-            accept="image/png, image/gif, image/jpeg"
-            onChange={imageChange}
-            className="hidden"
-            ref={fileInputRef}
-          />
-          <p className="mt-1 text-xs text-faint">JPG, GIF or PNG. 1MB max.</p>
-        </div>
-      </div>
+        </FieldBlock>
 
-      <FieldBlock
-        title="Full name"
-        desc="This will be displayed on your public profile"
-      >
-        <Input
-          id="name"
-          type="text"
-          autoComplete="given-name"
-          invalid={!!errors?.name}
-          {...register("name")}
-        />
-        {errors?.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
-      </FieldBlock>
-
-      <FieldBlock
-        title="Username"
-        desc="This will be how you share your profile"
-      >
-        <Input
-          id="username"
-          type="text"
-          autoComplete="username"
-          invalid={!!errors?.username}
-          {...register("username")}
-        />
-        {errors?.username && (
-          <ErrorMessage>{errors.username.message}</ErrorMessage>
-        )}
-      </FieldBlock>
-
-      <FieldBlock
-        title="Bio"
-        desc="This will be displayed on your public profile. Maximum 200 characters."
-      >
-        <Textarea
-          id="bio"
-          rows={3}
-          maxLength={200}
-          invalid={!!errors?.bio}
-          {...register("bio")}
-        />
-        {errors?.bio && <ErrorMessage>{errors.bio.message}</ErrorMessage>}
-      </FieldBlock>
-
-      <FieldBlock title="Location" desc="This is where you live">
-        <Input
-          id="location"
-          type="text"
-          placeholder="The moon 🌙"
-          autoComplete="country-name"
-          invalid={!!errors?.location}
-          {...register("location")}
-        />
-        {errors?.location && (
-          <ErrorMessage>{errors.location.message}</ErrorMessage>
-        )}
-      </FieldBlock>
-
-      <FieldBlock
-        title="Website URL"
-        desc="A link to your website (optional)"
-      >
-        <Input
-          id="websiteUrl"
-          type="text"
-          placeholder="https://example.com"
-          autoComplete="url"
-          invalid={!!errors?.websiteUrl}
-          {...register("websiteUrl")}
-        />
-        {errors?.websiteUrl && (
-          <ErrorMessage>{errors.websiteUrl.message}</ErrorMessage>
-        )}
-      </FieldBlock>
-
-      <FieldBlock
-        title="Topics"
-        desc="The topics you follow shape your feed. Edit them anytime."
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          {myTopics.length > 0 ? (
-            myTopics.map((t) => <Tag key={t}>{t}</Tag>)
-          ) : (
-            <p className="text-sm text-muted">
-              You haven&apos;t chosen any topics yet.
-            </p>
-          )}
-        </div>
-        <Button
-          color="dark/white"
-          type="button"
-          className="mt-3 h-[30px] rounded-md text-xs"
-          onClick={openTopics}
+        <FieldBlock
+          title="Invite friends"
+          desc="Share Codú and earn points + the Connector badge for every builder who joins."
         >
-          Edit topics
-        </Button>
-      </FieldBlock>
-
-      <FieldBlock
-        title="Invite friends"
-        desc="Share Codú and earn points + the Connector badge for every builder who joins."
-      >
-        <ReferralCard />
-      </FieldBlock>
+          <ReferralCard />
+        </FieldBlock>
       </div>
 
       {/* notifications */}
       <div className={tab === "Notifications" ? "" : "hidden"}>
-      <SettingsRow
-        title="Allow notifications from the platform"
-        desc="Send an email when a user interacts with you on the platform"
-      >
-        <Toggle
-          checked={emailNotifications}
-          onChange={setEmailNotifications}
-        />
-      </SettingsRow>
+        <SettingsRow
+          title="Allow notifications from the platform"
+          desc="Send an email when a user interacts with you on the platform"
+        >
+          <Toggle
+            checked={emailNotifications}
+            onChange={setEmailNotifications}
+          />
+        </SettingsRow>
 
-      <SettingsRow
-        title="Weekly Newsletter"
-        desc="Receive our weekly newsletter"
-      >
-        <Toggle checked={weeklyNewsletter} onChange={setWeeklyNewsletter} />
-      </SettingsRow>
+        <SettingsRow
+          title="Weekly Newsletter"
+          desc="Receive our weekly newsletter"
+        >
+          <Toggle checked={weeklyNewsletter} onChange={setWeeklyNewsletter} />
+        </SettingsRow>
       </div>
 
       {/* account */}
       <div className={tab === "Account" ? "" : "hidden"}>
-      <FieldBlock
-        title="Current email"
-        desc="This is where we will send all communications"
-      >
-        <Input type="text" value={profile.email || ""} disabled />
-      </FieldBlock>
-
-      <FieldBlock
-        title="Update email"
-        desc="You can alter your email by verifying a new email address."
-      >
-        <Input
-          type="email"
-          id="newEmail"
-          onChange={(e) => {
-            setNewEmail(e.target.value);
-            if (sendForVerification) {
-              setEmailError(""); // Clear error when user starts typing again
-            }
-          }}
-          value={newEmail}
-        />
-        {emailError && sendForVerification && (
-          <ErrorMessage>{emailError}</ErrorMessage>
-        )}
-        <div className="mt-2 flex justify-end">
-          <Button
-            color="accent"
-            disabled={
-              !isValidEmail(newEmail) ||
-              newEmail === profile.email ||
-              loading ||
-              cooldown > 0
-            }
-            onClick={handleNewEmailUpdate}
-          >
-            {loading && (
-              <Loader2 className="text-primary h-6 w-6 animate-spin" />
-            )}
-            {cooldown > 0 ? `Wait ${cooldown}s` : "Send Verification Email"}
-          </Button>
-        </div>
-      </FieldBlock>
-
-      <div className="flex items-center gap-4 py-4">
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold text-danger">
-            Delete account
-          </div>
-          <div className="mt-0.5 text-xs leading-relaxed text-muted">
-            Permanently remove your account and data. Contact us to start.
-          </div>
-        </div>
-        <a
-          href="mailto:hi@codu.co?subject=Delete%20my%20account"
-          className="rounded-md border border-hairline px-4 py-2 text-sm text-danger transition-colors hover:border-danger"
+        <FieldBlock
+          title="Current email"
+          desc="This is where we will send all communications"
         >
-          Delete account
-        </a>
-      </div>
+          <Input type="text" value={profile.email || ""} disabled />
+        </FieldBlock>
+
+        <FieldBlock
+          title="Update email"
+          desc="You can alter your email by verifying a new email address."
+        >
+          <Input
+            type="email"
+            id="newEmail"
+            onChange={(e) => {
+              setNewEmail(e.target.value);
+              if (sendForVerification) {
+                setEmailError(""); // Clear error when user starts typing again
+              }
+            }}
+            value={newEmail}
+          />
+          {emailError && sendForVerification && (
+            <ErrorMessage>{emailError}</ErrorMessage>
+          )}
+          <div className="mt-2 flex justify-end">
+            <Button
+              color="accent"
+              disabled={
+                !isValidEmail(newEmail) ||
+                newEmail === profile.email ||
+                loading ||
+                cooldown > 0
+              }
+              onClick={handleNewEmailUpdate}
+            >
+              {loading && (
+                <Loader2 className="text-primary h-6 w-6 animate-spin" />
+              )}
+              {cooldown > 0 ? `Wait ${cooldown}s` : "Send Verification Email"}
+            </Button>
+          </div>
+        </FieldBlock>
+
+        <div className="flex items-center gap-4 py-4">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-danger">
+              Delete account
+            </div>
+            <div className="mt-0.5 text-xs leading-relaxed text-muted">
+              Permanently remove your account and data. Contact us to start.
+            </div>
+          </div>
+          <a
+            href="mailto:hi@codu.co?subject=Delete%20my%20account"
+            className="rounded-md border border-hairline px-4 py-2 text-sm text-danger transition-colors hover:border-danger"
+          >
+            Delete account
+          </a>
+        </div>
       </div>
 
       {/* ---------- actions (sticky save bar) ---------- */}

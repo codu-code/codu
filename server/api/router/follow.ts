@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { follow, notification, user } from "@/server/db/schema";
 import { NEW_FOLLOWER } from "@/utils/notifications";
 import * as Sentry from "@sentry/nextjs";

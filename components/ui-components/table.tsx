@@ -67,12 +67,7 @@ export function TableHead({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"thead">) {
-  return (
-    <thead
-      {...props}
-      className={clsx(className, "text-muted")}
-    />
-  );
+  return <thead {...props} className={clsx(className, "text-muted")} />;
 }
 
 export function TableBody(props: React.ComponentPropsWithoutRef<"tbody">) {
@@ -113,7 +108,7 @@ export function TableRow({
         className={clsx(
           className,
           href &&
-            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-accent focus-within:bg-hover/50",
+            "focus-within:bg-hover/50 has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-accent",
           striped && "even:bg-hover/50",
           href && striped && "hover:bg-hover",
           href && !striped && "hover:bg-hover/50",

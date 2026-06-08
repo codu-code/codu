@@ -82,7 +82,13 @@ async function getUserPost(username: string, postSlug: string) {
         eq(posts.status, "published"),
         // Text-content kinds all render via the article reader (title + body +
         // discussion). Links have their own resolver below.
-        inArray(posts.type, ["article", "discussion", "question", "til", "resource"]),
+        inArray(posts.type, [
+          "article",
+          "discussion",
+          "question",
+          "til",
+          "resource",
+        ]),
         lte(posts.publishedAt, new Date().toISOString()),
       ),
     )

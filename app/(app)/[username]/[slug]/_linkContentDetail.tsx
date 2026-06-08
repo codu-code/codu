@@ -236,7 +236,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
               className="h-11 w-11 rounded-full border border-hairline"
             />
           ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+            <div className="bg-accent/12 flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-accent">
               {linkContent.source?.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -306,7 +306,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
             ) : faviconUrl ? (
               <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+              <div className="bg-accent/12 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-accent">
                 {linkContent.source.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
@@ -319,7 +319,9 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
               >
                 {linkContent.source.name}
               </Link>
-              <span className="font-mono text-xs text-faint">@{sourceSlug}</span>
+              <span className="font-mono text-xs text-faint">
+                @{sourceSlug}
+              </span>
             </div>
             {linkContent.source.description && (
               <p className="truncate text-sm text-muted">

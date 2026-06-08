@@ -31,7 +31,8 @@ const craftWhy = [
 const personas = [
   {
     tag: "The product-minded engineer",
-    quote: "I can build anything. I'm just not sure I'm building the right thing.",
+    quote:
+      "I can build anything. I'm just not sure I'm building the right thing.",
     why: "We're obsessed with the why. You'll learn to think like a product engineer, not just a coder — and that mindset on top of your skills is rare in any market.",
   },
   {
@@ -65,8 +66,8 @@ export default function AboutPage() {
         <div className="relative mx-auto max-w-container px-5 py-20 sm:px-8 sm:py-24">
           <Eyebrow>what codú is</Eyebrow>
           <h1 className="mt-6 max-w-[15ch] font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-fg sm:text-6xl">
-            The community for{" "}
-            <span className="text-accent">AI builders</span> &amp; indie hackers
+            The community for <span className="text-accent">AI builders</span>{" "}
+            &amp; indie hackers
           </h1>
           <p className="mt-6 max-w-prose text-lg leading-relaxed text-muted">
             Codú is a place to get genuinely good. Not a launch board. Not a

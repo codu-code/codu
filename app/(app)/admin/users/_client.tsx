@@ -200,7 +200,7 @@ const UserManagement = () => {
                       </span>
                     )}
                     {"isBanned" in user && user.isBanned && (
-                      <span className="rounded bg-danger/12 px-1.5 py-0.5 font-mono text-xs uppercase tracking-label text-danger">
+                      <span className="bg-danger/12 rounded px-1.5 py-0.5 font-mono text-xs uppercase tracking-label text-danger">
                         Banned
                       </span>
                     )}

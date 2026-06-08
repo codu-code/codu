@@ -20,7 +20,7 @@ export function AaToggle({
       onClick={onToggle}
       className={`flex h-[30px] w-[38px] items-center justify-center rounded-md border font-display text-sm font-bold leading-none transition-colors ${
         on
-          ? "border-accent bg-accent/12 text-accent-soft"
+          ? "bg-accent/12 border-accent text-accent-soft"
           : "border-hairline bg-transparent text-faint hover:text-muted"
       }`}
     >

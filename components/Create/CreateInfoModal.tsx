@@ -94,10 +94,7 @@ export function CreateInfoModal({
           >
             Read the full code of conduct ›
           </Link>
-          <button
-            className="primary-button ml-auto"
-            onClick={onContinue}
-          >
+          <button className="primary-button ml-auto" onClick={onContinue}>
             Got it — let&apos;s create
           </button>
         </div>

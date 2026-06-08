@@ -216,7 +216,7 @@ const UserLinkDetail = ({ username, contentSlug }: Props) => {
               className="h-11 w-11 rounded-full border border-hairline object-cover"
             />
           ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/12 text-sm font-bold text-accent">
+            <div className="bg-accent/12 flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-accent">
               {linkContent.author?.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}

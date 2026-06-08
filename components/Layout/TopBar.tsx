@@ -110,10 +110,7 @@ export function TopBar({
               className="flex rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
               aria-label="Account menu"
             >
-              <Avatar
-                name={session.user?.name}
-                image={session.user?.image}
-              />
+              <Avatar name={session.user?.name} image={session.user?.image} />
             </MenuButton>
             <Transition
               as={Fragment}

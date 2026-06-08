@@ -354,7 +354,9 @@ const TagsAdmin = () => {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-faint">Click a tag below to select</span>
+                  <span className="text-faint">
+                    Click a tag below to select
+                  </span>
                 )}
               </div>
             </div>
@@ -374,7 +376,9 @@ const TagsAdmin = () => {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-faint">Click a tag below to select</span>
+                  <span className="text-faint">
+                    Click a tag below to select
+                  </span>
                 )}
               </div>
             </div>
@@ -404,11 +408,7 @@ const TagsAdmin = () => {
         </div>
         <button
           onClick={() => setShowMergePanel(!showMergePanel)}
-          className={
-            showMergePanel
-              ? "primary-button"
-              : "secondary-button"
-          }
+          className={showMergePanel ? "primary-button" : "secondary-button"}
         >
           <ArrowsRightLeftIcon className="h-5 w-5" />
           Merge Mode

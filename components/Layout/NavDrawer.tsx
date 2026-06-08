@@ -27,7 +27,12 @@ interface NavDrawerProps {
  * backdrop click, Esc, or any nav action. ("Your topics" lives in Settings on
  * mobile.) Mirrors ui_kits/app/AppShell.jsx → NavDrawer.
  */
-export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) {
+export function NavDrawer({
+  open,
+  onClose,
+  session,
+  username,
+}: NavDrawerProps) {
   const pathname = usePathname();
 
   // Close on Escape while open.

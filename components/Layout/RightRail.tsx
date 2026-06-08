@@ -35,7 +35,9 @@ function ProgressCard() {
   const next = MILESTONES.find((m) => m > points) ?? points;
   const prev = [...MILESTONES].reverse().find((m) => m <= points) ?? 0;
   const pct =
-    next > prev ? Math.min(100, Math.round(((points - prev) / (next - prev)) * 100)) : 100;
+    next > prev
+      ? Math.min(100, Math.round(((points - prev) / (next - prev)) * 100))
+      : 100;
 
   return (
     <div className="card p-4">

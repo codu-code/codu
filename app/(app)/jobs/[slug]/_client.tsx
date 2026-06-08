@@ -20,7 +20,10 @@ export default function JobDetailClient({ slug }: { slug: string }) {
     data: job,
     isLoading,
     isError,
-  } = api.job.getBySlug.useQuery({ slug }, { enabled: flagEnabled, retry: false });
+  } = api.job.getBySlug.useQuery(
+    { slug },
+    { enabled: flagEnabled, retry: false },
+  );
 
   if (!flagEnabled) {
     notFound();
@@ -50,10 +53,7 @@ export default function JobDetailClient({ slug }: { slug: string }) {
 
   return (
     <div className="mx-auto max-w-3xl p-3 pt-8 sm:px-4">
-      <Link
-        href="/jobs"
-        className="text-sm text-muted hover:text-fg"
-      >
+      <Link href="/jobs" className="text-sm text-muted hover:text-fg">
         ← All jobs
       </Link>
 

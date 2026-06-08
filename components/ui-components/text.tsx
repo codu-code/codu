@@ -9,10 +9,7 @@ export function Text({
     <p
       data-slot="text"
       {...props}
-      className={clsx(
-        className,
-        "text-base/6 text-muted sm:text-sm/6",
-      )}
+      className={clsx(className, "text-base/6 text-muted sm:text-sm/6")}
     />
   );
 }
@@ -37,10 +34,7 @@ export function Strong({
   ...props
 }: React.ComponentPropsWithoutRef<"strong">) {
   return (
-    <strong
-      {...props}
-      className={clsx(className, "font-medium text-fg")}
-    />
+    <strong {...props} className={clsx(className, "font-medium text-fg")} />
   );
 }
 

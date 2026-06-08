@@ -98,7 +98,7 @@ const ArticlePreview: NextPage<Props> = ({
   };
 
   return (
-    <article className="relative my-2 rounded-r border border-l-0 border-hairline bg-surface p-4 pl-6 border-hairline bg-surface">
+    <article className="relative my-2 rounded-r border border-l-0 border-hairline bg-surface p-4 pl-6">
       <div className="absolute bottom-[-1px] left-0 top-[-1px] flex w-2 justify-between bg-accent" />
       <div className="flex justify-between">
         <div className="mb-4 flex items-center">
@@ -171,9 +171,7 @@ const ArticlePreview: NextPage<Props> = ({
               >
                 <BookmarkIcon
                   className={`h-6 w-6 ${
-                    bookmarked
-                      ? "fill-blue-400"
-                      : "fill-muted"
+                    bookmarked ? "fill-blue-400" : "fill-muted"
                   }`}
                 />
               </button>

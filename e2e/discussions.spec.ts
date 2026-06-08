@@ -68,6 +68,8 @@ test.describe("Discussion thread", () => {
     await expect(parent).toBeVisible({ timeout: 30000 });
 
     await parent.getByRole("button", { name: "Reply" }).first().click();
-    await expect(parent.getByRole("button", { name: "Reply" }).last()).toBeVisible();
+    await expect(
+      parent.getByRole("button", { name: "Reply" }).last(),
+    ).toBeVisible();
   });
 });

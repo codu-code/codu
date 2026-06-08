@@ -126,7 +126,7 @@ const ArticleActionBar = ({
         disabled={bookmarkStatus === "pending"}
         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
           isBookmarked
-            ? "border-accent bg-accent/12 text-accent-soft hover:bg-accent/20"
+            ? "bg-accent/12 border-accent text-accent-soft hover:bg-accent/20"
             : "border-hairline text-muted hover:bg-hover"
         }`}
       >

@@ -11,9 +11,7 @@ test.describe("Unauthenticated Login Page", () => {
     await expect(
       page.getByRole("heading", { name: "Start building with AI" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Codú home" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Codú home" })).toBeVisible();
     // Check for OAuth provider buttons
     await expect(
       page.getByRole("button", { name: "Continue with GitHub" }),

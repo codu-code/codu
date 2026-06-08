@@ -158,9 +158,7 @@ test.describe("Authenticated Article Flows", () => {
     await expect(
       page.getByRole("button", { name: "Add to the discussion…" }),
     ).toBeVisible({ timeout: 15000 });
-    await page
-      .getByRole("button", { name: "Add to the discussion…" })
-      .click();
+    await page.getByRole("button", { name: "Add to the discussion…" }).click();
 
     // The expanded editor is a markdown textarea - fill it directly.
     await page.waitForTimeout(500); // Wait for editor to expand

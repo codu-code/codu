@@ -745,7 +745,8 @@ export const contentRouter = createTRPCRouter({
       // must go through review too, otherwise a client could self-publish by
       // setting published:true here instead of calling publish. Mirrors the
       // publish mutation's gate.
-      const goingLive = input.published === true && existing[0].status !== "published";
+      const goingLive =
+        input.published === true && existing[0].status !== "published";
       const moderated = goingLive && isModerationEnabled();
       if (input.published !== undefined) {
         if (moderated) {

@@ -5,10 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
 import { api } from "@/server/trpc/react";
-import {
-  type SponsorInterest,
-  sponsorInterestLabels,
-} from "@/schema/sponsor";
+import { type SponsorInterest, sponsorInterestLabels } from "@/schema/sponsor";
 import { Input } from "@/components/ui-components/input";
 import { Textarea } from "@/components/ui-components/textarea";
 import {

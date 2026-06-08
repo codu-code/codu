@@ -63,7 +63,10 @@ export const profileRouter = createTRPCRouter({
         .set(set)
         .where(eq(user.id, ctx.session.user.id))
         .returning({ topics: user.topics, onboardedAt: user.onboardedAt });
-      return { topics: row?.topics ?? topics, onboardedAt: row?.onboardedAt ?? null };
+      return {
+        topics: row?.topics ?? topics,
+        onboardedAt: row?.onboardedAt ?? null,
+      };
     }),
 
   edit: protectedProcedure

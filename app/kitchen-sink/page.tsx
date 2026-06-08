@@ -72,9 +72,9 @@ export default function DesignSystemPage() {
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted">
             The canonical reference for the relaunch. Direction:{" "}
-            <em className="text-fg">fresh &amp; editorial</em> — cool dark canvas,
-            Mint accent, characterful type, hairline rules over soft shadows. Add or
-            remove sections here as we build real pages.
+            <em className="text-fg">fresh &amp; editorial</em> — cool dark
+            canvas, Mint accent, characterful type, hairline rules over soft
+            shadows. Add or remove sections here as we build real pages.
           </p>
         </header>
 
@@ -113,7 +113,9 @@ export default function DesignSystemPage() {
               ["info", "bg-info", "text-info"],
             ].map(([name, bg, fg]) => (
               <div key={name} className="flex flex-col gap-2">
-                <div className={`flex h-20 items-center justify-center rounded-lg ${bg}/12`}>
+                <div
+                  className={`flex h-20 items-center justify-center rounded-lg ${bg}/12`}
+                >
                   <span className={`h-6 w-6 rounded-full ${bg}`} />
                 </div>
                 <div className={`font-mono text-xs ${fg}`}>{name}</div>
@@ -121,12 +123,13 @@ export default function DesignSystemPage() {
             ))}
           </div>
           <p className="mt-6 text-sm text-muted">
-            Used via theme classes: <code className="font-mono text-accent-soft">bg-surface</code>,{" "}
+            Used via theme classes:{" "}
+            <code className="font-mono text-accent-soft">bg-surface</code>,{" "}
             <code className="font-mono text-accent-soft">text-fg</code>,{" "}
             <code className="font-mono text-accent-soft">text-accent</code>,{" "}
             <code className="font-mono text-accent-soft">border-hairline</code>,{" "}
-            <code className="font-mono text-accent-soft">bg-success/12</code> — no
-            inline colors.
+            <code className="font-mono text-accent-soft">bg-success/12</code> —
+            no inline colors.
           </p>
         </Section>
 
@@ -145,16 +148,18 @@ export default function DesignSystemPage() {
                 Body — Hanken Grotesk (font-sans)
               </span>
               <p className="max-w-2xl text-lg text-muted">
-                Learn to build with AI, share what you ship, and grow with people
-                doing the same. Calm, readable body copy lets the headlines and accent
-                talk.
+                Learn to build with AI, share what you ship, and grow with
+                people doing the same. Calm, readable body copy lets the
+                headlines and accent talk.
               </p>
             </div>
             <div>
               <span className="font-mono text-xs text-faint">
                 Mono — JetBrains Mono (font-mono)
               </span>
-              <p className="font-mono text-accent-soft">$ npx create-codu-app --ai</p>
+              <p className="font-mono text-accent-soft">
+                $ npx create-codu-app --ai
+              </p>
             </div>
           </div>
         </Section>
@@ -163,7 +168,9 @@ export default function DesignSystemPage() {
         <Section n="03" title="Buttons">
           <div className="flex flex-wrap items-center gap-4">
             <button className="primary-button">Primary — Join free</button>
-            <button className="secondary-button">Secondary — Browse feed</button>
+            <button className="secondary-button">
+              Secondary — Browse feed
+            </button>
             <button className="font-mono text-sm font-semibold text-accent">
               Ghost ›
             </button>
@@ -213,7 +220,9 @@ export default function DesignSystemPage() {
                   </h3>
                   <Tag variant="accent">Featured</Tag>
                 </div>
-                <p className="font-mono text-sm text-muted">Acme AI · Remote (EU)</p>
+                <p className="font-mono text-sm text-muted">
+                  Acme AI · Remote (EU)
+                </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {["Full-time", "AI-native", "LLM", "agents"].map((t) => (
                     <Tag key={t}>{t}</Tag>
@@ -234,12 +243,12 @@ export default function DesignSystemPage() {
             <div className="relative">
               <Eyebrow>the community for AI builders</Eyebrow>
               <h2 className="mt-5 max-w-2xl font-display text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl">
-                Learn to build with AI. <span className="text-accent">Ship</span> what
-                you make.
+                Learn to build with AI.{" "}
+                <span className="text-accent">Ship</span> what you make.
               </h2>
               <p className="mt-5 max-w-lg text-lg text-muted">
-                Tutorials, a curated feed, and a community of indie hackers and AI
-                builders doing the work.
+                Tutorials, a curated feed, and a community of indie hackers and
+                AI builders doing the work.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <button className="primary-button">Join free</button>
@@ -276,7 +285,9 @@ export default function DesignSystemPage() {
               ["2xl·22", "rounded-2xl"],
             ].map(([name, cls]) => (
               <div key={name} className="flex flex-col items-center gap-2">
-                <div className={`h-16 w-16 border border-strong bg-elevated ${cls}`} />
+                <div
+                  className={`h-16 w-16 border border-strong bg-elevated ${cls}`}
+                />
                 <span className="font-mono text-xs text-faint">{name}</span>
               </div>
             ))}
@@ -304,7 +315,8 @@ export default function DesignSystemPage() {
         </Section>
 
         <footer className="border-t border-hairline pt-8 font-mono text-xs text-faint">
-          /kitchen-sink · app/kitchen-sink/page.tsx · dev-only (NODE_ENV gate) · grow me
+          /kitchen-sink · app/kitchen-sink/page.tsx · dev-only (NODE_ENV gate) ·
+          grow me
         </footer>
       </div>
     </div>

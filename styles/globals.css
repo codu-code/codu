@@ -33,7 +33,8 @@
   --shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.55);
   --shadow-lg: 0 24px 60px -20px rgb(0 0 0 / 0.7);
   --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.65);
-  --shadow-glow: 0 0 0 1px rgb(45 212 191 / 0.4), 0 8px 32px -8px rgb(45 212 191 / 0.35);
+  --shadow-glow:
+    0 0 0 1px rgb(45 212 191 / 0.4), 0 8px 32px -8px rgb(45 212 191 / 0.35);
 }
 
 .dark {
@@ -89,7 +90,15 @@ body {
 
   /* Keyboard focus — a visible mint ring on every interactive element.
      :where() keeps specificity 0; the dark canvas offset matches the shell. */
-  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  :where(
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    summary,
+    [tabindex]
+  ):focus-visible {
     @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-canvas;
   }
 

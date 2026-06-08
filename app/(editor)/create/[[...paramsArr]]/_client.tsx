@@ -594,129 +594,123 @@ const CreateContent = ({ session }: { session: Session | null }) => {
           </div>
 
           <Disclosure>
-              {({ open: disclosureOpen }) => (
-                <>
-                  <DisclosureButton className="flex w-full items-center justify-between border-t border-hairline px-4 py-3 text-left text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg">
-                    <span className="flex items-center gap-2">
-                      <Settings2 className="h-4 w-4" />
-                      More Options
-                      <span className="font-mono text-xs font-normal uppercase tracking-label text-faint">
-                        (SEO, scheduling)
-                      </span>
+            {({ open: disclosureOpen }) => (
+              <>
+                <DisclosureButton className="flex w-full items-center justify-between border-t border-hairline px-4 py-3 text-left text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg">
+                  <span className="flex items-center gap-2">
+                    <Settings2 className="h-4 w-4" />
+                    More Options
+                    <span className="font-mono text-xs font-normal uppercase tracking-label text-faint">
+                      (SEO, scheduling)
                     </span>
-                    <ChevronDownIcon
-                      className={`${disclosureOpen ? "rotate-180" : ""} h-5 w-5 text-faint transition-transform`}
-                    />
-                  </DisclosureButton>
-                  <DisclosurePanel className="border-t border-hairline bg-inset p-4">
-                    <div className="space-y-6">
-                      <div>
-                        <label
-                          htmlFor="excerpt"
-                          className="eyebrow mb-1.5 block"
-                        >
-                          <span className="slash">{"// "}</span>Excerpt
-                        </label>
-                        <textarea
-                          maxLength={156}
-                          id="excerpt"
-                          rows={3}
-                          value={excerpt}
-                          onChange={(e) => setExcerpt(e.target.value)}
-                          placeholder={
-                            removeMarkdown(body, {}).substring(0, 155) ||
-                            "Brief description of your post..."
-                          }
-                          className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-                        />
-                        <p className="mt-1 text-xs text-faint">
-                          What readers will see before clicking. Good SEO
-                          descriptions are 140-156 characters.
-                        </p>
-                      </div>
-
-                      {(!data?.publishedAt ||
-                        new Date(data.publishedAt) > new Date()) && (
-                        <div>
-                          <div className="mb-2 flex items-center gap-2">
-                            <label
-                              htmlFor="schedule-switch"
-                              className="eyebrow"
-                            >
-                              <span className="slash">{"// "}</span>Schedule post
-                            </label>
-                            <Switch
-                              id="schedule-switch"
-                              checked={isPostScheduled}
-                              onCheckedChange={setIsPostScheduled}
-                            />
-                          </div>
-                          {isPostScheduled && (
-                            <input
-                              type="datetime-local"
-                              value={publishedTime}
-                              onChange={(e) => setPublishedTime(e.target.value)}
-                              min={new Date().toISOString().slice(0, 16)}
-                              className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-                            />
-                          )}
-                          <p className="mt-1 text-xs text-faint">
-                            Publish your post at a later time.
-                          </p>
-                        </div>
-                      )}
-
-                      <div>
-                        <label
-                          htmlFor="canonicalUrl"
-                          className="eyebrow mb-1.5 block"
-                        >
-                          <span className="slash">{"// "}</span>Canonical URL
-                        </label>
-                        <input
-                          id="canonicalUrl"
-                          type="text"
-                          placeholder="https://www.somesite.com/i-posted-here-first"
-                          value={canonicalUrl}
-                          onChange={(e) => setCanonicalUrl(e.target.value)}
-                          className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-                        />
-                        <p className="mt-1 text-xs text-faint">
-                          Add this if the post was originally published
-                          elsewhere.
-                        </p>
-                      </div>
-
-                      {postId && (
-                        <div>
-                          <label className="eyebrow mb-1.5 block">
-                            <span className="slash">{"// "}</span>Draft Preview Link
-                          </label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              readOnly
-                              value={PREVIEW_URL}
-                              className="flex-1 rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-muted"
-                            />
-                            <button
-                              onClick={handleCopyToClipboard}
-                              type="button"
-                              className="rounded-md border border-hairline bg-surface px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
-                            >
-                              {copied ? "Copied!" : "Copy"}
-                            </button>
-                          </div>
-                          <p className="mt-1 text-xs text-faint">
-                            Share this link with others to preview your draft.
-                          </p>
-                        </div>
-                      )}
+                  </span>
+                  <ChevronDownIcon
+                    className={`${disclosureOpen ? "rotate-180" : ""} h-5 w-5 text-faint transition-transform`}
+                  />
+                </DisclosureButton>
+                <DisclosurePanel className="border-t border-hairline bg-inset p-4">
+                  <div className="space-y-6">
+                    <div>
+                      <label htmlFor="excerpt" className="eyebrow mb-1.5 block">
+                        <span className="slash">{"// "}</span>Excerpt
+                      </label>
+                      <textarea
+                        maxLength={156}
+                        id="excerpt"
+                        rows={3}
+                        value={excerpt}
+                        onChange={(e) => setExcerpt(e.target.value)}
+                        placeholder={
+                          removeMarkdown(body, {}).substring(0, 155) ||
+                          "Brief description of your post..."
+                        }
+                        className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                      />
+                      <p className="mt-1 text-xs text-faint">
+                        What readers will see before clicking. Good SEO
+                        descriptions are 140-156 characters.
+                      </p>
                     </div>
-                  </DisclosurePanel>
-                </>
-              )}
-            </Disclosure>
+
+                    {(!data?.publishedAt ||
+                      new Date(data.publishedAt) > new Date()) && (
+                      <div>
+                        <div className="mb-2 flex items-center gap-2">
+                          <label htmlFor="schedule-switch" className="eyebrow">
+                            <span className="slash">{"// "}</span>Schedule post
+                          </label>
+                          <Switch
+                            id="schedule-switch"
+                            checked={isPostScheduled}
+                            onCheckedChange={setIsPostScheduled}
+                          />
+                        </div>
+                        {isPostScheduled && (
+                          <input
+                            type="datetime-local"
+                            value={publishedTime}
+                            onChange={(e) => setPublishedTime(e.target.value)}
+                            min={new Date().toISOString().slice(0, 16)}
+                            className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                          />
+                        )}
+                        <p className="mt-1 text-xs text-faint">
+                          Publish your post at a later time.
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <label
+                        htmlFor="canonicalUrl"
+                        className="eyebrow mb-1.5 block"
+                      >
+                        <span className="slash">{"// "}</span>Canonical URL
+                      </label>
+                      <input
+                        id="canonicalUrl"
+                        type="text"
+                        placeholder="https://www.somesite.com/i-posted-here-first"
+                        value={canonicalUrl}
+                        onChange={(e) => setCanonicalUrl(e.target.value)}
+                        className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                      />
+                      <p className="mt-1 text-xs text-faint">
+                        Add this if the post was originally published elsewhere.
+                      </p>
+                    </div>
+
+                    {postId && (
+                      <div>
+                        <label className="eyebrow mb-1.5 block">
+                          <span className="slash">{"// "}</span>Draft Preview
+                          Link
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={PREVIEW_URL}
+                            className="flex-1 rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-muted"
+                          />
+                          <button
+                            onClick={handleCopyToClipboard}
+                            type="button"
+                            className="rounded-md border border-hairline bg-surface px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-fg"
+                          >
+                            {copied ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                        <p className="mt-1 text-xs text-faint">
+                          Share this link with others to preview your draft.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </DisclosurePanel>
+              </>
+            )}
+          </Disclosure>
 
           <div className="flex items-center justify-end gap-3 border-t border-hairline px-4 py-3">
             <button

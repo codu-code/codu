@@ -1,9 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  UpdateCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import * as Sentry from "@sentry/nextjs";
 
 /**

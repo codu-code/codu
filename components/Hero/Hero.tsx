@@ -53,17 +53,20 @@ export default function Hero() {
         </Eyebrow>
 
         <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-fg sm:text-6xl">
-          The community for <span className="text-accent">AI builders</span> &amp;
-          indie hackers
+          The community for <span className="text-accent">AI builders</span>{" "}
+          &amp; indie hackers
         </h1>
 
         <p className="mx-auto mt-5 max-w-xl text-lg text-muted">
-          Learn to build with AI, share what you ship, and grow with people doing
-          the same.
+          Learn to build with AI, share what you ship, and grow with people
+          doing the same.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-          <Link href="/get-started" className="primary-button px-6 py-3 text-base">
+          <Link
+            href="/get-started"
+            className="primary-button px-6 py-3 text-base"
+          >
             Join free
           </Link>
           <Link

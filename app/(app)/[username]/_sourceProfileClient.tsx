@@ -74,7 +74,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
   if (status === "error" || !pub) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8 text-fg">
-        <div className="rounded-lg border border-danger/30 bg-danger/12 p-6 text-center">
+        <div className="bg-danger/12 rounded-lg border border-danger/30 p-6 text-center">
           <h1 className="text-lg font-semibold text-danger">
             Publication Not Found
           </h1>
