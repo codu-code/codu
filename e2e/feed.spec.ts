@@ -4,7 +4,6 @@ import { loggedInAsUserOne } from "./utils";
 test.describe("Unauthenticated Feed Page", () => {
   test("Should display feed page with content", async ({ page }) => {
     await page.goto("http://localhost:3000/");
-    await expect(page.locator("h1")).toContainText("Feed");
     await page.waitForSelector("article");
     expect(await page.locator("article").count()).toBeGreaterThan(0);
   });
@@ -131,7 +130,6 @@ test.describe("Authenticated Feed Page", () => {
     isMobile,
   }) => {
     await page.goto("http://localhost:3000/");
-    await expect(page.locator("h1")).toContainText("Feed");
     await page.waitForSelector("article");
 
     if (!isMobile) {

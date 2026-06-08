@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { nanoid } from "nanoid";
-import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { point_event, user, badge, follow, posts } from "@/server/db/schema";
 import { getStreak, getUserBadges } from "@/server/lib/engagement";
@@ -106,40 +106,4 @@ export const engagementRouter = createTRPCRouter({
       .where(eq(user.invitedBy, uid));
     return { code, count: Number(cnt?.c ?? 0) };
   }),
-
-  // Build Board — ranked builders by points over a window.
-  leaderboard: publicProcedure
-    .input(
-      z.object({
-        window: z.enum(["week", "all"]).default("week"),
-        limit: z.number().min(1).max(50).nullish(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const limit = input.limit ?? 10;
-      const where =
-        input.window === "week"
-          ? gt(
-              point_event.createdAt,
-              new Date(Date.now() - 7 * 86_400_000).toISOString(),
-            )
-          : undefined;
-
-      const rows = await ctx.db
-        .select({
-          userId: point_event.userId,
-          name: user.name,
-          username: user.username,
-          image: user.image,
-          points: sql<number>`sum(${point_event.points})`,
-        })
-        .from(point_event)
-        .innerJoin(user, eq(point_event.userId, user.id))
-        .where(where ? and(where) : undefined)
-        .groupBy(point_event.userId, user.name, user.username, user.image)
-        .orderBy(desc(sql`sum(${point_event.points})`))
-        .limit(limit);
-
-      return rows.map((r) => ({ ...r, points: Number(r.points) }));
-    }),
 });

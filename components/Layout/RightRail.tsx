@@ -4,12 +4,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { type Session } from "next-auth";
 import { api } from "@/server/trpc/react";
-import {
-  Tag,
-  ConversionHub,
-  NewsletterCapture,
-  BuildBoard,
-} from "@/components/ds";
+import { Tag, ConversionHub, NewsletterCapture } from "@/components/ds";
 
 interface RightRailProps {
   session: Session | null;
@@ -25,9 +20,6 @@ export function RightRail({ session }: RightRailProps) {
     <aside className="app-rightrail">
       {session ? <ProgressCard /> : <JoinCard />}
       <TrendingCard />
-      {/* Build Board self-gates on the BUILD_BOARD flag and hides while empty,
-          so it's safe to mount unconditionally. */}
-      <BuildBoard />
       {session ? <ConversionHub /> : <NewsletterCapture variant="compact" />}
     </aside>
   );
