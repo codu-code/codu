@@ -161,7 +161,7 @@ const sortOptions: Option[] = [
 const ALL_TOPICS = "all";
 
 const Divider = () => (
-  <span className="text-strong" aria-hidden="true">
+  <span className="text-faint" aria-hidden="true">
     ·
   </span>
 );

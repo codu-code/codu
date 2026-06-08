@@ -211,52 +211,54 @@ const UnifiedContentCard = ({
       className="group rounded-lg border border-hairline bg-surface p-5 transition-colors duration-base ease-out hover:border-strong"
       data-testid="content-card"
     >
-      {/* Header: kind chip + author + @handle · time (· via source for links) */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span
-          className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-mono text-xs ${chip.className}`}
-        >
-          {chip.label}
-        </span>
-        {avatarImg ? (
-          <img
-            src={avatarImg}
-            alt=""
-            className="h-5 w-5 rounded-full object-cover"
-          />
-        ) : authorName ? (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-[10px] font-bold text-accent">
-            {authorName.charAt(0).toUpperCase()}
-          </span>
-        ) : null}
-        {authorName &&
-          (handle ? (
-            <Link
-              href={`/${handle}`}
-              className="whitespace-nowrap text-sm font-semibold text-fg hover:underline"
-            >
-              {authorName}
-            </Link>
-          ) : (
-            <span className="whitespace-nowrap text-sm font-semibold text-fg">
-              {authorName}
-            </span>
-          ))}
-        <span className="whitespace-nowrap font-mono text-xs text-faint">
-          {handle ? `@${handle}` : ""}
-          {relativeTime ? `${handle ? " · " : ""}${relativeTime}` : ""}
-          {type === "LINK" && source?.name ? ` · via ${source.name}` : ""}
-          {readTimeMins ? ` · ${readTimeMins} min` : ""}
-        </span>
-      </div>
-
-      {/* Title + excerpt + optional thumbnail */}
-      <div className="mt-3 flex gap-4">
+      {/* Top row: [kind chip + author + title + excerpt] · preview image
+          (top-right, aligned with the header). */}
+      <div className="flex gap-4">
         <div className="min-w-0 flex-1">
+          {/* Header: kind chip + author + @handle · time (· via source for links) */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 font-mono text-xs ${chip.className}`}
+            >
+              {chip.label}
+            </span>
+            {avatarImg ? (
+              <img
+                src={avatarImg}
+                alt=""
+                className="h-5 w-5 rounded-full object-cover"
+              />
+            ) : authorName ? (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-[10px] font-bold text-accent">
+                {authorName.charAt(0).toUpperCase()}
+              </span>
+            ) : null}
+            {authorName &&
+              (handle ? (
+                <Link
+                  href={`/${handle}`}
+                  className="whitespace-nowrap text-sm font-semibold text-fg hover:underline"
+                >
+                  {authorName}
+                </Link>
+              ) : (
+                <span className="whitespace-nowrap text-sm font-semibold text-fg">
+                  {authorName}
+                </span>
+              ))}
+            <span className="whitespace-nowrap font-mono text-xs text-faint">
+              {handle ? `@${handle}` : ""}
+              {relativeTime ? `${handle ? " · " : ""}${relativeTime}` : ""}
+              {type === "LINK" && source?.name ? ` · via ${source.name}` : ""}
+              {readTimeMins ? ` · ${readTimeMins} min` : ""}
+            </span>
+          </div>
+
+          {/* Title + excerpt */}
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
-            className="block"
+            className="mt-3 block"
           >
             <h3 className="font-display text-lg font-bold leading-tight tracking-tight text-fg group-hover:text-accent">
               {title}
@@ -271,8 +273,9 @@ const UnifiedContentCard = ({
             </p>
           )}
         </div>
-        {/* Only render a thumbnail when there's a real image that loaded — no
-            grey placeholder box when an image is missing or fails. */}
+
+        {/* Preview image — top-right. Only when a real image loads (no grey
+            placeholder box when missing or failed). */}
         {showThumbnail && (
           <Link
             href={cardUrl}

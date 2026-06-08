@@ -22,7 +22,7 @@ export const Select = forwardRef(function Select(
         // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
         "dark:before:hidden",
         // Focus ring
-        "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500",
+        "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-accent",
         // Disabled state
         "has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none",
       ])}

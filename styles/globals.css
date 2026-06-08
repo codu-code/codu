@@ -51,7 +51,7 @@
   /* Text */
   --color-fg: 244 246 248; /* #f4f6f8 — cool white, never pure #fff */
   --color-muted: 154 163 176; /* #9aa3b0 */
-  --color-faint: 117 126 140; /* #757e8c — set for WCAG AA (>=4.5:1) on canvas & surface */
+  --color-faint: 134 143 155; /* #868f9b — clears WCAG AA (>=5.2:1) on canvas/surface/elevated; #757e8c sat at 4.49:1 */
   /* Accent: Mint */
   --color-accent: 45 212 191; /* #2dd4bf */
   --color-accent-soft: 110 231 214; /* #6ee7d6 — mint text on dark */
