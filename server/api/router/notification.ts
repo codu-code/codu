@@ -11,6 +11,7 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
   NEW_FOLLOWER,
   POST_APPROVED,
+  NEW_COMMENT_ON_FOLLOWED_POST,
 } from "@/utils/notifications";
 
 // Notification types surfaced in the notifications list / unread count.
@@ -19,6 +20,7 @@ const VISIBLE_NOTIFICATION_TYPES = [
   NEW_REPLY_TO_YOUR_COMMENT,
   NEW_FOLLOWER,
   POST_APPROVED,
+  NEW_COMMENT_ON_FOLLOWED_POST,
 ];
 
 export const notificationRouter = createTRPCRouter({

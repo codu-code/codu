@@ -2213,6 +2213,43 @@ export const followRelations = relations(follow, ({ one }) => ({
   }),
 }));
 
+// POST FOLLOW (users following a discussion/post to get new-comment notifications)
+
+export const post_follow = pgTable(
+  "post_follow",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pairKey: uniqueIndex("post_follow_pair_idx").on(table.userId, table.postId),
+    postIdx: index("post_follow_post_idx").on(table.postId),
+  }),
+);
+
+export const postFollowRelations = relations(post_follow, ({ one }) => ({
+  user: one(user, {
+    fields: [post_follow.userId],
+    references: [user.id],
+  }),
+  post: one(posts, {
+    fields: [post_follow.postId],
+    references: [posts.id],
+  }),
+}));
+
 // PUBLICATION FOLLOW (users following a feed source / "publication")
 
 export const publication_follow = pgTable(

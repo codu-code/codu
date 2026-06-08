@@ -10,6 +10,7 @@ import {
   NEW_REPLY_TO_YOUR_COMMENT,
   NEW_FOLLOWER,
   POST_APPROVED,
+  NEW_COMMENT_ON_FOLLOWED_POST,
 } from "@/utils/notifications";
 import { api } from "@/server/trpc/react";
 
@@ -151,6 +152,7 @@ const Notifications = () => {
                       NEW_REPLY_TO_YOUR_COMMENT,
                       NEW_FOLLOWER,
                       POST_APPROVED,
+                      NEW_COMMENT_ON_FOLLOWED_POST,
                     ].includes(type)
                   )
                     return null;
@@ -160,9 +162,11 @@ const Notifications = () => {
                       ? "started a discussion on your post"
                       : type === NEW_REPLY_TO_YOUR_COMMENT
                         ? "replied to your comment"
-                        : type === POST_APPROVED
-                          ? "approved your post — it's now live"
-                          : "started following you";
+                        : type === NEW_COMMENT_ON_FOLLOWED_POST
+                          ? "commented on a discussion you follow"
+                          : type === POST_APPROVED
+                            ? "approved your post — it's now live"
+                            : "started following you";
 
                   return (
                     <div

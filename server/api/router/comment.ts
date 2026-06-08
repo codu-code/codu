@@ -14,14 +14,17 @@ import {
 import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
+  NEW_COMMENT_ON_FOLLOWED_POST,
 } from "@/utils/notifications";
 import {
   comments,
   commentVotes,
   notification,
   posts,
+  post_follow,
   user,
 } from "@/server/db/schema";
+import * as Sentry from "@sentry/nextjs";
 import {
   and,
   count,
@@ -182,6 +185,37 @@ export const commentRouter = createTRPCRouter({
           postId,
           commentId: createdComment.id,
         });
+      }
+
+      // Notify followers of this post of the new comment — excluding the
+      // commenter, the post author, and the replied-to comment's author (they
+      // already get their own notification above). Never throws.
+      try {
+        const exclude = new Set(
+          [authorId, postData[0].authorId, parentAuthorId].filter(
+            Boolean,
+          ) as string[],
+        );
+        const followers = await ctx.db
+          .select({ userId: post_follow.userId })
+          .from(post_follow)
+          .where(eq(post_follow.postId, postId));
+        const recipients = followers
+          .map((f) => f.userId)
+          .filter((uid) => !exclude.has(uid));
+        if (recipients.length > 0) {
+          await ctx.db.insert(notification).values(
+            recipients.map((uid) => ({
+              notifierId: authorId,
+              type: NEW_COMMENT_ON_FOLLOWED_POST,
+              userId: uid,
+              postId,
+              commentId: createdComment.id,
+            })),
+          );
+        }
+      } catch (error) {
+        Sentry.captureException(error);
       }
 
       return createdComment;

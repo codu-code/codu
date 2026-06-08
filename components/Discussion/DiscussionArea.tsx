@@ -47,6 +47,29 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
 
   const { data: session } = useSession();
   const { openReport } = useReportModal();
+  const utils = api.useUtils();
+
+  const { data: isFollowing } = api.discussion.isFollowing.useQuery(
+    { postId: contentId },
+    { enabled: !!session, retry: false },
+  );
+
+  const onFollowSettled = () =>
+    utils.discussion.isFollowing.invalidate({ postId: contentId });
+  const followMut = api.discussion.follow.useMutation({
+    onSettled: onFollowSettled,
+  });
+  const unfollowMut = api.discussion.unfollow.useMutation({
+    onSettled: onFollowSettled,
+  });
+  const followPending = followMut.isPending || unfollowMut.isPending;
+
+  const toggleFollow = () => {
+    if (!session) return signIn();
+    if (followPending) return;
+    if (isFollowing) unfollowMut.mutate({ postId: contentId });
+    else followMut.mutate({ postId: contentId });
+  };
 
   const {
     data: discussionsResponse,
@@ -476,18 +499,36 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
           </div>
         </div>
       )}
-      {/* Sort control (the canonical "Discussion {N}" header is owned by the reader) */}
-      {initiallyLoaded && (discussionsResponse?.count ?? 0) > 1 && (
-        <div className="mb-4 flex items-center justify-end">
-          <FilterPill
-            testId="discussion-sort"
-            label="Sort comments"
-            value={sortOrder}
-            options={sortOptions}
-            isDefault={sortOrder === "top"}
-            align="right"
-            onChange={(next) => setSortOrder(next as SortOrder)}
-          />
+      {/* Follow toggle + sort control (the canonical "Discussion {N}" header is
+          owned by the reader) */}
+      {initiallyLoaded && (
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={toggleFollow}
+            disabled={followPending}
+            aria-pressed={!!isFollowing}
+            data-testid="discussion-follow"
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
+              isFollowing
+                ? "border border-hairline text-fg hover:border-accent/50"
+                : "bg-accent text-on-accent hover:bg-accent-soft"
+            }`}
+          >
+            <span aria-hidden="true">{isFollowing ? "✓" : "＋"}</span>
+            {isFollowing ? "Following" : "Follow"}
+          </button>
+          {(discussionsResponse?.count ?? 0) > 1 && (
+            <FilterPill
+              testId="discussion-sort"
+              label="Sort comments"
+              value={sortOrder}
+              options={sortOptions}
+              isDefault={sortOrder === "top"}
+              align="right"
+              onChange={(next) => setSortOrder(next as SortOrder)}
+            />
+          )}
         </div>
       )}
       <div className={discussions?.length ? "mb-8" : ""}>
