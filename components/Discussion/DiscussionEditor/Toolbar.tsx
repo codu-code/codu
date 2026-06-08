@@ -26,8 +26,8 @@ function ToolbarButton({
       title={title}
       className={`rounded p-1.5 transition-colors ${
         isActive
-          ? "bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white"
-          : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          ? "bg-accent/10 text-accent-soft"
+          : "text-muted hover:bg-elevated hover:text-fg"
       } disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {children}
@@ -36,7 +36,7 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return <div className="mx-1 h-5 w-px bg-neutral-300 dark:bg-neutral-600" />;
+  return <div className="mx-1 h-5 w-px bg-hairline" />;
 }
 
 interface LinkInputProps {
@@ -57,26 +57,26 @@ function LinkInput({ onSubmit, onCancel }: LinkInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 rounded bg-neutral-100 px-2 py-1 dark:bg-neutral-800"
+      className="flex items-center gap-2 rounded bg-inset px-2 py-1"
     >
       <input
         type="url"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder="Enter URL..."
-        className="w-48 border-none bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none dark:text-white"
+        className="w-48 border-none bg-transparent text-sm text-fg placeholder:text-faint focus:outline-none"
         autoFocus
       />
       <button
         type="submit"
-        className="text-xs text-accent hover:text-accent"
+        className="text-xs text-accent-soft hover:text-accent"
       >
         Add
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+        className="text-xs text-muted hover:text-fg"
       >
         Cancel
       </button>

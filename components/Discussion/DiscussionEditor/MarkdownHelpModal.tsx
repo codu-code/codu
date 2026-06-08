@@ -21,18 +21,18 @@ const MARKDOWN_SYNTAX = [
     result: "superscript",
     style: "text-[0.7em] align-super",
   },
-  { syntax: "[text](url)", result: "link", style: "text-blue-500 underline" },
+  { syntax: "[text](url)", result: "link", style: "text-accent-soft underline" },
   { syntax: "- item", result: "bullet list", style: "" },
   { syntax: "1. item", result: "numbered list", style: "" },
   {
     syntax: "> quote",
     result: "blockquote",
-    style: "border-l-2 border-neutral-400 pl-2",
+    style: "border-l-2 border-hairline pl-2",
   },
   {
     syntax: "`code`",
     result: "inline code",
-    style: "font-mono bg-neutral-200 dark:bg-neutral-700 px-1 rounded text-sm",
+    style: "font-mono bg-inset px-1 rounded text-sm",
   },
   { syntax: "```\\ncode\\n```", result: "code block", style: "font-mono" },
 ];
@@ -49,7 +49,7 @@ export function MarkdownHelpModal({ open, onClose }: MarkdownHelpModalProps) {
         <span>Markdown Help</span>
         <button
           onClick={onClose}
-          className="rounded-full p-1 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          className="rounded-full p-1 transition-colors hover:bg-elevated"
           aria-label="Close"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -58,18 +58,18 @@ export function MarkdownHelpModal({ open, onClose }: MarkdownHelpModalProps) {
         </button>
       </DialogTitle>
       <DialogBody>
-        <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mb-4 text-sm text-muted">
           Markdown is a way to quickly format text using typed symbols instead
           of a toolbar.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-200 text-left dark:border-neutral-700">
-                <th className="pb-2 pr-4 font-medium text-neutral-600 dark:text-neutral-400">
+              <tr className="border-b border-hairline text-left">
+                <th className="pb-2 pr-4 font-medium text-muted">
                   Type this
                 </th>
-                <th className="pb-2 font-medium text-neutral-600 dark:text-neutral-400">
+                <th className="pb-2 font-medium text-muted">
                   To get this
                 </th>
               </tr>
@@ -78,10 +78,10 @@ export function MarkdownHelpModal({ open, onClose }: MarkdownHelpModalProps) {
               {MARKDOWN_SYNTAX.map(({ syntax, result, style }) => (
                 <tr
                   key={syntax}
-                  className="border-b border-neutral-100 dark:border-neutral-800"
+                  className="border-b border-hairline"
                 >
                   <td className="py-2 pr-4">
-                    <code className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-xs dark:bg-neutral-800">
+                    <code className="rounded bg-inset px-1.5 py-0.5 font-mono text-xs">
                       {syntax}
                     </code>
                   </td>

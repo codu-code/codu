@@ -234,15 +234,12 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
         return (
           <section key={id} className="group/comment">
             {editCommentBoxId !== id ? (
-              <div className="flex">
-                {/* Avatar column - no self-stretch, just contains avatar */}
-                <div
-                  className="relative mr-3 flex-shrink-0"
-                  style={{ width: "32px" }}
-                >
+              <div className="flex gap-3">
+                {/* Avatar column */}
+                <div className="flex-shrink-0">
                   <Link href={`/${username}`}>
                     <img
-                      className="h-8 w-8 rounded-full bg-neutral-700 object-cover"
+                      className="h-9 w-9 rounded-full bg-elevated object-cover"
                       alt={`Avatar for ${name}`}
                       src={image}
                     />
@@ -250,32 +247,28 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                 </div>
 
                 {/* Content column */}
-                <div className="min-w-0 flex-1 pb-2">
+                <div className="min-w-0 flex-1">
                   {/* Header row */}
-                  <div className="mb-1 flex items-center justify-between">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <Link
-                        className="font-semibold text-neutral-900 hover:underline dark:text-white"
+                        className="text-sm font-semibold text-fg hover:underline"
                         href={`/${username}`}
                       >
                         {name}
                       </Link>
                       {isCurrentUser && (
-                        <span className="rounded border border-accent px-1 py-[1px] text-xs text-accent">
-                          YOU
+                        <span className="rounded-sm bg-accent/10 px-1.5 py-[1px] font-mono text-[10px] font-semibold uppercase tracking-wider text-accent-soft">
+                          You
                         </span>
                       )}
-                      <span aria-hidden="true">·</span>
-                      <time>{readableDate}</time>
-                      {discussionUpdated && (
-                        <>
-                          <span aria-hidden="true">·</span>
-                          <span>Edited</span>
-                        </>
-                      )}
+                      <span className="font-mono text-xs text-faint">
+                        @{username} · {readableDate}
+                        {discussionUpdated ? " · edited" : ""}
+                      </span>
                     </div>
                     <Menu as="div" className="relative">
-                      <MenuButton className="rounded-full p-1 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300">
+                      <MenuButton className="rounded-full p-1 text-faint transition-colors hover:bg-elevated hover:text-fg">
                         <span className="sr-only">Comment options</span>
                         <EllipsisHorizontalIcon className="h-5 w-5" />
                       </MenuButton>
@@ -506,83 +499,83 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     <>
       {!initiallyLoaded && (
         <div
-          className={`absolute bottom-0 left-0 right-0 top-0 z-20 ${noWrapper ? "" : "rounded-lg"} bg-white/80 dark:bg-neutral-900/80`}
+          className={`absolute bottom-0 left-0 right-0 top-0 z-20 ${noWrapper ? "" : "rounded-lg"} bg-canvas/80`}
         >
           <div className="flex h-full items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-700 border-l-neutral-500 opacity-100" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-hairline border-l-accent opacity-100" />
             <span className="sr-only">Loading</span>
           </div>
         </div>
       )}
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <ChatBubbleLeftIcon className="h-5 w-5" />
-          {initiallyLoaded
-            ? `Discussion (${discussionsResponse?.count || 0})`
-            : "Loading discussion..."}
-        </h2>
-        {initiallyLoaded && (discussionsResponse?.count ?? 0) > 1 && (
-          <div className="flex items-center gap-1 text-sm">
-            <span className="text-neutral-500 dark:text-neutral-400">
-              Sort:
-            </span>
-            <button
-              onClick={() => setSortOrder("top")}
-              className={`rounded-full px-3 py-1 font-medium transition-colors ${
-                sortOrder === "top"
-                  ? "bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white"
-                  : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
-              }`}
-            >
-              Top
-            </button>
-            <button
-              onClick={() => setSortOrder("new")}
-              className={`rounded-full px-3 py-1 font-medium transition-colors ${
-                sortOrder === "new"
-                  ? "bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white"
-                  : "text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
-              }`}
-            >
-              New
-            </button>
-          </div>
-        )}
-      </div>
-      <div className={discussions?.length ? "mb-6" : ""}>
+      {/* Sort control (the canonical "Discussion {N}" header is owned by the reader) */}
+      {initiallyLoaded && (discussionsResponse?.count ?? 0) > 1 && (
+        <div className="mb-4 flex items-center justify-end gap-2 font-mono text-xs text-faint">
+          <span>{"// "}sort</span>
+          <button
+            onClick={() => setSortOrder("top")}
+            className={`rounded-full px-2.5 py-1 transition-colors ${
+              sortOrder === "top"
+                ? "bg-accent/10 text-accent-soft"
+                : "text-muted hover:text-fg"
+            }`}
+          >
+            Top
+          </button>
+          <button
+            onClick={() => setSortOrder("new")}
+            className={`rounded-full px-2.5 py-1 transition-colors ${
+              sortOrder === "new"
+                ? "bg-accent/10 text-accent-soft"
+                : "text-muted hover:text-fg"
+            }`}
+          >
+            New
+          </button>
+        </div>
+      )}
+      <div className={discussions?.length ? "mb-8" : ""}>
         {session ? (
           <DiscussionEditor
             onSubmit={async (markdown) => {
               await handleCreateComment(markdown);
             }}
-            placeholder="Join the conversation..."
+            placeholder="Add to the discussion…"
             submitLabel="Comment"
             disabled={createDiscussionStatus === "pending"}
           />
         ) : (
-          <div className="mb-4 text-base">
-            <p className="mb-2">Hey! 👋</p>
-            <p className="mb-2">Got something to say?</p>
-            <p>
+          <div className="rounded-lg border border-hairline bg-surface p-4 text-sm text-muted">
+            <p className="font-medium text-fg">Got something to say?</p>
+            <p className="mt-1">
               <button
                 onClick={() => signIn()}
-                className="cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text tracking-wide text-transparent hover:from-accent hover:to-accent"
+                className="font-medium text-accent-soft transition-colors hover:text-accent"
               >
                 Sign in
               </button>{" "}
               or{" "}
               <button
                 onClick={() => signIn()}
-                className="cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text tracking-wide text-transparent hover:from-accent hover:to-accent"
+                className="font-medium text-accent-soft transition-colors hover:text-accent"
               >
                 sign up
               </button>{" "}
-              to leave a comment.
+              to join the conversation.
             </p>
           </div>
         )}
       </div>
-      <div className="mb-4">{generateDiscussions(discussions)}</div>
+      {discussions && discussions.length > 0 ? (
+        <div className="flex flex-col gap-6">
+          {generateDiscussions(discussions)}
+        </div>
+      ) : (
+        initiallyLoaded && (
+          <p className="py-2 text-sm text-faint">
+            No comments yet — be the first to add to the discussion.
+          </p>
+        )
+      )}
     </>
   );
 

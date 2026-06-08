@@ -47,7 +47,7 @@ export function DiscussionEditor({
         type="button"
         onClick={expand}
         disabled={disabled}
-        className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-4 py-3 text-left text-neutral-500 transition-colors hover:border-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:border-neutral-600"
+        className="w-full rounded-lg border border-hairline bg-inset px-4 py-3 text-left text-muted transition-colors hover:border-strong disabled:cursor-not-allowed disabled:opacity-50"
       >
         {placeholder}
       </button>
@@ -56,18 +56,18 @@ export function DiscussionEditor({
 
   // Expanded state
   return (
-    <div className="overflow-hidden rounded-lg border border-neutral-300 bg-white focus-within:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:focus-within:border-neutral-500">
+    <div className="overflow-hidden rounded-lg border border-hairline bg-surface focus-within:border-strong">
       {/* Rich text mode */}
       {mode === "rich" && (
         <>
           {/* Toolbar row - only show when showToolbar is true */}
           {showToolbar && (
-            <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+            <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
               <DiscussionEditorToolbar editor={editor} />
               <button
                 type="button"
                 onClick={toggleMode}
-                className="ml-2 whitespace-nowrap text-xs text-accent hover:text-accent hover:underline"
+                className="ml-2 whitespace-nowrap text-xs text-accent-soft hover:text-accent hover:underline"
               >
                 Switch to Markdown
               </button>
@@ -77,7 +77,7 @@ export function DiscussionEditor({
           {/* Editor content */}
           <EditorContent
             editor={editor}
-            className="min-h-[60px] [&_.ProseMirror:focus]:outline-none [&_.ProseMirror]:min-h-[60px] [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-1.5 [&_.ProseMirror]:text-sm [&_.ProseMirror]:outline-none"
+            className="min-h-[60px] text-fg [&_.ProseMirror:focus]:outline-none [&_.ProseMirror]:min-h-[60px] [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-1.5 [&_.ProseMirror]:text-sm [&_.ProseMirror]:outline-none"
           />
         </>
       )}
@@ -86,15 +86,15 @@ export function DiscussionEditor({
       {mode === "markdown" && (
         <>
           {/* Header row */}
-          <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+          <div className="flex items-center justify-between border-b border-hairline bg-inset px-3 py-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <span className="text-sm font-medium text-muted">
                 Markdown Editor
               </span>
               <button
                 type="button"
                 onClick={() => setShowMarkdownHelp(true)}
-                className="text-neutral-400 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
+                className="text-faint transition-colors hover:text-fg"
                 aria-label="Markdown help"
               >
                 <InformationCircleIcon className="h-4 w-4" />
@@ -103,7 +103,7 @@ export function DiscussionEditor({
             <button
               type="button"
               onClick={toggleMode}
-              className="text-xs text-accent hover:text-accent hover:underline"
+              className="text-xs text-accent-soft hover:text-accent hover:underline"
             >
               Switch to Rich Text Editor
             </button>
@@ -115,13 +115,13 @@ export function DiscussionEditor({
             onChange={(e) => setMarkdownContent(e.target.value)}
             placeholder="What are your thoughts?"
             minRows={2}
-            className="w-full resize-y border-none bg-transparent px-3 py-1.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-white"
+            className="w-full resize-y border-none bg-transparent px-3 py-1.5 text-sm text-fg placeholder:text-faint focus:outline-none focus:ring-0"
           />
         </>
       )}
 
       {/* Action buttons row */}
-      <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+      <div className="flex items-center justify-between border-t border-hairline bg-inset px-3 py-2">
         {/* Format toggle button (Aa) - only in rich text mode */}
         {mode === "rich" ? (
           <button
@@ -129,8 +129,8 @@ export function DiscussionEditor({
             onClick={() => setShowToolbar(!showToolbar)}
             className={`font-serif text-lg transition-colors ${
               showToolbar
-                ? "text-accent"
-                : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                ? "text-accent-soft"
+                : "text-faint hover:text-fg"
             }`}
             title={
               showToolbar
@@ -153,7 +153,7 @@ export function DiscussionEditor({
               onCancel?.();
             }}
             disabled={isSubmitting}
-            className="px-4 py-1.5 text-sm text-neutral-600 transition-colors hover:text-neutral-900 disabled:opacity-50 dark:text-neutral-400 dark:hover:text-white"
+            className="px-4 py-1.5 text-sm text-muted transition-colors hover:text-fg disabled:opacity-50"
           >
             Cancel
           </button>
@@ -161,7 +161,7 @@ export function DiscussionEditor({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting || isEmpty()}
-            className="rounded-full bg-gradient-to-r from-accent to-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:from-accent hover:to-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="primary-button px-4 py-1.5 text-sm"
           >
             {isSubmitting ? "Submitting..." : submitLabel}
           </button>
