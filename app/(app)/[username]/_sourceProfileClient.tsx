@@ -87,7 +87,7 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
             This source may have been removed or the link is invalid.
           </p>
           <Link
-            href="/feed"
+            href="/"
             className="mt-4 inline-block text-sm text-accent-soft hover:text-accent"
           >
             Back to Feed

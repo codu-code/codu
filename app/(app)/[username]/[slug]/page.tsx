@@ -503,7 +503,7 @@ const UnifiedPostPage = async (props: Props) => {
           {/* Breadcrumb navigation */}
           <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
             <Link
-              href="/feed"
+              href="/"
               className="hover:text-neutral-700 dark:hover:text-neutral-200"
             >
               Feed
@@ -583,7 +583,7 @@ const UnifiedPostPage = async (props: Props) => {
               <section className="mt-6 flex flex-wrap gap-3">
                 {userPost.tags.map(({ tag }) => (
                   <Link
-                    href={`/feed?tag=${tag.title.toLowerCase()}`}
+                    href={`/?tag=${tag.title.toLowerCase()}`}
                     key={tag.title}
                     className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-white hover:bg-accent"
                   >
@@ -696,7 +696,7 @@ const UnifiedPostPage = async (props: Props) => {
           {/* Breadcrumb navigation */}
           <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
             <Link
-              href="/feed"
+              href="/"
               className="hover:text-neutral-700 dark:hover:text-neutral-200"
             >
               Feed
@@ -779,7 +779,7 @@ const UnifiedPostPage = async (props: Props) => {
               <section className="mt-6 flex flex-wrap gap-3">
                 {userArticle.tags.map(({ tag }) => (
                   <Link
-                    href={`/feed?tag=${tag.title.toLowerCase()}`}
+                    href={`/?tag=${tag.title.toLowerCase()}`}
                     key={tag.title}
                     className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-white hover:bg-accent"
                   >

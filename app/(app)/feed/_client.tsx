@@ -114,7 +114,7 @@ const FeedPage = () => {
     if (nextTag) params.set("tag", nextTag);
 
     const queryString = params.toString();
-    router.push(`/feed${queryString ? `?${queryString}` : ""}`);
+    router.push(`/${queryString ? `?${queryString}` : ""}`);
   };
 
   const handleSortChange = (newSort: SortOption) =>
@@ -130,7 +130,7 @@ const FeedPage = () => {
     const params = new URLSearchParams();
     if (following) params.set("view", "following");
     const queryString = params.toString();
-    router.push(`/feed${queryString ? `?${queryString}` : ""}`);
+    router.push(`/${queryString ? `?${queryString}` : ""}`);
   };
 
   const filterCluster = (
@@ -168,10 +168,10 @@ const FeedPage = () => {
       {session?.user ? (
         <div className="mt-4 flex flex-wrap items-center gap-x-7 gap-y-2 border-b border-hairline">
           {[
-            { label: "For you", href: "/feed", active: !following },
+            { label: "For you", href: "/", active: !following },
             {
               label: "Following",
-              href: "/feed?view=following",
+              href: "/?view=following",
               active: following,
             },
           ].map((t) => (

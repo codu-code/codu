@@ -18,7 +18,7 @@ type Item = {
 };
 
 const QUICK_ACTIONS: { label: string; href: string }[] = [
-  { label: "Go to Feed", href: "/feed" },
+  { label: "Go to Feed", href: "/" },
   { label: "Browse Discussions", href: "/discussions" },
   { label: "Find a job", href: "/jobs" },
   { label: "Write a post", href: "/create" },
@@ -75,7 +75,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
       const tagItems: Item[] = (results?.tags ?? []).map((t) => ({
         id: `t:${t.slug}`,
         label: t.title,
-        href: `/feed?tag=${t.slug}`,
+        href: `/?tag=${t.slug}`,
         group: "Tags",
         sub: `${t.postCount ?? 0} posts`,
         glyph: "#",

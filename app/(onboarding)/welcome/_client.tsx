@@ -166,7 +166,7 @@ export default function Welcome() {
         markOnboarded: true,
       },
       {
-        onSettled: () => router.push("/feed"),
+        onSettled: () => router.push("/"),
       },
     );
   };

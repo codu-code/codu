@@ -12,7 +12,7 @@ const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
   "/about",
   "/articles",
-  "/feed",
+  "/",
   "/advertise",
   "/code-of-conduct",
   "/volunteer",

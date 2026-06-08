@@ -67,7 +67,7 @@ export default function Hero() {
             Join free
           </Link>
           <Link
-            href="/feed"
+            href="/"
             className="font-mono text-sm font-semibold text-fg hover:text-accent"
           >
             Browse the feed ›

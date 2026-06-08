@@ -98,7 +98,7 @@ const PreviewPage = async (props: Props) => {
           <section className="mt-6 flex flex-wrap gap-3">
             {post.tags.map(({ tag }) => (
               <Link
-                href={`/feed?tag=${tag.title.toLowerCase()}`}
+                href={`/?tag=${tag.title.toLowerCase()}`}
                 key={tag.title}
                 className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-white hover:bg-accent"
               >

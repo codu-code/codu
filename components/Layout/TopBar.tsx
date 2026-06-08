@@ -63,7 +63,7 @@ export function TopBar({
             <path d="M3 6h18M3 12h18M3 18h18" />
           </svg>
         </button>
-        <Link href="/feed" aria-label="Codú — home" className="flex shrink-0">
+        <Link href="/" aria-label="Codú — home" className="flex shrink-0">
           <Image
             src="/images/codu.png"
             alt="Codú"

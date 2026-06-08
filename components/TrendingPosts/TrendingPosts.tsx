@@ -67,7 +67,7 @@ export default async function TrendingPosts({ session }: TrendingPostsProps) {
       <div className="mt-6">
         <Link
           className="secondary-button block w-full text-center"
-          href="/feed"
+          href="/"
         >
           View Feed →
         </Link>

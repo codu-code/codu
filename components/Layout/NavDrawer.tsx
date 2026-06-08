@@ -5,9 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { type Session } from "next-auth";
-import { api } from "@/server/trpc/react";
-import { Tag } from "@/components/ds";
-import { useShellActions } from "@/components/Create/ShellActionsProvider";
 
 const FOOTER = [
   { name: "Privacy", href: "/privacy" },
@@ -25,18 +22,12 @@ interface NavDrawerProps {
 
 /**
  * Slide-out left drawer that replaces the left rail on ≤720px (opened by the
- * top-bar hamburger). Mirrors LeftRail's contents — nav, "Your topics", and the
- * info-page footer — and closes on backdrop click, Esc, or any nav action.
- * Mirrors ui_kits/app/AppShell.jsx → NavDrawer.
+ * top-bar hamburger). Mirrors LeftRail's nav + info-page footer, and closes on
+ * backdrop click, Esc, or any nav action. ("Your topics" lives in Settings on
+ * mobile.) Mirrors ui_kits/app/AppShell.jsx → NavDrawer.
  */
 export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) {
   const pathname = usePathname();
-  const { openTopics } = useShellActions();
-
-  const { data: interestsData } = api.profile.myInterests.useQuery(undefined, {
-    enabled: !!session && open,
-  });
-  const myTopics = interestsData?.topics ?? [];
 
   // Close on Escape while open.
   useEffect(() => {
@@ -51,7 +42,7 @@ export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) 
   if (!open) return null;
 
   const nav = [
-    { name: "Home", href: "/feed" },
+    { name: "Home", href: "/" },
     { name: "Discussions", href: "/discussions" },
     { name: "Jobs", href: "/jobs" },
     ...(session
@@ -64,9 +55,7 @@ export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) 
   ];
 
   const isActive = (href: string) =>
-    href === "/feed"
-      ? pathname === "/feed" || pathname === "/"
-      : pathname?.startsWith(href);
+    href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
   return (
     <div className="fixed inset-0 z-[60]">
@@ -91,7 +80,7 @@ export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) 
         }}
       >
         <div className="flex items-center justify-between px-2.5 pb-4">
-          <Link href="/feed" aria-label="Codú — home" onClick={onClose}>
+          <Link href="/" aria-label="Codú — home" onClick={onClose}>
             <Image
               src="/images/codu.png"
               alt="Codú"
@@ -130,40 +119,6 @@ export function NavDrawer({ open, onClose, session, username }: NavDrawerProps) 
             );
           })}
         </nav>
-
-        {session && (
-          <div className="mt-5 px-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.18em] text-faint">
-                Your topics
-              </p>
-              <button
-                onClick={() => {
-                  onClose();
-                  openTopics();
-                }}
-                className="font-mono text-[10px] text-faint transition-colors hover:text-accent-soft"
-              >
-                Edit
-              </button>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {myTopics.length > 0 ? (
-                myTopics.slice(0, 6).map((t) => <Tag key={t}>{t}</Tag>)
-              ) : (
-                <button
-                  onClick={() => {
-                    onClose();
-                    openTopics();
-                  }}
-                  className="font-mono text-xs text-accent-soft hover:underline"
-                >
-                  + Add topics
-                </button>
-              )}
-            </div>
-          </div>
-        )}
 
         <div className="mt-auto flex flex-col items-start gap-1.5 px-3 pt-6">
           {FOOTER.map((item) => (

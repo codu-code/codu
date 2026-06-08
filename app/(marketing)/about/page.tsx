@@ -82,7 +82,7 @@ export default function AboutPage() {
               Join free
             </Link>
             <Link
-              href="/feed"
+              href="/"
               className="font-mono text-sm font-semibold text-fg hover:text-accent"
             >
               Browse the feed ›

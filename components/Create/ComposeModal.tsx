@@ -53,7 +53,7 @@ export function ComposeModal({
         // New posts live in the `posts` table; the canonical URL is
         // /{username}/{slug}. Fall back to the feed if we lack the username.
         const href =
-          post?.slug && username ? `/${username}/${post.slug}` : "/feed";
+          post?.slug && username ? `/${username}/${post.slug}` : "/";
         setDone({ href });
       },
       onError: (err) => {

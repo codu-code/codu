@@ -13,7 +13,7 @@ export function MarketingNav({ session }: { session: Session | null }) {
     <header className="sticky top-0 z-40 border-b border-hairline bg-canvas/80 backdrop-blur-md">
       <nav className="mx-auto flex h-14 max-w-container-wide items-center justify-between px-5 sm:px-8">
         <Link
-          href="/feed"
+          href="/"
           className="font-mono text-sm text-muted transition-colors hover:text-fg"
         >
           ‹ Back to feed

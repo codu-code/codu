@@ -161,7 +161,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
     return (
       <div className="mx-auto max-w-prose px-4 py-8">
         <Link
-          href="/feed"
+          href="/"
           className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
         >
           ‹ Back to feed
@@ -200,7 +200,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
     <article className="mx-auto max-w-prose px-4 py-8">
       {/* Back to feed */}
       <Link
-        href="/feed"
+        href="/"
         className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
       >
         ‹ Back to feed

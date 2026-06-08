@@ -24,7 +24,7 @@ export default async function Page() {
     .limit(1);
 
   if (row?.onboardedAt) {
-    redirect("/feed");
+    redirect("/");
   }
 
   return <Welcome />;

@@ -27,7 +27,7 @@ export function LeftRail({ session, username }: LeftRailProps) {
   const pathname = usePathname();
 
   const nav = [
-    { name: "Home", href: "/feed" },
+    { name: "Home", href: "/" },
     { name: "Discussions", href: "/discussions" },
     { name: "Jobs", href: "/jobs" },
     ...(session
@@ -48,9 +48,7 @@ export function LeftRail({ session, username }: LeftRailProps) {
   const myTopics = interestsData?.topics ?? [];
 
   const isActive = (href: string) =>
-    href === "/feed"
-      ? pathname === "/feed" || pathname === "/"
-      : pathname?.startsWith(href);
+    href === "/" ? pathname === "/" : pathname?.startsWith(href);
 
   return (
     <aside className="app-leftrail">
@@ -110,7 +108,7 @@ export function LeftRail({ session, username }: LeftRailProps) {
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {popular.map((t) => (
-                <Link key={t.slug ?? t.title} href={`/feed?tag=${t.slug}`}>
+                <Link key={t.slug ?? t.title} href={`/?tag=${t.slug}`}>
                   <Tag>{t.title}</Tag>
                 </Link>
               ))}
