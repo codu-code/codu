@@ -1,6 +1,13 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { posts, comments, session, user } from "@/server/db/schema";
+import {
+  posts,
+  comments,
+  session,
+  user,
+  follow,
+  point_event,
+} from "@/server/db/schema";
 import {
   articleContent,
   articleExcerpt,
@@ -49,6 +56,9 @@ export const setup = async () => {
       // Link post slugs
       "e2e-link-published",
       "e2e-link-draft",
+      // Discussion / question slugs (relaunch post kinds)
+      "e2e-discussion-published",
+      "e2e-question-published",
     ];
 
     for (const slugPattern of e2eSlugs) {
@@ -231,6 +241,36 @@ export const setup = async () => {
         authorId: authorId,
         showComments: true,
       },
+      // Discussion + question posts (relaunch kinds) so the Discussions surface
+      // and discussion threads have real content to test against.
+      {
+        type: "discussion" as const,
+        title: "E2E Discussion: what's your testing setup?",
+        slug: "e2e-discussion-published",
+        excerpt: "Share how you test your apps end to end.",
+        body: "What does your end-to-end testing setup look like in 2026?",
+        upvotesCount: 8,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "question" as const,
+        title: "E2E Question: how do you seed test data?",
+        slug: "e2e-question-published",
+        excerpt: "Looking for patterns to seed Playwright fixtures.",
+        body: "How do you keep e2e seed data realistic without it going stale?",
+        upvotesCount: 5,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
     ];
 
     // Insert articles into new posts table
@@ -267,6 +307,86 @@ export const setup = async () => {
 
       console.log("Created E2E test comment");
     }
+
+    // Seed a threaded conversation on the discussion post (top-level comment +
+    // a nested reply) so the redesigned discussion thread has real data.
+    const discussionPost = insertedPosts.find(
+      (p) => p.slug === "e2e-discussion-published",
+    );
+    if (discussionPost) {
+      const parentPath = generateShortId().replace(/[^a-zA-Z0-9]/g, "");
+      const [parent] = await db
+        .insert(comments)
+        .values({
+          postId: discussionPost.id,
+          body: "We run Playwright against a seeded Postgres — works great.",
+          authorId: commenterId,
+          path: parentPath,
+          depth: 0,
+        })
+        .onConflictDoNothing()
+        .returning();
+
+      if (parent) {
+        const childPath = `${parentPath}.${generateShortId().replace(/[^a-zA-Z0-9]/g, "")}`;
+        await db
+          .insert(comments)
+          .values({
+            postId: discussionPost.id,
+            body: "Same here — the trick is cleaning up between runs.",
+            authorId: authorId,
+            parentId: parent.id,
+            path: childPath,
+            depth: 1,
+          })
+          .onConflictDoNothing();
+      }
+      console.log("Created E2E discussion thread");
+    }
+  };
+
+  // Follow graph: user two follows user one, so Following feed + followers/
+  // following lists have data. Cleaned up via the user-delete cascade.
+  const seedE2EFollow = async (followerId: string, followingId: string) => {
+    await db
+      .insert(follow)
+      .values({ followerId, followingId })
+      .onConflictDoNothing();
+  };
+
+  // Profile extras: topics (drives onboarding "pick topics" win + interests),
+  // a referral code, and a few point events (drives the progress card + the
+  // Achievements tab). Cleaned up via the user-delete cascade.
+  const seedE2EProfile = async (userId: string) => {
+    await db
+      .update(user)
+      .set({
+        topics: ["AI", "Testing", "DevOps"],
+        experienceLevel: "intermediate",
+        onboardedAt: new Date().toISOString(),
+        referralCode: "e2eref01",
+      })
+      .where(eq(user.id, userId));
+
+    await db
+      .insert(point_event)
+      .values([
+        {
+          userId,
+          action: "post_published" as const,
+          points: 10,
+          sourceType: "post",
+          sourceId: "e2e-seed-1",
+        },
+        {
+          userId,
+          action: "daily_active" as const,
+          points: 1,
+          sourceType: "day",
+          sourceId: "e2e-seed-day",
+        },
+      ])
+      .onConflictDoNothing();
   };
 
   const seedE2EUser = async (
@@ -362,6 +482,10 @@ export const setup = async () => {
 
     console.log("Creating articles");
     await addE2EArticleAndComment(E2E_USER_ONE_ID, E2E_USER_TWO_ID);
+
+    console.log("Creating follow graph + profile data");
+    await seedE2EFollow(E2E_USER_TWO_ID, E2E_USER_ONE_ID);
+    await seedE2EProfile(E2E_USER_ONE_ID);
 
     console.log("DB setup successful");
   } catch (err) {
