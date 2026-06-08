@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { award } from "@/server/lib/engagement";
+import { enforceRateLimit } from "@/server/lib/rateLimit";
 import {
   CreateCommentSchema,
   EditCommentSchema,
@@ -59,6 +60,14 @@ export const commentRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { body, postId, parentId } = input;
       const authorId = ctx.session.user.id;
+
+      // Throttle comment creation (anti-spam / anti-farm).
+      await enforceRateLimit({
+        key: `comment:${authorId}`,
+        limit: 10,
+        windowMs: 60_000,
+        message: "You're commenting too fast. Take a breather and try again.",
+      });
 
       // Validate post exists
       const postData = await ctx.db
@@ -122,20 +131,25 @@ export const commentRouter = createTRPCRouter({
       const ltreeSafeId = insertedComment.id.replace(/-/g, "");
       const newPath = parentPath ? `${parentPath}.${ltreeSafeId}` : ltreeSafeId;
 
-      // Update the path with the correct ltree value
+      // Update the path with the correct ltree value. Pin updatedAt back to
+      // createdAt so this internal path-write (which would otherwise trip the
+      // updatedAt $onUpdate) doesn't make a brand-new comment render as "edited".
       const [createdComment] = await ctx.db
         .update(comments)
-        .set({ path: newPath })
+        .set({ path: newPath, updatedAt: insertedComment.createdAt })
         .where(eq(comments.id, insertedComment.id))
         .returning();
 
-      // Engagement: award points for commenting (safe — never throws).
-      await award({
-        userId: authorId,
-        action: "comment_created",
-        sourceType: "comment",
-        sourceId: createdComment.id,
-      });
+      // Engagement: award points for commenting — but not for commenting on
+      // your own post (anti-farm). Safe — never throws.
+      if (postData[0].authorId !== authorId) {
+        await award({
+          userId: authorId,
+          action: "comment_created",
+          sourceType: "comment",
+          sourceId: createdComment.id,
+        });
+      }
 
       // Update post comment count
       await ctx.db
