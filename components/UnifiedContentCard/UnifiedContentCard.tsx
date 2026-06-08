@@ -11,20 +11,21 @@ import VoteControl from "@/components/Vote/VoteControl";
 export type ContentType = "POST" | "LINK";
 
 // Display kind → chip label + tone. Behavior keys off `type` (POST vs LINK);
-// `kind` only drives the editorial chip. Every chip shares the same shape + an
-// opaque wash so none look offset — only the color varies. Mirrored in
+// `kind` only drives the editorial chip. Every chip is the same shape: an opaque
+// bg-elevated pill with a colored border + colored label, so they read as
+// anchored pills (not floating text) — only the color varies. Mirrored in
 // components/ContentDetail/TypeBadge.tsx.
 const KIND: Record<string, { label: string; className: string }> = {
-  POST: { label: "Article", className: "bg-accent/15 text-accent-soft" },
-  ARTICLE: { label: "Article", className: "bg-accent/15 text-accent-soft" },
+  POST: { label: "Article", className: "border-accent/40 text-accent-soft" },
+  ARTICLE: { label: "Article", className: "border-accent/40 text-accent-soft" },
   DISCUSSION: {
     label: "Discussion",
-    className: "bg-accent/12 text-accent-soft",
+    className: "border-accent-soft/40 text-accent-soft",
   },
-  QUESTION: { label: "Question", className: "bg-info/12 text-info" },
-  TIL: { label: "TIL", className: "bg-success/12 text-success" },
-  RESOURCE: { label: "Resource", className: "bg-warning/12 text-warning" },
-  LINK: { label: "Link", className: "bg-elevated text-muted" },
+  QUESTION: { label: "Question", className: "border-info/40 text-info" },
+  TIL: { label: "TIL", className: "border-success/40 text-success" },
+  RESOURCE: { label: "Resource", className: "border-warning/40 text-warning" },
+  LINK: { label: "Link", className: "border-hairline text-muted" },
 };
 
 type AuthorInfo = {
@@ -218,7 +219,7 @@ const UnifiedContentCard = ({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 font-mono text-xs ${chip.className}`}
+              className={`inline-flex items-center whitespace-nowrap rounded-sm border bg-elevated px-2 py-0.5 font-mono text-xs ${chip.className}`}
             >
               {chip.label}
             </span>

@@ -541,11 +541,11 @@ const UnifiedPostPage = async (props: Props) => {
             </Link>
           </nav>
 
-          <article className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+          <article className="py-2">
+            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
               <Link
                 href={`/${userPost.user.username}`}
-                className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
+                className="flex items-center gap-2 hover:text-fg"
               >
                 {userPost.user.image ? (
                   <img
@@ -554,7 +554,7 @@ const UnifiedPostPage = async (props: Props) => {
                     className="h-5 w-5 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
                     {userPost.user.name?.charAt(0).toUpperCase() || "?"}
                   </div>
                 )}
@@ -605,7 +605,7 @@ const UnifiedPostPage = async (props: Props) => {
                   <Link
                     href={`/?tag=${tag.title.toLowerCase()}`}
                     key={tag.title}
-                    className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-white hover:bg-accent"
+                    className="rounded-sm border border-hairline px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-strong hover:text-fg"
                   >
                     {getCamelCaseFromLower(tag.title)}
                   </Link>
@@ -736,11 +736,11 @@ const UnifiedPostPage = async (props: Props) => {
             </Link>
           </nav>
 
-          <article className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
+          <article className="py-2">
+            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
               <Link
                 href={`/${userArticle.user.username}`}
-                className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
+                className="flex items-center gap-2 hover:text-fg"
               >
                 {userArticle.user.image ? (
                   <img
@@ -749,7 +749,7 @@ const UnifiedPostPage = async (props: Props) => {
                     className="h-5 w-5 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent dark:bg-accent/15 dark:text-accent">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
                     {userArticle.user.name?.charAt(0).toUpperCase() || "?"}
                   </div>
                 )}
@@ -803,7 +803,7 @@ const UnifiedPostPage = async (props: Props) => {
                   <Link
                     href={`/?tag=${tag.title.toLowerCase()}`}
                     key={tag.title}
-                    className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-white hover:bg-accent"
+                    className="rounded-sm border border-hairline px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-strong hover:text-fg"
                   >
                     {getCamelCaseFromLower(tag.title)}
                   </Link>

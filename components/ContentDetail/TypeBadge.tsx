@@ -5,25 +5,10 @@ interface ContentTypeBadgeProps {
   className?: string;
 }
 
-const badgeStyles: Record<
-  ContentType,
-  { bg: string; text: string; label: string }
-> = {
-  article: {
-    bg: "bg-accent",
-    text: "text-on-accent",
-    label: "Article",
-  },
-  link: {
-    bg: "bg-accent/12",
-    text: "text-accent-soft",
-    label: "Link",
-  },
-  community: {
-    bg: "bg-success/12",
-    text: "text-success",
-    label: "Community",
-  },
+const badgeStyles: Record<ContentType, { tone: string; label: string }> = {
+  article: { tone: "border-accent/40 text-accent-soft", label: "Article" },
+  link: { tone: "border-hairline text-muted", label: "Link" },
+  community: { tone: "border-success/40 text-success", label: "Community" },
 };
 
 const ContentTypeBadge = ({ type, className = "" }: ContentTypeBadgeProps) => {
@@ -31,7 +16,7 @@ const ContentTypeBadge = ({ type, className = "" }: ContentTypeBadgeProps) => {
 
   return (
     <span
-      className={`inline-flex items-center rounded-sm px-2 py-0.5 font-mono text-xs ${styles.bg} ${styles.text} ${className}`}
+      className={`inline-flex items-center rounded-sm border bg-elevated px-2 py-0.5 font-mono text-xs ${styles.tone} ${className}`}
     >
       {styles.label}
     </span>
