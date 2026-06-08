@@ -83,12 +83,12 @@ export const adminRouter = createTRPCRouter({
         );
       }
 
-      if (cursor) {
-        conditions.push(sql`${user.id} > ${cursor.toString()}`);
-      }
-
       const whereClause =
         conditions.length > 0 ? and(...conditions) : undefined;
+
+      // Offset-based pagination. The cursor is the row offset; keyed pagination
+      // on `id` would be wrong here because the list is ordered by `createdAt`.
+      const offset = cursor ?? 0;
 
       const users = await ctx.db.query.user.findMany({
         where: whereClause,
@@ -112,12 +112,13 @@ export const adminRouter = createTRPCRouter({
         },
         orderBy: [desc(user.createdAt)],
         limit: limit + 1,
+        offset,
       });
 
       let nextCursor: number | undefined;
       if (users.length > limit) {
         users.pop();
-        nextCursor = users.length;
+        nextCursor = offset + limit;
       }
 
       return {

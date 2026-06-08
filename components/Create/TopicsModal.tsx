@@ -3,28 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "@/server/trpc/react";
-
-// Shared with onboarding — the pool of selectable topics.
-export const TOPIC_POOL = [
-  "AI patterns",
-  "RAG",
-  "Agents",
-  "Prompting",
-  "Evals",
-  "LLM apps",
-  "Product",
-  "Design",
-  "Frontend",
-  "Backend",
-  "Infra & DevOps",
-  "Data",
-  "Career",
-  "Leadership",
-  "Indie hacking",
-  "Startups",
-  "Marketing",
-  "Open source",
-];
+import { TOPIC_POOL } from "./topics";
 
 /**
  * Edit "Your topics" — add/remove the topics that tune the feed. Reads + writes

@@ -138,11 +138,13 @@ export const discussionRouter = createTRPCRouter({
         })
         .returning();
 
-      // Now update with the correct path
+      // Now update with the correct path. Pin updatedAt back to createdAt so the
+      // path write (which trips the updatedAt $onUpdate) doesn't make a
+      // brand-new comment render as "edited".
       const finalPath = generatePath(parentPath, createdComment.id);
       await ctx.db
         .update(comments)
-        .set({ path: finalPath })
+        .set({ path: finalPath, updatedAt: createdComment.createdAt })
         .where(eq(comments.id, createdComment.id));
 
       // Note: Comment count is updated via trigger (tr_post_comments_count) on INSERT
@@ -352,16 +354,24 @@ export const discussionRouter = createTRPCRouter({
         .where(eq(comments.postId, contentId))
         .orderBy(comments.path); // Order by path for tree structure
 
-      // Get all votes for this user on these comments
+      // Get this user's votes on *these* comments only. Filtering by the
+      // post's comment ids avoids loading every vote the user has ever cast
+      // across the whole site.
       let userVotes: Map<string, string> = new Map();
-      if (userId) {
+      const commentIds = allComments.map((c) => c.id);
+      if (userId && commentIds.length > 0) {
         const votes = await db
           .select({
             commentId: comment_votes.commentId,
             voteType: comment_votes.voteType,
           })
           .from(comment_votes)
-          .where(eq(comment_votes.userId, userId));
+          .where(
+            and(
+              eq(comment_votes.userId, userId),
+              inArray(comment_votes.commentId, commentIds),
+            ),
+          );
 
         userVotes = new Map(votes.map((v) => [v.commentId, v.voteType]));
       }

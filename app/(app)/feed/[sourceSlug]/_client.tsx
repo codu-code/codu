@@ -7,22 +7,10 @@ import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
 import { Heading } from "@/components/ui-components/heading";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
+import { getFaviconUrl } from "@/utils/url";
 
 type Props = {
   sourceSlug: string;
-};
-
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=128`;
-  } catch {
-    return null;
-  }
 };
 
 function getDomainFromUrl(url: string) {
@@ -95,7 +83,7 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
     );
   }
 
-  const faviconUrl = getFaviconUrl(source.websiteUrl);
+  const faviconUrl = getFaviconUrl(source.websiteUrl, 128);
   const articles = articlesData?.pages.flatMap((page) => page.articles) ?? [];
 
   return (

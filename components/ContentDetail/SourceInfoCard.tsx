@@ -1,17 +1,5 @@
 import Link from "next/link";
-
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`;
-  } catch {
-    return null;
-  }
-};
+import { getFaviconUrl, getHostname, safeExternalHref } from "@/utils/url";
 
 interface SourceInfoCardProps {
   name: string;
@@ -28,8 +16,9 @@ const SourceInfoCard = ({
   logo,
   websiteUrl,
 }: SourceInfoCardProps) => {
-  const faviconUrl = getFaviconUrl(websiteUrl);
-  const sourceLink = slug ? `/feed/${slug}` : "#";
+  const faviconUrl = getFaviconUrl(websiteUrl, 64);
+  const safeWebsite = safeExternalHref(websiteUrl);
+  const sourceLink = slug ? `/${slug}` : "#";
 
   return (
     <div className="rounded-lg border border-hairline bg-surface p-4">
@@ -61,14 +50,14 @@ const SourceInfoCard = ({
               {description}
             </p>
           )}
-          {websiteUrl && (
+          {safeWebsite && (
             <a
-              href={websiteUrl}
+              href={safeWebsite}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-1 inline-block text-xs text-accent hover:underline"
             >
-              {new URL(websiteUrl).hostname}
+              {getHostname(websiteUrl)}
             </a>
           )}
         </div>

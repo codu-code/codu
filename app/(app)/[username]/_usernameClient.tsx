@@ -10,6 +10,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Heading } from "@/components/ui-components/heading";
 import { FollowButton, Tag } from "@/components/ds";
+import { safeExternalHref } from "@/utils/url";
 import { toast } from "sonner";
 
 type Props = {
@@ -184,10 +185,11 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                 ◉ {location}
               </span>
             )}
-            {websiteUrl && (
+            {safeExternalHref(websiteUrl) && (
               <Link
-                href={websiteUrl}
-                target="blank"
+                href={safeExternalHref(websiteUrl)!}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-accent-soft transition-colors hover:text-accent"
               >
                 <LinkIcon className="h-4" />

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { api } from "@/server/trpc/react";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
+import { safeExternalHref } from "@/utils/url";
 import { Heading } from "@/components/ui-components/heading";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -110,10 +111,10 @@ export default function JobDetailClient({ slug }: { slug: string }) {
         ))}
       </div>
 
-      {job.applicationUrl && (
+      {safeExternalHref(job.applicationUrl) && (
         <div className="mt-6">
           <Link
-            href={job.applicationUrl}
+            href={safeExternalHref(job.applicationUrl)!}
             target="_blank"
             rel="noopener noreferrer"
             className="primary-button inline-block"

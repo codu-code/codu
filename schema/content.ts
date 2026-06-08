@@ -1,4 +1,5 @@
 import z from "zod";
+import { httpUrl } from "./shared";
 
 // Content Type enum matching the database
 // POST/ARTICLE = user-created articles, LINK = external/RSS content
@@ -56,7 +57,7 @@ export const CreateContentSchema = z.object({
   title: z.string().min(1).max(500),
   body: z.string().nullish(), // Required for ARTICLE, optional for others
   excerpt: z.string().max(300).nullish(),
-  externalUrl: z.string().url().max(2000).nullish(), // Required for LINK, VIDEO
+  externalUrl: httpUrl().max(2000).nullish(), // Required for LINK, VIDEO
   imageUrl: z.string().url().nullish(),
   tags: z.array(z.string()).max(5).optional(),
   published: z.boolean().default(false),
@@ -73,7 +74,7 @@ export const UpdateContentSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   body: z.string().nullish(),
   excerpt: z.string().max(300).nullish(),
-  externalUrl: z.string().url().max(2000).nullish(),
+  externalUrl: httpUrl().max(2000).nullish(),
   imageUrl: z.string().url().nullish(),
   tags: z.array(z.string()).max(5).optional(),
   published: z.boolean().optional(),

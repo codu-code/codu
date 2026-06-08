@@ -1,27 +1,6 @@
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
-
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-  } catch {
-    return null;
-  }
-};
-
-const getHostname = (urlString: string | null | undefined): string | null => {
-  if (!urlString) return null;
-  try {
-    const url = new URL(urlString);
-    return url.hostname;
-  } catch {
-    return null;
-  }
-};
+import { getFaviconUrl, getHostname } from "@/utils/url";
 
 interface AuthorInfo {
   name: string;

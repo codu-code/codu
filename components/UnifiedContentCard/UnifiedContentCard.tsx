@@ -7,6 +7,7 @@ import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import VoteControl from "@/components/Vote/VoteControl";
+import { ensureHttps } from "@/utils/url";
 
 export type ContentType = "POST" | "LINK";
 
@@ -76,14 +77,6 @@ const getRelativeTime = (dateStr: string): string => {
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
-
-const ensureHttps = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
-  }
-  return url;
 };
 
 const UnifiedContentCard = ({

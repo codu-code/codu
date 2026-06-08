@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/nextjs";
 import { type MetadataRoute } from "next";
 
 import { db } from "@/server/db";
@@ -116,12 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...sources,
     ...articles,
     ...feedArticles,
-  ].filter((route) => !route.url.includes("/api/og")); // Filter out OG routes
-
-  // Capture data as sitemap has been inconsistent and want to test on dev
-  Sentry.captureMessage(
-    `Sitemap generated: Routes=${routes.length}, Articles=${articles.length}, Users=${users.length}, Sources=${sources.length}, FeedArticles=${feedArticles.length}`,
-  );
+  ].filter((route) => !route.url.includes("/api/og"));
 
   return allRoutes;
 }

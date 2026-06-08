@@ -1,4 +1,5 @@
 import z from "zod";
+import { httpUrl } from "./shared";
 
 // Post type enum matching the database (lowercase)
 export const PostTypeSchema = z.enum([
@@ -62,7 +63,7 @@ export const CreatePostSchema = z.object({
   title: z.string().min(1).max(500),
   body: z.string().nullish(), // Required for article, optional for others
   excerpt: z.string().max(300).nullish(),
-  externalUrl: z.string().url().max(2000).nullish(), // Required for link, resource
+  externalUrl: httpUrl().max(2000).nullish(), // Required for link, resource
   coverImage: z.string().url().nullish(),
   tags: z.array(z.string()).max(5).optional(),
   status: PostStatusSchema.default("draft"),

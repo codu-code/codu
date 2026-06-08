@@ -19,6 +19,7 @@ import {
   FeatureJobSchema,
 } from "@/schema/job";
 import sendEmail from "@/utils/sendEmail";
+import { escapeHtml } from "@/utils/escapeHtml";
 
 // Slug helper mirrors the pattern used in the post router.
 function generateSlug(title: string): string {
@@ -75,10 +76,10 @@ export const jobRouter = createTRPCRouter({
             subject: `New job listing: ${input.jobTitle} @ ${input.companyName}`,
             htmlMessage: `<p>A new job listing was submitted and is awaiting payment/moderation.</p>
               <ul>
-                <li><strong>Title:</strong> ${input.jobTitle}</li>
-                <li><strong>Company:</strong> ${input.companyName}</li>
-                <li><strong>Location:</strong> ${input.jobLocation}</li>
-                <li><strong>Type:</strong> ${input.jobType}</li>
+                <li><strong>Title:</strong> ${escapeHtml(input.jobTitle)}</li>
+                <li><strong>Company:</strong> ${escapeHtml(input.companyName)}</li>
+                <li><strong>Location:</strong> ${escapeHtml(input.jobLocation)}</li>
+                <li><strong>Type:</strong> ${escapeHtml(input.jobType)}</li>
               </ul>`,
           });
         } catch (emailError) {
@@ -210,6 +211,9 @@ export const jobRouter = createTRPCRouter({
           })
           .where(eq(job.id, input.id))
           .returning({ id: job.id, slug: job.slug, status: job.status });
+        if (!updated) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
+        }
         return updated;
       }
 
@@ -221,6 +225,9 @@ export const jobRouter = createTRPCRouter({
         })
         .where(eq(job.id, input.id))
         .returning({ id: job.id, status: job.status });
+      if (!updated) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
+      }
       return updated;
     }),
 
@@ -233,12 +240,18 @@ export const jobRouter = createTRPCRouter({
         .set({ featured: input.featured })
         .where(eq(job.id, input.id))
         .returning({ id: job.id, featured: job.featured });
+      if (!updated) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
+      }
       return updated;
     }),
 
   // Payment stub: marks a listing paid and moves it to the moderation queue.
-  // A real payment webhook will call this once a provider is wired up.
-  markPaid: protectedProcedure
+  // A real payment webhook will call this once a provider is wired up (as a
+  // signed server-to-server route, not this procedure). Until then it is
+  // admin-only — an owner must not be able to self-mark their listing paid and
+  // get a free, unpaid listing into the queue.
+  markPaid: adminOnlyProcedure
     .input(GetJobByIdSchema)
     .mutation(async ({ ctx, input }) => {
       const [found] = await ctx.db
@@ -249,12 +262,6 @@ export const jobRouter = createTRPCRouter({
 
       if (!found) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Job not found" });
-      }
-      if (
-        found.userId !== ctx.session.user.id &&
-        ctx.session.user.role !== "ADMIN"
-      ) {
-        throw new TRPCError({ code: "FORBIDDEN" });
       }
 
       const [updated] = await ctx.db

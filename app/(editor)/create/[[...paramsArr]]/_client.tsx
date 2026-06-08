@@ -83,16 +83,13 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const debouncedValue = useDebounce(title + body, 1500);
 
   // TRPC mutations
-  const {
-    mutate: publish,
-    status: publishStatus,
-    data: publishData,
-  } = api.content.publish.useMutation({
-    onError(error) {
-      toast.error("Error saving settings.");
-      Sentry.captureException(error);
-    },
-  });
+  const { mutate: publish, status: publishStatus } =
+    api.content.publish.useMutation({
+      onError(error) {
+        toast.error("Error saving settings.");
+        Sentry.captureException(error);
+      },
+    });
 
   const { mutate: save, status: saveStatus } = api.content.update.useMutation({
     onError(error) {

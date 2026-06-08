@@ -1,4 +1,5 @@
 import z from "zod";
+import { httpUrl } from "./shared";
 
 export const saveJobsSchema = z.object({
   companyName: z
@@ -18,11 +19,7 @@ export const saveJobsSchema = z.object({
     .string()
     .min(3, "Location should contain atleast 3 characters")
     .max(40, "Max location length is 40 characters."),
-  applicationUrl: z
-    .string()
-    .url("Provide a valid url")
-    .optional()
-    .or(z.literal("")),
+  applicationUrl: httpUrl().optional().or(z.literal("")),
   companyLogo: z.string().optional(),
   remote: z.boolean().optional().default(false),
   relocation: z.boolean().optional().default(false),

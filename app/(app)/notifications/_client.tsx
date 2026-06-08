@@ -200,7 +200,7 @@ const Notifications = () => {
                         {!isFollow && post && (
                           <Link
                             className="mt-1 block text-sm font-semibold text-fg hover:text-accent"
-                            href={`articles/${post.slug}`}
+                            href={`/articles/${post.slug}`}
                           >
                             {post.title}
                           </Link>

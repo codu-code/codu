@@ -46,8 +46,7 @@ const GetStarted: NextPage = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl");
   const [userEmail, setUserEmail] = useState<string>("");
-  const redirectTo =
-    typeof callbackUrl === "string" ? callbackUrl : "/articles";
+  const redirectTo = typeof callbackUrl === "string" ? callbackUrl : "/";
 
   // Capture a referral code (?ref=) so the referrer gets credited on signup.
   useEffect(() => {

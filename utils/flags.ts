@@ -4,8 +4,6 @@ export const FEATURE_FLAGS = {
   FEATURE_FLAG_TEST: "feature-flag-test",
   COURSE_VIDEO: "course-video",
   JOBS: "jobs",
-  BUILD_BOARD: "build-board",
-  // Add more feature flags as needed
 } as const;
 
 export type FeatureFlagName =
@@ -20,11 +18,10 @@ export function isDevEnvironment() {
 
 export const isFlagEnabled = (
   featureFlag: FeatureFlagName,
-  disableDevCheck = false, // Disable dev check to force feature flag to be checked always
-) => {
+  disableDevCheck = false,
+): boolean => {
   if (!disableDevCheck && isDevEnvironment()) {
-    console.log("Feature flag check skipped in development environment");
     return true;
   }
-  return posthog.isFeatureEnabled(featureFlag);
+  return !!posthog.isFeatureEnabled(featureFlag);
 };

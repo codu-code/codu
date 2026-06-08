@@ -49,7 +49,7 @@ import {
   screenContent,
   notifyAdminOfReview,
 } from "@/server/lib/moderation";
-import { enforceRateLimit } from "@/server/lib/rateLimit";
+import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import crypto from "crypto";
 
@@ -991,10 +991,23 @@ export const contentRouter = createTRPCRouter({
   trackClick: publicProcedure
     .input(TrackClickContentSchema)
     .mutation(async ({ ctx, input }) => {
+      // This endpoint is unauthenticated and bumps a counter that feeds
+      // trending/popular sort, so throttle per client+content to stop a script
+      // inflating any post's view count, and only count published posts.
+      const identifier =
+        ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`;
+      await enforceRateLimit({
+        key: `trackClick:${identifier}:${input.contentId}`,
+        limit: 10,
+        windowMs: 60_000,
+      });
+
       await ctx.db
         .update(posts)
         .set({ viewsCount: increment(posts.viewsCount) })
-        .where(eq(posts.id, input.contentId));
+        .where(
+          and(eq(posts.id, input.contentId), eq(posts.status, "published")),
+        );
 
       return { success: true };
     }),

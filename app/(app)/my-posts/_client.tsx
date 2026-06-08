@@ -141,7 +141,7 @@ const MyPosts = () => {
                   key={id}
                 >
                   {selectedTab === PUBLISHED ? (
-                    <Link href={`articles/${slug}`}>
+                    <Link href={`/articles/${slug}`}>
                       <h2 className="mb-2 text-2xl font-semibold hover:underline">
                         {title}
                       </h2>

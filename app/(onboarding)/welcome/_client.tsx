@@ -5,30 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { api } from "@/server/trpc/react";
+import { TOPIC_POOL } from "@/components/Create/topics";
 
 // New-member onboarding: interests → experience → focus. The picks tune the
 // feed / left-rail "Your topics".
-
-const ONB_TOPICS = [
-  "AI patterns",
-  "RAG",
-  "Agents",
-  "Prompting",
-  "Evals",
-  "LLM apps",
-  "Product",
-  "Design",
-  "Frontend",
-  "Backend",
-  "Infra & DevOps",
-  "Data",
-  "Career",
-  "Leadership",
-  "Indie hacking",
-  "Startups",
-  "Marketing",
-  "Open source",
-];
 
 const ONB_EXPERIENCE: [string, string, string][] = [
   ["new", "Just getting going", "New to building"],
@@ -218,7 +198,7 @@ export default function Welcome() {
                 You can change these anytime.
               </p>
               <div className="flex flex-wrap gap-2">
-                {ONB_TOPICS.map((t) => (
+                {TOPIC_POOL.map((t) => (
                   <OnbChip
                     key={t}
                     label={t}

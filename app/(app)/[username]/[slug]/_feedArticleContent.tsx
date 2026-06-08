@@ -16,42 +16,16 @@ import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Temporal } from "@js-temporal/polyfill";
 import DiscussionArea from "@/components/Discussion/DiscussionArea";
+import {
+  ensureHttps,
+  getFaviconUrl,
+  getHostname,
+  safeExternalHref,
+} from "@/utils/url";
 
 type Props = {
   sourceSlug: string;
   articleSlug: string;
-};
-
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-  } catch {
-    return null;
-  }
-};
-
-// Get hostname from URL
-const getHostname = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    return url.hostname;
-  } catch {
-    return urlString;
-  }
-};
-
-// Ensure image URL uses https
-const ensureHttps = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
-  }
-  return url;
 };
 
 const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
@@ -192,6 +166,8 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
   const hostname = article.externalUrl
     ? getHostname(article.externalUrl)
     : null;
+  // Guard against javascript:/data: schemes — z.string().url() accepts them.
+  const safeExternalUrl = safeExternalHref(article.externalUrl);
   const score = article.upvotes - article.downvotes;
 
   return (
@@ -259,9 +235,9 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         </div>
       </div>
 
-      {ensureHttps(article.imageUrl) && article.externalUrl ? (
+      {ensureHttps(article.imageUrl) && safeExternalUrl ? (
         <a
-          href={article.externalUrl}
+          href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleExternalClick}
@@ -282,9 +258,9 @@ const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
         <div className="mt-8 h-48 rounded-lg border border-hairline bg-elevated bg-grid-dots bg-[length:22px_22px]" />
       )}
 
-      {article.externalUrl && (
+      {safeExternalUrl && (
         <a
-          href={article.externalUrl}
+          href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleExternalClick}

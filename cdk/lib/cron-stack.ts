@@ -9,23 +9,26 @@ import type { Construct } from "constructs";
 import * as path from "path";
 
 export class CronStack extends cdk.Stack {
-  constructor(scope: Construct, id: string) {
-    super(scope, id);
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
 
     // Define the IAM role for the Lambda function
     const lambdaRole = new iam.Role(this, "LambdaExecutionRole", {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
     });
 
-    // Grant read access to SSM parameters
+    // Grant read access to SSM parameters. The cron lambdas only read config
+    // under the `/env/` prefix (e.g. `/env/db/dbUrl`), so scope the policy to
+    // that path rather than every parameter in the account.
     const policy = new iam.PolicyStatement({
-      actions: [
-        "ssm:GetParameter*",
-        "ssm:DescribeParameters",
-        "ssm:GetParameters",
-        "ssm:GetParametersByPath",
+      actions: ["ssm:GetParameter", "ssm:GetParameters"],
+      resources: [
+        this.formatArn({
+          service: "ssm",
+          resource: "parameter",
+          resourceName: "env/*",
+        }),
       ],
-      resources: ["*"],
     });
 
     lambdaRole.addToPolicy(policy);

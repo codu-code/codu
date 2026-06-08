@@ -249,12 +249,17 @@ export async function recordDailyActivity(userId: string): Promise<void> {
       .limit(1);
 
     if (!existing) {
-      await db.insert(user_streak).values({
-        userId,
-        currentStreak: 1,
-        longestStreak: 1,
-        lastActiveOn: now.toISOString(),
-      });
+      // onConflictDoNothing guards against two concurrent first-activity
+      // requests both hitting this branch and racing to insert the same row.
+      await db
+        .insert(user_streak)
+        .values({
+          userId,
+          currentStreak: 1,
+          longestStreak: 1,
+          lastActiveOn: now.toISOString(),
+        })
+        .onConflictDoNothing();
       await award({ userId, action: "daily_active", sourceId: today });
       return;
     }

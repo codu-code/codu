@@ -1,4 +1,5 @@
-DROP INDEX "point_event_dedupe_idx";--> statement-breakpoint
+ALTER TABLE "point_event" DROP CONSTRAINT IF EXISTS "point_event_dedupe_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "point_event_dedupe_idx";--> statement-breakpoint
 -- Remove duplicate point events (from the pre-fix NULLS-DISTINCT gap) before
 -- enforcing NULLS NOT DISTINCT — keep the earliest row per (user, action,
 -- source, actor), treating NULL actor/source as equal. This also corrects

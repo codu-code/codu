@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
 import DiscussionArea from "@/components/Discussion/DiscussionArea";
+import { ensureHttps, getHostname, safeExternalHref } from "@/utils/url";
 import {
   ContentDetailLayout,
   ContentTypeBadge,
@@ -15,25 +16,6 @@ import {
 type Props = {
   sourceSlug: string;
   shortId: string;
-};
-
-// Get hostname from URL
-const getHostname = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    return url.hostname;
-  } catch {
-    return urlString;
-  }
-};
-
-// Ensure image URL uses https (many RSS feeds provide http which won't load due to mixed content)
-const ensureHttps = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
-  }
-  return url;
 };
 
 const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
@@ -93,6 +75,8 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
   const hostname = article.externalUrl
     ? getHostname(article.externalUrl)
     : null;
+  // Guard against javascript:/data: schemes in externally-sourced URLs.
+  const safeExternalUrl = safeExternalHref(article.externalUrl);
   const shareUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/feed/${sourceSlug}/${shortId}`
@@ -161,7 +145,7 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
 
       {ensureHttps(article.imageUrl) && (
         <a
-          href={article.externalUrl ?? undefined}
+          href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleExternalClick}
@@ -180,9 +164,9 @@ const FeedArticlePage = ({ sourceSlug, shortId }: Props) => {
         </a>
       )}
 
-      {article.externalUrl && (
+      {safeExternalUrl && (
         <a
-          href={article.externalUrl}
+          href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleExternalClick}

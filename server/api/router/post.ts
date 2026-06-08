@@ -34,6 +34,7 @@ import {
   tag,
   user,
   banned_users,
+  point_event,
 } from "@/server/db/schema";
 import {
   and,
@@ -50,7 +51,7 @@ import {
   isNull,
 } from "drizzle-orm";
 import { increment } from "./utils";
-import { enforceRateLimit } from "@/server/lib/rateLimit";
+import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -738,9 +739,9 @@ export const postRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const { postId, voteType } = input;
 
-      // Check if post exists
+      // Check if post exists (author needed for upvote points).
       const postItem = await ctx.db
-        .select({ id: posts.id })
+        .select({ id: posts.id, authorId: posts.authorId })
         .from(posts)
         .where(eq(posts.id, postId))
         .limit(1);
@@ -759,6 +760,13 @@ export const postRouter = createTRPCRouter({
         .where(and(eq(postVotes.postId, postId), eq(postVotes.userId, userId)))
         .limit(1);
 
+      // Whether a previous "up" vote is going away (removed or switched to
+      // "down"). Used to revoke the author's upvote_received points.
+      const revokingUpvote =
+        existingVote.length > 0 &&
+        existingVote[0].voteType === "up" &&
+        voteType !== "up";
+
       // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
         // Remove vote
@@ -767,7 +775,6 @@ export const postRouter = createTRPCRouter({
             .delete(postVotes)
             .where(eq(postVotes.id, existingVote[0].id));
         }
-        return { voteType: null };
       } else if (existingVote.length === 0) {
         // New vote
         await ctx.db.insert(postVotes).values({
@@ -775,17 +782,43 @@ export const postRouter = createTRPCRouter({
           userId,
           voteType,
         });
-        return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
         // Change vote
         await ctx.db
           .update(postVotes)
           .set({ voteType })
           .where(eq(postVotes.id, existingVote[0].id));
-        return { voteType };
       }
 
-      // Same vote, no change needed
+      // Mirror content.vote so the author earns points consistently whichever
+      // vote path the UI uses. The dedupe index makes the award idempotent per
+      // (voter, post), so awarding from both routers can't double-count.
+      if (revokingUpvote) {
+        await ctx.db
+          .delete(point_event)
+          .where(
+            and(
+              eq(point_event.action, "upvote_received"),
+              eq(point_event.sourceId, postId),
+              eq(point_event.actorId, userId),
+            ),
+          );
+      }
+
+      if (
+        voteType === "up" &&
+        postItem[0].authorId &&
+        postItem[0].authorId !== userId
+      ) {
+        await award({
+          userId: postItem[0].authorId,
+          action: "upvote_received",
+          sourceType: "post",
+          sourceId: postId,
+          actorId: userId,
+        });
+      }
+
       return { voteType };
     }),
 
@@ -1254,10 +1287,21 @@ export const postRouter = createTRPCRouter({
   trackView: publicProcedure
     .input(GetByIdSchema)
     .mutation(async ({ ctx, input }) => {
+      // Unauthenticated counter that feeds trending/popular sort — throttle per
+      // client+post so it can't be scripted to inflate a post's view count, and
+      // only count published posts.
+      const identifier =
+        ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`;
+      await enforceRateLimit({
+        key: `trackView:${identifier}:${input.id}`,
+        limit: 10,
+        windowMs: 60_000,
+      });
+
       await ctx.db
         .update(posts)
         .set({ viewsCount: increment(posts.viewsCount) })
-        .where(eq(posts.id, input.id));
+        .where(and(eq(posts.id, input.id), eq(posts.status, "published")));
 
       return { success: true };
     }),

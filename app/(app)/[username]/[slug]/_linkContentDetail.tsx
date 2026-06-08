@@ -13,43 +13,17 @@ import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
 import { Temporal } from "@js-temporal/polyfill";
 import DiscussionArea from "@/components/Discussion/DiscussionArea";
+import {
+  ensureHttps,
+  getFaviconUrl,
+  getHostname,
+  safeExternalHref,
+} from "@/utils/url";
 import { useSession, signIn } from "next-auth/react";
 
 type Props = {
   sourceSlug: string;
   contentSlug: string;
-};
-
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-  } catch {
-    return null;
-  }
-};
-
-// Get hostname from URL
-const getHostname = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    return url.hostname;
-  } catch {
-    return urlString;
-  }
-};
-
-// Ensure image URL uses https
-const ensureHttps = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
-  }
-  return url;
 };
 
 const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
@@ -179,6 +153,8 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
   }
 
   const externalUrl = linkContent.externalUrl || "";
+  // Guard against javascript:/data: schemes — z.string().url() accepts them.
+  const safeExternalUrl = safeExternalHref(linkContent.externalUrl);
   const dateTime = linkContent.publishedAt
     ? Temporal.Instant.from(new Date(linkContent.publishedAt).toISOString())
     : null;
@@ -257,9 +233,9 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         </div>
       </div>
 
-      {ensureHttps(linkContent.imageUrl) && externalUrl ? (
+      {ensureHttps(linkContent.imageUrl) && safeExternalUrl ? (
         <a
-          href={externalUrl}
+          href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="relative mt-8 block overflow-hidden rounded-lg border border-hairline"
@@ -281,9 +257,9 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         <div className="mt-8 h-48 rounded-lg border border-hairline bg-elevated bg-grid-dots bg-[length:22px_22px]" />
       )}
 
-      {externalUrl && hostname && (
+      {safeExternalUrl && hostname && (
         <a
-          href={externalUrl}
+          href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="primary-button mt-8 w-full"

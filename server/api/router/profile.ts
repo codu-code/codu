@@ -100,9 +100,20 @@ export const profileRouter = createTRPCRouter({
         }
       }
 
+      // Explicitly whitelist updatable columns rather than spreading `input`,
+      // so a future field added to saveSettingsSchema can't silently become
+      // mass-assignable on the user row.
       const [profile] = await ctx.db
         .update(user)
-        .set({ ...input })
+        .set({
+          name: input.name,
+          bio: input.bio,
+          username: input.username,
+          location: input.location,
+          websiteUrl: input.websiteUrl,
+          emailNotifications: input.emailNotifications,
+          newsletter: input.newsletter,
+        })
         .where(eq(user.id, ctx.session.user.id))
         .returning();
 
