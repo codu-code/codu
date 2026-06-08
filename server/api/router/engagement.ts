@@ -2,10 +2,37 @@ import { z } from "zod";
 import { nanoid } from "nanoid";
 import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
-import { point_event, user, badge } from "@/server/db/schema";
+import { point_event, user, badge, follow, posts } from "@/server/db/schema";
 import { getStreak, getUserBadges } from "@/server/lib/engagement";
 
 export const engagementRouter = createTRPCRouter({
+  // "Get your first win in 3 steps" — real completion state for the feed banner:
+  // picked topics, followed 3 builders, published a first post.
+  onboardingWins: protectedProcedure.query(async ({ ctx }) => {
+    const uid = ctx.session.user.id;
+    const [u] = await ctx.db
+      .select({ topics: user.topics })
+      .from(user)
+      .where(eq(user.id, uid))
+      .limit(1);
+    const [followRow] = await ctx.db
+      .select({ c: sql<number>`count(*)` })
+      .from(follow)
+      .where(eq(follow.followerId, uid));
+    const [postRow] = await ctx.db
+      .select({ c: sql<number>`count(*)` })
+      .from(posts)
+      .where(eq(posts.authorId, uid));
+    const followCount = Number(followRow?.c ?? 0);
+    const postCount = Number(postRow?.c ?? 0);
+    return {
+      pickedTopics: (u?.topics?.length ?? 0) > 0,
+      followedThree: followCount >= 3,
+      posted: postCount > 0,
+      followCount,
+    };
+  }),
+
   // The signed-in user's streak + total points (personal, never empty-feeling).
   myStats: protectedProcedure.query(async ({ ctx }) => {
     const streak = await getStreak(ctx.session.user.id);

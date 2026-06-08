@@ -49,6 +49,7 @@ import {
   notifyAdminOfReview,
 } from "@/server/lib/moderation";
 import { enforceRateLimit } from "@/server/lib/rateLimit";
+import { award } from "@/server/lib/engagement";
 import crypto from "crypto";
 
 // Helper to generate slug from title
@@ -649,6 +650,17 @@ export const contentRouter = createTRPCRouter({
         }
       }
 
+      // Engagement: award points + check badges when a post goes live directly
+      // (the quick-compose Discussion/Link path). Never throws.
+      if (newContent && input.published) {
+        await award({
+          userId,
+          action: "post_published",
+          sourceType: "post",
+          sourceId: newContent.id,
+        });
+      }
+
       return newContent;
     }),
 
@@ -790,6 +802,7 @@ export const contentRouter = createTRPCRouter({
       const contentItem = await ctx.db
         .select({
           id: posts.id,
+          authorId: posts.authorId,
           upvotes: posts.upvotesCount,
           downvotes: posts.downvotesCount,
         })
@@ -834,6 +847,22 @@ export const contentRouter = createTRPCRouter({
           .update(post_votes)
           .set({ voteType: voteType as "up" | "down" })
           .where(eq(post_votes.id, existingVote[0].id));
+      }
+
+      // Award the author points for an upvote (idempotent per voter+post via
+      // the dedupe index; never self-award). Fire-and-forget — never throws.
+      if (
+        voteType === "up" &&
+        contentItem[0].authorId &&
+        contentItem[0].authorId !== userId
+      ) {
+        await award({
+          userId: contentItem[0].authorId,
+          action: "upvote_received",
+          sourceType: "post",
+          sourceId: contentId,
+          actorId: userId,
+        });
       }
 
       return { success: true };
@@ -1296,6 +1325,17 @@ export const contentRouter = createTRPCRouter({
         .set(updateData)
         .where(eq(posts.id, input.id))
         .returning();
+
+      // Award points the first time a post is published (draft → published;
+      // the moderation path awards on admin approval instead). Never throws.
+      if (input.published && existing[0].status === "draft") {
+        await award({
+          userId,
+          action: "post_published",
+          sourceType: "post",
+          sourceId: input.id,
+        });
+      }
 
       return updated;
     }),

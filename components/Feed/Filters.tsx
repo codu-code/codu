@@ -68,9 +68,20 @@ function FilterPill({
         }`}
       >
         {current.label}
-        <span className="text-[10px] text-faint" aria-hidden="true">
-          ▾
-        </span>
+        <svg
+          className="h-3.5 w-3.5 text-faint"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 8l4 4 4-4"
+          />
+        </svg>
       </button>
       {open && (
         <ul
@@ -160,12 +171,6 @@ const sortOptions: Option[] = [
 
 const ALL_TOPICS = "all";
 
-const Divider = () => (
-  <span className="text-faint" aria-hidden="true">
-    ·
-  </span>
-);
-
 const FeedFilters = ({
   sort,
   type,
@@ -189,10 +194,7 @@ const FeedFilters = ({
     typeValue !== "all" || sort !== "recent" || tagValue !== ALL_TOPICS;
 
   return (
-    <div
-      className="flex items-center gap-1"
-      data-testid="feed-filters"
-    >
+    <div className="flex items-center gap-2" data-testid="feed-filters">
       {isDirty && (
         <button
           type="button"
@@ -204,22 +206,19 @@ const FeedFilters = ({
       )}
 
       {showTypeFilter && onTypeChange && (
-        <>
-          <FilterPill
-            testId="type-filter"
-            label="Filter by type"
-            value={typeValue}
-            options={typeOptions}
-            isDefault={typeValue === "all"}
-            align="right"
-            onChange={(next) =>
-              onTypeChange(
-                next === "all" ? null : (next.toUpperCase() as ContentType),
-              )
-            }
-          />
-          <Divider />
-        </>
+        <FilterPill
+          testId="type-filter"
+          label="Filter by type"
+          value={typeValue}
+          options={typeOptions}
+          isDefault={typeValue === "all"}
+          align="right"
+          onChange={(next) =>
+            onTypeChange(
+              next === "all" ? null : (next.toUpperCase() as ContentType),
+            )
+          }
+        />
       )}
 
       <FilterPill
@@ -233,19 +232,14 @@ const FeedFilters = ({
       />
 
       {topics.length > 0 && (
-        <>
-          <Divider />
-          <FilterPill
-            label="Filter by topic"
-            value={tagValue}
-            options={topicOptions}
-            isDefault={tagValue === ALL_TOPICS}
-            align="right"
-            onChange={(next) =>
-              onTagChange(next === ALL_TOPICS ? null : next)
-            }
-          />
-        </>
+        <FilterPill
+          label="Filter by topic"
+          value={tagValue}
+          options={topicOptions}
+          isDefault={tagValue === ALL_TOPICS}
+          align="right"
+          onChange={(next) => onTagChange(next === ALL_TOPICS ? null : next)}
+        />
       )}
     </div>
   );
