@@ -57,47 +57,47 @@ const GetStarted: NextPage = () => {
   }, [searchParams]);
 
   return (
-    <div className="grid min-h-screen w-full min-[861px]:mx-auto min-[861px]:max-w-[1080px] min-[861px]:grid-cols-2">
-      {/* Brand panel — full split panel ≥861px; hidden entirely on narrow
-          screens (a small logo shows above the form instead). */}
-      <aside className="relative hidden flex-col justify-between overflow-hidden border-hairline bg-surface px-12 py-16 min-[861px]:flex min-[861px]:border-r">
+    <div className="grid min-h-screen w-full min-[861px]:grid-cols-2">
+      {/* Brand panel — full-bleed grey ≥861px; content sits in a centered
+          max-width column. Hidden entirely on narrow screens (a small logo
+          shows above the form instead). */}
+      <aside className="relative hidden overflow-hidden border-hairline bg-surface min-[861px]:flex min-[861px]:border-r">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-grid-dots bg-[length:24px_24px] opacity-50 [mask-image:radial-gradient(90%_70%_at_20%_10%,black_30%,transparent_80%)]"
         />
-        <Link
-          href="/"
-          aria-label="Codú home"
-          className="relative inline-flex w-fit"
-        >
-          <Image
-            src="/images/codu.png"
-            alt="Codú"
-            width={189}
-            height={60}
-            className="h-7 w-auto"
-            priority
-          />
-        </Link>
+        <div className="relative mx-auto flex w-full max-w-[540px] flex-col justify-between px-12 py-16">
+          <Link href="/" aria-label="Codú home" className="inline-flex w-fit">
+            <Image
+              src="/images/codu.png"
+              alt="Codú"
+              width={189}
+              height={60}
+              className="h-7 w-auto"
+              priority
+            />
+          </Link>
 
-        <div className="relative mt-0">
-          <Eyebrow>where coders become product engineers</Eyebrow>
-          <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-fg xl:text-5xl">
-            Build the right thing.
-            <br />
-            <span className="text-accent">And build it well.</span>
-          </h1>
-          <p className="mt-6 max-w-[34ch] text-lg leading-relaxed text-muted">
-            A place to get genuinely good — real skill, real product sense, and
-            builders who sharpen your work.
-          </p>
+          <div>
+            <Eyebrow>where coders become product engineers</Eyebrow>
+            <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-fg xl:text-5xl">
+              Build the right thing.
+              <br />
+              <span className="text-accent">And build it well.</span>
+            </h1>
+            <p className="mt-6 max-w-[34ch] text-lg leading-relaxed text-muted">
+              A place to get genuinely good — real skill, real product sense,
+              and builders who sharpen your work.
+            </p>
+          </div>
+
+          {/* spacer keeps logo top-aligned on desktop */}
+          <div aria-hidden />
         </div>
-
-        {/* spacer keeps logo top-aligned on desktop */}
-        <div className="relative" aria-hidden />
       </aside>
 
-      {/* Form panel */}
+      {/* Form panel — content in a centered max-width column to mirror the
+          brand panel. */}
       <main className="flex items-center justify-center px-6 py-12 min-[861px]:px-12 min-[861px]:py-16">
         <div className="w-full max-w-sm">
           {/* Small logo above the form when the brand panel is hidden */}
