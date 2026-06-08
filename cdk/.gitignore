@@ -1,0 +1,8 @@
+# CDK build artifacts (compiled from the .ts sources by `npm run build`)
+bin/*.js
+lib/*.js
+test/*.js
+*.d.ts
+
+# CDK synth output
+cdk.out/

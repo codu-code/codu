@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/cdk-pipeline-codu.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/cdk-codu.ts",
   "watch": {
     "include": ["**"],
     "exclude": [
