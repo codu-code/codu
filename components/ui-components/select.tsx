@@ -41,11 +41,11 @@ export const Select = forwardRef(function Select(
           // Options (multi-select)
           "[&_optgroup]:font-semibold",
           // Typography
-          "text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white dark:*:text-white sm:text-sm/6",
+          "text-base/6 text-zinc-950 placeholder:text-faint dark:text-fg dark:*:text-white sm:text-sm/6",
           // Border
-          "border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20",
+          "border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-hairline dark:data-[hover]:border-strong",
           // Background color
-          "bg-transparent dark:bg-white/5 dark:*:bg-zinc-800",
+          "bg-transparent dark:bg-inset dark:*:bg-zinc-800",
           // Hide default focus styles
           "focus:outline-none",
           // Invalid state

@@ -12,14 +12,13 @@ import { saveSettingsSchema } from "@/schema/profile";
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
-import { Loader2, Sun, Moon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Avatar } from "@/components/ui-components/avatar";
 import { Input } from "@/components/ui-components/input";
 import { ErrorMessage } from "@/components/ui-components/fieldset";
 import { Textarea } from "@/components/ui-components/textarea";
 import { ReferralCard, Tag } from "@/components/ds";
 import { useShellActions } from "@/components/Create/ShellActionsProvider";
-import { useTheme } from "next-themes";
 
 /** Mint switch — rounded-full track, knob slides left→right when on. */
 const Toggle = ({
@@ -46,11 +45,6 @@ const Toggle = ({
   </button>
 );
 
-/** A lighter in-tab group label (replaces the old mono "// " section eyebrows). */
-const GroupLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="mb-1 mt-8 text-sm font-bold text-fg">{children}</p>
-);
-
 /** A labelled settings row: title + description on the left, control on the right. */
 const SettingsRow = ({
   title,
@@ -61,7 +55,7 @@ const SettingsRow = ({
   desc?: string;
   children: React.ReactNode;
 }) => (
-  <div className="flex items-center gap-4 border-b border-hairline py-4">
+  <div className="flex items-center gap-4 border-b border-hairline py-4 last:border-b-0">
     <div className="min-w-0 flex-1">
       <div className="text-sm font-semibold text-fg">{title}</div>
       {desc && (
@@ -82,7 +76,7 @@ const FieldBlock = ({
   desc?: string;
   children: React.ReactNode;
 }) => (
-  <div className="border-b border-hairline py-4">
+  <div className="border-b border-hairline py-4 last:border-b-0">
     <div className="text-sm font-semibold text-fg">{title}</div>
     {desc && (
       <div className="mb-2 mt-0.5 text-xs leading-relaxed text-muted">
@@ -126,7 +120,6 @@ const Settings = ({ profile }: { profile: User }) => {
     },
   });
 
-  const { setTheme, resolvedTheme } = useTheme();
   const { emailNotifications: eNotifications, newsletter } = profile;
 
   const TABS = ["Profile", "Notifications", "Account"] as const;
@@ -452,23 +445,6 @@ const Settings = ({ profile }: { profile: User }) => {
         desc="Receive our weekly newsletter"
       >
         <Toggle checked={weeklyNewsletter} onChange={setWeeklyNewsletter} />
-      </SettingsRow>
-
-      {/* ---------- appearance ---------- */}
-      <GroupLabel>Display</GroupLabel>
-
-      <SettingsRow
-        title="Theme"
-        desc="Toggle between light and dark theme"
-      >
-        <div className="flex items-center gap-2">
-          <Sun className="h-4 w-4 text-faint" />
-          <Toggle
-            checked={resolvedTheme === "dark"}
-            onChange={(checked) => setTheme(checked ? "dark" : "light")}
-          />
-          <Moon className="h-4 w-4 text-muted" />
-        </div>
       </SettingsRow>
       </div>
 

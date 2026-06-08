@@ -166,7 +166,7 @@ const FeedPage = () => {
           pushed to the right of the same row. Signed-out users get the
           filters in a matching row without the tabs. */}
       {session?.user ? (
-        <div className="mt-4 flex items-center gap-5 border-b border-hairline">
+        <div className="mt-4 flex flex-wrap items-center gap-x-7 gap-y-2 border-b border-hairline">
           {[
             { label: "For you", href: "/feed", active: !following },
             {
@@ -179,7 +179,8 @@ const FeedPage = () => {
               key={t.label}
               type="button"
               onClick={() => router.push(t.href)}
-              className={`-mb-px border-b-2 px-1 pb-2 text-sm font-semibold transition-colors ${
+              aria-current={t.active ? "page" : undefined}
+              className={`-mb-px border-b-2 pb-2.5 text-sm font-semibold transition-colors ${
                 t.active
                   ? "border-accent text-fg"
                   : "border-transparent text-muted hover:text-fg"
@@ -188,7 +189,7 @@ const FeedPage = () => {
               {t.label}
             </button>
           ))}
-          <div className="ml-auto">{filterCluster}</div>
+          <div className="ml-auto pl-4">{filterCluster}</div>
         </div>
       ) : (
         <div className="mt-4 flex items-center border-b border-hairline pb-2">
@@ -197,7 +198,7 @@ const FeedPage = () => {
       )}
 
       {/* Feed list (rails now live in the global app shell) */}
-      <div>
+      <div className="mt-5">
         <div className="relative">
           <section className="space-y-3">
             {following &&
