@@ -271,7 +271,9 @@ const UnifiedContentCard = ({
             </p>
           )}
         </div>
-        {showThumbnail ? (
+        {/* Only render a thumbnail when there's a real image that loaded — no
+            grey placeholder box when an image is missing or fails. */}
+        {showThumbnail && (
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
@@ -284,10 +286,6 @@ const UnifiedContentCard = ({
               onError={() => setImageError(true)}
             />
           </Link>
-        ) : (
-          type === "LINK" && (
-            <div className="relative h-[68px] w-[104px] flex-shrink-0 self-start overflow-hidden rounded-sm border border-hairline bg-elevated bg-grid-dots bg-[length:9px_9px]" />
-          )
         )}
       </div>
 

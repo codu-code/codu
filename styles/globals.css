@@ -404,7 +404,7 @@ body {
 
 .token.function,
 .token.class-name {
-  @apply text-pink-500;
+  @apply text-accent-soft;
 }
 
 .token.regex,

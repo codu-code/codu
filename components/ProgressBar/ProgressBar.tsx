@@ -5,13 +5,10 @@ const ProgressBar = () => {
   return (
     <HolyLoader
       easing="linear"
-      color="linear-gradient(
-        to right,
-        rgb(251, 146, 60),
-        rgb(219, 39, 119)
-      )"
+      // Relaunch mint (accent → accent-soft), not the old orange/pink.
+      color="linear-gradient(to right, rgb(45, 212, 191), rgb(110, 231, 214))"
       zIndex={50}
-      height="0.25rem"
+      height="0.2rem"
     />
   );
 };
