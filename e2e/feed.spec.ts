@@ -85,10 +85,11 @@ test.describe("Unauthenticated Feed Page", () => {
     await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
-    // The relaunch reaction bar is "▲ helpful" (supportive, upvote-only).
-    await expect(page.getByLabel("Helpful").first()).toBeVisible({
+    // The relaunch reaction bar uses the VoteControl pill (up / score / down).
+    await expect(page.getByLabel("Upvote").first()).toBeVisible({
       timeout: 15000,
     });
+    await expect(page.getByLabel("Downvote").first()).toBeVisible();
   });
 
   test("Should show bookmark buttons on feed items", async ({ page }) => {
@@ -141,15 +142,15 @@ test.describe("Authenticated Feed Page", () => {
     }
   });
 
-  test("Should allow marking content helpful (upvote)", async ({ page }) => {
+  test("Should allow voting on feed items (upvote)", async ({ page }) => {
     await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
-    // Click the helpful (upvote) control
-    await page.getByLabel("Helpful").first().click();
+    // Click the upvote arrow on the first item's VoteControl pill.
+    await page.getByLabel("Upvote").first().click();
 
-    // Control should still be visible after interaction
-    await expect(page.getByLabel("Helpful").first()).toBeVisible();
+    // Control should still be visible after interaction.
+    await expect(page.getByLabel("Upvote").first()).toBeVisible();
   });
 
   test("Should allow bookmarking content", async ({ page }) => {

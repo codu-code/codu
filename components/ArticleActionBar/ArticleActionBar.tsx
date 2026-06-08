@@ -2,8 +2,6 @@
 
 import { Fragment, useState } from "react";
 import {
-  ChevronUpIcon,
-  ChevronDownIcon,
   BookmarkIcon,
   ChatBubbleLeftIcon,
   ShareIcon,
@@ -22,6 +20,7 @@ import { useSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { ReportModal } from "../ReportModal/ReportModal";
+import VoteControl from "@/components/Vote/VoteControl";
 
 interface ArticleActionBarProps {
   postId: string;
@@ -48,34 +47,11 @@ const ArticleActionBar = ({
 }: ArticleActionBarProps) => {
   const { data: session } = useSession();
   const utils = api.useUtils();
-  const [userVote, setUserVote] = useState(initialUserVote);
-  const [votes, setVotes] = useState({
-    upvotes: initialUpvotes,
-    downvotes: initialDownvotes,
-  });
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
 
-  const { mutate: vote, status: voteStatus } = api.post.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
-      });
-    },
+  // VoteControl owns the optimistic UI.
+  const { mutate: vote } = api.post.vote.useMutation({
     onError: (error) => {
-      setUserVote(initialUserVote);
-      setVotes({ upvotes: initialUpvotes, downvotes: initialDownvotes });
       toast.error("Failed to update vote");
       Sentry.captureException(error);
     },
@@ -124,43 +100,18 @@ const ArticleActionBar = ({
     }
   };
 
-  const score = votes.upvotes - votes.downvotes;
-
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center rounded-full border border-hairline">
-        <button
-          onClick={() => handleVote(userVote === "up" ? null : "up")}
-          disabled={voteStatus === "pending"}
-          className={`rounded-l-full p-2 transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50 ${
-            userVote === "up" ? "text-success" : "text-faint"
-          }`}
-          aria-label="Upvote"
-        >
-          <ChevronUpIcon className="h-5 w-5" />
-        </button>
-        <span
-          className={`min-w-[2rem] text-center text-sm font-semibold ${
-            score > 0
-              ? "text-success"
-              : score < 0
-                ? "text-danger"
-                : "text-faint"
-          }`}
-        >
-          {score}
-        </span>
-        <button
-          onClick={() => handleVote(userVote === "down" ? null : "down")}
-          disabled={voteStatus === "pending"}
-          className={`rounded-r-full p-2 transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50 ${
-            userVote === "down" ? "text-danger" : "text-faint"
-          }`}
-          aria-label="Downvote"
-        >
-          <ChevronDownIcon className="h-5 w-5" />
-        </button>
-      </div>
+      <VoteControl
+        base={
+          initialUpvotes -
+          initialDownvotes -
+          (initialUserVote === "up" ? 1 : initialUserVote === "down" ? -1 : 0)
+        }
+        initial={initialUserVote}
+        onGate={!session ? () => signIn() : undefined}
+        onVote={(next) => handleVote(next)}
+      />
 
       <a
         href="#comments"

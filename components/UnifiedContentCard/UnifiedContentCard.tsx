@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
+import VoteControl from "@/components/Vote/VoteControl";
 
 export type ContentType = "POST" | "LINK";
 
@@ -120,8 +121,7 @@ const UnifiedContentCard = ({
         : `/feed/${id}`; // Fallback
 
   // Unified content voting mutation
-  const { mutate: voteContent, status: voteStatus } =
-    api.content.vote.useMutation({
+  const { mutate: voteContent } = api.content.vote.useMutation({
       onMutate: async ({ voteType }) => {
         const oldVote = userVote;
         setUserVote(voteType);
@@ -299,22 +299,18 @@ const UnifiedContentCard = ({
           </span>
         )}
         <div className="ml-auto flex items-center gap-3">
-          {/* ▲ helpful (upvote) */}
-          <button
-            onClick={() => handleVote(userVote === "up" ? null : "up")}
-            disabled={voteStatus === "pending"}
-            title="Helpful"
-            aria-label="Helpful"
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 font-mono text-xs transition-colors disabled:opacity-50 ${
-              userVote === "up"
-                ? "bg-accent/10 text-accent-soft"
-                : "border border-hairline text-muted hover:text-fg"
-            }`}
-            aria-pressed={userVote === "up"}
-          >
-            <span className="text-[11px]">▲</span>
-            {votes.upvotes} helpful
-          </button>
+          {/* Net-score vote pill */}
+          <VoteControl
+            base={
+              votes.upvotes -
+              votes.downvotes -
+              (userVote === "up" ? 1 : userVote === "down" ? -1 : 0)
+            }
+            initial={userVote}
+            compact
+            onGate={!session ? () => signIn() : undefined}
+            onVote={(next) => handleVote(next)}
+          />
           <Link
             href={`${cardUrl}#discussion`}
             className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-xs text-faint hover:text-muted"

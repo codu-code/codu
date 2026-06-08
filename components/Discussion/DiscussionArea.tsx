@@ -8,11 +8,7 @@ import {
   MenuItems,
   Transition,
 } from "@headlessui/react";
-import {
-  EllipsisHorizontalIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/20/solid";
+import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import { signIn, useSession } from "next-auth/react";
 import { Fragment } from "react";
 import { markdocComponents } from "@/markdoc/components";
@@ -26,6 +22,7 @@ import { Temporal } from "@js-temporal/polyfill";
 import { EditDiscussionSchema } from "@/schema/discussion";
 import { api } from "@/server/trpc/react";
 import { useReportModal } from "@/components/ReportModal/ReportModal";
+import VoteControl from "@/components/Vote/VoteControl";
 import { DiscussionEditor } from "./DiscussionEditor";
 
 interface Props {
@@ -332,50 +329,16 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
                   </div>
 
                   <div className="mt-2 flex items-center gap-2">
-                    <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-                      <button
-                        onClick={() =>
-                          voteDiscussion(id, userVote === "up" ? null : "up")
-                        }
-                        disabled={voteStatus === "pending"}
-                        className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                          userVote === "up"
-                            ? "text-green-500"
-                            : "text-neutral-400 dark:text-neutral-500"
-                        }`}
-                        aria-label="Upvote"
-                      >
-                        <ChevronUpIcon className="h-5 w-5" />
-                      </button>
-                      <span
-                        className={`min-w-[2rem] text-center text-sm font-semibold ${
-                          score > 0
-                            ? "text-green-500"
-                            : score < 0
-                              ? "text-red-500"
-                              : "text-neutral-400 dark:text-neutral-500"
-                        }`}
-                      >
-                        {score}
-                      </span>
-                      <button
-                        onClick={() =>
-                          voteDiscussion(
-                            id,
-                            userVote === "down" ? null : "down",
-                          )
-                        }
-                        disabled={voteStatus === "pending"}
-                        className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-                          userVote === "down"
-                            ? "text-red-500"
-                            : "text-neutral-400 dark:text-neutral-500"
-                        }`}
-                        aria-label="Downvote"
-                      >
-                        <ChevronDownIcon className="h-5 w-5" />
-                      </button>
-                    </div>
+                    <VoteControl
+                      base={
+                        score -
+                        (userVote === "up" ? 1 : userVote === "down" ? -1 : 0)
+                      }
+                      initial={userVote}
+                      compact
+                      onGate={!session ? () => signIn() : undefined}
+                      onVote={(next) => voteDiscussion(id, next)}
+                    />
                     {depth < 6 && (
                       <button
                         className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1 text-sm font-medium text-neutral-500 transition-colors hover:border-neutral-300 hover:bg-neutral-100 hover:text-neutral-700 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
