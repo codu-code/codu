@@ -3,7 +3,8 @@ import { loggedInAsUserOne } from "./utils";
 
 // The relaunch added a /welcome onboarding flow. Logged-out visitors are sent
 // to /get-started; logged-in visitors either see step 1 ("What are you into?")
-// or, if already onboarded, get redirected to /feed.
+// or, if already onboarded, get redirected to the feed at "/". (Seed marks
+// user one as onboarded, so they take the redirect path.)
 
 test.describe("Onboarding — logged out", () => {
   test("Visiting /welcome redirects to /get-started", async ({ page }) => {
@@ -34,7 +35,8 @@ test.describe("Onboarding — logged in", () => {
       timeout: 15000,
     });
 
-    // And the URL is one of the two expected states.
-    await expect(page).toHaveURL(/\/welcome|\/feed/);
+    // And the URL is one of the two expected states: still on /welcome, or
+    // bounced to the feed homepage at "/".
+    await expect(page).toHaveURL(/\/welcome$|^http:\/\/localhost:3000\/$/);
   });
 });
