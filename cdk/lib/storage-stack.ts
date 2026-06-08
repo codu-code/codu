@@ -4,6 +4,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as backup from "aws-cdk-lib/aws-backup";
 import * as events from "aws-cdk-lib/aws-events";
@@ -20,6 +21,7 @@ export class StorageStack extends cdk.Stack {
   public readonly bucket: s3.Bucket;
   public readonly db: rds.DatabaseInstance;
   public readonly vpc: ec2.Vpc;
+  public readonly rateLimitTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
@@ -29,6 +31,32 @@ export class StorageStack extends cdk.Stack {
     });
 
     const { vpc } = this;
+
+    // ── Rate-limit counters (DynamoDB) ──
+    // Fixed-window counters keyed by `pk`, auto-expired via the `ttl`
+    // attribute. On-demand billing — pay only per request, no capacity to plan.
+    // The app reads the table name from RATE_LIMIT_TABLE (see SSM param below);
+    // its IAM principal needs dynamodb:UpdateItem on this table.
+    this.rateLimitTable = new dynamodb.Table(this, "RateLimitTable", {
+      partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: "ttl",
+      removalPolicy: props?.production
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Publish the generated table name so the app env (RATE_LIMIT_TABLE) can
+    // resolve it without hardcoding.
+    new ssm.StringParameter(this, "RateLimitTableNameParam", {
+      parameterName: "/env/rate-limit-table",
+      stringValue: this.rateLimitTable.tableName,
+    });
+
+    new cdk.CfnOutput(this, "RateLimitTableName", {
+      value: this.rateLimitTable.tableName,
+      description: "Set RATE_LIMIT_TABLE to this in the app environment",
+    });
 
     // S3 bucket
     const bucketName = ssm.StringParameter.valueForStringParameter(

@@ -10,7 +10,7 @@ import { TRPCError } from "@trpc/server";
 import { createSponsorInquiryEmailTemplate } from "@/utils/createSponsorInquiryEmailTemplate";
 import { sponsor_inquiry } from "@/server/db/schema";
 import { db } from "@/server/db";
-import { rateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
+import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 
 export const sponsorRouter = createTRPCRouter({
   submit: publicProcedure
@@ -19,13 +19,12 @@ export const sponsorRouter = createTRPCRouter({
       // Public, unauthenticated endpoint that writes a row + sends an email, so
       // throttle by IP to stop scripted flooding. 3 inquiries / hour per IP.
       const ip = clientIpFromHeaders(ctx.headers);
-      const { success } = rateLimit(`sponsor:${ip}`, 3, 60 * 60_000);
-      if (!success) {
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: "Too many inquiries. Please email partnerships@codu.co.",
-        });
-      }
+      await enforceRateLimit({
+        key: `sponsor:${ip}`,
+        limit: 3,
+        windowMs: 60 * 60_000,
+        message: "Too many inquiries. Please email partnerships@codu.co.",
+      });
 
       try {
         const { name, email, company, phone, interests, budgetRange, goals } =

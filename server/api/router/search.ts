@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { posts, user, tag, feed_sources } from "@/server/db/schema";
-import { rateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
+import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 
 // Live, debounced site search — replaces the external Algolia dependency.
 // Cheap but abusable, so it's defended on three fronts: a per-identifier rate
@@ -28,17 +27,12 @@ export const searchRouter = createTRPCRouter({
       // Rate limit by signed-in user, falling back to client IP.
       const identifier =
         ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`;
-      const { success } = rateLimit(
-        `search:${identifier}`,
-        RATE_LIMIT,
-        RATE_WINDOW_MS,
-      );
-      if (!success) {
-        throw new TRPCError({
-          code: "TOO_MANY_REQUESTS",
-          message: "You're searching too fast. Give it a second.",
-        });
-      }
+      await enforceRateLimit({
+        key: `search:${identifier}`,
+        limit: RATE_LIMIT,
+        windowMs: RATE_WINDOW_MS,
+        message: "You're searching too fast. Give it a second.",
+      });
 
       // Escape LIKE metacharacters so a query of "%"/"_" can't broaden into an
       // expensive full scan (Postgres treats backslash as the default escape).
