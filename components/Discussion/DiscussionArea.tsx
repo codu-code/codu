@@ -125,7 +125,6 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   type Discussions = typeof discussions;
   type Children = typeof firstChild;
 
-  // Sort discussions based on selected sort order
   const sortDiscussions = (
     items: Discussions | Children | undefined,
   ): typeof items => {
@@ -135,22 +134,18 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
         return b.score - a.score;
       }
       if (sortOrder === "oldest") {
-        // ascending by createdAt
         return (
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
       }
-      // "new" - sort by createdAt descending
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
     return sorted as typeof items;
   };
 
-  // Derive initial load state from query status - data exists means loaded at least once
   const initiallyLoaded = discussionStatus === "success" || !!discussions;
 
   const handleCreateComment = async (body: string, parentId?: string) => {
-    // validate markdoc syntax
     const ast = Markdoc.parse(body);
     const errors = Markdoc.validate(ast, config).filter(
       (e) => e.error.level === "critical",
@@ -176,7 +171,6 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   };
 
   const handleEditComment = async (body: string, id: string) => {
-    // validate markdoc syntax
     const ast = Markdoc.parse(body);
     const errors = Markdoc.validate(ast, config).filter(
       (e) => e.error.level === "critical",

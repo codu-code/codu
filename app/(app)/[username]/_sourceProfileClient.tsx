@@ -124,7 +124,6 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
 
   return (
     <div className="mx-auto max-w-2xl px-4 pt-6 text-fg">
-      {/* ── Publication header ── */}
       <header>
         <div className="flex items-start gap-4">
           {/* Square logo tile — the "publication, not person" signal. */}
@@ -157,7 +156,6 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             type="button"
@@ -177,7 +175,6 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
           </button>
         </div>
 
-        {/* Tagline */}
         {pub.tagline && (
           <p className="mt-4 max-w-[60ch] leading-relaxed text-muted">
             {pub.tagline}
@@ -205,7 +202,6 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
         </div>
       </header>
 
-      {/* ── Latest articles ── */}
       <section className="mt-8">
         <p className="eyebrow mb-3">
           <span className="slash">{"// "}</span>latest articles

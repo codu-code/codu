@@ -10,11 +10,10 @@ import VoteControl from "@/components/Vote/VoteControl";
 
 export type ContentType = "POST" | "LINK";
 
-// Display kind → chip label + tone. The card's behavior still keys off `type`
-// (POST vs LINK); `kind` only drives the editorial chip.
-// Every chip uses the SAME shape (see chip <span> below) and an opaque token
-// wash background so none look offset/unanchored — only the color varies by
-// kind. Mirrored in components/ContentDetail/TypeBadge.tsx for consistency.
+// Display kind → chip label + tone. Behavior keys off `type` (POST vs LINK);
+// `kind` only drives the editorial chip. Every chip shares the same shape + an
+// opaque wash so none look offset — only the color varies. Mirrored in
+// components/ContentDetail/TypeBadge.tsx.
 const KIND: Record<string, { label: string; className: string }> = {
   POST: { label: "Article", className: "bg-accent/15 text-accent-soft" },
   ARTICLE: { label: "Article", className: "bg-accent/15 text-accent-soft" },
@@ -61,7 +60,6 @@ export interface UnifiedContentCardProps {
   tags?: string[];
 }
 
-// Get relative time string
 const getRelativeTime = (dateStr: string): string => {
   const now = new Date();
   const date = new Date(dateStr);
@@ -76,7 +74,6 @@ const getRelativeTime = (dateStr: string): string => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-// Ensure image URL uses https
 const ensureHttps = (url: string | null | undefined): string | null => {
   if (!url) return null;
   if (url.startsWith("http://")) {
@@ -115,8 +112,7 @@ const UnifiedContentCard = ({
 
   const imageUrl = ensureHttps(rawImageUrl);
 
-  // Determine the URL for the card
-  // Priority: author (POST or user-created LINK) > source (aggregated LINK) > fallback
+  // URL priority: author (POST or user-created LINK) > source (aggregated LINK) > fallback.
   const cardUrl =
     author?.username && slug
       ? `/${author.username}/${slug}` // User-created content (POST or LINK)
@@ -215,11 +211,8 @@ const UnifiedContentCard = ({
       className="group rounded-lg border border-hairline bg-surface p-5 transition-colors duration-base ease-out hover:border-strong"
       data-testid="content-card"
     >
-      {/* Top row: [kind chip + author + title + excerpt] · preview image
-          (top-right, aligned with the header). */}
       <div className="flex gap-4">
         <div className="min-w-0 flex-1">
-          {/* Header: kind chip + author + @handle · time (· via source for links) */}
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 font-mono text-xs ${chip.className}`}
@@ -312,7 +305,6 @@ const UnifiedContentCard = ({
         )}
       </div>
 
-      {/* Footer: mono #tags + reaction bar */}
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {tags && tags.length > 0 && (
           <span className="min-w-0 truncate font-mono text-xs text-faint">
@@ -320,7 +312,6 @@ const UnifiedContentCard = ({
           </span>
         )}
         <div className="ml-auto flex items-center gap-3">
-          {/* Net-score vote pill */}
           <VoteControl
             base={
               votes.upvotes -

@@ -149,7 +149,6 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
           <Heading level={1}>{`Articles (${source.articleCount})`}</Heading>
         </div>
 
-        {/* Articles list using UnifiedContentCard */}
         <div>
           {articlesStatus === "pending" ? (
             <div className="space-y-4">
@@ -199,7 +198,6 @@ const SourceProfilePage = ({ sourceSlug }: Props) => {
                 );
               })}
 
-              {/* Load more trigger */}
               <div ref={loadMoreRef} className="py-4 text-center">
                 {isFetchingNextPage && (
                   <div className="text-sm text-neutral-500 dark:text-neutral-400">

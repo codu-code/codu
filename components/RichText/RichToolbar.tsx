@@ -69,7 +69,6 @@ export function RichToolbar({
 }: RichToolbarProps) {
   return (
     <div className="flex flex-nowrap items-center gap-[2px] overflow-x-auto rounded-md border border-hairline bg-canvas px-1.5 py-1">
-      {/* 1. Inline */}
       <TBtn label="Bold" onClick={() => exec("bold")} compact={compact}>
         <span className="font-display text-sm font-bold leading-none">B</span>
       </TBtn>
@@ -108,7 +107,6 @@ export function RichToolbar({
 
       <Divider />
 
-      {/* 3. Lists */}
       <TBtn
         label="Bulleted list"
         onClick={() => exec("ul")}
@@ -140,7 +138,6 @@ export function RichToolbar({
 
       <Divider />
 
-      {/* 5. Block */}
       <TBtn label="Quote" onClick={() => exec("quote")} compact={compact}>
         <Icon>
           <path d="M6 17h3l1.5-4V7H5v6h2.5z" />
@@ -159,7 +156,6 @@ export function RichToolbar({
         </Icon>
       </TBtn>
 
-      {/* 6. Spacer → Switch to Markdown */}
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}

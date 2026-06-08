@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
 
-// Get favicon URL from a website
 const getFaviconUrl = (
   websiteUrl: string | null | undefined,
 ): string | null => {
@@ -14,7 +13,6 @@ const getFaviconUrl = (
   }
 };
 
-// Get hostname from URL
 const getHostname = (urlString: string | null | undefined): string | null => {
   if (!urlString) return null;
   try {

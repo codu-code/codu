@@ -61,13 +61,10 @@ export function OnboardingBanner() {
 
   const allDone = wins ? steps.every((s) => s.done) : false;
 
-  // Celebration single-fire. We never want this to show twice:
-  //  - across visits: a localStorage flag (read via an external store, so it's
-  //    SSR-safe and stays in sync without setState-in-effect);
-  //  - within a session: once the user closes it, `closed` stays true.
-  // `closed` only ever flips from the onClose event handler — never from an
-  // effect — so there's no cascading-render loop. The effect below is a pure
-  // external-system sync (it writes localStorage, no setState).
+  // Celebration single-fire: a localStorage flag (read via the external store so
+  // it's SSR-safe) guards across visits; `closed` guards within a session.
+  // `closed` only flips from the onClose handler, never an effect — no render
+  // loop. The effect below is a pure external-system sync (writes localStorage).
   const celebrated = useSyncExternalStore(
     subscribe,
     hasCelebrated,

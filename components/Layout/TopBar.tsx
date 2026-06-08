@@ -42,7 +42,6 @@ export function TopBar({
 
   return (
     <header className="app-topbar">
-      {/* Left: hamburger (≤720px) + logo */}
       <div className="flex items-center gap-2 justify-self-start">
         <button
           type="button"
@@ -74,7 +73,6 @@ export function TopBar({
         </Link>
       </div>
 
-      {/* Center: search button styled like an input — opens the ⌘K palette */}
       <button
         type="button"
         onClick={onOpenPalette}
@@ -89,7 +87,6 @@ export function TopBar({
         </kbd>
       </button>
 
-      {/* Right: notifications · Create · avatar (or auth) */}
       {session ? (
         <div className="flex items-center gap-3 justify-self-end">
           <Link
