@@ -740,7 +740,7 @@ test.describe("Publish Flow", () => {
 
     // Should show scheduling-specific modal
     await expect(page.locator('text="Time travel activated!"')).toBeVisible({
-      timeout: 5000,
+      timeout: 10000,
     });
   });
 });

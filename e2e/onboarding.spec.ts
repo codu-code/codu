@@ -25,13 +25,14 @@ test.describe("Onboarding — logged in", () => {
     await page.goto("http://localhost:3000/welcome");
 
     // Either we're still on /welcome with the step-1 heading, or we've been
-    // bounced to /feed because the user is already onboarded. Both are valid.
+    // bounced to the feed (the page heading was removed, so detect the feed by
+    // its "For you" tab) because the user is already onboarded. Both are valid.
     const onboardingHeading = page.getByRole("heading", {
       name: "What are you into?",
     });
-    const feedHeading = page.locator("h1", { hasText: "Feed" });
+    const feedTab = page.getByRole("button", { name: "For you" });
 
-    await expect(onboardingHeading.or(feedHeading)).toBeVisible({
+    await expect(onboardingHeading.or(feedTab)).toBeVisible({
       timeout: 15000,
     });
 
