@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { type Session } from "next-auth";
 import { TopBar } from "./TopBar";
 import { LeftRail } from "./LeftRail";
@@ -22,7 +23,13 @@ interface AppShellProps {
  * sign-in bar. Replaces the old single-sidebar layout.
  * Mirrors ui_kits/app/AppShell.jsx.
  */
+// Standalone pages that drop the 3-column rails for a centered single column
+// (forms / info-style pages that aren't part of the feed reading experience).
+const BARE_ROUTES = ["/speakers", "/volunteer"];
+
 export function AppShell({ children, session, username }: AppShellProps) {
+  const pathname = usePathname();
+  const bare = BARE_ROUTES.some((p) => pathname?.startsWith(p));
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Remember the element that opened the palette so focus can be restored.
@@ -67,11 +74,15 @@ export function AppShell({ children, session, username }: AppShellProps) {
           onOpenPalette={openPalette}
           onOpenMenu={() => setDrawerOpen(true)}
         />
-        <main className="app-main">
-          <LeftRail session={session} username={username} />
-          <div className="min-w-0">{children}</div>
-          <RightRail session={session} />
-        </main>
+        {bare ? (
+          <main className="min-w-0">{children}</main>
+        ) : (
+          <main className="app-main">
+            <LeftRail session={session} username={username} />
+            <div className="min-w-0">{children}</div>
+            <RightRail session={session} />
+          </main>
+        )}
 
         {paletteOpen && <CommandPalette onClose={closePalette} />}
         {!session && <SignInBar />}

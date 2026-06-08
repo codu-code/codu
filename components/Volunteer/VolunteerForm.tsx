@@ -171,7 +171,7 @@ export function VolunteerForm() {
                 type="radio"
                 value={area}
                 {...register("area")}
-                className="h-4 w-4 accent-accent"
+                className="h-4 w-4 accent-mint"
               />
               <span>{volunteerAreaLabels[area]}</span>
             </label>
@@ -236,7 +236,7 @@ export function VolunteerForm() {
                 type="radio"
                 value={c}
                 {...register("commitment")}
-                className="h-4 w-4 accent-accent"
+                className="h-4 w-4 accent-mint"
               />
               <span>{volunteerCommitmentLabels[c]}</span>
             </label>

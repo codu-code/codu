@@ -118,6 +118,12 @@ body {
   }
 }
 
+/* Native form controls (radio/checkbox) tinted mint — Tailwind's arbitrary
+   accent-[...] inference is unreliable for accent-color, so this is explicit. */
+.accent-mint {
+  accent-color: rgb(var(--color-accent));
+}
+
 /* ── Eyebrow / kicker: the signature mono "// label" device ── */
 .eyebrow {
   @apply font-mono text-xs uppercase tracking-label text-accent;
