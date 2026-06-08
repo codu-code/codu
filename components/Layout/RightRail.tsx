@@ -108,7 +108,7 @@ function TrendingCard() {
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {tags.map((t) => (
-          <Link key={t.slug} href={`/feed?tag=${t.slug}`}>
+          <Link key={t.slug ?? t.title} href={`/feed?tag=${t.slug}`}>
             <Tag>{t.title}</Tag>
           </Link>
         ))}

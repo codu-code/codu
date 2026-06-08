@@ -7,7 +7,7 @@ import {
   post_tag,
   tag_merge_suggestions,
 } from "@/server/db/schema";
-import { desc, eq, ilike, sql, and, or, count } from "drizzle-orm";
+import { desc, eq, ilike, sql, and, or, count, isNotNull } from "drizzle-orm";
 
 /**
  * Generate a URL-friendly slug from a tag title
@@ -72,7 +72,13 @@ export const tagRouter = createTRPCRouter({
           })
           .from(tag)
           .where(
-            or(ilike(tag.title, searchPattern), ilike(tag.slug, searchPattern)),
+            and(
+              isNotNull(tag.slug),
+              or(
+                ilike(tag.title, searchPattern),
+                ilike(tag.slug, searchPattern),
+              ),
+            ),
           )
           .orderBy(desc(tag.postCount), tag.title)
           .limit(limit);
@@ -107,6 +113,8 @@ export const tagRouter = createTRPCRouter({
             postCount: tag.postCount,
           })
           .from(tag)
+          // Only tags with a slug are linkable (and safe as React keys).
+          .where(isNotNull(tag.slug))
           .orderBy(desc(tag.postCount))
           .limit(input.limit);
 

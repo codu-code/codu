@@ -629,9 +629,16 @@ export const contentRouter = createTRPCRouter({
           if (existingTags.length > 0) {
             tagId = existingTags[0].id;
           } else {
+            const title = tagName.toLowerCase();
+            // Always set a slug — null slugs break tag links + React keys.
+            const tagSlug =
+              title
+                .trim()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "") || title;
             const [newTag] = await ctx.db
               .insert(dbTag)
-              .values({ title: tagName.toLowerCase() })
+              .values({ title, slug: tagSlug })
               .returning();
             tagId = newTag.id;
           }
@@ -717,9 +724,16 @@ export const contentRouter = createTRPCRouter({
           if (existingTags.length > 0) {
             tagId = existingTags[0].id;
           } else {
+            const title = tagName.toLowerCase();
+            // Always set a slug — null slugs break tag links + React keys.
+            const tagSlug =
+              title
+                .trim()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "") || title;
             const [newTag] = await ctx.db
               .insert(dbTag)
-              .values({ title: tagName.toLowerCase() })
+              .values({ title, slug: tagSlug })
               .returning();
             tagId = newTag.id;
           }

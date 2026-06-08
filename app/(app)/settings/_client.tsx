@@ -455,7 +455,7 @@ const Settings = ({ profile }: { profile: User }) => {
         )}
         <div className="mt-2 flex justify-end">
           <Button
-            color="pink"
+            color="accent"
             disabled={
               !isValidEmail(newEmail) ||
               newEmail === profile.email ||
@@ -494,7 +494,7 @@ const Settings = ({ profile }: { profile: User }) => {
         <Button color="dark/white" onClick={() => reset()}>
           Reset
         </Button>
-        <Button color="pink" type="submit" disabled={isSubmitting}>
+        <Button color="accent" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </div>

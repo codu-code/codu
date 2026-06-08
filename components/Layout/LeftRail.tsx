@@ -110,7 +110,7 @@ export function LeftRail({ session, username }: LeftRailProps) {
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {popular.map((t) => (
-                <Link key={t.slug} href={`/feed?tag=${t.slug}`}>
+                <Link key={t.slug ?? t.title} href={`/feed?tag=${t.slug}`}>
                   <Tag>{t.title}</Tag>
                 </Link>
               ))}

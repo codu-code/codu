@@ -462,7 +462,7 @@ export default function Content() {
       <div className="flex justify-end">
         <Button
           className="rounded-md"
-          color="pink"
+          color="accent"
           type="submit"
           disabled={createJob.isPending}
         >

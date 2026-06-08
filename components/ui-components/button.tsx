@@ -155,6 +155,11 @@ const styles = {
       "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.rose.500)] [--btn-border:theme(colors.rose.600/90%)]",
       "[--btn-icon:theme(colors.rose.300)] data-[active]:[--btn-icon:theme(colors.rose.200)] data-[hover]:[--btn-icon:theme(colors.rose.200)]",
     ],
+    // Relaunch brand button — mint fill, near-black ink (design tokens).
+    accent: [
+      "text-on-accent [--btn-hover-overlay:theme(colors.black/8%)] [--btn-bg:rgb(var(--color-accent))] [--btn-border:rgb(var(--color-accent))]",
+      "[--btn-icon:rgb(var(--color-on-accent)/70%)] data-[active]:[--btn-icon:rgb(var(--color-on-accent))] data-[hover]:[--btn-icon:rgb(var(--color-on-accent))]",
+    ],
   },
 };
 
