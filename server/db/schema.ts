@@ -337,6 +337,10 @@ export const posts = pgTable(
 
     // For link/resource types (external URLs)
     externalUrl: varchar("external_url", { length: 2000 }),
+    externalUrlNormalized: text("externalUrlNormalized"),
+
+    // Moderation
+    moderationNote: text("moderationNote"),
 
     // RSS import metadata
     sourceId: integer("source_id").references(() => feed_sources.id, {
@@ -400,6 +404,9 @@ export const posts = pgTable(
     typeIdx: index("posts_type_idx").on(table.type),
     sourceIdIdx: index("posts_source_id_idx").on(table.sourceId),
     featuredIdx: index("posts_featured_idx").on(table.featured),
+    externalUrlNormalizedIdx: index("posts_external_url_normalized_idx").on(
+      table.externalUrlNormalized,
+    ),
   }),
 );
 
@@ -1700,6 +1707,11 @@ export const content_report = pgTable(
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
+    // posts.id is a uuid PK, so this FK column must be uuid (not text).
+    postId: uuid("postId").references(() => posts.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
     reporterId: text("reporterId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -1733,6 +1745,7 @@ export const content_report = pgTable(
     discussionIdIndex: index("ContentReport_discussionId_index").on(
       table.discussionId,
     ),
+    postIdIndex: index("ContentReport_postId_index").on(table.postId),
   }),
 );
 
@@ -1744,6 +1757,10 @@ export const contentReportRelations = relations(content_report, ({ one }) => ({
   discussion: one(discussion, {
     fields: [content_report.discussionId],
     references: [discussion.id],
+  }),
+  post: one(posts, {
+    fields: [content_report.postId],
+    references: [posts.id],
   }),
   reporter: one(user, {
     fields: [content_report.reporterId],

@@ -16,6 +16,8 @@ export const PostStatusSchema = z.enum([
   "published",
   "scheduled",
   "unlisted",
+  "in_review",
+  "rejected",
 ]);
 export type PostStatus = z.TypeOf<typeof PostStatusSchema>;
 
