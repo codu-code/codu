@@ -469,7 +469,15 @@ export const postRouter = createTRPCRouter({
       // Going-live gate (dedupe + moderation): route would-be-live creates
       // through review so a client can't self-publish around it; drafts stay
       // drafts. May throw CONFLICT for a hard duplicate (propagates to client).
-      const goingLive = input.status === "published";
+      // `in_review` / `rejected` are server-only moderation states — only the
+      // gate may produce them. Clamp them to `draft` so a client can't
+      // self-assign a moderation status (or skip the gate by claiming one).
+      const requestedStatus =
+        input.status === "in_review" || input.status === "rejected"
+          ? "draft"
+          : input.status;
+
+      const goingLive = requestedStatus === "published";
       const gate = goingLive
         ? await runDedupeAndGate({
             type: input.type,
@@ -478,7 +486,7 @@ export const postRouter = createTRPCRouter({
             externalUrl: input.externalUrl,
           })
         : null;
-      const dbStatus = gate ? gate.status : input.status;
+      const dbStatus = gate ? gate.status : requestedStatus;
 
       // Create writes the gate fields inline (typed insert) rather than via
       // applyGate; gate may be null on the draft path, and the `gate?.X ?? null`
@@ -604,8 +612,16 @@ export const postRouter = createTRPCRouter({
       // Update handlers gate on `!== "published"` (so a scheduled→published flip
       // via update IS re-gated); publish handlers gate on `=== "draft"` only. The
       // asymmetry is intentional and mirrors pre-existing behaviour.
+      // `in_review` / `rejected` are server-only moderation states — only the
+      // gate may produce them. Clamp a client-supplied moderation status to
+      // `draft` so it can't be self-assigned via update.
+      const requestedStatus =
+        input.status === "in_review" || input.status === "rejected"
+          ? "draft"
+          : input.status;
+
       const goingLive =
-        input.status === "published" && existing[0].status !== "published";
+        requestedStatus === "published" && existing[0].status !== "published";
       let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;
       if (input.status !== undefined) {
         if (goingLive) {
@@ -625,10 +641,10 @@ export const postRouter = createTRPCRouter({
           }
           // in_review: applyGate already left publishedAt null — admin approval sets it.
         } else {
-          updateData.status = input.status;
-          if (input.status === "published" && input.publishedAt) {
+          updateData.status = requestedStatus;
+          if (requestedStatus === "published" && input.publishedAt) {
             updateData.publishedAt = input.publishedAt;
-          } else if (input.status === "published") {
+          } else if (requestedStatus === "published") {
             updateData.publishedAt = new Date().toISOString();
           }
         }

@@ -1,3 +1,5 @@
+import { isHostFetchable } from "./ssrfGuard";
+
 const MAX_TEXT_LENGTH = 4000;
 const MAX_BODY_BYTES = 200 * 1024; // 200KB cap on fetched HTML
 const DEFAULT_TIMEOUT_MS = 4000;
@@ -30,12 +32,33 @@ export function extractReadableText(html: string): string {
  * Fetch a URL and return readable text for moderation pre-visiting. Best
  * effort only: bounded by a timeout, follows redirects, caps the body at
  * 200KB, and returns "" on ANY error (never throws). NOT unit-tested
- * (network); only extractReadableText is.
+ * (network); only extractReadableText + the SSRF guard are.
+ *
+ * SSRF guard: the author-supplied host is validated (incl. DNS resolution)
+ * against a denylist of internal/metadata/private targets before we fetch.
+ * If it's not publicly fetchable we return "" WITHOUT fetching — autoReview
+ * falls back to allow when the body is empty, so failing closed is safe.
+ *
+ * Residual risk: we keep redirect:"follow", so only the INITIAL host is
+ * validated; a redirect could still land on an internal host (redirect-based
+ * DNS rebinding), and the resolved IP could change between the guard's lookup
+ * and the actual connection. This is a pragmatic denylist, not a perfect
+ * anti-rebinding fortress; the blast radius is limited because the fetched
+ * body only ever feeds Bedrock (blind SSRF).
  */
 export async function fetchPageText(
   url: string,
   timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): Promise<string> {
+  // Validate the target host before any network call. Never throw.
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    return "";
+  }
+  if (!(await isHostFetchable(hostname))) return "";
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

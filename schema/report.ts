@@ -14,15 +14,11 @@ export const ReportReasonSchema = z.enum([
 
 export type ReportReason = z.TypeOf<typeof ReportReasonSchema>;
 
-// Legacy report schema (for backwards compatibility)
+// Legacy report schema (for backwards compatibility).
+// Note: post flags now route through report.create (the unified content_report
+// flow), so "post" is intentionally NOT part of this union — report.send only
+// handles comment + feed-article reports.
 export const ReportSchema = z.discriminatedUnion("type", [
-  z
-    .strictObject({
-      type: z.literal("post"),
-      id: z.string(),
-      body: z.string(),
-    })
-    .strict(),
   z.strictObject({
     type: z.literal("comment"),
     id: z.number().int(),

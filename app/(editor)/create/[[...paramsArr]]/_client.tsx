@@ -90,8 +90,18 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const { mutate: publish, status: publishStatus } =
     api.content.publish.useMutation({
       onError(error) {
-        toast.error("Error saving settings.");
-        Sentry.captureException(error);
+        // A CONFLICT is the dedupe gate refusing a duplicate link/question. It's
+        // expected user behaviour, not an exception: surface the human-readable
+        // message (e.g. "This link was already shared on Codú recently…") once
+        // and do NOT send it to Sentry. Other errors keep the generic toast +
+        // Sentry. The call-level onError below rejects the promise so onSubmit
+        // stops; the catch block must not toast again for these (see onSubmit).
+        if (error?.data?.code === "CONFLICT") {
+          toast.error(error.message);
+        } else {
+          toast.error("Error saving settings.");
+          Sentry.captureException(error);
+        }
       },
     });
 
@@ -298,12 +308,17 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         }
       }
     } catch (err) {
+      // ZodError is thrown synchronously by ConfirmContentSchema.parse above
+      // (before the publish mutation runs), so no hook-level handler has fired —
+      // toast it here.
       if (err instanceof ZodError) {
         return toast.error(err.issues[0].message);
-      } else {
-        console.error("Publish error:", err);
-        return toast.error("Something went wrong when trying to publish.");
       }
+      // Any other error here is a rejected save/publish mutation. Those
+      // mutations already showed the correct toast in their hook-level onError
+      // (including the dedupe CONFLICT message), so we must NOT toast a second,
+      // generic message — just log for debugging.
+      console.error("Publish error:", err);
     }
   };
 

@@ -90,43 +90,9 @@ export const reportRouter = createTRPCRouter({
           return { message: "Report has been sent!" };
         }
 
-        if (type === "post" && typeof id === "string") {
-          const [postDetails] = await ctx.db
-            .select({
-              slug: post.slug,
-              title: post.title,
-              user: {
-                email: user.email,
-                userId: user.id,
-                username: user.username,
-              },
-            })
-            .from(post)
-            .innerJoin(user, eq(user.id, post.userId))
-            .where(eq(post.id, id));
-
-          const report = {
-            reason: body,
-            url: `${getAppOrigin()}/${postDetails.user.username}/${postDetails.slug}`,
-            id,
-            email: postDetails.user.email || "",
-            title: postDetails.title,
-            userId: postDetails.user.userId || "",
-            username: postDetails.user.username || "",
-            reportedBy: {
-              username: reportingUser.username,
-              id: reportingUser.id,
-              email: reportingUser?.email || "",
-            },
-          };
-          const htmlMessage = createArticleReportEmailTemplate(report);
-          await sendEmail({
-            recipient: process.env.ADMIN_EMAIL,
-            htmlMessage,
-            subject: "A user has reported an article - codu.co",
-          });
-          return { message: "Report has been sent!" };
-        }
+        // Post flags now route through report.create (the unified
+        // content_report flow), so report.send no longer handles "post". The
+        // legacy branch (which queried the deprecated `post` table) was removed.
 
         if (type === "article" && typeof id === "string") {
           const [articleDetails] = await ctx.db
