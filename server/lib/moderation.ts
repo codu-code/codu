@@ -5,6 +5,7 @@
  */
 
 import sendEmail from "@/utils/sendEmail";
+import { getAppOrigin } from "@/server/lib/url";
 
 /** Escape user-controlled text before interpolating into email HTML. */
 function escapeHtml(value: string): string {
@@ -32,8 +33,7 @@ export async function notifyAdminOfReview(opts: {
 }): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
-  const base =
-    process.env.NEXTAUTH_URL || process.env.AUTH_URL || "https://www.codu.co";
+  const base = getAppOrigin();
   const title = escapeHtml(opts.title?.trim() || "Untitled post");
   const by = opts.authorName ? ` by ${escapeHtml(opts.authorName)}` : "";
   try {
@@ -43,7 +43,7 @@ export async function notifyAdminOfReview(opts: {
       htmlMessage: `
         <p>A new post is waiting in the review queue.</p>
         <p><strong>${title}</strong>${by}</p>
-        <p><a href="${base}/admin/moderation">Review it in the moderation queue →</a></p>
+        <p><a href="${base}/admin/moderation?item=${opts.postId}">Review it in the moderation queue →</a></p>
         <p style="color:#777;font-size:12px;">Keeping Codú's feed worth reading. Less theory, more shipping.</p>
       `,
     });
