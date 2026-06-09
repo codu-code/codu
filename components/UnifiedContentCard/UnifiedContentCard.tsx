@@ -7,6 +7,7 @@ import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import VoteControl from "@/components/Vote/VoteControl";
+import { ReportButton } from "@/components/ReportModal/ReportModal";
 import { ensureHttps } from "@/utils/url";
 
 export type ContentType = "POST" | "LINK";
@@ -340,6 +341,12 @@ const UnifiedContentCard = ({
           >
             {shared ? "Copied" : "Share"}
           </button>
+          <ReportButton
+            type="post"
+            id={String(id)}
+            variant="icon"
+            className="text-faint hover:text-muted"
+          />
         </div>
       </div>
     </article>

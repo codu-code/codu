@@ -150,10 +150,12 @@ export function ReportModalProvider() {
     const { type, id } = reportData;
 
     if (type === "post") {
-      sendReport({
-        type: "post",
-        body: reportBody,
-        id: id as string,
+      // Store post flags in the DB queue (shows in admin dashboard) instead of
+      // the legacy email-only path. Never auto-hides — a human acts on it.
+      createReport({
+        postId: id as string,
+        reason: "OTHER",
+        details: reportBody || undefined,
       });
     } else if (type === "discussion") {
       // Use new create mutation for discussions - stores in DB and shows in admin dashboard
