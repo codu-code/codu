@@ -47,6 +47,15 @@ import { type Session } from "next-auth";
 import { WriteTab } from "@/components/PostEditor/tabs/WriteTab";
 import { TagInput } from "@/components/PostEditor/components/TagInput";
 
+// Playful, on-brand lines that rotate under the "Reviewing your post…" loader
+// while the publish mutation runs (auto-review can take a few seconds).
+const REVIEW_LINES = [
+  "Checking the vibes…",
+  "Making sure it's a fit for the community…",
+  "Reading it over…",
+  "Almost there…",
+];
+
 const CreateContent = ({ session }: { session: Session | null }) => {
   const params = useParams();
   const router = useRouter();
@@ -196,6 +205,22 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     publishStatus === "pending" ||
     saveStatus === "pending" ||
     (!!postId && dataStatus === "pending");
+
+  const isPublishing = publishStatus === "pending";
+
+  // Rotate the playful loader lines while the publish/auto-review runs. The
+  // interval only ticks while publishing; clearing it on unmount / when
+  // publishing finishes. The displayed line is derived from the tick count so
+  // we never reset state synchronously in the effect.
+  const [reviewTick, setReviewTick] = useState(0);
+  useEffect(() => {
+    if (!isPublishing) return;
+    const interval = setInterval(() => {
+      setReviewTick((t) => t + 1);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [isPublishing]);
+  const reviewLine = REVIEW_LINES[reviewTick % REVIEW_LINES.length];
 
   const currentPostStatus = data?.publishedAt
     ? getPostStatus(new Date(data.publishedAt))
@@ -477,6 +502,30 @@ const CreateContent = ({ session }: { session: Session | null }) => {
             </div>
             <div className="mt-2 text-center font-mono text-xs text-faint">
               Fetching post data.
+            </div>
+          </div>
+          <div className="z-60 absolute bottom-0 left-0 right-0 top-0 bg-black opacity-25" />
+        </div>
+      )}
+
+      {isPublishing && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed left-0 top-0 z-40 flex h-screen w-screen items-center justify-center"
+        >
+          <div className="z-50 flex flex-col items-center rounded-xl border border-hairline bg-elevated px-8 py-6 opacity-100 shadow-xl">
+            <div className="loader-dots relative mt-2 block h-5 w-20">
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+              <div className="absolute top-0 mt-1 h-3 w-3 rounded-full bg-gradient-to-r from-accent to-accent shadow-sm"></div>
+            </div>
+            <div className="mt-4 font-display text-lg font-extrabold tracking-tight text-fg">
+              Reviewing your post…
+            </div>
+            <div className="mt-1 text-center font-mono text-xs text-faint">
+              {reviewLine}
             </div>
           </div>
           <div className="z-60 absolute bottom-0 left-0 right-0 top-0 bg-black opacity-25" />
