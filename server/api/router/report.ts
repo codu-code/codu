@@ -24,6 +24,7 @@ import {
 } from "@/server/db/schema";
 import { and, count, desc, eq, lt } from "drizzle-orm";
 import { db } from "@/server/db";
+import { getAppOrigin } from "@/server/lib/url";
 
 export const reportRouter = createTRPCRouter({
   // Legacy: Send report via email (backwards compatibility)
@@ -40,13 +41,6 @@ export const reportRouter = createTRPCRouter({
 
         const { type, id, body } = input;
         const reportingUser = ctx.session.user;
-
-        function getBaseUrl() {
-          if (typeof window !== "undefined") return "";
-          const env = process.env.DOMAIN_NAME || process.env.VERCEL_URL;
-          if (env) return "https://" + env;
-          return "http://localhost:3000";
-        }
 
         if (type === "comment" && typeof id === "number") {
           const [commentDetails] = await ctx.db
@@ -72,7 +66,7 @@ export const reportRouter = createTRPCRouter({
 
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/${postAuthor.username}/${commentDetails.postSlug}`,
+            url: `${getAppOrigin()}/${postAuthor.username}/${commentDetails.postSlug}`,
             id,
             email: commentDetails.commentUserEmail || "",
             comment: commentDetails.body || "",
@@ -112,7 +106,7 @@ export const reportRouter = createTRPCRouter({
 
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/${postDetails.user.username}/${postDetails.slug}`,
+            url: `${getAppOrigin()}/${postDetails.user.username}/${postDetails.slug}`,
             id,
             email: postDetails.user.email || "",
             title: postDetails.title,
@@ -161,7 +155,7 @@ export const reportRouter = createTRPCRouter({
           const articlePath = articleDetails.slug || articleDetails.shortId;
           const report = {
             reason: body,
-            url: `${getBaseUrl()}/${articleDetails.sourceSlug}/${articlePath}`,
+            url: `${getAppOrigin()}/${articleDetails.sourceSlug}/${articlePath}`,
             id: String(id),
             email: "", // Feed articles don't have a user email
             title: articleDetails.title,
