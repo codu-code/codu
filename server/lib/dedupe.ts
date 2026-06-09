@@ -1,8 +1,15 @@
 import { and, eq, gte, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 import { db } from "@/server/db";
 import { posts } from "@/server/db/schema";
 import { FRESHNESS_MONTHS } from "@/server/lib/freshness";
+import { normalizeUrl } from "@/server/lib/normalizeUrl";
+import {
+  gatePublish,
+  isModerationEnabled,
+  type GateResult,
+} from "@/server/lib/moderation";
 
 // Re-export the pure freshness predicate so callers can pull everything from
 // `dedupe`. The logic itself lives in `freshness.ts` (no DB import) so it can be
@@ -74,4 +81,69 @@ export async function findSimilarDiscussion(
         similarity: Number((row as { sim: unknown }).sim),
       }
     : null;
+}
+
+// Above this best-match similarity a discussion/question is treated as a hard
+// duplicate (CONFLICT). Between findSimilarDiscussion's floor (0.5) and this,
+// the post is allowed through but routed to human review.
+const HARD_DUPLICATE_SIMILARITY = 0.8;
+
+/**
+ * The single entry point the publish path uses. Run the DB-backed dedupe
+ * pre-checks, then delegate the published-vs-in_review decision to the pure
+ * `gatePublish`. Returns the {status, publishedAt, moderationNote,
+ * externalUrlNormalized} the caller writes into the row.
+ *
+ * Only call this on a GOING-LIVE transition (publishing) — drafts/non-status
+ * updates must not be deduped or gated.
+ *
+ * Dedupe only runs when moderation is ENABLED, so the moderation-off path keeps
+ * its exact previous behaviour (everything publishes immediately, no dedupe).
+ *
+ * Throws TRPCError CONFLICT for a hard duplicate; that propagates to the client
+ * so it can point the author at the existing post.
+ */
+export async function runDedupeAndGate(input: {
+  type: string;
+  title: string;
+  body?: string | null;
+  externalUrl?: string | null;
+}): Promise<GateResult> {
+  let forceInReview = false;
+
+  if (isModerationEnabled()) {
+    // Link/resource: reject an exact (normalized) repost that's still fresh.
+    if (
+      (input.type === "link" || input.type === "resource") &&
+      input.externalUrl
+    ) {
+      const normalized = normalizeUrl(input.externalUrl);
+      if (normalized) {
+        const dupe = await findFreshDuplicateLink(normalized);
+        if (dupe) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message:
+              "This link was already shared on Codú recently. Find it on the site instead of reposting.",
+          });
+        }
+      }
+    }
+
+    // Discussion/question: reject a near-identical recent title; a weaker
+    // best-match (0.5–0.8) is allowed but routed to human review.
+    if (input.type === "discussion" || input.type === "question") {
+      const similar = await findSimilarDiscussion(input.title);
+      if (similar && similar.similarity >= HARD_DUPLICATE_SIMILARITY) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            "This has already been asked recently — join the existing discussion.",
+        });
+      }
+      forceInReview = !!similar;
+    }
+  }
+
+  return gatePublish({ ...input, forceInReview });
 }

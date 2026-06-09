@@ -6,6 +6,8 @@
 
 import sendEmail from "@/utils/sendEmail";
 import { getAppOrigin } from "@/server/lib/url";
+import { autoReview } from "@/server/lib/autoReview";
+import { normalizeUrl } from "@/server/lib/normalizeUrl";
 
 /** Escape user-controlled text before interpolating into email HTML. */
 function escapeHtml(value: string): string {
@@ -99,4 +101,94 @@ export function screenContent({
   }
 
   return { ok: reasons.length === 0, linkCount, reasons };
+}
+
+export interface GateResult {
+  status: "published" | "in_review";
+  publishedAt: string | null;
+  moderationNote: string | null;
+  externalUrlNormalized: string | null;
+}
+
+/**
+ * Decide the stored status for a post the author is trying to publish.
+ *  - moderation disabled -> published immediately
+ *  - articles ALWAYS go to in_review (human editorial gate); auto-review still
+ *    runs so its verdict is recorded as an advisory note for the reviewer
+ *  - forceInReview (set by the caller for a "very similar" discussion) -> in_review
+ *  - everything else -> autoReview verdict decides: allow->published, review->in_review
+ *
+ * NOTE: hard-duplicate rejection (CONFLICT) is done by the CALLER before this,
+ * because it needs to surface the existing post to the user. This helper only
+ * decides published-vs-in_review and computes the note + normalized url.
+ *
+ * Kept DB-free on purpose: it only imports autoReview (no db) and normalizeUrl,
+ * so it can be unit tested without booting the env/db layer. The DB-backed
+ * dedupe pre-checks live in `dedupe.ts` (`runDedupeAndGate`).
+ */
+export async function gatePublish(input: {
+  type: string;
+  title: string;
+  body?: string | null;
+  externalUrl?: string | null;
+  forceInReview?: boolean;
+}): Promise<GateResult> {
+  const externalUrlNormalized = input.externalUrl
+    ? normalizeUrl(input.externalUrl)
+    : null;
+  const nowIso = new Date().toISOString();
+
+  if (!isModerationEnabled()) {
+    return {
+      status: "published",
+      publishedAt: nowIso,
+      moderationNote: null,
+      externalUrlNormalized,
+    };
+  }
+
+  if (input.type === "article") {
+    // Articles are always human-reviewed; auto-review is advisory only here.
+    const v = await autoReview(input);
+    return {
+      status: "in_review",
+      publishedAt: null,
+      moderationNote: noteFrom(v),
+      externalUrlNormalized,
+    };
+  }
+
+  if (input.forceInReview) {
+    return {
+      status: "in_review",
+      publishedAt: null,
+      moderationNote: "similar-existing",
+      externalUrlNormalized,
+    };
+  }
+
+  const v = await autoReview(input);
+  if (v.verdict === "review") {
+    return {
+      status: "in_review",
+      publishedAt: null,
+      moderationNote: noteFrom(v),
+      externalUrlNormalized,
+    };
+  }
+  return {
+    status: "published",
+    publishedAt: nowIso,
+    moderationNote: null,
+    externalUrlNormalized,
+  };
+}
+
+/** Turn a review verdict into a short reviewer note; null for an allow. */
+function noteFrom(v: {
+  verdict: string;
+  category: string;
+  reason: string;
+}): string | null {
+  return v.verdict === "review" ? `${v.category}: ${v.reason}`.slice(0, 500) : null;
 }
