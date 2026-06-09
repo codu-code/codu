@@ -17,6 +17,7 @@ import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEma
 import {
   comment,
   post,
+  posts,
   user,
   content_report,
   aggregated_article,
@@ -196,14 +197,17 @@ export const reportRouter = createTRPCRouter({
   create: protectedProcedure
     .input(CreateReportSchema)
     .mutation(async ({ input, ctx }) => {
-      const { contentId, discussionId, reason, details } = input;
+      const { contentId, discussionId, postId, reason, details } = input;
       const reporterId = ctx.session.user.id;
 
-      // Validate that at least one target is provided
-      if (!contentId && !discussionId) {
+      // Validate that exactly one target is provided
+      const targetCount = [contentId, discussionId, postId].filter(
+        (t) => t !== undefined && t !== null,
+      ).length;
+      if (targetCount !== 1) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Must provide either contentId or discussionId",
+          message: "Must provide exactly one of contentId, discussionId, postId",
         });
       }
 
@@ -235,14 +239,31 @@ export const reportRouter = createTRPCRouter({
         }
       }
 
-      // Check for duplicate reports from same user
+      // Validate post exists if provided
+      if (postId) {
+        const postItem = await db.query.posts.findFirst({
+          where: (p, { eq }) => eq(p.id, postId),
+          columns: { id: true },
+        });
+        if (!postItem) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Post not found",
+          });
+        }
+      }
+
+      // Check for duplicate PENDING report from same user on the same target
       const existingReport = await db.query.content_report.findFirst({
         where: (r, { eq, and }) =>
           and(
             eq(r.reporterId, reporterId),
+            eq(r.status, "PENDING"),
             contentId
               ? eq(r.contentId, contentId)
-              : eq(r.discussionId, discussionId!),
+              : discussionId
+                ? eq(r.discussionId, discussionId)
+                : eq(r.postId, postId!),
           ),
       });
 
@@ -260,6 +281,7 @@ export const reportRouter = createTRPCRouter({
         .values({
           contentId: contentId ?? null,
           discussionId: discussionId ?? null,
+          postId: postId ?? null,
           reporterId,
           reason,
           details: details ?? null,
@@ -267,6 +289,49 @@ export const reportRouter = createTRPCRouter({
           createdAt: now,
         })
         .returning();
+
+      // Notify the admin of a new post flag — fire-and-forget, never blocks the
+      // report and never changes the post's status (a human acts on the queue).
+      if (postId && process.env.ADMIN_EMAIL) {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        void (async () => {
+          try {
+            const [postDetails] = await db
+              .select({
+                title: posts.title,
+                authorEmail: user.email,
+                authorId: user.id,
+                authorUsername: user.username,
+              })
+              .from(posts)
+              .innerJoin(user, eq(user.id, posts.authorId))
+              .where(eq(posts.id, postId));
+
+            const htmlMessage = createArticleReportEmailTemplate({
+              reason: details || reason,
+              url: `${getAppOrigin()}/admin/moderation?item=${postId}`,
+              id: postId,
+              email: postDetails?.authorEmail || "",
+              title: postDetails?.title || "",
+              userId: postDetails?.authorId || "",
+              username: postDetails?.authorUsername || "",
+              reportedBy: {
+                username: ctx.session.user.username,
+                id: ctx.session.user.id,
+                email: ctx.session.user.email || "",
+              },
+            });
+
+            await sendEmail({
+              recipient: adminEmail,
+              htmlMessage,
+              subject: "A user has reported a post - codu.co",
+            });
+          } catch (error) {
+            Sentry.captureException(error);
+          }
+        })();
+      }
 
       return { id: report.id, message: "Report submitted successfully" };
     }),

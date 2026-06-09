@@ -39,8 +39,9 @@ export type ReportInput = z.TypeOf<typeof ReportSchema>;
 
 // New unified report schema
 export const CreateReportSchema = z.object({
-  contentId: z.string().optional(), // For content reports
+  contentId: z.string().optional(), // For legacy content reports
   discussionId: z.number().optional(), // For discussion reports
+  postId: z.string().optional(), // For post reports (posts.id is a uuid)
   reason: ReportReasonSchema,
   details: z.string().max(1000).optional(), // Optional additional details
 });
