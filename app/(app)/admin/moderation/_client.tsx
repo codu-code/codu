@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   FlagIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
   ArrowLeftIcon,
+  EyeSlashIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
@@ -60,6 +63,15 @@ const ModerationQueue = () => {
   );
   const utils = api.useUtils();
 
+  // Deep-link from the moderation email: ?item=<postId> highlights/scrolls the
+  // matching queue item (in either the awaiting-review or reported-live list).
+  const searchParams = useSearchParams();
+  const highlightedItem = searchParams.get("item");
+  const highlightRef = useRef<HTMLDivElement | null>(null);
+
+  // Optional per-item "Decline" note, keyed by postId.
+  const [declineNotes, setDeclineNotes] = useState<Record<string, string>>({});
+
   const { data, isLoading } = api.report.getAll.useQuery({
     status: statusFilter,
     limit: 20,
@@ -82,13 +94,23 @@ const ModerationQueue = () => {
   // Auto-moderation queue (posts awaiting review).
   const inReview = api.admin.listInReview.useQuery();
 
+  // Live posts that have been flagged by users (open reports on published posts).
+  const reportedPosts = api.admin.listReportedPosts.useQuery();
+
   const { mutate: moderatePost, isPending: isModerating } =
     api.admin.moderatePost.useMutation({
       onSuccess: (_data, variables) => {
         toast.success(
-          variables.decision === "approve" ? "Post approved" : "Post rejected",
+          variables.decision === "approve"
+            ? "Post approved"
+            : variables.decision === "hide"
+              ? "Post hidden and moved to review"
+              : "Post declined",
         );
         utils.admin.listInReview.invalidate();
+        utils.admin.listReportedPosts.invalidate();
+        utils.report.getAll.invalidate();
+        utils.report.getCounts.invalidate();
       },
       onError: () => {
         toast.error("Failed to update post");
@@ -110,6 +132,37 @@ const ModerationQueue = () => {
       actionTaken: "Content removed or user warned",
     });
   };
+
+  // Dismiss all open reports for a reported-live post (the post stays published).
+  const handleDismissReportedPost = (reportIds: number[]) => {
+    reportIds.forEach((reportId) =>
+      reviewReport({
+        reportId,
+        status: "DISMISSED",
+        actionTaken: "Reports dismissed by admin",
+      }),
+    );
+    utils.admin.listReportedPosts.invalidate();
+  };
+
+  // Scroll to + highlight the ?item=<postId> deep-linked card once data loads.
+  useEffect(() => {
+    if (!highlightedItem) return;
+    if (inReview.isLoading || reportedPosts.isLoading) return;
+    const node = highlightRef.current;
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [
+    highlightedItem,
+    inReview.isLoading,
+    reportedPosts.isLoading,
+    inReview.data,
+    reportedPosts.data,
+  ]);
+
+  const highlightClass = (id: string) =>
+    highlightedItem === id ? "ring-2 ring-accent rounded-lg" : "";
 
   const getRelativeTime = (dateStr: string): string => {
     const now = new Date();
@@ -194,36 +247,160 @@ const ModerationQueue = () => {
           {inReview.data?.map((post) => (
             <div
               key={post.id}
-              className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-3 last:border-0 last:pb-0"
+              ref={highlightedItem === post.id ? highlightRef : undefined}
+              className={`border-b border-hairline pb-3 last:border-0 last:pb-0 ${highlightClass(
+                post.id,
+              )}`}
             >
-              <div className="min-w-0">
-                <p className="truncate font-display font-semibold text-fg">
-                  {post.title || "Untitled"}
-                </p>
-                <p className="font-mono text-xs text-faint">
-                  @{post.authorUsername ?? "unknown"} ·{" "}
-                  {getRelativeTime(post.createdAt!)}
-                </p>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-display font-semibold text-fg">
+                    {post.title || "Untitled"}
+                  </p>
+                  <p className="font-mono text-xs text-faint">
+                    @{post.authorUsername ?? "unknown"} ·{" "}
+                    {getRelativeTime(post.createdAt!)}
+                  </p>
+                  {post.moderationNote && (
+                    <p className="mt-1 text-sm text-muted">
+                      <span className="font-medium text-fg">Reason:</span>{" "}
+                      {post.moderationNote}
+                    </p>
+                  )}
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    className="primary-button"
+                    disabled={isModerating}
+                    onClick={() =>
+                      moderatePost({ id: post.id, decision: "approve" })
+                    }
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="secondary-button"
+                    disabled={isModerating}
+                    onClick={() =>
+                      moderatePost({
+                        id: post.id,
+                        decision: "reject",
+                        note: declineNotes[post.id]?.trim() || undefined,
+                      })
+                    }
+                  >
+                    Decline
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  className="primary-button"
-                  disabled={isModerating}
-                  onClick={() =>
-                    moderatePost({ id: post.id, decision: "approve" })
-                  }
-                >
-                  Approve
-                </button>
-                <button
-                  className="secondary-button"
-                  disabled={isModerating}
-                  onClick={() =>
-                    moderatePost({ id: post.id, decision: "reject" })
-                  }
-                >
-                  Reject
-                </button>
+              <input
+                type="text"
+                value={declineNotes[post.id] ?? ""}
+                onChange={(e) =>
+                  setDeclineNotes((prev) => ({
+                    ...prev,
+                    [post.id]: e.target.value,
+                  }))
+                }
+                placeholder="Optional note shown to the author when declined…"
+                className="mt-2 w-full rounded border border-hairline bg-inset px-3 py-1.5 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Reported (live) — published posts users have flagged */}
+      <section className="card mb-8 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="eyebrow m-0">
+            <span className="slash">{"// "}</span>reported (live)
+          </p>
+          <span className="rounded-full bg-danger/12 px-2 py-0.5 font-mono text-xs text-danger">
+            {reportedPosts.data?.length ?? 0} flagged
+          </span>
+        </div>
+
+        {reportedPosts.isLoading && (
+          <p className="font-mono text-xs text-faint">Loading…</p>
+        )}
+
+        {!reportedPosts.isLoading &&
+          (reportedPosts.data?.length ?? 0) === 0 && (
+            <p className="font-mono text-xs text-faint">
+              {"// no flagged live posts"}
+            </p>
+          )}
+
+        <div className="space-y-3">
+          {reportedPosts.data?.map((post) => (
+            <div
+              key={post.id}
+              ref={highlightedItem === post.id ? highlightRef : undefined}
+              className={`border-b border-hairline pb-3 last:border-0 last:pb-0 ${highlightClass(
+                post.id,
+              )}`}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-display font-semibold text-fg">
+                    {post.title || "Untitled"}
+                  </p>
+                  <p className="font-mono text-xs text-faint">
+                    @{post.authorUsername ?? "unknown"} ·{" "}
+                    {post.reportCount} report
+                    {post.reportCount === 1 ? "" : "s"}
+                    {post.latestReportAt
+                      ? ` · ${getRelativeTime(post.latestReportAt)}`
+                      : ""}
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`${chipBase} ${
+                        reasonColors[post.latestReason as ReportReason] ??
+                        "border border-hairline text-muted"
+                      }`}
+                    >
+                      {reasonLabels[post.latestReason as ReportReason] ??
+                        post.latestReason}
+                    </span>
+                    {post.latestDetails && (
+                      <span className="text-sm text-muted">
+                        {post.latestDetails}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {post.authorUsername && post.slug && (
+                    <Link
+                      href={`/${post.authorUsername}/${post.slug}`}
+                      target="_blank"
+                      className="secondary-button px-3 py-1.5 text-sm"
+                    >
+                      <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                      View
+                    </Link>
+                  )}
+                  <button
+                    className="secondary-button px-3 py-1.5 text-sm text-danger"
+                    disabled={isModerating}
+                    onClick={() =>
+                      moderatePost({ id: post.id, decision: "hide" })
+                    }
+                  >
+                    <EyeSlashIcon className="h-4 w-4" />
+                    Hide
+                  </button>
+                  <button
+                    className="secondary-button px-3 py-1.5 text-sm"
+                    disabled={isReviewing}
+                    onClick={() => handleDismissReportedPost(post.reportIds)}
+                  >
+                    <XCircleIcon className="h-4 w-4" />
+                    Dismiss
+                  </button>
+                </div>
               </div>
             </div>
           ))}

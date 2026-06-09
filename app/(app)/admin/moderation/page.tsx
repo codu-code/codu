@@ -1,5 +1,6 @@
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import ModerationQueue from "./_client";
 
 export const metadata = {
@@ -14,5 +15,9 @@ export default async function Page() {
     redirect("/");
   }
 
-  return <ModerationQueue />;
+  return (
+    <Suspense>
+      <ModerationQueue />
+    </Suspense>
+  );
 }
