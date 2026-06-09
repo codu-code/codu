@@ -46,6 +46,40 @@ export class IamStack extends cdk.Stack {
       }),
     );
 
+    // Bedrock — auto-review calls Claude Haiku 4.5 via the Bedrock Runtime.
+    //
+    // Haiku 4.5 is invoked through a CROSS-REGION INFERENCE PROFILE (the EU
+    // `eu.anthropic.claude-haiku-4-5-*` / US `us.anthropic.claude-haiku-4-5-*`
+    // profile), not the bare foundation-model id. When you InvokeModel against
+    // an inference profile, IAM authorizes against BOTH:
+    //   1. the inference-profile ARN, AND
+    //   2. the underlying foundation-model ARN in EVERY region the profile may
+    //      route the request to.
+    // So a grant that names only one of them — or only the stack's own region —
+    // will intermittently fail with AccessDenied as the profile fans out.
+    //
+    // We deliberately keep this slightly broad to avoid blocking invocation:
+    //  - foundation-model: region wildcard (foundation-model ARNs are
+    //    region-scoped but account-less, hence the empty `::`) so it covers
+    //    eu-west-1 (our default BEDROCK_REGION) and any sibling region the
+    //    EU/US profile routes to.
+    //  - inference-profile: scoped to this account, any region/profile id.
+    // TIGHTEN LATER: once the exact profile id + region set is locked, replace
+    // the wildcards with the specific `eu.`/`us.` profile ARN(s) and the precise
+    // region list (e.g. eu-west-1/eu-west-3/eu-central-1/eu-north-1).
+    appUser.addToPolicy(
+      new iam.PolicyStatement({
+        sid: "AppBedrockInvoke",
+        actions: ["bedrock:InvokeModel"],
+        resources: [
+          // Underlying foundation model, in any region the profile routes to.
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+          // The cross-region inference profile in this account.
+          `arn:aws:bedrock:*:${this.account}:inference-profile/*`,
+        ],
+      }),
+    );
+
     const accessKey = new iam.CfnAccessKey(this, "AppUserAccessKey", {
       userName: appUser.userName,
     });
