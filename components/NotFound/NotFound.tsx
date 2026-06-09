@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Eyebrow } from "@/components/ds";
+import { useSession } from "next-auth/react";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -90,8 +90,8 @@ const resolveRoute = (q: string): Route | null => {
   );
 };
 
-const PROMPT: Seg[] = [
-  seg("guest@codu", C.user),
+const makePrompt = (handle: string): Seg[] => [
+  seg(`${handle}@codu`, C.user),
   seg(":", C.punc),
   seg("~/", C.path),
   seg("$ ", C.punc),
@@ -119,6 +119,14 @@ interface TerminalProps {
 }
 
 function Terminal({ route, onNav, onSearch, onJoin }: TerminalProps) {
+  const { data: session } = useSession();
+  // The handle `whoami` greets you with when logged in (real shells print the
+  // current user). Falls back to display name, then a generic token.
+  const username =
+    session?.user?.username || session?.user?.name || null;
+  // Personalize the shell prompt with the logged-in handle; guests stay `guest`.
+  const prompt = makePrompt(username ?? "guest");
+
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [booted, setBooted] = useState(0); // how many intro lines are visible
@@ -219,7 +227,16 @@ function Terminal({ route, onNav, onSearch, onJoin }: TerminalProps) {
       onSearch();
       return [line(seg("opening search… ", C.out), seg("(⌘K)", C.faint))];
     }
-    if (n === "whoami")
+    if (n === "whoami") {
+      // Logged in: print the username, like a real `whoami`. Logged out: keep
+      // the guest greeting that nudges you to join.
+      if (username)
+        return [
+          line(
+            seg(`${username}@codu`, C.user),
+            seg(" — you're in. welcome back.", C.out),
+          ),
+        ];
       return [
         line(seg("guest@codu", C.user), seg(" — just passing through.", C.out)),
         line(
@@ -228,6 +245,7 @@ function Terminal({ route, onNav, onSearch, onJoin }: TerminalProps) {
           seg(" to build with us.", C.out),
         ),
       ];
+    }
     if (n === "pwd") return [line(seg("/dev/null/404", C.out))];
     if (n === "date") return [line(seg(new Date().toString(), C.out))];
     if (n === "echo") return [line(seg(args.join(" "), C.out))];
@@ -303,7 +321,7 @@ function Terminal({ route, onNav, onSearch, onJoin }: TerminalProps) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const raw = input;
-    const echo: Entry = { type: "line", parts: [...PROMPT, seg(raw, C.key)] };
+    const echo: Entry = { type: "line", parts: [...prompt, seg(raw, C.key)] };
     const out = run(raw);
     if (raw.trim()) cmdHist.current = [...cmdHist.current, raw];
     histIdx.current = -1;
@@ -360,7 +378,7 @@ function Terminal({ route, onNav, onSearch, onJoin }: TerminalProps) {
             onSubmit={submit}
             style={{ display: "flex", alignItems: "center", marginTop: 2 }}
           >
-            {PROMPT.map((p, i) => (
+            {prompt.map((p, i) => (
               <span key={i} style={{ color: p.c, whiteSpace: "pre" }}>
                 {p.t}
               </span>
@@ -403,7 +421,7 @@ export default function NotFound() {
   const join = () => router.push("/get-started");
 
   return (
-    <div className="relative flex flex-col items-center overflow-hidden px-4 pb-16 pt-10">
+    <div className="relative flex flex-col items-center overflow-hidden px-4 pb-16">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-[-10%] bg-grid-dots bg-[length:22px_22px] opacity-40"
@@ -415,10 +433,6 @@ export default function NotFound() {
       />
 
       <div className="relative w-full max-w-[600px]">
-        <Eyebrow className="mb-4 text-center">
-          http 404 · route not found
-        </Eyebrow>
-
         <Terminal
           route={pathname || "/the-page-you-wanted"}
           onNav={nav}
