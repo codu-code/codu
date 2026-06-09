@@ -878,4 +878,6 @@ E2E: post a link, then post the same link again → second submit shows the "alr
 
 - **Secrets:** the pasted CDK keys are temporary STS (deploy-only); never commit them. Runtime Bedrock uses the app IAM user's `ACCESS_KEY`/`SECRET_KEY`.
 - **Bedrock region:** Haiku must be enabled in `BEDROCK_REGION` for the account; may require requesting model access in the Bedrock console + a regional inference profile id.
+- **Bedrock model id (confirmed enabled in dev+prod, 2026-06-09):** `anthropic.claude-haiku-4-5-20251001-v1:0`. Use as `BEDROCK_MODEL_ID`. At implementation, check whether the region requires a cross-region inference-profile prefix (e.g. `eu.anthropic.claude-haiku-4-5-20251001-v1:0` / `us.anthropic...`) vs the bare foundation-model id; the IAM grant (Task 8.1) must cover whichever ARN form is used.
 - **Latency:** synchronous link-fetch (≤4s) + Haiku (~1-2s) on publish is acceptable per design; loader covers it; all fail open.
+- **Dedupe TOCTOU:** link/discussion dedupe is check-then-insert, and `posts_external_url_normalized_idx` is non-unique, so two concurrent publishes of the same URL can both pass the check and both publish. Acceptable as spam-friction (moderation is default-off); the real fix, if dedupe is ever treated as authoritative, is a partial unique index `(externalUrlNormalized) WHERE status = 'published'`.

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { award } from "@/server/lib/engagement";
-import { notifyAdminOfReview } from "@/server/lib/moderation";
+import { applyGate, notifyAdminOfReview } from "@/server/lib/moderation";
 import { runDedupeAndGate } from "@/server/lib/dedupe";
 import {
   GetFeedSchema,
@@ -480,6 +480,9 @@ export const postRouter = createTRPCRouter({
         : null;
       const dbStatus = gate ? gate.status : input.status;
 
+      // Create writes the gate fields inline (typed insert) rather than via
+      // applyGate; gate may be null on the draft path, and the `gate?.X ?? null`
+      // form already keeps all four fields in sync, so there's no drift to fix.
       const [newPost] = await ctx.db
         .insert(posts)
         .values({
@@ -598,6 +601,9 @@ export const postRouter = createTRPCRouter({
       // setting status here instead of calling publish. Gate input is completed
       // from the existing row (type/externalUrl aren't in this input schema).
       // May throw CONFLICT for a hard duplicate.
+      // Update handlers gate on `!== "published"` (so a scheduled→published flip
+      // via update IS re-gated); publish handlers gate on `=== "draft"` only. The
+      // asymmetry is intentional and mirrors pre-existing behaviour.
       const goingLive =
         input.status === "published" && existing[0].status !== "published";
       let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;
@@ -609,14 +615,15 @@ export const postRouter = createTRPCRouter({
             body: input.body ?? existing[0].body,
             externalUrl: existing[0].externalUrl,
           });
-          updateData.status = gate.status;
-          updateData.moderationNote = gate.moderationNote;
-          updateData.externalUrlNormalized = gate.externalUrlNormalized;
+          // Writes all four gate fields (status, publishedAt, moderationNote,
+          // externalUrlNormalized). publishedAt is overwritten just below to
+          // honour an explicit scheduled publishedAt on the published path.
+          applyGate(updateData, gate);
           if (gate.status === "published") {
             // Honour an explicit scheduled publishedAt, else use the gate's now.
             updateData.publishedAt = input.publishedAt ?? gate.publishedAt;
           }
-          // in_review: leave publishedAt unset — admin approval sets it.
+          // in_review: applyGate already left publishedAt null — admin approval sets it.
         } else {
           updateData.status = input.status;
           if (input.status === "published" && input.publishedAt) {
@@ -1147,6 +1154,9 @@ export const postRouter = createTRPCRouter({
       const updateData: Record<string, unknown> = {};
 
       // First-time go-live (draft → live) is what the gate guards.
+      // Note the asymmetry vs update: publish gates on `=== "draft"` only, so a
+      // scheduled→published promotion via publish is intentionally NOT re-gated
+      // (mirrors pre-existing behaviour); update gates on `!== "published"`.
       const goingLive = input.published && existing[0].status === "draft";
 
       if (input.published) {
@@ -1166,14 +1176,15 @@ export const postRouter = createTRPCRouter({
             body: existing[0].body,
             externalUrl: existing[0].externalUrl,
           });
+          // Writes status, publishedAt, moderationNote, externalUrlNormalized.
+          // For the published path the scheduling logic below overwrites
+          // status/publishedAt to preserve `scheduled` + future publishTime.
+          applyGate(updateData, gate);
           if (existing[0].title) {
             updateData.slug = generateSlug(existing[0].title);
           }
 
           if (gate.status === "in_review") {
-            updateData.status = "in_review";
-            updateData.moderationNote = gate.moderationNote;
-            updateData.externalUrlNormalized = gate.externalUrlNormalized;
             // No publishedAt while in review — admin approval sets it.
             const [reviewed] = await ctx.db
               .update(posts)
@@ -1190,9 +1201,8 @@ export const postRouter = createTRPCRouter({
             return reviewed;
           }
 
-          // gate says published — record the normalized url and fall through to
-          // the publishedAt/scheduling logic below (preserving scheduled state).
-          updateData.externalUrlNormalized = gate.externalUrlNormalized;
+          // gate says published — fall through to the publishedAt/scheduling
+          // logic below (preserving scheduled state).
         }
 
         updateData.status = "published";

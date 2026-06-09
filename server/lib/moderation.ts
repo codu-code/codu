@@ -184,6 +184,25 @@ export async function gatePublish(input: {
   };
 }
 
+/**
+ * Copy the gate decision onto a drizzle insert/update values object.
+ *
+ * Writes all four gate fields (status, publishedAt, moderationNote,
+ * externalUrlNormalized) so call sites stop hand-copying them and can't drift
+ * (e.g. forgetting moderationNote on one path). Handlers with their own
+ * publishedAt scheduling (post.publish/update, content.publish) set publishedAt
+ * explicitly AFTER calling this — see those handlers.
+ */
+export function applyGate(
+  values: Record<string, unknown>,
+  gate: GateResult,
+): void {
+  values.status = gate.status;
+  values.publishedAt = gate.publishedAt;
+  values.moderationNote = gate.moderationNote;
+  values.externalUrlNormalized = gate.externalUrlNormalized;
+}
+
 /** Turn a review verdict into a short reviewer note; null for an allow. */
 function noteFrom(v: {
   verdict: string;

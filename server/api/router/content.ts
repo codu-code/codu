@@ -44,7 +44,7 @@ import {
   inArray,
 } from "drizzle-orm";
 import { increment } from "./utils";
-import { notifyAdminOfReview } from "@/server/lib/moderation";
+import { applyGate, notifyAdminOfReview } from "@/server/lib/moderation";
 import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
@@ -574,6 +574,9 @@ export const contentRouter = createTRPCRouter({
         : null;
       const dbStatus = gate ? gate.status : "draft";
 
+      // Create writes the gate fields inline (typed insert) rather than via
+      // applyGate; gate may be null on the draft path, and the `gate?.X ?? null`
+      // form already keeps all four fields in sync, so there's no drift to fix.
       const [newContent] = await ctx.db
         .insert(posts)
         .values({
@@ -706,6 +709,9 @@ export const contentRouter = createTRPCRouter({
       // setting published:true here instead of calling publish. Gate input is
       // completed from the existing row (title/body/externalUrl), since update
       // input may omit them. May throw CONFLICT for a hard duplicate.
+      // Update handlers gate on `!== "published"` (so a scheduled→published flip
+      // via update IS re-gated); publish handlers gate on `=== "draft"` only. The
+      // asymmetry is intentional and mirrors pre-existing behaviour.
       const goingLive =
         input.published === true && existing[0].status !== "published";
       let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;
@@ -720,11 +726,10 @@ export const contentRouter = createTRPCRouter({
                 ? input.externalUrl
                 : existing[0].externalUrl,
           });
-          updateData.status = gate.status;
-          updateData.moderationNote = gate.moderationNote;
-          updateData.externalUrlNormalized = gate.externalUrlNormalized;
-          // publishedAt is set on publish, left null while in review.
-          if (gate.publishedAt) updateData.publishedAt = gate.publishedAt;
+          // Writes all four gate fields. publishedAt is the gate's now when
+          // published, null while in review (admin approval sets it). This
+          // handler has no publishTime scheduling, so no override is needed.
+          applyGate(updateData, gate);
         } else {
           // Not going live (e.g. unpublish, or already published) — preserve the
           // previous straightforward status flip with no gating.
@@ -1314,6 +1319,9 @@ export const contentRouter = createTRPCRouter({
 
       // Whether this publish is a first-time go-live (draft → live), which is
       // what the gate guards. Republishing an already-published post isn't gated.
+      // Note the asymmetry vs update: publish gates on `=== "draft"` only, so a
+      // scheduled→published promotion via publish is intentionally NOT re-gated
+      // (mirrors pre-existing behaviour); update gates on `!== "published"`.
       const goingLive = input.published && existing[0].status === "draft";
       let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;
 
@@ -1335,9 +1343,10 @@ export const contentRouter = createTRPCRouter({
             body: existing[0].body,
             externalUrl: existing[0].externalUrl,
           });
-          updateData.status = gate.status;
-          updateData.moderationNote = gate.moderationNote;
-          updateData.externalUrlNormalized = gate.externalUrlNormalized;
+          // Writes all four gate fields. On the published path publishedAt is
+          // overwritten below to honour an explicit publishTime; on in_review it
+          // stays null (admin approval sets it).
+          applyGate(updateData, gate);
           // Generate the slug now so the post has a stable URL once live/approved.
           if (existing[0].title) {
             updateData.slug = generateSlug(existing[0].title);
