@@ -1,11 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import { award } from "@/server/lib/engagement";
-import {
-  isModerationEnabled,
-  screenContent,
-  notifyAdminOfReview,
-} from "@/server/lib/moderation";
+import { notifyAdminOfReview } from "@/server/lib/moderation";
+import { runDedupeAndGate } from "@/server/lib/dedupe";
 import {
   GetFeedSchema,
   GetPostByIdSchema,
@@ -469,12 +466,19 @@ export const postRouter = createTRPCRouter({
       const slug = generateSlug(input.title);
       const readingTime = calculateReadTime(input.body);
 
-      // Moderation gate (default off): route would-be-live creates to in_review so a client can't self-publish around review.
-      const moderated = input.status === "published" && isModerationEnabled();
-      if (moderated) {
-        screenContent({ title: input.title, body: input.body });
-      }
-      const dbStatus = moderated ? "in_review" : input.status;
+      // Going-live gate (dedupe + moderation): route would-be-live creates
+      // through review so a client can't self-publish around it; drafts stay
+      // drafts. May throw CONFLICT for a hard duplicate (propagates to client).
+      const goingLive = input.status === "published";
+      const gate = goingLive
+        ? await runDedupeAndGate({
+            type: input.type,
+            title: input.title,
+            body: input.body,
+            externalUrl: input.externalUrl,
+          })
+        : null;
+      const dbStatus = gate ? gate.status : input.status;
 
       const [newPost] = await ctx.db
         .insert(posts)
@@ -484,22 +488,21 @@ export const postRouter = createTRPCRouter({
           body: input.body,
           excerpt: input.excerpt,
           externalUrl: input.externalUrl,
+          externalUrlNormalized: gate?.externalUrlNormalized ?? null,
           coverImage: input.coverImage,
           canonicalUrl: input.canonicalUrl,
           authorId,
           slug,
           readingTime,
           status: dbStatus,
+          moderationNote: gate?.moderationNote ?? null,
           // No publishedAt while in review — admin approval sets it.
-          publishedAt:
-            input.status === "published" && !moderated
-              ? new Date().toISOString()
-              : null,
+          publishedAt: gate?.publishedAt ?? null,
           showComments: input.showComments,
         })
         .returning();
 
-      if (newPost && moderated) {
+      if (newPost && gate?.status === "in_review") {
         void notifyAdminOfReview({
           postId: newPost.id,
           title: input.title,
@@ -507,8 +510,8 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Skipped under moderation — the admin-approval path awards on publish instead.
-      if (newPost && input.status === "published" && !moderated) {
+      // Skipped when routed to review — the admin-approval path awards on publish.
+      if (newPost && gate?.status === "published") {
         await award({
           userId: authorId,
           action: "post_published",
@@ -557,6 +560,7 @@ export const postRouter = createTRPCRouter({
           type: posts.type,
           title: posts.title,
           body: posts.body,
+          externalUrl: posts.externalUrl,
           status: posts.status,
         })
         .from(posts)
@@ -589,18 +593,30 @@ export const postRouter = createTRPCRouter({
       if (input.canonicalUrl !== undefined)
         updateData.canonicalUrl = input.canonicalUrl || null;
 
-      // Moderation gate (default off): a draft→live transition via update must go through review too, else a client self-publishes by setting status here instead of calling publish.
+      // Going-live gate (dedupe + moderation): a draft→live transition via
+      // update must go through review too, else a client self-publishes by
+      // setting status here instead of calling publish. Gate input is completed
+      // from the existing row (type/externalUrl aren't in this input schema).
+      // May throw CONFLICT for a hard duplicate.
       const goingLive =
         input.status === "published" && existing[0].status !== "published";
-      const moderated = goingLive && isModerationEnabled();
+      let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;
       if (input.status !== undefined) {
-        if (moderated) {
-          screenContent({
+        if (goingLive) {
+          gate = await runDedupeAndGate({
+            type: existing[0].type,
             title: input.title ?? existing[0].title,
             body: input.body ?? existing[0].body,
+            externalUrl: existing[0].externalUrl,
           });
-          updateData.status = "in_review";
-          // No publishedAt while in review — admin approval sets it.
+          updateData.status = gate.status;
+          updateData.moderationNote = gate.moderationNote;
+          updateData.externalUrlNormalized = gate.externalUrlNormalized;
+          if (gate.status === "published") {
+            // Honour an explicit scheduled publishedAt, else use the gate's now.
+            updateData.publishedAt = input.publishedAt ?? gate.publishedAt;
+          }
+          // in_review: leave publishedAt unset — admin approval sets it.
         } else {
           updateData.status = input.status;
           if (input.status === "published" && input.publishedAt) {
@@ -617,7 +633,7 @@ export const postRouter = createTRPCRouter({
         .where(eq(posts.id, input.id))
         .returning();
 
-      if (updated && moderated) {
+      if (updated && gate?.status === "in_review") {
         void notifyAdminOfReview({
           postId: input.id,
           title: input.title ?? existing[0].title,
@@ -1103,8 +1119,10 @@ export const postRouter = createTRPCRouter({
         .select({
           id: posts.id,
           authorId: posts.authorId,
+          type: posts.type,
           title: posts.title,
           body: posts.body,
+          externalUrl: posts.externalUrl,
           slug: posts.slug,
           status: posts.status,
         })
@@ -1128,6 +1146,9 @@ export const postRouter = createTRPCRouter({
 
       const updateData: Record<string, unknown> = {};
 
+      // First-time go-live (draft → live) is what the gate guards.
+      const goingLive = input.published && existing[0].status === "draft";
+
       if (input.published) {
         // Throttle so a user can't mass-create drafts then publish-loop to flood the feed.
         await enforceRateLimit({
@@ -1137,28 +1158,41 @@ export const postRouter = createTRPCRouter({
           message: "You're posting too fast. Take a breather and try again.",
         });
 
-        // Moderation gate (default off): first-time publish of a draft routes to in_review with no publishedAt/points — admin approval handles both.
-        if (isModerationEnabled() && existing[0].status === "draft") {
-          // Advisory screen only — a failing screen still goes to in_review.
-          screenContent({ title: existing[0].title, body: existing[0].body });
-          updateData.status = "in_review";
+        if (goingLive) {
+          // Dedupe + moderation gate. May throw CONFLICT for a hard duplicate.
+          const gate = await runDedupeAndGate({
+            type: existing[0].type,
+            title: existing[0].title ?? "",
+            body: existing[0].body,
+            externalUrl: existing[0].externalUrl,
+          });
           if (existing[0].title) {
             updateData.slug = generateSlug(existing[0].title);
           }
 
-          const [reviewed] = await ctx.db
-            .update(posts)
-            .set(updateData)
-            .where(eq(posts.id, input.id))
-            .returning();
+          if (gate.status === "in_review") {
+            updateData.status = "in_review";
+            updateData.moderationNote = gate.moderationNote;
+            updateData.externalUrlNormalized = gate.externalUrlNormalized;
+            // No publishedAt while in review — admin approval sets it.
+            const [reviewed] = await ctx.db
+              .update(posts)
+              .set(updateData)
+              .where(eq(posts.id, input.id))
+              .returning();
 
-          void notifyAdminOfReview({
-            postId: input.id,
-            title: existing[0].title,
-            authorName: ctx.session.user.name,
-          });
+            void notifyAdminOfReview({
+              postId: input.id,
+              title: existing[0].title,
+              authorName: ctx.session.user.name,
+            });
 
-          return reviewed;
+            return reviewed;
+          }
+
+          // gate says published — record the normalized url and fall through to
+          // the publishedAt/scheduling logic below (preserving scheduled state).
+          updateData.externalUrlNormalized = gate.externalUrlNormalized;
         }
 
         updateData.status = "published";
@@ -1171,7 +1205,8 @@ export const postRouter = createTRPCRouter({
           updateData.publishedAt = new Date().toISOString();
         }
 
-        if (existing[0].status === "draft" && existing[0].title) {
+        // Regenerate the slug on first publish when the gate path didn't already.
+        if (!goingLive && existing[0].status === "draft" && existing[0].title) {
           updateData.slug = generateSlug(existing[0].title);
         }
       } else {
