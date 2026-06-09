@@ -27,7 +27,7 @@ import {
   tag,
   comments,
 } from "@/server/db/schema";
-import { eq, and, lte, inArray, count, isNull } from "drizzle-orm";
+import { eq, and, lte, inArray, count, isNull, or } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
@@ -40,13 +40,37 @@ import {
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
-async function getUserPost(username: string, postSlug: string) {
+async function getUserPost(
+  username: string,
+  postSlug: string,
+  viewerId?: string | null,
+) {
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
     where: eq(user.username, username),
   });
 
   if (!userRecord) return null;
+
+  // Owner bypass: the post's author may view their own post while it is
+  // awaiting review or has been hidden by a moderator. Everyone else only ever
+  // sees published posts whose publish time has passed (the public filter
+  // below). The author check is `viewerId === post author's id` — a hard
+  // identity match — so non-authors can never reach the relaxed branch.
+  const isAuthor = !!viewerId && viewerId === userRecord.id;
+
+  const visibilityFilter = isAuthor
+    ? or(
+        and(
+          eq(posts.status, "published"),
+          lte(posts.publishedAt, new Date().toISOString()),
+        ),
+        inArray(posts.status, ["in_review", "rejected"]),
+      )
+    : and(
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+      );
 
   const postResults = await db
     .select({
@@ -64,6 +88,7 @@ async function getUserPost(username: string, postSlug: string) {
       upvotesCount: posts.upvotesCount,
       downvotesCount: posts.downvotesCount,
       type: posts.type,
+      moderationNote: posts.moderationNote,
       authorId: user.id,
       authorName: user.name,
       authorImage: user.image,
@@ -76,7 +101,6 @@ async function getUserPost(username: string, postSlug: string) {
       and(
         eq(posts.slug, postSlug),
         eq(posts.authorId, userRecord.id),
-        eq(posts.status, "published"),
         // Text-content kinds all render via the article reader (title + body +
         // discussion). Links have their own resolver below.
         inArray(posts.type, [
@@ -86,7 +110,7 @@ async function getUserPost(username: string, postSlug: string) {
           "til",
           "resource",
         ]),
-        lte(posts.publishedAt, new Date().toISOString()),
+        visibilityFilter,
       ),
     )
     .limit(1);
@@ -443,9 +467,13 @@ const UnifiedPostPage = async (props: Props) => {
 
   const host = (await headers()).get("host") || "";
 
-  const userPost = await getUserPost(username, slug);
+  const userPost = await getUserPost(username, slug, session?.user?.id);
 
   if (userPost) {
+    // Only reachable by the author (the fetcher only returns non-published
+    // posts when viewerId matches the author's id).
+    const isAwaitingReview = userPost.status === "in_review";
+    const isRejected = userPost.status === "rejected";
     const bodyContent = userPost.body ?? "";
     const parsedBody = parseJSON(bodyContent);
     const isTiptapContent = parsedBody?.type === "doc";
@@ -507,6 +535,35 @@ const UnifiedPostPage = async (props: Props) => {
               {userPost.user.name}
             </Link>
           </nav>
+
+          {isAwaitingReview && (
+            <div
+              role="status"
+              className="mb-6 rounded-lg border border-hairline bg-elevated p-4 text-sm text-muted"
+            >
+              <p className="font-medium text-fg">Awaiting review</p>
+              <p className="mt-1">
+                This post is hidden from the feed until a moderator approves it.
+              </p>
+            </div>
+          )}
+
+          {isRejected && (
+            <div
+              role="alert"
+              className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm dark:border-red-800 dark:bg-red-950"
+            >
+              <p className="font-medium text-red-700 dark:text-red-300">
+                Hidden by moderator
+              </p>
+              <p className="mt-1 text-red-600 dark:text-red-400">
+                This post is not visible to anyone else.
+                {userPost.moderationNote
+                  ? ` Reason: ${userPost.moderationNote}`
+                  : ""}
+              </p>
+            </div>
+          )}
 
           <article className="py-2">
             <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
