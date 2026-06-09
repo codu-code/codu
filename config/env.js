@@ -30,6 +30,12 @@ export const env = createEnv({
     ),
     GITHUB_ID: z.string(),
     GITHUB_SECRET: z.string(),
+    // Bedrock + moderation. All optional: deploys without them still validate,
+    // and the auto-review/moderation features stay gated off when unset.
+    BEDROCK_REGION: z.string().optional(),
+    BEDROCK_MODEL_ID: z.string().optional(),
+    MODERATION_ENABLED: z.enum(["true", "false"]).optional(),
+    ADMIN_EMAIL: z.string().email().optional(),
   },
 
   /**
@@ -54,6 +60,10 @@ export const env = createEnv({
     GITHUB_SECRET: process.env.GITHUB_SECRET,
     GITLAB_ID: process.env.GITLAB_ID,
     GITLAB_SECRET: process.env.GITLAB_SECRET,
+    BEDROCK_REGION: process.env.BEDROCK_REGION,
+    BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID,
+    MODERATION_ENABLED: process.env.MODERATION_ENABLED,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
