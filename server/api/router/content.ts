@@ -48,11 +48,8 @@ import { applyGate, notifyAdminOfReview } from "@/server/lib/moderation";
 import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
+import { mintUrlId } from "@/server/lib/url-id";
 import crypto from "crypto";
-import { customAlphabet } from "nanoid";
-
-// Mints the immutable, URL-safe id that becomes the canonical content resolver.
-const mintUrlId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 8);
 
 function generateSlug(title: string): string {
   const baseSlug = title

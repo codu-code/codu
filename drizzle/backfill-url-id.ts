@@ -2,11 +2,8 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { isNull, eq } from "drizzle-orm";
 import postgres from "postgres";
-import { customAlphabet } from "nanoid";
 import { posts } from "../server/db/schema";
-
-const URL_ID_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
-const mintUrlId = customAlphabet(URL_ID_ALPHABET, 8);
+import { mintUrlId } from "../server/lib/url-id";
 
 /**
  * Derive a candidate urlId from an existing slug. Our slugs end in a short
