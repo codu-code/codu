@@ -63,6 +63,9 @@ export function ComposeModal({
     api.content.create.useMutation({
       onSuccess: (post) => {
         void utils.content.getFeed.invalidate();
+        // Posting is an onboarding step — refresh so the first-win celebration
+        // can fire (handled app-wide), even though we stay in this modal.
+        void utils.engagement.onboardingWins.invalidate();
         // Fall back to the feed if we lack the username for the /{username}/{slug} URL.
         const href = post?.slug && username ? `/${username}/${post.slug}` : "/";
         setDone({ href });
@@ -84,11 +87,19 @@ export function ComposeModal({
       : "";
   const { metadata: linkMeta, isLoading: linkMetaLoading } =
     useLinkMetadata(normalisedUrl);
-  const previewImage = linkMeta?.image ?? null;
-  const previewTitle = title.trim() || linkMeta?.title || "";
+  // Auto-fill from the link's OG metadata, but let the user override. The title
+  // field shows the fetched title until they type their own; the fetched
+  // description + image are persisted so the feed card has a blurb + thumbnail.
+  const metaTitle = tab === "link" ? (linkMeta?.title?.trim() ?? "") : "";
+  const metaDescription =
+    tab === "link" ? (linkMeta?.description?.trim() ?? "") : "";
+  const metaImage = tab === "link" ? (linkMeta?.image ?? null) : null;
+  const effectiveTitle = title.trim() || metaTitle;
+  const previewImage = metaImage;
+  const previewTitle = effectiveTitle;
 
   const canPost =
-    title.trim().length > 0 &&
+    effectiveTitle.length > 0 &&
     (tab === "discussion" || (tab === "link" && !!domain));
   const posting = createStatus === "pending";
 
@@ -106,16 +117,27 @@ export function ComposeModal({
 
   const submit = () => {
     if (!canPost || posting) return;
+    const externalUrl =
+      tab === "link"
+        ? url.startsWith("http")
+          ? url
+          : `https://${url}`
+        : null;
+    // Only persist an absolute http(s) image — the create schema requires a
+    // valid URL, and OG tags occasionally hand back relative/garbage values.
+    const httpImage =
+      metaImage && /^https?:\/\//i.test(metaImage) ? metaImage : null;
     create({
       type: tab === "link" ? "LINK" : "DISCUSSION",
-      title: title.trim(),
+      title: effectiveTitle,
       body: body.trim() || null,
-      externalUrl:
-        tab === "link"
-          ? url.startsWith("http")
-            ? url
-            : `https://${url}`
+      externalUrl,
+      // Carry the link's own metadata so the feed card has a blurb + thumbnail.
+      excerpt:
+        tab === "link" && metaDescription
+          ? metaDescription.slice(0, 300)
           : null,
+      imageUrl: tab === "link" ? httpImage : null,
       tags,
       published: true,
     });
@@ -244,7 +266,7 @@ export function ComposeModal({
             ) : (
               <div className="flex flex-col gap-4 px-6 pb-6 pt-5">
                 <textarea
-                  value={title}
+                  value={title || metaTitle}
                   maxLength={TITLE_MAX}
                   onChange={(e) => setTitle(e.target.value.replace(/\n/g, ""))}
                   rows={1}
@@ -304,9 +326,9 @@ export function ComposeModal({
                             <span className="h-2.5 w-2.5 shrink-0 rounded-sm bg-accent" />
                             <span className="truncate">{domain}</span>
                           </div>
-                          {body.trim() && (
+                          {(metaDescription || body.trim()) && (
                             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">
-                              {body.trim()}
+                              {metaDescription || body.trim()}
                             </p>
                           )}
                         </div>
