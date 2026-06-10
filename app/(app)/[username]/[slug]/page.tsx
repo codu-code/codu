@@ -615,12 +615,16 @@ const UnifiedPostPage = async (props: Props) => {
               {!isTiptapContent && <h1>{userPost.title}</h1>}
 
               {isTiptapContent ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: renderedContent ?? <NotFound />,
-                  }}
-                  className="tiptap-content"
-                />
+                renderedContent ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: renderedContent as string,
+                    }}
+                    className="tiptap-content"
+                  />
+                ) : (
+                  <NotFound />
+                )
               ) : (
                 <div>
                   {Markdoc.renderers.react(renderedContent, React, {
@@ -807,12 +811,16 @@ const UnifiedPostPage = async (props: Props) => {
               {!isTiptapContent && <h1>{userArticle.title}</h1>}
 
               {isTiptapContent ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: renderedContent ?? <NotFound />,
-                  }}
-                  className="tiptap-content"
-                />
+                renderedContent ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: renderedContent as string,
+                    }}
+                    className="tiptap-content"
+                  />
+                ) : (
+                  <NotFound />
+                )
               ) : (
                 <div>
                   {Markdoc.renderers.react(renderedContent, React, {
