@@ -14,6 +14,7 @@ import {
   isUserSubscribedToNewsletter,
   manageNewsletterSubscription,
 } from "@/server/lib/newsletter";
+import { isReservedUsername } from "@/server/lib/reserved-usernames";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 import { and, eq, gte } from "drizzle-orm";
@@ -78,6 +79,15 @@ export const profileRouter = createTRPCRouter({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Email not found",
+        });
+      }
+
+      // Usernames share the top-level namespace with routes/content, so block
+      // any handle that would collide with a reserved path.
+      if (isReservedUsername(input.username)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That username is reserved.",
         });
       }
 
