@@ -10,7 +10,8 @@ export const revalidate = 3600;
 const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
   "/about",
-  "/articles",
+  // "/articles" omitted — it 301-redirects to "/?type=article"; sitemaps should
+  // list only canonical 200 URLs.
   "/",
   "/advertise",
   "/code-of-conduct",
@@ -43,14 +44,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // User profiles: /[username]
-  const users = (await db.query.user.findMany()).map(
-    ({ username, updatedAt, createdAt }) => ({
-      url: `${BASE_URL}/${username}`,
-      lastModified: new Date(updatedAt || createdAt),
-      priority: 0.8,
-    }),
-  );
+  // User profiles: /[username] — only handle-having users, else we'd advertise
+  // `/null` (404) URLs and erode crawl trust.
+  const users = (
+    await db.query.user.findMany({ where: isNotNull(user.username) })
+  ).map(({ username, updatedAt, createdAt }) => ({
+    url: `${BASE_URL}/${username}`,
+    lastModified: new Date(updatedAt || createdAt),
+    priority: 0.8,
+  }));
 
   // Feed sources (pseudo-user profiles): /[sourceSlug]
   // Wrapped in try/catch to handle case where migrations haven't been run yet

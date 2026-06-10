@@ -328,7 +328,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userPost.title)}`],
       },
       alternates: {
-        canonical: userPost.canonicalUrl,
+        // Cross-posted content points at the original; native posts self-canonical
+        // so trailing-slash / query-param / legacy-path variants don't dilute.
+        canonical: userPost.canonicalUrl ?? `/${username}/${slug}`,
       },
     };
   }
@@ -364,7 +366,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userArticle.title)}`],
       },
       alternates: {
-        canonical: userArticle.canonicalUrl,
+        canonical: userArticle.canonicalUrl ?? `/${username}/${slug}`,
       },
     };
   }
@@ -386,6 +388,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
         images: userLinkPost.coverImage ? [userLinkPost.coverImage] : undefined,
         siteName: "Codú",
+      },
+      // Member-shared links carry the user's own commentary + discussion, so we
+      // keep Codú as canonical (aggregated feed links canonical to their source).
+      alternates: {
+        canonical: `/${username}/${slug}`,
       },
     };
   }
