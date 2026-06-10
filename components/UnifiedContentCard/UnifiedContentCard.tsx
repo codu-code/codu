@@ -121,18 +121,27 @@ const UnifiedContentCard = ({
   // Never emit `/feed/:id` — that route 404s (next.config 301s it to a routeless
   // `/:id`). When there's no resolvable internal page, a LINK opens its source
   // and anything else falls back to the author profile — never a dead route.
+  // Discussions and questions live under the /d/ namespace (the slug already
+  // ends with the urlId, so /d/{slug} is canonical). Everything else keeps the
+  // member/source/external resolution below.
+  const editorialKind = (kind || type).toUpperCase();
+  const isDiscussion =
+    editorialKind === "DISCUSSION" || editorialKind === "QUESTION";
+
   const cardUrl =
-    author?.username && slug
-      ? `/${author.username}/${slug}` // User-created content (POST or LINK)
-      : author?.username && urlId
-        ? `/${author.username}/${urlId}` // Member content, slug missing
-        : source?.slug && slug
-          ? `/${source.slug}/${slug}` // Aggregated content with source
-          : type === "LINK" && externalUrl
-            ? (ensureHttps(externalUrl) ?? "/")
-            : author?.username
-              ? `/${author.username}`
-              : "/";
+    isDiscussion && (slug || urlId)
+      ? `/d/${slug ?? urlId}` // Discussion/question namespace
+      : author?.username && slug
+        ? `/${author.username}/${slug}` // User-created content (POST or LINK)
+        : author?.username && urlId
+          ? `/${author.username}/${urlId}` // Member content, slug missing
+          : source?.slug && slug
+            ? `/${source.slug}/${slug}` // Aggregated content with source
+            : type === "LINK" && externalUrl
+              ? (ensureHttps(externalUrl) ?? "/")
+              : author?.username
+                ? `/${author.username}`
+                : "/";
 
   const { mutate: voteContent } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {
@@ -212,7 +221,7 @@ const UnifiedContentCard = ({
   const relativeTime = publishedAt ? getRelativeTime(publishedAt) : null;
 
   const showThumbnail = imageUrl && !imageError;
-  const chip = KIND[(kind || type).toUpperCase()] ?? KIND.LINK;
+  const chip = KIND[editorialKind] ?? KIND.LINK;
   const authorName = author?.name ?? source?.name ?? null;
   const handle = author?.username ?? source?.slug ?? null;
   const avatarImg = author?.image ?? source?.logo ?? null;
