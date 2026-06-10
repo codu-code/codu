@@ -86,6 +86,7 @@ const UnifiedContentCard = ({
   excerpt,
   slug,
   imageUrl: rawImageUrl,
+  externalUrl,
   publishedAt,
   readTimeMins,
   upvotes,
@@ -108,13 +109,20 @@ const UnifiedContentCard = ({
 
   const imageUrl = ensureHttps(rawImageUrl);
 
-  // URL priority: author (POST or user-created LINK) > source (aggregated LINK) > fallback.
+  // URL priority: author (POST or user-created LINK) > source (aggregated LINK).
+  // Never emit `/feed/:id` — that route 404s (next.config 301s it to a routeless
+  // `/:id`). When there's no resolvable internal page, a LINK opens its source
+  // and anything else falls back to the author profile — never a dead route.
   const cardUrl =
     author?.username && slug
       ? `/${author.username}/${slug}` // User-created content (POST or LINK)
       : source?.slug && slug
         ? `/${source.slug}/${slug}` // Aggregated content with source
-        : `/feed/${id}`; // Fallback
+        : type === "LINK" && externalUrl
+          ? (ensureHttps(externalUrl) ?? "/")
+          : author?.username
+            ? `/${author.username}`
+            : "/";
 
   const { mutate: voteContent } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {
