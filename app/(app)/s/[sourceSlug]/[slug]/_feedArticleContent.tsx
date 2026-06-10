@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import {
   ArrowTopRightOnSquareIcon,
+  BookmarkIcon,
   ChatBubbleLeftIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   ShareIcon,
 } from "@heroicons/react/20/solid";
+import { BookmarkIcon as BookmarkOutlineIcon } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
+import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Temporal } from "@js-temporal/polyfill";
 import DiscussionArea from "@/components/Discussion/DiscussionArea";
@@ -19,100 +22,94 @@ import {
   getHostname,
   safeExternalHref,
 } from "@/utils/url";
-import { useSession, signIn } from "next-auth/react";
 
 type Props = {
   sourceSlug: string;
-  contentSlug: string;
+  articleSlug: string;
 };
 
-const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
+const FeedArticleContent = ({ sourceSlug, articleSlug }: Props) => {
   const { data: session } = useSession();
-  const { data: linkContent, status } =
-    api.feed.getLinkContentBySourceAndSlug.useQuery({
+  const utils = api.useUtils();
+
+  const { data: article, status } = api.feed.getBySourceAndArticleSlug.useQuery(
+    {
       sourceSlug,
-      contentSlug,
-    });
+      articleSlug,
+    },
+  );
 
   const { data: discussionCount } =
     api.discussion.getContentDiscussionCount.useQuery(
-      { contentId: linkContent?.id ?? "" },
-      { enabled: !!linkContent?.id },
+      { contentId: article?.id ?? "" },
+      { enabled: !!article?.id },
     );
 
-  // Vote state management - derive initial values from query data
-  const initialVoteState = useMemo(
-    () => ({
-      userVote: linkContent?.userVote ?? null,
-      upvotes: linkContent?.upvotes ?? 0,
-      downvotes: linkContent?.downvotes ?? 0,
-    }),
-    [linkContent?.userVote, linkContent?.upvotes, linkContent?.downvotes],
-  );
-
-  const [userVote, setUserVote] = useState<"up" | "down" | null>(
-    initialVoteState.userVote,
-  );
-  const [votes, setVotes] = useState({
-    upvotes: initialVoteState.upvotes,
-    downvotes: initialVoteState.downvotes,
-  });
-
-  // Sync state when server data changes (e.g., after mutation invalidation)
-  const currentUserVote = linkContent?.userVote ?? null;
-  const currentUpvotes = linkContent?.upvotes ?? 0;
-  const currentDownvotes = linkContent?.downvotes ?? 0;
-
-  // Use refs to track if we need to sync
-  const serverVoteKey = `${currentUserVote}-${currentUpvotes}-${currentDownvotes}`;
-  const [lastSyncedKey, setLastSyncedKey] = useState(serverVoteKey);
-
-  if (serverVoteKey !== lastSyncedKey && linkContent) {
-    setUserVote(currentUserVote);
-    setVotes({ upvotes: currentUpvotes, downvotes: currentDownvotes });
-    setLastSyncedKey(serverVoteKey);
-  }
-
   const { mutate: vote, status: voteStatus } = api.content.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
+    onSuccess: () => {
+      utils.feed.getBySourceAndArticleSlug.invalidate({
+        sourceSlug,
+        articleSlug,
       });
+      utils.content.getFeed.invalidate();
     },
-    onError: () => {
-      setUserVote(linkContent?.userVote ?? null);
-      setVotes({
-        upvotes: linkContent?.upvotes ?? 0,
-        downvotes: linkContent?.downvotes ?? 0,
-      });
+    onError: (error) => {
       toast.error("Failed to update vote");
+      Sentry.captureException(error);
     },
   });
+
+  const { mutate: bookmark, status: bookmarkStatus } =
+    api.feed.bookmark.useMutation({
+      onSuccess: () => {
+        utils.feed.getBySourceAndArticleSlug.invalidate({
+          sourceSlug,
+          articleSlug,
+        });
+        utils.feed.getFeed.invalidate();
+        utils.feed.mySavedArticles.invalidate();
+      },
+      onError: (error) => {
+        toast.error("Failed to update bookmark");
+        Sentry.captureException(error);
+      },
+    });
+
+  const { mutate: trackClick } = api.feed.trackClick.useMutation();
 
   const handleVote = (voteType: "up" | "down" | null) => {
     if (!session) {
       signIn();
       return;
     }
-    if (!linkContent) return;
-    vote({ contentId: linkContent.id, voteType });
+    if (article) {
+      vote({ contentId: article.id, voteType });
+    }
+  };
+
+  const handleBookmark = () => {
+    if (!session) {
+      signIn();
+      return;
+    }
+    if (article) {
+      bookmark({ articleId: article.id, setBookmarked: !article.isBookmarked });
+    }
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/${sourceSlug}/${contentSlug}`;
+    const shareUrl = `${window.location.origin}/s/${sourceSlug}/${articleSlug}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied to clipboard");
     } catch {
       toast.error("Failed to copy link");
+    }
+  };
+
+  const handleExternalClick = () => {
+    if (article) {
+      trackClick({ articleId: article.id });
     }
   };
 
@@ -131,7 +128,7 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
     );
   }
 
-  if (status === "error" || !linkContent) {
+  if (status === "error" || !article) {
     return (
       <div className="mx-auto max-w-prose px-4 py-8">
         <Link
@@ -142,21 +139,18 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
         </Link>
         <div className="card text-center">
           <h1 className="font-display text-lg font-extrabold text-danger">
-            Content Not Found
+            Post Not Found
           </h1>
           <p className="mt-2 text-sm text-muted">
-            This link may have been removed or the URL is invalid.
+            This post may have been removed or the link is invalid.
           </p>
         </div>
       </div>
     );
   }
 
-  const externalUrl = linkContent.externalUrl || "";
-  // Guard against javascript:/data: schemes — z.string().url() accepts them.
-  const safeExternalUrl = safeExternalHref(linkContent.externalUrl);
-  const dateTime = linkContent.publishedAt
-    ? Temporal.Instant.from(new Date(linkContent.publishedAt).toISOString())
+  const dateTime = article.publishedAt
+    ? Temporal.Instant.from(new Date(article.publishedAt).toISOString())
     : null;
   const readableDate = dateTime
     ? dateTime.toLocaleString(["en-IE"], {
@@ -167,10 +161,14 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
     : null;
 
   const faviconUrl = getFaviconUrl(
-    linkContent.source?.websiteUrl || externalUrl,
+    article.source?.websiteUrl || article.externalUrl,
   );
-  const hostname = externalUrl ? getHostname(externalUrl) : null;
-  const score = votes.upvotes - votes.downvotes;
+  const hostname = article.externalUrl
+    ? getHostname(article.externalUrl)
+    : null;
+  // Guard against javascript:/data: schemes — z.string().url() accepts them.
+  const safeExternalUrl = safeExternalHref(article.externalUrl);
+  const score = article.upvotes - article.downvotes;
 
   return (
     <article className="mx-auto max-w-prose px-4 py-8">
@@ -183,25 +181,25 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
 
       <p className="eyebrow">
         <span className="slash">{"// "}</span>
-        Link
+        {article.source?.name || "Article"}
         {readableDate ? ` · ${readableDate}` : ""}
       </p>
 
       <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-fg md:text-4xl">
-        {linkContent.title}
+        {article.title}
       </h1>
 
-      {linkContent.excerpt && (
+      {article.excerpt && (
         <p className="mt-4 text-lg leading-relaxed text-muted">
-          {linkContent.excerpt}
+          {article.excerpt}
         </p>
       )}
 
       <div className="mt-6 flex items-center gap-3">
-        <Link href={`/${sourceSlug}`} className="flex-shrink-0">
-          {linkContent.source?.logoUrl ? (
+        <Link href={`/s/${sourceSlug}`} className="flex-shrink-0">
+          {article.source?.logoUrl ? (
             <img
-              src={linkContent.source.logoUrl}
+              src={article.source.logoUrl}
               alt=""
               className="h-11 w-11 rounded-full border border-hairline object-cover"
             />
@@ -213,69 +211,73 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
             />
           ) : (
             <div className="bg-accent/12 flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-accent">
-              {linkContent.source?.name?.charAt(0).toUpperCase() || "?"}
+              {article.source?.name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
         </Link>
         <div className="min-w-0 flex-1">
           <Link
-            href={`/${sourceSlug}`}
+            href={`/s/${sourceSlug}`}
             className="block text-sm font-semibold text-fg hover:text-accent"
           >
-            {linkContent.source?.name || "Unknown Source"}
+            {article.source?.name || "Unknown Source"}
           </Link>
           <div className="font-mono text-xs text-faint">
             @{sourceSlug}
-            {linkContent.sourceAuthor && linkContent.sourceAuthor.trim()
-              ? ` · ${linkContent.sourceAuthor}`
+            {article.sourceAuthor &&
+            article.sourceAuthor.trim() &&
+            !["by", "by,", "by ,"].includes(
+              article.sourceAuthor.trim().toLowerCase(),
+            )
+              ? ` · ${article.sourceAuthor.replace(/^by\s+/i, "").trim()}`
               : ""}
           </div>
         </div>
       </div>
 
-      {ensureHttps(linkContent.imageUrl) && safeExternalUrl ? (
+      {ensureHttps(article.imageUrl) && safeExternalUrl ? (
         <a
           href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleExternalClick}
           className="relative mt-8 block overflow-hidden rounded-lg border border-hairline"
         >
           <img
-            src={ensureHttps(linkContent.imageUrl)!}
+            src={ensureHttps(article.imageUrl)!}
             alt=""
             className="w-full object-cover transition-opacity hover:opacity-90"
             style={{ maxHeight: "400px" }}
           />
-          {hostname && (
-            <div className="absolute bottom-2 right-2 rounded-md bg-canvas/70 px-2 py-1 font-mono text-xs text-fg backdrop-blur">
-              <ArrowTopRightOnSquareIcon className="mr-1 inline h-3.5 w-3.5" />
-              {hostname}
-            </div>
-          )}
+          <div className="absolute bottom-2 right-2 rounded-md bg-canvas/70 px-2 py-1 font-mono text-xs text-fg backdrop-blur">
+            <ArrowTopRightOnSquareIcon className="mr-1 inline h-3.5 w-3.5" />
+            {hostname}
+          </div>
         </a>
       ) : (
         <div className="mt-8 h-48 rounded-lg border border-hairline bg-elevated bg-grid-dots bg-[length:22px_22px]" />
       )}
 
-      {safeExternalUrl && hostname && (
+      {safeExternalUrl && (
         <a
           href={safeExternalUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleExternalClick}
           className="primary-button mt-8 w-full"
         >
           <ArrowTopRightOnSquareIcon className="h-5 w-5" />
-          Visit Link at {hostname}
+          Read Full Article at {hostname}
         </a>
       )}
 
       {/* Inline source info - styled like author bio */}
-      {linkContent.source && (
+      {article.source && (
         <div className="mt-8 flex items-center gap-3 rounded-lg border border-hairline bg-surface p-4">
-          <Link href={`/${sourceSlug}`} className="flex-shrink-0">
-            {linkContent.source.logoUrl ? (
+          <Link href={`/s/${sourceSlug}`} className="flex-shrink-0">
+            {article.source.logoUrl ? (
               <img
-                src={linkContent.source.logoUrl}
+                src={article.source.logoUrl}
                 alt=""
                 className="h-8 w-8 rounded-full object-cover"
               />
@@ -283,25 +285,25 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
               <img src={faviconUrl} alt="" className="h-8 w-8 rounded-full" />
             ) : (
               <div className="bg-accent/12 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-accent">
-                {linkContent.source.name?.charAt(0).toUpperCase() || "?"}
+                {article.source.name?.charAt(0).toUpperCase() || "?"}
               </div>
             )}
           </Link>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <Link
-                href={`/${sourceSlug}`}
+                href={`/s/${sourceSlug}`}
                 className="font-medium text-fg hover:text-accent"
               >
-                {linkContent.source.name}
+                {article.source.name}
               </Link>
               <span className="font-mono text-xs text-faint">
                 @{sourceSlug}
               </span>
             </div>
-            {linkContent.source.description && (
+            {article.source.description && (
               <p className="truncate text-sm text-muted">
-                {linkContent.source.description}
+                {article.source.description}
               </p>
             )}
           </div>
@@ -311,10 +313,10 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
       <footer className="mt-6 flex flex-wrap items-center gap-4 border-t border-hairline pt-5">
         <div className="flex items-center gap-1 rounded-md border border-hairline bg-surface">
           <button
-            onClick={() => handleVote(userVote === "up" ? null : "up")}
+            onClick={() => handleVote(article.userVote === "up" ? null : "up")}
             disabled={voteStatus === "pending"}
             className={`rounded-l-md p-2 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
-              userVote === "up" ? "text-success" : "text-faint"
+              article.userVote === "up" ? "text-success" : "text-faint"
             }`}
             aria-label="Upvote"
           >
@@ -332,10 +334,12 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
             {score}
           </span>
           <button
-            onClick={() => handleVote(userVote === "down" ? null : "down")}
+            onClick={() =>
+              handleVote(article.userVote === "down" ? null : "down")
+            }
             disabled={voteStatus === "pending"}
             className={`rounded-r-md p-2 transition-colors hover:bg-elevated disabled:cursor-not-allowed disabled:opacity-50 ${
-              userVote === "down" ? "text-danger" : "text-faint"
+              article.userVote === "down" ? "text-danger" : "text-faint"
             }`}
             aria-label="Downvote"
           >
@@ -350,6 +354,23 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
           <ChatBubbleLeftIcon className="h-4 w-4" />
           <span>{discussionCount ?? 0} comments</span>
         </a>
+
+        <button
+          onClick={handleBookmark}
+          disabled={bookmarkStatus === "pending"}
+          className={`flex items-center gap-1.5 font-mono text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            article.isBookmarked
+              ? "text-accent-soft"
+              : "text-muted hover:text-fg"
+          }`}
+        >
+          {article.isBookmarked ? (
+            <BookmarkIcon className="h-4 w-4" />
+          ) : (
+            <BookmarkOutlineIcon className="h-4 w-4" />
+          )}
+          {article.isBookmarked ? "Saved" : "Save"}
+        </button>
 
         <button
           onClick={handleShare}
@@ -367,10 +388,10 @@ const LinkContentDetail = ({ sourceSlug, contentSlug }: Props) => {
             {discussionCount ?? 0}
           </span>
         </h2>
-        <DiscussionArea contentId={linkContent.id} noWrapper />
+        <DiscussionArea contentId={article.id} noWrapper />
       </section>
     </article>
   );
 };
 
-export default LinkContentDetail;
+export default FeedArticleContent;
