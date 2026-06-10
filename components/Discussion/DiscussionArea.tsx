@@ -259,7 +259,11 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
         const hasReplies = children && children.length > 0;
 
         return (
-          <section key={id} className="group/comment">
+          <section
+            key={id}
+            id={`comment-${id}`}
+            className="group/comment scroll-mt-24"
+          >
             {editCommentBoxId !== id ? (
               <div className="flex gap-3">
                 <div className="flex-shrink-0">

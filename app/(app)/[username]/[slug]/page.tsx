@@ -1,40 +1,17 @@
-import React from "react";
-import type { RenderableTreeNode } from "@markdoc/markdoc";
-import Markdoc from "@markdoc/markdoc";
-import Link from "next/link";
-import { markdocComponents } from "@/markdoc/components";
-import { config } from "@/markdoc/config";
-import DiscussionArea from "@/components/Discussion/DiscussionArea";
-import { ArticleActionBarWrapper } from "@/components/ArticleActionBar";
-import { InlineAuthorBio } from "@/components/ContentDetail";
 import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
-import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { type Metadata } from "next";
-import { getCamelCaseFromLower } from "@/utils/utils";
-import { generateHTML } from "@tiptap/core";
-import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
-import sanitizeHtml from "sanitize-html";
-import type { JSONContent } from "@tiptap/core";
-import NotFound from "@/components/NotFound/NotFound";
 import { db } from "@/server/db";
-import {
-  posts,
-  user,
-  feed_sources,
-  post_tags,
-  tag,
-  comments,
-} from "@/server/db/schema";
-import { eq, and, lte, inArray, count, isNull, or } from "drizzle-orm";
+import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
+import { eq, and, lte, inArray, or } from "drizzle-orm";
 import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
 import { JsonLd } from "@/components/JsonLd";
+import PostReader from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
 import {
-  getArticleSchema,
   getBreadcrumbSchema,
   getNewsArticleSchema,
 } from "@/lib/structured-data";
@@ -284,16 +261,6 @@ async function getUserArticleContent(username: string, contentSlug: string) {
   return getUserPost(username, contentSlug);
 }
 
-// Mirrors discussion.getContentDiscussionCount so the user-post reader renders
-// the same "Discussion {N}" heading as the source-content reader.
-async function getDiscussionCount(contentId: string) {
-  const [result] = await db
-    .select({ count: count() })
-    .from(comments)
-    .where(and(eq(comments.postId, contentId), isNull(comments.deletedAt)));
-  return result?.count ?? 0;
-}
-
 // urlId-first lookup for MEMBER (user-authored) content. The urlId is the
 // immutable, canonical resolver: parse it from the slug param, look up the
 // post (text kinds + member link-posts), and return the canonical username +
@@ -308,6 +275,7 @@ async function resolveMemberCanonicalByUrlId(urlId: string) {
     .select({
       slug: posts.slug,
       username: user.username,
+      type: posts.type,
     })
     .from(posts)
     .innerJoin(user, eq(posts.authorId, user.id))
@@ -329,14 +297,27 @@ async function resolveMemberCanonicalByUrlId(urlId: string) {
     .limit(1);
 
   if (!match || !match.username || !match.slug) return null;
-  return { username: match.username, slug: match.slug };
+  return { username: match.username, slug: match.slug, type: match.type };
+}
+
+// Discussions and questions live under the /d/ namespace. Everything else
+// (articles, TIL, resource, link) stays at /{username}/{slug}.
+function isDiscussionKind(type: string | null | undefined): boolean {
+  return type === "discussion" || type === "question";
 }
 
 // If the request's urlId resolves to a member post whose canonical path differs
 // from what was requested (title edit or username rename), 301 to canonical.
+// Discussion/question kinds 301 to their /d/{slug} canonical regardless of the
+// requested username path.
 async function redirectMemberToCanonical(username: string, slug: string) {
   const canonical = await resolveMemberCanonicalByUrlId(parseUrlId(slug));
   if (!canonical) return;
+
+  if (isDiscussionKind(canonical.type)) {
+    permanentRedirect(`/d/${canonical.slug}`);
+  }
+
   const canonicalPath = `/${canonical.username}/${canonical.slug}`;
   if (canonicalMismatch(`/${username}/${slug}`, canonicalPath)) {
     permanentRedirect(canonicalPath);
@@ -353,6 +334,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const userPost = await getUserPost(username, slug);
   if (userPost) {
+    // Discussions/questions canonicalize to /d/{slug}; redirect before
+    // rendering metadata so the legacy URL never serves discussion metadata.
+    if (isDiscussionKind(userPost.type)) {
+      permanentRedirect(`/d/${userPost.slug}`);
+    }
     const tags = userPost.tags.map((tag) => tag.tag.title);
     const host = (await headers()).get("host") || "";
     const authorName = userPost.user.name || "Unknown";
@@ -490,37 +476,6 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return { title: "Content Not Found" };
 }
 
-const parseJSON = (str: string): JSONContent | null => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return null;
-  }
-};
-
-const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
-  const rawHtml = generateHTML(jsonContent, [...RenderExtensions]);
-  return sanitizeHtml(rawHtml, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-      "img",
-      "iframe",
-      "h1",
-      "h2",
-    ]),
-    allowedAttributes: {
-      ...sanitizeHtml.defaults.allowedAttributes,
-      img: ["src", "alt", "title", "width", "height", "class"],
-      iframe: ["src", "width", "height", "frameborder", "allowfullscreen"],
-      "*": ["class", "id", "style"],
-    },
-    allowedIframeHostnames: [
-      "www.youtube.com",
-      "youtube.com",
-      "www.youtube-nocookie.com",
-    ],
-  });
-};
-
 const UnifiedPostPage = async (props: Props) => {
   const params = await props.params;
   const session = await getServerAuthSession();
@@ -536,420 +491,37 @@ const UnifiedPostPage = async (props: Props) => {
   const userPost = await getUserPost(username, slug, session?.user?.id);
 
   if (userPost) {
-    // Only reachable by the author (the fetcher only returns non-published
-    // posts when viewerId matches the author's id).
-    const isAwaitingReview = userPost.status === "in_review";
-    const isRejected = userPost.status === "rejected";
-    const bodyContent = userPost.body ?? "";
-    const parsedBody = parseJSON(bodyContent);
-    const isTiptapContent = parsedBody?.type === "doc";
-
-    let renderedContent: string | RenderableTreeNode;
-
-    if (isTiptapContent && parsedBody) {
-      const jsonContent = parsedBody;
-      renderedContent = renderSanitizedTiptapContent(jsonContent);
-    } else {
-      const ast = Markdoc.parse(bodyContent);
-      const transformedContent = Markdoc.transform(ast, config);
-      renderedContent = Markdoc.renderers.react(transformedContent, React, {
-        components: markdocComponents,
-      }) as unknown as string;
+    // Discussions/questions live under /d/{slug} — redirect before rendering.
+    if (isDiscussionKind(userPost.type)) {
+      permanentRedirect(`/d/${userPost.slug}`);
     }
 
-    const articleSchema = getArticleSchema({
-      title: userPost.title,
-      excerpt: userPost.excerpt,
-      slug: userPost.slug,
-      publishedAt: userPost.published,
-      updatedAt: userPost.updatedAt,
-      readingTime: userPost.readTimeMins,
-      canonicalUrl: userPost.canonicalUrl,
-      tags: userPost.tags.map((t) => ({ title: t.tag.title })),
-      author: {
-        name: userPost.user.name,
-        username: userPost.user.username,
-        image: userPost.user.image,
-        bio: userPost.user.bio,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: userPost.user.name || "Author",
-        url: `https://www.codu.co/${userPost.user.username}`,
-      },
-      { name: userPost.title },
-    ]);
-
-    const discussionCount = await getDiscussionCount(userPost.id);
-
     return (
-      <>
-        <JsonLd data={articleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          <nav className="mb-6 flex items-center gap-2 text-sm text-muted">
-            <Link href="/" className="hover:text-fg">
-              Feed
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link href={`/${userPost.user.username}`} className="hover:text-fg">
-              {userPost.user.name}
-            </Link>
-          </nav>
-
-          {isAwaitingReview && (
-            <div
-              role="status"
-              className="mb-6 rounded-lg border border-hairline bg-elevated p-4 text-sm text-muted"
-            >
-              <p className="font-medium text-fg">Awaiting review</p>
-              <p className="mt-1">
-                This post is hidden from the feed until a moderator approves it.
-              </p>
-            </div>
-          )}
-
-          {isRejected && (
-            <div
-              role="alert"
-              className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm dark:border-red-800 dark:bg-red-950"
-            >
-              <p className="font-medium text-red-700 dark:text-red-300">
-                Hidden by moderator
-              </p>
-              <p className="mt-1 text-red-600 dark:text-red-400">
-                This post is not visible to anyone else.
-                {userPost.moderationNote
-                  ? ` Reason: ${userPost.moderationNote}`
-                  : ""}
-              </p>
-            </div>
-          )}
-
-          <article className="py-2">
-            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-              <Link
-                href={`/${userPost.user.username}`}
-                className="flex items-center gap-2 hover:text-fg"
-              >
-                {userPost.user.image ? (
-                  <img
-                    src={userPost.user.image}
-                    alt=""
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
-                    {userPost.user.name?.charAt(0).toUpperCase() || "?"}
-                  </div>
-                )}
-                <span className="font-medium">{userPost.user.name}</span>
-              </Link>
-              {userPost.published && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <time>
-                    {new Date(userPost.published).toLocaleDateString("en-IE", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </time>
-                </>
-              )}
-              {userPost.readTimeMins && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>{userPost.readTimeMins} min read</span>
-                </>
-              )}
-            </div>
-
-            <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
-              {!isTiptapContent && <h1>{userPost.title}</h1>}
-
-              {isTiptapContent ? (
-                renderedContent ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: renderedContent as string,
-                    }}
-                    className="tiptap-content"
-                  />
-                ) : (
-                  <NotFound />
-                )
-              ) : (
-                <div>
-                  {Markdoc.renderers.react(renderedContent, React, {
-                    components: markdocComponents,
-                  })}
-                </div>
-              )}
-            </div>
-
-            {userPost.tags.length > 0 && (
-              <section className="mt-6 flex flex-wrap gap-3">
-                {userPost.tags.map(({ tag }) => (
-                  <Link
-                    href={`/?tag=${tag.title.toLowerCase()}`}
-                    key={tag.title}
-                    className="rounded-sm border border-hairline px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-strong hover:text-fg"
-                  >
-                    {getCamelCaseFromLower(tag.title)}
-                  </Link>
-                ))}
-              </section>
-            )}
-
-            <div className="mt-8">
-              <InlineAuthorBio
-                name={userPost.user.name || "Unknown"}
-                username={userPost.user.username || ""}
-                image={userPost.user.image}
-                bio={userPost.user.bio}
-              />
-            </div>
-
-            <div className="mt-8">
-              <ArticleActionBarWrapper
-                postId={userPost.id}
-                postTitle={userPost.title}
-                postUrl={`https://${host}/${userPost.user.username}/${userPost.slug}`}
-                postUsername={userPost.user.username || ""}
-                initialUpvotes={userPost.upvotes ?? 0}
-                initialDownvotes={userPost.downvotes ?? 0}
-              />
-            </div>
-
-            <section
-              id="discussion"
-              className="mt-10 border-t border-hairline pt-8"
-            >
-              <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
-                Discussion{" "}
-                <span className="font-sans font-medium text-faint">
-                  {discussionCount}
-                </span>
-              </h2>
-              {userPost.showComments ? (
-                <DiscussionArea contentId={userPost.id} noWrapper />
-              ) : (
-                <div className="py-4">
-                  <p className="italic text-muted">
-                    Comments are disabled for this post
-                  </p>
-                </div>
-              )}
-            </section>
-          </article>
-        </div>
-
-        {session && session?.user?.role === "ADMIN" && (
-          <ArticleAdminPanel session={session} postId={userPost.id} />
-        )}
-      </>
+      <PostReader
+        post={userPost}
+        session={session}
+        host={host}
+        canonicalPath={`/${userPost.user.username}/${userPost.slug}`}
+        commentsDisabledLabel="post"
+      />
     );
   }
 
   const userArticle = await getUserArticleContent(username, slug);
 
   if (userArticle && userArticle.user && userArticle.body) {
-    const parsedBody = parseJSON(userArticle.body);
-    const isTiptapContent = parsedBody?.type === "doc";
-
-    let renderedContent: string | RenderableTreeNode;
-
-    if (isTiptapContent && parsedBody) {
-      const jsonContent = parsedBody;
-      renderedContent = renderSanitizedTiptapContent(jsonContent);
-    } else {
-      const ast = Markdoc.parse(userArticle.body);
-      const transformedContent = Markdoc.transform(ast, config);
-      renderedContent = Markdoc.renderers.react(transformedContent, React, {
-        components: markdocComponents,
-      }) as unknown as string;
+    if (isDiscussionKind(userArticle.type)) {
+      permanentRedirect(`/d/${userArticle.slug}`);
     }
 
-    const articleSchema = getArticleSchema({
-      title: userArticle.title,
-      excerpt: userArticle.excerpt,
-      slug: userArticle.slug,
-      publishedAt: userArticle.publishedAt,
-      updatedAt: userArticle.updatedAt,
-      readingTime: userArticle.readTimeMins,
-      canonicalUrl: userArticle.canonicalUrl,
-      tags: userArticle.tags?.map((t) => ({ title: t.tag.title })),
-      author: {
-        name: userArticle.user.name,
-        username: userArticle.user.username,
-        image: userArticle.user.image,
-        bio: userArticle.user.bio,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: userArticle.user.name || "Author",
-        url: `https://www.codu.co/${userArticle.user.username}`,
-      },
-      { name: userArticle.title },
-    ]);
-
-    const discussionCount = await getDiscussionCount(userArticle.id);
-
     return (
-      <>
-        <JsonLd data={articleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          <nav className="mb-6 flex items-center gap-2 text-sm text-muted">
-            <Link href="/" className="hover:text-fg">
-              Feed
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link
-              href={`/${userArticle.user.username}`}
-              className="hover:text-fg"
-            >
-              {userArticle.user.name}
-            </Link>
-          </nav>
-
-          <article className="py-2">
-            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-              <Link
-                href={`/${userArticle.user.username}`}
-                className="flex items-center gap-2 hover:text-fg"
-              >
-                {userArticle.user.image ? (
-                  <img
-                    src={userArticle.user.image}
-                    alt=""
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
-                    {userArticle.user.name?.charAt(0).toUpperCase() || "?"}
-                  </div>
-                )}
-                <span className="font-medium">{userArticle.user.name}</span>
-              </Link>
-              {userArticle.publishedAt && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <time>
-                    {new Date(userArticle.publishedAt).toLocaleDateString(
-                      "en-IE",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      },
-                    )}
-                  </time>
-                </>
-              )}
-              {userArticle.readTimeMins && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>{userArticle.readTimeMins} min read</span>
-                </>
-              )}
-            </div>
-
-            <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
-              {!isTiptapContent && <h1>{userArticle.title}</h1>}
-
-              {isTiptapContent ? (
-                renderedContent ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: renderedContent as string,
-                    }}
-                    className="tiptap-content"
-                  />
-                ) : (
-                  <NotFound />
-                )
-              ) : (
-                <div>
-                  {Markdoc.renderers.react(renderedContent, React, {
-                    components: markdocComponents,
-                  })}
-                </div>
-              )}
-            </div>
-
-            {userArticle.tags && userArticle.tags.length > 0 && (
-              <section className="mt-6 flex flex-wrap gap-3">
-                {userArticle.tags.map(({ tag }) => (
-                  <Link
-                    href={`/?tag=${tag.title.toLowerCase()}`}
-                    key={tag.title}
-                    className="rounded-sm border border-hairline px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-strong hover:text-fg"
-                  >
-                    {getCamelCaseFromLower(tag.title)}
-                  </Link>
-                ))}
-              </section>
-            )}
-
-            <div className="mt-8">
-              <InlineAuthorBio
-                name={userArticle.user.name || "Unknown"}
-                username={userArticle.user.username || ""}
-                image={userArticle.user.image}
-                bio={userArticle.user.bio}
-              />
-            </div>
-
-            <div className="mt-8">
-              <ArticleActionBarWrapper
-                postId={userArticle.id}
-                postTitle={userArticle.title}
-                postUrl={`https://${host}/${userArticle.user.username}/${userArticle.slug}`}
-                postUsername={userArticle.user.username || ""}
-                initialUpvotes={userArticle.upvotes ?? 0}
-                initialDownvotes={userArticle.downvotes ?? 0}
-              />
-            </div>
-
-            <section
-              id="discussion"
-              className="mt-10 border-t border-hairline pt-8"
-            >
-              <h2 className="mb-4 font-display text-2xl font-extrabold tracking-tight text-fg">
-                Discussion{" "}
-                <span className="font-sans font-medium text-faint">
-                  {discussionCount}
-                </span>
-              </h2>
-              {userArticle.showComments ? (
-                <DiscussionArea contentId={userArticle.id} noWrapper />
-              ) : (
-                <div className="py-4">
-                  <p className="italic text-muted">
-                    Comments are disabled for this article
-                  </p>
-                </div>
-              )}
-            </section>
-          </article>
-        </div>
-
-        {session && session?.user?.role === "ADMIN" && (
-          <ArticleAdminPanel session={session} postId={userArticle.id} />
-        )}
-      </>
+      <PostReader
+        post={userArticle}
+        session={session}
+        host={host}
+        canonicalPath={`/${userArticle.user.username}/${userArticle.slug}`}
+        commentsDisabledLabel="article"
+      />
     );
   }
 
