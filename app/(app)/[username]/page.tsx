@@ -1,7 +1,6 @@
 import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Content from "./_usernameClient";
-import SourceProfileContent from "./_sourceProfileClient";
 import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
@@ -56,26 +55,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Check if it's a feed source
-  const source = await db.query.feed_sources.findFirst({
-    where: eq(feed_sources.slug, username),
-  });
-
-  if (source) {
-    return {
-      title: `${source.name} | Codú Feed`,
-      description:
-        source.description || `Articles from ${source.name} on Codú Feed`,
-      openGraph: {
-        title: source.name,
-        description:
-          source.description || `Articles from ${source.name} on Codú Feed`,
-        images: source.logoUrl ? [source.logoUrl] : undefined,
-      },
-    };
-  }
-
-  // Neither user nor source found
+  // Feed sources now live at /s/{sourceSlug} — the page redirects them, so we
+  // don't emit source metadata here (the /s/ route owns it).
   return { title: "Profile Not Found" };
 }
 
@@ -159,13 +140,15 @@ export default async function Page(props: {
     );
   }
 
-  // Check if it's a feed source
+  // The /{username} namespace is users-only. A segment that isn't a user but
+  // IS a feed source 301s to its canonical /s/{sourceSlug} home.
   const source = await db.query.feed_sources.findFirst({
+    columns: { slug: true },
     where: eq(feed_sources.slug, username),
   });
 
   if (source) {
-    return <SourceProfileContent sourceSlug={username} />;
+    permanentRedirect(`/s/${username}`);
   }
 
   // Neither user nor source found

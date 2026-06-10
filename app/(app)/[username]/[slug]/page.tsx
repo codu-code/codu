@@ -5,16 +5,9 @@ import { type Metadata } from "next";
 import { db } from "@/server/db";
 import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
 import { eq, and, lte, inArray, or } from "drizzle-orm";
-import FeedArticleContent from "./_feedArticleContent";
-import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
-import { JsonLd } from "@/components/JsonLd";
 import PostReader from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
-import {
-  getBreadcrumbSchema,
-  getNewsArticleSchema,
-} from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
@@ -253,10 +246,6 @@ async function getFeedArticle(
   };
 }
 
-async function getLinkContent(sourceSlug: string, contentSlug: string) {
-  return getFeedArticle(sourceSlug, contentSlug);
-}
-
 async function getUserArticleContent(username: string, contentSlug: string) {
   return getUserPost(username, contentSlug);
 }
@@ -437,40 +426,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
+  // Aggregated/source content moved to /s/{sourceSlug}/{slug}; the page 301s
+  // these, so 301 the metadata request too rather than emitting feed metadata
+  // at the legacy URL.
   const feedArticle = await getFeedArticle(username, slug);
   if (feedArticle) {
-    return {
-      title: `${feedArticle.title} | Codú Feed`,
-      description:
-        feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
-      openGraph: {
-        title: feedArticle.title,
-        description:
-          feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
-        images:
-          feedArticle.ogImageUrl || feedArticle.imageUrl
-            ? [feedArticle.ogImageUrl || feedArticle.imageUrl!]
-            : undefined,
-      },
-    };
-  }
-
-  const linkContent = await getLinkContent(username, slug);
-  if (linkContent) {
-    return {
-      title: `${linkContent.title} | Codú Feed`,
-      description:
-        linkContent.excerpt || `Discussion about ${linkContent.title}`,
-      openGraph: {
-        title: linkContent.title,
-        description:
-          linkContent.excerpt || `Discussion about ${linkContent.title}`,
-        images:
-          linkContent.ogImageUrl || linkContent.imageUrl
-            ? [linkContent.ogImageUrl || linkContent.imageUrl!]
-            : undefined,
-      },
-    };
+    permanentRedirect(`/s/${username}/${feedArticle.slug}`);
   }
 
   return { title: "Content Not Found" };
@@ -531,76 +492,13 @@ const UnifiedPostPage = async (props: Props) => {
     return <UserLinkDetail username={username} contentSlug={slug} />;
   }
 
+  // Aggregated/source content now lives at /s/{sourceSlug}/{slug}. When the
+  // segment resolves as aggregated content (no member author), 301 to the
+  // canonical /s/ path instead of rendering it under /{username}.
   const feedArticle = await getFeedArticle(username, slug);
 
   if (feedArticle) {
-    const newsArticleSchema = getNewsArticleSchema({
-      title: feedArticle.title,
-      excerpt: feedArticle.excerpt,
-      slug: feedArticle.slug,
-      externalUrl: feedArticle.externalUrl || "",
-      coverImage: feedArticle.imageUrl || feedArticle.ogImageUrl,
-      publishedAt: feedArticle.publishedAt,
-      source: {
-        name: feedArticle.source?.name || null,
-        slug: feedArticle.source?.slug || username,
-        logoUrl: feedArticle.source?.logoUrl,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: feedArticle.source?.name || username,
-        url: `https://www.codu.co/${feedArticle.source?.slug || username}`,
-      },
-      { name: feedArticle.title },
-    ]);
-
-    return (
-      <>
-        <JsonLd data={newsArticleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-        <FeedArticleContent sourceSlug={username} articleSlug={slug} />
-      </>
-    );
-  }
-
-  const linkContent = await getLinkContent(username, slug);
-
-  if (linkContent) {
-    const newsArticleSchema = getNewsArticleSchema({
-      title: linkContent.title,
-      excerpt: linkContent.excerpt,
-      slug: linkContent.slug,
-      externalUrl: linkContent.externalUrl || "",
-      coverImage: linkContent.imageUrl || linkContent.ogImageUrl,
-      publishedAt: linkContent.publishedAt,
-      source: {
-        name: linkContent.source?.name || null,
-        slug: linkContent.source?.slug || username,
-        logoUrl: linkContent.source?.logoUrl,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: linkContent.source?.name || username,
-        url: `https://www.codu.co/${linkContent.source?.slug || username}`,
-      },
-      { name: linkContent.title },
-    ]);
-
-    return (
-      <>
-        <JsonLd data={newsArticleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-        <LinkContentDetail sourceSlug={username} contentSlug={slug} />
-      </>
-    );
+    permanentRedirect(`/s/${username}/${feedArticle.slug}`);
   }
 
   return notFound();

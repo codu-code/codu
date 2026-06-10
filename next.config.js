@@ -36,18 +36,18 @@ const config = {
         destination: "https://newsletter.codu.co",
         permanent: true,
       },
-      // Redirect legacy feed article URLs to new unified pattern
-      // /feed/[sourceSlug]/[articleId] -> /[sourceSlug]/[articleId]
+      // Legacy feed article URLs -> /s/ namespace (one hop, no redirect chain).
+      // /feed/[sourceSlug]/[articleId] -> /s/[sourceSlug]/[articleId]
       {
         source: "/feed/:sourceSlug/:articleId",
-        destination: "/:sourceSlug/:articleId",
+        destination: "/s/:sourceSlug/:articleId",
         permanent: true,
       },
-      // Redirect legacy feed source URLs to new unified pattern
-      // /feed/[sourceSlug] -> /[sourceSlug]
+      // Legacy feed source URLs -> /s/ namespace.
+      // /feed/[sourceSlug] -> /s/[sourceSlug]
       {
         source: "/feed/:sourceSlug",
-        destination: "/:sourceSlug",
+        destination: "/s/:sourceSlug",
         permanent: true,
       },
     ];
