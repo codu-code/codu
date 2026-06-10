@@ -49,6 +49,10 @@ export interface UnifiedContentCardProps {
   title: string;
   excerpt?: string | null;
   slug?: string | null;
+  /** Immutable canonical resolver. For member content the slug already ends
+   * with this, so the slug stays canonical; used only as a fallback when the
+   * slug is missing (and by the upcoming /d/ + /s/ routes). */
+  urlId?: string | null;
   imageUrl?: string | null;
   externalUrl?: string | null;
   publishedAt?: string | null;
@@ -85,6 +89,7 @@ const UnifiedContentCard = ({
   title,
   excerpt,
   slug,
+  urlId,
   imageUrl: rawImageUrl,
   externalUrl,
   publishedAt,
@@ -110,19 +115,24 @@ const UnifiedContentCard = ({
   const imageUrl = ensureHttps(rawImageUrl);
 
   // URL priority: author (POST or user-created LINK) > source (aggregated LINK).
+  // Member content canonical is `/{username}/{slug}` — the slug already ends
+  // with the urlId, so the slug stays canonical. urlId is the fallback resolver
+  // when the slug is missing (the detail page resolves a bare urlId segment).
   // Never emit `/feed/:id` — that route 404s (next.config 301s it to a routeless
   // `/:id`). When there's no resolvable internal page, a LINK opens its source
   // and anything else falls back to the author profile — never a dead route.
   const cardUrl =
     author?.username && slug
       ? `/${author.username}/${slug}` // User-created content (POST or LINK)
-      : source?.slug && slug
-        ? `/${source.slug}/${slug}` // Aggregated content with source
-        : type === "LINK" && externalUrl
-          ? (ensureHttps(externalUrl) ?? "/")
-          : author?.username
-            ? `/${author.username}`
-            : "/";
+      : author?.username && urlId
+        ? `/${author.username}/${urlId}` // Member content, slug missing
+        : source?.slug && slug
+          ? `/${source.slug}/${slug}` // Aggregated content with source
+          : type === "LINK" && externalUrl
+            ? (ensureHttps(externalUrl) ?? "/")
+            : author?.username
+              ? `/${author.username}`
+              : "/";
 
   const { mutate: voteContent } = api.content.vote.useMutation({
     onMutate: async ({ voteType }) => {

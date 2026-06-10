@@ -63,6 +63,7 @@ const SavedPosts = () => {
               id={item.id}
               title={item.title}
               slug={item.slug}
+              urlId={item.urlId}
               publishedAt={item.publishedAt}
               sourceName={item.sourceName}
               sourceSlug={item.sourceSlug}

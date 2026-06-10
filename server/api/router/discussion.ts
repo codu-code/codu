@@ -518,6 +518,7 @@ export const discussionRouter = createTRPCRouter({
         imageUrl: posts.coverImage,
         ogImageUrl: posts.coverImage,
         slug: posts.slug,
+        urlId: posts.urlId,
         publishedAt: posts.publishedAt,
         upvotes: posts.upvotesCount,
         downvotes: posts.downvotesCount,

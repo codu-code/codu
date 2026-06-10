@@ -231,6 +231,7 @@ const FeedPage = () => {
                       title={item.title}
                       excerpt={item.excerpt}
                       slug={item.slug}
+                      urlId={item.urlId}
                       imageUrl={item.imageUrl || item.ogImageUrl}
                       externalUrl={item.externalUrl}
                       publishedAt={item.publishedAt}

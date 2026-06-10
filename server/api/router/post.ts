@@ -963,6 +963,7 @@ export const postRouter = createTRPCRouter({
           excerpt: posts.excerpt,
           externalUrl: posts.externalUrl,
           slug: posts.slug,
+          urlId: posts.urlId,
           publishedAt: posts.publishedAt,
           upvotesCount: posts.upvotesCount,
           downvotesCount: posts.downvotesCount,

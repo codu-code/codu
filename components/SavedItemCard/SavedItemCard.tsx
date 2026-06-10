@@ -7,6 +7,8 @@ export interface SavedItemCardProps {
   id: string;
   title: string;
   slug: string;
+  /** Immutable canonical resolver; fallback when slug is missing. */
+  urlId?: string | null;
   publishedAt: string | null;
   // Source info (for external links)
   sourceName?: string | null;
@@ -46,9 +48,9 @@ const getFaviconUrl = (
 };
 
 const SavedItemCard = ({
-  id,
   title,
   slug,
+  urlId,
   publishedAt,
   sourceName,
   sourceLogo,
@@ -59,13 +61,20 @@ const SavedItemCard = ({
   type,
   onRemove,
 }: SavedItemCardProps) => {
-  // Determine the URL for the card
+  // Determine the URL for the card. Member content canonical is
+  // `/{username}/{slug}` (slug already ends with the urlId); urlId is the
+  // fallback resolver when the slug is missing. Never emit `/feed/:id` — that
+  // route 404s.
   const cardUrl =
-    type === "POST"
-      ? `/${authorUsername || ""}/${slug}`
-      : sourceSlug && slug
-        ? `/${sourceSlug}/${slug}`
-        : `/feed/${id}`;
+    type === "POST" && authorUsername && slug
+      ? `/${authorUsername}/${slug}`
+      : type === "POST" && authorUsername && urlId
+        ? `/${authorUsername}/${urlId}`
+        : sourceSlug && slug
+          ? `/${sourceSlug}/${slug}`
+          : authorUsername
+            ? `/${authorUsername}`
+            : "/";
 
   const dateTime = publishedAt
     ? Temporal.Instant.from(new Date(publishedAt).toISOString())
