@@ -23,6 +23,8 @@ export function TopicsModal({ onClose }: { onClose: () => void }) {
   const { mutate: save, status } = api.profile.updateInterests.useMutation({
     onSuccess: () => {
       void utils.profile.myInterests.invalidate();
+      // Picking topics is an onboarding step — refresh the first-win trigger.
+      void utils.engagement.onboardingWins.invalidate();
       toast.success("Topics updated");
       onClose();
     },

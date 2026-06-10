@@ -15,6 +15,8 @@ export function FollowButton({ userId }: { userId: string }) {
     await Promise.all([
       utils.follow.isFollowing.invalidate({ userId }),
       utils.follow.counts.invalidate({ userId }),
+      // "Follow 3 builders" is an onboarding step — refresh the first-win trigger.
+      utils.engagement.onboardingWins.invalidate(),
     ]);
   };
 

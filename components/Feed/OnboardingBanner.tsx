@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { api } from "@/server/trpc/react";
 import { useShellActions } from "@/components/Create/ShellActionsProvider";
-import { Confetti } from "@/components/Celebrate/Confetti";
-import { BadgeUnlock } from "@/components/Celebrate/BadgeUnlock";
 
 const KEY = "codu.onboarding.dismissed";
-const CELEBRATED_KEY = "codu.onboarding.celebrated";
 
 // External store so dismissal is SSR-safe: server snapshot = not dismissed.
 const listeners = new Set<() => void>();
@@ -19,18 +16,17 @@ const subscribe = (cb: () => void) => {
 const isDismissed = () =>
   typeof window !== "undefined" && localStorage.getItem(KEY) === "1";
 
-const hasCelebrated = () =>
-  typeof window !== "undefined" && localStorage.getItem(CELEBRATED_KEY) === "1";
-
 /**
  * First-run guidance: a dismissible "first win in 3 steps" banner. Steps reflect
  * REAL completion (topics picked / 3 follows / first post) via
  * engagement.onboardingWins — done steps show a mint check + strikethrough. The
- * banner hides itself once all three are done. Mirrors ui_kits/app/Feed.jsx.
+ * banner hides itself once all three are done; the reward moment (confetti +
+ * first badge) is fired app-wide by <OnboardingCelebration>, not here, so it
+ * still plays when the last step is completed off the feed.
  */
 export function OnboardingBanner() {
   const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
-  const { openTopics, openCompose, username } = useShellActions();
+  const { openTopics, openCompose } = useShellActions();
   const { data: wins } = api.engagement.onboardingWins.useQuery();
 
   // Actions reuse the shell modals so they work when the rail is hidden on mobile.
@@ -57,38 +53,9 @@ export function OnboardingBanner() {
 
   const allDone = wins ? steps.every((s) => s.done) : false;
 
-  // Celebration single-fire: localStorage flag guards across visits, `closed`
-  // within a session; `closed` only flips from onClose, never an effect.
-  const celebrated = useSyncExternalStore(
-    subscribe,
-    hasCelebrated,
-    () => true, // server snapshot: assume celebrated so SSR renders nothing
-  );
-  const [closed, setClosed] = useState(false);
-  const celebrating = allDone && !celebrated && !closed;
-
-  useEffect(() => {
-    if (!celebrating) return;
-    try {
-      localStorage.setItem(CELEBRATED_KEY, "1");
-    } catch {
-      // ignore storage failures
-    }
-  }, [celebrating]);
-
-  if (allDone) {
-    return celebrating ? (
-      <>
-        <Confetti />
-        <BadgeUnlock
-          badgeName="First Post"
-          points={20}
-          username={username}
-          onClose={() => setClosed(true)}
-        />
-      </>
-    ) : null;
-  }
+  // Banner's job is done once all steps are complete; the celebration is owned
+  // by the app-wide <OnboardingCelebration>.
+  if (allDone) return null;
 
   if (dismissed) return null;
 

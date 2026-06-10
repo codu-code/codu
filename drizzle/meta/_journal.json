@@ -225,6 +225,13 @@
       "when": 1780988335732,
       "tag": "0031_tranquil_longshot",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1781031616911,
+      "tag": "0032_shallow_vivisector",
+      "breakpoints": true
     }
   ]
 }

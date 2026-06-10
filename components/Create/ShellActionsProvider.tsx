@@ -4,6 +4,7 @@ import { createContext, useContext, useState } from "react";
 import { CreateInfoModal } from "./CreateInfoModal";
 import { ComposeModal, type ComposeMode } from "./ComposeModal";
 import { TopicsModal } from "./TopicsModal";
+import { OnboardingCelebration } from "@/components/Celebrate/OnboardingCelebration";
 
 const INFO_KEY = "codu_create_info_seen";
 
@@ -86,6 +87,10 @@ export function ShellActionsProvider({
         />
       )}
       {topicsOpen && <TopicsModal onClose={() => setTopicsOpen(false)} />}
+      {/* App-wide first-win celebration — fires wherever the last onboarding
+          step is completed, not just on the feed. Authed only (the query it
+          reads is a protected procedure). */}
+      {authed && <OnboardingCelebration username={username} />}
     </ShellActionsContext.Provider>
   );
 }

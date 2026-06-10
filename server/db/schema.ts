@@ -206,6 +206,14 @@ export const user = pgTable(
       mode: "string",
       withTimezone: true,
     }),
+    // First-win celebration: set once when the confetti + first-badge moment is
+    // shown (all three onboarding steps done). Persisted so it survives refresh
+    // / new devices and never re-celebrates. Null = not yet celebrated.
+    firstWinCelebratedAt: timestamp("first_win_celebrated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
   },
   (table) => {
     return {

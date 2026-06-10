@@ -54,7 +54,7 @@ export function BadgeUnlock({
             className="codu-badge-pop flex h-24 w-24 items-center justify-center bg-accent text-3xl text-on-accent"
             style={{ clipPath: HEX_CLIP }}
           >
-            ✍️
+            🚀
           </div>
         </div>
 
