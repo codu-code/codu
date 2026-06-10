@@ -71,7 +71,7 @@ const SavedItemCard = ({
       : type === "POST" && authorUsername && urlId
         ? `/${authorUsername}/${urlId}`
         : sourceSlug && slug
-          ? `/${sourceSlug}/${slug}`
+          ? `/s/${sourceSlug}/${slug}`
           : authorUsername
             ? `/${authorUsername}`
             : "/";

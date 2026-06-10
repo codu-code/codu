@@ -136,7 +136,7 @@ const UnifiedContentCard = ({
         : author?.username && urlId
           ? `/${author.username}/${urlId}` // Member content, slug missing
           : source?.slug && slug
-            ? `/${source.slug}/${slug}` // Aggregated content with source
+            ? `/s/${source.slug}/${slug}` // Aggregated content lives at /s/{source}/{slug}
             : type === "LINK" && externalUrl
               ? (ensureHttps(externalUrl) ?? "/")
               : author?.username
@@ -225,6 +225,13 @@ const UnifiedContentCard = ({
   const authorName = author?.name ?? source?.name ?? null;
   const handle = author?.username ?? source?.slug ?? null;
   const avatarImg = author?.image ?? source?.logo ?? null;
+  // The byline name links to the profile: users at /{username}, feed sources at
+  // /s/{slug}. Members take priority, so an author present means it's a user.
+  const handleHref = author?.username
+    ? `/${author.username}`
+    : source?.slug
+      ? `/s/${source.slug}`
+      : null;
 
   return (
     <article
@@ -251,9 +258,9 @@ const UnifiedContentCard = ({
               </span>
             ) : null}
             {authorName &&
-              (handle ? (
+              (handleHref ? (
                 <Link
-                  href={`/${handle}`}
+                  href={handleHref}
                   className="whitespace-nowrap text-sm font-semibold text-fg hover:underline"
                 >
                   {authorName}
@@ -271,7 +278,7 @@ const UnifiedContentCard = ({
                   {" · in "}
                   {source.slug ? (
                     <Link
-                      href={`/${source.slug}`}
+                      href={`/s/${source.slug}`}
                       onClick={(e) => e.stopPropagation()}
                       className="text-accent-soft hover:text-accent"
                     >
