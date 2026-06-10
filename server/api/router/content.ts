@@ -49,6 +49,10 @@ import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import crypto from "crypto";
+import { customAlphabet } from "nanoid";
+
+// Mints the immutable, URL-safe id that becomes the canonical content resolver.
+const mintUrlId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 8);
 
 function generateSlug(title: string): string {
   const baseSlug = title
@@ -557,6 +561,7 @@ export const contentRouter = createTRPCRouter({
       }
 
       const slug = generateSlug(input.title);
+      const urlId = mintUrlId();
       const readingTime = calculateReadTime(input.body);
       const dbType = toDbType(input.type);
 
@@ -590,6 +595,7 @@ export const contentRouter = createTRPCRouter({
           canonicalUrl: input.canonicalUrl,
           authorId: userId,
           slug,
+          urlId,
           readingTime,
           status: dbStatus,
           moderationNote: gate?.moderationNote ?? null,

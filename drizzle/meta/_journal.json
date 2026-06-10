@@ -232,6 +232,13 @@
       "when": 1781031616911,
       "tag": "0032_shallow_vivisector",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1781105661207,
+      "tag": "0033_complex_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }

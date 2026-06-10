@@ -338,6 +338,9 @@ export const posts = pgTable(
 
     title: varchar("title", { length: 500 }).notNull(),
     slug: varchar("slug", { length: 300 }).notNull(),
+    // Immutable, URL-safe id used as the canonical resolver for content URLs.
+    // Nullable for now; backfilled, then made NOT NULL in a later migration.
+    urlId: varchar("url_id", { length: 16 }),
     excerpt: text("excerpt"),
     body: text("body"),
     canonicalUrl: text("canonical_url"),
@@ -404,6 +407,7 @@ export const posts = pgTable(
   (table) => ({
     authorIdIdx: index("posts_author_id_idx").on(table.authorId),
     slugKey: uniqueIndex("posts_slug_idx").on(table.slug),
+    urlIdKey: uniqueIndex("posts_url_id_key").on(table.urlId),
     legacyPostIdIdx: uniqueIndex("posts_legacy_post_id_idx").on(
       table.legacyPostId,
     ),
