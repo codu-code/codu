@@ -8,7 +8,7 @@ import DiscussionArea from "@/components/Discussion/DiscussionArea";
 import { ArticleActionBarWrapper } from "@/components/ArticleActionBar";
 import { InlineAuthorBio } from "@/components/ContentDetail";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
 import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { type Metadata } from "next";
@@ -32,6 +32,7 @@ import FeedArticleContent from "./_feedArticleContent";
 import LinkContentDetail from "./_linkContentDetail";
 import UserLinkDetail from "./_userLinkDetail";
 import { JsonLd } from "@/components/JsonLd";
+import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
 import {
   getArticleSchema,
   getBreadcrumbSchema,
@@ -293,9 +294,62 @@ async function getDiscussionCount(contentId: string) {
   return result?.count ?? 0;
 }
 
+// urlId-first lookup for MEMBER (user-authored) content. The urlId is the
+// immutable, canonical resolver: parse it from the slug param, look up the
+// post (text kinds + member link-posts), and return the canonical username +
+// slug. Aggregated/source content (no author) is intentionally excluded — it
+// resolves via the existing getFeedArticle/getLinkContent paths. A miss (legacy
+// link whose trailing token isn't a real urlId, or aggregated content) returns
+// null so callers fall back to the username+slug resolution unchanged.
+async function resolveMemberCanonicalByUrlId(urlId: string) {
+  if (!urlId) return null;
+
+  const [match] = await db
+    .select({
+      slug: posts.slug,
+      username: user.username,
+    })
+    .from(posts)
+    .innerJoin(user, eq(posts.authorId, user.id))
+    .where(
+      and(
+        eq(posts.urlId, urlId),
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+        inArray(posts.type, [
+          "article",
+          "discussion",
+          "question",
+          "til",
+          "resource",
+          "link",
+        ]),
+      ),
+    )
+    .limit(1);
+
+  if (!match || !match.username || !match.slug) return null;
+  return { username: match.username, slug: match.slug };
+}
+
+// If the request's urlId resolves to a member post whose canonical path differs
+// from what was requested (title edit or username rename), 301 to canonical.
+async function redirectMemberToCanonical(username: string, slug: string) {
+  const canonical = await resolveMemberCanonicalByUrlId(parseUrlId(slug));
+  if (!canonical) return;
+  const canonicalPath = `/${canonical.username}/${canonical.slug}`;
+  if (canonicalMismatch(`/${username}/${slug}`, canonicalPath)) {
+    permanentRedirect(canonicalPath);
+  }
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const { username, slug } = params;
+
+  // urlId-first canonicalization: 301 stale member URLs (title edits / username
+  // renames) before metadata work. No-op when already canonical or on a miss.
+  await redirectMemberToCanonical(username, slug);
 
   const userPost = await getUserPost(username, slug);
   if (userPost) {
@@ -471,6 +525,11 @@ const UnifiedPostPage = async (props: Props) => {
   const params = await props.params;
   const session = await getServerAuthSession();
   const { username, slug } = params;
+
+  // urlId-first canonicalization: 301 stale member URLs (title edits / username
+  // renames) to the canonical /{username}/{slug}. No-op when already canonical
+  // or when the urlId doesn't resolve to a member post (legacy/aggregated).
+  await redirectMemberToCanonical(username, slug);
 
   const host = (await headers()).get("host") || "";
 
