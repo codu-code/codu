@@ -49,16 +49,21 @@ import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import { mintUrlId } from "@/server/lib/url-id";
-import crypto from "crypto";
 
-function generateSlug(title: string): string {
-  const baseSlug = title
+// Produce the hyphenated lowercase base of a slug, with no id suffix. The
+// trailing token of a slug must be the post's urlId, so callers append it.
+function slugifyTitle(title: string): string {
+  return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .substring(0, 80);
-  const uniqueId = crypto.randomBytes(3).toString("hex");
-  return `${baseSlug}-${uniqueId}`;
+}
+
+// Build a slug whose trailing token IS the post's urlId, guaranteeing
+// parseUrlId(slug) === urlId for all new/re-slugged posts.
+function buildSlug(title: string, urlId: string): string {
+  return `${slugifyTitle(title)}-${urlId}`;
 }
 
 function calculateReadTime(body: string | null | undefined): number {
@@ -240,6 +245,7 @@ export const contentRouter = createTRPCRouter({
             imageUrl: posts.coverImage,
             ogImageUrl: posts.coverImage,
             slug: posts.slug,
+            urlId: posts.urlId,
             publishedAt: posts.publishedAt,
             upvotes: posts.upvotesCount,
             downvotes: posts.downvotesCount,
@@ -280,6 +286,7 @@ export const contentRouter = createTRPCRouter({
             imageUrl: posts.coverImage,
             ogImageUrl: posts.coverImage,
             slug: posts.slug,
+            urlId: posts.urlId,
             publishedAt: posts.publishedAt,
             upvotes: posts.upvotesCount,
             downvotes: posts.downvotesCount,
@@ -557,8 +564,8 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      const slug = generateSlug(input.title);
       const urlId = mintUrlId();
+      const slug = buildSlug(input.title, urlId);
       const readingTime = calculateReadTime(input.body);
       const dbType = toDbType(input.type);
 
@@ -1296,6 +1303,7 @@ export const contentRouter = createTRPCRouter({
           body: posts.body,
           externalUrl: posts.externalUrl,
           slug: posts.slug,
+          urlId: posts.urlId,
           status: posts.status,
         })
         .from(posts)
@@ -1351,8 +1359,11 @@ export const contentRouter = createTRPCRouter({
           // stays null (admin approval sets it).
           applyGate(updateData, gate);
           // Generate the slug now so the post has a stable URL once live/approved.
+          // Keep the existing urlId as the trailing token so the URL is stable.
           if (existing[0].title) {
-            updateData.slug = generateSlug(existing[0].title);
+            const slugUrlId = existing[0].urlId ?? mintUrlId();
+            if (!existing[0].urlId) updateData.urlId = slugUrlId;
+            updateData.slug = buildSlug(existing[0].title, slugUrlId);
           }
 
           if (gate.status === "in_review") {
@@ -1389,7 +1400,9 @@ export const contentRouter = createTRPCRouter({
           existing[0].status === "draft" &&
           existing[0].title
         ) {
-          updateData.slug = generateSlug(existing[0].title);
+          const slugUrlId = existing[0].urlId ?? mintUrlId();
+          if (!existing[0].urlId) updateData.urlId = slugUrlId;
+          updateData.slug = buildSlug(existing[0].title, slugUrlId);
         }
       }
 
