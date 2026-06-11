@@ -7,6 +7,7 @@ import {
   user,
   follow,
   point_event,
+  feed_sources,
 } from "@/server/db/schema";
 import {
   articleContent,
@@ -20,6 +21,17 @@ import {
   E2E_ADMIN_EMAIL,
   E2E_ADMIN_ID,
   E2E_ADMIN_SESSION_ID,
+  E2E_ROUTING_ARTICLE_SLUG,
+  E2E_ROUTING_ARTICLE_URL_ID,
+  E2E_ROUTING_ARTICLE_TITLE,
+  E2E_ROUTING_DISCUSSION_SLUG,
+  E2E_ROUTING_DISCUSSION_URL_ID,
+  E2E_ROUTING_DISCUSSION_TITLE,
+  E2E_ROUTING_SOURCE_SLUG,
+  E2E_ROUTING_SOURCE_NAME,
+  E2E_ROUTING_SOURCE_ARTICLE_SLUG,
+  E2E_ROUTING_SOURCE_ARTICLE_URL_ID,
+  E2E_ROUTING_SOURCE_ARTICLE_TITLE,
 } from "./constants";
 import { eq } from "drizzle-orm";
 
@@ -59,6 +71,10 @@ export const setup = async () => {
       // Discussion / question slugs (relaunch post kinds)
       "e2e-discussion-published",
       "e2e-question-published",
+      // Content-URL routing fixtures (content-urls.spec.ts)
+      E2E_ROUTING_ARTICLE_SLUG,
+      E2E_ROUTING_DISCUSSION_SLUG,
+      E2E_ROUTING_SOURCE_ARTICLE_SLUG,
     ];
 
     for (const slugPattern of e2eSlugs) {
@@ -271,6 +287,40 @@ export const setup = async () => {
         authorId: authorId,
         showComments: true,
       },
+      // ---------------------------------------------------------------------
+      // Content-URL routing fixtures. Deterministic slug + urlId so the routing
+      // spec can build exact canonical / wrong-words URLs and assert redirects.
+      // ---------------------------------------------------------------------
+      {
+        type: "article" as const,
+        title: E2E_ROUTING_ARTICLE_TITLE,
+        slug: E2E_ROUTING_ARTICLE_SLUG,
+        urlId: E2E_ROUTING_ARTICLE_URL_ID,
+        excerpt: "Canonical member article for URL routing regression tests.",
+        body: "This article exists to pin the /{username}/{slug} canonical URL and its urlId-based self-correcting redirect.",
+        upvotesCount: 3,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "discussion" as const,
+        title: E2E_ROUTING_DISCUSSION_TITLE,
+        slug: E2E_ROUTING_DISCUSSION_SLUG,
+        urlId: E2E_ROUTING_DISCUSSION_URL_ID,
+        excerpt: "Canonical discussion for URL routing regression tests.",
+        body: "This discussion pins the /d/{slug} canonical and the legacy /{username}/{slug} -> /d/{slug} redirect.",
+        upvotesCount: 2,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
     ];
 
     // Insert articles into new posts table
@@ -389,6 +439,69 @@ export const setup = async () => {
       .onConflictDoNothing();
   };
 
+  // Aggregated/source fixtures for the /s/{sourceSlug} routes + the legacy
+  // /{sourceSlug} -> /s/{sourceSlug} redirect. Creates a deterministic feed
+  // source and one published "imported" link post under it (aggregated content
+  // is author = the source's linked user + sourceId set). Idempotent: cleans up
+  // the prior fixture post + source by slug so the seed can re-run.
+  const seedE2ESource = async (linkedUserId: string) => {
+    // Remove a prior fixture article (FK-safe: comments first) then the source.
+    const priorPosts = await db
+      .select({ id: posts.id })
+      .from(posts)
+      .where(eq(posts.slug, E2E_ROUTING_SOURCE_ARTICLE_SLUG));
+    for (const p of priorPosts) {
+      await db.delete(comments).where(eq(comments.postId, p.id));
+    }
+    await db
+      .delete(posts)
+      .where(eq(posts.slug, E2E_ROUTING_SOURCE_ARTICLE_SLUG));
+    await db
+      .delete(feed_sources)
+      .where(eq(feed_sources.slug, E2E_ROUTING_SOURCE_SLUG));
+
+    const [source] = await db
+      .insert(feed_sources)
+      .values({
+        name: E2E_ROUTING_SOURCE_NAME,
+        // url has a unique index; keep it deterministic + namespaced.
+        url: "https://e2e-routing-source.example.com/rss.xml",
+        websiteUrl: "https://e2e-routing-source.example.com",
+        slug: E2E_ROUTING_SOURCE_SLUG,
+        category: "webdev",
+        description: "Deterministic feed source for URL routing E2E tests.",
+        status: "active" as const,
+        userId: linkedUserId,
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    if (source) {
+      await db
+        .insert(posts)
+        .values({
+          type: "link" as const,
+          title: E2E_ROUTING_SOURCE_ARTICLE_TITLE,
+          slug: E2E_ROUTING_SOURCE_ARTICLE_SLUG,
+          urlId: E2E_ROUTING_SOURCE_ARTICLE_URL_ID,
+          excerpt: "Imported source article for URL routing regression tests.",
+          body: "",
+          externalUrl: "https://e2e-routing-source.example.com/posts/hello",
+          sourceId: source.id,
+          upvotesCount: 1,
+          downvotesCount: 0,
+          readingTime: 1,
+          status: "published" as const,
+          publishedAt: new Date().toISOString(),
+          // Aggregated content is authored by the source's linked user.
+          authorId: linkedUserId,
+          showComments: true,
+        })
+        .onConflictDoNothing();
+      console.log("Created E2E routing source + aggregated article");
+    }
+  };
+
   const seedE2EUser = async (
     email: string,
     id: string,
@@ -486,6 +599,9 @@ export const setup = async () => {
     console.log("Creating follow graph + profile data");
     await seedE2EFollow(E2E_USER_TWO_ID, E2E_USER_ONE_ID);
     await seedE2EProfile(E2E_USER_ONE_ID);
+
+    console.log("Creating routing source fixtures");
+    await seedE2ESource(E2E_USER_ONE_ID);
 
     console.log("DB setup successful");
   } catch (err) {
