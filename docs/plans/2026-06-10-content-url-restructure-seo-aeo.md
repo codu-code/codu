@@ -9,6 +9,7 @@
 **Tech Stack:** Next.js App Router (RSC), Drizzle ORM (Postgres), tRPC v11, Playwright (e2e), Vitest (unit), `next/font`, nanoid, schema.org JSON-LD.
 
 **Decisions locked (flip any before starting):**
+
 - Questions == discussions → single `/d/` namespace, `DiscussionForumPosting` schema.
 - Feed sources move to `/s/{sourceSlug}` (frees top-level namespace).
 - `urlId`: backfill from each post's existing trailing slug-hash (old links resolve unchanged).
@@ -23,6 +24,7 @@
 ### Task 1: `urlId` column + migration + backfill
 
 **Files:**
+
 - Modify: `server/db/schema.ts` (posts table, ~line 332)
 - Create: `drizzle/00XX_add_post_url_id.sql` (via `npm run db:generate`)
 - Create: `drizzle/backfill-url-id.ts`
@@ -56,6 +58,7 @@ urlIdKey: uniqueIndex("posts_url_id_key").on(table.urlId),
 ### Task 2: Reserved-namespace list + username validation
 
 **Files:**
+
 - Create: `server/lib/reserved-usernames.ts`
 - Create: `server/lib/reserved-usernames.test.ts`
 - Modify: `schema/profile.ts:7-14` (saveSettingsSchema.username)
@@ -101,6 +104,7 @@ describe("isReservedUsername", () => {
 ### Task 3: Pure URL helpers (the heart of routing)
 
 **Files:**
+
 - Create: `server/lib/content-url.ts`
 - Create: `server/lib/content-url.test.ts`
 
@@ -139,7 +143,9 @@ describe("path builders", () => {
 
 describe("canonicalMismatch", () => {
   it("is true when the requested path differs from canonical", () => {
-    expect(canonicalMismatch("/niall/old-a1b2c3d4", "/niall-maher/new-a1b2c3d4")).toBe(true);
+    expect(
+      canonicalMismatch("/niall/old-a1b2c3d4", "/niall-maher/new-a1b2c3d4"),
+    ).toBe(true);
   });
   it("is false when they match", () => {
     expect(canonicalMismatch("/d/x-7x8y9z01", "/d/x-7x8y9z01")).toBe(false);
@@ -162,6 +168,7 @@ describe("canonicalMismatch", () => {
 ### Task 4: Member content route resolves on `urlId` + self-corrects
 
 **Files:**
+
 - Modify: `app/(app)/[username]/[slug]/page.tsx` (resolvers ~470-960)
 
 **Step 1:** Change resolution to: `parseUrlId(params.slug)` → look up post by `urlId` (+ that it's a member, non-discussion type). If found, compute canonical `buildMemberPath(author.username, post.slug, post.urlId)`; if `canonicalMismatch(requestedPath, canonical)` → `permanentRedirect(canonical)` (handles both wrong slug AND renamed username). If not found by id, fall back to the existing slug+username lookup (legacy links) and `permanentRedirect` to the new canonical.
@@ -179,6 +186,7 @@ describe("canonicalMismatch", () => {
 ### Task 5: New `/d/` discussion namespace + SSR detail page
 
 **Files:**
+
 - Create: `app/(app)/d/[slug]/page.tsx`
 - Reuse: the existing discussion detail rendering (currently reached via `[username]/[slug]`)
 
@@ -197,10 +205,12 @@ describe("canonicalMismatch", () => {
 ### Task 6: Fix the broken `/feed/${id}` card fallback (#4)
 
 **Files:**
+
 - Modify: `components/UnifiedContentCard/UnifiedContentCard.tsx:109-117`
 - Modify: `components/SavedItemCard/SavedItemCard.tsx:63-68`
 
 **Step 1 (TDD where possible):** Build `cardUrl` via the Task 3 helpers from `urlId` + kind:
+
 - discussion/question → `buildDiscussionPath(slug, urlId)`
 - aggregated link (has `source`) → `buildSourcePath(source.slug, slug, urlId)`
 - member content → `buildMemberPath(author.username, slug, urlId)`
@@ -217,6 +227,7 @@ describe("canonicalMismatch", () => {
 ### Task 7: Feed sources → `/s/{sourceSlug}`
 
 **Files:**
+
 - Create: `app/(app)/s/[sourceSlug]/page.tsx` (move from `[username]` source branch)
 - Create: `app/(app)/s/[sourceSlug]/[slug]/page.tsx` (aggregated article; canonical = original source URL)
 - Modify: `app/(app)/[username]/page.tsx` (drop the source-slug fallback; `[username]` = users only)
@@ -232,10 +243,12 @@ describe("canonicalMismatch", () => {
 ### Task 8: Redirect map (one hop) + comment anchors
 
 **Files:**
+
 - Modify: `next.config.js:27-54` (`redirects()`)
 - Modify: `app/(app)/articles/[slug]/page.tsx` (already redirect-only — point at new canonical)
 
 **Step 1:** Add permanent redirects (single hop, point directly at final canonical):
+
 - `/feed/:sourceSlug` → `/s/:sourceSlug`
 - `/feed/:sourceSlug/:articleId` → `/s/:sourceSlug/:articleId`
 - Old `/{sourceSlug}` and `/{sourceSlug}/{slug}` source URLs → `/s/...` (route-level redirect in the `[username]` resolver when the segment resolves to a source, not a user)
@@ -250,6 +263,7 @@ describe("canonicalMismatch", () => {
 ### Task 9: Global case + trailing-slash normalization
 
 **Files:**
+
 - Modify: `next.config.js` (`trailingSlash: false`) and/or a lightweight `middleware.ts`
 
 **Step 1:** Enforce no trailing slash + lowercase host/path for content routes; 301 `/Niall-Maher/...` → lowercase. Keep middleware minimal (it runs on every request).
@@ -265,6 +279,7 @@ describe("canonicalMismatch", () => {
 ### Task 10: `DiscussionForumPosting` builder (priority #1)
 
 **Files:**
+
 - Create: `lib/structured-data/schemas/discussion-forum-posting.ts`
 - Create: `lib/structured-data/schemas/discussion-forum-posting.test.ts`
 - Modify: `lib/structured-data/index.ts` (export), `lib/structured-data/types.ts` (types)
@@ -281,6 +296,7 @@ describe("canonicalMismatch", () => {
 ### Task 11: `ProfilePage` builder (priority #3)
 
 **Files:**
+
 - Create: `lib/structured-data/schemas/profile-page.ts` (+ test)
 - Wire into: `app/(app)/[username]/page.tsx`
 
@@ -293,6 +309,7 @@ describe("canonicalMismatch", () => {
 ### Task 12: Article audit + remove SearchAction
 
 **Files:**
+
 - Modify: `lib/structured-data/schemas/article.ts`, `lib/structured-data/schemas/website.ts`
 
 **Step 1:** Ensure `Article` emits honest `dateModified` (from `posts.updatedAt`), `image`, `author.url` → `/{username}`, and `BlogPosting`/`Article` type. Member link-posts use the same builder with Codú canonical.
@@ -342,6 +359,7 @@ describe("canonicalMismatch", () => {
 ### Task 17: Bing IndexNow
 
 **Files:**
+
 - Create: `public/{indexnow-key}.txt`, `server/lib/indexnow.ts`
 - Wire into: publish/edit/delete in `server/api/router/content.ts`, `admin.ts` (approval)
 
@@ -368,6 +386,7 @@ describe("canonicalMismatch", () => {
 ### Task 20 + 21: Profile "Replies" tab
 
 **Files:**
+
 - Modify: `server/api/router/engagement.ts` or `profile.ts` (new query: a user's comments joined to parent discussion `slug`+`urlId` for anchor links)
 - Modify: `app/(app)/[username]/_usernameClient.tsx:118` (add `"Replies"` to `TABS`) + a new panel (mirror the Posts panel style)
 
@@ -396,6 +415,7 @@ describe("canonicalMismatch", () => {
 **Files:** `e2e/content-urls.spec.ts` (new), extend `e2e/setup.ts` seed if needed.
 
 **Step 1:** Cover, with assertions:
+
 - article page renders at `/{username}/{slug}-{urlId}` (200, title in HTML)
 - discussion page renders at `/d/{slug}-{urlId}` (200, OP + a comment in HTML)
 - profile renders at `/{username}` (200)
@@ -422,6 +442,7 @@ describe("canonicalMismatch", () => {
 ## Appendix — JSON-LD templates
 
 ### A. Article / BlogPosting (`/{username}/{slug}-{urlId}`)
+
 ```json
 {
   "@context": "https://schema.org",
@@ -435,12 +456,17 @@ describe("canonicalMismatch", () => {
     "name": "Niall Maher",
     "url": "https://www.codu.co/niall-maher"
   },
-  "publisher": { "@type": "Organization", "name": "Codú", "logo": { "@type": "ImageObject", "url": "https://www.codu.co/logo.png" } },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Codú",
+    "logo": { "@type": "ImageObject", "url": "https://www.codu.co/logo.png" }
+  },
   "mainEntityOfPage": "https://www.codu.co/niall-maher/why-rag-beats-finetuning-a1b2c3d4"
 }
 ```
 
 ### B. DiscussionForumPosting (`/d/{slug}-{urlId}`)
+
 ```json
 {
   "@context": "https://schema.org",
@@ -449,17 +475,33 @@ describe("canonicalMismatch", () => {
   "text": "I keep getting flaky runs...",
   "datePublished": "2026-06-08T10:00:00Z",
   "dateModified": "2026-06-09T08:00:00Z",
-  "author": { "@type": "Person", "name": "Niall Maher", "url": "https://www.codu.co/niall-maher" },
+  "author": {
+    "@type": "Person",
+    "name": "Niall Maher",
+    "url": "https://www.codu.co/niall-maher"
+  },
   "interactionStatistic": [
-    { "@type": "InteractionCounter", "interactionType": "https://schema.org/CommentAction", "userInteractionCount": 12 },
-    { "@type": "InteractionCounter", "interactionType": "https://schema.org/LikeAction", "userInteractionCount": 34 }
+    {
+      "@type": "InteractionCounter",
+      "interactionType": "https://schema.org/CommentAction",
+      "userInteractionCount": 12
+    },
+    {
+      "@type": "InteractionCounter",
+      "interactionType": "https://schema.org/LikeAction",
+      "userInteractionCount": 34
+    }
   ],
   "comment": [
     {
       "@type": "Comment",
       "text": "We snapshot the tool-call traces and diff them.",
       "dateCreated": "2026-06-08T11:30:00Z",
-      "author": { "@type": "Person", "name": "Dev Two", "url": "https://www.codu.co/dev-two" },
+      "author": {
+        "@type": "Person",
+        "name": "Dev Two",
+        "url": "https://www.codu.co/dev-two"
+      },
       "url": "https://www.codu.co/d/how-do-you-test-ai-agents-7x8y9z01#comment-5678"
     }
   ]
@@ -467,6 +509,7 @@ describe("canonicalMismatch", () => {
 ```
 
 ### C. ProfilePage (`/{username}`)
+
 ```json
 {
   "@context": "https://schema.org",
@@ -484,14 +527,93 @@ describe("canonicalMismatch", () => {
 ```
 
 ### D. BreadcrumbList (articles + discussions)
+
 ```json
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Codú", "item": "https://www.codu.co/" },
-    { "@type": "ListItem", "position": 2, "name": "Discussions", "item": "https://www.codu.co/discussions" },
-    { "@type": "ListItem", "position": 3, "name": "How do you test AI agents?", "item": "https://www.codu.co/d/how-do-you-test-ai-agents-7x8y9z01" }
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Codú",
+      "item": "https://www.codu.co/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Discussions",
+      "item": "https://www.codu.co/discussions"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "How do you test AI agents?",
+      "item": "https://www.codu.co/d/how-do-you-test-ai-agents-7x8y9z01"
+    }
   ]
 }
 ```
+
+---
+
+## Migration runbook
+
+In-repo copy of the production cutover checklist for the content-URL restructure
+(mirrors the external watch-doc, but lives with the code the team ships).
+`urlId` is the immutable canonical resolver for every content URL; the steps
+below get it onto every row, enforce it, and confirm the new URL surface +
+crawler coverage are healthy.
+
+### 1. Schema + backfill (DB, run in order)
+
+1. **Run migration `0033`** (`0033_complex_wrecking_crew.sql`) — adds the
+   nullable `posts.url_id` column + the `posts_url_id_key` unique index.
+   - Command: `npm run db:migrate` (applies all pending Drizzle migrations from
+     `./drizzle` against `DATABASE_URL`). On Vercel production this also runs in
+     `vercel-build`, but run it explicitly first so the backfill has the column.
+2. **Backfill `url_id` on prod** — `npx tsx -r dotenv/config ./drizzle/backfill-url-id.ts`.
+   - Idempotent: only touches rows where `url_id IS NULL`. It derives the id from
+     the slug's trailing hex token when present, otherwise mints a fresh one, and
+     guarantees uniqueness against ids already in use.
+   - Verify zero NULLs remain before proceeding:
+     `SELECT count(*) FROM posts WHERE url_id IS NULL;` → must be `0`.
+3. **NOT NULL follow-up migration** — generate + apply the migration that flips
+   `posts.url_id` to `NOT NULL` (`drizzle-kit generate` after marking the column
+   `.notNull()` in `server/db/schema.ts`, then `npm run db:migrate`).
+   - ONLY run this once step 2 reports 0 NULLs in prod — the NOT NULL constraint
+     will fail the migration otherwise.
+
+### 2. Verify content lives in `posts` (not legacy `post`)
+
+- Confirm prod articles are served from the new `posts` table, not the legacy
+  `"Post"` table (both still exist during the transition):
+  - `SELECT count(*) FROM posts WHERE status = 'published';` should match the
+    live article/discussion/link count.
+  - Spot-check a few live URLs resolve via the new routes:
+    `/{username}/{slug}`, `/d/{slug}`, `/s/{sourceSlug}/{slug}`.
+- The e2e regression suite `e2e/content-urls.spec.ts` pins the full URL surface
+  - every redirect (301/308) and the no-routeless-`/[id]` guard; run it green
+    before cutover.
+
+### 3. Search engine resubmission
+
+- **Rebuild + submit the sitemap** (`app/sitemap.ts` emits the new urlId-suffixed
+  URLs) to **Google Search Console** and **Bing Webmaster Tools**. Resubmit the
+  sitemap URL so both recrawl against the new scheme.
+- **IndexNow**: ensure the IndexNow key file is reachable at the site root
+  (`https://www.codu.co/{key}.txt` returns 200) so push-notifications of changed
+  URLs are accepted. (Key file is added as part of the IndexNow setup — confirm
+  it's deployed and 200s before relying on IndexNow pings.)
+
+### 4. Post-cutover watch (2 weeks)
+
+- **Monitor 404 / 410 coverage** in GSC + Bing for ~2 weeks. Expectations:
+  - Legacy URLs should report as **301/308 redirects** to canonical (not 404s).
+  - Genuinely removed content should report **410/404** intentionally, not as
+    soft-404s on live content.
+  - Watch for any spike in 404s on `/{id}`-shaped paths — that would signal a
+    routeless-`/[id]` regression (the exact case `e2e/content-urls.spec.ts`
+    guards). Investigate immediately if it appears.
+- Keep the legacy `"Post"` table until coverage is stable, then schedule its
+  drop in a separate, reversible migration.
