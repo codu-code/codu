@@ -98,7 +98,7 @@ async function getDiscussionPost(
   if (!row) return null;
 
   const tagsResult = await db
-    .select({ title: tag.title })
+    .select({ title: tag.title, slug: tag.slug })
     .from(post_tags)
     .innerJoin(tag, eq(post_tags.tagId, tag.id))
     .where(eq(post_tags.postId, row.id));
@@ -120,7 +120,7 @@ async function getDiscussionPost(
     downvotes: row.downvotesCount,
     type: row.type,
     moderationNote: row.moderationNote,
-    tags: tagsResult.map((t) => ({ tag: { title: t.title } })),
+    tags: tagsResult.map((t) => ({ tag: { title: t.title, slug: t.slug } })),
     user: {
       id: row.authorId,
       name: row.authorName,

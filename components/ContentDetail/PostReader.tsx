@@ -13,7 +13,7 @@ import InlineAuthorBio from "@/components/ContentDetail/InlineAuthorBio";
 import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import NotFound from "@/components/NotFound/NotFound";
 import { JsonLd } from "@/components/JsonLd";
-import { getCamelCaseFromLower } from "@/utils/utils";
+import { getCamelCaseFromLower, slugifyTag } from "@/utils/utils";
 import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
 import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 import { db } from "@/server/db";
@@ -40,7 +40,7 @@ export interface ReaderPost {
   downvotes: number | null;
   type: string;
   moderationNote: string | null;
-  tags: { tag: { title: string } }[];
+  tags: { tag: { title: string; slug?: string | null } }[];
   user: {
     id: string | null;
     name: string | null;
@@ -283,7 +283,7 @@ const PostReader = async ({
             <section className="mt-6 flex flex-wrap gap-3">
               {post.tags.map(({ tag }) => (
                 <Link
-                  href={`/?tag=${tag.title.toLowerCase()}`}
+                  href={`/tag/${tag.slug || slugifyTag(tag.title)}`}
                   key={tag.title}
                   className="rounded-sm border border-hairline px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-strong hover:text-fg"
                 >

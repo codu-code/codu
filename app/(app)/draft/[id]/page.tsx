@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { InlineAuthorBio } from "@/components/ContentDetail";
 import { type Metadata } from "next";
 import { getPostPreview } from "@/server/lib/posts";
-import { getCamelCaseFromLower } from "@/utils/utils";
+import { getCamelCaseFromLower, slugifyTag } from "@/utils/utils";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -94,7 +94,7 @@ const PreviewPage = async (props: Props) => {
           <section className="mt-6 flex flex-wrap gap-3">
             {post.tags.map(({ tag }) => (
               <Link
-                href={`/?tag=${tag.title.toLowerCase()}`}
+                href={`/tag/${slugifyTag(tag.title)}`}
                 key={tag.title}
                 className="rounded-full bg-gradient-to-r from-accent to-accent px-3 py-1 text-xs font-bold text-on-accent hover:bg-accent"
               >

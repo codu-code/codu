@@ -93,7 +93,7 @@ async function getUserPost(
   const postRecord = postResults[0];
 
   const tagsResult = await db
-    .select({ title: tag.title })
+    .select({ title: tag.title, slug: tag.slug })
     .from(post_tags)
     .innerJoin(tag, eq(post_tags.tagId, tag.id))
     .where(eq(post_tags.postId, postRecord.id));
@@ -104,7 +104,7 @@ async function getUserPost(
     readTimeMins: postRecord.readingTime,
     upvotes: postRecord.upvotesCount,
     downvotes: postRecord.downvotesCount,
-    tags: tagsResult.map((t) => ({ tag: { title: t.title } })),
+    tags: tagsResult.map((t) => ({ tag: { title: t.title, slug: t.slug } })),
     user: {
       id: postRecord.authorId,
       name: postRecord.authorName,
