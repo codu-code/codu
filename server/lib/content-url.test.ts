@@ -4,6 +4,7 @@ import {
   buildMemberPath,
   buildDiscussionPath,
   buildSourcePath,
+  buildCommentHref,
   canonicalMismatch,
 } from "./content-url";
 
@@ -38,6 +39,52 @@ describe("buildSourcePath", () => {
     expect(buildSourcePath("vercel-blog", "some-article", "kk22dd00")).toBe(
       "/s/vercel-blog/some-article-kk22dd00",
     );
+  });
+});
+
+describe("buildCommentHref", () => {
+  it("links discussions to /d/{slug}#comment-{id}", () => {
+    expect(
+      buildCommentHref({
+        commentId: "c1",
+        parentType: "discussion",
+        parentSlug: "how-do-you-test-7x8y9z01",
+      }),
+    ).toBe("/d/how-do-you-test-7x8y9z01#comment-c1");
+  });
+
+  it("links questions to /d/{slug}#comment-{id}", () => {
+    expect(
+      buildCommentHref({
+        commentId: "c2",
+        parentType: "question",
+        parentSlug: "best-orm-aa11bb22",
+      }),
+    ).toBe("/d/best-orm-aa11bb22#comment-c2");
+  });
+
+  it("links aggregated content to /s/{sourceSlug}/{slug}#comment-{id}", () => {
+    expect(
+      buildCommentHref({
+        commentId: "c3",
+        parentType: "article",
+        parentSlug: "some-article-kk22dd00",
+        sourceSlug: "vercel-blog",
+        authorUsername: "feed-bot",
+      }),
+    ).toBe("/s/vercel-blog/some-article-kk22dd00#comment-c3");
+  });
+
+  it("links member content to /{authorUsername}/{slug}#comment-{id}", () => {
+    expect(
+      buildCommentHref({
+        commentId: "c4",
+        parentType: "article",
+        parentSlug: "why-rag-a1b2c3d4",
+        sourceSlug: null,
+        authorUsername: "niall-maher",
+      }),
+    ).toBe("/niall-maher/why-rag-a1b2c3d4#comment-c4");
   });
 });
 

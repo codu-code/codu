@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { user } from "@/server/db/schema";
+import {
+  user,
+  comments,
+  posts,
+  feed_sources as feedSources,
+} from "@/server/db/schema";
+import { buildCommentHref } from "@/server/lib/content-url";
 import {
   saveSettingsSchema,
   getProfileSchema,
@@ -17,7 +23,8 @@ import {
 import { isReservedUsername } from "@/server/lib/reserved-usernames";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
-import { and, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, isNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { emailTokenReqSchema } from "@/schema/token";
 import { generateEmailToken, sendVerificationEmail } from "@/utils/emailToken";
 import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
@@ -198,6 +205,71 @@ export const profileRouter = createTRPCRouter({
     }
     return profile;
   }),
+  // A user's comments/replies, newest first, each linked to the comment anchor
+  // on its published parent content. Profiles are public.
+  userReplies: publicProcedure
+    .input(getProfileSchema)
+    .query(async ({ ctx, input }) => {
+      const { username } = input;
+
+      const [profile] = await ctx.db
+        .select({ id: user.id })
+        .from(user)
+        .where(eq(user.username, username))
+        .limit(1);
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Profile not found",
+        });
+      }
+
+      // Parent post's author drives member hrefs; aliased so it doesn't collide
+      // with any future join on the comment author.
+      const postAuthor = alias(user, "post_author");
+
+      const rows = await ctx.db
+        .select({
+          id: comments.id,
+          body: comments.body,
+          createdAt: comments.createdAt,
+          parentTitle: posts.title,
+          parentType: posts.type,
+          parentSlug: posts.slug,
+          sourceSlug: feedSources.slug,
+          authorUsername: postAuthor.username,
+        })
+        .from(comments)
+        .innerJoin(posts, eq(comments.postId, posts.id))
+        .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+        .leftJoin(postAuthor, eq(posts.authorId, postAuthor.id))
+        .where(
+          and(
+            eq(comments.authorId, profile.id),
+            isNull(comments.deletedAt),
+            eq(posts.status, "published"),
+          ),
+        )
+        .orderBy(desc(comments.createdAt))
+        .limit(30);
+
+      return rows.map((r) => ({
+        id: r.id,
+        body: r.body,
+        createdAt: r.createdAt,
+        parent: {
+          title: r.parentTitle,
+          href: buildCommentHref({
+            commentId: r.id,
+            parentType: r.parentType,
+            parentSlug: r.parentSlug,
+            sourceSlug: r.sourceSlug,
+            authorUsername: r.authorUsername,
+          }),
+        },
+      }));
+    }),
   updateEmail: protectedProcedure
     .input(emailTokenReqSchema)
     .mutation(async ({ input, ctx }) => {

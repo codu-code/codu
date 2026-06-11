@@ -32,6 +32,32 @@ export function buildSourcePath(
   return `/s/${source}/${slug}-${urlId}`;
 }
 
+/**
+ * Path to a comment anchor on its parent content, per the live URL scheme.
+ * The stored `slug` already carries the trailing urlId, so it's used as-is.
+ * - discussion / question → /d/{slug}#comment-{id}
+ * - aggregated (sourceSlug set) → /s/{sourceSlug}/{slug}#comment-{id}
+ * - member content → /{authorUsername}/{slug}#comment-{id}
+ */
+export function buildCommentHref(input: {
+  commentId: string;
+  parentType: string;
+  parentSlug: string;
+  sourceSlug?: string | null;
+  authorUsername?: string | null;
+}): string {
+  const { commentId, parentType, parentSlug, sourceSlug, authorUsername } =
+    input;
+  const anchor = `#comment-${commentId}`;
+  if (parentType === "discussion" || parentType === "question") {
+    return `/d/${parentSlug}${anchor}`;
+  }
+  if (sourceSlug) {
+    return `/s/${sourceSlug}/${parentSlug}${anchor}`;
+  }
+  return `/${authorUsername ?? ""}/${parentSlug}${anchor}`;
+}
+
 function stripQuery(path: string): string {
   const queryIndex = path.indexOf("?");
   return queryIndex === -1 ? path : path.slice(0, queryIndex);
