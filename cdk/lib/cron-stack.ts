@@ -76,5 +76,35 @@ export class CronStack extends cdk.Stack {
     });
 
     voteReconcileRule.addTarget(new targets.LambdaFunction(voteReconcileFn));
+
+    // Scheduled-Post Promotion Invoker Lambda
+    //
+    // Thin invoker: it reads the shared cron secret from SSM and POSTs to the
+    // app's `/api/cron/promote-scheduled` route, which does the actual DB
+    // promotion + go-live side-effects. Keeping the logic in the app means the
+    // cron stays a one-liner here.
+    const promoteScheduledFn = new NodejsFunction(this, "PromoteScheduledLambda", {
+      timeout: cdk.Duration.seconds(60),
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(__dirname, "/../lambdas/promoteScheduled/index.ts"),
+      depsLockFilePath: path.join(
+        __dirname,
+        "/../lambdas/promoteScheduled/package-lock.json",
+      ),
+      role: lambdaRole,
+      bundling: {
+        nodeModules: ["@aws-sdk/client-ssm"],
+      },
+    });
+
+    // Run every 5 minutes — fine granularity for staggering content releases.
+    // Adjustable: tighten to `rate(1 minute)` if near-instant go-live matters.
+    const promoteScheduledRule = new events.Rule(this, "PromoteScheduledRule", {
+      schedule: events.Schedule.expression("rate(5 minutes)"),
+    });
+
+    promoteScheduledRule.addTarget(
+      new targets.LambdaFunction(promoteScheduledFn),
+    );
   }
 }

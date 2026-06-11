@@ -1,0 +1,8 @@
+{
+  "name": "promote-scheduled-lambda",
+  "version": "1.0.0",
+  "description": "Thin invoker Lambda to trigger the scheduled-post promotion cron route",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.509.0"
+  }
+}
