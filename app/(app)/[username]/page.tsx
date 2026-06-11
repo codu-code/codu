@@ -7,7 +7,7 @@ import { db } from "@/server/db";
 import { feed_sources } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { JsonLd } from "@/components/JsonLd";
-import { getPersonSchema } from "@/lib/structured-data";
+import { getProfilePageSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -119,19 +119,20 @@ export default async function Page(props: {
       accountLocked,
     };
 
-    // Prepare Person JSON-LD for SEO
-    const personSchema = getPersonSchema({
+    // Prepare ProfilePage JSON-LD (wraps a Person mainEntity) for profile SEO.
+    const profilePageSchema = getProfilePageSchema({
       name: shapedProfile.name,
       username: shapedProfile.username,
       image: shapedProfile.image,
       bio: shapedProfile.bio,
       websiteUrl: shapedProfile.websiteUrl,
+      createdAt: shapedProfile.createdAt,
     });
 
     return (
       <>
-        {/* Person JSON-LD for profile SEO */}
-        <JsonLd data={personSchema} />
+        {/* ProfilePage JSON-LD for profile SEO */}
+        <JsonLd data={profilePageSchema} />
 
         {/* The visible profile name (rendered as <h1> in _usernameClient) is the
             single page h1 — no separate sr-only h1 to avoid duplicate headings. */}
