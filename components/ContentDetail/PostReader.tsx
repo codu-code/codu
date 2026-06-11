@@ -102,6 +102,13 @@ interface PostReaderProps {
   canonicalPath: string;
   /** Discussion-disabled copy varies by surface ("post" vs "article"). */
   commentsDisabledLabel?: string;
+  /**
+   * Whether this reader emits its own Article + breadcrumb JSON-LD. The /d/
+   * (discussion) route emits DiscussionForumPosting + a discussion breadcrumb
+   * itself, so it passes `false` to avoid double/wrong schema. Defaults to true
+   * for the member-article surface.
+   */
+  emitArticleSchema?: boolean;
 }
 
 // Shared server component rendering a text post (article/discussion/question/
@@ -113,6 +120,7 @@ const PostReader = async ({
   host,
   canonicalPath,
   commentsDisabledLabel = "post",
+  emitArticleSchema = true,
 }: PostReaderProps) => {
   // Only reachable by the author (the resolver only returns non-published posts
   // when viewerId matches the author's id).
@@ -134,39 +142,42 @@ const PostReader = async ({
     }) as unknown as string;
   }
 
-  const articleSchema = getArticleSchema({
-    title: post.title,
-    excerpt: post.excerpt,
-    slug: post.slug,
-    publishedAt: post.published,
-    updatedAt: post.updatedAt,
-    readingTime: post.readTimeMins,
-    canonicalUrl: post.canonicalUrl,
-    tags: post.tags.map((t) => ({ title: t.tag.title })),
-    author: {
-      name: post.user.name,
-      username: post.user.username,
-      image: post.user.image,
-      bio: post.user.bio,
-    },
-  });
+  const articleSchema = emitArticleSchema
+    ? getArticleSchema({
+        title: post.title,
+        excerpt: post.excerpt,
+        slug: post.slug,
+        publishedAt: post.published,
+        updatedAt: post.updatedAt,
+        readingTime: post.readTimeMins,
+        canonicalUrl: post.canonicalUrl,
+        tags: post.tags.map((t) => ({ title: t.tag.title })),
+        author: {
+          name: post.user.name,
+          username: post.user.username,
+          image: post.user.image,
+          bio: post.user.bio,
+        },
+      })
+    : null;
 
-  const breadcrumbSchema = getBreadcrumbSchema([
-    { name: "Home", url: "https://www.codu.co" },
-    { name: "Feed", url: "https://www.codu.co/feed" },
-    {
-      name: post.user.name || "Author",
-      url: `https://www.codu.co/${post.user.username}`,
-    },
-    { name: post.title },
-  ]);
+  const breadcrumbSchema = emitArticleSchema
+    ? getBreadcrumbSchema([
+        { name: "Home", url: "https://www.codu.co" },
+        {
+          name: post.user.name || "Author",
+          url: `https://www.codu.co/${post.user.username}`,
+        },
+        { name: post.title },
+      ])
+    : null;
 
   const discussionCount = await getDiscussionCount(post.id);
 
   return (
     <>
-      <JsonLd data={articleSchema} />
-      <JsonLd data={breadcrumbSchema} />
+      {articleSchema && <JsonLd data={articleSchema} />}
+      {breadcrumbSchema && <JsonLd data={breadcrumbSchema} />}
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         <nav className="mb-6 flex items-center gap-2 text-sm text-muted">
