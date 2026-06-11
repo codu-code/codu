@@ -49,6 +49,26 @@ import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import { mintUrlId } from "@/server/lib/url-id";
+import { submitToIndexNow } from "@/server/lib/indexnow";
+
+const SITE_ORIGIN = "https://www.codu.co";
+
+// Absolute canonical URL for a freshly published member post, matching the
+// sitemap scheme: discussions/questions → /d/{slug}, everything else
+// member-authored → /{username}/{slug}. The slug already ends with the urlId.
+// Returns null when we can't build a stable public URL (no username) so callers
+// skip the IndexNow ping rather than submit a 404.
+function memberPostUrl(
+  dbType: DbPostType,
+  slug: string,
+  username: string | null | undefined,
+): string | null {
+  if (dbType === "discussion" || dbType === "question") {
+    return `${SITE_ORIGIN}/d/${slug}`;
+  }
+  if (!username) return null;
+  return `${SITE_ORIGIN}/${username}/${slug}`;
+}
 
 // Produce the hyphenated lowercase base of a slug, with no id suffix. The
 // trailing token of a slug must be the post's urlId, so callers append it.
@@ -660,6 +680,18 @@ export const contentRouter = createTRPCRouter({
           sourceType: "post",
           sourceId: newContent.id,
         });
+
+        // Ping IndexNow so Bing crawls the new URL immediately (fire-and-forget;
+        // guarded to production + www.codu.co inside the lib). Skip cross-posted
+        // content (its canonical lives off Codú).
+        if (!input.canonicalUrl) {
+          const url = memberPostUrl(
+            dbType,
+            slug,
+            ctx.session.user.username,
+          );
+          if (url) void submitToIndexNow(url);
+        }
       }
 
       return newContent;
@@ -763,6 +795,19 @@ export const contentRouter = createTRPCRouter({
           title: input.title ?? existing[0].title,
           authorName: ctx.session.user.name,
         });
+      }
+
+      // Ping IndexNow when the update leaves the post live — a new go-live that
+      // passed the gate, or an edit to already-published content (refresh crawl).
+      // Fire-and-forget, production-guarded inside the lib. Skip if the post
+      // canonicals off Codú.
+      if (updated?.status === "published" && !updated.canonicalUrl) {
+        const url = memberPostUrl(
+          updated.type,
+          updated.slug,
+          ctx.session.user.username,
+        );
+        if (url) void submitToIndexNow(url);
       }
 
       if (input.tags !== undefined) {

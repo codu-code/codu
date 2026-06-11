@@ -16,7 +16,10 @@ import {
 } from "@/server/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { award } from "@/server/lib/engagement";
+import { submitToIndexNow } from "@/server/lib/indexnow";
 import { POST_APPROVED } from "@/utils/notifications";
+
+const SITE_ORIGIN = "https://www.codu.co";
 
 // Mirror of the slug helper used by content/post publish so approved posts get
 // a stable URL when none was set yet.
@@ -338,8 +341,13 @@ export const adminRouter = createTRPCRouter({
           title: posts.title,
           slug: posts.slug,
           status: posts.status,
+          type: posts.type,
+          sourceId: posts.sourceId,
+          canonicalUrl: posts.canonicalUrl,
+          authorUsername: user.username,
         })
         .from(posts)
+        .leftJoin(user, eq(posts.authorId, user.id))
         .where(eq(posts.id, input.id))
         .limit(1);
 
@@ -438,6 +446,20 @@ export const adminRouter = createTRPCRouter({
         sourceType: "post",
         sourceId: existing.id,
       });
+
+      // Ping IndexNow now the post is live — same scheme as the sitemap.
+      // Fire-and-forget, production-guarded inside the lib. Source-imported and
+      // cross-posted rows are skipped (this path only approves member content).
+      if (!existing.sourceId && !existing.canonicalUrl) {
+        const slug = approved?.slug ?? existing.slug;
+        const url =
+          existing.type === "discussion" || existing.type === "question"
+            ? `${SITE_ORIGIN}/d/${slug}`
+            : existing.authorUsername
+              ? `${SITE_ORIGIN}/${existing.authorUsername}/${slug}`
+              : null;
+        if (url) void submitToIndexNow(url);
+      }
 
       // Notify the author their post was approved (notifier = author, so the
       // existing notifier join in the notifications list resolves correctly).
