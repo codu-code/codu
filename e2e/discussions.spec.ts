@@ -27,13 +27,28 @@ test.describe("Discussions page", () => {
   });
 });
 
+// Discussions/questions are canonical at /d/{slug}; the legacy
+// /{username}/{slug} path 301s here. Tests hit the /d/ canonical directly.
+const DISCUSSION_PATH = "http://localhost:3000/d/e2e-discussion-published";
+const LEGACY_DISCUSSION_PATH =
+  "http://localhost:3000/e2e-test-user-one-111/e2e-discussion-published";
+
 test.describe("Discussion thread", () => {
+  test("legacy /{username}/{slug} path 301s to the /d/ canonical", async ({
+    page,
+  }) => {
+    const response = await page.goto(LEGACY_DISCUSSION_PATH);
+    // Final URL after following the redirect should be the /d/ canonical.
+    expect(new URL(page.url()).pathname).toBe("/d/e2e-discussion-published");
+    // The hop itself is a permanent redirect.
+    const redirectChain = response?.request().redirectedFrom();
+    expect(redirectChain).not.toBeNull();
+  });
+
   test("renders the post and its seeded thread (comment + nested reply)", async ({
     page,
   }) => {
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-discussion-published",
-    );
+    await page.goto(DISCUSSION_PATH);
 
     await expect(
       page.getByRole("heading", { name: /testing setup/ }),
@@ -57,9 +72,7 @@ test.describe("Discussion thread", () => {
     page,
   }) => {
     await loggedInAsUserOne(page);
-    await page.goto(
-      "http://localhost:3000/e2e-test-user-one-111/e2e-discussion-published",
-    );
+    await page.goto(DISCUSSION_PATH);
 
     const parent = page
       .locator("section.group\\/comment")
