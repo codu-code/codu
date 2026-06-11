@@ -62,6 +62,9 @@ const config = {
     },
   },
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
+  // Explicit: never serve/redirect to trailing-slash variants. Next already
+  // 301s `/foo/` -> `/foo`; this documents the intent and keeps canonicals tidy.
+  trailingSlash: false,
   images: {
     remotePatterns: REMOTE_PATTERNS,
   },

@@ -9,8 +9,8 @@ export const saveSettingsSchema = z.object({
     .min(3)
     .max(40, "Max username length is 40 characters.")
     .regex(
-      /^[a-zA-Z0-9-]+$/,
-      "Username can only contain alphanumerics and dashes.",
+      /^[a-z0-9-]+$/,
+      "Usernames are lowercase: letters, numbers, dashes.",
     ),
   location: z
     .string()
