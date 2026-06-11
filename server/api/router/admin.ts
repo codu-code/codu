@@ -15,11 +15,8 @@ import {
   notification,
 } from "@/server/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
-import { award } from "@/server/lib/engagement";
-import { submitToIndexNow } from "@/server/lib/indexnow";
+import { runPostGoLiveSideEffects } from "@/server/lib/post-go-live";
 import { POST_APPROVED } from "@/utils/notifications";
-
-const SITE_ORIGIN = "https://www.codu.co";
 
 // Mirror of the slug helper used by content/post publish so approved posts get
 // a stable URL when none was set yet.
@@ -331,6 +328,12 @@ export const adminRouter = createTRPCRouter({
         id: z.string(),
         decision: z.enum(["approve", "reject", "hide"]),
         note: z.string().max(1000).optional(),
+        // When approving, an optional future release time. If set to a future
+        // instant the post is scheduled (status `scheduled`, publishedAt=this)
+        // instead of going live now; the promote-scheduled cron runs the
+        // go-live side-effects (points/IndexNow/notification) at that time. A
+        // missing or past value approves + publishes immediately (unchanged).
+        publishAt: z.string().datetime().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -426,53 +429,69 @@ export const adminRouter = createTRPCRouter({
         return rejected;
       }
 
+      // Ensure the post has a stable slug before approving (now) or scheduling.
+      const slug =
+        existing.slug ||
+        (existing.title ? generateSlug(existing.title) : existing.slug);
+
+      // Approve & schedule: a FUTURE publishAt parks the post as `scheduled`
+      // with publishedAt = that time. The go-live side-effects (points,
+      // IndexNow, the "published" notification) DO NOT run now — the
+      // promote-scheduled cron runs them at the real go-live. We still write
+      // the slug so the eventual URL is stable, and optionally notify the
+      // author it's approved + scheduled.
+      const publishAt = input.publishAt ? new Date(input.publishAt) : null;
+      if (publishAt && publishAt.getTime() > Date.now()) {
+        const [scheduled] = await ctx.db
+          .update(posts)
+          .set({
+            status: "scheduled",
+            publishedAt: publishAt.toISOString(),
+            slug,
+          })
+          .where(eq(posts.id, input.id))
+          .returning();
+
+        // Optional courtesy notification: approved, scheduled for a later time.
+        // Re-uses POST_APPROVED (notifier = author) so the notifications join
+        // resolves; the actual "published" go-live notification fires from the
+        // cron when the post actually goes live.
+        try {
+          await ctx.db.insert(notification).values({
+            type: POST_APPROVED,
+            userId: existing.authorId,
+            notifierId: existing.authorId,
+            postId: existing.id,
+          });
+        } catch (error) {
+          Sentry.captureException(error);
+        }
+
+        return scheduled;
+      }
+
       // Approve → publish now, mirroring the normal publish path.
       const [approved] = await ctx.db
         .update(posts)
         .set({
           status: "published",
           publishedAt: new Date().toISOString(),
-          slug:
-            existing.slug ||
-            (existing.title ? generateSlug(existing.title) : existing.slug),
+          slug,
         })
         .where(eq(posts.id, input.id))
         .returning();
 
-      // Award publish points, exactly as the normal publish flow does.
-      await award({
-        userId: existing.authorId,
-        action: "post_published",
-        sourceType: "post",
-        sourceId: existing.id,
+      // Run the same go-live side-effects the cron uses (points + IndexNow +
+      // author notification).
+      await runPostGoLiveSideEffects(ctx.db, {
+        id: existing.id,
+        authorId: existing.authorId,
+        type: existing.type,
+        slug: approved?.slug ?? slug,
+        authorUsername: existing.authorUsername,
+        sourceId: existing.sourceId,
+        canonicalUrl: existing.canonicalUrl,
       });
-
-      // Ping IndexNow now the post is live — same scheme as the sitemap.
-      // Fire-and-forget, production-guarded inside the lib. Source-imported and
-      // cross-posted rows are skipped (this path only approves member content).
-      if (!existing.sourceId && !existing.canonicalUrl) {
-        const slug = approved?.slug ?? existing.slug;
-        const url =
-          existing.type === "discussion" || existing.type === "question"
-            ? `${SITE_ORIGIN}/d/${slug}`
-            : existing.authorUsername
-              ? `${SITE_ORIGIN}/${existing.authorUsername}/${slug}`
-              : null;
-        if (url) void submitToIndexNow(url);
-      }
-
-      // Notify the author their post was approved (notifier = author, so the
-      // existing notifier join in the notifications list resolves correctly).
-      try {
-        await ctx.db.insert(notification).values({
-          type: POST_APPROVED,
-          userId: existing.authorId,
-          notifierId: existing.authorId,
-          postId: existing.id,
-        });
-      } catch (error) {
-        Sentry.captureException(error);
-      }
 
       return approved;
     }),

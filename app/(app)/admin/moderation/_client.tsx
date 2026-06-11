@@ -72,6 +72,12 @@ const ModerationQueue = () => {
   // Optional per-item "Decline" note, keyed by postId.
   const [declineNotes, setDeclineNotes] = useState<Record<string, string>>({});
 
+  // Optional per-item future release time (datetime-local value), keyed by
+  // postId. Used by the "Schedule" affordance to approve + schedule a post.
+  const [scheduleTimes, setScheduleTimes] = useState<Record<string, string>>(
+    {},
+  );
+
   const { data, isLoading } = api.report.getAll.useQuery({
     status: statusFilter,
     limit: 20,
@@ -102,7 +108,9 @@ const ModerationQueue = () => {
       onSuccess: (_data, variables) => {
         toast.success(
           variables.decision === "approve"
-            ? "Post approved"
+            ? variables.publishAt
+              ? "Post approved and scheduled"
+              : "Post approved"
             : variables.decision === "hide"
               ? "Post hidden and moved to review"
               : "Post declined",
@@ -305,6 +313,45 @@ const ModerationQueue = () => {
                 placeholder="Optional note shown to the author when declined…"
                 className="mt-2 w-full rounded border border-hairline bg-inset px-3 py-1.5 text-sm text-fg placeholder:text-faint focus:border-accent focus:outline-none"
               />
+              {/* Approve & schedule: pick a future release time, then Schedule.
+                  "Approve" (above) still publishes immediately. */}
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <label className="font-mono text-xs uppercase tracking-label text-faint">
+                  Schedule for
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduleTimes[post.id] ?? ""}
+                  min={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) =>
+                    setScheduleTimes((prev) => ({
+                      ...prev,
+                      [post.id]: e.target.value,
+                    }))
+                  }
+                  className="rounded border border-hairline bg-inset px-3 py-1.5 text-sm text-fg focus:border-accent focus:outline-none"
+                />
+                <button
+                  className="secondary-button px-3 py-1.5 text-sm disabled:opacity-50"
+                  disabled={isModerating || !scheduleTimes[post.id]}
+                  onClick={() => {
+                    const value = scheduleTimes[post.id];
+                    if (!value) return;
+                    const when = new Date(value);
+                    if (when.getTime() <= Date.now()) {
+                      toast.error("Pick a time in the future");
+                      return;
+                    }
+                    moderatePost({
+                      id: post.id,
+                      decision: "approve",
+                      publishAt: when.toISOString(),
+                    });
+                  }}
+                >
+                  Schedule
+                </button>
+              </div>
             </div>
           ))}
         </div>
