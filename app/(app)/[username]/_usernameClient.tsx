@@ -175,6 +175,16 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               <FollowButton userId={id} />
             </div>
           )}
+          {isOwner && !accountLocked && (
+            <div className="flex-shrink-0">
+              <Link
+                href="/my-posts"
+                className="inline-flex items-center rounded-md border border-hairline bg-elevated px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-hover hover:text-fg"
+              >
+                Manage posts
+              </Link>
+            </div>
+          )}
         </div>
 
         {bio && (

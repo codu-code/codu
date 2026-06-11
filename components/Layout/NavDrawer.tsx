@@ -58,6 +58,7 @@ export function NavDrawer({
           { name: "Notifications", href: "/notifications" },
           { name: "Saved", href: "/saved" },
           { name: "Profile", href: `/${username || "settings"}` },
+          { name: "My posts", href: "/my-posts" },
         ]
       : []),
   ];

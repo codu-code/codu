@@ -134,6 +134,7 @@ export function TopBar({
                 </div>
                 {[
                   { name: "Profile", href: `/${username || "settings"}` },
+                  { name: "My posts", href: "/my-posts" },
                   { name: "Settings", href: "/settings" },
                 ].map((item) => (
                   <MenuItem key={item.name}>
