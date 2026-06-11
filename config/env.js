@@ -36,6 +36,10 @@ export const env = createEnv({
     BEDROCK_MODEL_ID: z.string().optional(),
     MODERATION_ENABLED: z.enum(["true", "false"]).optional(),
     ADMIN_EMAIL: z.string().email().optional(),
+    // Shared secret for authenticating internal cron invocations (e.g. the
+    // promote-scheduled route). Optional so deploys without it still validate;
+    // the route refuses to run (401) when it's unset.
+    CRON_SECRET: z.string().optional(),
   },
 
   /**
@@ -64,6 +68,7 @@ export const env = createEnv({
     BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID,
     MODERATION_ENABLED: process.env.MODERATION_ENABLED,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    CRON_SECRET: process.env.CRON_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
