@@ -57,7 +57,12 @@ export function ComposeModal({
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
-  const [done, setDone] = useState<{ href: string } | null>(null);
+  const [done, setDone] = useState<{ href: string; label: string } | null>(
+    null,
+  );
+  // Tracks whether the in-flight mutation is a "Save draft" so the success
+  // panel can point at /my-posts instead of the live post.
+  const [savingDraft, setSavingDraft] = useState(false);
 
   const { mutate: create, status: createStatus } =
     api.content.create.useMutation({
@@ -65,12 +70,19 @@ export function ComposeModal({
         void utils.content.getFeed.invalidate();
         // Posting is an onboarding step — refresh so the first-win celebration
         // can fire (handled app-wide), even though we stay in this modal.
+        // (A draft won't satisfy "posted" server-side, which is correct.)
         void utils.engagement.onboardingWins.invalidate();
+        if (savingDraft) {
+          toast.success("Saved to drafts");
+          setDone({ href: "/my-posts?tab=drafts", label: "View drafts" });
+          return;
+        }
         // Fall back to the feed if we lack the username for the /{username}/{slug} URL.
         const href = post?.slug && username ? `/${username}/${post.slug}` : "/";
-        setDone({ href });
+        setDone({ href, label: "View post" });
       },
       onError: (err) => {
+        setSavingDraft(false);
         toast.error(err.message || "Couldn't post. Try again.");
         Sentry.captureException(err);
       },
@@ -101,6 +113,8 @@ export function ComposeModal({
   const canPost =
     effectiveTitle.length > 0 &&
     (tab === "discussion" || (tab === "link" && !!domain));
+  // Drafts only need a title — slug/edit resume keys off it. Discussion only.
+  const canSaveDraft = tab === "discussion" && effectiveTitle.length > 0;
   const posting = createStatus === "pending";
 
   const addTag = (t: string) => {
@@ -115,8 +129,10 @@ export function ComposeModal({
     setDraft("");
   };
 
-  const submit = () => {
-    if (!canPost || posting) return;
+  const submit = (published = true) => {
+    if (posting) return;
+    if (published ? !canPost : !canSaveDraft) return;
+    setSavingDraft(!published);
     const externalUrl =
       tab === "link"
         ? url.startsWith("http")
@@ -139,7 +155,7 @@ export function ComposeModal({
           : null,
       imageUrl: tab === "link" ? httpImage : null,
       tags,
-      published: true,
+      published,
     });
   };
 
@@ -165,14 +181,16 @@ export function ComposeModal({
         {done ? (
           <div className="p-6">
             <p className="eyebrow">
-              <span className="slash">{"// "}</span>posted
+              <span className="slash">{"// "}</span>
+              {savingDraft ? "saved" : "posted"}
             </p>
             <h3 className="mt-1.5 font-display text-2xl font-extrabold tracking-tight">
-              You&apos;re live.
+              {savingDraft ? "Draft saved." : "You're live."}
             </h3>
             <p className="mt-3 font-mono text-xs leading-relaxed text-faint">
-              Your post is in the feed now. Be around to reply — the best
-              threads come from the author sticking around.
+              {savingDraft
+                ? "It's waiting in My posts under drafts — pick it back up whenever you're ready to publish."
+                : "Your post is in the feed now. Be around to reply — the best threads come from the author sticking around."}
             </p>
             <div className="mt-5 flex justify-end gap-3">
               <button
@@ -182,7 +200,7 @@ export function ComposeModal({
                   onClose();
                 }}
               >
-                View post
+                {done.label}
               </button>
               <button className="primary-button" onClick={onClose}>
                 Done
@@ -432,13 +450,24 @@ export function ComposeModal({
                     Open the editor →
                   </button>
                 ) : (
-                  <button
-                    className="primary-button"
-                    disabled={!canPost || posting}
-                    onClick={submit}
-                  >
-                    {posting ? "Posting…" : "Post"}
-                  </button>
+                  <>
+                    {tab === "discussion" && (
+                      <button
+                        className="secondary-button"
+                        disabled={!canSaveDraft || posting}
+                        onClick={() => submit(false)}
+                      >
+                        {posting && savingDraft ? "Saving…" : "Save draft"}
+                      </button>
+                    )}
+                    <button
+                      className="primary-button"
+                      disabled={!canPost || posting}
+                      onClick={() => submit(true)}
+                    >
+                      {posting && !savingDraft ? "Posting…" : "Post"}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
