@@ -8,6 +8,9 @@ interface ArticleData {
   title: string;
   excerpt?: string | null;
   slug: string;
+  // Explicit image (e.g. a link post's coverImage). Falls back to the
+  // generated OG image when omitted.
+  image?: string | null;
   publishedAt?: string | null;
   updatedAt?: string | null;
   readingTime?: number | null;
@@ -30,8 +33,11 @@ export function getArticleSchema(
 ): WithContext<Article> {
   const schemaType = options?.schemaType ?? "BlogPosting";
 
-  // Build the OG image URL with article metadata
-  const ogImageUrl = `${BASE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name || "")}&readTime=${article.readingTime || 5}&date=${article.updatedAt || article.publishedAt || ""}`;
+  // Prefer an explicit image (link post coverImage); otherwise build the OG
+  // image URL with article metadata.
+  const ogImageUrl =
+    article.image ||
+    `${BASE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name || "")}&readTime=${article.readingTime || 5}&date=${article.updatedAt || article.publishedAt || ""}`;
 
   // Determine the canonical URL
   const mainEntityUrl =

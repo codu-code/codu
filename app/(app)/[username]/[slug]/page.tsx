@@ -8,6 +8,8 @@ import { eq, and, lte, inArray, or } from "drizzle-orm";
 import UserLinkDetail from "./_userLinkDetail";
 import PostReader from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
+import { JsonLd } from "@/components/JsonLd";
+import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
@@ -489,7 +491,43 @@ const UnifiedPostPage = async (props: Props) => {
   const userLinkPost = await getUserLinkPost(username, slug);
 
   if (userLinkPost && userLinkPost.user) {
-    return <UserLinkDetail username={username} contentSlug={slug} />;
+    // Member-shared links carry the user's own commentary + discussion and are
+    // self-canonical on Codú, so emit BlogPosting + BreadcrumbList JSON-LD to
+    // match member articles. The link's coverImage is the article image.
+    const linkAuthorName = userLinkPost.user.name || "Unknown";
+    const articleSchema = getArticleSchema({
+      title: userLinkPost.title,
+      excerpt: userLinkPost.excerpt,
+      slug: userLinkPost.slug,
+      image: userLinkPost.coverImage,
+      publishedAt: userLinkPost.published,
+      updatedAt: userLinkPost.updatedAt,
+      readingTime: userLinkPost.readTimeMins,
+      // Self-canonical: omit canonicalUrl so the builder uses the Codú URL.
+      tags: userLinkPost.tags.map((t) => ({ title: t.tag.title })),
+      author: {
+        name: userLinkPost.user.name,
+        username: userLinkPost.user.username,
+        image: userLinkPost.user.image,
+        bio: userLinkPost.user.bio,
+      },
+    });
+    const breadcrumbSchema = getBreadcrumbSchema([
+      { name: "Home", url: "https://www.codu.co" },
+      {
+        name: linkAuthorName,
+        url: `https://www.codu.co/${userLinkPost.user.username}`,
+      },
+      { name: userLinkPost.title },
+    ]);
+
+    return (
+      <>
+        <JsonLd data={articleSchema} />
+        <JsonLd data={breadcrumbSchema} />
+        <UserLinkDetail username={username} contentSlug={slug} />
+      </>
+    );
   }
 
   // Aggregated/source content now lives at /s/{sourceSlug}/{slug}. When the
