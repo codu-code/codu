@@ -98,6 +98,11 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     { enabled: !accountLocked },
   );
 
+  const { data: replies } = api.profile.userReplies.useQuery(
+    { username: username ?? "" },
+    { enabled: !accountLocked && !!username },
+  );
+
   const handleBanSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (accountLocked) return;
@@ -115,12 +120,17 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     }
   };
 
-  const TABS = ["Posts", "Achievements"] as const;
+  const TABS = ["Posts", "Replies", "Achievements"] as const;
   type Tab = (typeof TABS)[number];
 
-  // URL is the source of truth: ?tab=posts|achievements (lower-case).
+  // URL is the source of truth: ?tab=posts|replies|achievements (lower-case).
   const tabParam = searchParams?.get("tab")?.toLowerCase();
-  const tab: Tab = tabParam === "achievements" ? "Achievements" : "Posts";
+  const tab: Tab =
+    tabParam === "achievements"
+      ? "Achievements"
+      : tabParam === "replies"
+        ? "Replies"
+        : "Posts";
 
   const setTab = (value: Tab) => {
     const params = new URLSearchParams(searchParams?.toString());
@@ -367,6 +377,33 @@ const Profile = ({ profile, isOwner, session }: Props) => {
               </div>
             )}
 
+            {tab === "Replies" && (
+              <div className="mt-6 space-y-3">
+                {replies && replies.length > 0 ? (
+                  replies.map((reply) => (
+                    <Link
+                      key={reply.id}
+                      href={reply.parent.href}
+                      className="block rounded-lg border border-hairline bg-surface p-4 transition-colors hover:border-accent/50"
+                    >
+                      <p className="font-mono text-xs text-faint">
+                        Replied on{" "}
+                        <span className="text-accent-soft">
+                          {reply.parent.title}
+                        </span>{" "}
+                        · {getRelativeTime(reply.createdAt)}
+                      </p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">
+                        {reply.body}
+                      </p>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="py-4 font-medium text-muted">No replies yet.</p>
+                )}
+              </div>
+            )}
+
             {tab === "Achievements" && (
               <div className="mt-6">
                 {engagement ? (
@@ -496,6 +533,19 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 };
 
 export default Profile;
+
+function getRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 function getDomainFromUrl(url: string) {
   const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
