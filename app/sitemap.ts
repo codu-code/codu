@@ -1,10 +1,10 @@
 import { type MetadataRoute } from "next";
 
 import { db } from "@/server/db";
-import { post, user, feed_sources, posts } from "@/server/db/schema";
+import { user, feed_sources, posts } from "@/server/db/schema";
 import { lte, and, isNull, isNotNull, eq } from "drizzle-orm";
 
-// Regenerate sitemap every hour to pick up new feed content from cron jobs
+// Regenerate sitemap every hour to pick up new feed content from cron jobs.
 export const revalidate = 3600;
 
 const BASE_URL = "https://www.codu.co";
@@ -19,32 +19,57 @@ const ROUTES_TO_INDEX = [
   "/speakers",
 ];
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // User articles with new URL pattern: /[username]/[slug]
-  const articles = (
-    await db
-      .select({
-        slug: post.slug,
-        updatedAt: post.updatedAt,
-        createdAt: post.createdAt,
-        username: user.username,
-      })
-      .from(post)
-      .innerJoin(user, eq(post.userId, user.id))
-      .where(
-        and(
-          isNotNull(post.published),
-          isNull(post.canonicalUrl),
-          lte(post.published, new Date().toISOString()),
-        ),
-      )
-  ).map(({ slug, updatedAt, createdAt, username }) => ({
-    url: `${BASE_URL}/${username}/${slug}`,
-    lastModified: new Date(updatedAt || createdAt),
-    priority: 0.7,
-  }));
+// Discussions + questions live under /d/{slug}; everything else member-authored
+// (article / til / resource / member-link) lives under /{username}/{slug}.
+const DISCUSSION_TYPES = ["discussion", "question"] as const;
 
-  // User profiles: /[username] — only handle-having users, else we'd advertise
+// TODO: split via generateSitemaps when total URLs >5k. Today this is a single
+// well-structured sitemap; the queries below are already partitioned by type so
+// the split is mechanical when traffic warrants it.
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date().toISOString();
+
+  // Member content (articles, TIL, resources, member link posts, discussions,
+  // questions). Excludes cross-posted (canonicalUrl set → canonical lives off
+  // Codú) and aggregated/source rows (source_id set → handled separately).
+  const memberPosts = await db
+    .select({
+      slug: posts.slug,
+      type: posts.type,
+      updatedAt: posts.updatedAt,
+      createdAt: posts.createdAt,
+      publishedAt: posts.publishedAt,
+      username: user.username,
+    })
+    .from(posts)
+    .innerJoin(user, eq(posts.authorId, user.id))
+    .where(
+      and(
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, now),
+        isNull(posts.canonicalUrl),
+        isNull(posts.sourceId),
+        isNotNull(user.username),
+      ),
+    );
+
+  const members = memberPosts.map(
+    ({ slug, type, updatedAt, createdAt, username }) => {
+      const isDiscussion = (DISCUSSION_TYPES as readonly string[]).includes(
+        type,
+      );
+      // Discussions/questions resolve under /d/{slug}; all other member content
+      // under /{username}/{slug}. The slug already ends with the urlId.
+      const path = isDiscussion ? `/d/${slug}` : `/${username}/${slug}`;
+      return {
+        url: `${BASE_URL}${path}`,
+        lastModified: new Date(updatedAt || createdAt),
+        priority: isDiscussion ? 0.6 : 0.7,
+      };
+    },
+  );
+
+  // User profiles: /{username} — only handle-having users, else we'd advertise
   // `/null` (404) URLs and erode crawl trust.
   const users = (
     await db.query.user.findMany({ where: isNotNull(user.username) })
@@ -54,25 +79,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Feed sources (pseudo-user profiles): /[sourceSlug]
-  // Wrapped in try/catch to handle case where migrations haven't been run yet
+  // Source profiles + aggregated/RSS source articles. Wrapped in try/catch since
+  // these tables may lag migrations on a fresh environment.
   let sources: { url: string; lastModified: Date; priority: number }[] = [];
-  let feedArticles: { url: string; lastModified: Date; priority: number }[] =
+  let sourceArticles: { url: string; lastModified: Date; priority: number }[] =
     [];
 
   try {
+    // Source profiles: /s/{slug}
     sources = (
       await db.query.feed_sources.findMany({
-        where: eq(feed_sources.status, "active"),
+        where: and(
+          eq(feed_sources.status, "active"),
+          isNotNull(feed_sources.slug),
+        ),
       })
     ).map(({ slug, updatedAt, createdAt }) => ({
-      url: `${BASE_URL}/${slug}`,
+      url: `${BASE_URL}/s/${slug}`,
       lastModified: new Date(updatedAt || createdAt),
       priority: 0.6,
     }));
 
-    // Feed articles from posts table (type=link): /[sourceSlug]/[slug]
-    feedArticles = (
+    // Aggregated/RSS source articles: /s/{sourceSlug}/{slug}. We INCLUDE these —
+    // they self-canonical to Codú, and surfacing fresh source content is the
+    // whole freshness strategy.
+    sourceArticles = (
       await db
         .select({
           articleSlug: posts.slug,
@@ -87,16 +118,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             eq(posts.type, "link"),
             eq(posts.status, "published"),
             eq(feed_sources.status, "active"),
+            isNotNull(feed_sources.slug),
+            isNotNull(posts.slug),
           ),
         )
     ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
-      url: `${BASE_URL}/${sourceSlug}/${articleSlug}`,
+      url: `${BASE_URL}/s/${sourceSlug}/${articleSlug}`,
       lastModified: new Date(updatedAt || publishedAt || new Date()),
       priority: 0.5,
     }));
   } catch {
-    // Tables may not exist yet if migrations haven't been run
-    // Continue with empty arrays for sources and feedArticles
+    // Tables may not exist yet if migrations haven't been run — continue with
+    // empty arrays for sources and sourceArticles.
   }
 
   const routes = ROUTES_TO_INDEX.map((route) => ({
@@ -105,7 +138,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  // Shape and connect all the data
   const allRoutes = [
     {
       url: BASE_URL,
@@ -115,8 +147,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...routes,
     ...users,
     ...sources,
-    ...articles,
-    ...feedArticles,
+    ...members,
+    ...sourceArticles,
   ].filter((route) => !route.url.includes("/api/og"));
 
   return allRoutes;
