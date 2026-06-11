@@ -32,14 +32,8 @@ import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { usePrompt } from "@/components/PromptService";
-import { Switch } from "@/components/Switch/Switch";
 import copy from "copy-to-clipboard";
-import {
-  type PostStatus,
-  getPostStatus,
-  isValidScheduleTime,
-  status,
-} from "@/utils/post";
+import { type PostStatus, getPostStatus, status } from "@/utils/post";
 import { Eye, EyeOff, Settings2, Share2 } from "lucide-react";
 import EditorNav from "./navigation";
 import { type Session } from "next-auth";
@@ -67,12 +61,10 @@ const CreateContent = ({ session }: { session: Session | null }) => {
   const [tags, setTags] = useState<string[]>([]);
   const [excerpt, setExcerpt] = useState("");
   const [canonicalUrl, setCanonicalUrl] = useState("");
-  const [publishedTime, setPublishedTime] = useState("");
 
   const [viewPreview, setViewPreview] = useState(false);
   const [savedTime, setSavedTime] = useState("");
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
-  const [isPostScheduled, setIsPostScheduled] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const formPopulatedRef = useRef(false);
@@ -166,9 +158,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
       tags,
       excerpt: currentExcerpt,
       canonicalUrl: canonicalUrl || undefined,
-      published: publishedTime,
     };
-  }, [title, body, tags, excerpt, canonicalUrl, publishedTime]);
+  }, [title, body, tags, excerpt, canonicalUrl]);
 
   const savePost = useCallback(async (): Promise<string> => {
     const formData = getFormData();
@@ -277,10 +268,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
           {
             id: savedPostId,
             published: true,
-            publishTime:
-              isPostScheduled && publishedTime
-                ? new Date(publishedTime)
-                : new Date(),
+            publishTime: new Date(),
           },
           {
             onSuccess: (data) => resolve(data),
@@ -299,13 +287,8 @@ const CreateContent = ({ session }: { session: Session | null }) => {
         toast.success("Sent for review — we'll notify you when it's approved");
         router.push("/my-posts?tab=drafts");
       } else if (session?.user?.username && publishResult?.slug) {
-        if (isPostScheduled) {
-          toast.success("Post scheduled!");
-          router.push("/my-posts?tab=scheduled");
-        } else {
-          toast.success("Published!");
-          router.push(`/${session.user.username}/${publishResult.slug}`);
-        }
+        toast.success("Published!");
+        router.push(`/${session.user.username}/${publishResult.slug}`);
       }
     } catch (err) {
       // ZodError is thrown synchronously by ConfirmContentSchema.parse above
@@ -344,10 +327,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
 
     setExcerpt(existingExcerpt || "");
     setTags(existingTags.map(({ tag }) => tag.title.toUpperCase()));
-    setPublishedTime(publishedAt || "");
-    setIsPostScheduled(
-      publishedAt ? new Date(publishedAt) > new Date() : false,
-    );
     setPostStatus(
       publishedAt ? getPostStatus(new Date(publishedAt)) : status.DRAFT,
     );
@@ -414,17 +393,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
     setBody(newBody);
   }, []);
 
-  const getPublishButtonText = () => {
-    if (currentPostStatus === status.PUBLISHED) return "Save changes";
-    if (currentPostStatus === status.DRAFT) {
-      return isPostScheduled ? "Schedule" : "Publish now";
-    }
-    if (currentPostStatus === status.SCHEDULED) {
-      return isPostScheduled ? "Update schedule" : "Publish now";
-    }
-    return "Publish";
-  };
-
   return (
     <>
       <EditorNav
@@ -466,18 +434,12 @@ const CreateContent = ({ session }: { session: Session | null }) => {
               leaveTo="opacity-0 scale-95"
             >
               <DialogPanel className="mx-auto max-w-md rounded-xl border border-hairline bg-elevated p-8 text-center shadow-xl">
-                <div className="mb-3 text-5xl">
-                  {isPostScheduled ? "⏰" : "🚀"}
-                </div>
+                <div className="mb-3 text-5xl">🚀</div>
                 <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-fg">
-                  {isPostScheduled
-                    ? "Time travel activated!"
-                    : "Ready to launch?"}
+                  Ready to launch?
                 </DialogTitle>
                 <p className="mt-3 text-sm text-muted">
-                  {isPostScheduled
-                    ? `"${title || "Untitled"}" will appear on ${new Date(publishedTime).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} at ${new Date(publishedTime).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`
-                    : `Your masterpiece "${title || "Untitled"}" is about to go live!`}
+                  {`Your masterpiece "${title || "Untitled"}" is about to go live!`}
                 </p>
                 <div className="mt-8 flex justify-center gap-3">
                   <button
@@ -485,7 +447,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     onClick={() => setShowPublishConfirm(false)}
                     className="secondary-button"
                   >
-                    {isPostScheduled ? "Change my mind" : "Maybe later"}
+                    Maybe later
                   </button>
                   <button
                     type="button"
@@ -493,11 +455,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     disabled={hasLoadingState}
                     className="primary-button disabled:cursor-not-allowed"
                   >
-                    {hasLoadingState
-                      ? "Working on it..."
-                      : isPostScheduled
-                        ? "Set it and forget it!"
-                        : "Let's do this!"}
+                    {hasLoadingState ? "Working on it..." : "Let's do this!"}
                   </button>
                 </div>
               </DialogPanel>
@@ -640,7 +598,7 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                     <Settings2 className="h-4 w-4" />
                     More Options
                     <span className="font-mono text-xs font-normal uppercase tracking-label text-faint">
-                      (SEO, scheduling)
+                      (SEO)
                     </span>
                   </span>
                   <ChevronDownIcon
@@ -670,34 +628,6 @@ const CreateContent = ({ session }: { session: Session | null }) => {
                         descriptions are 140-156 characters.
                       </p>
                     </div>
-
-                    {(!data?.publishedAt ||
-                      new Date(data.publishedAt) > new Date()) && (
-                      <div>
-                        <div className="mb-2 flex items-center gap-2">
-                          <label htmlFor="schedule-switch" className="eyebrow">
-                            <span className="slash">{"// "}</span>Schedule post
-                          </label>
-                          <Switch
-                            id="schedule-switch"
-                            checked={isPostScheduled}
-                            onCheckedChange={setIsPostScheduled}
-                          />
-                        </div>
-                        {isPostScheduled && (
-                          <input
-                            type="datetime-local"
-                            value={publishedTime}
-                            onChange={(e) => setPublishedTime(e.target.value)}
-                            min={new Date().toISOString().slice(0, 16)}
-                            className="w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-fg focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-                          />
-                        )}
-                        <p className="mt-1 text-xs text-faint">
-                          Publish your post at a later time.
-                        </p>
-                      </div>
-                    )}
 
                     <div>
                       <label
