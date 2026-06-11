@@ -10,10 +10,13 @@ export type {
   Article,
   BreadcrumbItem,
   BreadcrumbList,
+  Comment,
+  DiscussionForumPosting,
   ImageObject,
+  InteractionCounter,
   Organization,
   Person,
-  SearchAction,
+  ProfilePage,
   WebSite,
   WithContext,
 } from "./types";
@@ -28,3 +31,5 @@ export { getArticleSchema } from "./schemas/article";
 export { getNewsArticleSchema } from "./schemas/news-article";
 export { getBreadcrumbSchema } from "./schemas/breadcrumb";
 export { getWebSiteSchema } from "./schemas/website";
+export { getDiscussionForumPostingSchema } from "./schemas/discussion-forum-posting";
+export { getProfilePageSchema } from "./schemas/profile-page";

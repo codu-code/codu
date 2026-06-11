@@ -55,22 +55,44 @@ export interface BreadcrumbList {
   itemListElement: BreadcrumbItem[];
 }
 
-export interface SearchAction {
-  "@type": "SearchAction";
-  target: {
-    "@type": "EntryPoint";
-    urlTemplate: string;
-  };
-  "query-input": string;
-}
-
 export interface WebSite {
   "@type": "WebSite";
   name: string;
   url: string;
   description?: string;
   publisher?: Organization;
-  potentialAction?: SearchAction;
+}
+
+export interface InteractionCounter {
+  "@type": "InteractionCounter";
+  interactionType: { "@type": "CommentAction" | "LikeAction" };
+  userInteractionCount: number;
+}
+
+export interface Comment {
+  "@type": "Comment";
+  text: string;
+  dateCreated: string;
+  author: Person;
+  url?: string;
+}
+
+export interface DiscussionForumPosting {
+  "@type": "DiscussionForumPosting";
+  headline: string;
+  text?: string;
+  datePublished: string;
+  dateModified?: string;
+  author: Person;
+  mainEntityOfPage: string;
+  interactionStatistic: InteractionCounter[];
+  comment: Comment[];
+}
+
+export interface ProfilePage {
+  "@type": "ProfilePage";
+  dateCreated?: string;
+  mainEntity: Person;
 }
 
 // Wrapper type for JSON-LD with @context

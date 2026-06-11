@@ -3,12 +3,26 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { type Metadata } from "next";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
-import { posts, user, post_tags, tag } from "@/server/db/schema";
-import { eq, and, lte, inArray, or, type SQL } from "drizzle-orm";
+import { posts, user, post_tags, tag, comments } from "@/server/db/schema";
+import {
+  eq,
+  and,
+  lte,
+  inArray,
+  or,
+  isNull,
+  asc,
+  type SQL,
+} from "drizzle-orm";
 import PostReader, {
   type ReaderPost,
 } from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
+import { JsonLd } from "@/components/JsonLd";
+import {
+  getDiscussionForumPostingSchema,
+  getBreadcrumbSchema,
+} from "@/lib/structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -117,6 +131,39 @@ async function getDiscussionPost(
   };
 }
 
+// Server-side fetch of the discussion's top-level + nested comments to populate
+// the DiscussionForumPosting `comment[]` for crawlers. The visible thread is
+// client-rendered (DiscussionArea), so this is the only schema-visible source.
+// Excludes soft-deleted ("[deleted]") comments; ordered oldest-first.
+type ForumComment = {
+  id: string;
+  body: string | null;
+  createdAt: string | null;
+  author: { name: string | null; username: string | null };
+};
+
+async function getDiscussionComments(postId: string): Promise<ForumComment[]> {
+  const rows = await db
+    .select({
+      id: comments.id,
+      body: comments.body,
+      createdAt: comments.createdAt,
+      authorName: user.name,
+      authorUsername: user.username,
+    })
+    .from(comments)
+    .leftJoin(user, eq(comments.authorId, user.id))
+    .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)))
+    .orderBy(asc(comments.createdAt));
+
+  return rows.map((r) => ({
+    id: r.id,
+    body: r.body,
+    createdAt: r.createdAt,
+    author: { name: r.authorName, username: r.authorUsername },
+  }));
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
   const post = await getDiscussionPost(slug);
@@ -171,14 +218,44 @@ const DiscussionPage = async (props: Props) => {
 
   const host = (await headers()).get("host") || "";
 
+  const forumComments = await getDiscussionComments(post.id);
+
+  const discussionForumSchema = getDiscussionForumPostingSchema({
+    title: post.title,
+    body: post.body,
+    excerpt: post.excerpt,
+    slug: post.slug,
+    publishedAt: post.published,
+    updatedAt: post.updatedAt,
+    upvotes: post.upvotes,
+    author: {
+      name: post.user.name,
+      username: post.user.username,
+      image: post.user.image,
+      bio: post.user.bio,
+    },
+    comments: forumComments,
+  });
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: "Home", url: "https://www.codu.co" },
+    { name: "Discussions", url: "https://www.codu.co/discussions" },
+    { name: post.title },
+  ]);
+
   return (
-    <PostReader
-      post={post}
-      session={session}
-      host={host}
-      canonicalPath={canonical}
-      commentsDisabledLabel="discussion"
-    />
+    <>
+      <JsonLd data={discussionForumSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <PostReader
+        post={post}
+        session={session}
+        host={host}
+        canonicalPath={canonical}
+        commentsDisabledLabel="discussion"
+        emitArticleSchema={false}
+      />
+    </>
   );
 };
 
