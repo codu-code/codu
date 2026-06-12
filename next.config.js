@@ -48,6 +48,18 @@ const config = {
         destination: "/s/:sourceSlug",
         permanent: true,
       },
+      // Deleted course pages and the removed /alpha section — send home
+      // rather than hard-404 previously-resolvable URLs.
+      {
+        source: "/courses/:path*",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/alpha/:path*",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
   // Turbopack configuration for SVGR (replaces webpack config)
