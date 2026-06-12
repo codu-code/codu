@@ -17,6 +17,15 @@ export class CronStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
     });
 
+    // Allow the lambdas to create their log group/stream and write to
+    // CloudWatch Logs. Without this basic-execution policy the cron lambdas
+    // run blind (no logs).
+    lambdaRole.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AWSLambdaBasicExecutionRole",
+      ),
+    );
+
     // Grant read access to SSM parameters. The cron lambdas only read config
     // under the `/env/` prefix (e.g. `/env/db/dbUrl`), so scope the policy to
     // that path rather than every parameter in the account.
