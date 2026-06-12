@@ -2,10 +2,9 @@
  * JSON-LD structured data component
  *
  * Renders schema.org structured data as a script tag.
- * This is safe because:
- * 1. JSON.stringify escapes special characters (quotes, backslashes, etc.)
- * 2. The data comes from our database (trusted internal data)
- * 3. This is the standard Next.js pattern for JSON-LD structured data
+ * The serialized JSON additionally escapes `<`, `>`, and `&` (which
+ * JSON.stringify leaves untouched) so a value containing `</script>` cannot
+ * break out of the script tag. This is the standard Next.js pattern for JSON-LD.
  *
  * @see https://nextjs.org/docs/app/building-your-application/optimizing/metadata#json-ld
  */
@@ -15,9 +14,13 @@ interface JsonLdProps {
 }
 
 export function JsonLd({ data }: JsonLdProps) {
-  // JSON.stringify escapes characters that could break out of the script tag
-  // This is safe for trusted data from our database
-  const jsonString = JSON.stringify(data);
+  // JSON.stringify does NOT escape `<`, `>`, or `&`, so a value containing
+  // `</script>` would break out of the script tag. Escape them to their JSON
+  // unicode equivalents — valid inside JSON string values and inert in HTML.
+  const jsonString = JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
 
   return (
     <script
