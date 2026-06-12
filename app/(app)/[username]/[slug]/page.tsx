@@ -375,7 +375,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${userPost.title} | by ${authorName} | Codú`,
       authors: {
         name: authorName,
-        url: `https://www.${host}/${userPost.user.username}`,
+        url: `https://${host}/${userPost.user.username}`,
       },
       keywords: tags,
       description: userPost.excerpt ?? undefined,
@@ -413,7 +413,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${userArticle.title} | by ${articleAuthorName} | Codú`,
       authors: {
         name: articleAuthorName,
-        url: `https://www.${host}/${userArticle.user.username}`,
+        url: `https://${host}/${userArticle.user.username}`,
       },
       keywords: tags,
       description: userArticle.excerpt,
@@ -448,7 +448,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${userLinkPost.title} | shared by ${linkAuthorName} | Codú`,
       authors: {
         name: linkAuthorName,
-        url: `https://www.${host}/${userLinkPost.user.username}`,
+        url: `https://${host}/${userLinkPost.user.username}`,
       },
       description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
       openGraph: {

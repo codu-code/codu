@@ -107,10 +107,8 @@ async function handle(request: Request) {
     const promoted = await promoteDueScheduledPosts();
     return NextResponse.json({ promoted });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to promote scheduled posts", details: String(error) },
-      { status: 500 },
-    );
+    console.error("Failed to promote scheduled posts:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 

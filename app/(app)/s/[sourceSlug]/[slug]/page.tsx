@@ -58,13 +58,6 @@ export default async function Page(props: Props) {
     notFound();
   }
 
-  // Already resolved exactly; guard the rare case where the requested slug
-  // differs from the canonical post slug (shouldn't happen on an exact hit,
-  // but keeps the canonical contract explicit).
-  if (article.slug !== slug) {
-    permanentRedirect(`/s/${sourceSlug}/${article.slug}`);
-  }
-
   const newsArticleSchema = getNewsArticleSchema({
     title: article.title,
     excerpt: article.excerpt,

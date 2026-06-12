@@ -39,6 +39,16 @@ const reasonLabels: Record<ReportReason, string> = {
 const chipBase =
   "rounded-full px-2 py-0.5 font-mono text-xs uppercase tracking-label";
 
+// datetime-local inputs are in the moderator's LOCAL time, so the `min`
+// boundary must be local time too. Shift by the timezone offset before
+// slicing to "YYYY-MM-DDTHH:mm".
+function localDateTimeMin(): string {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 16);
+}
+
 const reasonColors: Record<ReportReason, string> = {
   SPAM: "bg-warning/12 text-warning",
   HARASSMENT: "bg-danger/12 text-danger",
@@ -322,7 +332,7 @@ const ModerationQueue = () => {
                 <input
                   type="datetime-local"
                   value={scheduleTimes[post.id] ?? ""}
-                  min={new Date().toISOString().slice(0, 16)}
+                  min={localDateTimeMin()}
                   onChange={(e) =>
                     setScheduleTimes((prev) => ({
                       ...prev,
