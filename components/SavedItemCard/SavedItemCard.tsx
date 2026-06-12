@@ -61,10 +61,8 @@ const SavedItemCard = ({
   type,
   onRemove,
 }: SavedItemCardProps) => {
-  // Determine the URL for the card. Member content canonical is
-  // `/{username}/{slug}` (slug already ends with the urlId); urlId is the
-  // fallback resolver when the slug is missing. Never emit `/feed/:id` — that
-  // route is legacy (next.config 301s `/feed/:sourceSlug` to `/s/:sourceSlug`).
+  // Member /{username}/{slug} (slug ends with urlId; urlId is the fallback when
+  // slug is missing) > source /s/ > author profile. Never the legacy /feed/:id.
   const cardUrl =
     type === "POST" && authorUsername && slug
       ? `/${authorUsername}/${slug}`

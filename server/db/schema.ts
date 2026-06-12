@@ -206,9 +206,7 @@ export const user = pgTable(
       mode: "string",
       withTimezone: true,
     }),
-    // First-win celebration: set once when the confetti + first-badge moment is
-    // shown (all three onboarding steps done). Persisted so it survives refresh
-    // / new devices and never re-celebrates. Null = not yet celebrated.
+    // First-win celebration timestamp; persisted so it never re-fires. Null = not yet.
     firstWinCelebratedAt: timestamp("first_win_celebrated_at", {
       precision: 3,
       mode: "string",
@@ -218,9 +216,8 @@ export const user = pgTable(
   (table) => {
     return {
       usernameKey: uniqueIndex("User_username_key").on(table.username),
-      // Case-insensitive uniqueness (GitHub-style): nobody can take `niall` if
-      // `Niall` exists. Display casing stays in the column; routing + uniqueness
-      // normalize on lower(username).
+      // Case-insensitive uniqueness (GitHub-style): `Niall` blocks `niall`.
+      // Display casing stays in the column; routing/uniqueness use lower(username).
       usernameLowerKey: uniqueIndex("user_username_lower_key").on(
         sql`lower(${table.username})`,
       ),

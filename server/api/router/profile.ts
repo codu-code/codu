@@ -98,9 +98,8 @@ export const profileRouter = createTRPCRouter({
         });
       }
 
-      // Handles are case-insensitively unique (GitHub-style): reject if another
-      // user already holds this handle in any casing. The DB also enforces this
-      // via the lower(username) unique index; this check gives a clean message.
+      // Case-insensitive uniqueness (GitHub-style). The lower(username) index
+      // also enforces this; this check just gives a clean message.
       const handleClash = await ctx.db.query.user.findFirst({
         columns: { id: true },
         where: (users) =>

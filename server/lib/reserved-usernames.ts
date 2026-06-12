@@ -1,7 +1,6 @@
-// Usernames that would collide with top-level routes/sections (content shares
-// the top-level namespace with profiles), plus infra/well-known paths,
-// auth/account paths, future sections, legal pages, and impersonation/safety
-// terms. Keep all entries lowercase; lookups are normalized to lowercase.
+// Usernames that would collide with top-level routes/sections, infra paths,
+// future sections, legal pages, and impersonation/safety terms. All lowercase;
+// lookups normalize to lowercase.
 
 const RESERVED_LIST = [
   // Live routes

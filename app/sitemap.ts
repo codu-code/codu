@@ -23,15 +23,13 @@ const ROUTES_TO_INDEX = [
 // (article / til / resource / member-link) lives under /{username}/{slug}.
 const DISCUSSION_TYPES = ["discussion", "question"] as const;
 
-// TODO: split via generateSitemaps when total URLs >5k. Today this is a single
-// well-structured sitemap; the queries below are already partitioned by type so
-// the split is mechanical when traffic warrants it.
+// TODO: split via generateSitemaps when total URLs >5k (queries are already
+// partitioned by type, so the split is mechanical).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date().toISOString();
 
-  // Member content (articles, TIL, resources, member link posts, discussions,
-  // questions). Excludes cross-posted (canonicalUrl set → canonical lives off
-  // Codú) and aggregated/source rows (source_id set → handled separately).
+  // Member content. Excludes cross-posted (canonicalUrl → off Codú) and
+  // aggregated rows (source_id → handled separately).
   const memberPosts = await db
     .select({
       slug: posts.slug,
@@ -100,9 +98,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    // Aggregated/RSS source articles: /s/{sourceSlug}/{slug}. We INCLUDE these —
-    // they self-canonical to Codú, and surfacing fresh source content is the
-    // whole freshness strategy.
+    // Aggregated source articles: /s/{sourceSlug}/{slug}. Included — they
+    // self-canonical to Codú and drive the freshness strategy.
     sourceArticles = (
       await db
         .select({

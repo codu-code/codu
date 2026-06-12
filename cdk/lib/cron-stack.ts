@@ -17,9 +17,7 @@ export class CronStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
     });
 
-    // Allow the lambdas to create their log group/stream and write to
-    // CloudWatch Logs. Without this basic-execution policy the cron lambdas
-    // run blind (no logs).
+    // Basic execution: lets the lambdas write to CloudWatch Logs.
     lambdaRole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         "service-role/AWSLambdaBasicExecutionRole",
@@ -86,12 +84,8 @@ export class CronStack extends cdk.Stack {
 
     voteReconcileRule.addTarget(new targets.LambdaFunction(voteReconcileFn));
 
-    // Scheduled-Post Promotion Invoker Lambda
-    //
-    // Thin invoker: it reads the shared cron secret from SSM and POSTs to the
-    // app's `/api/cron/promote-scheduled` route, which does the actual DB
-    // promotion + go-live side-effects. Keeping the logic in the app means the
-    // cron stays a one-liner here.
+    // Scheduled-Post Promotion Invoker Lambda — reads CRON_SECRET from SSM and
+    // POSTs the app's /api/cron/promote-scheduled route (which holds the logic).
     const promoteScheduledFn = new NodejsFunction(this, "PromoteScheduledLambda", {
       timeout: cdk.Duration.seconds(60),
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -106,8 +100,7 @@ export class CronStack extends cdk.Stack {
       },
     });
 
-    // Run every 5 minutes — fine granularity for staggering content releases.
-    // Adjustable: tighten to `rate(1 minute)` if near-instant go-live matters.
+    // Every 5 minutes; tighten to rate(1 minute) for near-instant go-live.
     const promoteScheduledRule = new events.Rule(this, "PromoteScheduledRule", {
       schedule: events.Schedule.expression("rate(5 minutes)"),
     });

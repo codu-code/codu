@@ -2,9 +2,8 @@ import { db } from "@/server/db";
 import { posts, feed_sources } from "@/server/db/schema";
 import { eq, and } from "drizzle-orm";
 
-// Resolves aggregated (source-imported) link content by source slug + article
-// slug. Server-only — must never be imported into a client component (pulls in
-// @/server/db and would trigger a `Module not found: 'fs'` client-bundle error).
+// Resolves aggregated (source-imported) link content by source + article slug.
+// Server-only — importing into a client component pulls in @/server/db ('fs').
 export async function getFeedArticle(
   sourceSlug: string,
   articleSlugOrShortId: string,
@@ -68,8 +67,7 @@ export async function getFeedArticle(
   };
 }
 
-// Alias retained for the legacy `getLinkContent` call sites. Both resolve the
-// same aggregated link content.
+// Alias retained for the legacy `getLinkContent` call sites.
 export async function getLinkContent(
   sourceSlug: string,
   contentSlug: string,
@@ -77,9 +75,8 @@ export async function getLinkContent(
   return getFeedArticle(sourceSlug, contentSlug);
 }
 
-// urlId-first canonical resolver for aggregated content. Given a slug param,
-// parse its trailing urlId and look up the canonical post slug for this source
-// so the route can slug-correct (301 to the canonical /s/{source}/{slug}).
+// Resolve a slug param's trailing urlId to the canonical post slug for this
+// source so the route can slug-correct (301 to /s/{source}/{slug}).
 export async function resolveAggregatedCanonical(
   sourceSlug: string,
   slugParam: string,

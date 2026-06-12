@@ -12,11 +12,7 @@ interface ProfilePageInput {
   createdAt?: string | null;
 }
 
-/**
- * Generate ProfilePage schema for a user profile.
- * Reuses getPersonSchema for the Person mainEntity (name, url, image,
- * description, sameAs) and drops its @context since it's nested here.
- */
+/** ProfilePage schema wrapping a Person mainEntity (from getPersonSchema). */
 export function getProfilePageSchema(
   profile: ProfilePageInput,
 ): WithContext<ProfilePage> {

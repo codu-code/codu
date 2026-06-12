@@ -35,8 +35,8 @@ export const engagementRouter = createTRPCRouter({
       .select({ c: sql<number>`count(*)` })
       .from(posts)
       .where(eq(posts.authorId, uid));
-    // The reward badge must be genuinely earned before we celebrate — a post
-    // can exist (posted=true) yet sit in moderation review with no badge.
+    // Badge must be earned before we celebrate — a posted-but-in-review post
+    // has no badge yet.
     const [firstBadge] = await ctx.db
       .select({ id: user_badge.id })
       .from(user_badge)
@@ -53,12 +53,9 @@ export const engagementRouter = createTRPCRouter({
     return {
       ...wins,
       followCount,
-      // Current username (server-truth) so the celebration's "See your badges"
-      // link points at the profile even if the SSR-threaded prop is stale.
+      // Server-truth username so the celebration's badges link survives a stale prop.
       username: u?.username ?? null,
-      // Server-truth trigger for the app-wide first-win celebration: every step
-      // done, the first_post badge actually earned, and not yet celebrated.
-      // Drives <OnboardingCelebration> on any page.
+      // App-wide first-win trigger: all steps done, badge earned, not yet celebrated.
       celebrate: shouldCelebrateFirstWin(
         wins,
         !!firstBadge,

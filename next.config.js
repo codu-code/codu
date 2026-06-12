@@ -37,14 +37,12 @@ const config = {
         permanent: true,
       },
       // Legacy feed article URLs -> /s/ namespace (one hop, no redirect chain).
-      // /feed/[sourceSlug]/[articleId] -> /s/[sourceSlug]/[articleId]
       {
         source: "/feed/:sourceSlug/:articleId",
         destination: "/s/:sourceSlug/:articleId",
         permanent: true,
       },
       // Legacy feed source URLs -> /s/ namespace.
-      // /feed/[sourceSlug] -> /s/[sourceSlug]
       {
         source: "/feed/:sourceSlug",
         destination: "/s/:sourceSlug",
@@ -62,8 +60,7 @@ const config = {
     },
   },
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
-  // Explicit: never serve/redirect to trailing-slash variants. Next already
-  // 301s `/foo/` -> `/foo`; this documents the intent and keeps canonicals tidy.
+  // Never serve trailing-slash variants (Next 301s `/foo/` -> `/foo`).
   trailingSlash: false,
   images: {
     remotePatterns: REMOTE_PATTERNS,

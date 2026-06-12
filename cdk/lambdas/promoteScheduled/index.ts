@@ -1,14 +1,11 @@
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
-// Thin invoker Lambda: on a schedule, call the production cron route that does
-// the actual scheduled-post promotion + go-live side-effects. The promotion
-// logic lives in the app (app/api/cron/promote-scheduled/route.ts); this Lambda
-// only authenticates with the shared CRON_SECRET and reports the result.
+// Thin invoker: on a schedule, POST the app's cron route (which does the actual
+// promotion). This Lambda only authenticates with CRON_SECRET and reports back.
 
 const ssmClient = new SSMClient({ region: "eu-west-1" });
 
-// Helper to get values from AWS SSM (matches rssFetcher's convention:
-// SecureString params under the `/env/...` prefix, decrypted on read).
+// Read a decrypted SecureString from SSM (matches rssFetcher's `/env/...` convention).
 async function getSsmValue(secretName: string): Promise<string> {
   const params = {
     Name: secretName,
@@ -28,9 +25,7 @@ async function getSsmValue(secretName: string): Promise<string> {
   }
 }
 
-// Resolve the site base URL. Prefer the optional `/env/siteUrl` SSM param so the
-// invoker can be pointed at a preview environment, but fall back to the stable
-// production host when it isn't set.
+// Site base URL: optional `/env/siteUrl` param (point at a preview env), else production.
 async function getBaseUrl(): Promise<string> {
   try {
     const value = await getSsmValue("/env/siteUrl");

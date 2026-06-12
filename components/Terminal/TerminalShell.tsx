@@ -1,17 +1,9 @@
 "use client";
 
-/* ============================================================
-   TerminalShell — the shared interactive shell behind both the
-   404 (not-found) and 500 (error) pages. A tiny working terminal:
-   type `help`, `ls` the site's pages, `open jobs` to jump around.
-   Lives inside the normal app shell (rails intact).
-
-   Variant pages (NotFound, the error boundary) supply only what
-   differs — the banner art, the intro lines, the status `code`,
-   and any extra commands (e.g. `retry` on the 500). Everything
-   else — boot sequence, command parser, history, prompt, chrome
-   — lives here so the two pages can never drift apart.
-   ============================================================ */
+// TerminalShell — the shared interactive shell behind the 404 and 500 pages.
+// Variant pages supply only what differs (banner art, intro lines, status code,
+// extra commands); the boot sequence, parser, history, and prompt live here so
+// the two pages can't drift apart.
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -147,10 +139,8 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
   const join = () => router.push("/get-started");
 
   const { data: session } = useSession();
-  // The handle `whoami` greets you with when logged in (real shells print the
-  // current user). Falls back to display name, then a generic token.
+  // Logged-in handle for `whoami` + the prompt; guests stay `guest`.
   const username = session?.user?.username || session?.user?.name || null;
-  // Personalize the shell prompt with the logged-in handle; guests stay `guest`.
   const prompt = makePrompt(username ?? "guest");
 
   const bodyRef = useRef<HTMLDivElement | null>(null);
@@ -244,8 +234,7 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
       return [line(seg("opening search… ", C.out), seg("(⌘K)", C.faint))];
     }
     if (n === "whoami") {
-      // Logged in: print the username, like a real `whoami`. Logged out: keep
-      // the guest greeting that nudges you to join.
+      // Logged in: print the username. Logged out: guest greeting nudging to join.
       if (username)
         return [
           line(

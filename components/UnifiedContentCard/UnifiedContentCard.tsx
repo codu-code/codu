@@ -114,17 +114,9 @@ const UnifiedContentCard = ({
 
   const imageUrl = ensureHttps(rawImageUrl);
 
-  // URL priority: author (POST or user-created LINK) > source (aggregated LINK).
-  // Member content canonical is `/{username}/{slug}` — the slug already ends
-  // with the urlId, so the slug stays canonical. urlId is the fallback resolver
-  // when the slug is missing (the detail page resolves a bare urlId segment).
-  // Never emit `/feed/:id` — that route is legacy (next.config 301s
-  // `/feed/:sourceSlug` to the `/s/:sourceSlug` namespace). When there's no
-  // resolvable internal page, a LINK opens its source
-  // and anything else falls back to the author profile — never a dead route.
-  // Discussions and questions live under the /d/ namespace (the slug already
-  // ends with the urlId, so /d/{slug} is canonical). Everything else keeps the
-  // member/source/external resolution below.
+  // Card URL priority (slug ends with urlId, so it stays canonical; urlId is the
+  // fallback when slug is missing): discussion /d/ > member /{username}/ >
+  // source /s/ > external link > author profile. Never emit legacy /feed/:id.
   const editorialKind = (kind || type).toUpperCase();
   const isDiscussion =
     editorialKind === "DISCUSSION" || editorialKind === "QUESTION";

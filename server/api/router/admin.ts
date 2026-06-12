@@ -328,11 +328,9 @@ export const adminRouter = createTRPCRouter({
         id: z.string(),
         decision: z.enum(["approve", "reject", "hide"]),
         note: z.string().max(1000).optional(),
-        // When approving, an optional future release time. If set to a future
-        // instant the post is scheduled (status `scheduled`, publishedAt=this)
-        // instead of going live now; the promote-scheduled cron runs the
-        // go-live side-effects (points/IndexNow/notification) at that time. A
-        // missing or past value approves + publishes immediately (unchanged).
+        // Optional future release time when approving: a future value schedules
+        // the post (the promote-scheduled cron goes it live); missing/past
+        // publishes immediately.
         publishAt: z.string().datetime().optional(),
       }),
     )
@@ -434,12 +432,8 @@ export const adminRouter = createTRPCRouter({
         existing.slug ||
         (existing.title ? generateSlug(existing.title) : existing.slug);
 
-      // Approve & schedule: a FUTURE publishAt parks the post as `scheduled`
-      // with publishedAt = that time. The go-live side-effects (points,
-      // IndexNow, the "published" notification) DO NOT run now — the
-      // promote-scheduled cron runs them at the real go-live. We still write
-      // the slug so the eventual URL is stable, and optionally notify the
-      // author it's approved + scheduled.
+      // Approve & schedule: a FUTURE publishAt parks the post as `scheduled`;
+      // go-live side-effects run from the cron at the real go-live, not now.
       const publishAt = input.publishAt ? new Date(input.publishAt) : null;
       if (publishAt && publishAt.getTime() > Date.now()) {
         const [scheduled] = await ctx.db
@@ -452,10 +446,8 @@ export const adminRouter = createTRPCRouter({
           .where(eq(posts.id, input.id))
           .returning();
 
-        // Optional courtesy notification: approved, scheduled for a later time.
-        // Re-uses POST_APPROVED (notifier = author) so the notifications join
-        // resolves; the actual "published" go-live notification fires from the
-        // cron when the post actually goes live.
+        // Courtesy "approved + scheduled" notification (POST_APPROVED, notifier =
+        // author); the go-live notification fires from the cron later.
         try {
           await ctx.db.insert(notification).values({
             type: POST_APPROVED,
@@ -481,8 +473,7 @@ export const adminRouter = createTRPCRouter({
         .where(eq(posts.id, input.id))
         .returning();
 
-      // Run the same go-live side-effects the cron uses (points + IndexNow +
-      // author notification).
+      // Same go-live side-effects the cron runs (points + IndexNow + notification).
       await runPostGoLiveSideEffects(ctx.db, {
         id: existing.id,
         authorId: existing.authorId,

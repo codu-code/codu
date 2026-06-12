@@ -25,11 +25,8 @@ async function getUserPost(
 
   if (!userRecord) return null;
 
-  // Owner bypass: the post's author may view their own post while it is
-  // awaiting review or has been hidden by a moderator. Everyone else only ever
-  // sees published posts whose publish time has passed (the public filter
-  // below). The author check is `viewerId === post author's id` — a hard
-  // identity match — so non-authors can never reach the relaxed branch.
+  // Owner bypass: the author may view their own in_review/rejected post;
+  // everyone else only sees published posts whose publish time has passed.
   const isAuthor = !!viewerId && viewerId === userRecord.id;
 
   const visibilityFilter = isAuthor
@@ -74,8 +71,7 @@ async function getUserPost(
       and(
         eq(posts.slug, postSlug),
         eq(posts.authorId, userRecord.id),
-        // Text-content kinds all render via the article reader (title + body +
-        // discussion). Links have their own resolver below.
+        // Text-content kinds render via the article reader; links resolve below.
         inArray(posts.type, [
           "article",
           "discussion",
@@ -252,13 +248,9 @@ async function getUserArticleContent(username: string, contentSlug: string) {
   return getUserPost(username, contentSlug);
 }
 
-// urlId-first lookup for MEMBER (user-authored) content. The urlId is the
-// immutable, canonical resolver: parse it from the slug param, look up the
-// post (text kinds + member link-posts), and return the canonical username +
-// slug. Aggregated/source content (no author) is intentionally excluded — it
-// resolves via the existing getFeedArticle/getLinkContent paths. A miss (legacy
-// link whose trailing token isn't a real urlId, or aggregated content) returns
-// null so callers fall back to the username+slug resolution unchanged.
+// Resolve a member post by its urlId to its canonical username + slug.
+// Aggregated/source content (no author) is excluded; a miss returns null so
+// callers fall back to username+slug resolution.
 async function resolveMemberCanonicalByUrlId(urlId: string) {
   if (!urlId) return null;
 
@@ -297,11 +289,9 @@ function isDiscussionKind(type: string | null | undefined): boolean {
   return type === "discussion" || type === "question";
 }
 
-// Lightweight existence check: does a published post live at the EXACT
-// (username, slug) requested? Used to suppress urlId-based canonical redirects
-// when the requested URL already addresses a real post — otherwise a post whose
-// slug's trailing token happens to collide with another post's urlId would be
-// hijacked (301'd) to that other post.
+// Does a published post live at the EXACT (username, slug) requested? Suppresses
+// urlId-based redirects so a slug whose trailing token collides with another
+// post's urlId isn't hijacked (301'd) to that other post.
 async function exactPublishedPostExists(
   username: string,
   slug: string,
@@ -323,25 +313,21 @@ async function exactPublishedPostExists(
   return !!match;
 }
 
-// If the request's urlId resolves to a member post whose canonical path differs
-// from what was requested (title edit or username rename), 301 to canonical.
-// Discussion/question kinds 301 to their /d/{slug} canonical regardless of the
-// requested username path.
+// 301 to canonical when the request's urlId resolves to a member post whose
+// canonical path differs (title edit / username rename). Discussion/question
+// kinds always 301 to /d/{slug}.
 async function redirectMemberToCanonical(username: string, slug: string) {
   const canonical = await resolveMemberCanonicalByUrlId(parseUrlId(slug));
   if (!canonical) return;
 
-  // Discussions/questions always move to the /d/ namespace, even when an exact
-  // post exists at the requested URL — they no longer live under /{username}/.
+  // Discussions/questions always move to /d/, even if an exact post exists here.
   if (isDiscussionKind(canonical.type)) {
     permanentRedirect(`/d/${canonical.slug}`);
   }
 
-  // Hijack guard: if a real published post already lives at the EXACT requested
-  // (username, slug), don't issue the urlId-based canonical redirect — the
-  // requested token collided with another post's urlId. The normal render path
-  // serves the correct post. Only the member /{username}/{slug} correction is
-  // guarded; the discussion redirect above is unconditional.
+  // Hijack guard: if a real post already lives at the EXACT requested URL, the
+  // token collided with another post's urlId — let the normal render path serve
+  // the correct post (the discussion redirect above stays unconditional).
   if (await exactPublishedPostExists(username, slug)) {
     return;
   }
@@ -356,14 +342,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const { username, slug } = params;
 
-  // urlId-first canonicalization: 301 stale member URLs (title edits / username
-  // renames) before metadata work. No-op when already canonical or on a miss.
+  // 301 stale member URLs (title edits / username renames) before metadata work.
   await redirectMemberToCanonical(username, slug);
 
   const userPost = await getUserPost(username, slug);
   if (userPost) {
-    // Discussions/questions canonicalize to /d/{slug}; redirect before
-    // rendering metadata so the legacy URL never serves discussion metadata.
+    // Discussions/questions canonicalize to /d/{slug}; redirect before metadata.
     if (isDiscussionKind(userPost.type)) {
       permanentRedirect(`/d/${userPost.slug}`);
     }
@@ -396,8 +380,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userPost.title)}`],
       },
       alternates: {
-        // Cross-posted content points at the original; native posts self-canonical
-        // so trailing-slash / query-param / legacy-path variants don't dilute.
+        // Cross-posted content points at the original; native posts self-canonical.
         canonical: userPost.canonicalUrl ?? `/${username}/${slug}`,
       },
     };
@@ -457,17 +440,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: userLinkPost.coverImage ? [userLinkPost.coverImage] : undefined,
         siteName: "Codú",
       },
-      // Member-shared links carry the user's own commentary + discussion, so we
-      // keep Codú as canonical (aggregated feed links canonical to their source).
+      // Member-shared links keep Codú as canonical (aggregated links point to source).
       alternates: {
         canonical: `/${username}/${slug}`,
       },
     };
   }
 
-  // Aggregated/source content moved to /s/{sourceSlug}/{slug}; the page 301s
-  // these, so 301 the metadata request too rather than emitting feed metadata
-  // at the legacy URL.
+  // Aggregated/source content moved to /s/{sourceSlug}/{slug} — 301 rather than
+  // emit feed metadata at the legacy URL.
   const feedArticle = await getFeedArticle(username, slug);
   if (feedArticle) {
     permanentRedirect(`/s/${username}/${feedArticle.slug}`);
@@ -481,9 +462,7 @@ const UnifiedPostPage = async (props: Props) => {
   const session = await getServerAuthSession();
   const { username, slug } = params;
 
-  // urlId-first canonicalization: 301 stale member URLs (title edits / username
-  // renames) to the canonical /{username}/{slug}. No-op when already canonical
-  // or when the urlId doesn't resolve to a member post (legacy/aggregated).
+  // 301 stale member URLs (title edits / username renames) to canonical.
   await redirectMemberToCanonical(username, slug);
 
   const host = (await headers()).get("host") || "";
@@ -528,9 +507,8 @@ const UnifiedPostPage = async (props: Props) => {
   const userLinkPost = await getUserLinkPost(username, slug);
 
   if (userLinkPost && userLinkPost.user) {
-    // Member-shared links carry the user's own commentary + discussion and are
-    // self-canonical on Codú, so emit BlogPosting + BreadcrumbList JSON-LD to
-    // match member articles. The link's coverImage is the article image.
+    // Member-shared links are self-canonical, so emit BlogPosting + BreadcrumbList
+    // JSON-LD like member articles.
     const linkAuthorName = userLinkPost.user.name || "Unknown";
     const articleSchema = getArticleSchema({
       title: userLinkPost.title,
@@ -567,9 +545,7 @@ const UnifiedPostPage = async (props: Props) => {
     );
   }
 
-  // Aggregated/source content now lives at /s/{sourceSlug}/{slug}. When the
-  // segment resolves as aggregated content (no member author), 301 to the
-  // canonical /s/ path instead of rendering it under /{username}.
+  // Aggregated content now lives at /s/{sourceSlug}/{slug} — 301 there.
   const feedArticle = await getFeedArticle(username, slug);
 
   if (feedArticle) {

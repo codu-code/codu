@@ -87,9 +87,7 @@ export function ShellActionsProvider({
         />
       )}
       {topicsOpen && <TopicsModal onClose={() => setTopicsOpen(false)} />}
-      {/* App-wide first-win celebration — fires wherever the last onboarding
-          step is completed, not just on the feed. Authed only (the query it
-          reads is a protected procedure). */}
+      {/* App-wide first-win celebration; authed only (reads a protected query). */}
       {authed && <OnboardingCelebration username={username} />}
     </ShellActionsContext.Provider>
   );

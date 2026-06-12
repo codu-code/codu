@@ -6,15 +6,10 @@ import { Confetti } from "./Confetti";
 import { BadgeUnlock } from "./BadgeUnlock";
 
 /**
- * App-wide first-win celebration. Mounted in the authed shell (not the feed) so
- * it fires wherever the user finishes their last onboarding step — picking
- * topics, following three builders, or posting their first tip can all happen
- * off the feed. The trigger is server-truth: `engagement.onboardingWins.celebrate`
- * is true only when all three steps are done AND the user has never celebrated.
- *
- * On fire we immediately persist via `markFirstWinCelebrated` (idempotent) so it
- * never re-fires across refreshes or devices, then show the confetti + badge.
- * Reduced-motion users still get the badge dialog — the reward is information.
+ * App-wide first-win celebration. Mounted in the authed shell so it fires
+ * wherever the user finishes their last onboarding step (not just the feed).
+ * Trigger is server-truth (`onboardingWins.celebrate`); on fire we persist via
+ * `markFirstWinCelebrated` so it never re-fires across refreshes/devices.
  */
 export function OnboardingCelebration({
   username,
@@ -32,10 +27,8 @@ export function OnboardingCelebration({
 
   const [closed, setClosed] = useState(false);
 
-  // Fire-once: persist the moment the server says to celebrate. Firing the
-  // mutation is an external-system update, so it belongs in an effect; the
-  // mutation's own status (no longer idle) latches the dialog open even after
-  // the persist flips `celebrate` back to false on refetch.
+  // Fire-once: persist when the server says to celebrate. The mutation's status
+  // (no longer idle) latches the dialog open even after `celebrate` flips false.
   useEffect(() => {
     if (data?.celebrate && isIdle) {
       mutate();
@@ -51,8 +44,7 @@ export function OnboardingCelebration({
       <BadgeUnlock
         badgeName="First Post"
         points={20}
-        // Prefer the server-truth username (current) over the SSR-threaded prop,
-        // which can be stale if the handle was set later in the same session.
+        // Prefer server-truth username over the (possibly stale) SSR-threaded prop.
         username={data?.username ?? username}
         onClose={() => setClosed(true)}
       />

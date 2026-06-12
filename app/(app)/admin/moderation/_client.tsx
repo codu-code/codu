@@ -39,9 +39,8 @@ const reasonLabels: Record<ReportReason, string> = {
 const chipBase =
   "rounded-full px-2 py-0.5 font-mono text-xs uppercase tracking-label";
 
-// datetime-local inputs are in the moderator's LOCAL time, so the `min`
-// boundary must be local time too. Shift by the timezone offset before
-// slicing to "YYYY-MM-DDTHH:mm".
+// datetime-local is in the moderator's LOCAL time, so shift the `min` boundary
+// by the tz offset before slicing to "YYYY-MM-DDTHH:mm".
 function localDateTimeMin(): string {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
@@ -82,8 +81,7 @@ const ModerationQueue = () => {
   // Optional per-item "Decline" note, keyed by postId.
   const [declineNotes, setDeclineNotes] = useState<Record<string, string>>({});
 
-  // Optional per-item future release time (datetime-local value), keyed by
-  // postId. Used by the "Schedule" affordance to approve + schedule a post.
+  // Per-postId future release time (datetime-local) for the "Schedule" affordance.
   const [scheduleTimes, setScheduleTimes] = useState<Record<string, string>>(
     {},
   );

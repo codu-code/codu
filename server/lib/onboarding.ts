@@ -20,18 +20,13 @@ export function isOnboardingComplete(wins: OnboardingWins): boolean {
 }
 
 /**
- * Whether the first-win celebration should fire for this user right now.
- * Server-truth: every step complete AND the reward badge actually earned AND
- * not yet celebrated.
+ * Whether the first-win celebration should fire now: every step complete, the
+ * reward badge actually earned, and not yet celebrated.
  *
- * `firstBadgeEarned` guards against promising a badge we can't show: a post can
- * be created (so `posted` is true) but held in moderation review, in which case
- * the `first_post` badge isn't awarded until approval. Gating on the real badge
- * keeps the celebration in lockstep with the Achievements tab.
- *
- * `firstWinCelebratedAt` is the persisted timestamp (null/undefined = never
- * celebrated), so the celebration survives refresh / new devices and never
- * re-fires.
+ * `firstBadgeEarned` guards against promising a badge we can't show — a post can
+ * be `posted` but held in review, so the `first_post` badge isn't awarded yet.
+ * `firstWinCelebratedAt` (persisted; null = never) makes it survive refresh /
+ * new devices and never re-fire.
  */
 export function shouldCelebrateFirstWin(
   wins: OnboardingWins,

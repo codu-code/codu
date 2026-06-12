@@ -1,11 +1,7 @@
 "use client";
 
-/* ============================================================
-   NotFound — the center-column 404. A thin variant over the
-   shared TerminalShell: it supplies the "404" banner and the
-   intro copy; the shell provides the working terminal (type
-   `help`, `ls` the pages, `open jobs`). Rails stay intact.
-   ============================================================ */
+// NotFound — the center-column 404. A thin TerminalShell variant supplying the
+// "404" banner and intro copy; the shell provides the working terminal.
 
 import { usePathname } from "next/navigation";
 import TerminalShell, {

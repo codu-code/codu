@@ -1,12 +1,8 @@
 "use client";
 
-/* ============================================================
-   Error boundary — the center-column 500. A thin variant over
-   the shared TerminalShell (same engine as the 404): it supplies
-   the "500" banner, the intro copy, and a `retry` command wired
-   to the boundary's reset(). The thrown error is reported to
-   Sentry on mount. Rails stay intact.
-   ============================================================ */
+// Error boundary — the center-column 500. A thin TerminalShell variant (same
+// engine as the 404) supplying the "500" banner, intro copy, and a `retry`
+// command wired to reset(). The thrown error is reported to Sentry on mount.
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";

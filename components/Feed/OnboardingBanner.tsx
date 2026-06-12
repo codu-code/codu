@@ -17,12 +17,9 @@ const isDismissed = () =>
   typeof window !== "undefined" && localStorage.getItem(KEY) === "1";
 
 /**
- * First-run guidance: a dismissible "first win in 3 steps" banner. Steps reflect
- * REAL completion (topics picked / 3 follows / first post) via
- * engagement.onboardingWins — done steps show a mint check + strikethrough. The
- * banner hides itself once all three are done; the reward moment (confetti +
- * first badge) is fired app-wide by <OnboardingCelebration>, not here, so it
- * still plays when the last step is completed off the feed.
+ * Dismissible "first win in 3 steps" banner. Steps reflect real completion via
+ * engagement.onboardingWins and hide once all three are done. The reward moment
+ * is fired app-wide by <OnboardingCelebration>, not here.
  */
 export function OnboardingBanner() {
   const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
@@ -53,8 +50,7 @@ export function OnboardingBanner() {
 
   const allDone = wins ? steps.every((s) => s.done) : false;
 
-  // Banner's job is done once all steps are complete; the celebration is owned
-  // by the app-wide <OnboardingCelebration>.
+  // Hide once complete; the celebration is owned by <OnboardingCelebration>.
   if (allDone) return null;
 
   if (dismissed) return null;

@@ -26,10 +26,9 @@ import {
 
 type Props = { params: Promise<{ slug: string }> };
 
-// Resolve a discussion/question post by its urlId (parsed from the slug). The
-// urlId is the immutable canonical resolver; the slug already ends with it, so
-// the canonical path is just /d/{slug}. Mirrors getUserPost's query shape
-// (author join, tags, owner-bypass visibility) but scoped to discussion kinds.
+// Resolve a discussion/question post by its urlId (parsed from the slug).
+// Mirrors getUserPost's query shape but scoped to discussion kinds; canonical
+// path is /d/{slug}.
 async function getDiscussionPost(
   slug: string,
   viewerId?: string | null,
@@ -37,9 +36,8 @@ async function getDiscussionPost(
   const urlId = parseUrlId(slug);
   if (!urlId) return null;
 
-  // urlId is the canonical resolver (real posts' slugs end with it). Fall back
-  // to a full-slug match so legacy posts whose slug predates the
-  // slug-ends-with-urlId convention still resolve; canonical stays /d/{slug}.
+  // Match on urlId, falling back to a full-slug match for legacy posts whose
+  // slug predates the slug-ends-with-urlId convention.
   const idMatch: SQL =
     urlId === slug
       ? eq(posts.urlId, urlId)
@@ -50,9 +48,8 @@ async function getDiscussionPost(
     lte(posts.publishedAt, new Date().toISOString()),
   );
 
-  // Owner bypass: the author may view their own discussion while it awaits
-  // review or has been hidden. The relaxed branch is only reachable when the
-  // viewer's id matches the post author's id (checked after the row loads).
+  // Owner bypass: the author may view their own in_review/rejected discussion;
+  // everyone else only sees published.
   const [row] = await db
     .select({
       id: posts.id,
@@ -131,10 +128,8 @@ async function getDiscussionPost(
   };
 }
 
-// Server-side fetch of the discussion's top-level + nested comments to populate
-// the DiscussionForumPosting `comment[]` for crawlers. The visible thread is
-// client-rendered (DiscussionArea), so this is the only schema-visible source.
-// Excludes soft-deleted ("[deleted]") comments; ordered oldest-first.
+// Fetch comments to populate the DiscussionForumPosting `comment[]` for crawlers
+// (the visible thread is client-rendered). Excludes soft-deleted; oldest-first.
 type ForumComment = {
   id: string;
   body: string | null;

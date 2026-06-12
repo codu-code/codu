@@ -1,17 +1,7 @@
-// Shared "post goes live" side-effects. Run these exactly once when a post
-// transitions into the public feed (status → `published`), whether that's via
-// a moderator's instant approve (server/api/router/admin.ts) or the
-// promote-scheduled cron picking up a due scheduled post
-// (app/api/cron/promote-scheduled/route.ts).
-//
-// Effects (each guarded so one failing doesn't break the others / the caller):
-//   1. Award `post_published` engagement points to the author.
-//   2. Ping IndexNow with the live canonical URL (member vs discussion scheme),
-//      skipping source-imported / cross-posted rows.
-//   3. Insert the author "post approved/published" notification.
-//
-// The caller is responsible for the DB write that actually sets
-// status='published' + publishedAt; this helper only runs the side-effects.
+// Shared "post goes live" side-effects, run once when a post becomes published
+// (via moderator approve or the promote-scheduled cron): award points, ping
+// IndexNow, notify the author. Each effect is guarded so one failure doesn't
+// break the others. The caller owns the status='published' DB write.
 import * as Sentry from "@sentry/nextjs";
 
 import type { db as Database } from "@/server/db";
@@ -32,9 +22,9 @@ export interface GoLivePost {
   canonicalUrl: string | null;
 }
 
-// Build the public canonical URL for a now-live post, or null when there's no
-// stable URL / it's not a member-originated post we should ping. Discussions &
-// questions live at /d/{slug}; member articles at /{username}/{slug}.
+// Public canonical URL for a now-live post, or null when there's no stable URL
+// or it's not member-originated. Discussions/questions → /d/{slug};
+// member articles → /{username}/{slug}.
 export function buildCanonicalUrl(post: GoLivePost): string | null {
   // Source-imported and cross-posted rows are not our canonical content.
   if (post.sourceId || post.canonicalUrl) return null;
@@ -64,13 +54,11 @@ export async function runPostGoLiveSideEffects(
     Sentry.captureException(error);
   }
 
-  // 2. Ping IndexNow now the post is live — fire-and-forget, production-guarded
-  // inside the lib.
+  // 2. Ping IndexNow — fire-and-forget, production-guarded inside the lib.
   const url = buildCanonicalUrl(post);
   if (url) void submitToIndexNow(url);
 
-  // 3. Notify the author (notifier = author, so the notifier join in the
-  // notifications list resolves correctly).
+  // 3. Notify the author (notifier = author so the notifier join resolves).
   try {
     await db.insert(notification).values({
       type: POST_APPROVED,

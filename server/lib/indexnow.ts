@@ -1,10 +1,7 @@
-// IndexNow ping — notifies Bing (and other IndexNow participants) the instant a
-// URL is published/updated, so it gets crawled without waiting for the next
-// sitemap sweep. Fire-and-forget: never throws, never blocks a mutation. The
-// key is PUBLIC (verified via /{key}.txt), so it lives in source, not env.
-//
-// Keep this file dependency-light (no db/next/drizzle imports) — it's called
-// from hot mutation paths and must stay cheap to import.
+// IndexNow ping — tells Bing to crawl a published/updated URL without waiting
+// for the next sitemap sweep. Fire-and-forget: never throws, never blocks. The
+// key is PUBLIC (verified via /{key}.txt), so it lives in source. Keep this file
+// dependency-light (no db/next imports) — it's called from hot mutation paths.
 import * as Sentry from "@sentry/nextjs";
 
 const HOST = "www.codu.co";

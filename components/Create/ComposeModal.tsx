@@ -60,17 +60,16 @@ export function ComposeModal({
   const [done, setDone] = useState<{ href: string; label: string } | null>(
     null,
   );
-  // Tracks whether the in-flight mutation is a "Save draft" so the success
-  // panel can point at /my-posts instead of the live post.
+  // Whether the in-flight mutation is a "Save draft" (success panel points at
+  // /my-posts instead of the live post).
   const [savingDraft, setSavingDraft] = useState(false);
 
   const { mutate: create, status: createStatus } =
     api.content.create.useMutation({
       onSuccess: (post) => {
         void utils.content.getFeed.invalidate();
-        // Posting is an onboarding step — refresh so the first-win celebration
-        // can fire (handled app-wide), even though we stay in this modal.
-        // (A draft won't satisfy "posted" server-side, which is correct.)
+        // Posting is an onboarding step — refresh so the (app-wide) first-win
+        // celebration can fire. A draft won't satisfy "posted" server-side.
         void utils.engagement.onboardingWins.invalidate();
         if (savingDraft) {
           toast.success("Saved to drafts");
@@ -99,9 +98,7 @@ export function ComposeModal({
       : "";
   const { metadata: linkMeta, isLoading: linkMetaLoading } =
     useLinkMetadata(normalisedUrl);
-  // Auto-fill from the link's OG metadata, but let the user override. The title
-  // field shows the fetched title until they type their own; the fetched
-  // description + image are persisted so the feed card has a blurb + thumbnail.
+  // Auto-fill from the link's OG metadata; the user's typed title overrides it.
   const metaTitle = tab === "link" ? (linkMeta?.title?.trim() ?? "") : "";
   const metaDescription =
     tab === "link" ? (linkMeta?.description?.trim() ?? "") : "";
@@ -139,8 +136,7 @@ export function ComposeModal({
           ? url
           : `https://${url}`
         : null;
-    // Only persist an absolute http(s) image — the create schema requires a
-    // valid URL, and OG tags occasionally hand back relative/garbage values.
+    // Only persist an absolute http(s) image — OG tags sometimes hand back garbage.
     const httpImage =
       metaImage && /^https?:\/\//i.test(metaImage) ? metaImage : null;
     create({

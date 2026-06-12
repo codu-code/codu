@@ -103,10 +103,8 @@ interface PostReaderProps {
   /** Discussion-disabled copy varies by surface ("post" vs "article"). */
   commentsDisabledLabel?: string;
   /**
-   * Whether this reader emits its own Article + breadcrumb JSON-LD. The /d/
-   * (discussion) route emits DiscussionForumPosting + a discussion breadcrumb
-   * itself, so it passes `false` to avoid double/wrong schema. Defaults to true
-   * for the member-article surface.
+   * Emit this reader's own Article + breadcrumb JSON-LD. The /d/ route emits
+   * DiscussionForumPosting itself, so it passes `false` to avoid double schema.
    */
   emitArticleSchema?: boolean;
 }
@@ -137,10 +135,8 @@ const PostReader = async ({
   } else {
     const ast = Markdoc.parse(bodyContent);
     const transformedContent = Markdoc.transform(ast, config);
-    // `renderedContent` is typed `string | RenderableTreeNode` to share the
-    // Tiptap (HTML string) branch below; the Markdoc branch actually holds a
-    // RenderableTreeNode, hence the cast. It is consumed only by
-    // `Markdoc.renderers.react` in the non-Tiptap render path, never as a string.
+    // Cast: the union type shares the Tiptap branch above; this branch holds a
+    // React node consumed only by Markdoc's renderer, never as a string.
     renderedContent = Markdoc.renderers.react(transformedContent, React, {
       components: markdocComponents,
     }) as unknown as string;

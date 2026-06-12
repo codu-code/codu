@@ -15,8 +15,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const username = params.username;
 
-  // First check if it's a user. Handles are case-insensitive (GitHub-style):
-  // resolve on lower(username) so /NiallMaher and /niallmaher both match.
+  // Case-insensitive handle resolution (GitHub-style) on lower(username).
   const profile = await db.query.user.findFirst({
     columns: {
       bio: true,
@@ -56,8 +55,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Feed sources now live at /s/{sourceSlug} — the page redirects them, so we
-  // don't emit source metadata here (the /s/ route owns it).
+  // Feed sources live at /s/{sourceSlug} (the /s/ route owns their metadata).
   return { title: "Profile Not Found" };
 }
 
@@ -107,9 +105,8 @@ export default async function Page(props: {
   });
 
   if (profile) {
-    // Canonicalize casing: redirect to the handle's stored display casing so a
-    // mixed-case request (/NiallMaher) 301s to the canonical (/niall-maher),
-    // keeping a single indexable URL per profile.
+    // Canonicalize casing: 301 to the handle's stored display casing so there's
+    // one indexable URL per profile.
     if (profile.username && profile.username !== username) {
       permanentRedirect(`/${profile.username}`);
     }
@@ -128,7 +125,7 @@ export default async function Page(props: {
       accountLocked,
     };
 
-    // Prepare ProfilePage JSON-LD (wraps a Person mainEntity) for profile SEO.
+    // ProfilePage JSON-LD (wraps a Person mainEntity) for profile SEO.
     const profilePageSchema = getProfilePageSchema({
       name: shapedProfile.name,
       username: shapedProfile.username,
@@ -140,7 +137,6 @@ export default async function Page(props: {
 
     return (
       <>
-        {/* ProfilePage JSON-LD for profile SEO */}
         <JsonLd data={profilePageSchema} />
 
         {/* The visible profile name (rendered as <h1> in _usernameClient) is the
@@ -150,8 +146,7 @@ export default async function Page(props: {
     );
   }
 
-  // The /{username} namespace is users-only. A segment that isn't a user but
-  // IS a feed source 301s to its canonical /s/{sourceSlug} home.
+  // /{username} is users-only: a non-user segment that IS a feed source 301s to /s/.
   const source = await db.query.feed_sources.findFirst({
     columns: { slug: true },
     where: eq(feed_sources.slug, username),

@@ -17,9 +17,8 @@ async function getTagBySlug(slug: string) {
   });
 }
 
-// Published posts carrying this tag, newest first. Joins to the author (member
-// content) and feed source (aggregated content) so each row can be linked to
-// its canonical URL per the live scheme.
+// Published posts carrying this tag, newest first. Author + source joins so each
+// row can be linked to its canonical URL.
 async function getPostsForTag(tagId: number) {
   return db
     .select({

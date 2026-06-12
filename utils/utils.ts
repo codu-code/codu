@@ -35,9 +35,9 @@ const commonCamelCaseCSWords = new Map([
 
 // @TODO make a list of words like "JavaScript" that we can map the words to if they exist
 /**
- * URL-friendly tag slug from a title. Must stay in sync with the slug written
- * on tag creation (see server/api/router/content.ts + tag.ts). Pure + client-safe
- * — used as a fallback for tag links when a row's stored slug isn't loaded.
+ * URL-friendly tag slug from a title. Must stay in sync with the slug written on
+ * tag creation (server/api/router/content.ts + tag.ts). Client-safe fallback for
+ * tag links when a row's stored slug isn't loaded.
  */
 export const slugifyTag = (title: string): string =>
   title

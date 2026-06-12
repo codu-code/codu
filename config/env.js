@@ -36,9 +36,8 @@ export const env = createEnv({
     BEDROCK_MODEL_ID: z.string().optional(),
     MODERATION_ENABLED: z.enum(["true", "false"]).optional(),
     ADMIN_EMAIL: z.string().email().optional(),
-    // Shared secret for authenticating internal cron invocations (e.g. the
-    // promote-scheduled route). Optional so deploys without it still validate;
-    // the route refuses to run (401) when it's unset.
+    // Shared secret for internal cron invocations (e.g. promote-scheduled).
+    // Optional; the route refuses to run when unset.
     CRON_SECRET: z.string().optional(),
   },
 

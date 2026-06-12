@@ -34,10 +34,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
           : undefined,
     },
     alternates: {
-      // RSS-aggregated links exist to populate Codú with fresh content for SEO,
-      // so we CLAIM them as Codú content (self-canonical), the same as member-
-      // shared links. These are a snippet + outbound link (not a full-body copy
-      // of the source), so this is aggregator listing content, not duplication.
+      // Self-canonical: these are snippet + outbound-link listings (not full-body
+      // copies), so claiming them as Codú content is aggregation, not duplication.
       canonical: `/s/${sourceSlug}/${feedArticle.slug ?? slug}`,
     },
   };

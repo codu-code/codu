@@ -1193,9 +1193,8 @@ export const postRouter = createTRPCRouter({
             body: existing[0].body,
             externalUrl: existing[0].externalUrl,
           });
-          // Writes status, publishedAt, moderationNote, externalUrlNormalized.
-          // For the published path the logic below overwrites status/publishedAt
-          // to publish-now (users cannot self-schedule via this path).
+          // Writes the gate fields; the published path overwrites
+          // status/publishedAt to publish-now below.
           applyGate(updateData, gate);
           if (existing[0].title) {
             updateData.slug = generateSlug(existing[0].title);
@@ -1222,8 +1221,8 @@ export const postRouter = createTRPCRouter({
         }
 
         updateData.status = "published";
-        // Users cannot self-schedule: a FUTURE publishTime is ignored and
-        // clamped to publish-now. Only scheduling path is admin.moderatePost.
+        // Users can't self-schedule: a future publishTime is clamped to now
+        // (only admin.moderatePost schedules).
         const effectivePublish =
           input.publishTime && input.publishTime <= new Date()
             ? input.publishTime

@@ -681,9 +681,8 @@ export const contentRouter = createTRPCRouter({
           sourceId: newContent.id,
         });
 
-        // Ping IndexNow so Bing crawls the new URL immediately (fire-and-forget;
-        // guarded to production + www.codu.co inside the lib). Skip cross-posted
-        // content (its canonical lives off Codú).
+        // Ping IndexNow (fire-and-forget, guarded inside the lib). Skip
+        // cross-posted content — its canonical lives off Codú.
         if (!input.canonicalUrl) {
           const url = memberPostUrl(
             dbType,
@@ -797,10 +796,8 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      // Ping IndexNow when the update leaves the post live — a new go-live that
-      // passed the gate, or an edit to already-published content (refresh crawl).
-      // Fire-and-forget, production-guarded inside the lib. Skip if the post
-      // canonicals off Codú.
+      // Ping IndexNow when the update leaves the post live (new go-live or edit to
+      // published content). Fire-and-forget; skip posts that canonical off Codú.
       if (updated?.status === "published" && !updated.canonicalUrl) {
         const url = memberPostUrl(
           updated.type,
@@ -1399,12 +1396,10 @@ export const contentRouter = createTRPCRouter({
             body: existing[0].body,
             externalUrl: existing[0].externalUrl,
           });
-          // Writes all four gate fields. On the published path publishedAt is
-          // overwritten below to publish-now (users cannot self-schedule); on
-          // in_review it stays null (admin approval sets it).
+          // Writes all four gate fields; publishedAt is set below (published) or
+          // by admin approval (in_review).
           applyGate(updateData, gate);
-          // Generate the slug now so the post has a stable URL once live/approved.
-          // Keep the existing urlId as the trailing token so the URL is stable.
+          // Slug now so the URL is stable once live; reuse the existing urlId.
           if (existing[0].title) {
             const slugUrlId = existing[0].urlId ?? mintUrlId();
             if (!existing[0].urlId) updateData.urlId = slugUrlId;
@@ -1431,8 +1426,8 @@ export const contentRouter = createTRPCRouter({
           // gate says published — fall through to the publishedAt logic below.
         }
 
-        // Users cannot self-schedule: a FUTURE publishTime is ignored and
-        // clamped to publish-now. Only scheduling path is admin.moderatePost.
+        // Users can't self-schedule: a future publishTime is clamped to now
+        // (only admin.moderatePost schedules).
         const effectivePublish =
           input.publishTime && input.publishTime <= new Date()
             ? input.publishTime
