@@ -5,7 +5,7 @@ import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
 import { feed_sources } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { JsonLd } from "@/components/JsonLd";
 import { getProfilePageSchema } from "@/lib/structured-data";
 
@@ -15,13 +15,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const username = params.username;
 
-  // First check if it's a user
+  // First check if it's a user. Handles are case-insensitive (GitHub-style):
+  // resolve on lower(username) so /NiallMaher and /niallmaher both match.
   const profile = await db.query.user.findFirst({
     columns: {
       bio: true,
       name: true,
     },
-    where: (users, { eq }) => eq(users.username, username),
+    where: (users) => sql`lower(${users.username}) = ${username.toLowerCase()}`,
   });
 
   if (profile) {
@@ -101,10 +102,18 @@ export default async function Page(props: {
         orderBy: (posts, { desc }) => [desc(posts.publishedAt)],
       },
     },
-    where: (users, { eq }) => eq(users.username, username),
+    // Case-insensitive handle resolution (GitHub-style).
+    where: (users) => sql`lower(${users.username}) = ${username.toLowerCase()}`,
   });
 
   if (profile) {
+    // Canonicalize casing: redirect to the handle's stored display casing so a
+    // mixed-case request (/NiallMaher) 301s to the canonical (/niall-maher),
+    // keeping a single indexable URL per profile.
+    if (profile.username && profile.username !== username) {
+      permanentRedirect(`/${profile.username}`);
+    }
+
     const bannedUser = await db.query.banned_users.findFirst({
       where: (bannedUsers, { eq }) => eq(bannedUsers.userId, profile.id),
     });

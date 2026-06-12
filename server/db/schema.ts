@@ -218,6 +218,12 @@ export const user = pgTable(
   (table) => {
     return {
       usernameKey: uniqueIndex("User_username_key").on(table.username),
+      // Case-insensitive uniqueness (GitHub-style): nobody can take `niall` if
+      // `Niall` exists. Display casing stays in the column; routing + uniqueness
+      // normalize on lower(username).
+      usernameLowerKey: uniqueIndex("user_username_lower_key").on(
+        sql`lower(${table.username})`,
+      ),
       emailKey: uniqueIndex("User_email_key").on(table.email),
       usernameIdIdx: index("User_username_id_idx").on(table.id, table.username),
       usernameIndex: index("User_username_index").on(table.username),

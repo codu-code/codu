@@ -23,7 +23,7 @@ import {
 import { isReservedUsername } from "@/server/lib/reserved-usernames";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
-import { and, desc, eq, gte, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { emailTokenReqSchema } from "@/schema/token";
 import { generateEmailToken, sendVerificationEmail } from "@/utils/emailToken";
@@ -95,6 +95,24 @@ export const profileRouter = createTRPCRouter({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "That username is reserved.",
+        });
+      }
+
+      // Handles are case-insensitively unique (GitHub-style): reject if another
+      // user already holds this handle in any casing. The DB also enforces this
+      // via the lower(username) unique index; this check gives a clean message.
+      const handleClash = await ctx.db.query.user.findFirst({
+        columns: { id: true },
+        where: (users) =>
+          and(
+            sql`lower(${users.username}) = ${input.username.toLowerCase()}`,
+            ne(users.id, ctx.session.user.id),
+          ),
+      });
+      if (handleClash) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That username is already taken.",
         });
       }
 
