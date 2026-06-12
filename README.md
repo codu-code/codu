@@ -89,6 +89,12 @@ Run the command `docker compose up`.
 
 Alternatively, if you have PostgreSQL running locally, you can use your local connection string or grab one from a free service like [Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres#finding-your-connection-string).
 
+### Local email (Mailpit)
+
+`docker compose up` also starts [Mailpit](https://mailpit.axllent.org/), a local email catcher. Set `EMAIL_PROVIDER=local` in your `.env` and every outgoing email (magic-link sign-in, moderation/report notifications) is captured at [http://localhost:8027](http://localhost:8027) instead of being sent through SES — no AWS credentials or real inboxes needed in development.
+
+The email E2E spec (`e2e/email.spec.ts`) asserts delivery through Mailpit's API; it skips automatically when Mailpit isn't running. To include it: `EMAIL_PROVIDER=local npm run dev:e2e` (server) and `EMAIL_PROVIDER=local npm test` (tests).
+
 ### GITHUB_ID and GITHUB_SECRET
 
 Currently, we only allow authentication via GitHub. To enable this, you need to have a `GITHUB_ID` and `GITHUB_SECRET` value.

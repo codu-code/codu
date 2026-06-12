@@ -379,22 +379,17 @@ test.describe("More Options Accordion", () => {
     );
   });
 
-  test("Should show schedule toggle", async ({ page }) => {
+  test("Should not offer scheduling controls (moderator-only feature)", async ({
+    page,
+  }) => {
+    // User-facing scheduling was removed — only admin.moderatePost schedules.
+    // Guard against the toggle quietly returning to the editor.
     await page.goto(CREATE_URL);
     await page.locator(SELECTORS.moreOptionsButton).click();
 
-    await expect(page.locator(SELECTORS.scheduleSwitch)).toBeVisible();
-  });
-
-  test("Should show date picker when scheduling enabled", async ({ page }) => {
-    await page.goto(CREATE_URL);
-    await page.locator(SELECTORS.moreOptionsButton).click();
-
-    // Enable scheduling
-    await page.locator(SELECTORS.scheduleSwitch).click();
-
-    // Date picker should appear
-    await expect(page.locator(SELECTORS.datetimeInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.canonicalUrlInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.scheduleSwitch)).toHaveCount(0);
+    await expect(page.locator(SELECTORS.datetimeInput)).toHaveCount(0);
   });
 });
 
@@ -691,57 +686,6 @@ test.describe("Publish Flow", () => {
         timeout: 10000,
       });
     }
-  });
-
-  test("Should show schedule-specific modal text when scheduling", async ({
-    page,
-  }) => {
-    await page.goto(CREATE_URL);
-
-    // Enter valid content - longer body for proper validation
-    await page.locator(SELECTORS.titleInput).fill("Scheduled Article Title");
-    await page.locator(SELECTORS.editorContent).click();
-    await page.keyboard.type(
-      "Content for scheduled article test here with enough text to pass validation",
-    );
-
-    // Wait for auto-save to complete
-    await expect(page.locator("nav >> text=/Saved .*/")).toBeVisible({
-      timeout: 15000,
-    });
-
-    // Expand More Options
-    await page.locator(SELECTORS.moreOptionsButton).click();
-
-    // Wait for accordion to expand
-    await expect(page.locator(SELECTORS.scheduleSwitch)).toBeVisible();
-
-    // Click the schedule switch using force to ensure it toggles
-    await page.locator(SELECTORS.scheduleSwitch).click({ force: true });
-
-    // Verify the switch is now checked
-    await expect(page.locator(SELECTORS.scheduleSwitch)).toHaveAttribute(
-      "data-state",
-      "checked",
-    );
-
-    // Set a future date - wait for datetime input to appear
-    await expect(page.locator(SELECTORS.datetimeInput)).toBeVisible();
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 1);
-    const dateString = futureDate.toISOString().slice(0, 16);
-    await page.locator(SELECTORS.datetimeInput).fill(dateString);
-
-    // Wait for state to settle after date input
-    await page.waitForTimeout(300);
-
-    // Click Publish button in nav
-    await page.locator('nav button:has-text("Publish")').click();
-
-    // Should show scheduling-specific modal
-    await expect(page.locator('text="Time travel activated!"')).toBeVisible({
-      timeout: 10000,
-    });
   });
 });
 

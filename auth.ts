@@ -36,6 +36,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...(emailAuthEnabled
       ? [
           Nodemailer({
+            // next-auth v5 registers this provider as "nodemailer" by default,
+            // but the sign-in UI calls signIn("email") — pin the id so the
+            // magic-link flow actually resolves a provider.
+            id: "email",
+            name: "Email",
             server: {
               // Using custom sendVerificationRequest, so this is not used
               host: "",

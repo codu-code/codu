@@ -11,6 +11,20 @@ services:
       - "5432:5432"
     volumes:
       - db:/var/lib/postgresql/data
+
+  # Mailpit: local email catcher for dev/E2E (maintained MailHog successor).
+  # Set EMAIL_PROVIDER=local in .env and every outgoing email (magic links,
+  # moderation/report notifications) lands here instead of SES.
+  # Host ports are offset (other local projects commonly hold 1025/8025);
+  # the app and e2e helpers default to these.
+  # Web UI + REST API: http://localhost:8027
+  mailpit:
+    container_name: codu-mailpit
+    image: axllent/mailpit:latest
+    restart: always
+    ports:
+      - "1027:1025" # SMTP
+      - "8027:8025" # Web UI / API
 volumes:
   db:
     driver: local
