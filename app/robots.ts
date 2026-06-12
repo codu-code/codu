@@ -5,7 +5,6 @@ import { type MetadataRoute } from "next";
 // must repeat this list — otherwise those bots get a bare `allow: "/"` and can
 // crawl /settings, /api, /draft, etc.
 const DISALLOW = [
-  "/alpha/",
   "/api/",
   "/draft/",
   "/settings/",

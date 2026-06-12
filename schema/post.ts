@@ -1,5 +1,4 @@
 import z from "zod";
-import { httpUrl } from "./shared";
 
 // Post type enum matching the database (lowercase)
 export const PostTypeSchema = z.enum([
@@ -58,38 +57,6 @@ export const GetPostBySlugSchema = z.object({
 });
 
 export type GetPostBySlugInput = z.TypeOf<typeof GetPostBySlugSchema>;
-
-// Create Post Schema
-export const CreatePostSchema = z.object({
-  type: PostTypeSchema,
-  title: z.string().min(1).max(500),
-  body: z.string().nullish(), // Required for article, optional for others
-  excerpt: z.string().max(300).nullish(),
-  externalUrl: httpUrl().max(2000).nullish(), // Required for link, resource
-  coverImage: z.string().url().nullish(),
-  tags: z.array(z.string()).max(5).optional(),
-  status: PostStatusSchema.default("draft"),
-  showComments: z.boolean().default(true),
-  canonicalUrl: z.string().url().nullish(),
-});
-
-export type CreatePostInput = z.TypeOf<typeof CreatePostSchema>;
-
-// Update/Save Post Schema
-export const SavePostSchema = z.object({
-  id: z.string(),
-  title: z.string().trim().max(500, "Max title length is 500 characters."),
-  body: z.string().trim(),
-  excerpt: z.optional(
-    z.string().trim().max(300, "Max length is 300 characters."),
-  ),
-  canonicalUrl: z.optional(z.string().trim().url()),
-  tags: z.string().array().max(5).optional(),
-  status: PostStatusSchema.optional(),
-  publishedAt: z.string().datetime().optional(),
-});
-
-export type SavePostInput = z.TypeOf<typeof SavePostSchema>;
 
 // Delete Post Schema
 export const DeletePostSchema = z.object({
@@ -155,33 +122,6 @@ export const GetByIdSchema = z.object({
 });
 
 export type GetByIdInput = z.TypeOf<typeof GetByIdSchema>;
-
-// Publish Post Schema
-export const PublishPostSchema = z.object({
-  id: z.string(),
-  published: z.boolean(),
-  publishTime: z.date().optional(),
-});
-
-export type PublishPostInput = z.TypeOf<typeof PublishPostSchema>;
-
-// Confirm Post Schema - validation before publishing
-export const ConfirmPostSchema = z.object({
-  body: z
-    .string()
-    .trim()
-    .min(50, "Content is too short. Minimum of 50 characters."),
-  title: z
-    .string()
-    .trim()
-    .max(500)
-    .min(10, "Title is too short. Minimum of 10 characters."),
-  excerpt: z.string().trim().max(300).optional(),
-  canonicalUrl: z.string().trim().url().optional().or(z.literal("")),
-  tags: z.string().array().max(5).optional(),
-});
-
-export type ConfirmPostInput = z.TypeOf<typeof ConfirmPostSchema>;
 
 // Get Posts Schema
 export const GetPostsSchema = z.object({
