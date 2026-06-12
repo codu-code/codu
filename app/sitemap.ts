@@ -3,11 +3,11 @@ import { type MetadataRoute } from "next";
 import { db } from "@/server/db";
 import { user, feed_sources, posts, post_tags, tag } from "@/server/db/schema";
 import { lte, and, isNull, isNotNull, eq, exists, sql } from "drizzle-orm";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 // Regenerate sitemap every hour to pick up new feed content from cron jobs.
 export const revalidate = 3600;
 
-const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
   "/about",
   // "/articles" omitted — it 301-redirects to "/?type=article"; sitemaps should

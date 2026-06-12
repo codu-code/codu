@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { api } from "@/server/trpc/react";
+import { getHostname } from "@/utils/url";
 import { useLinkMetadata } from "@/components/PostEditor/hooks/useLinkMetadata";
 import {
   AaToggle,
@@ -18,15 +19,6 @@ export type ComposeMode = "discussion" | "link" | "article";
 
 const TITLE_MAX = 300;
 const TAG_MAX = 4;
-
-function parseDomain(url: string): string | null {
-  try {
-    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
-    return u.hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Reddit-style create modal: Discussion + Link publish immediately (after the
@@ -87,7 +79,12 @@ export function ComposeModal({
       },
     });
 
-  const domain = parseDomain(url);
+  // Display domain (scheme optional while typing, "www." stripped for the chip).
+  const domain =
+    getHostname(url.startsWith("http") ? url : `https://${url}`)?.replace(
+      /^www\./,
+      "",
+    ) ?? null;
 
   // Normalised URL we feed to the OG metadata fetcher (only when it looks valid).
   const normalisedUrl =

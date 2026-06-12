@@ -7,7 +7,7 @@ import {
   linkedinUrl,
 } from "@/config/site_settings";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 /**
  * Codu organization schema - used as publisher for articles

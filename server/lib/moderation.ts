@@ -113,6 +113,8 @@ export interface GateResult {
 /**
  * Decide the stored status for a post the author is trying to publish.
  *  - moderation disabled -> published immediately
+ *  - the synchronous screenContent() heuristic flags -> in_review with the
+ *    reasons as the note (runs before any model call)
  *  - articles ALWAYS go to in_review (human editorial gate); auto-review still
  *    runs so its verdict is recorded as an advisory note for the reviewer
  *  - forceInReview (set by the caller for a "very similar" discussion) -> in_review
@@ -143,6 +145,19 @@ export async function gatePublish(input: {
       status: "published",
       publishedAt: nowIso,
       moderationNote: null,
+      externalUrlNormalized,
+    };
+  }
+
+  // Cheap synchronous screen runs before the model call. A flag routes straight
+  // to review (note matches autoReview's heuristic fallback), so obvious spam
+  // can't slip through a fail-open Bedrock error — and skips the model cost.
+  const screen = screenContent(input);
+  if (!screen.ok) {
+    return {
+      status: "in_review",
+      publishedAt: null,
+      moderationNote: `heuristic: ${screen.reasons.join(", ")}`.slice(0, 500),
       externalUrlNormalized,
     };
   }

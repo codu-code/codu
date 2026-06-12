@@ -10,7 +10,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Heading } from "@/components/ui-components/heading";
 import { FollowButton, Tag } from "@/components/ds";
-import { safeExternalHref } from "@/utils/url";
+import { getHostname, safeExternalHref } from "@/utils/url";
+import { getRelativeTime } from "@/utils/relativeTime";
 import { toast } from "sonner";
 
 type Props = {
@@ -213,7 +214,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                 className="inline-flex items-center gap-1 text-accent-soft transition-colors hover:text-accent"
               >
                 <LinkIcon className="h-4" />
-                {getDomainFromUrl(websiteUrl)}
+                {getHostname(safeExternalHref(websiteUrl))}
               </Link>
             )}
           </div>
@@ -543,24 +544,3 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 };
 
 export default Profile;
-
-function getRelativeTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  const diffMs = Date.now() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function getDomainFromUrl(url: string) {
-  const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
-  if (domain[domain.length - 1] === "/") {
-    return domain.slice(0, domain.length - 1);
-  }
-  return domain;
-}

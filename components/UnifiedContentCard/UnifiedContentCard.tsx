@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import VoteControl from "@/components/Vote/VoteControl";
 import { ReportButton } from "@/components/ReportModal/ReportModal";
 import { ensureHttps } from "@/utils/url";
+import { getRelativeTime } from "@/utils/relativeTime";
 
 export type ContentType = "POST" | "LINK";
 
@@ -68,20 +69,6 @@ export interface UnifiedContentCardProps {
   tags?: string[];
 }
 
-const getRelativeTime = (dateStr: string): string => {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
-
 const UnifiedContentCard = ({
   type,
   kind,
@@ -96,7 +83,7 @@ const UnifiedContentCard = ({
   readTimeMins,
   upvotes,
   downvotes,
-  userVote: initialUserVote,
+  userVote,
   isBookmarked: initialBookmarked = false,
   discussionCount = 0,
   author,
@@ -104,8 +91,6 @@ const UnifiedContentCard = ({
   tags,
 }: UnifiedContentCardProps) => {
   const [imageError, setImageError] = useState(false);
-  const [userVote, setUserVote] = useState(initialUserVote);
-  const [votes, setVotes] = useState({ upvotes, downvotes });
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [shared, setShared] = useState(false);
 
@@ -136,23 +121,10 @@ const UnifiedContentCard = ({
                 ? `/${author.username}`
                 : "/";
 
+  // Optimistic vote display lives inside VoteControl (it owns the +1/-1 from
+  // the user's current vote); we only fire the mutation and refresh the feed.
   const { mutate: voteContent } = api.content.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
-      });
-    },
     onError: (error) => {
-      setUserVote(initialUserVote);
-      setVotes({ upvotes, downvotes });
       toast.error("Failed to update vote");
       Sentry.captureException(error);
     },
@@ -333,8 +305,8 @@ const UnifiedContentCard = ({
         <div className="ml-auto flex items-center gap-3">
           <VoteControl
             base={
-              votes.upvotes -
-              votes.downvotes -
+              upvotes -
+              downvotes -
               (userVote === "up" ? 1 : userVote === "down" ? -1 : 0)
             }
             initial={userVote}

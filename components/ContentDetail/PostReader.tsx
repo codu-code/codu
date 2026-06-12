@@ -128,18 +128,15 @@ const PostReader = async ({
   const parsedBody = parseJSON(bodyContent);
   const isTiptapContent = parsedBody?.type === "doc";
 
+  // Tiptap branch: sanitized HTML string. Markdoc branch: the transformed tree,
+  // rendered to React exactly once at the render site below.
   let renderedContent: string | RenderableTreeNode;
 
   if (isTiptapContent && parsedBody) {
     renderedContent = renderSanitizedTiptapContent(parsedBody);
   } else {
     const ast = Markdoc.parse(bodyContent);
-    const transformedContent = Markdoc.transform(ast, config);
-    // Cast: the union type shares the Tiptap branch above; this branch holds a
-    // React node consumed only by Markdoc's renderer, never as a string.
-    renderedContent = Markdoc.renderers.react(transformedContent, React, {
-      components: markdocComponents,
-    }) as unknown as string;
+    renderedContent = Markdoc.transform(ast, config);
   }
 
   const articleSchema = emitArticleSchema

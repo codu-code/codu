@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
+import { getRelativeTime } from "@/utils/relativeTime";
 
 type ReportStatus = "PENDING" | "REVIEWED" | "DISMISSED" | "ACTIONED";
 type ReportReason =
@@ -179,21 +180,6 @@ const ModerationQueue = () => {
 
   const highlightClass = (id: string) =>
     highlightedItem === id ? "ring-2 ring-accent rounded-lg" : "";
-
-  const getRelativeTime = (dateStr: string): string => {
-    const now = new Date();
-    const date = new Date(dateStr);
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  };
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">

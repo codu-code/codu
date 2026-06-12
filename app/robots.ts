@@ -1,4 +1,5 @@
 import { type MetadataRoute } from "next";
+import { SITE_ORIGIN } from "@/config/site";
 
 // Private/utility routes no crawler (search OR AI) should index. A named
 // user-agent group fully OVERRIDES the `*` group, so every AI-bot rule below
@@ -50,6 +51,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: DISALLOW,
       })),
     ],
-    sitemap: "https://www.codu.co/sitemap.xml",
+    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
   };
 }

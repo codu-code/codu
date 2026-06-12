@@ -2,7 +2,7 @@ import type { Article, WithContext } from "../types";
 import { getOrganizationRef } from "./organization";
 import { getPersonRef } from "./person";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 interface ArticleData {
   title: string;

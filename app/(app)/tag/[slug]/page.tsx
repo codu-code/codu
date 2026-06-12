@@ -7,9 +7,29 @@ import { posts, post_tags, tag, user, feed_sources } from "@/server/db/schema";
 import { and, desc, eq, lte } from "drizzle-orm";
 import { getCamelCaseFromLower } from "@/utils/utils";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string | string[] }>;
+};
 
-const MAX_POSTS = 50;
+const PAGE_SIZE = 30;
+
+// Strict ?page=N parsing: undefined → 1, otherwise an all-digit integer >= 1.
+// Anything else (page=abc, page=0, page=-2, page=1.5) returns null → 404,
+// so invalid URLs never render duplicate/soft-404 content.
+function parsePage(raw: string | string[] | undefined): number | null {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value === undefined) return 1;
+  if (!/^[0-9]+$/.test(value)) return null;
+  const page = Number.parseInt(value, 10);
+  return page >= 1 ? page : null;
+}
+
+// Page 1 canonicalises to the bare tag URL (so /tag/x and /tag/x?page=1
+// dedupe); later pages self-canonical with their page param.
+function canonicalPath(slug: string, page: number): string {
+  return page === 1 ? `/tag/${slug}` : `/tag/${slug}?page=${page}`;
+}
 
 async function getTagBySlug(slug: string) {
   return db.query.tag.findFirst({
@@ -18,8 +38,9 @@ async function getTagBySlug(slug: string) {
 }
 
 // Published posts carrying this tag, newest first. Author + source joins so each
-// row can be linked to its canonical URL.
-async function getPostsForTag(tagId: number) {
+// row can be linked to its canonical URL. Fetches PAGE_SIZE + 1 rows so the
+// extra row acts as a "has next page" probe without a separate count query.
+async function getPostsForTag(tagId: number, page: number) {
   return db
     .select({
       id: posts.id,
@@ -44,7 +65,8 @@ async function getPostsForTag(tagId: number) {
       ),
     )
     .orderBy(desc(posts.publishedAt))
-    .limit(MAX_POSTS);
+    .limit(PAGE_SIZE + 1)
+    .offset((page - 1) * PAGE_SIZE);
 }
 
 // The stored slug already carries the trailing urlId, so it is used as-is.
@@ -69,7 +91,16 @@ function canonicalHref(post: {
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
-  const { slug } = await props.params;
+  const [{ slug }, search] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+  const page = parsePage(search.page);
+
+  if (page === null) {
+    return { title: "Tag Not Found | Codú" };
+  }
+
   const tagRow = await getTagBySlug(slug);
 
   if (!tagRow) {
@@ -77,16 +108,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const label = getCamelCaseFromLower(tagRow.title);
+  const pageSuffix = page > 1 ? ` — Page ${page}` : "";
+  const title = `#${label}${pageSuffix} — Codú`;
   const description =
     tagRow.description ||
     `Articles, discussions, and resources tagged #${label} on Codú.`;
 
   return {
-    title: `#${label} — Codú`,
+    title,
     description,
-    alternates: { canonical: `/tag/${slug}` },
+    alternates: { canonical: canonicalPath(slug, page) },
     openGraph: {
-      title: `#${label} — Codú`,
+      title,
       description,
       siteName: "Codú",
     },
@@ -94,7 +127,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export default async function TagPage(props: Props) {
-  const { slug } = await props.params;
+  const [{ slug }, search] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+  const page = parsePage(search.page);
+
+  if (page === null) {
+    notFound();
+  }
+
   const tagRow = await getTagBySlug(slug);
 
   if (!tagRow) {
@@ -102,7 +144,25 @@ export default async function TagPage(props: Props) {
   }
 
   const label = getCamelCaseFromLower(tagRow.title);
-  const taggedPosts = await getPostsForTag(tagRow.id);
+  const fetched = await getPostsForTag(tagRow.id, page);
+
+  // Past the last page → hard 404 rather than an empty shell. An empty tag is
+  // only a valid render on page 1.
+  if (fetched.length === 0 && page > 1) {
+    notFound();
+  }
+
+  const hasNextPage = fetched.length > PAGE_SIZE;
+  const taggedPosts = fetched.slice(0, PAGE_SIZE);
+
+  // Prev link to page 1 points at the bare URL to match its canonical.
+  const prevHref =
+    page > 1
+      ? page === 2
+        ? `/tag/${slug}`
+        : `/tag/${slug}?page=${page - 1}`
+      : null;
+  const nextHref = hasNextPage ? `/tag/${slug}?page=${page + 1}` : null;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -149,6 +209,37 @@ export default async function TagPage(props: Props) {
             );
           })}
         </ul>
+      )}
+
+      {(prevHref || nextHref) && (
+        <nav
+          aria-label="Pagination"
+          className="mt-8 flex items-center justify-between border-t border-hairline pt-6 font-mono text-sm"
+        >
+          {prevHref ? (
+            <Link
+              href={prevHref}
+              rel="prev"
+              className="text-muted hover:text-accent"
+            >
+              ← Previous
+            </Link>
+          ) : (
+            <span />
+          )}
+          <span className="text-faint">Page {page}</span>
+          {nextHref ? (
+            <Link
+              href={nextHref}
+              rel="next"
+              className="text-muted hover:text-accent"
+            >
+              Next →
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
       )}
     </div>
   );

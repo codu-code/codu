@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { SITE_ORIGIN } from "@/config/site";
 import "@/styles/globals.css";
 import Fathom from "@/components/Fathom/Fathom";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
@@ -67,16 +68,16 @@ export const metadata = {
     "TypeScript",
     "Python",
   ],
-  metadataBase: new URL("https://www.codu.co"),
+  metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
     title: "Codú — The community for AI builders & indie hackers",
     description:
       "Codú is the community for AI builders and indie hackers. Learn to build with AI, share what you ship, and grow with people doing the same.",
-    url: "https://www.codu.co",
+    url: SITE_ORIGIN,
     siteName: "Codú",
     images: [
       {
-        url: "https://www.codu.co/images/og/home-og.png",
+        url: `${SITE_ORIGIN}/images/og/home-og.png`,
         width: 1200,
         height: 630,
         alt: "Codú — the community for AI builders & indie hackers",

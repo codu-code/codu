@@ -1,8 +1,10 @@
+// Sitewide footer links — point at canonical 200 URLs, not redirecting legacy
+// paths (/articles and /feed both 308 now).
 export const footerNav = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
-  { name: "Articles", href: "/articles" },
-  { name: "Feed", href: "/feed" },
+  { name: "Articles", href: "/?type=article" },
+  { name: "Discussions", href: "/discussions" },
   { name: "Events", href: "https://www.meetup.com/codu-community/" },
   { name: "Advertise", href: "/advertise" },
   { name: "Code Of Conduct", href: "/code-of-conduct" },
@@ -10,8 +12,8 @@ export const footerNav = [
 ];
 
 export const navigation = [
-  { name: "Articles", href: "/articles" },
-  { name: "Feed", href: "/feed" },
+  { name: "Articles", href: "/?type=article" },
+  { name: "Discussions", href: "/discussions" },
   { name: "Events", href: "https://www.meetup.com/codu-community/" },
   { name: "About", href: "/about" },
 ];

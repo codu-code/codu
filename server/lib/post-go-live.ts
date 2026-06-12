@@ -9,8 +9,8 @@ import { notification } from "@/server/db/schema";
 import { award } from "@/server/lib/engagement";
 import { submitToIndexNow } from "@/server/lib/indexnow";
 import { POST_APPROVED } from "@/utils/notifications";
-
-const SITE_ORIGIN = "https://www.codu.co";
+import { buildContentHref } from "@/server/lib/content-url";
+import { SITE_ORIGIN } from "@/config/site";
 
 export interface GoLivePost {
   id: string;
@@ -30,12 +30,12 @@ export function buildCanonicalUrl(post: GoLivePost): string | null {
   if (post.sourceId || post.canonicalUrl) return null;
   if (!post.slug) return null;
 
-  if (post.type === "discussion" || post.type === "question") {
-    return `${SITE_ORIGIN}/d/${post.slug}`;
-  }
-  return post.authorUsername
-    ? `${SITE_ORIGIN}/${post.authorUsername}/${post.slug}`
-    : null;
+  const path = buildContentHref({
+    type: post.type,
+    slug: post.slug,
+    authorUsername: post.authorUsername,
+  });
+  return path ? `${SITE_ORIGIN}${path}` : null;
 }
 
 export async function runPostGoLiveSideEffects(

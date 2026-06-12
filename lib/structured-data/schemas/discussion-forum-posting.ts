@@ -6,7 +6,7 @@ import type {
 } from "../types";
 import { getPersonRef } from "./person";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 interface ForumCommentInput {
   id: string;

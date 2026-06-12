@@ -4,7 +4,8 @@
 // dependency-light (no db/next imports) — it's called from hot mutation paths.
 import * as Sentry from "@sentry/nextjs";
 
-const HOST = "www.codu.co";
+import { SITE_HOST as HOST } from "@/config/site";
+
 const KEY = "71c1d9ae86d395b88bdfeee926f49863";
 const KEY_LOCATION = `https://${HOST}/${KEY}.txt`;
 const ENDPOINT = "https://api.indexnow.org/indexnow";

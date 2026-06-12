@@ -11,6 +11,7 @@ import {
 import { api } from "@/server/trpc/react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
+import { getRelativeTime } from "@/utils/relativeTime";
 
 const UserManagement = () => {
   const searchParams = useSearchParams();
@@ -67,21 +68,6 @@ const UserManagement = () => {
 
   const handleUnban = (userId: string) => {
     unbanUser({ userId });
-  };
-
-  const getRelativeTime = (dateStr: string): string => {
-    const now = new Date();
-    const date = new Date(dateStr);
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffDays < 1) return "today";
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      year: "numeric",
-    });
   };
 
   const displayUsers = showBannedOnly

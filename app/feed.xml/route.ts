@@ -5,8 +5,7 @@ import { db } from "@/server/db";
 import { posts } from "@/server/db/schema";
 import { and, desc, eq, inArray, isNull, lte } from "drizzle-orm";
 import { buildContentHref } from "@/server/lib/content-url";
-
-const SITE_ORIGIN = "https://www.codu.co";
+import { SITE_ORIGIN } from "@/config/site";
 
 // Member-written content only: articles and community text posts. Aggregated
 // source content (sourceId set) canonicalises off Codú, and bare link/resource

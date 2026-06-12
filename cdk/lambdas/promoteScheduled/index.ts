@@ -25,14 +25,12 @@ async function getSsmValue(secretName: string): Promise<string> {
   }
 }
 
-// Site base URL: optional `/env/siteUrl` param (point at a preview env), else production.
+// Site base URL from the required `/env/siteUrl` param. FAIL CLOSED: a missing
+// or unreadable param throws (visible Lambda failure) rather than falling back
+// to production — otherwise a non-prod deploy would silently POST prod.
 async function getBaseUrl(): Promise<string> {
-  try {
-    const value = await getSsmValue("/env/siteUrl");
-    return value.replace(/\/+$/, "");
-  } catch {
-    return "https://www.codu.co";
-  }
+  const value = await getSsmValue("/env/siteUrl");
+  return value.replace(/\/+$/, "");
 }
 
 // Main Lambda handler

@@ -1,7 +1,7 @@
 import type { WebSite, WithContext } from "../types";
 import { getOrganizationRef } from "./organization";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 /**
  * Generate WebSite schema for the homepage.

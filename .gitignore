@@ -75,3 +75,4 @@ ssmSetup.zsh
 
 # Local-only deploy notes (never commit)
 local.md
+logs/

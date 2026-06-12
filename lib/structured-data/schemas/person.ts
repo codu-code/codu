@@ -1,6 +1,6 @@
 import type { Person, WithContext } from "../types";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 interface PersonData {
   name: string | null;

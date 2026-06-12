@@ -1,6 +1,6 @@
 import type { Article, Organization, WithContext } from "../types";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 interface FeedArticleData {
   title: string;
