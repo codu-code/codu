@@ -24,6 +24,18 @@ import {
 const E2E_DB_URL = "postgresql://postgres:secret@127.0.0.1:5432/postgres";
 const e2eDb = () => drizzle(postgres(E2E_DB_URL));
 
+/**
+ * Signed-in users can legitimately earn a badge mid-test (commenting, voting…),
+ * which pops the full-screen BadgeCelebration dialog and blocks pointer events.
+ * Auto-dismiss it whenever it appears so tests exercise the flow under it.
+ */
+const dismissBadgeCelebration = async (page: Page) => {
+  const keepBrowsing = page.getByRole("button", { name: "Keep browsing" });
+  await page.addLocatorHandler(keepBrowsing, async () => {
+    await keepBrowsing.click();
+  });
+};
+
 export const loggedInAsUserOne = async (page: Page) => {
   try {
     // Clear cookies to ensure fresh session (prevents stale React Query cache when switching users)
@@ -44,6 +56,8 @@ export const loggedInAsUserOne = async (page: Page) => {
         (cookie) => cookie.name === "authjs.session-token",
       ),
     ).toBeTruthy();
+
+    await dismissBadgeCelebration(page);
   } catch (err) {
     throw Error("Error while authenticating E2E test user one");
   }
@@ -68,6 +82,8 @@ export const loggedInAsUserTwo = async (page: Page) => {
         (cookie) => cookie.name === "authjs.session-token",
       ),
     ).toBeTruthy();
+
+    await dismissBadgeCelebration(page);
   } catch (err) {
     throw Error("Error while authenticating E2E test user two");
   }
@@ -93,6 +109,8 @@ export const loggedInAsAdmin = async (page: Page) => {
         (cookie) => cookie.name === "authjs.session-token",
       ),
     ).toBeTruthy();
+
+    await dismissBadgeCelebration(page);
   } catch (err) {
     throw Error("Error while authenticating E2E admin user");
   }

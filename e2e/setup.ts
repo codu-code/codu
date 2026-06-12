@@ -57,6 +57,9 @@ export const setup = async () => {
     // Clean up any old E2E test posts by slug pattern
     const e2eSlugs = [
       "e2e-test-slug-published",
+      // Dedicated bookmark fixture: only saved.spec.ts touches this post, so
+      // its save/unsave toggling can't race other specs sharing the main one.
+      "e2e-saved-target",
       "e2e-test-slug-scheduled",
       "e2e-test-slug-draft",
       "e2e-nextjs-best-practices",
@@ -106,6 +109,20 @@ export const setup = async () => {
         excerpt: articleExcerpt,
         body: articleContent,
         upvotesCount: 10,
+        downvotesCount: 0,
+        readingTime: 2,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "article" as const,
+        title: "Saved Target Article",
+        slug: "e2e-saved-target",
+        excerpt: "Bookmark fixture owned exclusively by saved.spec.ts.",
+        body: articleContent,
+        upvotesCount: 1,
         downvotesCount: 0,
         readingTime: 2,
         status: "published" as const,

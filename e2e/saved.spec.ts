@@ -10,8 +10,11 @@ test.describe.configure({ mode: "serial", retries: 2 });
 // Post-relaunch: the feed is the homepage at "/". Feed rows are
 // UnifiedContentCards whose bookmark control is the "Save" button
 // (data-testid="bookmark-button"). Saved items live on the /saved page.
+// Dedicated fixture (seeded by e2e/setup.ts) that no other spec mutates, so
+// the save/unsave toggling here can't race parallel specs sharing the main
+// published article.
 const PUBLISHED_ARTICLE_URL =
-  "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published";
+  "http://localhost:3000/e2e-test-user-one-111/e2e-saved-target";
 
 test.describe("Unauthenticated Saved Page", () => {
   test("Should redirect unauthenticated users to get-started page", async ({

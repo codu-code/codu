@@ -19,7 +19,6 @@ const emailAuthEnabled =
   process.env.NODE_ENV !== "production";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // @ts-expect-error - DrizzleAdapter type mismatch with next-auth internal types
   adapter: DrizzleAdapter(db, {
     // @ts-expect-error - Custom user table
     usersTable: user,
