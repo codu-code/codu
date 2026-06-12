@@ -83,31 +83,32 @@ const BADGE_RULES: { key: string; test: (s: BadgeStats) => boolean }[] = [
 export async function checkBadges(userId: string): Promise<void> {
   try {
     if (!userId) return;
-    const [pts] = await db
-      .select({
-        total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
-      })
-      .from(point_event)
-      .where(eq(point_event.userId, userId));
-    const [streak] = await db
-      .select({ longest: user_streak.longestStreak })
-      .from(user_streak)
-      .where(eq(user_streak.userId, userId))
-      .limit(1);
-    const [postRow] = await db
-      .select({ c: sql<number>`count(*)` })
-      .from(point_event)
-      .where(
-        and(
-          eq(point_event.userId, userId),
-          eq(point_event.action, "post_published"),
+    const [[pts], [streak], [postRow], [refRow]] = await Promise.all([
+      db
+        .select({
+          total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
+        })
+        .from(point_event)
+        .where(eq(point_event.userId, userId)),
+      db
+        .select({ longest: user_streak.longestStreak })
+        .from(user_streak)
+        .where(eq(user_streak.userId, userId))
+        .limit(1),
+      db
+        .select({ c: sql<number>`count(*)` })
+        .from(point_event)
+        .where(
+          and(
+            eq(point_event.userId, userId),
+            eq(point_event.action, "post_published"),
+          ),
         ),
-      );
-
-    const [refRow] = await db
-      .select({ c: sql<number>`count(*)` })
-      .from(user)
-      .where(eq(user.invitedBy, userId));
+      db
+        .select({ c: sql<number>`count(*)` })
+        .from(user)
+        .where(eq(user.invitedBy, userId)),
+    ]);
 
     const stats: BadgeStats = {
       points: Number(pts?.total ?? 0),
@@ -126,10 +127,10 @@ export async function checkBadges(userId: string): Promise<void> {
       .from(badge)
       .where(inArray(badge.key, earnedKeys));
 
-    for (const b of badges) {
+    if (badges.length > 0) {
       await db
         .insert(user_badge)
-        .values({ userId, badgeId: b.id })
+        .values(badges.map((b) => ({ userId, badgeId: b.id })))
         .onConflictDoNothing();
     }
   } catch (error) {

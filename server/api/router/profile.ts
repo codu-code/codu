@@ -15,7 +15,12 @@ import {
 
 import { getPresignedUrl } from "@/server/common/getPresignedUrl";
 
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import {
   isUserSubscribedToNewsletter,
   manageNewsletterSubscription,
@@ -77,7 +82,13 @@ export const profileRouter = createTRPCRouter({
       };
     }),
 
-  edit: protectedProcedure
+  edit: rateLimitedProcedure({
+    name: "profile-edit",
+    limit: 5,
+    windowMs: 10 * 60_000,
+    message:
+      "You're updating your profile too fast. Take a breather and try again.",
+  })
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       const { email } = ctx.session.user;
@@ -288,7 +299,13 @@ export const profileRouter = createTRPCRouter({
         },
       }));
     }),
-  updateEmail: protectedProcedure
+  updateEmail: rateLimitedProcedure({
+    name: "profile-update-email",
+    limit: 5,
+    windowMs: 10 * 60_000,
+    message:
+      "You're requesting email changes too fast. Take a breather and try again.",
+  })
     .input(emailTokenReqSchema)
     .mutation(async ({ input, ctx }) => {
       const { newEmail } = input;

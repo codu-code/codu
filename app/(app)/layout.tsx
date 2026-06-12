@@ -1,4 +1,5 @@
 import { getServerAuthSession } from "@/server/auth";
+import { SITE_ORIGIN } from "@/config/site";
 import React from "react";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
@@ -38,7 +39,7 @@ export const metadata = {
     "TypeScript",
     "Python",
   ],
-  metadataBase: new URL("https://www.codu.co"),
+  metadataBase: new URL(SITE_ORIGIN),
   openGraph: {
     images: "/images/og/home-og.png",
   },
@@ -50,19 +51,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerAuthSession();
-  const userData = session?.user?.id
-    ? await db.query.user.findFirst({
-        where: eq(user.id, session.user.id),
-        columns: { username: true },
-      })
-    : null;
-
-  // Roll the daily-activity streak forward + ensure/attribute referral
-  // (both idempotent, never throw).
-  if (session?.user?.id) {
-    await recordDailyActivity(session.user.id);
-    await ensureReferral(session.user.id);
-  }
+  // Username fetch + daily-activity streak roll + referral attribution are
+  // independent (the engagement calls are idempotent, never throw), so run
+  // them in parallel.
+  const [userData] = session?.user?.id
+    ? await Promise.all([
+        db.query.user.findFirst({
+          where: eq(user.id, session.user.id),
+          columns: { username: true },
+        }),
+        recordDailyActivity(session.user.id),
+        ensureReferral(session.user.id),
+      ])
+    : [null];
 
   return (
     <>

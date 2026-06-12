@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import { award } from "@/server/lib/engagement";
 import { enforceRateLimit } from "@/server/lib/rateLimit";
 import {
@@ -205,7 +210,13 @@ export const commentRouter = createTRPCRouter({
       return createdComment;
     }),
 
-  edit: protectedProcedure
+  edit: rateLimitedProcedure({
+    name: "comment-edit",
+    limit: 20,
+    windowMs: 10 * 60_000,
+    message:
+      "You're editing comments too fast. Take a breather and try again.",
+  })
     .input(EditCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, body } = input;
@@ -259,7 +270,13 @@ export const commentRouter = createTRPCRouter({
       return updatedComment;
     }),
 
-  delete: protectedProcedure
+  delete: rateLimitedProcedure({
+    name: "comment-delete",
+    limit: 20,
+    windowMs: 10 * 60_000,
+    message:
+      "You're deleting comments too fast. Take a breather and try again.",
+  })
     .input(DeleteCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
@@ -315,7 +332,12 @@ export const commentRouter = createTRPCRouter({
       return { id: deletedComment.id, deletedAt: deletedComment.deletedAt };
     }),
 
-  vote: protectedProcedure
+  vote: rateLimitedProcedure({
+    name: "comment-vote",
+    limit: 100,
+    windowMs: 5 * 60_000,
+    message: "You're voting too fast. Take a breather and try again.",
+  })
     .input(VoteCommentSchema)
     .mutation(async ({ input, ctx }) => {
       const { commentId, voteType } = input;

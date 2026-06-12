@@ -18,31 +18,33 @@ export const engagementRouter = createTRPCRouter({
   // picked topics, followed 3 builders, published a first post.
   onboardingWins: protectedProcedure.query(async ({ ctx }) => {
     const uid = ctx.session.user.id;
-    const [u] = await ctx.db
-      .select({
-        topics: user.topics,
-        username: user.username,
-        firstWinCelebratedAt: user.firstWinCelebratedAt,
-      })
-      .from(user)
-      .where(eq(user.id, uid))
-      .limit(1);
-    const [followRow] = await ctx.db
-      .select({ c: sql<number>`count(*)` })
-      .from(follow)
-      .where(eq(follow.followerId, uid));
-    const [postRow] = await ctx.db
-      .select({ c: sql<number>`count(*)` })
-      .from(posts)
-      .where(eq(posts.authorId, uid));
     // Badge must be earned before we celebrate — a posted-but-in-review post
     // has no badge yet.
-    const [firstBadge] = await ctx.db
-      .select({ id: user_badge.id })
-      .from(user_badge)
-      .innerJoin(badge, eq(user_badge.badgeId, badge.id))
-      .where(and(eq(user_badge.userId, uid), eq(badge.key, "first_post")))
-      .limit(1);
+    const [[u], [followRow], [postRow], [firstBadge]] = await Promise.all([
+      ctx.db
+        .select({
+          topics: user.topics,
+          username: user.username,
+          firstWinCelebratedAt: user.firstWinCelebratedAt,
+        })
+        .from(user)
+        .where(eq(user.id, uid))
+        .limit(1),
+      ctx.db
+        .select({ c: sql<number>`count(*)` })
+        .from(follow)
+        .where(eq(follow.followerId, uid)),
+      ctx.db
+        .select({ c: sql<number>`count(*)` })
+        .from(posts)
+        .where(eq(posts.authorId, uid)),
+      ctx.db
+        .select({ id: user_badge.id })
+        .from(user_badge)
+        .innerJoin(badge, eq(user_badge.badgeId, badge.id))
+        .where(and(eq(user_badge.userId, uid), eq(badge.key, "first_post")))
+        .limit(1),
+    ]);
     const followCount = Number(followRow?.c ?? 0);
     const postCount = Number(postRow?.c ?? 0);
     const wins = {
@@ -78,13 +80,15 @@ export const engagementRouter = createTRPCRouter({
 
   // The signed-in user's streak + total points (personal, never empty-feeling).
   myStats: protectedProcedure.query(async ({ ctx }) => {
-    const streak = await getStreak(ctx.session.user.id);
-    const [pts] = await ctx.db
-      .select({
-        total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
-      })
-      .from(point_event)
-      .where(eq(point_event.userId, ctx.session.user.id));
+    const [streak, [pts]] = await Promise.all([
+      getStreak(ctx.session.user.id),
+      ctx.db
+        .select({
+          total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
+        })
+        .from(point_event)
+        .where(eq(point_event.userId, ctx.session.user.id)),
+    ]);
     return {
       currentStreak: streak?.currentStreak ?? 0,
       longestStreak: streak?.longestStreak ?? 0,
@@ -96,23 +100,25 @@ export const engagementRouter = createTRPCRouter({
   profileEngagement: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const [pts] = await ctx.db
-        .select({
-          total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
-        })
-        .from(point_event)
-        .where(eq(point_event.userId, input.userId));
-      const streak = await getStreak(input.userId);
-      const earned = await getUserBadges(input.userId);
-      const all = await ctx.db
-        .select({
-          key: badge.key,
-          name: badge.name,
-          description: badge.description,
-          emoji: badge.emoji,
-        })
-        .from(badge)
-        .orderBy(badge.id);
+      const [[pts], streak, earned, all] = await Promise.all([
+        ctx.db
+          .select({
+            total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
+          })
+          .from(point_event)
+          .where(eq(point_event.userId, input.userId)),
+        getStreak(input.userId),
+        getUserBadges(input.userId),
+        ctx.db
+          .select({
+            key: badge.key,
+            name: badge.name,
+            description: badge.description,
+            emoji: badge.emoji,
+          })
+          .from(badge)
+          .orderBy(badge.id),
+      ]);
       const earnedMap = new Map(earned.map((e) => [e.key, e.awardedAt]));
       const badges = all.map((b) => ({
         ...b,

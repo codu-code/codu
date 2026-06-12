@@ -1,13 +1,24 @@
 import { z } from "zod";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import { follow, notification, user } from "@/server/db/schema";
 import { NEW_FOLLOWER } from "@/utils/notifications";
 import * as Sentry from "@sentry/nextjs";
 
 export const followRouter = createTRPCRouter({
-  follow: protectedProcedure
+  follow: rateLimitedProcedure({
+    name: "user-follow",
+    limit: 30,
+    windowMs: 10 * 60_000,
+    message:
+      "You're following people too fast. Take a breather and try again.",
+  })
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.userId === ctx.session.user.id) {

@@ -8,6 +8,7 @@ import {
   publicProcedure,
   protectedProcedure,
   adminOnlyProcedure,
+  rateLimitedProcedure,
 } from "../trpc";
 import { job } from "@/server/db/schema";
 import {
@@ -36,7 +37,13 @@ const LISTING_DAYS = 30;
 
 export const jobRouter = createTRPCRouter({
   // Create a listing. Lands in pending_payment until payment + moderation.
-  create: protectedProcedure
+  create: rateLimitedProcedure({
+    name: "job-create",
+    limit: 5,
+    windowMs: 10 * 60_000,
+    message:
+      "You're creating job listings too fast. Take a breather and try again.",
+  })
     .input(saveJobsSchema)
     .mutation(async ({ ctx, input }) => {
       try {

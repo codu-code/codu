@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import {
   CreateDiscussionSchema,
   EditDiscussionSchema,
@@ -83,7 +88,12 @@ function generatePath(parentPath: string | null, id: string): string {
 }
 
 export const discussionRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: rateLimitedProcedure({
+    name: "discussion-create",
+    limit: 10,
+    windowMs: 10 * 60_000,
+    message: "You're commenting too fast. Take a breather and try again.",
+  })
     .input(CreateDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, contentId, parentId } = input;
@@ -178,7 +188,12 @@ export const discussionRouter = createTRPCRouter({
       return createdComment.id;
     }),
 
-  edit: protectedProcedure
+  edit: rateLimitedProcedure({
+    name: "discussion-edit",
+    limit: 20,
+    windowMs: 10 * 60_000,
+    message: "You're editing too fast. Take a breather and try again.",
+  })
     .input(EditDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, id } = input;
@@ -241,7 +256,12 @@ export const discussionRouter = createTRPCRouter({
       return id;
     }),
 
-  vote: protectedProcedure
+  vote: rateLimitedProcedure({
+    name: "discussion-vote",
+    limit: 100,
+    windowMs: 5 * 60_000,
+    message: "You're voting too fast. Take a breather and try again.",
+  })
     .input(VoteDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { discussionId: commentId, voteType } = input;
@@ -413,7 +433,13 @@ export const discussionRouter = createTRPCRouter({
     }),
 
   // Follow a discussion to be notified of new comments. Idempotent.
-  follow: protectedProcedure
+  follow: rateLimitedProcedure({
+    name: "discussion-follow",
+    limit: 30,
+    windowMs: 10 * 60_000,
+    message:
+      "You're following discussions too fast. Take a breather and try again.",
+  })
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db

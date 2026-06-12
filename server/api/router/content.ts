@@ -49,26 +49,25 @@ import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import { mintUrlId } from "@/server/lib/url-id";
-import { buildSlug } from "@/server/lib/content-url";
+import { buildSlug, buildContentHref } from "@/server/lib/content-url";
 import { submitToIndexNow } from "@/server/lib/indexnow";
-
-const SITE_ORIGIN = "https://www.codu.co";
+import { SITE_ORIGIN } from "@/config/site";
 
 // Absolute canonical URL for a freshly published member post, matching the
-// sitemap scheme: discussions/questions → /d/{slug}, everything else
-// member-authored → /{username}/{slug}. The slug already ends with the urlId.
-// Returns null when we can't build a stable public URL (no username) so callers
-// skip the IndexNow ping rather than submit a 404.
+// sitemap scheme (shared path rules in buildContentHref). The slug already
+// ends with the urlId. Returns null when we can't build a stable public URL
+// (no username) so callers skip the IndexNow ping rather than submit a 404.
 function memberPostUrl(
   dbType: DbPostType,
   slug: string,
   username: string | null | undefined,
 ): string | null {
-  if (dbType === "discussion" || dbType === "question") {
-    return `${SITE_ORIGIN}/d/${slug}`;
-  }
-  if (!username) return null;
-  return `${SITE_ORIGIN}/${username}/${slug}`;
+  const path = buildContentHref({
+    type: dbType,
+    slug,
+    authorUsername: username,
+  });
+  return path ? `${SITE_ORIGIN}${path}` : null;
 }
 
 function calculateReadTime(body: string | null | undefined): number {

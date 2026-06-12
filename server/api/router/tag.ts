@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import { TRPCError } from "@trpc/server";
 import {
   tag,
@@ -131,7 +136,12 @@ export const tagRouter = createTRPCRouter({
    * Get or create a tag - for tag input
    * Returns existing tag or creates a new one with proper slug
    */
-  getOrCreate: protectedProcedure
+  getOrCreate: rateLimitedProcedure({
+    name: "tag-get-or-create",
+    limit: 10,
+    windowMs: 10 * 60_000,
+    message: "You're creating tags too fast. Take a breather and try again.",
+  })
     .input(
       z.object({
         title: z
