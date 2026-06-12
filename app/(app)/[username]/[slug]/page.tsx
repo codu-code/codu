@@ -4,7 +4,7 @@ import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
 import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
-import { eq, and, lte, inArray, or } from "drizzle-orm";
+import { eq, and, lte, inArray, or, sql } from "drizzle-orm";
 import UserLinkDetail from "./_userLinkDetail";
 import PostReader from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
@@ -18,9 +18,10 @@ async function getUserPost(
   postSlug: string,
   viewerId?: string | null,
 ) {
+  // Case-insensitive handle resolution (GitHub-style), matching the profile page.
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
-    where: eq(user.username, username),
+    where: sql`lower(${user.username}) = ${username.toLowerCase()}`,
   });
 
   if (!userRecord) return null;
@@ -114,7 +115,7 @@ async function getUserPost(
 async function getUserLinkPost(username: string, postSlug: string) {
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
-    where: eq(user.username, username),
+    where: sql`lower(${user.username}) = ${username.toLowerCase()}`,
   });
 
   if (!userRecord) return null;
@@ -302,7 +303,7 @@ async function exactPublishedPostExists(
     .innerJoin(user, eq(posts.authorId, user.id))
     .where(
       and(
-        eq(user.username, username),
+        sql`lower(${user.username}) = ${username.toLowerCase()}`,
         eq(posts.slug, slug),
         eq(posts.status, "published"),
         lte(posts.publishedAt, new Date().toISOString()),
@@ -380,8 +381,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userPost.title)}`],
       },
       alternates: {
-        // Cross-posted content points at the original; native posts self-canonical.
-        canonical: userPost.canonicalUrl ?? `/${username}/${slug}`,
+        // Cross-posted content points at the original; native posts
+        // self-canonical at the stored handle casing.
+        canonical:
+          userPost.canonicalUrl ??
+          `/${userPost.user.username ?? username}/${userPost.slug}`,
       },
     };
   }
@@ -417,7 +421,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userArticle.title)}`],
       },
       alternates: {
-        canonical: userArticle.canonicalUrl ?? `/${username}/${slug}`,
+        canonical:
+          userArticle.canonicalUrl ??
+          `/${userArticle.user.username ?? username}/${userArticle.slug}`,
       },
     };
   }
@@ -442,7 +448,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       },
       // Member-shared links keep Codú as canonical (aggregated links point to source).
       alternates: {
-        canonical: `/${username}/${slug}`,
+        canonical: `/${userLinkPost.user.username ?? username}/${userLinkPost.slug}`,
       },
     };
   }
@@ -475,6 +481,11 @@ const UnifiedPostPage = async (props: Props) => {
       permanentRedirect(`/d/${userPost.slug}`);
     }
 
+    // Handle resolution is case-insensitive; only the stored casing renders.
+    if (userPost.user.username && userPost.user.username !== username) {
+      permanentRedirect(`/${userPost.user.username}/${userPost.slug}`);
+    }
+
     return (
       <PostReader
         post={userPost}
@@ -493,6 +504,10 @@ const UnifiedPostPage = async (props: Props) => {
       permanentRedirect(`/d/${userArticle.slug}`);
     }
 
+    if (userArticle.user.username && userArticle.user.username !== username) {
+      permanentRedirect(`/${userArticle.user.username}/${userArticle.slug}`);
+    }
+
     return (
       <PostReader
         post={userArticle}
@@ -507,6 +522,10 @@ const UnifiedPostPage = async (props: Props) => {
   const userLinkPost = await getUserLinkPost(username, slug);
 
   if (userLinkPost && userLinkPost.user) {
+    if (userLinkPost.user.username && userLinkPost.user.username !== username) {
+      permanentRedirect(`/${userLinkPost.user.username}/${userLinkPost.slug}`);
+    }
+
     // Member-shared links are self-canonical, so emit BlogPosting + BreadcrumbList
     // JSON-LD like member articles.
     const linkAuthorName = userLinkPost.user.name || "Unknown";

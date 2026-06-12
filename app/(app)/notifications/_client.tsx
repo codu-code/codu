@@ -13,6 +13,7 @@ import {
   NEW_COMMENT_ON_FOLLOWED_POST,
 } from "@/utils/notifications";
 import { api } from "@/server/trpc/react";
+import { buildContentHref } from "@/server/lib/content-url";
 
 // Moved outside to avoid "cannot create components during render" error
 const Placeholder = () => (
@@ -145,6 +146,14 @@ const Notifications = () => {
                         },
                   );
                   const { username, name, image } = notifier;
+                  const postHref =
+                    !isFollow && post?.slug
+                      ? buildContentHref({
+                          type: post.type,
+                          slug: post.slug,
+                          authorUsername: post.author?.username,
+                        })
+                      : null;
                   // Check that we handle the notifications
                   if (
                     ![
@@ -197,10 +206,10 @@ const Notifications = () => {
                             · {readableDate}
                           </span>
                         </p>
-                        {!isFollow && post && (
+                        {!isFollow && post && postHref && (
                           <Link
                             className="mt-1 block text-sm font-semibold text-fg hover:text-accent"
-                            href={`/articles/${post.slug}`}
+                            href={postHref}
                           >
                             {post.title}
                           </Link>

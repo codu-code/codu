@@ -3,8 +3,8 @@ import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 
 export const metadata = {
-  title: "Bookmarked posts",
-  description: "Find all your bookmarked articles here.",
+  title: "My posts",
+  description: "Manage your drafts, scheduled and published posts.",
 };
 
 export default async function Page() {
@@ -12,5 +12,5 @@ export default async function Page() {
   if (!session) {
     redirect("/get-started");
   }
-  return <Content />;
+  return <Content username={session.user.username || null} />;
 }

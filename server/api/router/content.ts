@@ -49,6 +49,7 @@ import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 import { award } from "@/server/lib/engagement";
 import { mintUrlId } from "@/server/lib/url-id";
+import { buildSlug } from "@/server/lib/content-url";
 import { submitToIndexNow } from "@/server/lib/indexnow";
 
 const SITE_ORIGIN = "https://www.codu.co";
@@ -68,22 +69,6 @@ function memberPostUrl(
   }
   if (!username) return null;
   return `${SITE_ORIGIN}/${username}/${slug}`;
-}
-
-// Produce the hyphenated lowercase base of a slug, with no id suffix. The
-// trailing token of a slug must be the post's urlId, so callers append it.
-function slugifyTitle(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .substring(0, 80);
-}
-
-// Build a slug whose trailing token IS the post's urlId, guaranteeing
-// parseUrlId(slug) === urlId for all new/re-slugged posts.
-function buildSlug(title: string, urlId: string): string {
-  return `${slugifyTitle(title)}-${urlId}`;
 }
 
 function calculateReadTime(body: string | null | undefined): number {
@@ -164,7 +149,12 @@ export const contentRouter = createTRPCRouter({
 
       const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
-      const conditions = [eq(posts.status, "published")];
+      // Published AND past its publish time — scheduled releases carry a
+      // future publishedAt and must not leak into the feed early.
+      const conditions = [
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+      ];
 
       if (type) {
         const dbType = toDbType(type);
@@ -260,7 +250,6 @@ export const contentRouter = createTRPCRouter({
             type: posts.type,
             title: posts.title,
             excerpt: posts.excerpt,
-            body: posts.body,
             externalUrl: posts.externalUrl,
             imageUrl: posts.coverImage,
             ogImageUrl: posts.coverImage,
@@ -301,7 +290,6 @@ export const contentRouter = createTRPCRouter({
             type: posts.type,
             title: posts.title,
             excerpt: posts.excerpt,
-            body: posts.body,
             externalUrl: posts.externalUrl,
             imageUrl: posts.coverImage,
             ogImageUrl: posts.coverImage,
@@ -1366,15 +1354,32 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
+      // Moderation owns these lifecycle states: a scheduled release (set by
+      // admin.moderatePost) or a post in the review pipeline can't be
+      // force-published by its author — that would override the moderator's
+      // release time or skip review entirely. Pulling back to draft
+      // (published: false) stays allowed.
+      if (
+        input.published &&
+        (existing[0].status === "scheduled" ||
+          existing[0].status === "in_review" ||
+          existing[0].status === "rejected")
+      ) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            existing[0].status === "scheduled"
+              ? "This post is scheduled and will be published automatically."
+              : "This post is awaiting moderation review.",
+        });
+      }
+
       const updateData: Record<string, unknown> = {
         status: input.published ? "published" : "draft",
       };
 
       // Whether this publish is a first-time go-live (draft → live), which is
       // what the gate guards. Republishing an already-published post isn't gated.
-      // Note the asymmetry vs update: publish gates on `=== "draft"` only, so a
-      // scheduled→published promotion via publish is intentionally NOT re-gated
-      // (mirrors pre-existing behaviour); update gates on `!== "published"`.
       const goingLive = input.published && existing[0].status === "draft";
       let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;
 
@@ -1464,6 +1469,17 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
+      // Ping IndexNow when the post leaves this mutation live, same as the
+      // create/update paths. Fire-and-forget; skip posts that canonical off Codú.
+      if (updated?.status === "published" && !updated.canonicalUrl) {
+        const url = memberPostUrl(
+          updated.type,
+          updated.slug,
+          ctx.session.user.username,
+        );
+        if (url) void submitToIndexNow(url);
+      }
+
       return updated;
     }),
 
@@ -1475,7 +1491,7 @@ export const contentRouter = createTRPCRouter({
       const userResult = await ctx.db
         .select({ id: user.id })
         .from(user)
-        .where(eq(user.username, input.username))
+        .where(sql`lower(${user.username}) = ${input.username.toLowerCase()}`)
         .limit(1);
 
       if (userResult.length === 0) {

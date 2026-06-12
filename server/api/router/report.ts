@@ -26,12 +26,21 @@ import {
 import { and, count, desc, eq, lt } from "drizzle-orm";
 import { db } from "@/server/db";
 import { getAppOrigin } from "@/server/lib/url";
+import { enforceRateLimit } from "@/server/lib/rateLimit";
 
 export const reportRouter = createTRPCRouter({
   // Legacy: Send report via email (backwards compatibility)
   send: protectedProcedure
     .input(ReportSchema)
     .mutation(async ({ input, ctx }) => {
+      // Each call emails the admin inbox — throttle per reporter so a script
+      // can't use this as an email-amplification endpoint.
+      await enforceRateLimit({
+        key: `report:${ctx.session.user.id}`,
+        limit: 5,
+        windowMs: 10 * 60_000,
+        message: "You're reporting too fast. Try again in a few minutes.",
+      });
       try {
         if (!process.env.ADMIN_EMAIL) {
           throw new TRPCError({
@@ -165,6 +174,15 @@ export const reportRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const { contentId, discussionId, postId, reason, details } = input;
       const reporterId = ctx.session.user.id;
+
+      // Same per-reporter throttle as send — reports fan out to admin
+      // email/notifications and unbounded inserts are abusable.
+      await enforceRateLimit({
+        key: `report:${reporterId}`,
+        limit: 5,
+        windowMs: 10 * 60_000,
+        message: "You're reporting too fast. Try again in a few minutes.",
+      });
 
       // Validate that exactly one target is provided
       const targetCount = [contentId, discussionId, postId].filter(

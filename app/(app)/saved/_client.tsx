@@ -3,10 +3,10 @@
 import { api } from "@/server/trpc/react";
 import { SavedItemCard } from "@/components/SavedItemCard";
 
-// Map DB type to frontend type
-const toFrontendType = (dbType: string | null): "POST" | "LINK" => {
-  if (dbType === "article") return "POST";
-  return "LINK";
+// POST = member-authored content (shows the author); LINK = aggregated source
+// content (shows the source). Member discussions/TILs/links are all POSTs.
+const toFrontendType = (sourceSlug: string | null): "POST" | "LINK" => {
+  return sourceSlug ? "LINK" : "POST";
 };
 
 const SavedPosts = () => {
@@ -70,7 +70,8 @@ const SavedPosts = () => {
               authorName={item.authorName}
               authorUsername={item.authorUsername}
               authorImage={item.authorImage}
-              type={toFrontendType(item.type)}
+              type={toFrontendType(item.sourceSlug)}
+              dbType={item.type}
               onRemove={() => removeSavedItem(item.id)}
             />
           ))}

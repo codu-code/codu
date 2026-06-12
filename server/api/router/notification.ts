@@ -76,6 +76,10 @@ export const notificationRouter = createTRPCRouter({
             columns: {
               title: true,
               slug: true,
+              type: true,
+            },
+            with: {
+              author: { columns: { username: true } },
             },
           },
         },

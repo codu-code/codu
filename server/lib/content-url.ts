@@ -9,6 +9,26 @@ export function parseUrlId(slugWithId: string): string {
   return slugWithId.split("-").pop() ?? slugWithId;
 }
 
+/**
+ * Produce the hyphenated lowercase base of a slug, with no id suffix. The
+ * trailing token of a slug must be the post's urlId, so callers append it.
+ */
+export function slugifyTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 80);
+}
+
+/**
+ * Build a slug whose trailing token IS the post's urlId, guaranteeing
+ * parseUrlId(slug) === urlId for all new/re-slugged posts.
+ */
+export function buildSlug(title: string, urlId: string): string {
+  return `${slugifyTitle(title)}-${urlId}`;
+}
+
 /** Path to a member's content: /username/slug-urlId */
 export function buildMemberPath(
   username: string,
@@ -56,6 +76,31 @@ export function buildCommentHref(input: {
     return `/s/${sourceSlug}/${parentSlug}${anchor}`;
   }
   return `/${authorUsername ?? ""}/${parentSlug}${anchor}`;
+}
+
+/**
+ * Path to a content row from its stored fields, per the live URL scheme.
+ * The stored `slug` already carries the trailing urlId, so it's used as-is.
+ * - discussion / question → /d/{slug}
+ * - aggregated (sourceSlug set) → /s/{sourceSlug}/{slug}
+ * - member content → /{authorUsername}/{slug}; null without a username, so
+ *   callers skip the link rather than emit a broken one.
+ */
+export function buildContentHref(input: {
+  type: string;
+  slug: string;
+  sourceSlug?: string | null;
+  authorUsername?: string | null;
+}): string | null {
+  const { type, slug, sourceSlug, authorUsername } = input;
+  if (type === "discussion" || type === "question") {
+    return `/d/${slug}`;
+  }
+  if (sourceSlug) {
+    return `/s/${sourceSlug}/${slug}`;
+  }
+  if (!authorUsername) return null;
+  return `/${authorUsername}/${slug}`;
 }
 
 function stripQuery(path: string): string {

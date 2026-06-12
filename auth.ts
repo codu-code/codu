@@ -76,6 +76,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = user.id;
         session.user.role = user.role;
         session.user.newsletter = user.newsletter;
+        // The Session type promises this and server code builds member URLs
+        // from it (e.g. IndexNow pings) — without this line it's undefined.
+        session.user.username = user.username ?? "";
       }
       return session;
     },

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Temporal } from "@js-temporal/polyfill";
+import { buildContentHref } from "@/server/lib/content-url";
 
 export interface SavedItemCardProps {
   id: string;
@@ -18,8 +19,10 @@ export interface SavedItemCardProps {
   authorName?: string | null;
   authorUsername?: string | null;
   authorImage?: string | null;
-  // For building the URL
+  // Display variant: POST shows the author, LINK shows the source
   type: "POST" | "LINK";
+  /** Raw posts.type (article/discussion/question/til/link/resource) for URL building. */
+  dbType?: string | null;
   // Optional remove callback
   onRemove?: () => void;
 }
@@ -39,14 +42,6 @@ const getRelativeTime = (dateStr: string): string => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-// Get favicon URL from a website
-const getFaviconUrl = (
-  sourceLogo: string | null | undefined,
-): string | null => {
-  if (!sourceLogo) return null;
-  return sourceLogo;
-};
-
 const SavedItemCard = ({
   title,
   slug,
@@ -59,20 +54,22 @@ const SavedItemCard = ({
   authorUsername,
   authorImage,
   type,
+  dbType,
   onRemove,
 }: SavedItemCardProps) => {
-  // Member /{username}/{slug} (slug ends with urlId; urlId is the fallback when
-  // slug is missing) > source /s/ > author profile. Never the legacy /feed/:id.
+  // Shared URL scheme (/d/ discussions, /s/ sources, member paths); slug ends
+  // with the urlId, and a bare urlId resolves too when slug is missing. Falls
+  // back to the author profile rather than the legacy /feed/:id.
+  const contentSlug = slug || urlId || null;
   const cardUrl =
-    type === "POST" && authorUsername && slug
-      ? `/${authorUsername}/${slug}`
-      : type === "POST" && authorUsername && urlId
-        ? `/${authorUsername}/${urlId}`
-        : sourceSlug && slug
-          ? `/s/${sourceSlug}/${slug}`
-          : authorUsername
-            ? `/${authorUsername}`
-            : "/";
+    (contentSlug &&
+      buildContentHref({
+        type: dbType ?? (type === "POST" ? "article" : "link"),
+        slug: contentSlug,
+        sourceSlug,
+        authorUsername,
+      })) ||
+    (authorUsername ? `/${authorUsername}` : "/");
 
   const dateTime = publishedAt
     ? Temporal.Instant.from(new Date(publishedAt).toISOString())

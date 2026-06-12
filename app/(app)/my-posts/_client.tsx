@@ -35,7 +35,7 @@ const renderDate = (label: string, date: string | Date) => (
   </small>
 );
 
-const MyPosts = () => {
+const MyPosts = ({ username }: { username: string | null }) => {
   const searchParams = useSearchParams();
 
   const tabFromParams = searchParams?.get("tab");
@@ -140,8 +140,8 @@ const MyPosts = () => {
                   className="mb-4 border border-hairline bg-surface p-4"
                   key={id}
                 >
-                  {selectedTab === PUBLISHED ? (
-                    <Link href={`/articles/${slug}`}>
+                  {selectedTab === PUBLISHED && username ? (
+                    <Link href={`/${username}/${slug}`}>
                       <h2 className="mb-2 text-2xl font-semibold hover:underline">
                         {title}
                       </h2>

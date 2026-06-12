@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { BanUserSchema, UnbanUserSchema } from "../../../schema/admin";
 import z from "zod";
-import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 
 import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
@@ -17,18 +16,8 @@ import {
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { runPostGoLiveSideEffects } from "@/server/lib/post-go-live";
 import { POST_APPROVED } from "@/utils/notifications";
-
-// Mirror of the slug helper used by content/post publish so approved posts get
-// a stable URL when none was set yet.
-function generateSlug(title: string): string {
-  const baseSlug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .substring(0, 80);
-  const uniqueId = crypto.randomBytes(3).toString("hex");
-  return `${baseSlug}-${uniqueId}`;
-}
+import { buildSlug } from "@/server/lib/content-url";
+import { mintUrlId } from "@/server/lib/url-id";
 
 export const adminRouter = createTRPCRouter({
   // Get dashboard stats
@@ -341,6 +330,7 @@ export const adminRouter = createTRPCRouter({
           authorId: posts.authorId,
           title: posts.title,
           slug: posts.slug,
+          urlId: posts.urlId,
           status: posts.status,
           type: posts.type,
           sourceId: posts.sourceId,
@@ -428,9 +418,13 @@ export const adminRouter = createTRPCRouter({
       }
 
       // Ensure the post has a stable slug before approving (now) or scheduling.
+      // The slug's trailing token must be the post's urlId (parseUrlId
+      // contract), so mint one if the row predates the urlId column.
+      const slugUrlId = existing.urlId ?? mintUrlId();
+      const urlIdPatch = existing.urlId ? {} : { urlId: slugUrlId };
       const slug =
         existing.slug ||
-        (existing.title ? generateSlug(existing.title) : existing.slug);
+        (existing.title ? buildSlug(existing.title, slugUrlId) : existing.slug);
 
       // Approve & schedule: a FUTURE publishAt parks the post as `scheduled`;
       // go-live side-effects run from the cron at the real go-live, not now.
@@ -442,6 +436,7 @@ export const adminRouter = createTRPCRouter({
             status: "scheduled",
             publishedAt: publishAt.toISOString(),
             slug,
+            ...urlIdPatch,
           })
           .where(eq(posts.id, input.id))
           .returning();
@@ -469,6 +464,7 @@ export const adminRouter = createTRPCRouter({
           status: "published",
           publishedAt: new Date().toISOString(),
           slug,
+          ...urlIdPatch,
         })
         .where(eq(posts.id, input.id))
         .returning();

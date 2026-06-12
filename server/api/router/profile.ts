@@ -209,10 +209,11 @@ export const profileRouter = createTRPCRouter({
     }),
   get: publicProcedure.input(getProfileSchema).query(async ({ ctx, input }) => {
     const { username } = input;
+    // Handles resolve case-insensitively (GitHub-style).
     const [profile] = await ctx.db
       .select()
       .from(user)
-      .where(eq(user.username, username));
+      .where(sql`lower(${user.username}) = ${username.toLowerCase()}`);
 
     if (!profile) {
       throw new TRPCError({
@@ -232,7 +233,7 @@ export const profileRouter = createTRPCRouter({
       const [profile] = await ctx.db
         .select({ id: user.id })
         .from(user)
-        .where(eq(user.username, username))
+        .where(sql`lower(${user.username}) = ${username.toLowerCase()}`)
         .limit(1);
 
       if (!profile) {
