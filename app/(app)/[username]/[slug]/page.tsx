@@ -297,6 +297,32 @@ function isDiscussionKind(type: string | null | undefined): boolean {
   return type === "discussion" || type === "question";
 }
 
+// Lightweight existence check: does a published post live at the EXACT
+// (username, slug) requested? Used to suppress urlId-based canonical redirects
+// when the requested URL already addresses a real post — otherwise a post whose
+// slug's trailing token happens to collide with another post's urlId would be
+// hijacked (301'd) to that other post.
+async function exactPublishedPostExists(
+  username: string,
+  slug: string,
+): Promise<boolean> {
+  const [match] = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .innerJoin(user, eq(posts.authorId, user.id))
+    .where(
+      and(
+        eq(user.username, username),
+        eq(posts.slug, slug),
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+      ),
+    )
+    .limit(1);
+
+  return !!match;
+}
+
 // If the request's urlId resolves to a member post whose canonical path differs
 // from what was requested (title edit or username rename), 301 to canonical.
 // Discussion/question kinds 301 to their /d/{slug} canonical regardless of the
@@ -305,8 +331,19 @@ async function redirectMemberToCanonical(username: string, slug: string) {
   const canonical = await resolveMemberCanonicalByUrlId(parseUrlId(slug));
   if (!canonical) return;
 
+  // Discussions/questions always move to the /d/ namespace, even when an exact
+  // post exists at the requested URL — they no longer live under /{username}/.
   if (isDiscussionKind(canonical.type)) {
     permanentRedirect(`/d/${canonical.slug}`);
+  }
+
+  // Hijack guard: if a real published post already lives at the EXACT requested
+  // (username, slug), don't issue the urlId-based canonical redirect — the
+  // requested token collided with another post's urlId. The normal render path
+  // serves the correct post. Only the member /{username}/{slug} correction is
+  // guarded; the discussion redirect above is unconditional.
+  if (await exactPublishedPostExists(username, slug)) {
+    return;
   }
 
   const canonicalPath = `/${canonical.username}/${canonical.slug}`;
