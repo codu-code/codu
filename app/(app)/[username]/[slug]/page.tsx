@@ -353,20 +353,24 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       permanentRedirect(`/d/${userPost.slug}`);
     }
     const tags = userPost.tags.map((tag) => tag.tag.title);
-    const host = (await headers()).get("host") || "";
     const authorName = userPost.user.name || "Unknown";
 
     return {
       title: `${userPost.title} | by ${authorName} | Codú`,
       authors: {
         name: authorName,
-        url: `https://${host}/${userPost.user.username}`,
+        // Author URLs always point at the canonical production host —
+        // host-header values vary on previews.
+        url: `https://www.codu.co/${userPost.user.username}`,
       },
       keywords: tags,
       description: userPost.excerpt ?? undefined,
       openGraph: {
         description: userPost.excerpt ?? undefined,
         type: "article",
+        url: `/${userPost.user.username ?? username}/${userPost.slug}`,
+        publishedTime: userPost.published ?? undefined,
+        modifiedTime: userPost.updatedAt ?? undefined,
         images: [
           `/og?title=${encodeURIComponent(
             userPost.title,
@@ -393,20 +397,22 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const userArticle = await getUserArticleContent(username, slug);
   if (userArticle && userArticle.user) {
     const tags = userArticle.tags?.map((t) => t.tag.title) || [];
-    const host = (await headers()).get("host") || "";
     const articleAuthorName = userArticle.user.name || "Unknown";
 
     return {
       title: `${userArticle.title} | by ${articleAuthorName} | Codú`,
       authors: {
         name: articleAuthorName,
-        url: `https://${host}/${userArticle.user.username}`,
+        url: `https://www.codu.co/${userArticle.user.username}`,
       },
       keywords: tags,
       description: userArticle.excerpt,
       openGraph: {
         description: userArticle.excerpt || "",
         type: "article",
+        url: `/${userArticle.user.username ?? username}/${userArticle.slug}`,
+        publishedTime: userArticle.published ?? undefined,
+        modifiedTime: userArticle.updatedAt ?? undefined,
         images: [
           `/og?title=${encodeURIComponent(
             userArticle.title,
@@ -430,14 +436,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   const userLinkPost = await getUserLinkPost(username, slug);
   if (userLinkPost && userLinkPost.user) {
-    const host = (await headers()).get("host") || "";
     const linkAuthorName = userLinkPost.user.name || "Unknown";
 
     return {
       title: `${userLinkPost.title} | shared by ${linkAuthorName} | Codú`,
       authors: {
         name: linkAuthorName,
-        url: `https://${host}/${userLinkPost.user.username}`,
+        url: `https://www.codu.co/${userLinkPost.user.username}`,
       },
       description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
       openGraph: {

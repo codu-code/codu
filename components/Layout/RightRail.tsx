@@ -106,7 +106,9 @@ function TrendingCard() {
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         {tags.map((t) => (
-          <Link key={t.slug ?? t.title} href={`/?tag=${t.slug}`}>
+          // Indexable tag landing pages — the rail is their main sitewide
+          // internal-link source (the /?tag= filter canonicalises to "/").
+          <Link key={t.slug ?? t.title} href={`/tag/${t.slug}`}>
             <Tag>{t.title}</Tag>
           </Link>
         ))}

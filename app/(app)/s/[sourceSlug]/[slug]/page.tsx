@@ -71,8 +71,9 @@ export default async function Page(props: Props) {
   });
 
   const breadcrumbSchema = getBreadcrumbSchema([
+    // The feed lives at "/" (legacy /feed redirects) — breadcrumbs must not
+    // reference redirecting URLs.
     { name: "Home", url: "https://www.codu.co" },
-    { name: "Feed", url: "https://www.codu.co/feed" },
     {
       name: article.source?.name || sourceSlug,
       url: `https://www.codu.co/s/${article.source?.slug || sourceSlug}`,

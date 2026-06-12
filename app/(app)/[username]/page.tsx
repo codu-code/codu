@@ -20,18 +20,24 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     columns: {
       bio: true,
       name: true,
+      username: true,
     },
     where: (users) => sql`lower(${users.username}) = ${username.toLowerCase()}`,
   });
 
   if (profile) {
     const { bio, name } = profile;
-    const title = `${name || username} - Codú Profile | Codú - The community for AI builders & indie hackers`;
-    const description = `${name || username}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
+    const handle = profile.username ?? username;
+    // Short enough to survive SERP truncation (~60 chars).
+    const title = `${name || handle} (@${handle}) | Codú`;
+    const description = `${name || handle}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
 
     return {
       title,
       description,
+      // Canonical at the stored handle casing (mixed-case requests 301 anyway;
+      // this guards query-param duplicates).
+      alternates: { canonical: `/${handle}` },
       openGraph: {
         title,
         description,

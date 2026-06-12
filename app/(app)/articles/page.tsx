@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
-// Redirect /articles to /?type=article
-// The unified feed now handles all content types with filtering
+// Permanently redirect the legacy /articles index to the unified feed —
+// /articles carries years of equity that should consolidate onto "/".
 export default function Page() {
-  redirect("/?type=article");
+  permanentRedirect("/?type=article");
 }

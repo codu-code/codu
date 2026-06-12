@@ -178,11 +178,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     title: `${post.title} — Discussion | Codú`,
     description: post.excerpt ?? undefined,
     alternates: { canonical },
+    authors: post.user.username
+      ? { name: authorName, url: `https://www.codu.co/${post.user.username}` }
+      : { name: authorName },
     openGraph: {
       title: post.title,
       description: post.excerpt ?? undefined,
       type: "article",
       siteName: "Codú",
+      url: canonical,
+      publishedTime: post.published ?? undefined,
+      modifiedTime: post.updatedAt ?? undefined,
       images: [
         `/og?title=${encodeURIComponent(
           post.title,

@@ -4,20 +4,25 @@ import { type MetadataRoute } from "next";
 // user-agent group fully OVERRIDES the `*` group, so every AI-bot rule below
 // must repeat this list — otherwise those bots get a bare `allow: "/"` and can
 // crawl /settings, /api, /draft, etc.
+// Each route is listed as "/x$" (exact, so /xyz usernames stay crawlable) plus
+// "/x/" (subpaths). /og is deliberately NOT blocked — social/search crawlers
+// must fetch it for cards and rich results.
 const DISALLOW = [
-  "/api/",
-  "/draft/",
-  "/settings/",
-  "/metrics/",
-  "/notifications/",
-  "/create/",
-  "/my-posts/",
-  "/hub/",
-  "/og", // Block OG image endpoint (was causing 5xx errors)
-  "/src/", // Source code paths (404 cleanup)
-  "/config/", // Config paths (404 cleanup)
-  "/temp/", // Temp paths (404 cleanup)
-];
+  "/api",
+  "/draft",
+  "/settings",
+  "/metrics",
+  "/notifications",
+  "/create",
+  "/my-posts",
+  "/saved",
+  "/admin",
+  "/auth",
+  "/hub",
+  "/src", // Source code paths (404 cleanup)
+  "/config", // Config paths (404 cleanup)
+  "/temp", // Temp paths (404 cleanup)
+].flatMap((path) => [`${path}$`, `${path}/`]);
 
 // AI crawlers we explicitly welcome (AEO). ClaudeBot/Claude-User are Anthropic's
 // current agents; OAI-SearchBot powers ChatGPT search (distinct from GPTBot).

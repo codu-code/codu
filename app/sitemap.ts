@@ -1,8 +1,8 @@
 import { type MetadataRoute } from "next";
 
 import { db } from "@/server/db";
-import { user, feed_sources, posts } from "@/server/db/schema";
-import { lte, and, isNull, isNotNull, eq } from "drizzle-orm";
+import { user, feed_sources, posts, post_tags, tag } from "@/server/db/schema";
+import { lte, and, isNull, isNotNull, eq, exists, sql } from "drizzle-orm";
 
 // Regenerate sitemap every hour to pick up new feed content from cron jobs.
 export const revalidate = 3600;
@@ -11,8 +11,8 @@ const BASE_URL = "https://www.codu.co";
 const ROUTES_TO_INDEX = [
   "/about",
   // "/articles" omitted — it 301-redirects to "/?type=article"; sitemaps should
-  // list only canonical 200 URLs.
-  "/",
+  // list only canonical 200 URLs. "/" is appended separately as the homepage.
+  "/discussions",
   "/advertise",
   "/code-of-conduct",
   "/volunteer",
@@ -67,14 +67,57 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   );
 
-  // User profiles: /{username} — only handle-having users, else we'd advertise
-  // `/null` (404) URLs and erode crawl trust.
+  // User profiles: /{username} — only handle-having users WITH at least one
+  // published post. Advertising every thin signup profile at high priority
+  // erodes crawl-budget trust at exactly relaunch time.
   const users = (
-    await db.query.user.findMany({ where: isNotNull(user.username) })
+    await db
+      .select({
+        username: user.username,
+        updatedAt: user.updatedAt,
+        createdAt: user.createdAt,
+      })
+      .from(user)
+      .where(
+        and(
+          isNotNull(user.username),
+          exists(
+            db
+              .select({ one: sql`1` })
+              .from(posts)
+              .where(
+                and(
+                  eq(posts.authorId, user.id),
+                  eq(posts.status, "published"),
+                  lte(posts.publishedAt, now),
+                ),
+              ),
+          ),
+        ),
+      )
   ).map(({ username, updatedAt, createdAt }) => ({
     url: `${BASE_URL}/${username}`,
     lastModified: new Date(updatedAt || createdAt),
-    priority: 0.8,
+    priority: 0.5,
+  }));
+
+  // Tag landing pages: /tag/{slug} — only tags carrying published content.
+  const tags = (
+    await db
+      .selectDistinct({ slug: tag.slug })
+      .from(tag)
+      .innerJoin(post_tags, eq(post_tags.tagId, tag.id))
+      .innerJoin(posts, eq(post_tags.postId, posts.id))
+      .where(
+        and(
+          eq(posts.status, "published"),
+          lte(posts.publishedAt, now),
+          isNotNull(tag.slug),
+        ),
+      )
+  ).map(({ slug }) => ({
+    url: `${BASE_URL}/tag/${slug}`,
+    priority: 0.6,
   }));
 
   // Source profiles + aggregated/RSS source articles. Wrapped in try/catch since
@@ -129,19 +172,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // empty arrays for sources and sourceArticles.
   }
 
+  // Static routes carry no lastModified — stamping new Date() every hourly
+  // regeneration is fake freshness that teaches crawlers to ignore lastmod.
   const routes = ROUTES_TO_INDEX.map((route) => ({
     url: BASE_URL + route,
-    lastModified: new Date(),
     priority: 0.9,
   }));
 
   const allRoutes = [
     {
       url: BASE_URL,
-      lastModified: new Date(),
       priority: 1.0,
     },
     ...routes,
+    ...tags,
     ...users,
     ...sources,
     ...members,

@@ -37,7 +37,8 @@ export function getPersonRef(profile: PersonData): Person {
   return {
     "@type": "Person",
     name: profile.name || profile.username || "Codu Member",
-    url: `${BASE_URL}/${profile.username}`,
+    // Omit the URL for handle-less users rather than emit /null.
+    ...(profile.username && { url: `${BASE_URL}/${profile.username}` }),
     ...(profile.image && { image: profile.image }),
     ...(profile.bio && { description: profile.bio }),
   };

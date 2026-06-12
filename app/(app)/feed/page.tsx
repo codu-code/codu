@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
-// The feed now lives at "/". Redirect legacy /feed links here, preserving any
-// query (?tag=, ?type=, ?view=following, ?sort=).
+// The feed now lives at "/". 308-redirect legacy /feed links here, preserving
+// any query (?tag=, ?type=, ?view=following, ?sort=).
 export default async function Page({
   searchParams,
 }: {
@@ -13,5 +13,5 @@ export default async function Page({
       v === undefined ? [] : Array.isArray(v) ? v.map((x) => [k, x]) : [[k, v]],
     ) as [string, string][],
   ).toString();
-  redirect(`/${qs ? `?${qs}` : ""}`);
+  permanentRedirect(`/${qs ? `?${qs}` : ""}`);
 }
