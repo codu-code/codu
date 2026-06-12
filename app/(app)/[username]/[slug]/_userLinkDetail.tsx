@@ -10,6 +10,7 @@ import {
   ShareIcon,
 } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
+import { type RouterOutputs } from "@/server/trpc/shared";
 import { toast } from "sonner";
 import { Temporal } from "@js-temporal/polyfill";
 import DiscussionArea from "@/components/Discussion/DiscussionArea";
@@ -21,14 +22,19 @@ import { FollowButton } from "@/components/ds";
 type Props = {
   username: string;
   contentSlug: string;
+  /** Server-fetched content so the body renders in the crawlable HTML. */
+  initialContent?: RouterOutputs["content"]["getUserLinkBySlug"] | null;
 };
 
-const UserLinkDetail = ({ username, contentSlug }: Props) => {
+const UserLinkDetail = ({ username, contentSlug, initialContent }: Props) => {
   const { data: session } = useSession();
-  const { data: linkContent, status } = api.content.getUserLinkBySlug.useQuery({
-    username,
-    slug: contentSlug,
-  });
+  const { data: linkContent, status } = api.content.getUserLinkBySlug.useQuery(
+    {
+      username,
+      slug: contentSlug,
+    },
+    initialContent ? { initialData: initialContent } : undefined,
+  );
 
   const { data: discussionCount } =
     api.discussion.getContentDiscussionCount.useQuery(

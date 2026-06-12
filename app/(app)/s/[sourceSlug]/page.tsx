@@ -1,9 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import { type Metadata } from "next";
-import { db } from "@/server/db";
-import { feed_sources } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { getSourceProfile } from "./_resolvers";
 import SourceProfileContent from "./_sourceProfileClient";
 
 type Props = { params: Promise<{ sourceSlug: string }> };
@@ -11,9 +9,7 @@ type Props = { params: Promise<{ sourceSlug: string }> };
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { sourceSlug } = await props.params;
 
-  const source = await db.query.feed_sources.findFirst({
-    where: eq(feed_sources.slug, sourceSlug),
-  });
+  const source = await getSourceProfile(sourceSlug);
 
   if (!source) {
     return { title: "Publication Not Found" };
@@ -22,12 +18,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${source.name} | Codú Feed`,
     description:
-      source.description || `Articles from ${source.name} on Codú Feed`,
+      source.tagline || `Articles from ${source.name} on Codú Feed`,
     alternates: { canonical: `/s/${source.slug}` },
     openGraph: {
       title: source.name,
       description:
-        source.description || `Articles from ${source.name} on Codú Feed`,
+        source.tagline || `Articles from ${source.name} on Codú Feed`,
       images: source.logoUrl ? [source.logoUrl] : undefined,
     },
   };
@@ -40,14 +36,16 @@ export default async function Page(props: Props) {
     notFound();
   }
 
-  const source = await db.query.feed_sources.findFirst({
-    columns: { id: true },
-    where: eq(feed_sources.slug, sourceSlug),
-  });
+  // Resolved once per request (React cache) and shared with generateMetadata.
+  // Passing it down as initialData means the profile header and first page of
+  // articles are in the server-rendered HTML for crawlers that don't run JS.
+  const profile = await getSourceProfile(sourceSlug);
 
-  if (!source) {
+  if (!profile) {
     notFound();
   }
 
-  return <SourceProfileContent sourceSlug={sourceSlug} />;
+  return (
+    <SourceProfileContent sourceSlug={sourceSlug} initialProfile={profile} />
+  );
 }

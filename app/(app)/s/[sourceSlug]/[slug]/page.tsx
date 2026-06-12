@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from "next/navigation";
 import { type Metadata } from "next";
+import { SITE_ORIGIN } from "@/config/site";
 import { JsonLd } from "@/components/JsonLd";
 import {
   getBreadcrumbSchema,
@@ -73,10 +74,10 @@ export default async function Page(props: Props) {
   const breadcrumbSchema = getBreadcrumbSchema([
     // The feed lives at "/" (legacy /feed redirects) — breadcrumbs must not
     // reference redirecting URLs.
-    { name: "Home", url: "https://www.codu.co" },
+    { name: "Home", url: SITE_ORIGIN },
     {
       name: article.source?.name || sourceSlug,
-      url: `https://www.codu.co/s/${article.source?.slug || sourceSlug}`,
+      url: `${SITE_ORIGIN}/s/${article.source?.slug || sourceSlug}`,
     },
     { name: article.title },
   ]);
@@ -85,7 +86,7 @@ export default async function Page(props: Props) {
     <>
       <JsonLd data={newsArticleSchema} />
       <JsonLd data={breadcrumbSchema} />
-      <FeedArticleContent sourceSlug={sourceSlug} articleSlug={article.slug} />
+      <FeedArticleContent sourceSlug={sourceSlug} article={article} />
     </>
   );
 }

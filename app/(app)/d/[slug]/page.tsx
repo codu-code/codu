@@ -1,6 +1,8 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import { type Metadata } from "next";
+import { SITE_ORIGIN } from "@/config/site";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { posts, user, post_tags, tag, comments } from "@/server/db/schema";
@@ -29,7 +31,7 @@ type Props = { params: Promise<{ slug: string }> };
 // Resolve a discussion/question post by its urlId (parsed from the slug).
 // Mirrors getUserPost's query shape but scoped to discussion kinds; canonical
 // path is /d/{slug}.
-async function getDiscussionPost(
+async function getDiscussionPostUncached(
   slug: string,
   viewerId?: string | null,
 ): Promise<ReaderPost | null> {
@@ -128,6 +130,9 @@ async function getDiscussionPost(
   };
 }
 
+// Per-request dedupe between generateMetadata and the page body.
+const getDiscussionPost = cache(getDiscussionPostUncached);
+
 // Fetch comments to populate the DiscussionForumPosting `comment[]` for crawlers
 // (the visible thread is client-rendered). Excludes soft-deleted; oldest-first.
 type ForumComment = {
@@ -161,7 +166,9 @@ async function getDiscussionComments(postId: string): Promise<ForumComment[]> {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
-  const post = await getDiscussionPost(slug);
+  // Same viewerId as the page body so the cache()d resolver runs once per request.
+  const session = await getServerAuthSession();
+  const post = await getDiscussionPost(slug, session?.user?.id);
 
   if (!post) {
     return { title: "Discussion Not Found" };
@@ -179,7 +186,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     description: post.excerpt ?? undefined,
     alternates: { canonical },
     authors: post.user.username
-      ? { name: authorName, url: `https://www.codu.co/${post.user.username}` }
+      ? { name: authorName, url: `${SITE_ORIGIN}/${post.user.username}` }
       : { name: authorName },
     openGraph: {
       title: post.title,
@@ -239,8 +246,8 @@ const DiscussionPage = async (props: Props) => {
   });
 
   const breadcrumbSchema = getBreadcrumbSchema([
-    { name: "Home", url: "https://www.codu.co" },
-    { name: "Discussions", url: "https://www.codu.co/discussions" },
+    { name: "Home", url: SITE_ORIGIN },
+    { name: "Discussions", url: `${SITE_ORIGIN}/discussions` },
     { name: post.title },
   ]);
 

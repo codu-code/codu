@@ -5,10 +5,17 @@ import { useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { api } from "@/server/trpc/react";
+import { type RouterOutputs } from "@/server/trpc/shared";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
+
+type SourceProfile = RouterOutputs["publication"]["getBySlug"];
 
 type Props = {
   sourceSlug: string;
+  /** Server-resolved profile (anonymous view) so the header + first page of
+   * articles are in the SSR HTML for crawlers; per-user state (isFollowing,
+   * votes, bookmarks) hydrates via the immediate background refetch. */
+  initialProfile: SourceProfile;
 };
 
 // Deterministic hue from the slug (sum of char codes mod 360). Math.random is
@@ -27,13 +34,17 @@ const initialsFromName = (name: string): string => {
   return (words[0][0] + words[1][0]).toUpperCase();
 };
 
-const SourceProfileContent = ({ sourceSlug }: Props) => {
+const SourceProfileContent = ({ sourceSlug, initialProfile }: Props) => {
   const { data: session } = useSession();
   const utils = api.useUtils();
 
-  const { data: pub, status } = api.publication.getBySlug.useQuery({
-    slug: sourceSlug,
-  });
+  // Seeded with the server-resolved profile so SSR emits the full header +
+  // article list; the default staleTime of 0 means a refetch fires on mount to
+  // pick up per-user state (isFollowing, votes, bookmarks).
+  const { data: pub, status } = api.publication.getBySlug.useQuery(
+    { slug: sourceSlug },
+    { initialData: initialProfile },
+  );
 
   // Optimistic follow state, seeded from the query once it resolves.
   const [optimisticFollowing, setOptimisticFollowing] = useState<
@@ -57,20 +68,8 @@ const SourceProfileContent = ({ sourceSlug }: Props) => {
   });
   const pending = followMut.isPending || unfollowMut.isPending;
 
-  if (status === "pending") {
-    return (
-      <div className="mx-auto max-w-2xl px-4 pt-6 text-fg">
-        <div className="flex items-start gap-4">
-          <div className="h-16 w-16 animate-pulse rounded-lg bg-inset" />
-          <div className="flex-1">
-            <div className="mb-2 h-6 w-48 animate-pulse rounded bg-inset" />
-            <div className="h-4 w-32 animate-pulse rounded bg-inset" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // No pending branch: initialData means the query always has data, so the
+  // first render (including SSR) is the real profile rather than a skeleton.
   if (status === "error" || !pub) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-8 text-fg">

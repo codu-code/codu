@@ -11,61 +11,43 @@ import {
   OnboardingBanner,
 } from "@/components/Feed";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
+import { type RouterOutputs } from "@/server/trpc/shared";
+import {
+  deriveFeedInput,
+  type FeedSort,
+  type FeedContentType,
+} from "./feedQuery";
 
-type SortOption = "recent" | "trending" | "popular";
-type ContentType =
-  | "ARTICLE"
-  | "LINK"
-  | "TIL"
-  | "QUESTION"
-  | "VIDEO"
-  | "DISCUSSION"
-  | null;
+type FeedFirstPage = RouterOutputs["content"]["getFeed"];
 
-const validSorts: SortOption[] = ["recent", "trending", "popular"];
-// Lowercase type values for URL params (converted to uppercase for API)
-const validTypesLower: string[] = [
-  "article",
-  "link",
-  "til",
-  "question",
-  "video",
-  "discussion",
-];
+type SortOption = FeedSort;
+type ContentType = FeedContentType;
 
-const FeedPage = () => {
+const FeedPage = ({ initialFeed }: { initialFeed?: FeedFirstPage | null }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session } = useSession();
 
-  // Get filter params from URL
-  const sortParam = searchParams?.get("sort");
-  const categoryParam = searchParams?.get("category");
-  const tagParam = searchParams?.get("tag");
-  const typeParam = searchParams?.get("type")?.toLowerCase();
+  // Same derivation the server page uses to SSR the first feed page — the
+  // inputs must match for initialFeed to attach to this query.
+  const { sort, type, category, tag, following, limit } = deriveFeedInput(
+    {
+      sort: searchParams?.get("sort"),
+      category: searchParams?.get("category"),
+      tag: searchParams?.get("tag"),
+      type: searchParams?.get("type"),
+      view: searchParams?.get("view"),
+    },
+    !!session?.user,
+  );
 
-  // Validate sort param
-  const sort: SortOption = validSorts.includes(sortParam as SortOption)
-    ? (sortParam as SortOption)
-    : "recent";
-
-  const category = typeof categoryParam === "string" ? categoryParam : null;
-  const tag = typeof tagParam === "string" ? tagParam : null;
-
-  // Validate type param (URL uses lowercase, API uses uppercase)
-  const type: ContentType = validTypesLower.includes(typeParam || "")
-    ? (typeParam?.toUpperCase() as ContentType)
-    : null;
-
-  // "Following" view (signed-in only)
-  const following =
-    !!session?.user && searchParams?.get("view") === "following";
-
-  // Fetch feed data with infinite scroll using the unified content API
+  // Fetch feed data with infinite scroll using the unified content API. The
+  // server-fetched first page renders in the crawlable HTML; the client query
+  // refetches per its normal staleness rules afterwards.
   const { status, data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     api.content.getFeed.useInfiniteQuery(
       {
-        limit: 25,
+        limit,
         sort,
         type,
         category,
@@ -74,6 +56,9 @@ const FeedPage = () => {
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
+        ...(initialFeed
+          ? { initialData: { pages: [initialFeed], pageParams: [null] } }
+          : {}),
       },
     );
 

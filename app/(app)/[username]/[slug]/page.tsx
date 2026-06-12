@@ -1,19 +1,22 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
+import { SITE_ORIGIN } from "@/config/site";
 import { db } from "@/server/db";
 import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
 import { eq, and, lte, inArray, or, sql } from "drizzle-orm";
 import UserLinkDetail from "./_userLinkDetail";
 import PostReader from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
+import { serverApi } from "@/server/trpc/caller";
 import { JsonLd } from "@/components/JsonLd";
 import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
-async function getUserPost(
+async function getUserPostUncached(
   username: string,
   postSlug: string,
   viewerId?: string | null,
@@ -112,7 +115,7 @@ async function getUserPost(
   };
 }
 
-async function getUserLinkPost(username: string, postSlug: string) {
+async function getUserLinkPostUncached(username: string, postSlug: string) {
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
     where: sql`lower(${user.username}) = ${username.toLowerCase()}`,
@@ -183,7 +186,7 @@ async function getUserLinkPost(username: string, postSlug: string) {
   };
 }
 
-async function getFeedArticle(
+async function getFeedArticleUncached(
   sourceSlug: string,
   articleSlugOrShortId: string,
 ) {
@@ -245,6 +248,14 @@ async function getFeedArticle(
   };
 }
 
+// Per-request dedupe: generateMetadata and the page body run the same
+// resolution cascade; cache() makes each (resolver, args) pair hit the DB once.
+const getUserPost = cache(getUserPostUncached);
+const getUserLinkPost = cache(getUserLinkPostUncached);
+const getFeedArticle = cache(getFeedArticleUncached);
+const resolveMemberCanonicalByUrlId = cache(resolveMemberCanonicalByUrlIdUncached);
+const exactPublishedPostExists = cache(exactPublishedPostExistsUncached);
+
 async function getUserArticleContent(username: string, contentSlug: string) {
   return getUserPost(username, contentSlug);
 }
@@ -252,7 +263,7 @@ async function getUserArticleContent(username: string, contentSlug: string) {
 // Resolve a member post by its urlId to its canonical username + slug.
 // Aggregated/source content (no author) is excluded; a miss returns null so
 // callers fall back to username+slug resolution.
-async function resolveMemberCanonicalByUrlId(urlId: string) {
+async function resolveMemberCanonicalByUrlIdUncached(urlId: string) {
   if (!urlId) return null;
 
   const [match] = await db
@@ -293,7 +304,7 @@ function isDiscussionKind(type: string | null | undefined): boolean {
 // Does a published post live at the EXACT (username, slug) requested? Suppresses
 // urlId-based redirects so a slug whose trailing token collides with another
 // post's urlId isn't hijacked (301'd) to that other post.
-async function exactPublishedPostExists(
+async function exactPublishedPostExistsUncached(
   username: string,
   slug: string,
 ): Promise<boolean> {
@@ -346,7 +357,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   // 301 stale member URLs (title edits / username renames) before metadata work.
   await redirectMemberToCanonical(username, slug);
 
-  const userPost = await getUserPost(username, slug);
+  // Same viewerId as the page body so the cache()d resolver runs once per request.
+  const session = await getServerAuthSession();
+  const userPost = await getUserPost(username, slug, session?.user?.id);
   if (userPost) {
     // Discussions/questions canonicalize to /d/{slug}; redirect before metadata.
     if (isDiscussionKind(userPost.type)) {
@@ -361,7 +374,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         name: authorName,
         // Author URLs always point at the canonical production host —
         // host-header values vary on previews.
-        url: `https://www.codu.co/${userPost.user.username}`,
+        url: `${SITE_ORIGIN}/${userPost.user.username}`,
       },
       keywords: tags,
       description: userPost.excerpt ?? undefined,
@@ -403,7 +416,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${userArticle.title} | by ${articleAuthorName} | Codú`,
       authors: {
         name: articleAuthorName,
-        url: `https://www.codu.co/${userArticle.user.username}`,
+        url: `${SITE_ORIGIN}/${userArticle.user.username}`,
       },
       keywords: tags,
       description: userArticle.excerpt,
@@ -442,7 +455,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: `${userLinkPost.title} | shared by ${linkAuthorName} | Codú`,
       authors: {
         name: linkAuthorName,
-        url: `https://www.codu.co/${userLinkPost.user.username}`,
+        url: `${SITE_ORIGIN}/${userLinkPost.user.username}`,
       },
       description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
       openGraph: {
@@ -552,19 +565,29 @@ const UnifiedPostPage = async (props: Props) => {
       },
     });
     const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
+      { name: "Home", url: SITE_ORIGIN },
       {
         name: linkAuthorName,
-        url: `https://www.codu.co/${userLinkPost.user.username}`,
+        url: `${SITE_ORIGIN}/${userLinkPost.user.username}`,
       },
       { name: userLinkPost.title },
     ]);
+
+    // Server-fetch the tRPC-shaped content (in-process, includes the viewer's
+    // vote) so the link body is in the crawlable HTML, not client-fetched.
+    const initialLinkContent = await serverApi()
+      .then((api) => api.content.getUserLinkBySlug({ username, slug }))
+      .catch(() => null);
 
     return (
       <>
         <JsonLd data={articleSchema} />
         <JsonLd data={breadcrumbSchema} />
-        <UserLinkDetail username={username} contentSlug={slug} />
+        <UserLinkDetail
+          username={username}
+          contentSlug={slug}
+          initialContent={initialLinkContent}
+        />
       </>
     );
   }

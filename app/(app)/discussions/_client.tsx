@@ -9,9 +9,11 @@ import { FeedItemLoading } from "@/components/Feed";
 import { FilterPill, type Option } from "@/components/Feed/Filters";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { useShellActions } from "@/components/Create/ShellActionsProvider";
+import { type RouterOutputs } from "@/server/trpc/shared";
 
 type View = "all" | "following";
 type Sort = "recent" | "active" | "top";
+type DiscussionFirstPage = RouterOutputs["discussion"]["list"];
 
 const sortOptions: Option[] = [
   { value: "recent", label: "Recent" },
@@ -24,7 +26,11 @@ const sortOptions: Option[] = [
  * the feed. All / Following tabs (deep-linkable via ?view=) + a sort filter,
  * mirroring the feed's tab + FilterPill pattern.
  */
-const DiscussionsPage = () => {
+const DiscussionsPage = ({
+  initialList,
+}: {
+  initialList?: DiscussionFirstPage | null;
+}) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session } = useSession();
@@ -56,6 +62,10 @@ const DiscussionsPage = () => {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         // Following tab is meaningless signed-out — skip the query.
         enabled: view === "all" || !!session,
+        // Server-fetched first page (same input) renders in crawlable HTML.
+        ...(initialList
+          ? { initialData: { pages: [initialList], pageParams: [null] } }
+          : {}),
       },
     );
 
