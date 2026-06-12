@@ -9,6 +9,7 @@ import {
 } from "../trpc";
 import { follow, notification, user } from "@/server/db/schema";
 import { NEW_FOLLOWER } from "@/utils/notifications";
+import { checkBadges } from "@/server/lib/engagement";
 import * as Sentry from "@sentry/nextjs";
 
 export const followRouter = createTRPCRouter({
@@ -47,6 +48,9 @@ export const followRouter = createTRPCRouter({
         } catch (error) {
           Sentry.captureException(error);
         }
+        // Following is an onboarding-badge input; no points awarded here, so
+        // run the badge check explicitly. Never throws.
+        await checkBadges(ctx.session.user.id);
       }
       return { following: true };
     }),

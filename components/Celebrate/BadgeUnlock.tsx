@@ -8,8 +8,10 @@ const HEX_CLIP = "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)";
 interface BadgeUnlockProps {
   /** Display name of the unlocked badge, e.g. "First Post". */
   badgeName: string;
-  /** Points awarded, shown as `+{points}`. */
-  points: number;
+  /** Badge emoji shown in the hexagon tile. */
+  emoji?: string | null;
+  /** Points awarded, shown as `+{points}`; omit to hide the line. */
+  points?: number;
   /** Current user's username, for the "See your badges" profile link. */
   username: string | null;
   /** Close the dialog. */
@@ -17,13 +19,14 @@ interface BadgeUnlockProps {
 }
 
 /**
- * Full-screen celebration dialog shown when a user unlocks their first badge.
+ * Full-screen celebration dialog shown when a user unlocks a badge.
  * A hexagon badge tile pops in (with a pulsing halo) above an eyebrow, the badge
  * name, the points line, and two actions. Motion is CSS-gated on
  * prefers-reduced-motion — reduced-motion users get the static dialog.
  */
 export function BadgeUnlock({
   badgeName,
+  emoji,
   points,
   username,
   onClose,
@@ -54,7 +57,7 @@ export function BadgeUnlock({
             className="codu-badge-pop flex h-24 w-24 items-center justify-center bg-accent text-3xl text-on-accent"
             style={{ clipPath: HEX_CLIP }}
           >
-            🚀
+            {emoji || "🏅"}
           </div>
         </div>
 
@@ -64,9 +67,11 @@ export function BadgeUnlock({
         <h3 className="mt-2 font-display text-2xl font-extrabold tracking-tight">
           {badgeName}
         </h3>
-        <p className="mt-2 font-mono text-sm font-semibold text-accent-soft">
-          +{points} points
-        </p>
+        {points !== undefined && (
+          <p className="mt-2 font-mono text-sm font-semibold text-accent-soft">
+            +{points} points
+          </p>
+        )}
 
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button

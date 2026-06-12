@@ -8,25 +8,20 @@ import {
   badge,
   user_badge,
   follow,
-  posts,
+  comments,
 } from "@/server/db/schema";
 import { getStreak, getUserBadges } from "@/server/lib/engagement";
-import { shouldCelebrateFirstWin } from "@/server/lib/onboarding";
 
 export const engagementRouter = createTRPCRouter({
   // "Get your first win in 3 steps" — real completion state for the feed banner:
-  // picked topics, followed 3 builders, published a first post.
+  // picked topics, followed 3 builders, left a first comment. The reward (the
+  // onboarding_complete badge) is granted by checkBadges and celebrated through
+  // the generic uncelebratedBadges flow below.
   onboardingWins: protectedProcedure.query(async ({ ctx }) => {
     const uid = ctx.session.user.id;
-    // Badge must be earned before we celebrate — a posted-but-in-review post
-    // has no badge yet.
-    const [[u], [followRow], [postRow], [firstBadge]] = await Promise.all([
+    const [[u], [followRow], [commentRow]] = await Promise.all([
       ctx.db
-        .select({
-          topics: user.topics,
-          username: user.username,
-          firstWinCelebratedAt: user.firstWinCelebratedAt,
-        })
+        .select({ topics: user.topics })
         .from(user)
         .where(eq(user.id, uid))
         .limit(1),
@@ -36,47 +31,57 @@ export const engagementRouter = createTRPCRouter({
         .where(eq(follow.followerId, uid)),
       ctx.db
         .select({ c: sql<number>`count(*)` })
-        .from(posts)
-        .where(eq(posts.authorId, uid)),
-      ctx.db
-        .select({ id: user_badge.id })
-        .from(user_badge)
-        .innerJoin(badge, eq(user_badge.badgeId, badge.id))
-        .where(and(eq(user_badge.userId, uid), eq(badge.key, "first_post")))
-        .limit(1),
+        .from(comments)
+        .where(eq(comments.authorId, uid)),
     ]);
     const followCount = Number(followRow?.c ?? 0);
-    const postCount = Number(postRow?.c ?? 0);
-    const wins = {
+    return {
       pickedTopics: (u?.topics?.length ?? 0) > 0,
       followedThree: followCount >= 3,
-      posted: postCount > 0,
-    };
-    return {
-      ...wins,
+      commented: Number(commentRow?.c ?? 0) > 0,
       followCount,
-      // Server-truth username so the celebration's badges link survives a stale prop.
-      username: u?.username ?? null,
-      // App-wide first-win trigger: all steps done, badge earned, not yet celebrated.
-      celebrate: shouldCelebrateFirstWin(
-        wins,
-        !!firstBadge,
-        u?.firstWinCelebratedAt ?? null,
-      ),
     };
   }),
 
-  // Persist that the first-win celebration has been shown. Idempotent: only
-  // stamps the timestamp once (guarded by isNull), so it never re-celebrates.
-  markFirstWinCelebrated: protectedProcedure.mutation(async ({ ctx }) => {
-    await ctx.db
-      .update(user)
-      .set({ firstWinCelebratedAt: new Date().toISOString() })
+  // Badges earned but not yet celebrated in-app, oldest first — the client
+  // shows the confetti dialog per badge and marks each one below.
+  uncelebratedBadges: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db
+      .select({
+        userBadgeId: user_badge.id,
+        key: badge.key,
+        name: badge.name,
+        emoji: badge.emoji,
+        awardedAt: user_badge.awardedAt,
+      })
+      .from(user_badge)
+      .innerJoin(badge, eq(user_badge.badgeId, badge.id))
       .where(
-        and(eq(user.id, ctx.session.user.id), isNull(user.firstWinCelebratedAt)),
-      );
-    return { ok: true };
+        and(
+          eq(user_badge.userId, ctx.session.user.id),
+          isNull(user_badge.celebratedAt),
+        ),
+      )
+      .orderBy(user_badge.awardedAt);
   }),
+
+  // Persist that a badge's celebration has been shown. Idempotent (isNull
+  // guard) and owner-scoped, so a badge never re-celebrates.
+  markBadgeCelebrated: protectedProcedure
+    .input(z.object({ userBadgeId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(user_badge)
+        .set({ celebratedAt: new Date().toISOString() })
+        .where(
+          and(
+            eq(user_badge.id, input.userBadgeId),
+            eq(user_badge.userId, ctx.session.user.id),
+            isNull(user_badge.celebratedAt),
+          ),
+        );
+      return { ok: true };
+    }),
 
   // The signed-in user's streak + total points (personal, never empty-feeling).
   myStats: protectedProcedure.query(async ({ ctx }) => {

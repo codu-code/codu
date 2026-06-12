@@ -9,6 +9,8 @@ import {
   badge,
   user_badge,
   user,
+  follow,
+  comments,
 } from "@/server/db/schema";
 
 type PointAction =
@@ -68,9 +70,19 @@ interface BadgeStats {
   longestStreak: number;
   posts: number;
   referrals: number;
+  comments: number;
+  topicsPicked: boolean;
+  follows: number;
 }
 
 const BADGE_RULES: { key: string; test: (s: BadgeStats) => boolean }[] = [
+  // Mirrors the "first win in 3 steps" onboarding banner: topics + 3 follows
+  // + first comment. Deliberately does NOT require a post — first_post stays
+  // unearned after onboarding as the next-step tease.
+  {
+    key: "onboarding_complete",
+    test: (s) => s.topicsPicked && s.follows >= 3 && s.comments >= 1,
+  },
   { key: "first_post", test: (s) => s.posts >= 1 },
   { key: "streak_7", test: (s) => s.longestStreak >= 7 },
   { key: "streak_30", test: (s) => s.longestStreak >= 30 },
@@ -83,38 +95,55 @@ const BADGE_RULES: { key: string; test: (s: BadgeStats) => boolean }[] = [
 export async function checkBadges(userId: string): Promise<void> {
   try {
     if (!userId) return;
-    const [[pts], [streak], [postRow], [refRow]] = await Promise.all([
-      db
-        .select({
-          total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
-        })
-        .from(point_event)
-        .where(eq(point_event.userId, userId)),
-      db
-        .select({ longest: user_streak.longestStreak })
-        .from(user_streak)
-        .where(eq(user_streak.userId, userId))
-        .limit(1),
-      db
-        .select({ c: sql<number>`count(*)` })
-        .from(point_event)
-        .where(
-          and(
-            eq(point_event.userId, userId),
-            eq(point_event.action, "post_published"),
+    const [[pts], [streak], [postRow], [refRow], [commentRow], [u], [followRow]] =
+      await Promise.all([
+        db
+          .select({
+            total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
+          })
+          .from(point_event)
+          .where(eq(point_event.userId, userId)),
+        db
+          .select({ longest: user_streak.longestStreak })
+          .from(user_streak)
+          .where(eq(user_streak.userId, userId))
+          .limit(1),
+        db
+          .select({ c: sql<number>`count(*)` })
+          .from(point_event)
+          .where(
+            and(
+              eq(point_event.userId, userId),
+              eq(point_event.action, "post_published"),
+            ),
           ),
-        ),
-      db
-        .select({ c: sql<number>`count(*)` })
-        .from(user)
-        .where(eq(user.invitedBy, userId)),
-    ]);
+        db
+          .select({ c: sql<number>`count(*)` })
+          .from(user)
+          .where(eq(user.invitedBy, userId)),
+        db
+          .select({ c: sql<number>`count(*)` })
+          .from(comments)
+          .where(eq(comments.authorId, userId)),
+        db
+          .select({ topics: user.topics })
+          .from(user)
+          .where(eq(user.id, userId))
+          .limit(1),
+        db
+          .select({ c: sql<number>`count(*)` })
+          .from(follow)
+          .where(eq(follow.followerId, userId)),
+      ]);
 
     const stats: BadgeStats = {
       points: Number(pts?.total ?? 0),
       longestStreak: streak?.longest ?? 0,
       posts: Number(postRow?.c ?? 0),
       referrals: Number(refRow?.c ?? 0),
+      comments: Number(commentRow?.c ?? 0),
+      topicsPicked: (u?.topics?.length ?? 0) > 0,
+      follows: Number(followRow?.c ?? 0),
     };
 
     const earnedKeys = BADGE_RULES.filter((r) => r.test(stats)).map(

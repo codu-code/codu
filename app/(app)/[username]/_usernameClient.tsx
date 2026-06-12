@@ -452,9 +452,10 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                       <p className="eyebrow">
                         <span className="slash">{"// "}</span>badges
                       </p>
+                      {/* Just the earned count — the catalogue grows over time,
+                          so "of N" would keep moving the goalposts. */}
                       <span className="font-mono text-xs text-faint">
-                        {earnedBadges.length} of {engagement.badges.length}{" "}
-                        earned
+                        {earnedBadges.length} earned
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">

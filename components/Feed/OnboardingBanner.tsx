@@ -23,7 +23,7 @@ const isDismissed = () =>
  */
 export function OnboardingBanner() {
   const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
-  const { openTopics, openCompose } = useShellActions();
+  const { openTopics } = useShellActions();
   const { data: wins } = api.engagement.onboardingWins.useQuery();
 
   // Actions reuse the shell modals so they work when the rail is hidden on mobile.
@@ -41,16 +41,18 @@ export function OnboardingBanner() {
       href: "/discussions",
     },
     {
-      label: "Post your first tip",
-      done: !!wins?.posted,
-      onClick: () => openCompose("discussion"),
-      href: undefined as string | undefined,
+      // Commenting (not posting) is the deliberate low bar: the first_post
+      // achievement stays locked after onboarding as the next-step tease.
+      label: "Leave your first comment",
+      done: !!wins?.commented,
+      onClick: undefined,
+      href: "/discussions",
     },
   ];
 
   const allDone = wins ? steps.every((s) => s.done) : false;
 
-  // Hide once complete; the celebration is owned by <OnboardingCelebration>.
+  // Hide once complete; the reward is celebrated app-wide by <BadgeCelebration>.
   if (allDone) return null;
 
   if (dismissed) return null;

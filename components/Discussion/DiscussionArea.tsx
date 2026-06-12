@@ -84,6 +84,10 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
       onSuccess: () => {
         refetch();
         setShowCommentBoxId(null);
+        // Commenting is the onboarding badge's final step — refresh the banner
+        // and any newly earned badge so the celebration fires right away.
+        void utils.engagement.onboardingWins.invalidate();
+        void utils.engagement.uncelebratedBadges.invalidate();
       },
     });
 

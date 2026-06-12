@@ -11,6 +11,13 @@ const db: PostgresJsDatabase = drizzle(client);
 
 const BADGES = [
   {
+    key: "onboarding_complete",
+    name: "First Steps",
+    description:
+      "Picked your topics, followed 3 builders, and joined the conversation.",
+    emoji: "👣",
+  },
+  {
     key: "first_post",
     name: "First Post",
     description: "Published your first post on Codú.",

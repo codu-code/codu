@@ -26,6 +26,7 @@ import {
   manageNewsletterSubscription,
 } from "@/server/lib/newsletter";
 import { isReservedUsername } from "@/server/lib/reserved-usernames";
+import { checkBadges } from "@/server/lib/engagement";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
 import { and, desc, eq, gte, isNull, ne, sql } from "drizzle-orm";
@@ -76,6 +77,9 @@ export const profileRouter = createTRPCRouter({
         .set(set)
         .where(eq(user.id, ctx.session.user.id))
         .returning({ topics: user.topics, onboardedAt: user.onboardedAt });
+      // Topic picks are an onboarding-badge input; no points awarded here, so
+      // run the badge check explicitly. Never throws.
+      await checkBadges(ctx.session.user.id);
       return {
         topics: row?.topics ?? topics,
         onboardedAt: row?.onboardedAt ?? null,

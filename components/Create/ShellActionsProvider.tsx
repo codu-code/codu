@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from "react";
 import { CreateInfoModal } from "./CreateInfoModal";
 import { ComposeModal, type ComposeMode } from "./ComposeModal";
 import { TopicsModal } from "./TopicsModal";
-import { OnboardingCelebration } from "@/components/Celebrate/OnboardingCelebration";
+import { BadgeCelebration } from "@/components/Celebrate/BadgeCelebration";
 
 const INFO_KEY = "codu_create_info_seen";
 
@@ -88,7 +88,7 @@ export function ShellActionsProvider({
       )}
       {topicsOpen && <TopicsModal onClose={() => setTopicsOpen(false)} />}
       {/* App-wide first-win celebration; authed only (reads a protected query). */}
-      {authed && <OnboardingCelebration username={username} />}
+      {authed && <BadgeCelebration username={username} />}
     </ShellActionsContext.Provider>
   );
 }

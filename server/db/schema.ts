@@ -206,12 +206,6 @@ export const user = pgTable(
       mode: "string",
       withTimezone: true,
     }),
-    // First-win celebration timestamp; persisted so it never re-fires. Null = not yet.
-    firstWinCelebratedAt: timestamp("first_win_celebrated_at", {
-      precision: 3,
-      mode: "string",
-      withTimezone: true,
-    }),
   },
   (table) => {
     return {
@@ -2184,6 +2178,13 @@ export const user_badge = pgTable(
     })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+    // Null until the in-app "badge unlocked" celebration has been shown; the
+    // client marks it so each badge celebrates exactly once across devices.
+    celebratedAt: timestamp("celebrated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
   },
   (table) => ({
     uniq: uniqueIndex("user_badge_user_badge_idx").on(

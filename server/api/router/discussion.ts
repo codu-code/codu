@@ -31,6 +31,7 @@ import {
 import { and, count, desc, eq, isNull, inArray, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { decrement } from "./utils";
+import { award } from "@/server/lib/engagement";
 import * as Sentry from "@sentry/nextjs";
 
 /**
@@ -183,6 +184,15 @@ export const discussionRouter = createTRPCRouter({
         commentId: createdComment.id,
         commenterId: userId,
         excludeUserIds: [postData[0].authorId, parentAuthorId],
+      });
+
+      // Same engagement as the legacy comment.create path: comment points +
+      // badge check (commenting is the onboarding badge's final step).
+      await award({
+        userId,
+        action: "comment_created",
+        sourceType: "comment",
+        sourceId: createdComment.id,
       });
 
       return createdComment.id;
