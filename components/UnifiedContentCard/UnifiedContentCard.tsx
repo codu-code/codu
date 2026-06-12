@@ -118,8 +118,9 @@ const UnifiedContentCard = ({
   // Member content canonical is `/{username}/{slug}` — the slug already ends
   // with the urlId, so the slug stays canonical. urlId is the fallback resolver
   // when the slug is missing (the detail page resolves a bare urlId segment).
-  // Never emit `/feed/:id` — that route 404s (next.config 301s it to a routeless
-  // `/:id`). When there's no resolvable internal page, a LINK opens its source
+  // Never emit `/feed/:id` — that route is legacy (next.config 301s
+  // `/feed/:sourceSlug` to the `/s/:sourceSlug` namespace). When there's no
+  // resolvable internal page, a LINK opens its source
   // and anything else falls back to the author profile — never a dead route.
   // Discussions and questions live under the /d/ namespace (the slug already
   // ends with the urlId, so /d/{slug} is canonical). Everything else keeps the

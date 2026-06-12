@@ -64,7 +64,7 @@ const SavedItemCard = ({
   // Determine the URL for the card. Member content canonical is
   // `/{username}/{slug}` (slug already ends with the urlId); urlId is the
   // fallback resolver when the slug is missing. Never emit `/feed/:id` — that
-  // route 404s.
+  // route is legacy (next.config 301s `/feed/:sourceSlug` to `/s/:sourceSlug`).
   const cardUrl =
     type === "POST" && authorUsername && slug
       ? `/${authorUsername}/${slug}`
