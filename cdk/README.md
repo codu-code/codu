@@ -8,7 +8,12 @@ is deployed by assuming that account's credentials and running `cdk deploy`.
 
 - **StorageStack** — VPC, RDS (Postgres), the S3 upload bucket, the rate-limit
   DynamoDB table, and the image-resize lambdas.
-- **CronStack** — scheduled lambdas (RSS fetcher, vote-count reconciliation).
+- **CronStack** — scheduled lambdas (RSS fetcher, vote-count reconciliation,
+  scheduled-post promotion). The promotion lambda reads two **manually created
+  SSM parameters per account** and fails closed when they're missing:
+  - `/env/siteUrl` — the app origin to POST (e.g. `https://www.codu.co`)
+  - `/env/cronSecret` — must exactly equal the `CRON_SECRET` env var set in
+    Vercel for the same environment (the app's `/api/cron/*` routes verify it)
 - **IamStack** — the IAM user the Vercel app authenticates as, granted exactly
   what the app uses (S3 read/write, `dynamodb:UpdateItem`, `ses:SendEmail`). Its
   outputs are the app access keys to set in Vercel. **Add any new app AWS grant

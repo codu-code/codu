@@ -105,6 +105,9 @@ const SavedItemCard = ({
               <time
                 dateTime={dateTime?.toString()}
                 title={readableDate || undefined}
+                // Relative times derive from Date.now(); avoid hydration
+                // text-mismatch noise when a minute boundary is crossed.
+                suppressHydrationWarning
               >
                 {relativeTime}
               </time>

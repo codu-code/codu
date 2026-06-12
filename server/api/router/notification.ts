@@ -80,6 +80,8 @@ export const notificationRouter = createTRPCRouter({
             },
             with: {
               author: { columns: { username: true } },
+              // Aggregated content has no author — its link needs /s/{source}.
+              source: { columns: { slug: true } },
             },
           },
         },

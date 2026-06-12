@@ -151,6 +151,7 @@ const Notifications = () => {
                       ? buildContentHref({
                           type: post.type,
                           slug: post.slug,
+                          sourceSlug: post.source?.slug,
                           authorUsername: post.author?.username,
                         })
                       : null;

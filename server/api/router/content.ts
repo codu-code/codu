@@ -33,12 +33,14 @@ import {
 } from "@/server/db/schema";
 import {
   and,
+  or,
   eq,
   desc,
   lt,
   lte,
   sql,
   isNotNull,
+  isNull,
   count,
   exists,
   inArray,
@@ -149,10 +151,14 @@ export const contentRouter = createTRPCRouter({
       const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
       // Published AND past its publish time — scheduled releases carry a
-      // future publishedAt and must not leak into the feed early.
+      // future publishedAt and must not leak into the feed early. A NULL
+      // publishedAt (legacy/imported rows) counts as visible, not hidden.
       const conditions = [
         eq(posts.status, "published"),
-        lte(posts.publishedAt, new Date().toISOString()),
+        or(
+          lte(posts.publishedAt, new Date().toISOString()),
+          isNull(posts.publishedAt),
+        )!,
       ];
 
       if (type) {
@@ -732,14 +738,29 @@ export const contentRouter = createTRPCRouter({
       if (input.showComments !== undefined)
         updateData.showComments = input.showComments;
 
+      // Moderation owns these lifecycle states — same guard as the publish
+      // mutation, else update({published:true}) force-publishes around a
+      // moderator's schedule or rejection. Pulling back to draft stays allowed.
+      if (
+        input.published === true &&
+        (existing[0].status === "scheduled" ||
+          existing[0].status === "in_review" ||
+          existing[0].status === "rejected")
+      ) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message:
+            existing[0].status === "scheduled"
+              ? "This post is scheduled and will be published automatically."
+              : "This post is awaiting moderation review.",
+        });
+      }
+
       // Going-live gate (dedupe + moderation): a draft→live transition via
       // update must go through review too, else a client self-publishes by
       // setting published:true here instead of calling publish. Gate input is
       // completed from the existing row (title/body/externalUrl), since update
       // input may omit them. May throw CONFLICT for a hard duplicate.
-      // Update handlers gate on `!== "published"` (so a scheduled→published flip
-      // via update IS re-gated); publish handlers gate on `=== "draft"` only. The
-      // asymmetry is intentional and mirrors pre-existing behaviour.
       const goingLive =
         input.published === true && existing[0].status !== "published";
       let gate: Awaited<ReturnType<typeof runDedupeAndGate>> | null = null;

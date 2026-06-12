@@ -5,12 +5,13 @@ import { z } from "zod";
 const hasAccessKeys = process.env.ACCESS_KEY && process.env.SECRET_KEY;
 
 // EMAIL_PROVIDER=local routes every outgoing email (sendEmail + the next-auth
-// magic-link sender) to the docker Mailpit catcher (SMTP localhost:1025, UI
-// http://localhost:8025) so dev and E2E can inspect real messages without SES.
-// Hard-disabled on production deploys regardless of env misconfiguration.
+// magic-link sender) to the docker Mailpit catcher (SMTP localhost:1027, UI
+// http://localhost:8027 — see docker-compose.yml) so dev and E2E can inspect
+// real messages without SES. Hard-disabled on ANY production build (Vercel
+// prod, previews, self-hosted) regardless of env misconfiguration.
 export const isLocalMail =
   process.env.EMAIL_PROVIDER === "local" &&
-  process.env.VERCEL_ENV !== "production";
+  process.env.NODE_ENV !== "production";
 
 // Never send real email from tests / E2E. The dev:e2e server sets ENV=E2E;
 // MOCK_EMAIL is an explicit override (e.g. when reusing a plain dev server for

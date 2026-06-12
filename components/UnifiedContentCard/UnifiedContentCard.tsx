@@ -235,7 +235,13 @@ const UnifiedContentCard = ({
                   {authorName}
                 </span>
               ))}
-            <span className="whitespace-nowrap font-mono text-xs text-faint">
+            <span
+              className="whitespace-nowrap font-mono text-xs text-faint"
+              // Cards now SSR (feed initialData) and relative times derive
+              // from Date.now() — a minute boundary between server render and
+              // hydration would otherwise log a text mismatch.
+              suppressHydrationWarning
+            >
               {handle ? `@${handle}` : ""}
               {relativeTime ? `${handle ? " · " : ""}${relativeTime}` : ""}
               {type === "LINK" && source?.name ? (

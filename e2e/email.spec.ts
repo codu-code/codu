@@ -7,7 +7,7 @@ import {
 } from "./mailpit";
 
 // End-to-end email delivery through the local Mailpit catcher. Requires:
-//   - docker-compose `mailpit` service running (http://localhost:8025)
+//   - docker-compose `mailpit` service running (http://localhost:8027)
 //   - the app server started with EMAIL_PROVIDER=local
 // Skips itself cleanly when Mailpit isn't up so plain runs stay green.
 

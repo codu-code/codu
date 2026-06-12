@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { SITE_ORIGIN } from "@/config/site";
+import { getServerAuthSession } from "@/server/auth";
 import "@/styles/globals.css";
 import Fathom from "@/components/Fathom/Fathom";
 import A11yProvider from "@/components/A11yProvider/A11yProvider";
@@ -100,6 +101,9 @@ export default async function RootLayout({
     headersObject[key] = value;
   });
 
+  // Request-deduped (React cache) — the app layout/pages reuse this lookup.
+  const session = await getServerAuthSession();
+
   return (
     <html
       lang="en"
@@ -118,7 +122,7 @@ export default async function RootLayout({
           <PostHogPageView />
           <A11yProvider>
             <ProgressBar />
-            <AuthProvider>
+            <AuthProvider session={session}>
               <ThemeProvider>
                 <Toaster />
                 <TRPCReactProvider headers={headersObject}>

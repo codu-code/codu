@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { api } from "@/server/trpc/react";
 import { getHostname } from "@/utils/url";
+import { buildContentHref } from "@/server/lib/content-url";
 import { useLinkMetadata } from "@/components/PostEditor/hooks/useLinkMetadata";
 import {
   AaToggle,
@@ -60,16 +61,25 @@ export function ComposeModal({
     api.content.create.useMutation({
       onSuccess: (post) => {
         void utils.content.getFeed.invalidate();
-        // Posting is an onboarding step — refresh so the (app-wide) first-win
-        // celebration can fire. A draft won't satisfy "posted" server-side.
+        // Publishing can earn a badge (e.g. first_post) — refresh the banner
+        // and the app-wide celebration so the confetti fires right away.
         void utils.engagement.onboardingWins.invalidate();
+        void utils.engagement.uncelebratedBadges.invalidate();
         if (savingDraft) {
           toast.success("Saved to drafts");
           setDone({ href: "/my-posts?tab=drafts", label: "View drafts" });
           return;
         }
-        // Fall back to the feed if we lack the username for the /{username}/{slug} URL.
-        const href = post?.slug && username ? `/${username}/${post.slug}` : "/";
+        // Canonical path per kind (discussions → /d/); fall back to the feed
+        // when we can't build a stable URL.
+        const href =
+          (post?.slug &&
+            buildContentHref({
+              type: post.type,
+              slug: post.slug,
+              authorUsername: username,
+            })) ||
+          "/";
         setDone({ href, label: "View post" });
       },
       onError: (err) => {
