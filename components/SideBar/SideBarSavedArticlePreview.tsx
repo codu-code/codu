@@ -29,7 +29,7 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
   });
 
   return (
-    <article className="my-2 flex flex-col border border-neutral-300 bg-white p-4 px-4 py-3 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-50">
+    <article className="my-2 flex flex-col border border-hairline bg-surface p-4 px-4 py-3 text-fg">
       <header className="flex grow items-center">
         <Link
           className="mb-2 cursor-pointer text-base font-semibold leading-6 tracking-wide hover:underline"
@@ -41,13 +41,10 @@ const SideBarSavedArticlePreview: NextPage<Props> = ({
       <div className="flex grow items-center">
         <span className="sr-only">{name}</span>
 
-        <div className="flex flex-col justify-center text-[12px] text-neutral-500">
-          <p className="font-medium text-neutral-500">
+        <div className="flex flex-col justify-center text-[12px] text-muted">
+          <p className="font-medium text-muted">
             Written by{" "}
-            <Link
-              href={`/${username}`}
-              className="font-semibold text-neutral-900 dark:text-neutral-400"
-            >
+            <Link href={`/${username}`} className="font-semibold text-faint">
               {name}
             </Link>
           </p>

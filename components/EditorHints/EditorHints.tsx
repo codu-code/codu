@@ -6,8 +6,8 @@ const EditorHints = () => {
   return (
     <Fragment>
       {visible && (
-        <div className="fixed bottom-0 left-0 flex w-screen flex-col items-center bg-gray-700">
-          <div className="flex w-full justify-end px-8 py-4 text-neutral-400">
+        <div className="fixed bottom-0 left-0 flex w-screen flex-col items-center bg-surface">
+          <div className="flex w-full justify-end px-8 py-4 text-faint">
             <button
               onClick={() => {
                 setVisible(false);
@@ -17,7 +17,7 @@ const EditorHints = () => {
             </button>
           </div>
 
-          <div className="max-w-3xl px-24 pb-8 pt-4 text-neutral-400">
+          <div className="max-w-3xl px-24 pb-8 pt-4 text-faint">
             <h3 className="">How to use the editor</h3>
             <p className="my-2 text-sm">
               Your post remains private until you “publish” the article.
@@ -29,7 +29,7 @@ const EditorHints = () => {
                 href="https://www.markdownguide.org/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
+                className="cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text tracking-wide text-transparent hover:from-accent hover:to-accent"
               >
                 this
               </a>{" "}
@@ -38,7 +38,7 @@ const EditorHints = () => {
                 href="https://www.markdownguide.org/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
+                className="cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text tracking-wide text-transparent hover:from-accent hover:to-accent"
               >
                 markdownguide
               </a>

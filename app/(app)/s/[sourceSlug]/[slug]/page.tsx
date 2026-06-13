@@ -1,0 +1,89 @@
+import { notFound, permanentRedirect } from "next/navigation";
+import { type Metadata } from "next";
+import { SITE_ORIGIN } from "@/config/site";
+import { JsonLd } from "@/components/JsonLd";
+import {
+  getBreadcrumbSchema,
+  getNewsArticleSchema,
+} from "@/lib/structured-data";
+import { getFeedArticle, resolveAggregatedCanonical } from "./_resolvers";
+import FeedArticleContent from "./_feedArticleContent";
+
+type Props = { params: Promise<{ sourceSlug: string; slug: string }> };
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const { sourceSlug, slug } = await props.params;
+
+  const feedArticle = await getFeedArticle(sourceSlug, slug);
+  if (!feedArticle) {
+    return { title: "Content Not Found" };
+  }
+
+  return {
+    title: `${feedArticle.title} | Codú Feed`,
+    description: feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
+    openGraph: {
+      title: feedArticle.title,
+      description:
+        feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
+      images:
+        feedArticle.ogImageUrl || feedArticle.imageUrl
+          ? [feedArticle.ogImageUrl || feedArticle.imageUrl!]
+          : undefined,
+    },
+    alternates: {
+      // Self-canonical: these are snippet + outbound-link listings (not full-body
+      // copies), so claiming them as Codú content is aggregation, not duplication.
+      canonical: `/s/${sourceSlug}/${feedArticle.slug ?? slug}`,
+    },
+  };
+}
+
+export default async function Page(props: Props) {
+  const { sourceSlug, slug } = await props.params;
+
+  const article = await getFeedArticle(sourceSlug, slug);
+
+  if (!article) {
+    // Slug-correct: the requested slug may be stale (title edit) but its urlId
+    // still resolves to a canonical post. 301 to the canonical slug.
+    const canonical = await resolveAggregatedCanonical(sourceSlug, slug);
+    if (canonical && canonical.slug !== slug) {
+      permanentRedirect(`/s/${sourceSlug}/${canonical.slug}`);
+    }
+    notFound();
+  }
+
+  const newsArticleSchema = getNewsArticleSchema({
+    title: article.title,
+    excerpt: article.excerpt,
+    slug: article.slug,
+    externalUrl: article.externalUrl || "",
+    coverImage: article.imageUrl || article.ogImageUrl,
+    publishedAt: article.publishedAt,
+    source: {
+      name: article.source?.name || null,
+      slug: article.source?.slug || sourceSlug,
+      logoUrl: article.source?.logoUrl,
+    },
+  });
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    // The feed lives at "/" (legacy /feed redirects) — breadcrumbs must not
+    // reference redirecting URLs.
+    { name: "Home", url: SITE_ORIGIN },
+    {
+      name: article.source?.name || sourceSlug,
+      url: `${SITE_ORIGIN}/s/${article.source?.slug || sourceSlug}`,
+    },
+    { name: article.title },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={newsArticleSchema} />
+      <JsonLd data={breadcrumbSchema} />
+      <FeedArticleContent sourceSlug={sourceSlug} article={article} />
+    </>
+  );
+}

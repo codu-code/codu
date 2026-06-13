@@ -4,6 +4,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as backup from "aws-cdk-lib/aws-backup";
 import * as events from "aws-cdk-lib/aws-events";
@@ -20,6 +21,7 @@ export class StorageStack extends cdk.Stack {
   public readonly bucket: s3.Bucket;
   public readonly db: rds.DatabaseInstance;
   public readonly vpc: ec2.Vpc;
+  public readonly rateLimitTable: dynamodb.Table;
 
   constructor(scope: Construct, id: string, props?: Props) {
     super(scope, id, props);
@@ -29,6 +31,32 @@ export class StorageStack extends cdk.Stack {
     });
 
     const { vpc } = this;
+
+    // ── Rate-limit counters (DynamoDB) ──
+    // Fixed-window counters keyed by `pk`, auto-expired via the `ttl`
+    // attribute. On-demand billing — pay only per request, no capacity to plan.
+    // The app reads the table name from RATE_LIMIT_TABLE (see SSM param below);
+    // its IAM principal needs dynamodb:UpdateItem on this table.
+    this.rateLimitTable = new dynamodb.Table(this, "RateLimitTable", {
+      partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: "ttl",
+      removalPolicy: props?.production
+        ? cdk.RemovalPolicy.RETAIN
+        : cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Publish the generated table name so the app env (RATE_LIMIT_TABLE) can
+    // resolve it without hardcoding.
+    new ssm.StringParameter(this, "RateLimitTableNameParam", {
+      parameterName: "/env/rate-limit-table",
+      stringValue: this.rateLimitTable.tableName,
+    });
+
+    new cdk.CfnOutput(this, "RateLimitTableName", {
+      value: this.rateLimitTable.tableName,
+      description: "Set RATE_LIMIT_TABLE to this in the app environment",
+    });
 
     // S3 bucket
     const bucketName = ssm.StringParameter.valueForStringParameter(
@@ -112,13 +140,32 @@ export class StorageStack extends cdk.Stack {
       1,
     );
 
+    // PG15 engine, shared by the instance and its parameter group so they can
+    // never drift. `.of()` because this aws-cdk-lib (2.233.0) predates the
+    // VER_15_17 enum; 15.17 is the lowest 15.x RDS offers as a valid
+    // major-upgrade target from 14.22. PG15+ is required by the schema —
+    // point_event dedupe uses `UNIQUE NULLS NOT DISTINCT` (Postgres 15). Local
+    // dev runs postgres:15-alpine, keeping RDS in step.
+    const pgVersion = rds.PostgresEngineVersion.of("15.17", "15");
+
+    // Pin `rds.force_ssl` ON explicitly rather than inheriting it from the
+    // default.postgres15 group, whose default flipped 0 -> 1 vs postgres14 and
+    // silently required SSL after the major upgrade. All app + migrate
+    // connections must therefore carry `sslmode=require` in DATABASE_URL.
+    const parameterGroup = new rds.ParameterGroup(this, "db-parameter-group", {
+      engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
+      description: "Codú Postgres 15 — force_ssl pinned on",
+      parameters: {
+        "rds.force_ssl": "1",
+      },
+    });
+
     // RDS
     this.db = new rds.DatabaseInstance(this, "db-instance", {
       instanceIdentifier: "codu-rds",
       databaseName: dbName,
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_14_5,
-      }),
+      engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
+      parameterGroup,
       credentials: rds.Credentials.fromPassword(
         dbUsername,
         cdk.SecretValue.ssmSecure("/env/db/password", "1"),
@@ -136,6 +183,10 @@ export class StorageStack extends cdk.Stack {
       publiclyAccessible: true,
       deletionProtection: props?.production ?? false,
       autoMinorVersionUpgrade: true,
+      // Required for the 14.5 -> 15.x major-version upgrade; RDS rejects a
+      // major engine change without it. Safe to leave enabled (it permits, it
+      // doesn't force, future major upgrades via CDK).
+      allowMajorVersionUpgrade: true,
       backupRetention: props?.production
         ? cdk.Duration.days(7) // 7 days retention for production
         : cdk.Duration.days(1), // 1 day retention for non-production (minimum allowed)

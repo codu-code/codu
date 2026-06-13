@@ -19,10 +19,9 @@ import {
 } from "@heroicons/react/20/solid";
 
 const statusColors = {
-  active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  paused:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  error: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+  active: "bg-success/12 text-success",
+  paused: "bg-warning/12 text-warning",
+  error: "bg-danger/12 text-danger",
 };
 
 const statusIcons = {
@@ -61,7 +60,7 @@ const LogoWithFallback = ({
   // Fallback to initial letter
   return (
     <span
-      className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-orange-500 ${textSize} font-medium text-white`}
+      className={`flex ${sizeClass} flex-shrink-0 items-center justify-center rounded bg-accent ${textSize} font-medium text-on-accent`}
     >
       {initial}
     </span>
@@ -93,8 +92,8 @@ const DataCompletenessBadge = ({
 
   return (
     <span className="group relative ml-1.5 inline-flex">
-      <ExclamationTriangleIcon className="h-4 w-4 text-amber-500" />
-      <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-neutral-900 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-neutral-700">
+      <ExclamationTriangleIcon className="h-4 w-4 text-warning" />
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 -translate-x-1/2 whitespace-nowrap rounded border border-hairline bg-elevated px-2 py-1 font-mono text-xs text-fg opacity-0 transition-opacity group-hover:opacity-100">
         Missing: {missingFields.join(", ")}
       </span>
     </span>
@@ -331,10 +330,13 @@ const AdminSourcesPage = () => {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+          <p className="eyebrow">
+            <span className="slash">{"// "}</span>admin
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-fg">
             Feed Sources
           </h1>
-          <p className="mt-1 text-neutral-600 dark:text-neutral-400">
+          <p className="mt-1 text-muted">
             Manage RSS feed sources for the content aggregator
           </p>
         </div>
@@ -342,7 +344,7 @@ const AdminSourcesPage = () => {
           <button
             onClick={handleSyncAll}
             disabled={syncingAll}
-            className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="secondary-button disabled:opacity-50"
           >
             <CloudArrowDownIcon
               className={`h-5 w-5 ${syncingAll ? "animate-pulse" : ""}`}
@@ -351,7 +353,7 @@ const AdminSourcesPage = () => {
           </button>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600"
+            className="primary-button"
           >
             <PlusIcon className="h-5 w-5" />
             Add Source
@@ -359,15 +361,14 @@ const AdminSourcesPage = () => {
         </div>
       </div>
 
-      {/* Add Source Form */}
       {showAddForm && (
-        <div className="mb-8 rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-800">
-          <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+        <div className="mb-8 rounded-lg border border-hairline bg-surface p-6">
+          <h2 className="mb-4 font-display text-lg font-semibold text-fg">
             Add New Feed Source
           </h2>
           <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                 Name *
               </label>
               <input
@@ -377,12 +378,12 @@ const AdminSourcesPage = () => {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 placeholder="e.g., Josh Comeau's Blog"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                 RSS Feed URL *
               </label>
               <input
@@ -392,12 +393,12 @@ const AdminSourcesPage = () => {
                   setFormData({ ...formData, url: e.target.value })
                 }
                 required
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 placeholder="https://example.com/rss.xml"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                 Website URL
               </label>
               <input
@@ -406,12 +407,12 @@ const AdminSourcesPage = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, websiteUrl: e.target.value })
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 placeholder="https://example.com"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                 Logo URL
               </label>
               <input
@@ -420,12 +421,12 @@ const AdminSourcesPage = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, logoUrl: e.target.value })
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 placeholder="https://example.com/logo.png"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                 Category
               </label>
               <input
@@ -434,7 +435,7 @@ const AdminSourcesPage = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 placeholder="e.g., frontend, react, career"
               />
             </div>
@@ -442,14 +443,14 @@ const AdminSourcesPage = () => {
               <button
                 type="submit"
                 disabled={createSource.status === "pending"}
-                className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                className="primary-button disabled:opacity-50"
               >
                 {createSource.status === "pending" ? "Adding..." : "Add Source"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="secondary-button"
               >
                 Cancel
               </button>
@@ -458,24 +459,23 @@ const AdminSourcesPage = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
       {editingSource && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-lg rounded-lg bg-white p-6 dark:bg-neutral-800">
+          <div className="mx-4 w-full max-w-lg rounded-lg border border-hairline bg-surface p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+              <h2 className="font-display text-lg font-semibold text-fg">
                 Edit Feed Source
               </h2>
               <button
                 onClick={() => setEditingSource(null)}
-                className="rounded p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                className="rounded p-1 text-muted transition-colors hover:bg-elevated hover:text-fg"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Name
                 </label>
                 <input
@@ -484,22 +484,22 @@ const AdminSourcesPage = () => {
                   onChange={(e) =>
                     setEditingSource({ ...editingSource, name: e.target.value })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   RSS Feed URL (read-only)
                 </label>
                 <input
                   type="url"
                   value={editingSource.url}
                   readOnly
-                  className="w-full rounded-lg border border-neutral-300 bg-neutral-100 px-3 py-2 text-neutral-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400"
+                  className="w-full rounded-md border border-hairline bg-inset px-3 py-2 text-faint"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Website URL
                 </label>
                 <input
@@ -511,34 +511,32 @@ const AdminSourcesPage = () => {
                       websiteUrl: e.target.value,
                     })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="https://example.com"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Logo
                 </label>
                 <div className="flex items-start gap-4">
-                  {/* Logo preview */}
                   <div className="flex-shrink-0">
                     {editingSource.logoUrl ? (
                       <img
                         src={editingSource.logoUrl}
                         alt={`${editingSource.name} logo`}
-                        className="h-16 w-16 rounded-lg border border-neutral-200 object-cover dark:border-neutral-600"
+                        className="h-16 w-16 rounded-lg border border-hairline object-cover"
                         onError={(e) => {
                           // Hide broken images
                           (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
                     ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800">
-                        <PhotoIcon className="h-8 w-8 text-neutral-400" />
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-hairline bg-inset">
+                        <PhotoIcon className="h-8 w-8 text-faint" />
                       </div>
                     )}
                   </div>
-                  {/* Upload controls */}
                   <div className="flex-1 space-y-2">
                     <input
                       type="file"
@@ -551,7 +549,7 @@ const AdminSourcesPage = () => {
                       type="button"
                       onClick={() => logoInputRef.current?.click()}
                       disabled={uploadingLogo}
-                      className="flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                      className="secondary-button px-3 py-2 text-sm disabled:opacity-50"
                     >
                       {uploadingLogo ? (
                         <>
@@ -565,7 +563,7 @@ const AdminSourcesPage = () => {
                         </>
                       )}
                     </button>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="font-mono text-xs text-faint">
                       PNG, JPG, GIF or WEBP. Max 5MB.
                     </p>
                     {/* URL input as fallback */}
@@ -578,14 +576,14 @@ const AdminSourcesPage = () => {
                           logoUrl: e.target.value,
                         })
                       }
-                      className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-700"
+                      className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-sm text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                       placeholder="Or paste image URL..."
                     />
                   </div>
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Category
                 </label>
                 <input
@@ -597,12 +595,12 @@ const AdminSourcesPage = () => {
                       category: e.target.value,
                     })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="e.g., frontend, react, career"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                <label className="mb-1 block font-mono text-xs uppercase tracking-label text-faint">
                   Description
                 </label>
                 <textarea
@@ -614,7 +612,7 @@ const AdminSourcesPage = () => {
                     })
                   }
                   rows={3}
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-700"
+                  className="w-full rounded-md border border-hairline bg-transparent px-3 py-2 text-fg placeholder-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="A brief description of this feed source..."
                 />
               </div>
@@ -622,14 +620,14 @@ const AdminSourcesPage = () => {
                 <button
                   type="button"
                   onClick={() => setEditingSource(null)}
-                  className="rounded-lg border border-neutral-300 px-4 py-2 font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                  className="secondary-button"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateSource.status === "pending"}
-                  className="rounded-lg bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
+                  className="primary-button disabled:opacity-50"
                 >
                   {updateSource.status === "pending"
                     ? "Saving..."
@@ -641,53 +639,55 @@ const AdminSourcesPage = () => {
         </div>
       )}
 
-      {/* Sources Table */}
       {status === "pending" && (
         <div className="flex items-center justify-center py-12">
-          <ArrowPathIcon className="h-8 w-8 animate-spin text-neutral-400" />
+          <ArrowPathIcon className="h-8 w-8 animate-spin text-faint" />
         </div>
       )}
 
       {status === "error" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+        <div className="bg-danger/8 rounded-lg border border-danger/40 p-4 text-danger">
           Failed to load feed sources. Please refresh the page.
         </div>
       )}
 
       {status === "success" && (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-700">
-          <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
-            <thead className="bg-neutral-50 dark:bg-neutral-800">
+        <div className="overflow-hidden rounded-lg border border-hairline">
+          <table className="min-w-full divide-y divide-hairline">
+            <thead className="bg-elevated">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Source
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Articles
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Last Fetched
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-left font-mono text-xs uppercase tracking-label text-faint">
                   Errors
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <th className="px-6 py-3 text-right font-mono text-xs uppercase tracking-label text-faint">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-900">
+            <tbody className="divide-y divide-hairline bg-surface">
               {sources?.map((source) => {
                 const StatusIcon =
                   statusIcons[source.status as keyof typeof statusIcons];
                 return (
-                  <tr key={source.sourceId}>
+                  <tr
+                    key={source.sourceId}
+                    className="transition-colors hover:bg-elevated"
+                  >
                     <td className="whitespace-nowrap px-6 py-4">
                       <span className="inline-flex items-center gap-3">
                         <LogoWithFallback
@@ -695,14 +695,14 @@ const AdminSourcesPage = () => {
                           name={source.sourceName}
                         />
                         <span>
-                          <span className="flex items-center font-medium text-neutral-900 dark:text-neutral-100">
+                          <span className="flex items-center font-medium text-fg">
                             {source.sourceName}
                             <DataCompletenessBadge
                               missingFields={getMissingFields(source)}
                             />
                           </span>
                           {source.websiteUrl && (
-                            <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                            <span className="block font-mono text-xs text-faint">
                               {(() => {
                                 try {
                                   return new URL(source.websiteUrl).hostname;
@@ -715,12 +715,12 @@ const AdminSourcesPage = () => {
                         </span>
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-muted">
                       {source.category || "-"}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-xs uppercase tracking-label ${
                           statusColors[
                             source.status as keyof typeof statusColors
                           ]
@@ -730,22 +730,22 @@ const AdminSourcesPage = () => {
                         {source.status}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-muted">
                       {source.articleCount}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-faint">
                       {source.lastFetchedAt
                         ? new Date(source.lastFetchedAt).toLocaleDateString()
                         : "Never"}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm text-muted">
                       {source.errorCount}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEditModal(source)}
-                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
+                          className="rounded bg-transparent p-1.5 text-muted transition-colors hover:bg-elevated hover:text-fg"
                           title="Edit"
                         >
                           <PencilSquareIcon className="h-4 w-4" />
@@ -755,7 +755,7 @@ const AdminSourcesPage = () => {
                             handleSyncSource(source.sourceId, source.sourceName)
                           }
                           disabled={syncingSourceId === source.sourceId}
-                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200 disabled:opacity-50"
+                          className="rounded bg-transparent p-1.5 text-muted transition-colors hover:bg-elevated hover:text-fg disabled:opacity-50"
                           title="Sync now"
                         >
                           <ArrowPathIcon
@@ -766,7 +766,7 @@ const AdminSourcesPage = () => {
                           onClick={() =>
                             handleStatusToggle(source.sourceId, source.status)
                           }
-                          className="rounded bg-transparent p-1.5 text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
+                          className="rounded bg-transparent p-1.5 text-muted transition-colors hover:bg-elevated hover:text-fg"
                           title={
                             source.status === "active" ? "Pause" : "Activate"
                           }
@@ -781,7 +781,7 @@ const AdminSourcesPage = () => {
                           onClick={() =>
                             handleDelete(source.sourceId, source.sourceName)
                           }
-                          className="rounded bg-transparent p-1.5 text-red-400 transition-colors hover:bg-red-950 hover:text-red-300"
+                          className="hover:bg-danger/12 rounded bg-transparent p-1.5 text-danger transition-colors"
                           title="Delete"
                         >
                           <TrashIcon className="h-4 w-4" />
@@ -794,7 +794,7 @@ const AdminSourcesPage = () => {
             </tbody>
           </table>
           {sources?.length === 0 && (
-            <div className="py-12 text-center text-neutral-500 dark:text-neutral-400">
+            <div className="py-12 text-center text-muted">
               No feed sources yet. Add your first source above.
             </div>
           )}

@@ -44,7 +44,7 @@ function MobileSidebar({
         transition
         className="fixed inset-y-0 z-50 w-full max-w-80 p-2 transition duration-300 ease-in-out data-[closed]:-translate-x-full"
       >
-        <div className="flex h-full flex-col rounded-lg bg-neutral-100 shadow-sm ring-1 ring-neutral-200 dark:bg-black dark:ring-neutral-800">
+        <div className="flex h-full flex-col rounded-lg bg-surface shadow-sm ring-1 ring-hairline">
           <div className="-mb-3 px-4 pt-3">
             <Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
               <CloseMenuIcon />
@@ -75,11 +75,11 @@ export function SidebarLayout({
   const contentPadding = isCollapsed ? "lg:pl-16" : "lg:pl-64";
 
   return (
-    <div className="relative isolate flex min-h-svh w-full bg-neutral-100 dark:bg-black max-lg:flex-col">
+    <div className="relative isolate flex min-h-svh w-full bg-surface max-lg:flex-col">
       {/* Desktop navbar - completely independent, full width, above everything */}
       <header
         aria-label="Site header"
-        className="fixed left-0 right-0 top-0 z-50 hidden h-16 items-center border-b border-neutral-200 bg-neutral-100 px-6 dark:border-neutral-800 dark:bg-black lg:flex"
+        className="fixed left-0 right-0 top-0 z-50 hidden h-16 items-center border-b border-hairline bg-surface px-6 lg:flex"
       >
         {navbar}
       </header>
@@ -88,7 +88,7 @@ export function SidebarLayout({
       {/* Outer frame: animates width, has border */}
       <div
         data-collapsed={isCollapsed ? "true" : undefined}
-        className={`fixed bottom-0 left-0 top-16 z-30 border-r border-neutral-200 transition-all duration-300 ease-in-out dark:border-neutral-800 max-lg:hidden ${isCollapsed ? "w-16" : "w-64"}`}
+        className={`fixed bottom-0 left-0 top-16 z-30 border-r border-hairline transition-all duration-300 ease-in-out max-lg:hidden ${isCollapsed ? "w-16" : "w-64"}`}
       >
         {/* Middle: clips content */}
         <div className="h-full overflow-hidden">
@@ -105,7 +105,7 @@ export function SidebarLayout({
       {/* Navbar on mobile */}
       <header
         aria-label="Site header"
-        className="flex items-center border-b border-neutral-200 px-4 dark:border-neutral-800 lg:hidden"
+        className="flex items-center border-b border-hairline px-4 lg:hidden"
       >
         <div className="py-2.5">
           <NavbarItem

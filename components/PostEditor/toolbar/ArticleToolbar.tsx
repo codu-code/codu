@@ -26,8 +26,8 @@ function ToolbarButton({
       title={title}
       className={`rounded p-1.5 transition-colors ${
         isActive
-          ? "bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-white"
-          : "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          ? "bg-accent/15 text-accent"
+          : "text-muted hover:bg-elevated hover:text-fg"
       } disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {children}
@@ -36,7 +36,7 @@ function ToolbarButton({
 }
 
 function ToolbarDivider() {
-  return <div className="mx-1 h-5 w-px bg-neutral-200 dark:bg-neutral-700" />;
+  return <div className="mx-1 h-5 w-px bg-hairline" />;
 }
 
 interface LinkInputProps {
@@ -62,26 +62,26 @@ function UrlInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800"
+      className="flex items-center gap-2 rounded-md border border-hairline bg-elevated px-3 py-1.5"
     >
       <input
         type="url"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder={placeholder}
-        className="w-64 border-none bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none dark:text-white"
+        className="w-64 border-none bg-transparent text-sm text-fg placeholder:text-faint focus:outline-none"
         autoFocus
       />
       <button
         type="submit"
-        className="text-sm font-medium text-pink-600 hover:text-pink-500"
+        className="text-sm font-medium text-accent transition-colors hover:text-accent-soft"
       >
         Add
       </button>
       <button
         type="button"
         onClick={onCancel}
-        className="text-sm text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300"
+        className="text-sm text-muted transition-colors hover:text-fg"
       >
         Cancel
       </button>
@@ -221,7 +221,7 @@ export function ArticleToolbar({
 
   if (showLinkInput) {
     return (
-      <div className="border-b border-neutral-200 bg-neutral-50 p-2 dark:border-neutral-700 dark:bg-neutral-800">
+      <div className="border-b border-hairline bg-inset p-2">
         <UrlInput
           onSubmit={handleAddLink}
           onCancel={() => setShowLinkInput(false)}
@@ -233,7 +233,7 @@ export function ArticleToolbar({
 
   if (showYoutubeInput) {
     return (
-      <div className="border-b border-neutral-200 bg-neutral-50 p-2 dark:border-neutral-700 dark:bg-neutral-800">
+      <div className="border-b border-hairline bg-inset p-2">
         <UrlInput
           onSubmit={handleAddYoutube}
           onCancel={() => setShowYoutubeInput(false)}
@@ -244,9 +244,8 @@ export function ArticleToolbar({
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-neutral-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline bg-inset px-3 py-2">
       <div className="flex flex-wrap items-center gap-0.5">
-        {/* Headings */}
         <ToolbarButton
           onClick={() =>
             editor.chain().focus().toggleHeading({ level: 1 }).run()
@@ -277,7 +276,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Text formatting */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           isActive={editor.isActive("bold")}
@@ -302,7 +300,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Link */}
         <ToolbarButton
           onClick={() => {
             if (editor.isActive("link")) {
@@ -317,7 +314,6 @@ export function ArticleToolbar({
           {icons.link}
         </ToolbarButton>
 
-        {/* Image */}
         <ToolbarButton
           onClick={() => fileInputRef.current?.click()}
           title="Insert Image"
@@ -334,7 +330,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Lists */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           isActive={editor.isActive("bulletList")}
@@ -352,7 +347,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Block elements */}
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           isActive={editor.isActive("blockquote")}
@@ -377,7 +371,6 @@ export function ArticleToolbar({
 
         <ToolbarDivider />
 
-        {/* Special elements */}
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           title="Horizontal Rule"
@@ -392,12 +385,11 @@ export function ArticleToolbar({
         </ToolbarButton>
       </div>
 
-      {/* Switch to Markdown */}
       {onSwitchToMarkdown && (
         <button
           type="button"
           onClick={onSwitchToMarkdown}
-          className="flex items-center gap-1.5 text-sm text-pink-600 hover:text-pink-500 dark:text-pink-500 dark:hover:text-pink-400"
+          className="flex items-center gap-1.5 text-sm text-accent transition-colors hover:text-accent-soft"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm1 2v14h16V5H4Zm3 10.5H5v-7h2l2 2.5 2-2.5h2v7h-2v-4l-2 2.5-2-2.5v4Zm11-3h2l-3 3-3-3h2V8h2v4.5Z" />

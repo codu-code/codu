@@ -21,7 +21,6 @@ export default async function Page(props: Props) {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="overflow-hidden rounded-lg bg-white shadow dark:bg-neutral-800">
-        {/* Sponsor Header */}
         <div className="border-b border-neutral-200 p-6 dark:border-neutral-700">
           <div className="flex flex-col items-center gap-6 sm:flex-row">
             <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-md bg-neutral-700 p-2">
@@ -43,7 +42,7 @@ export default async function Page(props: Props) {
               {company.url && (
                 <a
                   href={company.url}
-                  className="mt-4 inline-flex items-center text-sm font-medium text-pink-600 hover:text-pink-500 dark:text-pink-600 dark:hover:text-pink-500"
+                  className="mt-4 inline-flex items-center text-sm font-medium text-accent hover:text-accent dark:text-accent dark:hover:text-accent"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

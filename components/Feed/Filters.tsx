@@ -1,235 +1,240 @@
 "use client";
 
-import { Fragment } from "react";
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  Transition,
-} from "@headlessui/react";
-import {
-  ChevronDownIcon,
-  ClockIcon,
-  FireIcon,
-  ArrowTrendingUpIcon,
-  DocumentTextIcon,
-  LinkIcon,
-  QuestionMarkCircleIcon,
-  VideoCameraIcon,
-  ChatBubbleLeftRightIcon,
-  Squares2X2Icon,
-} from "@heroicons/react/20/solid";
+import { useEffect, useId, useRef, useState } from "react";
+
+export type Option = { value: string; label: string };
+
+type FilterPillProps = {
+  /** Currently-selected option value. */
+  value: string;
+  options: Option[];
+  onChange: (_value: string) => void;
+  /** When true, the trigger renders in the "muted" (default) state. */
+  isDefault: boolean;
+  align?: "left" | "right";
+  testId?: string;
+  /** Accessible label for the trigger button. */
+  label: string;
+};
+
+/**
+ * Flat, borderless filter trigger that opens a small listbox popover.
+ * No icons, no boxed trigger — matches the relaunch filter style.
+ */
+export function FilterPill({
+  value,
+  options,
+  onChange,
+  isDefault,
+  align = "left",
+  testId,
+  label,
+}: FilterPillProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
+
+  const current = options.find((o) => o.value === value) ?? options[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={containerRef} data-testid={testId}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={label}
+        className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 text-sm font-medium transition-colors hover:text-fg ${
+          open ? "bg-surface text-fg" : isDefault ? "text-muted" : "text-fg"
+        }`}
+      >
+        {current.label}
+        <svg
+          className="h-3.5 w-3.5 text-faint"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+        </svg>
+      </button>
+      {open && (
+        <ul
+          id={listboxId}
+          role="listbox"
+          aria-label={label}
+          className={`absolute top-[calc(100%+6px)] z-40 min-w-44 rounded-md border border-strong bg-elevated p-2 shadow-pop ${
+            align === "right" ? "right-0" : "left-0"
+          }`}
+        >
+          {options.map((option) => {
+            const selected = option.value === value;
+            return (
+              <li key={option.value} role="none">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(option.value);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full items-center justify-between gap-3 rounded-sm px-2.5 py-2 text-left text-sm transition-colors ${
+                    selected
+                      ? "bg-accent/10 font-semibold text-accent-soft"
+                      : "font-medium text-muted hover:bg-hover hover:text-fg"
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {selected && (
+                    <span className="text-[11px]" aria-hidden="true">
+                      ✓
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
   | "ARTICLE"
   | "LINK"
+  | "TIL"
   | "QUESTION"
   | "VIDEO"
   | "DISCUSSION"
   | null;
 
+type TopicOption = { slug: string; title: string };
+
 type Props = {
   sort: SortOption;
   type?: ContentType;
-  category?: string | null;
-  categories: string[];
+  /** Currently-selected tag slug, or null for "All topics". */
+  tag?: string | null;
+  /** Popular tags from api.tag.getPopular. */
+  topics: TopicOption[];
   onSortChange: (_sort: SortOption) => void;
   onTypeChange?: (_type: ContentType) => void;
-  onCategoryChange: (_category: string | null) => void;
+  onTagChange: (_tag: string | null) => void;
+  onClear: () => void;
   showTypeFilter?: boolean;
 };
 
-const sortOptions: {
-  value: SortOption;
-  label: string;
-  icon: typeof ClockIcon;
-}[] = [
-  { value: "recent", label: "Recent", icon: ClockIcon },
-  { value: "trending", label: "Trending", icon: FireIcon },
-  { value: "popular", label: "Popular", icon: ArrowTrendingUpIcon },
+// URL param uses lowercase; "all" sentinel maps to null (no param).
+const typeOptions: Option[] = [
+  { value: "all", label: "All types" },
+  { value: "article", label: "Articles" },
+  { value: "discussion", label: "Discussions" },
+  { value: "link", label: "Links" },
+  { value: "question", label: "Questions" },
+  { value: "til", label: "TIL" },
 ];
 
-const typeOptions: {
-  value: ContentType;
-  label: string;
-  icon: typeof DocumentTextIcon;
-}[] = [
-  { value: null, label: "All Types", icon: Squares2X2Icon },
-  { value: "ARTICLE", label: "Articles", icon: DocumentTextIcon },
-  { value: "LINK", label: "Links", icon: LinkIcon },
-  { value: "QUESTION", label: "Questions", icon: QuestionMarkCircleIcon },
-  { value: "VIDEO", label: "Videos", icon: VideoCameraIcon },
-  { value: "DISCUSSION", label: "Discussions", icon: ChatBubbleLeftRightIcon },
+// Only the three sorts the backend supports.
+const sortOptions: Option[] = [
+  { value: "recent", label: "Recent" },
+  { value: "trending", label: "Trending" },
+  { value: "popular", label: "Popular" },
 ];
+
+const ALL_TOPICS = "all";
 
 const FeedFilters = ({
   sort,
   type,
-  category,
-  categories,
+  tag,
+  topics,
   onSortChange,
   onTypeChange,
-  onCategoryChange,
+  onTagChange,
+  onClear,
   showTypeFilter = true,
 }: Props) => {
-  const currentSort =
-    sortOptions.find((opt) => opt.value === sort) || sortOptions[0];
-  const currentType =
-    typeOptions.find((opt) => opt.value === type) || typeOptions[0];
+  const typeValue = type ? type.toLowerCase() : "all";
+  const tagValue = tag ?? ALL_TOPICS;
+
+  const topicOptions: Option[] = [
+    { value: ALL_TOPICS, label: "All topics" },
+    ...topics.map((t) => ({ value: t.slug, label: t.title })),
+  ];
+
+  const isDirty =
+    typeValue !== "all" || sort !== "recent" || tagValue !== ALL_TOPICS;
 
   return (
-    <div
-      className="flex items-center gap-2 sm:gap-3"
-      data-testid="feed-filters"
-    >
-      {/* Content Type Dropdown */}
-      {showTypeFilter && onTypeChange && (
-        <Menu as="div" className="relative" data-testid="type-filter">
-          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 sm:px-3">
-            <currentType.icon className="h-4 w-4" />
-            <span>{currentType.label}</span>
-            <ChevronDownIcon className="h-4 w-4" />
-          </MenuButton>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <MenuItems className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
-              <div className="py-1">
-                {typeOptions.map((option) => (
-                  <MenuItem key={option.value || "all"}>
-                    {({ focus }) => (
-                      <button
-                        onClick={() => onTypeChange(option.value)}
-                        className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm ${
-                          focus
-                            ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                            : "text-neutral-700 dark:text-neutral-200"
-                        } ${
-                          type === option.value
-                            ? "font-medium text-orange-600 dark:text-orange-400"
-                            : ""
-                        }`}
-                      >
-                        <option.icon className="h-4 w-4" />
-                        {option.label}
-                      </button>
-                    )}
-                  </MenuItem>
-                ))}
-              </div>
-            </MenuItems>
-          </Transition>
-        </Menu>
+    <div className="flex items-center gap-2" data-testid="feed-filters">
+      {isDirty && (
+        <button
+          type="button"
+          onClick={onClear}
+          className="mr-1 font-mono text-xs text-faint transition-colors hover:text-muted"
+        >
+          clear
+        </button>
       )}
 
-      {/* Sort Dropdown */}
-      <Menu as="div" className="relative" data-testid="sort-filter">
-        <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 sm:px-3">
-          <currentSort.icon className="h-4 w-4" />
-          <span>{currentSort.label}</span>
-          <ChevronDownIcon className="h-4 w-4" />
-        </MenuButton>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        >
-          <MenuItems className="absolute right-0 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
-            <div className="py-1">
-              {sortOptions.map((option) => (
-                <MenuItem key={option.value}>
-                  {({ focus }) => (
-                    <button
-                      onClick={() => onSortChange(option.value)}
-                      className={`flex w-full items-center gap-2 px-4 py-2 text-left text-sm ${
-                        focus
-                          ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                          : "text-neutral-700 dark:text-neutral-200"
-                      } ${
-                        sort === option.value
-                          ? "font-medium text-orange-600 dark:text-orange-400"
-                          : ""
-                      }`}
-                    >
-                      <option.icon className="h-4 w-4" />
-                      {option.label}
-                    </button>
-                  )}
-                </MenuItem>
-              ))}
-            </div>
-          </MenuItems>
-        </Transition>
-      </Menu>
+      {showTypeFilter && onTypeChange && (
+        <FilterPill
+          testId="type-filter"
+          label="Filter by type"
+          value={typeValue}
+          options={typeOptions}
+          isDefault={typeValue === "all"}
+          align="right"
+          onChange={(next) =>
+            onTypeChange(
+              next === "all" ? null : (next.toUpperCase() as ContentType),
+            )
+          }
+        />
+      )}
 
-      {/* Category Dropdown */}
-      {categories.length > 0 && (
-        <Menu as="div" className="relative" data-testid="topic-filter">
-          <MenuButton className="flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 sm:px-3">
-            <span>{category || "All Topics"}</span>
-            <ChevronDownIcon className="h-4 w-4" />
-          </MenuButton>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <MenuItems className="absolute right-0 z-10 mt-2 max-h-60 w-44 origin-top-right overflow-y-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
-              <div className="py-1">
-                <MenuItem>
-                  {({ focus }) => (
-                    <button
-                      onClick={() => onCategoryChange(null)}
-                      className={`block w-full px-4 py-2 text-left text-sm ${
-                        focus
-                          ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                          : "text-neutral-700 dark:text-neutral-200"
-                      } ${!category ? "font-medium text-orange-600 dark:text-orange-400" : ""}`}
-                    >
-                      All Topics
-                    </button>
-                  )}
-                </MenuItem>
-                {categories.map((cat) => (
-                  <MenuItem key={cat}>
-                    {({ focus }) => (
-                      <button
-                        onClick={() => onCategoryChange(cat)}
-                        className={`block w-full px-4 py-2 text-left text-sm capitalize ${
-                          focus
-                            ? "bg-neutral-100 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100"
-                            : "text-neutral-700 dark:text-neutral-200"
-                        } ${
-                          category === cat
-                            ? "font-medium text-orange-600 dark:text-orange-400"
-                            : ""
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    )}
-                  </MenuItem>
-                ))}
-              </div>
-            </MenuItems>
-          </Transition>
-        </Menu>
+      <FilterPill
+        testId="sort-filter"
+        label="Sort feed"
+        value={sort}
+        options={sortOptions}
+        isDefault={sort === "recent"}
+        align="right"
+        onChange={(next) => onSortChange(next as SortOption)}
+      />
+
+      {topics.length > 0 && (
+        <FilterPill
+          label="Filter by topic"
+          value={tagValue}
+          options={topicOptions}
+          isDefault={tagValue === ALL_TOPICS}
+          align="right"
+          onChange={(next) => onTagChange(next === ALL_TOPICS ? null : next)}
+        />
       )}
     </div>
   );

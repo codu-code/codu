@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
@@ -12,20 +13,80 @@ import { saveSettingsSchema } from "@/schema/profile";
 import { uploadFile } from "@/utils/s3helpers";
 import type { user } from "@/server/db/schema";
 import { Button } from "@/components/ui-components/button";
-import { Loader2, Sun, Moon } from "lucide-react";
-import { Subheading, Heading } from "@/components/ui-components/heading";
+import { Loader2 } from "lucide-react";
 import { Avatar } from "@/components/ui-components/avatar";
 import { Input } from "@/components/ui-components/input";
-import {
-  ErrorMessage,
-  Field,
-  Label,
-} from "@/components/ui-components/fieldset";
+import { ErrorMessage } from "@/components/ui-components/fieldset";
 import { Textarea } from "@/components/ui-components/textarea";
-import { Switch } from "@/components/ui-components/switch";
-import { Divider } from "@/components/ui-components/divider";
-import { Text } from "@/components/ui-components/text";
-import { useTheme } from "next-themes";
+import { ReferralCard, Tag } from "@/components/ds";
+import { useShellActions } from "@/components/Create/ShellActionsProvider";
+
+/** Mint switch — rounded-full track, knob slides left→right when on. */
+const Toggle = ({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void; // eslint-disable-line no-unused-vars
+}) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={`relative h-[23px] w-10 shrink-0 rounded-full transition-colors ${
+      checked ? "bg-accent" : "bg-elevated"
+    }`}
+  >
+    <span
+      className={`absolute top-[3px] h-[17px] w-[17px] rounded-full transition-all ${
+        checked ? "left-5 bg-on-accent" : "left-[3px] bg-faint"
+      }`}
+    />
+  </button>
+);
+
+/** A labelled settings row: title + description on the left, control on the right. */
+const SettingsRow = ({
+  title,
+  desc,
+  children,
+}: {
+  title: string;
+  desc?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="flex items-center gap-4 border-b border-hairline py-4 last:border-b-0">
+    <div className="min-w-0 flex-1">
+      <div className="text-sm font-semibold text-fg">{title}</div>
+      {desc && (
+        <div className="mt-0.5 text-xs leading-relaxed text-muted">{desc}</div>
+      )}
+    </div>
+    {children}
+  </div>
+);
+
+/** A stacked field block: label + description above the input. */
+const FieldBlock = ({
+  title,
+  desc,
+  children,
+}: {
+  title: string;
+  desc?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="border-b border-hairline py-4 last:border-b-0">
+    <div className="text-sm font-semibold text-fg">{title}</div>
+    {desc && (
+      <div className="mb-2 mt-0.5 text-xs leading-relaxed text-muted">
+        {desc}
+      </div>
+    )}
+    <div className={desc ? "" : "mt-2"}>{children}</div>
+  </div>
+);
 
 type User = Pick<
   typeof user.$inferSelect,
@@ -60,8 +121,29 @@ const Settings = ({ profile }: { profile: User }) => {
     },
   });
 
-  const { setTheme, resolvedTheme } = useTheme();
   const { emailNotifications: eNotifications, newsletter } = profile;
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const TABS = ["Profile", "Notifications", "Account"] as const;
+  type Tab = (typeof TABS)[number];
+
+  // URL is the source of truth: ?tab=profile|notifications|account (lower-case).
+  const tabParam = searchParams?.get("tab")?.toLowerCase();
+  const tab: Tab =
+    tabParam === "notifications"
+      ? "Notifications"
+      : tabParam === "account"
+        ? "Account"
+        : "Profile";
+
+  const setTab = (value: Tab) => {
+    const params = new URLSearchParams(searchParams?.toString());
+    params.set("tab", value.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
   const [emailNotifications, setEmailNotifications] = useState(eNotifications);
   const [weeklyNewsletter, setWeeklyNewsletter] = useState(newsletter);
@@ -75,6 +157,10 @@ const Settings = ({ profile }: { profile: User }) => {
     status: "idle",
     url: profile.image,
   });
+
+  const { openTopics } = useShellActions();
+  const { data: interestsData } = api.profile.myInterests.useQuery();
+  const myTopics = interestsData?.topics ?? [];
 
   const { mutate, isError, isSuccess } = api.profile.edit.useMutation();
   const { mutate: getUploadUrl } = api.profile.getUploadUrl.useMutation();
@@ -189,64 +275,75 @@ const Settings = ({ profile }: { profile: User }) => {
 
   return (
     <form
-      className="mx-auto max-w-4xl p-3 pt-8 sm:px-4"
+      className="mx-auto max-w-[620px] p-3 pt-8 sm:px-4"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <Heading level={1}>Your Settings</Heading>
-      <Divider className="my-10 mt-6" />
+      <div>
+        <p className="eyebrow">
+          <span className="slash">{"// "}</span>your account
+        </p>
+        <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-fg">
+          Settings
+        </h1>
+      </div>
 
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Profile Picture</Subheading>
-          <Text>This will be displayed on your public profile</Text>
-        </div>
-        <Field>
-          <div className="flex items-center space-x-4">
-            <Avatar
-              square
-              src={
-                profilePhoto.status === "error" ||
-                profilePhoto.status === "pending"
-                  ? undefined
-                  : `${profilePhoto.url}`
-              }
-              alt="Profile photo upload section"
-              className="h-16 w-16 overflow-hidden rounded-full"
+      <div className="mb-2 mt-8 flex gap-5 border-b border-hairline">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTab(t)}
+            className={`-mb-px border-b-2 pb-2 pt-1 text-sm transition-colors ${
+              t === tab
+                ? "border-accent font-semibold text-fg"
+                : "border-transparent font-medium text-muted hover:text-fg"
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* profile */}
+      <div className={tab === "Profile" ? "" : "hidden"}>
+        <div className="flex items-center gap-4 border-b border-hairline py-4">
+          <Avatar
+            square
+            src={
+              profilePhoto.status === "error" ||
+              profilePhoto.status === "pending"
+                ? undefined
+                : `${profilePhoto.url}`
+            }
+            alt="Profile photo upload section"
+            className="h-16 w-16 shrink-0 overflow-hidden rounded-full"
+          />
+          <div>
+            <Button
+              color="dark/white"
+              type="button"
+              className="h-[30px] rounded-md text-xs"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Change avatar
+            </Button>
+            <Input
+              type="file"
+              id="file-input"
+              name="user-photo"
+              accept="image/png, image/gif, image/jpeg"
+              onChange={imageChange}
+              className="hidden"
+              ref={fileInputRef}
             />
-            <div>
-              <Button
-                color="dark/white"
-                type="button"
-                className="h-[30px] rounded-md text-xs"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Change avatar
-              </Button>
-              <Input
-                type="file"
-                id="file-input"
-                name="user-photo"
-                accept="image/png, image/gif, image/jpeg"
-                onChange={imageChange}
-                className="hidden"
-                ref={fileInputRef}
-              />
-              <Text className="mt-1 text-xs text-gray-500">
-                JPG, GIF or PNG. 1MB max.
-              </Text>
-            </div>
+            <p className="mt-1 text-xs text-faint">JPG, GIF or PNG. 1MB max.</p>
           </div>
-        </Field>
-      </section>
-
-      <Divider className="my-10" soft />
-
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Full Name</Subheading>
-          <Text>This will be displayed on your public profile</Text>
         </div>
-        <Field>
+
+        <FieldBlock
+          title="Full name"
+          desc="This will be displayed on your public profile"
+        >
           <Input
             id="name"
             type="text"
@@ -255,17 +352,12 @@ const Settings = ({ profile }: { profile: User }) => {
             {...register("name")}
           />
           {errors?.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <Divider className="my-10" soft />
-
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Username</Subheading>
-          <Text>This will be how you share your profile</Text>
-        </div>
-        <Field>
+        <FieldBlock
+          title="Username"
+          desc="This will be how you share your profile"
+        >
           <Input
             id="username"
             type="text"
@@ -276,20 +368,12 @@ const Settings = ({ profile }: { profile: User }) => {
           {errors?.username && (
             <ErrorMessage>{errors.username.message}</ErrorMessage>
           )}
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <Divider className="my-10" soft />
-
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Bio</Subheading>
-          <Text>
-            This will be displayed on your public profile. Maximum 200
-            characters.
-          </Text>
-        </div>
-        <Field>
+        <FieldBlock
+          title="Bio"
+          desc="This will be displayed on your public profile. Maximum 200 characters."
+        >
           <Textarea
             id="bio"
             rows={3}
@@ -298,17 +382,9 @@ const Settings = ({ profile }: { profile: User }) => {
             {...register("bio")}
           />
           {errors?.bio && <ErrorMessage>{errors.bio.message}</ErrorMessage>}
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <Divider className="my-10" soft />
-
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Location</Subheading>
-          <Text>This is where you live</Text>
-        </div>
-        <Field>
+        <FieldBlock title="Location" desc="This is where you live">
           <Input
             id="location"
             type="text"
@@ -320,17 +396,12 @@ const Settings = ({ profile }: { profile: User }) => {
           {errors?.location && (
             <ErrorMessage>{errors.location.message}</ErrorMessage>
           )}
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <Divider className="my-10" soft />
-
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Website URL</Subheading>
-          <Text>A link to your website (optional)</Text>
-        </div>
-        <Field>
+        <FieldBlock
+          title="Website URL"
+          desc="A link to your website (optional)"
+        >
           <Input
             id="websiteUrl"
             type="text"
@@ -342,29 +413,72 @@ const Settings = ({ profile }: { profile: User }) => {
           {errors?.websiteUrl && (
             <ErrorMessage>{errors.websiteUrl.message}</ErrorMessage>
           )}
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <Divider className="my-10" soft />
+        <FieldBlock
+          title="Topics"
+          desc="The topics you follow shape your feed. Edit them anytime."
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            {myTopics.length > 0 ? (
+              myTopics.map((t) => <Tag key={t}>{t}</Tag>)
+            ) : (
+              <p className="text-sm text-muted">
+                You haven&apos;t chosen any topics yet.
+              </p>
+            )}
+          </div>
+          <Button
+            color="dark/white"
+            type="button"
+            className="mt-3 h-[30px] rounded-md text-xs"
+            onClick={openTopics}
+          >
+            Edit topics
+          </Button>
+        </FieldBlock>
 
-      <section className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={3}>Current Email</Subheading>
-          <Text>This is where we will send all communications</Text>
-        </div>
-        <Field>
+        <FieldBlock
+          title="Invite friends"
+          desc="Share Codú and earn points + the Connector badge for every builder who joins."
+        >
+          <ReferralCard />
+        </FieldBlock>
+      </div>
+
+      {/* notifications */}
+      <div className={tab === "Notifications" ? "" : "hidden"}>
+        <SettingsRow
+          title="Allow notifications from the platform"
+          desc="Send an email when a user interacts with you on the platform"
+        >
+          <Toggle
+            checked={emailNotifications}
+            onChange={setEmailNotifications}
+          />
+        </SettingsRow>
+
+        <SettingsRow
+          title="Weekly Newsletter"
+          desc="Receive our weekly newsletter"
+        >
+          <Toggle checked={weeklyNewsletter} onChange={setWeeklyNewsletter} />
+        </SettingsRow>
+      </div>
+
+      {/* account */}
+      <div className={tab === "Account" ? "" : "hidden"}>
+        <FieldBlock
+          title="Current email"
+          desc="This is where we will send all communications"
+        >
           <Input type="text" value={profile.email || ""} disabled />
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <section className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={3}>Update Email</Subheading>
-          <Text>
-            You can alter your email by verifying a new email address.
-          </Text>
-        </div>
-        <Field>
+        <FieldBlock
+          title="Update email"
+          desc="You can alter your email by verifying a new email address."
+        >
           <Input
             type="email"
             id="newEmail"
@@ -381,7 +495,7 @@ const Settings = ({ profile }: { profile: User }) => {
           )}
           <div className="mt-2 flex justify-end">
             <Button
-              color="pink"
+              color="accent"
               disabled={
                 !isValidEmail(newEmail) ||
                 newEmail === profile.email ||
@@ -396,77 +510,32 @@ const Settings = ({ profile }: { profile: User }) => {
               {cooldown > 0 ? `Wait ${cooldown}s` : "Send Verification Email"}
             </Button>
           </div>
-        </Field>
-      </section>
+        </FieldBlock>
 
-      <Divider className="my-10" soft />
-
-      <section className="mt-6 space-y-4">
-        <Field className="flex items-center justify-between">
-          <Label passive className="flex flex-col">
-            <span>Allow notifications from the platform</span>
-            <Text className="text-xs text-gray-500">
-              Send an email when a user interacts with you on the platform
-            </Text>
-          </Label>
-
-          <Switch
-            color="pink"
-            checked={emailNotifications}
-            onChange={setEmailNotifications}
-          />
-        </Field>
-
-        <Field className="flex items-center justify-between">
-          <Label passive className="flex flex-col">
-            <span>Weekly Newsletter</span>
-            <Text className="text-xs text-gray-500">
-              Receive our weekly newsletter
-            </Text>
-          </Label>
-
-          <Switch
-            color="pink"
-            checked={weeklyNewsletter}
-            onChange={setWeeklyNewsletter}
-          />
-        </Field>
-      </section>
-
-      <Divider className="my-10" soft />
-
-      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-        <div className="space-y-1">
-          <Subheading level={2}>Appearance</Subheading>
-          <Text>Choose your preferred theme</Text>
-        </div>
-        <Field className="flex items-center justify-between">
-          <Label passive className="flex flex-col">
-            <span>Theme</span>
-            <Text className="text-xs text-gray-500">
-              Toggle between light and dark theme
-            </Text>
-          </Label>
-
-          <div className="flex items-center gap-2">
-            <Sun className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-            <Switch
-              color="pink"
-              checked={resolvedTheme === "dark"}
-              onChange={(checked) => setTheme(checked ? "dark" : "light")}
-            />
-            <Moon className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+        <div className="flex items-center gap-4 py-4">
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-danger">
+              Delete account
+            </div>
+            <div className="mt-0.5 text-xs leading-relaxed text-muted">
+              Permanently remove your account and data. Contact us to start.
+            </div>
           </div>
-        </Field>
-      </section>
+          <a
+            href="mailto:hi@codu.co?subject=Delete%20my%20account"
+            className="rounded-md border border-hairline px-4 py-2 text-sm text-danger transition-colors hover:border-danger"
+          >
+            Delete account
+          </a>
+        </div>
+      </div>
 
-      <Divider className="my-10" soft />
-
-      <div className="flex justify-end space-x-4">
+      {/* ---------- actions (sticky save bar) ---------- */}
+      <div className="sticky bottom-0 mt-8 flex justify-end gap-4 border-t border-hairline bg-gradient-to-t from-canvas via-canvas py-4">
         <Button color="dark/white" onClick={() => reset()}>
           Reset
         </Button>
-        <Button color="pink" type="submit" disabled={isSubmitting}>
+        <Button color="accent" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </div>

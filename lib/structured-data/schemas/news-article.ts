@@ -1,6 +1,6 @@
 import type { Article, Organization, WithContext } from "../types";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 interface FeedArticleData {
   title: string;
@@ -45,14 +45,14 @@ export function getNewsArticleSchema(
     // Link to the original article
     url: article.externalUrl,
     // The Codu discussion page is the main entity
-    mainEntityOfPage: `${BASE_URL}/${article.source.slug}/${article.slug}`,
+    mainEntityOfPage: `${BASE_URL}/s/${article.source.slug}/${article.slug}`,
     datePublished: article.publishedAt || new Date().toISOString(),
     publisher,
     // Author is the source organization for feed articles
     author: {
       "@type": "Organization",
       name: article.source.name || "External Source",
-      url: `${BASE_URL}/${article.source.slug}`,
+      url: `${BASE_URL}/s/${article.source.slug}`,
     },
   };
 }

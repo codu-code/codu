@@ -419,6 +419,215 @@ const feedSourcesRaw = [
     websiteUrl: "https://www.deeplearning.ai/the-batch",
     category: "ai",
   },
+  // AI builders / indie hackers (relaunch focus)
+  {
+    name: "Latent Space",
+    url: "https://www.latent.space/feed",
+    websiteUrl: "https://www.latent.space",
+    category: "ai",
+    description:
+      "The AI engineering newsletter & podcast (swyx) — practical guidance for people building real products with AI.",
+  },
+  {
+    name: "Simon Willison",
+    url: "https://simonwillison.net/atom/everything/",
+    websiteUrl: "https://simonwillison.net",
+    category: "ai",
+    description:
+      "Hands-on writing on LLM tooling, prompt engineering, and building with AI from the co-creator of Django.",
+  },
+  {
+    name: "Ahead of AI",
+    url: "https://magazine.sebastianraschka.com/feed",
+    websiteUrl: "https://magazine.sebastianraschka.com",
+    category: "ai",
+    description:
+      "Sebastian Raschka's deep, practical writing on LLMs and machine learning for builders.",
+  },
+  {
+    name: "Import AI",
+    url: "https://jack-clark.net/feed/",
+    websiteUrl: "https://jack-clark.net",
+    category: "ai",
+    description:
+      "Jack Clark's weekly analysis of AI research and policy — high-signal context for AI builders.",
+  },
+  {
+    name: "Eugene Yan",
+    url: "https://eugeneyan.com/rss/",
+    websiteUrl: "https://eugeneyan.com",
+    category: "ai",
+    description:
+      "Applied ML and AI engineering essays — how to design, build, and ship ML/AI systems in production.",
+  },
+  // AI engineering — individuals & researchers
+  {
+    name: "Lilian Weng (Lil'Log)",
+    url: "https://lilianweng.github.io/index.xml",
+    websiteUrl: "https://lilianweng.github.io",
+    category: "ai",
+    description:
+      "Deep, clear explainers on LLMs, agents, and modern ML from a leading AI researcher.",
+  },
+  {
+    name: "Chip Huyen",
+    url: "https://huyenchip.com/feed.xml",
+    websiteUrl: "https://huyenchip.com",
+    category: "ai",
+    description:
+      "Practical writing on building and operating ML/AI systems in production.",
+  },
+  {
+    name: "Hamel Husain",
+    url: "https://hamel.dev/index.xml",
+    websiteUrl: "https://hamel.dev",
+    category: "ai",
+    description:
+      "Hands-on guidance on evals, fine-tuning, and shipping reliable LLM applications.",
+  },
+  {
+    name: "Jay Alammar",
+    url: "https://jalammar.github.io/feed.xml",
+    websiteUrl: "https://jalammar.github.io",
+    category: "ai",
+    description:
+      "The Illustrated Transformer author — visual, intuitive explanations of how AI models work.",
+  },
+  {
+    name: "Interconnects",
+    url: "https://www.interconnects.ai/feed",
+    websiteUrl: "https://www.interconnects.ai",
+    category: "ai",
+    description:
+      "Nathan Lambert's analysis of frontier models, RLHF, and the AI research frontier.",
+  },
+  {
+    name: "One Useful Thing",
+    url: "https://www.oneusefulthing.org/feed",
+    websiteUrl: "https://www.oneusefulthing.org",
+    category: "ai",
+    description:
+      "Ethan Mollick on practically using AI for real work — grounded, experiment-driven.",
+  },
+  {
+    name: "AI Snake Oil",
+    url: "https://www.aisnakeoil.com/feed",
+    websiteUrl: "https://www.aisnakeoil.com",
+    category: "ai",
+    description:
+      "Princeton researchers separating AI hype from reality — a useful counterweight.",
+  },
+  {
+    name: "The Gradient",
+    url: "https://thegradient.pub/rss/",
+    websiteUrl: "https://thegradient.pub",
+    category: "ai",
+    description:
+      "Essays and interviews on AI research and its implications, for technical readers.",
+  },
+  // AI engineering — labs & tools
+  {
+    name: "Google DeepMind",
+    url: "https://deepmind.google/blog/rss.xml",
+    websiteUrl: "https://deepmind.google/discover/blog",
+    category: "ai",
+    description: "Research and product updates from Google DeepMind.",
+  },
+  {
+    name: "Microsoft AI",
+    url: "https://blogs.microsoft.com/ai/feed/",
+    websiteUrl: "https://blogs.microsoft.com/ai",
+    category: "ai",
+    description: "Microsoft's AI product and research announcements.",
+  },
+  {
+    name: "AWS Machine Learning",
+    url: "https://aws.amazon.com/blogs/machine-learning/feed/",
+    websiteUrl: "https://aws.amazon.com/blogs/machine-learning",
+    category: "ai",
+    description:
+      "Hands-on guides for building ML/AI applications on AWS (SageMaker, Bedrock, etc.).",
+  },
+  {
+    name: "NVIDIA Developer",
+    url: "https://developer.nvidia.com/blog/feed/",
+    websiteUrl: "https://developer.nvidia.com/blog",
+    category: "ai",
+    description:
+      "Technical posts on GPUs, inference, and building performant AI systems.",
+  },
+  {
+    name: "Together AI",
+    url: "https://www.together.ai/blog/rss.xml",
+    websiteUrl: "https://www.together.ai/blog",
+    category: "ai",
+    description:
+      "Open-model inference and fine-tuning — practical posts for AI builders.",
+  },
+  {
+    name: "Replicate",
+    url: "https://replicate.com/blog/rss",
+    websiteUrl: "https://replicate.com/blog",
+    category: "ai",
+    description:
+      "Running and shipping AI models via API — builder-focused tutorials and updates.",
+  },
+  {
+    name: "Ollama",
+    url: "https://ollama.com/blog/rss.xml",
+    websiteUrl: "https://ollama.com/blog",
+    category: "ai",
+    description:
+      "Running open LLMs locally — releases and guides for self-hosted AI.",
+  },
+  {
+    name: "LlamaIndex",
+    url: "https://medium.com/feed/@llama_index",
+    websiteUrl: "https://www.llamaindex.ai/blog",
+    category: "ai",
+    description:
+      "Building LLM apps over your data — RAG patterns and framework updates.",
+  },
+  {
+    name: "Roboflow",
+    url: "https://blog.roboflow.com/rss/",
+    websiteUrl: "https://blog.roboflow.com",
+    category: "ai",
+    description:
+      "Practical computer-vision and multimodal AI tutorials for builders.",
+  },
+  // AI research labs / education
+  {
+    name: "fast.ai",
+    url: "https://www.fast.ai/index.xml",
+    websiteUrl: "https://www.fast.ai",
+    category: "ai",
+    description:
+      "Jeremy Howard & team on making deep learning accessible and practical.",
+  },
+  {
+    name: "Answer.AI",
+    url: "https://www.answer.ai/index.xml",
+    websiteUrl: "https://www.answer.ai",
+    category: "ai",
+    description:
+      "Applied AI R&D lab (from the fast.ai team) — practical, open work.",
+  },
+  {
+    name: "BAIR (Berkeley AI Research)",
+    url: "https://bair.berkeley.edu/blog/feed.xml",
+    websiteUrl: "https://bair.berkeley.edu/blog",
+    category: "ai",
+    description:
+      "Research from Berkeley AI Research, written up for a technical audience.",
+  },
+  {
+    name: "Apple Machine Learning",
+    url: "https://machinelearning.apple.com/rss.xml",
+    websiteUrl: "https://machinelearning.apple.com",
+    category: "ai",
+    description: "Apple's machine learning research and engineering writeups.",
+  },
 ];
 
 async function seedFeedSources() {

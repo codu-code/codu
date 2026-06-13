@@ -1,12 +1,75 @@
 @tailwind base;
 
+/* Relaunch design tokens (consumed by tailwind.config.js). Values are
+   space-separated RGB so Tailwind opacity modifiers work (e.g. bg-surface/60).
+   Dark-first: .dark holds the canonical palette. */
+:root {
+  /* Surfaces */
+  --color-canvas: 255 255 255;
+  --color-surface: 246 247 249;
+  --color-elevated: 255 255 255;
+  --color-hover: 240 242 245;
+  --color-inset: 244 246 248;
+  /* Borders */
+  --color-hairline: 228 231 236;
+  --color-strong: 203 208 216;
+  /* Text */
+  --color-fg: 10 11 14;
+  --color-muted: 91 100 114;
+  --color-faint: 117 126 140;
+  /* Accent (teal-600, darker for contrast on light) */
+  --color-accent: 13 148 136;
+  --color-accent-soft: 20 184 166;
+  --color-on-accent: 4 34 29;
+  /* Status */
+  --color-success: 5 150 105;
+  --color-warning: 217 119 6;
+  --color-danger: 220 38 38;
+  --color-info: 37 99 235;
+
+  /* Composed, theme-independent (mint glow halo + soft/sparse shadow ladder) */
+  --ring-focus: 0 0 0 3px rgb(var(--color-accent) / 0.16);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 8px 24px -8px rgb(0 0 0 / 0.55);
+  --shadow-lg: 0 24px 60px -20px rgb(0 0 0 / 0.7);
+  --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.65);
+  --shadow-glow:
+    0 0 0 1px rgb(var(--color-accent) / 0.4),
+    0 8px 32px -8px rgb(var(--color-accent) / 0.35);
+}
+
+.dark {
+  /* Surfaces — the cool near-black canvas ladder */
+  --color-canvas: 10 11 14; /* #0a0b0e */
+  --color-surface: 18 20 25; /* #121419 */
+  --color-elevated: 24 27 34; /* #181b22 */
+  --color-hover: 29 33 42; /* #1d212a */
+  --color-inset: 8 9 12; /* #08090c — darker than canvas: wells, code blocks */
+  /* Borders */
+  --color-hairline: 36 40 50; /* #242832 */
+  --color-strong: 47 52 64; /* #2f3440 */
+  /* Text */
+  --color-fg: 244 246 248; /* #f4f6f8 — cool white, never pure #fff */
+  --color-muted: 154 163 176; /* #9aa3b0 */
+  --color-faint: 134 143 155; /* #868f9b — clears WCAG AA (>=5.2:1) on canvas/surface/elevated; #757e8c sat at 4.49:1 */
+  /* Accent: Mint */
+  --color-accent: 45 212 191; /* #2dd4bf */
+  --color-accent-soft: 110 231 214; /* #6ee7d6 — mint text on dark */
+  --color-on-accent: 4 34 29; /* #04221d — near-black text on a mint fill */
+  /* Status — low-chroma to sit calmly on dark */
+  --color-success: 52 211 153; /* #34d399 */
+  --color-warning: 245 181 68; /* #f5b544 */
+  --color-danger: 244 115 107; /* #f4736b */
+  --color-info: 95 168 245; /* #5fa8f5 */
+}
+
 html {
   /* Prevent layout shift when scrollbar appears/disappears */
   scrollbar-gutter: stable;
 }
 
 body {
-  @apply bg-neutral-100 text-neutral-900 dark:bg-black dark:text-white;
+  @apply bg-canvas font-sans text-fg;
 }
 
 #__next {
@@ -17,58 +80,219 @@ body {
 @tailwind utilities;
 
 @layer base {
-  .old-input [type="text"]:not(#article-title),
-  .old-input [type="email"],
-  .old-input [type="url"],
-  .old-input [type="password"],
-  .old-input [type="number"],
-  .old-input [type="date"],
-  .old-input [type="datetime-local"],
-  .old-input [type="month"],
-  .old-input [type="tel"],
-  .old-input [type="time"],
-  .old-input [type="week"],
-  .old-input [multiple],
-  .old-input textarea:not(#article-content),
-  .old-input select {
-    @apply mt-1 block w-full border px-2 py-2 text-black shadow-sm ring-offset-1 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-neutral-300 disabled:opacity-50 dark:border-white dark:bg-black dark:text-white sm:text-sm;
+  /* Headlines use the display family by default (Bricolage Grotesque). */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-extrabold tracking-tight;
+    text-wrap: balance;
   }
 
-  .old-input a {
-    @apply focus-style;
+  /* Keyboard focus — a visible mint ring on every interactive element.
+     :where() keeps specificity 0; the dark canvas offset matches the shell. */
+  :where(
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    summary,
+    [tabindex]
+  ):focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-canvas;
   }
 
-  .old-input label {
-    @apply block text-sm font-medium text-neutral-900 dark:text-white;
+  ::selection {
+    background: rgb(var(--color-accent) / 0.16);
   }
+
+  /* Placeholders use faint, not the browser's muddy grey. */
+  ::placeholder {
+    color: rgb(var(--color-faint));
+    opacity: 1;
+  }
+
+  /* Respect reduced-motion preferences globally (mirrors handoff base.css). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Native form controls (radio/checkbox) tinted mint — Tailwind's arbitrary
+   accent-[...] inference is unreliable for accent-color, so this is explicit.
+   Also recolour the focus ring: kill the browser's blue outline on pointer
+   focus, and show a mint outline for keyboard focus-visible. */
+.accent-mint {
+  /* Fully custom radio. accent-color is unreliable under `color-scheme: dark`
+     (Chrome keeps painting the UA blue regardless of the value), so we paint
+     our own mint control with appearance:none. */
+  -webkit-appearance: none;
+  appearance: none;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid rgb(var(--color-strong));
+  border-radius: 9999px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+.accent-mint:checked {
+  border-color: rgb(var(--color-accent));
+  background-image: radial-gradient(
+    circle at center,
+    rgb(var(--color-accent)) 0 42%,
+    transparent 46%
+  );
+}
+.accent-mint:focus {
+  outline: none;
+}
+.accent-mint:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 2px;
+}
+
+/* ── Eyebrow / kicker: the signature mono "// label" device ── */
+.eyebrow {
+  @apply font-mono text-xs uppercase tracking-label text-accent;
+}
+.eyebrow .slash {
+  @apply text-faint;
+}
+
+/* ── Workhorse card: surface fill, hairline border, no shadow by default ── */
+.card {
+  @apply rounded-lg border border-hairline bg-surface p-5;
 }
 
 .nav-button {
-  @apply focus-style rounded-md px-2 py-2 text-neutral-900 hover:bg-neutral-200 hover:text-black focus:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white dark:focus:text-white;
+  @apply focus-style rounded-md px-2 py-2 text-muted transition-colors hover:bg-elevated hover:text-fg focus:text-fg;
 }
 
 .focus-style {
-  @apply rounded-md focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600;
+  @apply rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
 }
 
 .primary-button {
-  @apply inline-flex justify-center rounded-md bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-white disabled:border-neutral-300 disabled:from-neutral-500 disabled:to-neutral-700 disabled:text-neutral-300 disabled:hover:text-neutral-300;
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-accent px-3.5 py-1.5 text-sm font-semibold text-on-accent transition-colors duration-base ease-out hover:bg-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px disabled:bg-strong disabled:text-faint disabled:hover:bg-strong;
 }
 
 .secondary-button {
-  @apply inline-flex items-center justify-center rounded-md border border-neutral-300 bg-white bg-gradient-to-r px-4 py-2 font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-strong bg-transparent px-3.5 py-1.5 text-sm font-semibold text-fg transition-colors duration-base ease-out hover:border-faint hover:bg-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-px;
+}
+
+.ghost-button {
+  @apply inline-flex items-center gap-1.5 whitespace-nowrap bg-transparent font-mono text-sm font-semibold text-accent transition-colors duration-base ease-out hover:text-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
+}
+
+/* Jumbo modifier — opt-in larger CTA for hero / marketing. Combine with a
+   button class, e.g. `primary-button btn-jumbo`. The compact size above is the
+   app default; this is the deliberate exception. */
+.btn-jumbo {
+  @apply px-6 py-3 text-base;
+}
+
+/* App shell — sticky top bar + 3-column rail grid. Breakpoints (1080 / 720) are
+   bespoke to the handoff, so they're raw media queries rather than Tailwind's
+   lg/md. */
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  height: 56px;
+  padding: 0 clamp(1rem, 3vw, 1.75rem);
+  border-bottom: 1px solid rgb(var(--color-hairline));
+  background: color-mix(in srgb, rgb(var(--color-canvas)) 85%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.app-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) 300px;
+  gap: clamp(1.5rem, 2.4vw, 2.5rem);
+  padding: 2rem clamp(1rem, 3vw, 2rem) 4rem;
+}
+
+.app-leftrail,
+.app-rightrail {
+  position: sticky;
+  top: calc(56px + 1.5rem);
+  align-self: start;
+}
+
+.app-leftrail {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 56px - 5.5rem);
+}
+
+.app-rightrail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.app-leftrail-footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 1080px) {
+  .app-main {
+    grid-template-columns: 200px minmax(0, 1fr);
+    max-width: 832px;
+  }
+  .app-rightrail {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-main {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 6rem;
+  }
+  .app-leftrail {
+    display: none;
+  }
+}
+
+/* Hamburger (left of logo) — opens the slide-out NavDrawer; shown ≤720px
+   where the left rail is hidden. */
+.nav-burger {
+  display: none;
+}
+@media (max-width: 720px) {
+  .nav-burger {
+    display: inline-flex;
+  }
 }
 
 .dropdown-button {
-  @apply inline-flex items-center justify-center border border-neutral-300 bg-white bg-gradient-to-r px-4 py-2 font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply focus-style inline-flex items-center justify-center rounded-md border border-strong bg-elevated px-4 py-2 font-medium text-fg shadow-sm transition-colors hover:bg-hover;
 }
 
 .dropdown-item {
-  @apply rounded-none bg-white bg-gradient-to-r font-medium text-neutral-800 shadow-sm hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800;
+  @apply rounded-none bg-elevated font-medium text-fg transition-colors hover:bg-hover focus:outline-none;
 }
 
 .dropdown-bg {
-  @apply bg-white bg-gradient-to-r text-neutral-800 dark:bg-neutral-900 dark:text-white;
+  @apply bg-elevated text-fg;
 }
 
 .prose {
@@ -137,7 +361,7 @@ body {
 .tiptap .is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: #ced4da;
+  color: rgb(var(--color-faint));
   pointer-events: none;
   height: 0;
 }
@@ -220,7 +444,7 @@ body {
 
 .token.function,
 .token.class-name {
-  @apply text-pink-500;
+  @apply text-accent-soft;
 }
 
 .token.regex,
@@ -325,5 +549,43 @@ table div {
   }
   100% {
     transform: translate(24px, 0);
+  }
+}
+
+/* Onboarding celebration — badge unlock pop + halo ring. Motion is gated on
+   prefers-reduced-motion: no-preference, so reduced-motion users see the static
+   dialog with no animation. */
+@keyframes codu-badge-pop {
+  0% {
+    transform: scale(0.6) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes codu-ring-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .codu-badge-pop {
+    animation: codu-badge-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .codu-ring-pulse {
+    animation: codu-ring-pulse 1100ms ease-out 120ms infinite;
   }
 }

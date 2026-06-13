@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { BanUserSchema, UnbanUserSchema } from "../../../schema/admin";
 import z from "zod";
+import * as Sentry from "@sentry/nextjs";
 
 import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
 import {
@@ -10,8 +11,13 @@ import {
   posts,
   content_report,
   feed_sources,
+  notification,
 } from "@/server/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { runPostGoLiveSideEffects } from "@/server/lib/post-go-live";
+import { POST_APPROVED } from "@/utils/notifications";
+import { buildSlug } from "@/server/lib/content-url";
+import { mintUrlId } from "@/server/lib/url-id";
 
 export const adminRouter = createTRPCRouter({
   // Get dashboard stats
@@ -66,12 +72,12 @@ export const adminRouter = createTRPCRouter({
         );
       }
 
-      if (cursor) {
-        conditions.push(sql`${user.id} > ${cursor.toString()}`);
-      }
-
       const whereClause =
         conditions.length > 0 ? and(...conditions) : undefined;
+
+      // Offset-based pagination. The cursor is the row offset; keyed pagination
+      // on `id` would be wrong here because the list is ordered by `createdAt`.
+      const offset = cursor ?? 0;
 
       const users = await ctx.db.query.user.findMany({
         where: whereClause,
@@ -95,12 +101,13 @@ export const adminRouter = createTRPCRouter({
         },
         orderBy: [desc(user.createdAt)],
         limit: limit + 1,
+        offset,
       });
 
       let nextCursor: number | undefined;
       if (users.length > limit) {
         users.pop();
-        nextCursor = users.length;
+        nextCursor = offset + limit;
       }
 
       return {
@@ -194,5 +201,283 @@ export const adminRouter = createTRPCRouter({
         );
 
       return { unbanned: true };
+    }),
+
+  // Auto-moderation queue: posts awaiting human review (status `in_review`).
+  // `moderationNote` surfaces WHY a post was flagged (auto-mod reason, etc.).
+  listInReview: adminOnlyProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        authorId: posts.authorId,
+        authorUsername: user.username,
+        authorName: user.name,
+        moderationNote: posts.moderationNote,
+        createdAt: posts.createdAt,
+      })
+      .from(posts)
+      .leftJoin(user, eq(posts.authorId, user.id))
+      .where(eq(posts.status, "in_review"))
+      .orderBy(desc(posts.createdAt))
+      .limit(50);
+
+    return rows;
+  }),
+
+  // Live posts (status `published`) that have at least one PENDING report.
+  // These are flagged-but-still-public; an admin can Hide (→ in_review) or
+  // Dismiss the report(s). Two-step query: find the flagged post ids + counts,
+  // then attach the latest report reason/details and the open report ids.
+  listReportedPosts: adminOnlyProcedure.query(async ({ ctx }) => {
+    // Pending post reports joined to their (live) post + author.
+    const pendingReports = await ctx.db
+      .select({
+        reportId: content_report.id,
+        reason: content_report.reason,
+        details: content_report.details,
+        reportCreatedAt: content_report.createdAt,
+        postId: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        authorId: posts.authorId,
+        authorUsername: user.username,
+        authorName: user.name,
+      })
+      .from(content_report)
+      .innerJoin(posts, eq(content_report.postId, posts.id))
+      .leftJoin(user, eq(posts.authorId, user.id))
+      .where(
+        and(
+          eq(content_report.status, "PENDING"),
+          eq(posts.status, "published"),
+          isNotNull(content_report.postId),
+        ),
+      )
+      .orderBy(desc(content_report.createdAt))
+      .limit(200);
+
+    // Group by post. Rows are newest-first, so the first row seen for a post is
+    // its latest report (used for the headline reason/details).
+    const byPost = new Map<
+      string,
+      {
+        id: string;
+        title: string | null;
+        slug: string | null;
+        authorId: string;
+        authorUsername: string | null;
+        authorName: string | null;
+        reportCount: number;
+        reportIds: number[];
+        latestReason: string;
+        latestDetails: string | null;
+        latestReportAt: string | null;
+      }
+    >();
+
+    for (const row of pendingReports) {
+      const existing = byPost.get(row.postId);
+      if (existing) {
+        existing.reportCount += 1;
+        existing.reportIds.push(row.reportId);
+      } else {
+        byPost.set(row.postId, {
+          id: row.postId,
+          title: row.title,
+          slug: row.slug,
+          authorId: row.authorId,
+          authorUsername: row.authorUsername,
+          authorName: row.authorName,
+          reportCount: 1,
+          reportIds: [row.reportId],
+          latestReason: row.reason,
+          latestDetails: row.details,
+          latestReportAt: row.reportCreatedAt,
+        });
+      }
+    }
+
+    return Array.from(byPost.values());
+  }),
+
+  // Moderate a post from the queue.
+  //  - approve : in_review → published (+ points + author notification)
+  //  - reject  : in_review → rejected  (+ stores moderationNote so the author
+  //              later sees "Hidden by moderator" + reason)
+  //  - hide    : published → in_review (a live, reported post leaves the public
+  //              feed and re-enters the review queue for a human decision)
+  // Nothing is ever deleted. When hiding/rejecting a post that has open
+  // reports, those reports are resolved (set to ACTIONED) so they leave the
+  // flagged queue.
+  moderatePost: adminOnlyProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        decision: z.enum(["approve", "reject", "hide"]),
+        note: z.string().max(1000).optional(),
+        // Optional future release time when approving: a future value schedules
+        // the post (the promote-scheduled cron goes it live); missing/past
+        // publishes immediately.
+        publishAt: z.string().datetime().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [existing] = await ctx.db
+        .select({
+          id: posts.id,
+          authorId: posts.authorId,
+          title: posts.title,
+          slug: posts.slug,
+          urlId: posts.urlId,
+          status: posts.status,
+          type: posts.type,
+          sourceId: posts.sourceId,
+          canonicalUrl: posts.canonicalUrl,
+          authorUsername: user.username,
+        })
+        .from(posts)
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .where(eq(posts.id, input.id))
+        .limit(1);
+
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" });
+      }
+
+      // Guards: approve/reject only act on posts awaiting review; hide only acts
+      // on currently-live (published) posts. This keeps actions scoped to the
+      // correct lifecycle state and prevents acting on arbitrary statuses.
+      if (input.decision === "hide") {
+        if (existing.status !== "published") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Only a published post can be hidden",
+          });
+        }
+      } else if (existing.status !== "in_review") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Post is not in review",
+        });
+      }
+
+      // Resolve any open reports for a post (set to ACTIONED) so it leaves the
+      // flagged queue once a moderator hides or rejects it.
+      const resolveOpenReports = async () => {
+        await ctx.db
+          .update(content_report)
+          .set({
+            status: "ACTIONED",
+            actionTaken: "Resolved by moderator",
+            reviewedById: ctx.session.user.id,
+            reviewedAt: new Date().toISOString(),
+          })
+          .where(
+            and(
+              eq(content_report.postId, input.id),
+              eq(content_report.status, "PENDING"),
+            ),
+          );
+      };
+
+      if (input.decision === "hide") {
+        // Move the live post into review and resolve its open reports.
+        const [hidden] = await ctx.db
+          .update(posts)
+          .set({
+            status: "in_review",
+            // Carry the moderator's note (if any) into the review queue so the
+            // reason a live post was pulled is visible to the next reviewer.
+            ...(input.note !== undefined ? { moderationNote: input.note } : {}),
+          })
+          .where(eq(posts.id, input.id))
+          .returning();
+        await resolveOpenReports();
+        return hidden;
+      }
+
+      if (input.decision === "reject") {
+        const [rejected] = await ctx.db
+          .update(posts)
+          .set({
+            status: "rejected",
+            // Store the moderator's reason so the author can later see
+            // "Hidden by moderator" + this note.
+            moderationNote: input.note ?? null,
+          })
+          .where(eq(posts.id, input.id))
+          .returning();
+        // A rejected post may also have open reports (if it was hidden first);
+        // resolve them so they don't linger in the flagged queue.
+        await resolveOpenReports();
+        return rejected;
+      }
+
+      // Ensure the post has a stable slug before approving (now) or scheduling.
+      // The slug's trailing token must be the post's urlId (parseUrlId
+      // contract), so mint one if the row predates the urlId column.
+      const slugUrlId = existing.urlId ?? mintUrlId();
+      const urlIdPatch = existing.urlId ? {} : { urlId: slugUrlId };
+      const slug =
+        existing.slug ||
+        (existing.title ? buildSlug(existing.title, slugUrlId) : existing.slug);
+
+      // Approve & schedule: a FUTURE publishAt parks the post as `scheduled`;
+      // go-live side-effects run from the cron at the real go-live, not now.
+      const publishAt = input.publishAt ? new Date(input.publishAt) : null;
+      if (publishAt && publishAt.getTime() > Date.now()) {
+        const [scheduled] = await ctx.db
+          .update(posts)
+          .set({
+            status: "scheduled",
+            publishedAt: publishAt.toISOString(),
+            slug,
+            ...urlIdPatch,
+          })
+          .where(eq(posts.id, input.id))
+          .returning();
+
+        // Courtesy "approved + scheduled" notification (POST_APPROVED, notifier =
+        // author); the go-live notification fires from the cron later.
+        try {
+          await ctx.db.insert(notification).values({
+            type: POST_APPROVED,
+            userId: existing.authorId,
+            notifierId: existing.authorId,
+            postId: existing.id,
+          });
+        } catch (error) {
+          Sentry.captureException(error);
+        }
+
+        return scheduled;
+      }
+
+      // Approve → publish now, mirroring the normal publish path.
+      const [approved] = await ctx.db
+        .update(posts)
+        .set({
+          status: "published",
+          publishedAt: new Date().toISOString(),
+          slug,
+          ...urlIdPatch,
+        })
+        .where(eq(posts.id, input.id))
+        .returning();
+
+      // Same go-live side-effects the cron runs (points + IndexNow + notification).
+      await runPostGoLiveSideEffects(ctx.db, {
+        id: existing.id,
+        authorId: existing.authorId,
+        type: existing.type,
+        slug: approved?.slug ?? slug,
+        authorUsername: existing.authorUsername,
+        sourceId: existing.sourceId,
+        canonicalUrl: existing.canonicalUrl,
+      });
+
+      return approved;
     }),
 });

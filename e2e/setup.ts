@@ -1,6 +1,14 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
-import { posts, comments, session, user } from "@/server/db/schema";
+import {
+  posts,
+  comments,
+  session,
+  user,
+  follow,
+  point_event,
+  feed_sources,
+} from "@/server/db/schema";
 import {
   articleContent,
   articleExcerpt,
@@ -13,6 +21,17 @@ import {
   E2E_ADMIN_EMAIL,
   E2E_ADMIN_ID,
   E2E_ADMIN_SESSION_ID,
+  E2E_ROUTING_ARTICLE_SLUG,
+  E2E_ROUTING_ARTICLE_URL_ID,
+  E2E_ROUTING_ARTICLE_TITLE,
+  E2E_ROUTING_DISCUSSION_SLUG,
+  E2E_ROUTING_DISCUSSION_URL_ID,
+  E2E_ROUTING_DISCUSSION_TITLE,
+  E2E_ROUTING_SOURCE_SLUG,
+  E2E_ROUTING_SOURCE_NAME,
+  E2E_ROUTING_SOURCE_ARTICLE_SLUG,
+  E2E_ROUTING_SOURCE_ARTICLE_URL_ID,
+  E2E_ROUTING_SOURCE_ARTICLE_TITLE,
 } from "./constants";
 import { eq } from "drizzle-orm";
 
@@ -38,6 +57,9 @@ export const setup = async () => {
     // Clean up any old E2E test posts by slug pattern
     const e2eSlugs = [
       "e2e-test-slug-published",
+      // Dedicated bookmark fixture: only saved.spec.ts touches this post, so
+      // its save/unsave toggling can't race other specs sharing the main one.
+      "e2e-saved-target",
       "e2e-test-slug-scheduled",
       "e2e-test-slug-draft",
       "e2e-nextjs-best-practices",
@@ -49,6 +71,13 @@ export const setup = async () => {
       // Link post slugs
       "e2e-link-published",
       "e2e-link-draft",
+      // Discussion / question slugs (relaunch post kinds)
+      "e2e-discussion-published",
+      "e2e-question-published",
+      // Content-URL routing fixtures (content-urls.spec.ts)
+      E2E_ROUTING_ARTICLE_SLUG,
+      E2E_ROUTING_DISCUSSION_SLUG,
+      E2E_ROUTING_SOURCE_ARTICLE_SLUG,
     ];
 
     for (const slugPattern of e2eSlugs) {
@@ -80,6 +109,20 @@ export const setup = async () => {
         excerpt: articleExcerpt,
         body: articleContent,
         upvotesCount: 10,
+        downvotesCount: 0,
+        readingTime: 2,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "article" as const,
+        title: "Saved Target Article",
+        slug: "e2e-saved-target",
+        excerpt: "Bookmark fixture owned exclusively by saved.spec.ts.",
+        body: articleContent,
+        upvotesCount: 1,
         downvotesCount: 0,
         readingTime: 2,
         status: "published" as const,
@@ -231,6 +274,70 @@ export const setup = async () => {
         authorId: authorId,
         showComments: true,
       },
+      // Discussion + question posts (relaunch kinds) so the Discussions surface
+      // and discussion threads have real content to test against.
+      {
+        type: "discussion" as const,
+        title: "E2E Discussion: what's your testing setup?",
+        slug: "e2e-discussion-published",
+        excerpt: "Share how you test your apps end to end.",
+        body: "What does your end-to-end testing setup look like in 2026?",
+        upvotesCount: 8,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "question" as const,
+        title: "E2E Question: how do you seed test data?",
+        slug: "e2e-question-published",
+        excerpt: "Looking for patterns to seed Playwright fixtures.",
+        body: "How do you keep e2e seed data realistic without it going stale?",
+        upvotesCount: 5,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      // ---------------------------------------------------------------------
+      // Content-URL routing fixtures. Deterministic slug + urlId so the routing
+      // spec can build exact canonical / wrong-words URLs and assert redirects.
+      // ---------------------------------------------------------------------
+      {
+        type: "article" as const,
+        title: E2E_ROUTING_ARTICLE_TITLE,
+        slug: E2E_ROUTING_ARTICLE_SLUG,
+        urlId: E2E_ROUTING_ARTICLE_URL_ID,
+        excerpt: "Canonical member article for URL routing regression tests.",
+        body: "This article exists to pin the /{username}/{slug} canonical URL and its urlId-based self-correcting redirect.",
+        upvotesCount: 3,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
+      {
+        type: "discussion" as const,
+        title: E2E_ROUTING_DISCUSSION_TITLE,
+        slug: E2E_ROUTING_DISCUSSION_SLUG,
+        urlId: E2E_ROUTING_DISCUSSION_URL_ID,
+        excerpt: "Canonical discussion for URL routing regression tests.",
+        body: "This discussion pins the /d/{slug} canonical and the legacy /{username}/{slug} -> /d/{slug} redirect.",
+        upvotesCount: 2,
+        downvotesCount: 0,
+        readingTime: 1,
+        status: "published" as const,
+        publishedAt: now,
+        authorId: authorId,
+        showComments: true,
+      },
     ];
 
     // Insert articles into new posts table
@@ -266,6 +373,149 @@ export const setup = async () => {
         .returning();
 
       console.log("Created E2E test comment");
+    }
+
+    // Seed a threaded conversation on the discussion post (top-level comment +
+    // a nested reply) so the redesigned discussion thread has real data.
+    const discussionPost = insertedPosts.find(
+      (p) => p.slug === "e2e-discussion-published",
+    );
+    if (discussionPost) {
+      const parentPath = generateShortId().replace(/[^a-zA-Z0-9]/g, "");
+      const [parent] = await db
+        .insert(comments)
+        .values({
+          postId: discussionPost.id,
+          body: "We run Playwright against a seeded Postgres — works great.",
+          authorId: commenterId,
+          path: parentPath,
+          depth: 0,
+        })
+        .onConflictDoNothing()
+        .returning();
+
+      if (parent) {
+        const childPath = `${parentPath}.${generateShortId().replace(/[^a-zA-Z0-9]/g, "")}`;
+        await db
+          .insert(comments)
+          .values({
+            postId: discussionPost.id,
+            body: "Same here — the trick is cleaning up between runs.",
+            authorId: authorId,
+            parentId: parent.id,
+            path: childPath,
+            depth: 1,
+          })
+          .onConflictDoNothing();
+      }
+      console.log("Created E2E discussion thread");
+    }
+  };
+
+  // Follow graph: user two follows user one, so Following feed + followers/
+  // following lists have data. Cleaned up via the user-delete cascade.
+  const seedE2EFollow = async (followerId: string, followingId: string) => {
+    await db
+      .insert(follow)
+      .values({ followerId, followingId })
+      .onConflictDoNothing();
+  };
+
+  // Profile extras: topics (drives onboarding "pick topics" win + interests),
+  // a referral code, and a few point events (drives the progress card + the
+  // Achievements tab). Cleaned up via the user-delete cascade.
+  const seedE2EProfile = async (userId: string) => {
+    await db
+      .update(user)
+      .set({
+        topics: ["AI", "Testing", "DevOps"],
+        experienceLevel: "intermediate",
+        onboardedAt: new Date().toISOString(),
+        referralCode: "e2eref01",
+      })
+      .where(eq(user.id, userId));
+
+    await db
+      .insert(point_event)
+      .values([
+        {
+          userId,
+          action: "post_published" as const,
+          points: 10,
+          sourceType: "post",
+          sourceId: "e2e-seed-1",
+        },
+        {
+          userId,
+          action: "daily_active" as const,
+          points: 1,
+          sourceType: "day",
+          sourceId: "e2e-seed-day",
+        },
+      ])
+      .onConflictDoNothing();
+  };
+
+  // Aggregated/source fixtures for the /s/{sourceSlug} routes + the legacy
+  // /{sourceSlug} -> /s/{sourceSlug} redirect. Creates a deterministic feed
+  // source and one published "imported" link post under it (aggregated content
+  // is author = the source's linked user + sourceId set). Idempotent: cleans up
+  // the prior fixture post + source by slug so the seed can re-run.
+  const seedE2ESource = async (linkedUserId: string) => {
+    // Remove a prior fixture article (FK-safe: comments first) then the source.
+    const priorPosts = await db
+      .select({ id: posts.id })
+      .from(posts)
+      .where(eq(posts.slug, E2E_ROUTING_SOURCE_ARTICLE_SLUG));
+    for (const p of priorPosts) {
+      await db.delete(comments).where(eq(comments.postId, p.id));
+    }
+    await db
+      .delete(posts)
+      .where(eq(posts.slug, E2E_ROUTING_SOURCE_ARTICLE_SLUG));
+    await db
+      .delete(feed_sources)
+      .where(eq(feed_sources.slug, E2E_ROUTING_SOURCE_SLUG));
+
+    const [source] = await db
+      .insert(feed_sources)
+      .values({
+        name: E2E_ROUTING_SOURCE_NAME,
+        // url has a unique index; keep it deterministic + namespaced.
+        url: "https://e2e-routing-source.example.com/rss.xml",
+        websiteUrl: "https://e2e-routing-source.example.com",
+        slug: E2E_ROUTING_SOURCE_SLUG,
+        category: "webdev",
+        description: "Deterministic feed source for URL routing E2E tests.",
+        status: "active" as const,
+        userId: linkedUserId,
+      })
+      .onConflictDoNothing()
+      .returning();
+
+    if (source) {
+      await db
+        .insert(posts)
+        .values({
+          type: "link" as const,
+          title: E2E_ROUTING_SOURCE_ARTICLE_TITLE,
+          slug: E2E_ROUTING_SOURCE_ARTICLE_SLUG,
+          urlId: E2E_ROUTING_SOURCE_ARTICLE_URL_ID,
+          excerpt: "Imported source article for URL routing regression tests.",
+          body: "",
+          externalUrl: "https://e2e-routing-source.example.com/posts/hello",
+          sourceId: source.id,
+          upvotesCount: 1,
+          downvotesCount: 0,
+          readingTime: 1,
+          status: "published" as const,
+          publishedAt: new Date().toISOString(),
+          // Aggregated content is authored by the source's linked user.
+          authorId: linkedUserId,
+          showComments: true,
+        })
+        .onConflictDoNothing();
+      console.log("Created E2E routing source + aggregated article");
     }
   };
 
@@ -362,6 +612,13 @@ export const setup = async () => {
 
     console.log("Creating articles");
     await addE2EArticleAndComment(E2E_USER_ONE_ID, E2E_USER_TWO_ID);
+
+    console.log("Creating follow graph + profile data");
+    await seedE2EFollow(E2E_USER_TWO_ID, E2E_USER_ONE_ID);
+    await seedE2EProfile(E2E_USER_ONE_ID);
+
+    console.log("Creating routing source fixtures");
+    await seedE2ESource(E2E_USER_ONE_ID);
 
     console.log("DB setup successful");
   } catch (err) {

@@ -92,7 +92,7 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
           >
             <item.icon
               className={cn("h-4 w-4", {
-                "text-pink-200": item.isActive(),
+                "text-accent": item.isActive(),
               })}
             />
           </button>

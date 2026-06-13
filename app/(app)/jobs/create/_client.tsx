@@ -27,9 +27,10 @@ import { saveJobsSchema } from "@/schema/job";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 import { uploadFile } from "@/utils/s3helpers";
 import { getUploadUrl } from "@/app/actions/getUploadUrl";
+import { api } from "@/server/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { Controller, useForm } from "react-hook-form";
@@ -37,12 +38,13 @@ import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
 export default function Content() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
     reset,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<saveJobsInput>({
     resolver: zodResolver(saveJobsSchema),
     defaultValues: {
@@ -55,20 +57,42 @@ export default function Content() {
       relocation: false,
       visa_sponsorship: false,
       jobType: "full-time",
+      aiNative: false,
+      tags: [],
     },
   });
   const flagEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [tagInput, setTagInput] = useState("");
   const [uploadStatus, setUploadStatus] = useState<
     "idle" | "pending" | "success" | "error"
   >("idle");
+
+  const createJob = api.job.create.useMutation({
+    onSuccess: (data) => {
+      toast.success("Job submitted! We'll review it shortly.");
+      reset();
+      setImgUrl(null);
+      setTagInput("");
+      router.push(`/jobs/${data.slug}`);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Something went wrong. Please try again.");
+    },
+  });
+
   const onSubmit: SubmitHandler<saveJobsInput> = (values) => {
-    const formData = {
+    const tags = tagInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+    createJob.mutate({
       ...values,
       companyLogo: imgUrl || undefined,
-    };
-    console.log(formData);
+      tags,
+    });
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -363,6 +387,41 @@ export default function Content() {
 
       <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
         <div className="space-y-1">
+          <Subheading level={2}>AI &amp; tags</Subheading>
+          <Text>Help builders find this role.</Text>
+        </div>
+        <Field>
+          <CheckboxGroup>
+            <CheckboxField>
+              <Controller
+                name="aiNative"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox checked={field.value} onChange={field.onChange} />
+                )}
+              />
+              <Label>This is an AI-native role</Label>
+              <Description>
+                Building with AI is core to the work (LLM apps, agents, etc.)
+              </Description>
+            </CheckboxField>
+          </CheckboxGroup>
+          <Input
+            className="mt-3"
+            placeholder="Tags, comma separated (e.g. LLM, agents, Next.js)"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+          />
+          <Text className="mt-1 text-xs text-gray-500">
+            Up to 8 tags. Used for filtering on the jobs board.
+          </Text>
+        </Field>
+      </section>
+
+      <Divider className="my-10" soft />
+
+      <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+        <div className="space-y-1">
           <Subheading level={2}>Terms & Conditions</Subheading>
           <Text>Ah yes, the fine print.</Text>
         </div>
@@ -403,11 +462,11 @@ export default function Content() {
       <div className="flex justify-end">
         <Button
           className="rounded-md"
-          color="pink"
+          color="accent"
           type="submit"
-          disabled={isSubmitting}
+          disabled={createJob.isPending}
         >
-          Submit and checkout
+          {createJob.isPending ? "Submitting..." : "Submit and checkout"}
         </Button>
       </div>
     </form>

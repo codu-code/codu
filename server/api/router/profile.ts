@@ -1,4 +1,11 @@
-import { user } from "@/server/db/schema";
+import { z } from "zod";
+import {
+  user,
+  comments,
+  posts,
+  feed_sources as feedSources,
+} from "@/server/db/schema";
+import { buildCommentHref } from "@/server/lib/content-url";
 import {
   saveSettingsSchema,
   getProfileSchema,
@@ -8,21 +15,84 @@ import {
 
 import { getPresignedUrl } from "@/server/common/getPresignedUrl";
 
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import {
   isUserSubscribedToNewsletter,
   manageNewsletterSubscription,
 } from "@/server/lib/newsletter";
+import { isReservedUsername } from "@/server/lib/reserved-usernames";
+import { checkBadges } from "@/server/lib/engagement";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
-import { and, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, ne, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { emailTokenReqSchema } from "@/schema/token";
 import { generateEmailToken, sendVerificationEmail } from "@/utils/emailToken";
 import { TOKEN_EXPIRATION_TIME } from "@/config/constants";
 import { emailChangeRequest } from "@/server/db/schema";
 
 export const profileRouter = createTRPCRouter({
-  edit: protectedProcedure
+  // The signed-in user's chosen topics ("Your topics" / onboarding).
+  myInterests: protectedProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.db
+      .select({
+        topics: user.topics,
+        onboardedAt: user.onboardedAt,
+        experienceLevel: user.experienceLevel,
+      })
+      .from(user)
+      .where(eq(user.id, ctx.session.user.id))
+      .limit(1);
+    return {
+      topics: row?.topics ?? [],
+      onboardedAt: row?.onboardedAt ?? null,
+      experienceLevel: row?.experienceLevel ?? null,
+    };
+  }),
+
+  // Save the user's topics (and optional onboarding fields). Topics are capped
+  // and trimmed so the column can't be stuffed.
+  updateInterests: protectedProcedure
+    .input(
+      z.object({
+        topics: z.array(z.string().min(1).max(40)).max(24),
+        experienceLevel: z.string().max(40).optional(),
+        markOnboarded: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const topics = Array.from(
+        new Set(input.topics.map((t) => t.trim()).filter(Boolean)),
+      ).slice(0, 24);
+      const set: Record<string, unknown> = { topics };
+      if (input.experienceLevel) set.experienceLevel = input.experienceLevel;
+      if (input.markOnboarded) set.onboardedAt = new Date().toISOString();
+      const [row] = await ctx.db
+        .update(user)
+        .set(set)
+        .where(eq(user.id, ctx.session.user.id))
+        .returning({ topics: user.topics, onboardedAt: user.onboardedAt });
+      // Topic picks are an onboarding-badge input; no points awarded here, so
+      // run the badge check explicitly. Never throws.
+      await checkBadges(ctx.session.user.id);
+      return {
+        topics: row?.topics ?? topics,
+        onboardedAt: row?.onboardedAt ?? null,
+      };
+    }),
+
+  edit: rateLimitedProcedure({
+    name: "profile-edit",
+    limit: 5,
+    windowMs: 10 * 60_000,
+    message:
+      "You're updating your profile too fast. Take a breather and try again.",
+  })
     .input(saveSettingsSchema)
     .mutation(async ({ input, ctx }) => {
       const { email } = ctx.session.user;
@@ -31,6 +101,32 @@ export const profileRouter = createTRPCRouter({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Email not found",
+        });
+      }
+
+      // Usernames share the top-level namespace with routes/content, so block
+      // any handle that would collide with a reserved path.
+      if (isReservedUsername(input.username)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That username is reserved.",
+        });
+      }
+
+      // Case-insensitive uniqueness (GitHub-style). The lower(username) index
+      // also enforces this; this check just gives a clean message.
+      const handleClash = await ctx.db.query.user.findFirst({
+        columns: { id: true },
+        where: (users) =>
+          and(
+            sql`lower(${users.username}) = ${input.username.toLowerCase()}`,
+            ne(users.id, ctx.session.user.id),
+          ),
+      });
+      if (handleClash) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That username is already taken.",
         });
       }
 
@@ -53,9 +149,20 @@ export const profileRouter = createTRPCRouter({
         }
       }
 
+      // Explicitly whitelist updatable columns rather than spreading `input`,
+      // so a future field added to saveSettingsSchema can't silently become
+      // mass-assignable on the user row.
       const [profile] = await ctx.db
         .update(user)
-        .set({ ...input })
+        .set({
+          name: input.name,
+          bio: input.bio,
+          username: input.username,
+          location: input.location,
+          websiteUrl: input.websiteUrl,
+          emailNotifications: input.emailNotifications,
+          newsletter: input.newsletter,
+        })
         .where(eq(user.id, ctx.session.user.id))
         .returning();
 
@@ -117,10 +224,11 @@ export const profileRouter = createTRPCRouter({
     }),
   get: publicProcedure.input(getProfileSchema).query(async ({ ctx, input }) => {
     const { username } = input;
+    // Handles resolve case-insensitively (GitHub-style).
     const [profile] = await ctx.db
       .select()
       .from(user)
-      .where(eq(user.username, username));
+      .where(sql`lower(${user.username}) = ${username.toLowerCase()}`);
 
     if (!profile) {
       throw new TRPCError({
@@ -130,7 +238,78 @@ export const profileRouter = createTRPCRouter({
     }
     return profile;
   }),
-  updateEmail: protectedProcedure
+  // A user's comments/replies, newest first, each linked to the comment anchor
+  // on its published parent content. Profiles are public.
+  userReplies: publicProcedure
+    .input(getProfileSchema)
+    .query(async ({ ctx, input }) => {
+      const { username } = input;
+
+      const [profile] = await ctx.db
+        .select({ id: user.id })
+        .from(user)
+        .where(sql`lower(${user.username}) = ${username.toLowerCase()}`)
+        .limit(1);
+
+      if (!profile) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Profile not found",
+        });
+      }
+
+      // Parent post's author drives member hrefs; aliased so it doesn't collide
+      // with any future join on the comment author.
+      const postAuthor = alias(user, "post_author");
+
+      const rows = await ctx.db
+        .select({
+          id: comments.id,
+          body: comments.body,
+          createdAt: comments.createdAt,
+          parentTitle: posts.title,
+          parentType: posts.type,
+          parentSlug: posts.slug,
+          sourceSlug: feedSources.slug,
+          authorUsername: postAuthor.username,
+        })
+        .from(comments)
+        .innerJoin(posts, eq(comments.postId, posts.id))
+        .leftJoin(feedSources, eq(posts.sourceId, feedSources.id))
+        .leftJoin(postAuthor, eq(posts.authorId, postAuthor.id))
+        .where(
+          and(
+            eq(comments.authorId, profile.id),
+            isNull(comments.deletedAt),
+            eq(posts.status, "published"),
+          ),
+        )
+        .orderBy(desc(comments.createdAt))
+        .limit(30);
+
+      return rows.map((r) => ({
+        id: r.id,
+        body: r.body,
+        createdAt: r.createdAt,
+        parent: {
+          title: r.parentTitle,
+          href: buildCommentHref({
+            commentId: r.id,
+            parentType: r.parentType,
+            parentSlug: r.parentSlug,
+            sourceSlug: r.sourceSlug,
+            authorUsername: r.authorUsername,
+          }),
+        },
+      }));
+    }),
+  updateEmail: rateLimitedProcedure({
+    name: "profile-update-email",
+    limit: 5,
+    windowMs: 10 * 60_000,
+    message:
+      "You're requesting email changes too fast. Take a breather and try again.",
+  })
     .input(emailTokenReqSchema)
     .mutation(async ({ input, ctx }) => {
       const { newEmail } = input;

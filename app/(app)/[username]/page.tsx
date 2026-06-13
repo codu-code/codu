@@ -1,14 +1,13 @@
 import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Content from "./_usernameClient";
-import SourceProfileContent from "./_sourceProfileClient";
 import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
 import { feed_sources } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { JsonLd } from "@/components/JsonLd";
-import { getPersonSchema } from "@/lib/structured-data";
+import { getProfilePageSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -16,23 +15,29 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const username = params.username;
 
-  // First check if it's a user
+  // Case-insensitive handle resolution (GitHub-style) on lower(username).
   const profile = await db.query.user.findFirst({
     columns: {
       bio: true,
       name: true,
+      username: true,
     },
-    where: (users, { eq }) => eq(users.username, username),
+    where: (users) => sql`lower(${users.username}) = ${username.toLowerCase()}`,
   });
 
   if (profile) {
     const { bio, name } = profile;
-    const title = `${name || username} - Codú Profile | Codú - The Web Developer Community`;
-    const description = `${name || username}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
+    const handle = profile.username ?? username;
+    // Short enough to survive SERP truncation (~60 chars).
+    const title = `${name || handle} (@${handle}) | Codú`;
+    const description = `${name || handle}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
 
     return {
       title,
       description,
+      // Canonical at the stored handle casing (mixed-case requests 301 anyway;
+      // this guards query-param duplicates).
+      alternates: { canonical: `/${handle}` },
       openGraph: {
         title,
         description,
@@ -56,26 +61,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  // Check if it's a feed source
-  const source = await db.query.feed_sources.findFirst({
-    where: eq(feed_sources.slug, username),
-  });
-
-  if (source) {
-    return {
-      title: `${source.name} | Codú Feed`,
-      description:
-        source.description || `Articles from ${source.name} on Codú Feed`,
-      openGraph: {
-        title: source.name,
-        description:
-          source.description || `Articles from ${source.name} on Codú Feed`,
-        images: source.logoUrl ? [source.logoUrl] : undefined,
-      },
-    };
-  }
-
-  // Neither user nor source found
+  // Feed sources live at /s/{sourceSlug} (the /s/ route owns their metadata).
   return { title: "Profile Not Found" };
 }
 
@@ -98,6 +84,9 @@ export default async function Page(props: {
       image: true,
       id: true,
       websiteUrl: true,
+      location: true,
+      topics: true,
+      createdAt: true,
     },
     with: {
       posts: {
@@ -117,10 +106,17 @@ export default async function Page(props: {
         orderBy: (posts, { desc }) => [desc(posts.publishedAt)],
       },
     },
-    where: (users, { eq }) => eq(users.username, username),
+    // Case-insensitive handle resolution (GitHub-style).
+    where: (users) => sql`lower(${users.username}) = ${username.toLowerCase()}`,
   });
 
   if (profile) {
+    // Canonicalize casing: 301 to the handle's stored display casing so there's
+    // one indexable URL per profile.
+    if (profile.username && profile.username !== username) {
+      permanentRedirect(`/${profile.username}`);
+    }
+
     const bannedUser = await db.query.banned_users.findFirst({
       where: (bannedUsers, { eq }) => eq(bannedUsers.userId, profile.id),
     });
@@ -135,33 +131,35 @@ export default async function Page(props: {
       accountLocked,
     };
 
-    // Prepare Person JSON-LD for SEO
-    const personSchema = getPersonSchema({
+    // ProfilePage JSON-LD (wraps a Person mainEntity) for profile SEO.
+    const profilePageSchema = getProfilePageSchema({
       name: shapedProfile.name,
       username: shapedProfile.username,
       image: shapedProfile.image,
       bio: shapedProfile.bio,
       websiteUrl: shapedProfile.websiteUrl,
+      createdAt: shapedProfile.createdAt,
     });
 
     return (
       <>
-        {/* Person JSON-LD for profile SEO */}
-        <JsonLd data={personSchema} />
+        <JsonLd data={profilePageSchema} />
 
-        <h1 className="sr-only">{`${shapedProfile.name || shapedProfile.username}'s Coding Profile`}</h1>
+        {/* The visible profile name (rendered as <h1> in _usernameClient) is the
+            single page h1 — no separate sr-only h1 to avoid duplicate headings. */}
         <Content profile={shapedProfile} isOwner={isOwner} session={session} />
       </>
     );
   }
 
-  // Check if it's a feed source
+  // /{username} is users-only: a non-user segment that IS a feed source 301s to /s/.
   const source = await db.query.feed_sources.findFirst({
+    columns: { slug: true },
     where: eq(feed_sources.slug, username),
   });
 
   if (source) {
-    return <SourceProfileContent sourceSlug={username} />;
+    permanentRedirect(`/s/${username}`);
   }
 
   // Neither user nor source found

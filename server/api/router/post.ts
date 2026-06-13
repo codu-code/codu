@@ -1,18 +1,16 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
+import { award } from "@/server/lib/engagement";
 import {
   GetFeedSchema,
   GetPostByIdSchema,
   GetPostBySlugSchema,
-  CreatePostSchema,
-  SavePostSchema,
   DeletePostSchema,
   VotePostSchema,
   BookmarkPostSchema,
   GetUserPostsSchema,
   GetBookmarkedPostsSchema,
   GetByIdSchema,
-  PublishPostSchema,
   GetPostsSchema,
   GetLimitSidePosts,
   FeaturePostSchema,
@@ -28,6 +26,7 @@ import {
   tag,
   user,
   banned_users,
+  point_event,
 } from "@/server/db/schema";
 import {
   and,
@@ -44,29 +43,9 @@ import {
   isNull,
 } from "drizzle-orm";
 import { increment } from "./utils";
-import crypto from "crypto";
-
-// Helper to generate slug from title
-function generateSlug(title: string): string {
-  const baseSlug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .substring(0, 80);
-  const uniqueId = crypto.randomBytes(3).toString("hex");
-  return `${baseSlug}-${uniqueId}`;
-}
-
-// Helper to calculate read time
-function calculateReadTime(body: string | null | undefined): number {
-  if (!body) return 1;
-  const wordsPerMinute = 200;
-  const words = body.trim().split(/\s+/).length;
-  return Math.max(1, Math.ceil(words / wordsPerMinute));
-}
+import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 
 export const postRouter = createTRPCRouter({
-  // Get unified feed with optional type filtering
   getFeed: publicProcedure
     .input(GetFeedSchema)
     .query(async ({ ctx, input }) => {
@@ -74,7 +53,6 @@ export const postRouter = createTRPCRouter({
       const limit = input?.limit ?? 25;
       const { cursor, sort, type, sourceId, authorId } = input;
 
-      // Build the vote subquery for current user
       const userVotesSubquery = userId
         ? ctx.db
             .select({
@@ -86,7 +64,6 @@ export const postRouter = createTRPCRouter({
             .as("userVotes")
         : null;
 
-      // Build the bookmark subquery for current user
       const userBookmarksSubquery = userId
         ? ctx.db
             .select({
@@ -97,10 +74,8 @@ export const postRouter = createTRPCRouter({
             .as("userBookmarks")
         : null;
 
-      // Calculate score for trending
       const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
 
-      // Build conditions
       const conditions = [
         eq(posts.status, "published"),
         isNull(banned_users.userId),
@@ -118,7 +93,6 @@ export const postRouter = createTRPCRouter({
         conditions.push(eq(posts.authorId, authorId));
       }
 
-      // Build order by and cursor conditions based on sort type
       const getOrderAndCursor = () => {
         switch (sort) {
           case "recent":
@@ -158,7 +132,6 @@ export const postRouter = createTRPCRouter({
         conditions.push(cursorCondition);
       }
 
-      // Build query
       let query;
       if (userVotesSubquery && userBookmarksSubquery) {
         query = ctx.db
@@ -183,17 +156,14 @@ export const postRouter = createTRPCRouter({
             featured: posts.featured,
             pinnedUntil: posts.pinnedUntil,
             createdAt: posts.createdAt,
-            // Source info
             sourceName: feedSources.name,
             sourceSlug: feedSources.slug,
             sourceLogo: feedSources.logoUrl,
             sourceWebsite: feedSources.websiteUrl,
             sourceCategory: feedSources.category,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User-specific
             userVote: userVotesSubquery.voteType,
             isBookmarked: sql<boolean>`${userBookmarksSubquery.postId} IS NOT NULL`,
           })
@@ -232,17 +202,15 @@ export const postRouter = createTRPCRouter({
             featured: posts.featured,
             pinnedUntil: posts.pinnedUntil,
             createdAt: posts.createdAt,
-            // Source info
             sourceName: feedSources.name,
             sourceSlug: feedSources.slug,
             sourceLogo: feedSources.logoUrl,
             sourceWebsite: feedSources.websiteUrl,
             sourceCategory: feedSources.category,
-            // Author info
             authorName: user.name,
             authorUsername: user.username,
             authorImage: user.image,
-            // User-specific (null when not logged in)
+            // null when not logged in
             userVote: sql<"up" | "down" | null>`NULL`,
             isBookmarked: sql<boolean>`FALSE`,
           })
@@ -257,7 +225,6 @@ export const postRouter = createTRPCRouter({
 
       const results = await query;
 
-      // Check if there's a next page
       let nextCursor:
         | { id: string; publishedAt?: string; score?: number }
         | undefined;
@@ -277,7 +244,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get post by ID
   getById: publicProcedure
     .input(GetPostByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -309,13 +275,11 @@ export const postRouter = createTRPCRouter({
           pinnedUntil: posts.pinnedUntil,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Source info
           sourceName: feedSources.name,
           sourceSlug: feedSources.slug,
           sourceLogo: feedSources.logoUrl,
           sourceWebsite: feedSources.websiteUrl,
           sourceCategory: feedSources.category,
-          // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
@@ -335,7 +299,6 @@ export const postRouter = createTRPCRouter({
 
       const item = results[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
@@ -368,7 +331,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get post by slug
   getBySlug: publicProcedure
     .input(GetPostBySlugSchema)
     .query(async ({ ctx, input }) => {
@@ -400,13 +362,11 @@ export const postRouter = createTRPCRouter({
           pinnedUntil: posts.pinnedUntil,
           createdAt: posts.createdAt,
           updatedAt: posts.updatedAt,
-          // Source info
           sourceName: feedSources.name,
           sourceSlug: feedSources.slug,
           sourceLogo: feedSources.logoUrl,
           sourceWebsite: feedSources.websiteUrl,
           sourceCategory: feedSources.category,
-          // Author info
           authorName: user.name,
           authorUsername: user.username,
           authorImage: user.image,
@@ -426,7 +386,6 @@ export const postRouter = createTRPCRouter({
 
       const item = results[0];
 
-      // Get user vote if logged in
       let userVote: "up" | "down" | null = null;
       let isBookmarked = false;
 
@@ -459,181 +418,12 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Create new post
-  create: protectedProcedure
-    .input(CreatePostSchema)
-    .mutation(async ({ ctx, input }) => {
-      const authorId = ctx.session.user.id;
-
-      // Validate based on post type
-      if (input.type === "article" && !input.body) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Body is required for articles",
-        });
-      }
-
-      if (
-        (input.type === "link" || input.type === "resource") &&
-        !input.externalUrl
-      ) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "External URL is required for links and resources",
-        });
-      }
-
-      const slug = generateSlug(input.title);
-      const readingTime = calculateReadTime(input.body);
-
-      const [newPost] = await ctx.db
-        .insert(posts)
-        .values({
-          type: input.type,
-          title: input.title,
-          body: input.body,
-          excerpt: input.excerpt,
-          externalUrl: input.externalUrl,
-          coverImage: input.coverImage,
-          canonicalUrl: input.canonicalUrl,
-          authorId,
-          slug,
-          readingTime,
-          status: input.status,
-          publishedAt:
-            input.status === "published" ? new Date().toISOString() : null,
-          showComments: input.showComments,
-        })
-        .returning();
-
-      // Add tags if provided
-      if (input.tags && input.tags.length > 0) {
-        for (const tagName of input.tags) {
-          // Try to find existing tag
-          const existingTags = await ctx.db
-            .select({ id: tag.id })
-            .from(tag)
-            .where(eq(tag.title, tagName.toLowerCase()))
-            .limit(1);
-
-          let tagId: number;
-          if (existingTags.length > 0) {
-            tagId = existingTags[0].id;
-          } else {
-            // Create new tag
-            const [newTag] = await ctx.db
-              .insert(tag)
-              .values({ title: tagName.toLowerCase() })
-              .returning();
-            tagId = newTag.id;
-          }
-
-          // Link tag to post
-          await ctx.db
-            .insert(postTags)
-            .values({ postId: newPost.id, tagId })
-            .onConflictDoNothing();
-        }
-      }
-
-      return newPost;
-    }),
-
-  // Update/save post
-  update: protectedProcedure
-    .input(SavePostSchema)
-    .mutation(async ({ ctx, input }) => {
-      const authorId = ctx.session.user.id;
-
-      // Check ownership
-      const existing = await ctx.db
-        .select({ authorId: posts.authorId, type: posts.type })
-        .from(posts)
-        .where(eq(posts.id, input.id))
-        .limit(1);
-
-      if (existing.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Post not found",
-        });
-      }
-
-      if (existing[0].authorId !== authorId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You can only edit your own posts",
-        });
-      }
-
-      const updateData: Record<string, unknown> = {
-        updatedAt: new Date(),
-      };
-      if (input.title !== undefined) updateData.title = input.title;
-      if (input.body !== undefined) {
-        updateData.body = input.body;
-        updateData.readingTime = calculateReadTime(input.body);
-      }
-      if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
-      if (input.canonicalUrl !== undefined)
-        updateData.canonicalUrl = input.canonicalUrl || null;
-      if (input.status !== undefined) {
-        updateData.status = input.status;
-        if (input.status === "published" && input.publishedAt) {
-          updateData.publishedAt = input.publishedAt;
-        } else if (input.status === "published") {
-          updateData.publishedAt = new Date().toISOString();
-        }
-      }
-
-      const [updated] = await ctx.db
-        .update(posts)
-        .set(updateData)
-        .where(eq(posts.id, input.id))
-        .returning();
-
-      // Update tags if provided
-      if (input.tags !== undefined) {
-        // Remove existing tags
-        await ctx.db.delete(postTags).where(eq(postTags.postId, input.id));
-
-        // Add new tags
-        for (const tagName of input.tags) {
-          const existingTags = await ctx.db
-            .select({ id: tag.id })
-            .from(tag)
-            .where(eq(tag.title, tagName.toLowerCase()))
-            .limit(1);
-
-          let tagId: number;
-          if (existingTags.length > 0) {
-            tagId = existingTags[0].id;
-          } else {
-            const [newTag] = await ctx.db
-              .insert(tag)
-              .values({ title: tagName.toLowerCase() })
-              .returning();
-            tagId = newTag.id;
-          }
-
-          await ctx.db
-            .insert(postTags)
-            .values({ postId: input.id, tagId })
-            .onConflictDoNothing();
-        }
-      }
-
-      return updated;
-    }),
-
-  // Delete post
   delete: protectedProcedure
     .input(DeletePostSchema)
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.session.user.id;
       const isAdmin = ctx.session.user.role === "ADMIN";
 
-      // Check ownership
       const existing = await ctx.db
         .select({ authorId: posts.authorId })
         .from(posts)
@@ -659,16 +449,15 @@ export const postRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Vote on post (Reddit-style)
   vote: protectedProcedure
     .input(VotePostSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { postId, voteType } = input;
 
-      // Check if post exists
+      // Check if post exists (author needed for upvote points).
       const postItem = await ctx.db
-        .select({ id: posts.id })
+        .select({ id: posts.id, authorId: posts.authorId })
         .from(posts)
         .where(eq(posts.id, postId))
         .limit(1);
@@ -680,51 +469,77 @@ export const postRouter = createTRPCRouter({
         });
       }
 
-      // Get existing vote
       const existingVote = await ctx.db
         .select({ id: postVotes.id, voteType: postVotes.voteType })
         .from(postVotes)
         .where(and(eq(postVotes.postId, postId), eq(postVotes.userId, userId)))
         .limit(1);
 
+      // Whether a previous "up" vote is going away (removed or switched to
+      // "down"). Used to revoke the author's upvote_received points.
+      const revokingUpvote =
+        existingVote.length > 0 &&
+        existingVote[0].voteType === "up" &&
+        voteType !== "up";
+
       // Database triggers handle vote count updates automatically (tr_post_vote_counts)
       if (voteType === null) {
-        // Remove vote
         if (existingVote.length > 0) {
           await ctx.db
             .delete(postVotes)
             .where(eq(postVotes.id, existingVote[0].id));
         }
-        return { voteType: null };
       } else if (existingVote.length === 0) {
-        // New vote
         await ctx.db.insert(postVotes).values({
           postId,
           userId,
           voteType,
         });
-        return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
-        // Change vote
         await ctx.db
           .update(postVotes)
           .set({ voteType })
           .where(eq(postVotes.id, existingVote[0].id));
-        return { voteType };
       }
 
-      // Same vote, no change needed
+      // Mirror content.vote so the author earns points consistently whichever
+      // vote path the UI uses. The dedupe index makes the award idempotent per
+      // (voter, post), so awarding from both routers can't double-count.
+      if (revokingUpvote) {
+        await ctx.db
+          .delete(point_event)
+          .where(
+            and(
+              eq(point_event.action, "upvote_received"),
+              eq(point_event.sourceId, postId),
+              eq(point_event.actorId, userId),
+            ),
+          );
+      }
+
+      if (
+        voteType === "up" &&
+        postItem[0].authorId &&
+        postItem[0].authorId !== userId
+      ) {
+        await award({
+          userId: postItem[0].authorId,
+          action: "upvote_received",
+          sourceType: "post",
+          sourceId: postId,
+          actorId: userId,
+        });
+      }
+
       return { voteType };
     }),
 
-  // Bookmark post
   bookmark: protectedProcedure
     .input(BookmarkPostSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const { postId, setBookmarked } = input;
 
-      // Check if post exists
       const postItem = await ctx.db
         .select({ id: posts.id })
         .from(posts)
@@ -754,7 +569,6 @@ export const postRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Get sidebar data for a post
   sidebarData: publicProcedure
     .input(GetByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -797,7 +611,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get user's posts
   getUserPosts: publicProcedure
     .input(GetUserPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -853,7 +666,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Get bookmarked posts for current user
   myBookmarks: protectedProcedure
     .input(GetBookmarkedPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -874,6 +686,7 @@ export const postRouter = createTRPCRouter({
           excerpt: posts.excerpt,
           externalUrl: posts.externalUrl,
           slug: posts.slug,
+          urlId: posts.urlId,
           publishedAt: posts.publishedAt,
           upvotesCount: posts.upvotesCount,
           downvotesCount: posts.downvotesCount,
@@ -908,60 +721,6 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  // Edit Draft - get user's own post by ID for editing
-  editDraft: protectedProcedure
-    .input(GetByIdSchema)
-    .query(async ({ ctx, input }) => {
-      const authorId = ctx.session.user.id;
-
-      const results = await ctx.db
-        .select({
-          id: posts.id,
-          type: posts.type,
-          title: posts.title,
-          body: posts.body,
-          excerpt: posts.excerpt,
-          externalUrl: posts.externalUrl,
-          canonicalUrl: posts.canonicalUrl,
-          coverImage: posts.coverImage,
-          slug: posts.slug,
-          status: posts.status,
-          publishedAt: posts.publishedAt,
-          showComments: posts.showComments,
-          readingTime: posts.readingTime,
-          createdAt: posts.createdAt,
-          updatedAt: posts.updatedAt,
-        })
-        .from(posts)
-        .where(and(eq(posts.id, input.id), eq(posts.authorId, authorId)))
-        .limit(1);
-
-      if (results.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Post not found or you don't have permission to edit it",
-        });
-      }
-
-      // Get tags for this post
-      const postTagsResult = await ctx.db
-        .select({
-          tag: {
-            id: tag.id,
-            title: tag.title,
-          },
-        })
-        .from(postTags)
-        .innerJoin(tag, eq(postTags.tagId, tag.id))
-        .where(eq(postTags.postId, input.id));
-
-      return {
-        ...results[0],
-        tags: postTagsResult,
-      };
-    }),
-
-  // My Drafts - get user's draft posts (articles)
   myDrafts: protectedProcedure.query(async ({ ctx }) => {
     const authorId = ctx.session.user.id;
 
@@ -988,7 +747,6 @@ export const postRouter = createTRPCRouter({
       .orderBy(desc(posts.updatedAt));
   }),
 
-  // My Published - get user's published posts (articles)
   myPublished: protectedProcedure.query(async ({ ctx }) => {
     const authorId = ctx.session.user.id;
     const now = new Date().toISOString();
@@ -1020,7 +778,6 @@ export const postRouter = createTRPCRouter({
       .orderBy(desc(posts.publishedAt));
   }),
 
-  // My Scheduled - get user's scheduled posts (publishedAt > now)
   myScheduled: protectedProcedure.query(async ({ ctx }) => {
     const authorId = ctx.session.user.id;
     const now = new Date().toISOString();
@@ -1049,71 +806,6 @@ export const postRouter = createTRPCRouter({
       .orderBy(asc(posts.publishedAt));
   }),
 
-  // Publish - publish/unpublish/schedule a post
-  publish: protectedProcedure
-    .input(PublishPostSchema)
-    .mutation(async ({ ctx, input }) => {
-      const authorId = ctx.session.user.id;
-
-      // Check ownership
-      const existing = await ctx.db
-        .select({
-          id: posts.id,
-          authorId: posts.authorId,
-          title: posts.title,
-          slug: posts.slug,
-          status: posts.status,
-        })
-        .from(posts)
-        .where(eq(posts.id, input.id))
-        .limit(1);
-
-      if (existing.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Post not found",
-        });
-      }
-
-      if (existing[0].authorId !== authorId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You can only publish your own posts",
-        });
-      }
-
-      const updateData: Record<string, unknown> = {};
-
-      if (input.published) {
-        updateData.status = "published";
-        if (input.publishTime) {
-          updateData.publishedAt = input.publishTime.toISOString();
-          // If publish time is in the future, mark as scheduled
-          if (input.publishTime > new Date()) {
-            updateData.status = "scheduled";
-          }
-        } else {
-          updateData.publishedAt = new Date().toISOString();
-        }
-
-        // Generate new slug if this is the first time publishing
-        if (existing[0].status === "draft" && existing[0].title) {
-          updateData.slug = generateSlug(existing[0].title);
-        }
-      } else {
-        updateData.status = "draft";
-      }
-
-      const [updated] = await ctx.db
-        .update(posts)
-        .set(updateData)
-        .where(eq(posts.id, input.id))
-        .returning();
-
-      return updated;
-    }),
-
-  // Get categories (from sources)
   getCategories: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .selectDistinct({ category: feedSources.category })
@@ -1126,7 +818,6 @@ export const postRouter = createTRPCRouter({
       .sort();
   }),
 
-  // Get post types count
   getTypeCounts: publicProcedure.query(async ({ ctx }) => {
     const results = await ctx.db
       .select({
@@ -1140,19 +831,26 @@ export const postRouter = createTRPCRouter({
     return results;
   }),
 
-  // Track view on a post
   trackView: publicProcedure
     .input(GetByIdSchema)
     .mutation(async ({ ctx, input }) => {
+      // Feeds trending/popular sort — throttle per client+post so it can't be scripted to inflate view counts.
+      const identifier =
+        ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`;
+      await enforceRateLimit({
+        key: `trackView:${identifier}:${input.id}`,
+        limit: 10,
+        windowMs: 60_000,
+      });
+
       await ctx.db
         .update(posts)
         .set({ viewsCount: increment(posts.viewsCount) })
-        .where(eq(posts.id, input.id));
+        .where(and(eq(posts.id, input.id), eq(posts.status, "published")));
 
       return { success: true };
     }),
 
-  // Feature a post (admin only)
   feature: protectedProcedure
     .input(FeaturePostSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1174,7 +872,6 @@ export const postRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Pin a post (admin only)
   pin: protectedProcedure
     .input(PinPostSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1196,7 +893,6 @@ export const postRouter = createTRPCRouter({
       return updated;
     }),
 
-  // Get featured posts
   getFeatured: publicProcedure
     .input(GetLimitSidePosts)
     .query(async ({ ctx, input }) => {
@@ -1224,7 +920,6 @@ export const postRouter = createTRPCRouter({
         .limit(limit);
     }),
 
-  // Get comment count for a post
   getCommentCount: publicProcedure
     .input(GetByIdSchema)
     .query(async ({ ctx, input }) => {
@@ -1236,7 +931,7 @@ export const postRouter = createTRPCRouter({
       return result.count;
     }),
 
-  // Legacy: Get published posts (for backwards compatibility)
+  // Legacy: kept for backwards compatibility.
   published: publicProcedure
     .input(GetPostsSchema)
     .query(async ({ ctx, input }) => {
@@ -1344,7 +1039,6 @@ export const postRouter = createTRPCRouter({
         .limit(limit + 1)
         .orderBy(paginationMapping[sort].orderBy);
 
-      // Calculate hotScore for each post
       const calculateHotScore = (
         upvotes: number,
         downvotes: number,
@@ -1373,7 +1067,6 @@ export const postRouter = createTRPCRouter({
           currentUserBookmarkedPost,
           userVote: elem.userVote?.voteType ?? null,
           hotScore,
-          // Legacy field mappings
           likes: elem.post.upvotes,
         };
       });

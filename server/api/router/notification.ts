@@ -6,6 +6,22 @@ import {
 } from "../../../schema/notification";
 import { notification } from "@/server/db/schema";
 import { and, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import {
+  NEW_COMMENT_ON_YOUR_POST,
+  NEW_REPLY_TO_YOUR_COMMENT,
+  NEW_FOLLOWER,
+  POST_APPROVED,
+  NEW_COMMENT_ON_FOLLOWED_POST,
+} from "@/utils/notifications";
+
+// Notification types surfaced in the notifications list / unread count.
+const VISIBLE_NOTIFICATION_TYPES = [
+  NEW_COMMENT_ON_YOUR_POST,
+  NEW_REPLY_TO_YOUR_COMMENT,
+  NEW_FOLLOWER,
+  POST_APPROVED,
+  NEW_COMMENT_ON_FOLLOWED_POST,
+];
 
 export const notificationRouter = createTRPCRouter({
   delete: protectedProcedure
@@ -60,14 +76,19 @@ export const notificationRouter = createTRPCRouter({
             columns: {
               title: true,
               slug: true,
+              type: true,
+            },
+            with: {
+              author: { columns: { username: true } },
+              // Aggregated content has no author — its link needs /s/{source}.
+              source: { columns: { slug: true } },
             },
           },
         },
         where: (notifications, { eq, and, lte }) =>
           and(
             eq(notifications.userId, userId),
-            inArray(notifications.type, [0, 1]),
-            isNotNull(notifications.postId),
+            inArray(notifications.type, VISIBLE_NOTIFICATION_TYPES),
             isNotNull(notifications.notifierId),
             cursor ? lte(notifications.id, cursor) : undefined,
           ),
@@ -94,8 +115,7 @@ export const notificationRouter = createTRPCRouter({
       .where(
         and(
           eq(notification.userId, userId),
-          inArray(notification.type, [0, 1]),
-          isNotNull(notification.postId),
+          inArray(notification.type, VISIBLE_NOTIFICATION_TYPES),
           isNotNull(notification.notifierId),
         ),
       );

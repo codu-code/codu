@@ -19,8 +19,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 3 : undefined,
+  /* Capped locally too: unbounded workers over-subscribe the single dev
+     server (Turbopack compiles + shared fixtures) and cause timeout flake.
+     4 workers runs the suite faster AND reliably green. */
+  workers: process.env.CI ? 3 : 4,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -40,27 +42,28 @@ export default defineConfig({
     { name: "setup", testMatch: /auth.setup\.ts/ },
     {
       name: "Desktop Chrome",
+      use: { ...devices["Desktop Chrome"] },
     },
 
-    // Example other browsers
-    {
-      name: "Desktop Firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-      },
-    },
-    {
-      name: "Mobile Chrome",
-      use: {
-        ...devices["Pixel 9"],
-      },
-    },
-    {
-      name: "Mobile Safari",
-      use: {
-        ...devices["iPhone 16"],
-      },
-    },
+    // The full cross-browser + mobile matrix is ~4× slower, so it only runs on
+    // CI or when explicitly opted into locally with ALL_BROWSERS=1. Day-to-day
+    // local runs stay on Desktop Chrome for a fast feedback loop.
+    ...(process.env.CI || process.env.ALL_BROWSERS
+      ? [
+          {
+            name: "Desktop Firefox",
+            use: { ...devices["Desktop Firefox"] },
+          },
+          {
+            name: "Mobile Chrome",
+            use: { ...devices["Pixel 9"] },
+          },
+          {
+            name: "Mobile Safari",
+            use: { ...devices["iPhone 16"] },
+          },
+        ]
+      : []),
   ],
 
   outputDir: "playwright-report",

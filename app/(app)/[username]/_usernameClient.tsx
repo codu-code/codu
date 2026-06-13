@@ -6,9 +6,12 @@ import Link from "next/link";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
 import { LinkIcon } from "@heroicons/react/20/solid";
 import { api } from "@/server/trpc/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Session } from "next-auth";
 import { Heading } from "@/components/ui-components/heading";
+import { FollowButton, Tag } from "@/components/ds";
+import { getHostname, safeExternalHref } from "@/utils/url";
+import { getRelativeTime } from "@/utils/relativeTime";
 import { toast } from "sonner";
 
 type Props = {
@@ -30,14 +33,16 @@ type Props = {
     image: string;
     bio: string;
     websiteUrl: string;
+    location: string;
+    topics: string[];
+    createdAt: string;
   };
 };
 
 const Profile = ({ profile, isOwner, session }: Props) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const tabFromParams = searchParams?.get("tab");
 
   const { mutate: banUser } = api.admin.ban.useMutation({
     onSettled() {
@@ -51,8 +56,53 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     },
   });
 
-  const { name, username, image, bio, posts, websiteUrl, id, accountLocked } =
-    profile;
+  const { data: followCounts } = api.follow.counts.useQuery({
+    userId: profile.id,
+  });
+
+  const [listView, setListView] = React.useState<
+    null | "followers" | "following"
+  >(null);
+  const { data: followersList } = api.follow.getFollowers.useQuery(
+    { userId: profile.id },
+    { enabled: listView === "followers" },
+  );
+  const { data: followingList } = api.follow.getFollowing.useQuery(
+    { userId: profile.id },
+    { enabled: listView === "following" },
+  );
+  const listData = listView === "followers" ? followersList : followingList;
+
+  const {
+    name,
+    username,
+    image,
+    bio,
+    posts,
+    websiteUrl,
+    location,
+    topics,
+    createdAt,
+    id,
+    accountLocked,
+  } = profile;
+
+  const joinedLabel = createdAt
+    ? `Joined ${new Date(createdAt).toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      })}`
+    : null;
+
+  const { data: engagement } = api.engagement.profileEngagement.useQuery(
+    { userId: id },
+    { enabled: !accountLocked },
+  );
+
+  const { data: replies } = api.profile.userReplies.useQuery(
+    { username: username ?? "" },
+    { enabled: !accountLocked && !!username },
+  );
 
   const handleBanSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -71,112 +121,394 @@ const Profile = ({ profile, isOwner, session }: Props) => {
     }
   };
 
-  const ARTICLES = "articles";
-  const selectedTab = tabFromParams === ARTICLES ? ARTICLES : ARTICLES;
+  const TABS = ["Posts", "Replies", "Achievements"] as const;
+  type Tab = (typeof TABS)[number];
+
+  // URL is the source of truth: ?tab=posts|replies|achievements (lower-case).
+  const tabParam = searchParams?.get("tab")?.toLowerCase();
+  const tab: Tab =
+    tabParam === "achievements"
+      ? "Achievements"
+      : tabParam === "replies"
+        ? "Replies"
+        : "Posts";
+
+  const setTab = (value: Tab) => {
+    const params = new URLSearchParams(searchParams?.toString());
+    params.set("tab", value.toLowerCase());
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // Show a "Top helper" chip when the user is clearly engaged: a high point
+  // total or any earned badge. Uses existing profileEngagement data only.
+  const earnedBadges = engagement?.badges.filter((b) => b.earned) ?? [];
+  const isTopHelper =
+    !!engagement && (engagement.points >= 100 || earnedBadges.length > 0);
 
   return (
     <>
-      <div className="text-900 mx-auto max-w-2xl px-4 text-black dark:text-white">
-        <div className="pt-6 sm:flex">
-          <div className="mr-4 flex-shrink-0 self-center">
+      <div className="mx-auto max-w-2xl px-4 text-fg">
+        <div className="mt-2 flex flex-col gap-4 px-1 sm:flex-row sm:items-start">
+          <div className="flex-shrink-0">
             {image && (
               <img
-                className="mb-2 h-20 w-20 rounded-full object-cover sm:mb-0 sm:h-24 sm:w-24 lg:h-32 lg:w-32"
+                className="h-24 w-24 rounded-full object-cover ring-4 ring-canvas"
                 alt={`Avatar for ${name}`}
                 src={image}
               />
             )}
           </div>
-          <div className="flex flex-col justify-center">
-            <h1 className="mb-0 text-lg font-bold md:text-xl">{name}</h1>
-            <h2 className="text-sm font-bold text-neutral-500 dark:text-neutral-400">
-              @{username}
-            </h2>
-            <p className="mt-1">{bio}</p>
-            {websiteUrl && !accountLocked && (
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="mb-0 font-display text-2xl font-extrabold tracking-tight text-fg">
+                {name}
+              </h1>
+              {isTopHelper && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 font-mono text-xs text-accent-soft">
+                  ◆ Top helper
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 font-mono text-sm text-faint">@{username}</p>
+          </div>
+          {session && !isOwner && !accountLocked && (
+            <div className="flex-shrink-0">
+              <FollowButton userId={id} />
+            </div>
+          )}
+          {isOwner && !accountLocked && (
+            <div className="flex-shrink-0">
               <Link
-                href={websiteUrl}
-                className="flex flex-row items-center"
-                target="blank"
+                href="/my-posts"
+                className="inline-flex items-center rounded-md border border-hairline bg-elevated px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-hover hover:text-fg"
               >
-                <LinkIcon className="mr-2 h-5 text-neutral-500 dark:text-neutral-400" />
-                <p className="mt-1 text-blue-500">
-                  {getDomainFromUrl(websiteUrl)}
-                </p>
+                Manage posts
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {bio && (
+          <p className="mt-5 max-w-[60ch] px-1 leading-relaxed text-muted">
+            {bio}
+          </p>
+        )}
+
+        {(joinedLabel || location || websiteUrl) && (
+          <div className="mt-4 flex flex-wrap gap-4 px-1 font-mono text-xs text-faint">
+            {joinedLabel && (
+              <span className="inline-flex items-center gap-1">
+                ◷ {joinedLabel}
+              </span>
+            )}
+            {location && (
+              <span className="inline-flex items-center gap-1">
+                ◉ {location}
+              </span>
+            )}
+            {safeExternalHref(websiteUrl) && (
+              <Link
+                href={safeExternalHref(websiteUrl)!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-accent-soft transition-colors hover:text-accent"
+              >
+                <LinkIcon className="h-4" />
+                {getHostname(safeExternalHref(websiteUrl))}
               </Link>
             )}
           </div>
-        </div>
+        )}
+
+        {topics && topics.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2 px-1">
+            {topics.map((t) => (
+              <Tag key={t}>{t}</Tag>
+            ))}
+          </div>
+        )}
+
+        {!accountLocked && (
+          <div className="mt-6 flex flex-wrap gap-8 px-1">
+            <div>
+              <div className="whitespace-nowrap font-display text-2xl font-extrabold text-fg">
+                {posts.length}
+              </div>
+              <div className="font-mono text-xs uppercase tracking-[0.15em] text-faint">
+                Posts
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setListView((v) => (v === "followers" ? null : "followers"))
+              }
+              className="text-left transition-colors hover:opacity-80"
+            >
+              <div className="whitespace-nowrap font-display text-2xl font-extrabold text-fg">
+                {followCounts?.followers ?? 0}
+              </div>
+              <div className="font-mono text-xs uppercase tracking-[0.15em] text-faint">
+                Followers
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setListView((v) => (v === "following" ? null : "following"))
+              }
+              className="text-left transition-colors hover:opacity-80"
+            >
+              <div className="whitespace-nowrap font-display text-2xl font-extrabold text-fg">
+                {followCounts?.following ?? 0}
+              </div>
+              <div className="font-mono text-xs uppercase tracking-[0.15em] text-faint">
+                Following
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Followers / Following list */}
+        {!accountLocked && listView && (
+          <div className="mt-6 rounded-xl border border-hairline bg-surface p-5">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-lg font-bold capitalize text-fg">
+                {listView}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setListView(null)}
+                className="font-mono text-xs text-faint hover:text-fg"
+              >
+                close
+              </button>
+            </div>
+            <div className="mt-4 space-y-3">
+              {!listData && <p className="text-sm text-muted">Loading…</p>}
+              {listData && listData.length === 0 && (
+                <p className="text-sm text-muted">No {listView} yet.</p>
+              )}
+              {listData?.map((u) => (
+                <div key={u.id} className="flex items-center gap-3">
+                  <img
+                    src={u.image || "/images/person.png"}
+                    className="h-9 w-9 rounded-full object-cover"
+                    alt=""
+                  />
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/${u.username}`}
+                      className="block truncate text-sm font-semibold text-fg hover:text-accent"
+                    >
+                      {u.name || u.username}
+                    </Link>
+                    <p className="truncate text-xs text-muted">@{u.username}</p>
+                  </div>
+                  {session && session.user?.id !== u.id && (
+                    <FollowButton userId={u.id} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {accountLocked ? (
-          <div className="mt-8 flex items-center justify-between border-b pb-4 text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-4xl">
+          <div className="mt-8 flex items-center justify-between border-b border-hairline pb-4 font-display text-3xl font-extrabold tracking-tight text-fg sm:text-4xl">
             <Heading level={1}>Account locked 🔒</Heading>
           </div>
         ) : (
-          <div className="mx-auto mt-4 sm:max-w-2xl lg:max-w-5xl">
-            <Heading level={1}>{`Articles (${posts.length})`}</Heading>
-          </div>
-        )}
-        {(() => {
-          switch (selectedTab) {
-            case ARTICLES:
-              return (
-                <div>
-                  {posts.length ? (
-                    posts.map(
-                      ({
-                        slug,
-                        title,
-                        excerpt,
-                        readingTime,
-                        publishedAt,
-                        id,
-                      }) => {
-                        if (!publishedAt) return null;
-                        return (
-                          <div key={slug} className="relative">
-                            <UnifiedContentCard
-                              type="POST"
-                              id={id}
-                              title={title}
-                              excerpt={excerpt}
-                              slug={slug}
-                              publishedAt={publishedAt}
-                              readTimeMins={readingTime}
-                              upvotes={0}
-                              downvotes={0}
-                              author={{
-                                name: name,
-                                username: username || "",
-                                image: image,
-                              }}
-                            />
-                            {isOwner && (
-                              <Link
-                                href={`/create/${id}`}
-                                className="absolute right-2 top-2 rounded-md bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
-                              >
-                                Edit
-                              </Link>
-                            )}
+          <>
+            <div className="mt-8 flex gap-5 border-b border-hairline">
+              {TABS.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTab(t)}
+                  className={`-mb-px border-b-2 pb-2 pt-1 text-sm transition-colors ${
+                    t === tab
+                      ? "border-accent font-semibold text-fg"
+                      : "border-transparent font-medium text-muted hover:text-fg"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            {tab === "Posts" && (
+              <div className="mt-6">
+                {posts.length ? (
+                  posts.map(
+                    ({
+                      slug,
+                      title,
+                      excerpt,
+                      readingTime,
+                      publishedAt,
+                      id,
+                    }) => {
+                      if (!publishedAt) return null;
+                      return (
+                        <div key={slug} className="relative">
+                          <UnifiedContentCard
+                            type="POST"
+                            id={id}
+                            title={title}
+                            excerpt={excerpt}
+                            slug={slug}
+                            publishedAt={publishedAt}
+                            readTimeMins={readingTime}
+                            upvotes={0}
+                            downvotes={0}
+                            author={{
+                              name: name,
+                              username: username || "",
+                              image: image,
+                            }}
+                          />
+                          {isOwner && (
+                            <Link
+                              href={`/create/${id}`}
+                              className="absolute right-2 top-2 rounded-md bg-elevated px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-hover hover:text-fg"
+                            >
+                              Edit
+                            </Link>
+                          )}
+                        </div>
+                      );
+                    },
+                  )
+                ) : (
+                  <p className="py-4 font-medium text-muted">
+                    Nothing published yet... 🥲
+                  </p>
+                )}
+              </div>
+            )}
+
+            {tab === "Replies" && (
+              <div className="mt-6 space-y-3">
+                {replies && replies.length > 0 ? (
+                  replies.map((reply) => (
+                    <Link
+                      key={reply.id}
+                      href={reply.parent.href}
+                      className="block rounded-lg border border-hairline bg-surface p-4 transition-colors hover:border-accent/50"
+                    >
+                      <p className="font-mono text-xs text-faint">
+                        Replied on{" "}
+                        <span className="text-accent-soft">
+                          {reply.parent.title}
+                        </span>{" "}
+                        · {getRelativeTime(reply.createdAt)}
+                      </p>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">
+                        {reply.body}
+                      </p>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="py-4 font-medium text-muted">No replies yet.</p>
+                )}
+              </div>
+            )}
+
+            {tab === "Achievements" && (
+              <div className="mt-6">
+                {engagement ? (
+                  <>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="card flex items-center gap-4">
+                        <span className="text-3xl text-accent" aria-hidden>
+                          ✦
+                        </span>
+                        <div>
+                          <div className="font-display text-3xl font-extrabold leading-none text-fg">
+                            {engagement.points}
                           </div>
-                        );
-                      },
-                    )
-                  ) : (
-                    <p className="py-4 font-medium">
-                      Nothing published yet... 🥲
+                          <div className="mt-1 font-mono text-xs text-faint">
+                            points
+                          </div>
+                        </div>
+                      </div>
+                      <div className="card flex items-center gap-4">
+                        <span className="text-3xl" aria-hidden>
+                          🔥
+                        </span>
+                        <div>
+                          <div className="font-display text-3xl font-extrabold leading-none text-fg">
+                            {engagement.currentStreak}
+                          </div>
+                          <div className="mt-1 font-mono text-xs text-faint">
+                            day streak
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-5 mt-8 flex items-baseline justify-between">
+                      <p className="eyebrow">
+                        <span className="slash">{"// "}</span>badges
+                      </p>
+                      {/* Just the earned count — the catalogue grows over time,
+                          so "of N" would keep moving the goalposts. */}
+                      <span className="font-mono text-xs text-faint">
+                        {earnedBadges.length} earned
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+                      {engagement.badges.map((b) => (
+                        <div
+                          key={b.key}
+                          className={`flex flex-col items-center gap-2 text-center ${
+                            b.earned ? "" : "opacity-40"
+                          }`}
+                          title={b.description}
+                        >
+                          <div
+                            className={`flex h-16 w-16 items-center justify-center rounded-2xl text-2xl ${
+                              b.earned
+                                ? "bg-accent text-on-accent"
+                                : "bg-elevated text-faint"
+                            }`}
+                            aria-hidden
+                          >
+                            {b.earned ? b.emoji : "🔒"}
+                          </div>
+                          <div
+                            className={`text-xs font-semibold ${
+                              b.earned ? "text-fg" : "text-faint"
+                            }`}
+                          >
+                            {b.name}
+                          </div>
+                          <div className="font-mono text-[10px] leading-snug text-faint">
+                            {b.description}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-6 font-mono text-xs text-faint">
+                      {"// "}points come from posting and helpful contributions
                     </p>
-                  )}
-                </div>
-              );
-            default:
-              return null;
-          }
-        })()}
+                  </>
+                ) : (
+                  <p className="py-4 font-medium text-muted">
+                    No achievements yet.
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+        )}
       </div>
       {session?.user?.role === "ADMIN" && (
-        <div className="border-t-2 pb-8 text-center">
-          <h4 className="mb-6 mt-4 text-2xl">Admin Control</h4>
+        <div className="mx-auto mt-8 max-w-2xl border-t border-hairline px-4 pb-8 pt-6 text-center">
+          <h4 className="mb-6 font-display text-2xl font-bold text-fg">
+            Admin Control
+          </h4>
           {accountLocked ? (
             <button
               onClick={() => unbanUser({ userId: id })}
@@ -188,7 +520,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
             <form className="flex flex-col" onSubmit={handleBanSubmit}>
               <label
                 htmlFor="note"
-                className="block text-sm font-medium leading-6 text-gray-700 dark:text-gray-400"
+                className="block text-sm font-medium leading-6 text-muted"
               >
                 Add your reason to ban the user
               </label>
@@ -197,7 +529,7 @@ const Profile = ({ profile, isOwner, session }: Props) => {
                   rows={4}
                   name="note"
                   id="note"
-                  className="block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-inset dark:ring-gray-300 sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border border-hairline bg-inset py-1.5 text-fg shadow-sm placeholder:text-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent sm:text-sm sm:leading-6"
                   defaultValue={""}
                 />
               </div>
@@ -213,11 +545,3 @@ const Profile = ({ profile, isOwner, session }: Props) => {
 };
 
 export default Profile;
-
-function getDomainFromUrl(url: string) {
-  const domain = url.replace(/(https?:\/\/)?(www.)?/i, "");
-  if (domain[domain.length - 1] === "/") {
-    return domain.slice(0, domain.length - 1);
-  }
-  return domain;
-}

@@ -1,4 +1,5 @@
 import z from "zod";
+import { httpUrl } from "./shared";
 
 // Content Type enum matching the database
 // POST/ARTICLE = user-created articles, LINK = external/RSS content
@@ -6,6 +7,7 @@ import z from "zod";
 export const ContentTypeSchema = z.enum([
   "POST",
   "LINK",
+  "TIL",
   "QUESTION",
   "VIDEO",
   "DISCUSSION",
@@ -25,10 +27,12 @@ export const GetUnifiedFeedSchema = z.object({
     .nullish(),
   sort: z.enum(["recent", "trending", "popular"]).default("recent"),
   type: ContentTypeSchema.nullish(), // Filter by content type
+  kinds: z.array(ContentTypeSchema).nullish(), // Filter by multiple kinds (e.g. Discussions = discussion + question)
   category: z.string().nullish(),
   tag: z.string().nullish(),
   sourceId: z.number().nullish(),
   userId: z.string().nullish(), // Filter by author
+  following: z.boolean().nullish(), // Only authors the current user follows
 });
 
 export type GetUnifiedFeedInput = z.TypeOf<typeof GetUnifiedFeedSchema>;
@@ -53,7 +57,7 @@ export const CreateContentSchema = z.object({
   title: z.string().min(1).max(500),
   body: z.string().nullish(), // Required for ARTICLE, optional for others
   excerpt: z.string().max(300).nullish(),
-  externalUrl: z.string().url().max(2000).nullish(), // Required for LINK, VIDEO
+  externalUrl: httpUrl().max(2000).nullish(), // Required for LINK, VIDEO
   imageUrl: z.string().url().nullish(),
   tags: z.array(z.string()).max(5).optional(),
   published: z.boolean().default(false),
@@ -70,7 +74,7 @@ export const UpdateContentSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   body: z.string().nullish(),
   excerpt: z.string().max(300).nullish(),
-  externalUrl: z.string().url().max(2000).nullish(),
+  externalUrl: httpUrl().max(2000).nullish(),
   imageUrl: z.string().url().nullish(),
   tags: z.array(z.string()).max(5).optional(),
   published: z.boolean().optional(),

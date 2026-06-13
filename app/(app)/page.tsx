@@ -1,82 +1,56 @@
-import { Suspense } from "react";
-import Link from "next/link";
-import Hero from "@/components/Hero/Hero";
-import TrendingPosts from "@/components/TrendingPosts/TrendingPosts";
-import TrendingLoading from "@/components/TrendingPosts/TrendingPostsLoading";
-import SideBarSavedPosts from "@/components/SideBar/SideBarSavedPosts";
-import { getServerAuthSession } from "@/server/auth";
-import PopularTags from "@/components/PopularTags/PopularTags";
-import PopularTagsLoading from "@/components/PopularTags/PopularTagsLoading";
-import NewsletterCTA from "@/components/NewsletterCTA/NewsletterCTA";
+import type { Metadata } from "next";
+import Content from "./feed/_client";
 import { JsonLd } from "@/components/JsonLd";
-import { getWebSiteSchema } from "@/lib/structured-data";
+import { getWebSiteSchema } from "@/lib/structured-data/schemas/website";
+import { getServerAuthSession } from "@/server/auth";
+import { serverApi } from "@/server/trpc/caller";
+import { deriveFeedInput } from "./feed/feedQuery";
 
-const Home = async () => {
+// The feed is the homepage. It renders at "/" inside the app shell; "/feed"
+// 308-redirects here (preserving query) for any old links/bookmarks.
+export const metadata: Metadata = {
+  title: "Codú — the community for AI builders & indie hackers",
+  description:
+    "Learn to build with AI, share what you ship, and grow with people doing the same. A curated feed of articles, tips, questions, and links from the community.",
+  alternates: { canonical: "/" },
+};
+
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function Page(props: Props) {
+  const sp = await props.searchParams;
   const session = await getServerAuthSession();
+
+  const first = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : (v ?? null);
+
+  // Server-fetch the first feed page so crawlers (and first paint) get real
+  // content links in the HTML — AI crawlers don't execute JS. The client
+  // infinite query picks this up as initialData (same derived input).
+  const input = deriveFeedInput(
+    {
+      sort: first(sp.sort),
+      category: first(sp.category),
+      tag: first(sp.tag),
+      type: first(sp.type),
+      view: first(sp.view),
+    },
+    !!session?.user,
+  );
+
+  const initialFeed = await serverApi()
+    .then((api) => api.content.getFeed(input))
+    .catch(() => null);
 
   return (
     <>
-      {/* WebSite JSON-LD for homepage SEO and sitelinks search box */}
       <JsonLd data={getWebSiteSchema()} />
-
-      {!session && (
-        <div>
-          <Hero />
-          <section className="bg-white px-2 dark:bg-neutral-300" id="cta">
-            <div className="mx-auto py-20 sm:max-w-2xl sm:py-32 lg:max-w-5xl">
-              <h2 className="max-w-[660px] text-center text-2xl font-semibold tracking-tight text-neutral-900 dark:text-gray-900 sm:text-4xl md:text-left">
-                <span className="font-extrabold">Sign up today</span> to become
-                a writer and get a <span className="font-extrabold">free</span>{" "}
-                invite to our Discord community.
-              </h2>
-              <div className="mt-8 flex items-center justify-center gap-x-6 md:justify-start">
-                <Link href="/get-started" className="primary-button">
-                  Get started
-                </Link>
-                <Link
-                  href="/feed"
-                  className="font-semibold leading-6 text-neutral-900 dark:text-gray-900"
-                >
-                  Browse feed <span aria-hidden="true">→</span>
-                </Link>
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
-
-      <div className="mx-2" id={session ? "cta" : ""}>
-        <div className="mt-6 flex max-w-5xl items-center justify-between sm:mx-auto sm:max-w-2xl lg:max-w-5xl">
-          <h3 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-50">
-            Trending
-          </h3>
-        </div>
-        <div className="mx-auto grid-cols-12 gap-6 sm:max-w-2xl lg:grid lg:max-w-5xl">
-          <Suspense fallback={<TrendingLoading />}>
-            <TrendingPosts session={session} />
-          </Suspense>
-          <section className="col-span-5 hidden lg:block">
-            <div className="sticky top-20">
-              <NewsletterCTA isSubscribed={session?.user?.newsletter} />
-              <h4 className="mb-4 mt-4 text-2xl font-semibold leading-6 tracking-wide">
-                Popular topics
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                <Suspense fallback={<PopularTagsLoading />}>
-                  <PopularTags />
-                </Suspense>
-              </div>
-              {session && (
-                <div className="flex flex-wrap gap-2">
-                  <SideBarSavedPosts />
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-      </div>
+      <h1 className="sr-only">
+        Codú — the community for AI builders &amp; indie hackers
+      </h1>
+      <Content initialFeed={initialFeed} />
     </>
   );
-};
-
-export default Home;
+}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "user_username_lower_key" ON "user" USING btree (lower("username"));

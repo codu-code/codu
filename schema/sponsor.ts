@@ -7,6 +7,8 @@ export const sponsorInterests = [
   "CONTENT",
 ] as const;
 
+export type SponsorInterest = (typeof sponsorInterests)[number];
+
 export const sponsorInterestLabels: Record<
   (typeof sponsorInterests)[number],
   string

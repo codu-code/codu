@@ -27,7 +27,7 @@ export const PostAuthPage = (content: {
   if (!mounted) return null;
 
   return (
-    <div className="flex w-full flex-grow flex-col justify-center bg-neutral-100 px-4 py-20 dark:bg-black sm:px-6 lg:py-40">
+    <div className="flex w-full flex-grow flex-col justify-center bg-canvas px-4 py-20 sm:px-6 lg:py-40">
       <div className="flex flex-shrink-0 justify-center">
         <Link href="/">
           <span className="sr-only">Codú</span>
@@ -46,15 +46,15 @@ export const PostAuthPage = (content: {
       </div>
       <div className="py-16">
         <div className="text-center">
-          <p className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
+          <p className="bg-gradient-to-r from-accent to-accent bg-clip-text text-xl font-semibold uppercase leading-6 tracking-wide text-transparent">
             {content.heading}{" "}
           </p>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-black dark:text-white sm:text-5xl">
+          <h1 className="mt-2 font-display text-4xl text-fg sm:text-5xl">
             {content.subHeading}{" "}
           </h1>
           <div className="mt-6">
             <Link
-              className="bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-base font-semibold tracking-wide text-transparent"
+              className="bg-gradient-to-r from-accent to-accent bg-clip-text text-base font-semibold tracking-wide text-transparent"
               href="/"
             >
               Return home<span aria-hidden="true"> &rarr;</span>

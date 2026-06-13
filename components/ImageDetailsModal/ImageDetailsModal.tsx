@@ -123,7 +123,7 @@ export default function ImageDetailsModal(props: Props) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="ml-5 inline-flex justify-center rounded bg-gradient-to-r from-orange-400 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:from-orange-300 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 disabled:opacity-50"
+              className="ml-5 inline-flex justify-center rounded bg-accent px-4 py-2 text-sm font-medium text-on-accent shadow-sm transition-colors hover:bg-accent-soft focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 disabled:opacity-50"
               onClick={handleSubmit(onSubmit)}
             >
               Submit
@@ -131,7 +131,7 @@ export default function ImageDetailsModal(props: Props) {
             <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
               <button
                 type="button"
-                className="bg-neutral-900 text-neutral-400 hover:text-neutral-200 focus:text-neutral-200"
+                className="bg-surface text-faint hover:text-muted focus:text-muted"
                 onClick={() => {
                   setIsImageDetailsModalOpen(false);
                   reset();

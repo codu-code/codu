@@ -11,6 +11,10 @@ const REMOTE_PATTERNS = [
   "images.unsplash.com",
   "avatars.githubusercontent.com",
   "www.gravatar.com",
+  // Seed/placeholder avatars + cover images used by dev/e2e fixtures.
+  "robohash.org",
+  "picsum.photos",
+  "i.pravatar.cc",
   // Temporary wildcard
   "*.s3.eu-west-1.amazonaws.com",
   "s3.eu-west-1.amazonaws.com",
@@ -32,18 +36,28 @@ const config = {
         destination: "https://newsletter.codu.co",
         permanent: true,
       },
-      // Redirect legacy feed article URLs to new unified pattern
-      // /feed/[sourceSlug]/[articleId] -> /[sourceSlug]/[articleId]
+      // Legacy feed article URLs -> /s/ namespace (one hop, no redirect chain).
       {
         source: "/feed/:sourceSlug/:articleId",
-        destination: "/:sourceSlug/:articleId",
+        destination: "/s/:sourceSlug/:articleId",
         permanent: true,
       },
-      // Redirect legacy feed source URLs to new unified pattern
-      // /feed/[sourceSlug] -> /[sourceSlug]
+      // Legacy feed source URLs -> /s/ namespace.
       {
         source: "/feed/:sourceSlug",
-        destination: "/:sourceSlug",
+        destination: "/s/:sourceSlug",
+        permanent: true,
+      },
+      // Deleted course pages and the removed /alpha section — send home
+      // rather than hard-404 previously-resolvable URLs.
+      {
+        source: "/courses/:path*",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/alpha/:path*",
+        destination: "/",
         permanent: true,
       },
     ];
@@ -58,6 +72,8 @@ const config = {
     },
   },
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
+  // Never serve trailing-slash variants (Next 301s `/foo/` -> `/foo`).
+  trailingSlash: false,
   images: {
     remotePatterns: REMOTE_PATTERNS,
   },

@@ -25,3 +25,34 @@ export const E2E_LINK_POST_ID = "e2elinkp";
 export const E2E_LINK_POST_DRAFT_ID = "e2elnkdr";
 export const TEST_LINK_URL = "https://github.com/codu-code/codu";
 export const TEST_LINK_TITLE = "Codú - A space for coders";
+
+// ---------------------------------------------------------------------------
+// Content-URL routing fixtures (content-urls.spec.ts). The relaunch moves all
+// content under stable, urlId-suffixed slugs:
+//   - member article : /{username}/{slug}            (slug ends with urlId)
+//   - discussion      : /d/{slug}                    (canonical; legacy
+//                       /{username}/{slug} 301s here)
+//   - source content  : /s/{sourceSlug}/{slug}       (aggregated)
+//   - source profile  : /s/{sourceSlug}
+// These fixtures pin deterministic slugs + urlIds so the routing/redirect spec
+// can construct exact URLs (e.g. /{username}/wrong-words-{urlId}) and assert
+// the canonical landing. Seeded in e2e/setup.ts.
+// ---------------------------------------------------------------------------
+
+// Member article: title-derived slug ends with the urlId. A request with the
+// right urlId but the wrong words must 301 to this canonical slug.
+export const E2E_ROUTING_ARTICLE_URL_ID = "rt1a2b3";
+export const E2E_ROUTING_ARTICLE_SLUG = `e2e-routing-canonical-article-${E2E_ROUTING_ARTICLE_URL_ID}`;
+export const E2E_ROUTING_ARTICLE_TITLE = "E2E Routing Canonical Article";
+
+// Discussion: canonical lives at /d/{slug}; the legacy /{username}/{slug} 301s.
+export const E2E_ROUTING_DISCUSSION_URL_ID = "rtd1234";
+export const E2E_ROUTING_DISCUSSION_SLUG = `e2e-routing-discussion-${E2E_ROUTING_DISCUSSION_URL_ID}`;
+export const E2E_ROUTING_DISCUSSION_TITLE = "E2E Routing Discussion Thread";
+
+// Aggregated source + one of its imported link posts.
+export const E2E_ROUTING_SOURCE_SLUG = "e2e-routing-source";
+export const E2E_ROUTING_SOURCE_NAME = "E2E Routing Source";
+export const E2E_ROUTING_SOURCE_ARTICLE_URL_ID = "rts5678";
+export const E2E_ROUTING_SOURCE_ARTICLE_SLUG = `e2e-routing-source-article-${E2E_ROUTING_SOURCE_ARTICLE_URL_ID}`;
+export const E2E_ROUTING_SOURCE_ARTICLE_TITLE = "E2E Routing Source Article";

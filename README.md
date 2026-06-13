@@ -4,9 +4,9 @@
 
 ![Codu Logo](https://raw.githubusercontent.com/codu-code/codu/develop/public/images/codu-gradient.png)
 
-> A space for coders
+> A community for AI builders and indie hackers
 
-Codú is the ultimate community of web developers to learn, share, and get support for your projects, either big or small. It is the perfect place to sharpen your skills and build your portfolio. In Codú, we're all here to help each other to grow as web developers. Plus, Codú makes it easier to find collaborators for your next big project.
+Codú is a community for AI builders and indie hackers. Share what you're building, learn from people shipping real projects, and get support — whether it's a weekend experiment or a product you're taking to market. Write articles, post TILs, start discussions, ask questions, and find people to build with.
 
 ---
 
@@ -53,6 +53,14 @@ npm run db:migrate
 
 The full command can be seen in our [package.json](/package.json#16) file.
 
+> Deploy note: the Vercel Build Command runs `npm run db:migrate && npm run ci-build`
+> on **every** target, so **both preview and production builds migrate** — preview
+> against the shared dev database, production against prod. A migration that fails
+> aborts the build, so a branch carrying a broken or environment-incompatible
+> migration turns the Vercel check red. Connections require SSL
+> (`sslmode=require` in `DATABASE_URL`) because the RDS instances run with
+> `rds.force_ssl` on; local dev and e2e use Docker over localhost and need none.
+
 7. Seed the database with some mock data by running:
 
 ```bash
@@ -69,17 +77,15 @@ npm run dev
 
 After completion of the above commands, navigate to [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-You can start your journey by modifying `pages/index.tsx`. With the auto-update feature, pages update as you edit the file.
+The app uses the Next.js App Router — routes live in the `app/` directory and hot-reload as you edit. The home feed is served from `app/(app)/page.tsx`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-Learn more about API routes [here](https://nextjs.org/docs/api-routes/introduction).
+API endpoints are [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) under `app/api/*`, alongside the tRPC routers in `server/`.
 
 ## Environment Variables
 
 ### DATABASE_URL
 
-The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15.0).
+The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15).
 
 By default, we point to a database running locally with Docker from our `docker-compose.yml` file.
 
@@ -88,6 +94,12 @@ To run this file, make sure you have [Docker installed](https://docs.docker.com/
 Run the command `docker compose up`.
 
 Alternatively, if you have PostgreSQL running locally, you can use your local connection string or grab one from a free service like [Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres#finding-your-connection-string).
+
+### Local email (Mailpit)
+
+`docker compose up` also starts [Mailpit](https://mailpit.axllent.org/), a local email catcher. Set `EMAIL_PROVIDER=local` in your `.env` and every outgoing email (magic-link sign-in, moderation/report notifications) is captured at [http://localhost:8027](http://localhost:8027) instead of being sent through SES — no AWS credentials or real inboxes needed in development.
+
+The email E2E spec (`e2e/email.spec.ts`) asserts delivery through Mailpit's API; it skips automatically when Mailpit isn't running. To include it: `EMAIL_PROVIDER=local npm run dev:e2e` (server) and `EMAIL_PROVIDER=local npm test` (tests).
 
 ### GITHUB_ID and GITHUB_SECRET
 

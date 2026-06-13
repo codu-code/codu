@@ -7,7 +7,7 @@ import {
   linkedinUrl,
 } from "@/config/site_settings";
 
-const BASE_URL = "https://www.codu.co";
+import { SITE_ORIGIN as BASE_URL } from "@/config/site";
 
 /**
  * Codu organization schema - used as publisher for articles
@@ -25,7 +25,7 @@ const CODU_ORGANIZATION: Organization = {
   },
   sameAs: [discordInviteUrl, githubUrl, twitterUrl, youtubeUrl, linkedinUrl],
   description:
-    "A free network and community for web developers. Learn and grow together.",
+    "Codú is the community for AI builders and indie hackers. Learn to build with AI, share what you ship, and grow with people doing the same.",
 };
 
 /**

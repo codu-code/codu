@@ -1,3 +1,5 @@
+import { getAppOrigin } from "@/server/lib/url";
+
 type ReportDetails = {
   reason: string;
   url: string;
@@ -16,13 +18,6 @@ type ReportDetails = {
 export const createArticleReportEmailTemplate = (
   reportDetails: ReportDetails,
 ) => {
-  function getBaseUrl() {
-    if (typeof window !== "undefined") return "";
-    const env = process.env.DOMAIN_NAME || process.env.VERCEL_URL;
-    if (env) return "https://" + env;
-    return "http://localhost:3000";
-  }
-
   return `
   <!DOCTYPE html>
   <html>
@@ -34,7 +29,7 @@ export const createArticleReportEmailTemplate = (
           <p style='padding:3rem; border: 2px solid white;'>Title : ${
             reportDetails.title || ""
           }</p>
-          <p>Article written by user <a href="${getBaseUrl()}/${
+          <p>Article written by user <a href="${getAppOrigin()}/${
             reportDetails.username
           }" target="_blank" rel="nofollow">@${
             reportDetails.username || ""
@@ -45,7 +40,7 @@ export const createArticleReportEmailTemplate = (
      <br>
      <br>
      <br>
-     <p>Comment left by the reporter : <a href="${getBaseUrl()}/${
+     <p>Comment left by the reporter : <a href="${getAppOrigin()}/${
        reportDetails.reportedBy.username
      }" target="_blank" rel="nofollow">@${
        reportDetails.reportedBy.username || ""

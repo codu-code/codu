@@ -35,8 +35,8 @@ test.describe("Notifications Page", () => {
       await expect(
         page.getByRole("heading", { name: "Notifications" }),
       ).toBeVisible();
-      // Should show empty state message
-      await expect(page.getByText(/No new notifications/)).toBeVisible();
+      // Should show empty state message (copy is lower-case in the relaunch)
+      await expect(page.getByText(/no new notifications/i)).toBeVisible();
     });
   });
 
@@ -71,7 +71,7 @@ test.describe("Notifications Page", () => {
 
       // Verify notification card styling (rounded corners, proper borders)
       const notificationCard = page
-        .locator('[class*="rounded-lg"][class*="border-neutral-200"]')
+        .locator('[class*="rounded-lg"][class*="border-hairline"]')
         .first();
       await expect(notificationCard).toBeVisible({ timeout: 10000 });
     });
@@ -152,18 +152,18 @@ test.describe("Notifications Page", () => {
 
       // Wait for discussion section to load
       await expect(
-        page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
-      ).toBeVisible({ timeout: 15000 });
+        page.getByRole("button", { name: /Add to the discussion/ }),
+      ).toBeVisible({ timeout: 30000 });
 
       // Post a comment
-      await page
-        .getByRole("button", { name: "Join the conversation..." })
-        .click();
+      await page.getByRole("button", { name: /Add to the discussion/ }).click();
 
       await page.waitForTimeout(500);
-      await page.locator(".ProseMirror").first().click();
       const commentText = `E2E notification test comment ${randomUUID()}`;
-      await page.keyboard.type(commentText);
+      await page
+        .getByPlaceholder("What are your thoughts?")
+        .first()
+        .fill(commentText);
       await page.getByRole("button", { name: "Comment", exact: true }).click();
 
       // Verify comment was posted - this confirms the mutation completed and notification was created
@@ -199,17 +199,17 @@ test.describe("Notifications Page", () => {
       );
 
       await expect(
-        page.getByRole("heading", { name: /^Discussion \(\d+\)$/ }),
-      ).toBeVisible({ timeout: 15000 });
+        page.getByRole("button", { name: /Add to the discussion/ }),
+      ).toBeVisible({ timeout: 30000 });
 
       // Post a comment as user one
-      await page
-        .getByRole("button", { name: "Join the conversation..." })
-        .click();
+      await page.getByRole("button", { name: /Add to the discussion/ }).click();
       await page.waitForTimeout(500);
-      await page.locator(".ProseMirror").first().click();
       const originalComment = `Original comment for reply test ${randomUUID()}`;
-      await page.keyboard.type(originalComment);
+      await page
+        .getByPlaceholder("What are your thoughts?")
+        .first()
+        .fill(originalComment);
       await page.getByRole("button", { name: "Comment", exact: true }).click();
 
       // Verify comment was posted
@@ -241,12 +241,13 @@ test.describe("Notifications Page", () => {
       // Wait for reply editor to expand
       await page.waitForTimeout(500);
 
-      // The reply editor appears within the same comment section
-      // Find the ProseMirror editor that appeared after clicking Reply
-      const replyEditor = commentSection.locator(".ProseMirror").first();
-      await replyEditor.click();
+      // The reply editor appears within the same comment section — type into
+      // its markdown textarea.
       const replyText = `Reply to trigger notification ${randomUUID()}`;
-      await page.keyboard.type(replyText);
+      await commentSection
+        .getByPlaceholder("What are your thoughts?")
+        .first()
+        .fill(replyText);
 
       // Submit the reply - click the Reply button within the reply form
       // The submit button has the same text "Reply" as the expand button, but it's the last one

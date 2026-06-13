@@ -29,15 +29,15 @@ export function Listbox<T>({
           // Basic layout
           "group relative block w-full",
           // Background color + shadow applied to inset pseudo element, so shadow blends with border in light mode
-          "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-white before:shadow",
+          "before:absolute before:inset-px before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-surface before:shadow",
           // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
           "dark:before:hidden",
           // Hide default focus styles
           "focus:outline-none",
           // Focus ring
-          "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:data-[focus]:ring-2 after:data-[focus]:ring-blue-500",
+          "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:data-[focus]:ring-2 after:data-[focus]:ring-accent",
           // Disabled state
-          "data-[disabled]:opacity-50 before:data-[disabled]:bg-zinc-950/5 before:data-[disabled]:shadow-none",
+          "data-[disabled]:opacity-50 before:data-[disabled]:bg-inset before:data-[disabled]:shadow-none",
         ])}
       >
         <Headless.ListboxSelectedOption
@@ -45,9 +45,7 @@ export function Listbox<T>({
           options={options}
           placeholder={
             placeholder && (
-              <span className="block truncate text-zinc-500">
-                {placeholder}
-              </span>
+              <span className="block truncate text-muted">{placeholder}</span>
             )
           }
           className={clsx([
@@ -58,20 +56,20 @@ export function Listbox<T>({
             // Horizontal padding
             "pl-[calc(theme(spacing[3.5])-1px)] pr-[calc(theme(spacing.7)-1px)] sm:pl-[calc(theme(spacing.3)-1px)]",
             // Typography
-            "text-left text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white sm:text-sm/6 forced-colors:text-[CanvasText]",
+            "text-left text-base/6 text-fg placeholder:text-muted sm:text-sm/6 forced-colors:text-[CanvasText]",
             // Border
-            "border border-zinc-950/10 group-data-[active]:border-zinc-950/20 group-data-[hover]:border-zinc-950/20 dark:border-white/10 dark:group-data-[active]:border-white/20 dark:group-data-[hover]:border-white/20",
+            "border border-hairline group-data-[active]:border-strong group-data-[hover]:border-strong",
             // Background color
-            "bg-transparent dark:bg-white/5",
+            "bg-inset",
             // Invalid state
-            "group-data-[invalid]:border-red-500 group-data-[invalid]:group-data-[hover]:border-red-500 group-data-[invalid]:dark:border-red-600 group-data-[invalid]:data-[hover]:dark:border-red-600",
+            "group-data-[invalid]:border-danger group-data-[invalid]:group-data-[hover]:border-danger",
             // Disabled state
-            "group-data-[disabled]:border-zinc-950/20 group-data-[disabled]:opacity-100 group-data-[disabled]:dark:border-white/15 group-data-[disabled]:dark:bg-white/[2.5%] dark:data-[hover]:group-data-[disabled]:border-white/15",
+            "group-data-[disabled]:border-strong group-data-[disabled]:opacity-100",
           ])}
         />
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
           <svg
-            className="size-5 stroke-zinc-500 group-data-[disabled]:stroke-zinc-600 dark:stroke-zinc-400 sm:size-4 forced-colors:stroke-[CanvasText]"
+            className="size-5 stroke-muted group-data-[disabled]:stroke-faint sm:size-4 forced-colors:stroke-[CanvasText]"
             viewBox="0 0 16 16"
             aria-hidden="true"
             fill="none"
@@ -104,9 +102,9 @@ export function Listbox<T>({
           // Handle scrolling when menu won't fit in viewport
           "overflow-y-scroll overscroll-contain",
           // Popover background
-          "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
+          "bg-elevated/90 backdrop-blur-xl",
           // Shadows
-          "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
+          "shadow-lg ring-1 ring-inset ring-hairline",
           // Transitions
           "transition-opacity duration-100 ease-in data-[transition]:pointer-events-none data-[closed]:data-[leave]:opacity-0",
         )}
@@ -130,7 +128,7 @@ export function ListboxOption<T>({
     "flex min-w-0 items-center",
     // Icons
     "[&>[data-slot=icon]]:size-5 [&>[data-slot=icon]]:shrink-0 sm:[&>[data-slot=icon]]:size-4",
-    "[&>[data-slot=icon]]:text-zinc-500 [&>[data-slot=icon]]:group-data-[focus]/option:text-white [&>[data-slot=icon]]:dark:text-zinc-400",
+    "[&>[data-slot=icon]]:text-muted [&>[data-slot=icon]]:group-data-[focus]/option:text-on-accent",
     "forced-colors:[&>[data-slot=icon]]:text-[CanvasText] forced-colors:[&>[data-slot=icon]]:group-data-[focus]/option:text-[Canvas]",
     // Avatars
     "[&>[data-slot=avatar]]:-mx-0.5 [&>[data-slot=avatar]]:size-6 sm:[&>[data-slot=avatar]]:size-5",
@@ -151,9 +149,9 @@ export function ListboxOption<T>({
               // Basic layout
               "group/option grid cursor-default grid-cols-[theme(spacing.5),1fr] items-baseline gap-x-2 rounded-lg py-2.5 pl-2 pr-3.5 sm:grid-cols-[theme(spacing.4),1fr] sm:py-1.5 sm:pl-1.5 sm:pr-3",
               // Typography
-              "text-base/6 text-zinc-950 dark:text-white sm:text-sm/6 forced-colors:text-[CanvasText]",
+              "text-base/6 text-fg sm:text-sm/6 forced-colors:text-[CanvasText]",
               // Focus
-              "outline-none data-[focus]:bg-blue-500 data-[focus]:text-white",
+              "outline-none data-[focus]:bg-accent data-[focus]:text-on-accent",
               // Forced colors mode
               "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText]",
               // Disabled
@@ -208,7 +206,7 @@ export function ListboxDescription({
       {...props}
       className={clsx(
         className,
-        "flex flex-1 overflow-hidden text-zinc-500 before:w-2 before:min-w-0 before:shrink group-data-[focus]/option:text-white dark:text-zinc-400",
+        "flex flex-1 overflow-hidden text-muted before:w-2 before:min-w-0 before:shrink group-data-[focus]/option:text-on-accent",
       )}
     >
       <span className="flex-1 truncate">{children}</span>

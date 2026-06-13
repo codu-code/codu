@@ -89,10 +89,7 @@ export function SidebarDivider({
   return (
     <hr
       {...props}
-      className={clsx(
-        className,
-        "-mx-3 my-4 border-t border-neutral-200 dark:border-neutral-800",
-      )}
+      className={clsx(className, "-mx-3 my-4 border-t border-hairline")}
     />
   );
 }
@@ -117,10 +114,7 @@ export function SidebarHeading({
   return (
     <h3
       {...props}
-      className={clsx(
-        className,
-        "mb-1 px-2 text-xs/6 font-medium text-neutral-500 dark:text-neutral-400",
-      )}
+      className={clsx(className, "mb-1 px-2 text-xs/6 font-medium text-muted")}
     />
   );
 }
@@ -139,26 +133,21 @@ export const SidebarItem = forwardRef(function SidebarItem(
 ) {
   const classes = clsx(
     // Base - inactive text and icons same grey
-    "flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium text-neutral-400 sm:py-2 sm:text-sm/5",
+    "flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium text-muted sm:py-2 sm:text-sm/5",
     // Collapsed state - animate max-width to contain hover area (matches container 300ms animation)
     "max-w-full transition-[max-width] duration-300 ease-in-out [[data-collapsed=true]_&]:max-w-9",
     // Leading icon/icon-only - same grey as text
-    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:text-neutral-400 sm:data-[slot=icon]:*:size-5",
+    "data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:text-muted sm:data-[slot=icon]:*:size-5",
     // Trailing icon (down chevron or similar)
     "data-[slot=icon]:last:*:ml-auto data-[slot=icon]:last:*:size-5 sm:data-[slot=icon]:last:*:size-4",
     // Avatar
     "data-[slot=avatar]:*:-m-0.5 data-[slot=avatar]:*:size-7 data-[slot=avatar]:*:[--ring-opacity:10%] sm:data-[slot=avatar]:*:size-6",
     // Hover
-    "data-[hover]:bg-neutral-200 data-[hover]:text-neutral-800 data-[slot=icon]:*:data-[hover]:text-neutral-800",
+    "data-[hover]:bg-hover data-[hover]:text-fg data-[slot=icon]:*:data-[hover]:text-fg",
     // Active
-    "data-[active]:bg-neutral-200 data-[active]:text-neutral-800 data-[slot=icon]:*:data-[active]:text-neutral-800",
-    // Current - text and icons become dark when active
-    "data-[current]:text-neutral-800 data-[slot=icon]:*:data-[current]:text-neutral-800",
-    // Dark mode - inactive text and icons same grey
-    "dark:text-neutral-400 dark:data-[slot=icon]:*:text-neutral-400",
-    "dark:data-[hover]:bg-neutral-900 dark:data-[hover]:text-white dark:data-[slot=icon]:*:data-[hover]:text-white",
-    "dark:data-[active]:bg-neutral-900 dark:data-[active]:text-white dark:data-[slot=icon]:*:data-[active]:text-white",
-    "dark:data-[current]:text-white dark:data-[slot=icon]:*:data-[current]:text-white",
+    "data-[active]:bg-hover data-[active]:text-fg data-[slot=icon]:*:data-[active]:text-fg",
+    // Current - text and icons become bright when active
+    "data-[current]:text-fg data-[slot=icon]:*:data-[current]:text-fg",
   );
 
   return (
@@ -166,7 +155,7 @@ export const SidebarItem = forwardRef(function SidebarItem(
       {current && (
         <motion.span
           layoutId="current-indicator"
-          className="absolute inset-y-2 -left-3 w-0.5 rounded-full bg-pink-600"
+          className="absolute inset-y-2 -left-3 w-0.5 rounded-full bg-accent"
         />
       )}
       {"href" in props ? (

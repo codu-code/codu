@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+  rateLimitedProcedure,
+} from "../trpc";
 import {
   CreateDiscussionSchema,
   EditDiscussionSchema,
@@ -11,19 +16,70 @@ import {
 import {
   NEW_COMMENT_ON_YOUR_POST,
   NEW_REPLY_TO_YOUR_COMMENT,
+  NEW_COMMENT_ON_FOLLOWED_POST,
 } from "@/utils/notifications";
 import {
   comments,
   comment_votes,
   notification,
   posts,
+  post_follow,
+  post_votes,
+  bookmarks,
   user,
 } from "@/server/db/schema";
-import { and, count, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, isNull, inArray, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { decrement } from "./utils";
+import { award } from "@/server/lib/engagement";
+import * as Sentry from "@sentry/nextjs";
 
-// Helper to generate ltree path
+/**
+ * Notify everyone following `postId` of a new comment, except people who are
+ * already covered by another notification for this comment (the post author and
+ * the replied-to comment's author) and the commenter themselves. Never throws.
+ */
+async function notifyPostFollowers({
+  postId,
+  commentId,
+  commenterId,
+  excludeUserIds,
+}: {
+  postId: string;
+  commentId: string;
+  commenterId: string;
+  excludeUserIds: (string | null | undefined)[];
+}) {
+  try {
+    const exclude = new Set(
+      [commenterId, ...excludeUserIds].filter(Boolean) as string[],
+    );
+
+    const followers = await db
+      .select({ userId: post_follow.userId })
+      .from(post_follow)
+      .where(eq(post_follow.postId, postId));
+
+    const recipients = followers
+      .map((f) => f.userId)
+      .filter((uid) => !exclude.has(uid));
+
+    if (recipients.length === 0) return;
+
+    await db.insert(notification).values(
+      recipients.map((uid) => ({
+        notifierId: commenterId,
+        type: NEW_COMMENT_ON_FOLLOWED_POST,
+        userId: uid,
+        postId,
+        commentId,
+      })),
+    );
+  } catch (error) {
+    Sentry.captureException(error);
+  }
+}
+
 function generatePath(parentPath: string | null, id: string): string {
   const cleanId = id.replace(/-/g, "");
   if (parentPath) {
@@ -33,13 +89,17 @@ function generatePath(parentPath: string | null, id: string): string {
 }
 
 export const discussionRouter = createTRPCRouter({
-  create: protectedProcedure
+  create: rateLimitedProcedure({
+    name: "discussion-create",
+    limit: 10,
+    windowMs: 10 * 60_000,
+    message: "You're commenting too fast. Take a breather and try again.",
+  })
     .input(CreateDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, contentId, parentId } = input;
       const userId = ctx.session.user.id;
 
-      // Validate post exists (using new posts table)
       const postData = await ctx.db
         .select({ id: posts.id, authorId: posts.authorId })
         .from(posts)
@@ -53,7 +113,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Get parent comment if replying
       let parentPath: string | null = null;
       let parentAuthorId: string | null = null;
 
@@ -72,7 +131,7 @@ export const discussionRouter = createTRPCRouter({
 
       const now = new Date().toISOString();
 
-      // First insert the comment without the path (we need the generated ID for the path)
+      // Insert without path first; the path needs the generated comment ID.
       const [createdComment] = await ctx.db
         .insert(comments)
         .values({
@@ -80,23 +139,22 @@ export const discussionRouter = createTRPCRouter({
           body,
           postId: contentId,
           parentId: parentId || null,
-          path: "temp", // Will update after we have the ID
+          path: "temp",
           depth: parentPath ? parentPath.split(".").length : 0,
           createdAt: now,
           updatedAt: now,
         })
         .returning();
 
-      // Now update with the correct path
+      // Pin updatedAt to createdAt so the path write (which trips updatedAt's $onUpdate) doesn't make a brand-new comment render as "edited".
       const finalPath = generatePath(parentPath, createdComment.id);
       await ctx.db
         .update(comments)
-        .set({ path: finalPath })
+        .set({ path: finalPath, updatedAt: createdComment.createdAt })
         .where(eq(comments.id, createdComment.id));
 
-      // Note: Comment count is updated via trigger (tr_post_comments_count) on INSERT
+      // Comment count is updated via trigger (tr_post_comments_count) on INSERT.
 
-      // Send notifications for replies
       if (parentId && parentAuthorId && parentAuthorId !== userId) {
         await ctx.db.insert(notification).values({
           notifierId: userId,
@@ -107,7 +165,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Send notification for new top-level comment on user's post
       if (
         !parentId &&
         postData[0].authorId &&
@@ -122,10 +179,31 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
+      await notifyPostFollowers({
+        postId: contentId,
+        commentId: createdComment.id,
+        commenterId: userId,
+        excludeUserIds: [postData[0].authorId, parentAuthorId],
+      });
+
+      // Same engagement as the legacy comment.create path: comment points +
+      // badge check (commenting is the onboarding badge's final step).
+      await award({
+        userId,
+        action: "comment_created",
+        sourceType: "comment",
+        sourceId: createdComment.id,
+      });
+
       return createdComment.id;
     }),
 
-  edit: protectedProcedure
+  edit: rateLimitedProcedure({
+    name: "discussion-edit",
+    limit: 20,
+    windowMs: 10 * 60_000,
+    message: "You're editing too fast. Take a breather and try again.",
+  })
     .input(EditDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { body, id } = input;
@@ -174,7 +252,6 @@ export const discussionRouter = createTRPCRouter({
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
-      // Soft delete: set deletedAt timestamp
       await ctx.db
         .update(comments)
         .set({ deletedAt: new Date().toISOString() })
@@ -189,14 +266,17 @@ export const discussionRouter = createTRPCRouter({
       return id;
     }),
 
-  // Reddit-style voting (upvote/downvote)
-  vote: protectedProcedure
+  vote: rateLimitedProcedure({
+    name: "discussion-vote",
+    limit: 100,
+    windowMs: 5 * 60_000,
+    message: "You're voting too fast. Take a breather and try again.",
+  })
     .input(VoteDiscussionSchema)
     .mutation(async ({ input, ctx }) => {
       const { discussionId: commentId, voteType } = input;
       const userId = ctx.session.user.id;
 
-      // Check if comment exists
       const commentItem = await ctx.db
         .select({
           id: comments.id,
@@ -214,7 +294,6 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      // Get existing vote
       const existingVote = await ctx.db
         .select({ id: comment_votes.id, voteType: comment_votes.voteType })
         .from(comment_votes)
@@ -226,9 +305,8 @@ export const discussionRouter = createTRPCRouter({
         )
         .limit(1);
 
-      // Database triggers handle vote count updates automatically (tr_comment_vote_counts)
+      // Vote counts are kept in sync by trigger (tr_comment_vote_counts).
       if (voteType === null) {
-        // Remove vote
         if (existingVote.length > 0) {
           await ctx.db
             .delete(comment_votes)
@@ -236,7 +314,6 @@ export const discussionRouter = createTRPCRouter({
         }
         return { voteType: null };
       } else if (existingVote.length === 0) {
-        // New vote
         await ctx.db.insert(comment_votes).values({
           commentId,
           userId,
@@ -244,7 +321,6 @@ export const discussionRouter = createTRPCRouter({
         });
         return { voteType };
       } else if (existingVote[0].voteType !== voteType) {
-        // Change vote
         await ctx.db
           .update(comment_votes)
           .set({ voteType: voteType as "up" | "down" })
@@ -252,7 +328,6 @@ export const discussionRouter = createTRPCRouter({
         return { voteType };
       }
 
-      // Same vote, no change needed
       return { voteType };
     }),
 
@@ -262,13 +337,13 @@ export const discussionRouter = createTRPCRouter({
       const { contentId } = input;
       const userId = ctx?.session?.user?.id;
 
-      // Get total count (excluding soft-deleted)
+      // Total count excludes soft-deleted.
       const [commentCount] = await db
         .select({ count: count() })
         .from(comments)
         .where(and(eq(comments.postId, contentId), isNull(comments.deletedAt)));
 
-      // Fetch all comments for this post (flat list, we'll build tree in JS)
+      // Fetch flat; the tree is built in JS below.
       const allComments = await db
         .select({
           id: comments.id,
@@ -292,25 +367,30 @@ export const discussionRouter = createTRPCRouter({
         .where(eq(comments.postId, contentId))
         .orderBy(comments.path); // Order by path for tree structure
 
-      // Get all votes for this user on these comments
+      // Scope the user-vote lookup to this post's comments, not every vote the user has ever cast.
       let userVotes: Map<string, string> = new Map();
-      if (userId) {
+      const commentIds = allComments.map((c) => c.id);
+      if (userId && commentIds.length > 0) {
         const votes = await db
           .select({
             commentId: comment_votes.commentId,
             voteType: comment_votes.voteType,
           })
           .from(comment_votes)
-          .where(eq(comment_votes.userId, userId));
+          .where(
+            and(
+              eq(comment_votes.userId, userId),
+              inArray(comment_votes.commentId, commentIds),
+            ),
+          );
 
         userVotes = new Map(votes.map((v) => [v.commentId, v.voteType]));
       }
 
-      // Build tree structure
       const commentMap = new Map<string, any>();
       const rootComments: any[] = [];
 
-      // First pass: create all comment objects
+      // First pass: create all comment objects.
       for (const comment of allComments) {
         const shaped = {
           id: comment.id,
@@ -349,7 +429,6 @@ export const discussionRouter = createTRPCRouter({
       return { data: rootComments, count: commentCount.count };
     }),
 
-  // Get comment count for content (useful for feed display)
   getContentDiscussionCount: publicProcedure
     .input(z.object({ contentId: z.string() }))
     .query(async ({ input }) => {
@@ -361,5 +440,178 @@ export const discussionRouter = createTRPCRouter({
         );
 
       return result.count;
+    }),
+
+  // Follow a discussion to be notified of new comments. Idempotent.
+  follow: rateLimitedProcedure({
+    name: "discussion-follow",
+    limit: 30,
+    windowMs: 10 * 60_000,
+    message:
+      "You're following discussions too fast. Take a breather and try again.",
+  })
+    .input(z.object({ postId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .insert(post_follow)
+        .values({ userId: ctx.session.user.id, postId: input.postId })
+        .onConflictDoNothing();
+      return { following: true };
+    }),
+
+  unfollow: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(post_follow)
+        .where(
+          and(
+            eq(post_follow.userId, ctx.session.user.id),
+            eq(post_follow.postId, input.postId),
+          ),
+        );
+      return { following: false };
+    }),
+
+  isFollowing: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const [row] = await ctx.db
+        .select({ id: post_follow.id })
+        .from(post_follow)
+        .where(
+          and(
+            eq(post_follow.userId, ctx.session.user.id),
+            eq(post_follow.postId, input.postId),
+          ),
+        )
+        .limit(1);
+      return !!row;
+    }),
+
+  list: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(25),
+        cursor: z.number().nullish(),
+        view: z.enum(["all", "following"]).default("all"),
+        sort: z.enum(["recent", "active", "top"]).default("recent"),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session?.user?.id;
+      const { limit, view, sort } = input;
+      const offset = input.cursor ?? 0;
+
+      // Following view requires auth and returns empty when signed out.
+      if (view === "following" && !userId) {
+        return { items: [], nextCursor: undefined };
+      }
+
+      const conditions = [
+        eq(posts.status, "published"),
+        inArray(posts.type, ["discussion", "question"] as const),
+      ];
+
+      if (view === "following" && userId) {
+        conditions.push(
+          sql`EXISTS (SELECT 1 FROM ${post_follow} WHERE ${post_follow.postId} = ${posts.id} AND ${post_follow.userId} = ${userId})`,
+        );
+      }
+
+      const scoreExpr = sql<number>`(${posts.upvotesCount} - ${posts.downvotesCount})`;
+      const orderBy =
+        sort === "top"
+          ? desc(scoreExpr)
+          : sort === "active"
+            ? desc(posts.commentsCount)
+            : desc(posts.publishedAt);
+
+      const userBookmarks = userId
+        ? ctx.db
+            .select({ postId: bookmarks.postId })
+            .from(bookmarks)
+            .where(eq(bookmarks.userId, userId))
+            .as("userBookmarks")
+        : null;
+
+      const userVotes = userId
+        ? ctx.db
+            .select({
+              postId: post_votes.postId,
+              voteType: post_votes.voteType,
+            })
+            .from(post_votes)
+            .where(eq(post_votes.userId, userId))
+            .as("userVotes")
+        : null;
+
+      const baseSelect = {
+        id: posts.id,
+        type: posts.type,
+        title: posts.title,
+        excerpt: posts.excerpt,
+        imageUrl: posts.coverImage,
+        ogImageUrl: posts.coverImage,
+        slug: posts.slug,
+        urlId: posts.urlId,
+        publishedAt: posts.publishedAt,
+        upvotes: posts.upvotesCount,
+        downvotes: posts.downvotesCount,
+        commentsCount: posts.commentsCount,
+        userId: posts.authorId,
+        sourceId: posts.sourceId,
+        authorName: user.name,
+        authorUsername: user.username,
+        authorImage: user.image,
+      };
+
+      let results;
+      if (userVotes && userBookmarks) {
+        results = await ctx.db
+          .select({
+            ...baseSelect,
+            userVote: userVotes.voteType,
+            isBookmarked: sql<boolean>`${userBookmarks.postId} IS NOT NULL`,
+          })
+          .from(posts)
+          .leftJoin(user, eq(posts.authorId, user.id))
+          .leftJoin(userVotes, eq(posts.id, userVotes.postId))
+          .leftJoin(userBookmarks, eq(posts.id, userBookmarks.postId))
+          .where(and(...conditions))
+          .orderBy(orderBy)
+          .limit(limit + 1)
+          .offset(offset);
+      } else {
+        results = await ctx.db
+          .select({
+            ...baseSelect,
+            userVote: sql<"up" | "down" | null>`NULL`,
+            isBookmarked: sql<boolean>`FALSE`,
+          })
+          .from(posts)
+          .leftJoin(user, eq(posts.authorId, user.id))
+          .where(and(...conditions))
+          .orderBy(orderBy)
+          .limit(limit + 1)
+          .offset(offset);
+      }
+
+      let nextCursor: number | undefined;
+      if (results.length > limit) {
+        results.pop();
+        nextCursor = offset + limit;
+      }
+
+      const typeMap: Record<string, string> = {
+        discussion: "DISCUSSION",
+        question: "QUESTION",
+      };
+      const items = results.map((item) => ({
+        ...item,
+        type: typeMap[item.type] ?? item.type.toUpperCase(),
+      }));
+
+      return { items, nextCursor };
     }),
 });

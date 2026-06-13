@@ -10,7 +10,7 @@ const styles = {
     // Sizing
     "px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6",
     // Focus
-    "focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500",
+    "focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-accent",
     // Disabled
     "data-[disabled]:opacity-50",
     // Icon
@@ -154,6 +154,11 @@ const styles = {
     rose: [
       "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.rose.500)] [--btn-border:theme(colors.rose.600/90%)]",
       "[--btn-icon:theme(colors.rose.300)] data-[active]:[--btn-icon:theme(colors.rose.200)] data-[hover]:[--btn-icon:theme(colors.rose.200)]",
+    ],
+    // Relaunch brand button — mint fill, near-black ink (design tokens).
+    accent: [
+      "text-on-accent [--btn-hover-overlay:theme(colors.black/8%)] [--btn-bg:rgb(var(--color-accent))] [--btn-border:rgb(var(--color-accent))]",
+      "[--btn-icon:rgb(var(--color-on-accent)/70%)] data-[active]:[--btn-icon:rgb(var(--color-on-accent))] data-[hover]:[--btn-icon:rgb(var(--color-on-accent))]",
     ],
   },
 };

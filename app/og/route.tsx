@@ -17,9 +17,18 @@ export async function GET(request: Request) {
     const readTime = searchParams.get("readTime");
     const date = searchParams.get("date");
 
-    if (!title || !author || !readTime || !date) {
-      throw new Error("Missing required parameters");
+    // Only the title is required — byline/meta lines render when provided, so
+    // title-only callers (e.g. twitter images) get a valid card, not a 500.
+    if (!title) {
+      throw new Error("Missing required parameter: title");
     }
+
+    const metaLine = [
+      date ? formatDate(date) : null,
+      readTime ? `${readTime} min read` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
     const regularFontData = await fetch(
       new URL("@/assets/Lato-Regular.ttf", import.meta.url),
@@ -131,18 +140,22 @@ export async function GET(request: Request) {
             </div>
             <div tw="flex items-center justify-between">
               <div tw="flex flex-col">
-                <div
-                  tw="flex text-2xl text-neutral-100"
-                  style={{ paddingBottom: "0.1em" }}
-                >
-                  {author}
-                </div>
-                <div
-                  tw="text-xl text-neutral-400"
-                  style={{ paddingBottom: "0.1em" }}
-                >
-                  {`${formatDate(date)} · ${readTime} min read`}
-                </div>
+                {author && (
+                  <div
+                    tw="flex text-2xl text-neutral-100"
+                    style={{ paddingBottom: "0.1em" }}
+                  >
+                    {author}
+                  </div>
+                )}
+                {metaLine && (
+                  <div
+                    tw="text-xl text-neutral-400"
+                    style={{ paddingBottom: "0.1em" }}
+                  >
+                    {metaLine}
+                  </div>
+                )}
               </div>
             </div>
           </div>

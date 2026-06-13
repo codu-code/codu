@@ -26,17 +26,17 @@ const MAX_TALKS = 3;
 
 function SuccessState() {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center sm:p-12">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
-        <CheckIcon className="h-10 w-10 text-green-500" />
+    <div className="rounded-xl border border-hairline bg-surface p-8 text-center sm:p-12">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-success/20">
+        <CheckIcon className="h-10 w-10 text-success" />
       </div>
-      <h2 className="text-2xl font-bold text-white">Thanks for pitching!</h2>
-      <p className="mx-auto mt-3 max-w-md text-neutral-300">
+      <h2 className="font-display text-2xl text-fg">Thanks for pitching!</h2>
+      <p className="mx-auto mt-3 max-w-md text-muted">
         We read every submission and reply within 2 weeks. In the meantime, say
         hi in our{" "}
         <a
           href="https://www.codu.co/discord"
-          className="text-orange-400 hover:underline"
+          className="text-accent hover:underline"
         >
           Discord
         </a>
@@ -94,7 +94,7 @@ export function SpeakerForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 rounded-xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8"
+      className="space-y-6 rounded-xl border border-hairline bg-surface p-6 sm:p-8"
       noValidate
     >
       <div
@@ -141,7 +141,7 @@ export function SpeakerForm() {
       <Field>
         <Label>
           LinkedIn / Twitter / website{" "}
-          <span className="font-normal text-neutral-500">(optional)</span>
+          <span className="font-normal text-faint">(optional)</span>
         </Label>
         <Input
           type="url"
@@ -177,37 +177,37 @@ export function SpeakerForm() {
       </Field>
 
       <fieldset>
-        <legend className="text-sm font-medium text-white">
+        <legend className="text-sm font-medium text-muted">
           Format preference
         </legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           {speakerFormats.map((f) => (
             <label
               key={f}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-hairline bg-inset px-4 py-3 text-fg transition-colors hover:border-strong has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={f}
                 {...register("format")}
-                className="h-4 w-4 accent-pink-600"
+                className="accent-mint h-4 w-4"
               />
               <span className="text-sm">{speakerFormatLabels[f]}</span>
             </label>
           ))}
         </div>
         {errors.format && (
-          <p className="mt-2 text-sm text-red-500">{errors.format.message}</p>
+          <p className="mt-2 text-sm text-danger">{errors.format.message}</p>
         )}
       </fieldset>
 
-      <div className="border-t border-neutral-800 pt-6">
+      <div className="border-t border-hairline pt-6">
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <h3 className="text-base font-semibold text-white">
+            <h3 className="font-display text-base text-fg">
               Your talk{fields.length === 1 ? "" : "s"}
             </h3>
-            <p className="mt-1 text-sm text-neutral-400">
+            <p className="mt-1 text-sm text-muted">
               Pitch up to 3. Short abstracts are perfect — we&apos;re not
               looking for a full outline.
             </p>
@@ -218,17 +218,17 @@ export function SpeakerForm() {
           {fields.map((field, idx) => (
             <div
               key={field.id}
-              className="rounded-lg border border-neutral-700 bg-neutral-800/40 p-5"
+              className="rounded-lg border border-hairline bg-inset p-5"
             >
               <div className="mb-4 flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                   Talk {idx + 1}
                 </span>
                 {fields.length > 1 && (
                   <button
                     type="button"
                     onClick={() => remove(idx)}
-                    className="flex items-center gap-1 text-xs text-neutral-400 hover:text-red-400"
+                    className="flex items-center gap-1 text-xs text-muted hover:text-danger"
                   >
                     <TrashIcon className="h-4 w-4" />
                     Remove
@@ -253,27 +253,27 @@ export function SpeakerForm() {
                 </Field>
 
                 <fieldset>
-                  <legend className="text-sm font-medium text-white">
+                  <legend className="text-sm font-medium text-muted">
                     Length
                   </legend>
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {talkLengths.map((l) => (
                       <label
                         key={l}
-                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-900/60 px-3 py-2 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+                        className="flex cursor-pointer items-center gap-3 rounded-lg border border-hairline bg-canvas px-3 py-2 text-fg transition-colors hover:border-strong has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
                       >
                         <input
                           type="radio"
                           value={l}
                           {...register(`talks.${idx}.length` as const)}
-                          className="h-4 w-4 accent-pink-600"
+                          className="accent-mint h-4 w-4"
                         />
                         <span className="text-sm">{talkLengthLabels[l]}</span>
                       </label>
                     ))}
                   </div>
                   {errors.talks?.[idx]?.length && (
-                    <p className="mt-2 text-sm text-red-500">
+                    <p className="mt-2 text-sm text-danger">
                       {errors.talks[idx]?.length?.message}
                     </p>
                   )}
@@ -304,7 +304,7 @@ export function SpeakerForm() {
             onClick={() =>
               append({ title: "", length: "STANDARD_20", abstract: "" })
             }
-            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:border-orange-400/60 hover:text-white"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-hairline px-4 py-2 text-sm text-muted hover:border-accent/60 hover:text-fg"
           >
             <PlusIcon className="h-4 w-4" />
             Add another talk
@@ -316,28 +316,28 @@ export function SpeakerForm() {
           !Array.isArray(errors.talks) &&
           "message" in errors.talks &&
           errors.talks.message && (
-            <p className="mt-2 text-sm text-red-500">
+            <p className="mt-2 text-sm text-danger">
               {errors.talks.message as string}
             </p>
           )}
       </div>
 
       <fieldset>
-        <legend className="text-sm font-medium text-white">
+        <legend className="text-sm font-medium text-muted">
           Speaking experience{" "}
-          <span className="font-normal text-neutral-500">(optional)</span>
+          <span className="font-normal text-faint">(optional)</span>
         </legend>
         <div className="mt-3 space-y-2">
           {speakerExperiences.map((e) => (
             <label
               key={e}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-hairline bg-inset px-4 py-3 text-fg transition-colors hover:border-strong has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={e}
                 {...register("experience")}
-                className="h-4 w-4 accent-pink-600"
+                className="accent-mint h-4 w-4"
               />
               <span>{speakerExperienceLabels[e]}</span>
             </label>
@@ -348,7 +348,7 @@ export function SpeakerForm() {
       <Field>
         <Label>
           Anything else?{" "}
-          <span className="font-normal text-neutral-500">(optional)</span>
+          <span className="font-normal text-faint">(optional)</span>
         </Label>
         <Textarea
           rows={3}
@@ -360,12 +360,12 @@ export function SpeakerForm() {
       </Field>
 
       {submitMutation.error && (
-        <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
+        <div className="rounded-lg bg-danger/10 p-4 text-sm text-danger">
           {submitMutation.error.message}
         </div>
       )}
 
-      <div className="flex justify-end border-t border-neutral-800 pt-6">
+      <div className="flex justify-end border-t border-hairline pt-6">
         <button
           type="submit"
           disabled={isSubmitting}

@@ -98,8 +98,8 @@ const ArticlePreview: NextPage<Props> = ({
   };
 
   return (
-    <article className="relative my-2 rounded-r border border-l-0 border-neutral-300 bg-white p-4 pl-6 dark:border-neutral-600 dark:bg-neutral-900">
-      <div className="absolute bottom-[-1px] left-0 top-[-1px] flex w-2 justify-between bg-pink-600" />
+    <article className="relative my-2 rounded-r border border-l-0 border-hairline bg-surface p-4 pl-6">
+      <div className="absolute bottom-[-1px] left-0 top-[-1px] flex w-2 justify-between bg-accent" />
       <div className="flex justify-between">
         <div className="mb-4 flex items-center">
           <span className="sr-only">{name}</span>
@@ -110,12 +110,12 @@ const ArticlePreview: NextPage<Props> = ({
               alt={`${name}'s avatar`}
             />
           </Link>
-          <div className="flex flex-col justify-center text-xs text-neutral-500">
-            <p className="font-medium text-neutral-500">
+          <div className="flex flex-col justify-center text-xs text-muted">
+            <p className="font-medium text-muted">
               Written by{" "}
               <Link
                 href={`/${username}`}
-                className="font-semibold text-neutral-900 dark:text-neutral-400"
+                className="font-semibold text-fg dark:text-faint"
               >
                 {name}
               </Link>
@@ -147,7 +147,7 @@ const ArticlePreview: NextPage<Props> = ({
       <div className="flex w-full content-center justify-between">
         <div className="flex w-full items-center justify-between">
           <Link
-            className="semibold cursor-pointer bg-gradient-to-r from-orange-400 to-pink-600 bg-clip-text text-lg tracking-wide text-transparent hover:from-orange-300 hover:to-pink-500"
+            className="semibold cursor-pointer bg-gradient-to-r from-accent to-accent bg-clip-text text-lg tracking-wide text-transparent hover:from-accent hover:to-accent"
             href={`/${username}/${slug}`}
           >
             Read full article
@@ -155,7 +155,7 @@ const ArticlePreview: NextPage<Props> = ({
           <div className="flex gap-x-2">
             {showBookmark && (
               <button
-                className="rounded-full p-2 hover:bg-neutral-300 focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-pink-600 dark:hover:bg-neutral-800 lg:mx-auto"
+                className="rounded-full p-2 hover:bg-elevated focus:outline-none focus:ring-white focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-accent lg:mx-auto"
                 onClick={() => {
                   if (!session) {
                     return signIn();
@@ -171,9 +171,7 @@ const ArticlePreview: NextPage<Props> = ({
               >
                 <BookmarkIcon
                   className={`h-6 w-6 ${
-                    bookmarked
-                      ? "fill-blue-400"
-                      : "fill-neutral-400 dark:fill-neutral-600"
+                    bookmarked ? "fill-blue-400" : "fill-muted"
                   }`}
                 />
               </button>
@@ -181,7 +179,7 @@ const ArticlePreview: NextPage<Props> = ({
             {menuOptions && (
               <Menu as="div" className="relative">
                 <div>
-                  <MenuButton className="rounded-full p-1 hover:bg-neutral-300 dark:hover:bg-neutral-800">
+                  <MenuButton className="rounded-full p-1 hover:bg-elevated">
                     <span className="sr-only">Open user menu</span>
                     <EllipsisHorizontalIcon className="h-6 w-6" />
                   </MenuButton>
@@ -195,12 +193,12 @@ const ArticlePreview: NextPage<Props> = ({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-md bg-white px-1 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <MenuItems className="absolute bottom-10 right-0 mt-2 w-48 origin-top-right rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
                     {menuOptions.map((item) => (
                       <MenuItem key={item.label}>
                         {"href" in item ? (
                           <Link
-                            className="block w-full rounded px-4 py-2 text-left text-neutral-700 hover:bg-neutral-200"
+                            className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
                             key={item.label}
                             href={item.href}
                           >
@@ -208,7 +206,7 @@ const ArticlePreview: NextPage<Props> = ({
                           </Link>
                         ) : (
                           <button
-                            className="block w-full rounded px-4 py-2 text-left text-neutral-700 hover:bg-neutral-200"
+                            className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
                             onClick={item.onClick}
                           >
                             {item.label}

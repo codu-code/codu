@@ -22,17 +22,17 @@ import { CheckIcon } from "@heroicons/react/24/outline";
 
 function SuccessState() {
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center sm:p-12">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20">
-        <CheckIcon className="h-10 w-10 text-green-500" />
+    <div className="rounded-xl border border-hairline bg-surface p-8 text-center sm:p-12">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-success/20">
+        <CheckIcon className="h-10 w-10 text-success" />
       </div>
-      <h2 className="text-2xl font-bold text-white">Thanks!</h2>
-      <p className="mx-auto mt-3 max-w-md text-neutral-300">
+      <h2 className="font-display text-2xl text-fg">Thanks!</h2>
+      <p className="mx-auto mt-3 max-w-md text-muted">
         We read every application and reply within 2 weeks. In the meantime, say
         hi in our{" "}
         <a
           href="https://www.codu.co/discord"
-          className="text-orange-400 hover:underline"
+          className="text-accent hover:underline"
         >
           Discord
         </a>
@@ -85,7 +85,7 @@ export function VolunteerForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 rounded-xl border border-neutral-800 bg-neutral-900 p-6 sm:p-8"
+      className="space-y-6 rounded-xl border border-hairline bg-surface p-6 sm:p-8"
       noValidate
     >
       {/* Honeypot — visually hidden, tab-index removed, name "website" */}
@@ -133,7 +133,7 @@ export function VolunteerForm() {
       <Field>
         <Label>
           LinkedIn or portfolio URL{" "}
-          <span className="font-normal text-neutral-500">(optional)</span>
+          <span className="font-normal text-faint">(optional)</span>
         </Label>
         <Input
           type="url"
@@ -158,27 +158,27 @@ export function VolunteerForm() {
       </Field>
 
       <fieldset>
-        <legend className="text-sm font-medium text-white">
+        <legend className="text-sm font-medium text-muted">
           Which area interests you?
         </legend>
         <div className="mt-3 space-y-2">
           {volunteerAreas.map((area) => (
             <label
               key={area}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-hairline bg-inset px-4 py-3 text-fg transition-colors hover:border-strong has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={area}
                 {...register("area")}
-                className="h-4 w-4 accent-pink-600"
+                className="accent-mint h-4 w-4"
               />
               <span>{volunteerAreaLabels[area]}</span>
             </label>
           ))}
         </div>
         {errors.area && (
-          <p className="mt-2 text-sm text-red-500">{errors.area.message}</p>
+          <p className="mt-2 text-sm text-danger">{errors.area.message}</p>
         )}
       </fieldset>
 
@@ -196,7 +196,7 @@ export function VolunteerForm() {
       <Field>
         <Label>
           Any relevant experience?{" "}
-          <span className="font-normal text-neutral-500">(optional)</span>
+          <span className="font-normal text-faint">(optional)</span>
         </Label>
         <Textarea
           rows={4}
@@ -223,27 +223,27 @@ export function VolunteerForm() {
       </Field>
 
       <fieldset>
-        <legend className="text-sm font-medium text-white">
+        <legend className="text-sm font-medium text-muted">
           Time commitment per month
         </legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {volunteerCommitments.map((c) => (
             <label
               key={c}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800/40 px-4 py-3 text-neutral-200 transition-colors hover:border-neutral-600 has-[:checked]:border-orange-400/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-400/10 has-[:checked]:to-pink-600/10"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-hairline bg-inset px-4 py-3 text-fg transition-colors hover:border-strong has-[:checked]:border-accent/60 has-[:checked]:bg-gradient-to-br has-[:checked]:from-accent/10 has-[:checked]:to-accent/10"
             >
               <input
                 type="radio"
                 value={c}
                 {...register("commitment")}
-                className="h-4 w-4 accent-pink-600"
+                className="accent-mint h-4 w-4"
               />
               <span>{volunteerCommitmentLabels[c]}</span>
             </label>
           ))}
         </div>
         {errors.commitment && (
-          <p className="mt-2 text-sm text-red-500">
+          <p className="mt-2 text-sm text-danger">
             {errors.commitment.message}
           </p>
         )}
@@ -252,7 +252,7 @@ export function VolunteerForm() {
       <Field>
         <Label>
           Anything else?{" "}
-          <span className="font-normal text-neutral-500">(optional)</span>
+          <span className="font-normal text-faint">(optional)</span>
         </Label>
         <Textarea
           rows={3}
@@ -264,12 +264,12 @@ export function VolunteerForm() {
       </Field>
 
       {submitMutation.error && (
-        <div className="rounded-lg bg-red-500/10 p-4 text-sm text-red-500">
+        <div className="rounded-lg bg-danger/10 p-4 text-sm text-danger">
           {submitMutation.error.message}
         </div>
       )}
 
-      <div className="flex justify-end border-t border-neutral-800 pt-6">
+      <div className="flex justify-end border-t border-hairline pt-6">
         <button
           type="submit"
           disabled={isSubmitting}

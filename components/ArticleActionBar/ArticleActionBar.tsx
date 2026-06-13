@@ -2,8 +2,6 @@
 
 import { Fragment, useState } from "react";
 import {
-  ChevronUpIcon,
-  ChevronDownIcon,
   BookmarkIcon,
   ChatBubbleLeftIcon,
   ShareIcon,
@@ -22,6 +20,7 @@ import { useSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 import * as Sentry from "@sentry/nextjs";
 import { ReportModal } from "../ReportModal/ReportModal";
+import VoteControl from "@/components/Vote/VoteControl";
 
 interface ArticleActionBarProps {
   postId: string;
@@ -48,34 +47,11 @@ const ArticleActionBar = ({
 }: ArticleActionBarProps) => {
   const { data: session } = useSession();
   const utils = api.useUtils();
-  const [userVote, setUserVote] = useState(initialUserVote);
-  const [votes, setVotes] = useState({
-    upvotes: initialUpvotes,
-    downvotes: initialDownvotes,
-  });
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
 
-  const { mutate: vote, status: voteStatus } = api.post.vote.useMutation({
-    onMutate: async ({ voteType }) => {
-      const oldVote = userVote;
-      setUserVote(voteType);
-
-      setVotes((prev) => {
-        let newUpvotes = prev.upvotes;
-        let newDownvotes = prev.downvotes;
-
-        if (oldVote === "up") newUpvotes--;
-        if (oldVote === "down") newDownvotes--;
-
-        if (voteType === "up") newUpvotes++;
-        if (voteType === "down") newDownvotes++;
-
-        return { upvotes: newUpvotes, downvotes: newDownvotes };
-      });
-    },
+  // VoteControl owns the optimistic UI.
+  const { mutate: vote } = api.post.vote.useMutation({
     onError: (error) => {
-      setUserVote(initialUserVote);
-      setVotes({ upvotes: initialUpvotes, downvotes: initialDownvotes });
       toast.error("Failed to update vote");
       Sentry.captureException(error);
     },
@@ -124,66 +100,34 @@ const ArticleActionBar = ({
     }
   };
 
-  const score = votes.upvotes - votes.downvotes;
-
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Vote buttons */}
-      <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-        <button
-          onClick={() => handleVote(userVote === "up" ? null : "up")}
-          disabled={voteStatus === "pending"}
-          className={`rounded-l-full p-2 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-            userVote === "up"
-              ? "text-green-500"
-              : "text-neutral-400 dark:text-neutral-500"
-          }`}
-          aria-label="Upvote"
-        >
-          <ChevronUpIcon className="h-5 w-5" />
-        </button>
-        <span
-          className={`min-w-[2rem] text-center text-sm font-semibold ${
-            score > 0
-              ? "text-green-500"
-              : score < 0
-                ? "text-red-500"
-                : "text-neutral-400 dark:text-neutral-500"
-          }`}
-        >
-          {score}
-        </span>
-        <button
-          onClick={() => handleVote(userVote === "down" ? null : "down")}
-          disabled={voteStatus === "pending"}
-          className={`rounded-r-full p-2 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-            userVote === "down"
-              ? "text-red-500"
-              : "text-neutral-400 dark:text-neutral-500"
-          }`}
-          aria-label="Downvote"
-        >
-          <ChevronDownIcon className="h-5 w-5" />
-        </button>
-      </div>
+      <VoteControl
+        base={
+          initialUpvotes -
+          initialDownvotes -
+          (initialUserVote === "up" ? 1 : initialUserVote === "down" ? -1 : 0)
+        }
+        initial={initialUserVote}
+        onGate={!session ? () => signIn() : undefined}
+        onVote={(next) => handleVote(next)}
+      />
 
-      {/* Comments button */}
       <a
         href="#comments"
-        className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+        className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-hover"
       >
         <ChatBubbleLeftIcon className="h-4 w-4" />
         <span>{discussionCount} Comments</span>
       </a>
 
-      {/* Bookmark button */}
       <button
         onClick={handleBookmark}
         disabled={bookmarkStatus === "pending"}
         className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
           isBookmarked
-            ? "border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30"
-            : "border-neutral-200 text-neutral-500 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            ? "bg-accent/12 border-accent text-accent-soft hover:bg-accent/20"
+            : "border-hairline text-muted hover:bg-hover"
         }`}
       >
         {isBookmarked ? (
@@ -194,9 +138,8 @@ const ArticleActionBar = ({
         <span>{isBookmarked ? "Saved" : "Save"}</span>
       </button>
 
-      {/* Share button */}
       <Menu as="div" className="relative">
-        <MenuButton className="flex items-center gap-1.5 rounded-full border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800">
+        <MenuButton className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-hover">
           <ShareIcon className="h-4 w-4" />
           <span>Share</span>
         </MenuButton>
@@ -209,13 +152,13 @@ const ArticleActionBar = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <MenuItems className="absolute bottom-12 left-0 z-10 mt-2 w-48 origin-bottom-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
+          <MenuItems className="absolute bottom-12 left-0 z-10 mt-2 w-48 origin-bottom-left rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
             <MenuItem>
               <a
                 href={`https://twitter.com/intent/tweet?text="${postTitle}", by ${postUsername}&hashtags=coducommunity,codu&url=${postUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="block rounded-md px-2 py-2 text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
               >
                 Share to X
               </a>
@@ -225,7 +168,7 @@ const ArticleActionBar = ({
                 href={`https://www.linkedin.com/sharing/share-offsite/?url=${postUrl}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="block rounded-md px-2 py-2 text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
               >
                 Share to LinkedIn
               </a>
@@ -233,7 +176,7 @@ const ArticleActionBar = ({
             <MenuItem>
               <button
                 onClick={handleCopyLink}
-                className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="block w-full rounded-md px-2 py-2 text-left text-sm text-fg transition-colors hover:bg-surface data-[focus]:bg-surface"
               >
                 Copy link
               </button>
@@ -242,9 +185,8 @@ const ArticleActionBar = ({
         </Transition>
       </Menu>
 
-      {/* More options menu */}
       <Menu as="div" className="relative ml-auto">
-        <MenuButton className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300">
+        <MenuButton className="rounded-full p-2 text-faint hover:bg-hover hover:text-fg">
           <span className="sr-only">More options</span>
           <EllipsisHorizontalIcon className="h-5 w-5" />
         </MenuButton>
@@ -257,9 +199,9 @@ const ArticleActionBar = ({
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <MenuItems className="absolute bottom-12 right-0 z-10 mt-2 w-40 origin-bottom-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-neutral-800 dark:ring-neutral-700">
+          <MenuItems className="absolute bottom-12 right-0 z-10 mt-2 w-40 origin-bottom-right rounded-lg border border-strong bg-elevated p-2 shadow-pop focus:outline-none">
             <MenuItem>
-              <div className="block w-full px-4 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700">
+              <div className="block w-full rounded-md px-2 py-2 text-left text-sm text-danger transition-colors hover:bg-surface data-[focus]:bg-surface">
                 <ReportModal type="post" title={postTitle} id={postId} />
               </div>
             </MenuItem>

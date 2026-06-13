@@ -1,17 +1,5 @@
 import Link from "next/link";
-
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=64`;
-  } catch {
-    return null;
-  }
-};
+import { getFaviconUrl, getHostname, safeExternalHref } from "@/utils/url";
 
 interface SourceInfoCardProps {
   name: string;
@@ -28,11 +16,12 @@ const SourceInfoCard = ({
   logo,
   websiteUrl,
 }: SourceInfoCardProps) => {
-  const faviconUrl = getFaviconUrl(websiteUrl);
-  const sourceLink = slug ? `/feed/${slug}` : "#";
+  const faviconUrl = getFaviconUrl(websiteUrl, 64);
+  const safeWebsite = safeExternalHref(websiteUrl);
+  const sourceLink = slug ? `/${slug}` : "#";
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
+    <div className="rounded-lg border border-hairline bg-surface p-4">
       <div className="flex items-start gap-3">
         <Link href={sourceLink} className="flex-shrink-0">
           {logo ? (
@@ -44,7 +33,7 @@ const SourceInfoCard = ({
           ) : faviconUrl ? (
             <img src={faviconUrl} alt="" className="h-12 w-12 rounded-lg" />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 text-lg font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
+            <div className="bg-accent/12 flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold text-accent">
               {name?.charAt(0).toUpperCase() || "?"}
             </div>
           )}
@@ -52,23 +41,23 @@ const SourceInfoCard = ({
         <div className="min-w-0 flex-1">
           <Link
             href={sourceLink}
-            className="font-semibold text-neutral-900 hover:underline dark:text-neutral-100"
+            className="font-semibold text-fg hover:underline"
           >
             {name}
           </Link>
           {description && (
-            <p className="mt-1 line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="mt-1 line-clamp-2 text-sm text-muted">
               {description}
             </p>
           )}
-          {websiteUrl && (
+          {safeWebsite && (
             <a
-              href={websiteUrl}
+              href={safeWebsite}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400"
+              className="mt-1 inline-block text-xs text-accent hover:underline"
             >
-              {new URL(websiteUrl).hostname}
+              {getHostname(websiteUrl)}
             </a>
           )}
         </div>

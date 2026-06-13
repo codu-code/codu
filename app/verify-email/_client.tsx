@@ -52,11 +52,11 @@ function Content() {
   }, [token]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-[350px] rounded-lg border bg-white shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
+      <div className="w-[350px] rounded-lg border bg-surface shadow-sm">
         <div className="flex flex-col space-y-1.5 p-6 text-center">
           <div className="text-2xl font-bold">Email Verification</div>
-          <div className="text-gray-400">Verifying your email address</div>
+          <div className="text-faint">Verifying your email address</div>
         </div>
         <div className="min-h-12 p-6 pt-0">
           {status === "pending" && (
@@ -84,7 +84,7 @@ function Content() {
           <div className="flex items-center justify-center p-6 pt-0">
             <Button
               onClick={() => router.push("/settings")}
-              className="mt-4 h-10 rounded-md bg-gray-200 px-4 py-2 transition-colors hover:bg-gray-300"
+              className="mt-4 h-10 rounded-md bg-elevated px-4 py-2 transition-colors hover:bg-hover"
             >
               Return to Settings
             </Button>

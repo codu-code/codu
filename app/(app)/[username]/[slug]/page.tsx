@@ -1,48 +1,51 @@
-import React from "react";
-import type { RenderableTreeNode } from "@markdoc/markdoc";
-import Markdoc from "@markdoc/markdoc";
-import Link from "next/link";
-import { markdocComponents } from "@/markdoc/components";
-import { config } from "@/markdoc/config";
-import DiscussionArea from "@/components/Discussion/DiscussionArea";
-import { ArticleActionBarWrapper } from "@/components/ArticleActionBar";
-import { InlineAuthorBio } from "@/components/ContentDetail";
+import { cache } from "react";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getServerAuthSession } from "@/server/auth";
-import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { type Metadata } from "next";
-import { getCamelCaseFromLower } from "@/utils/utils";
-import { generateHTML } from "@tiptap/core";
-import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
-import sanitizeHtml from "sanitize-html";
-import type { JSONContent } from "@tiptap/core";
-import NotFound from "@/components/NotFound/NotFound";
+import { SITE_ORIGIN } from "@/config/site";
 import { db } from "@/server/db";
 import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
-import { eq, and, lte } from "drizzle-orm";
-import FeedArticleContent from "./_feedArticleContent";
-import LinkContentDetail from "./_linkContentDetail";
+import { eq, and, lte, inArray, or, sql } from "drizzle-orm";
 import UserLinkDetail from "./_userLinkDetail";
+import PostReader from "@/components/ContentDetail/PostReader";
+import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
+import { serverApi } from "@/server/trpc/caller";
 import { JsonLd } from "@/components/JsonLd";
-import {
-  getArticleSchema,
-  getBreadcrumbSchema,
-  getNewsArticleSchema,
-} from "@/lib/structured-data";
+import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
-// Helper to fetch user article by username and slug (uses new posts table)
-async function getUserPost(username: string, postSlug: string) {
+async function getUserPostUncached(
+  username: string,
+  postSlug: string,
+  viewerId?: string | null,
+) {
+  // Case-insensitive handle resolution (GitHub-style), matching the profile page.
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
-    where: eq(user.username, username),
+    where: sql`lower(${user.username}) = ${username.toLowerCase()}`,
   });
 
   if (!userRecord) return null;
 
-  // Then find published article by slug that belongs to this user - using explicit JOIN
+  // Owner bypass: the author may view their own in_review/rejected post;
+  // everyone else only sees published posts whose publish time has passed.
+  const isAuthor = !!viewerId && viewerId === userRecord.id;
+
+  const visibilityFilter = isAuthor
+    ? or(
+        and(
+          eq(posts.status, "published"),
+          lte(posts.publishedAt, new Date().toISOString()),
+        ),
+        inArray(posts.status, ["in_review", "rejected"]),
+      )
+    : and(
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+      );
+
   const postResults = await db
     .select({
       id: posts.id,
@@ -59,7 +62,7 @@ async function getUserPost(username: string, postSlug: string) {
       upvotesCount: posts.upvotesCount,
       downvotesCount: posts.downvotesCount,
       type: posts.type,
-      // Author info via JOIN
+      moderationNote: posts.moderationNote,
       authorId: user.id,
       authorName: user.name,
       authorImage: user.image,
@@ -72,9 +75,15 @@ async function getUserPost(username: string, postSlug: string) {
       and(
         eq(posts.slug, postSlug),
         eq(posts.authorId, userRecord.id),
-        eq(posts.status, "published"),
-        eq(posts.type, "article"),
-        lte(posts.publishedAt, new Date().toISOString()),
+        // Text-content kinds render via the article reader; links resolve below.
+        inArray(posts.type, [
+          "article",
+          "discussion",
+          "question",
+          "til",
+          "resource",
+        ]),
+        visibilityFilter,
       ),
     )
     .limit(1);
@@ -83,21 +92,19 @@ async function getUserPost(username: string, postSlug: string) {
 
   const postRecord = postResults[0];
 
-  // Fetch tags separately using explicit JOIN
   const tagsResult = await db
-    .select({ title: tag.title })
+    .select({ title: tag.title, slug: tag.slug })
     .from(post_tags)
     .innerJoin(tag, eq(post_tags.tagId, tag.id))
     .where(eq(post_tags.postId, postRecord.id));
 
-  // Map to expected shape for backwards compatibility
   return {
     ...postRecord,
     published: postRecord.publishedAt,
     readTimeMins: postRecord.readingTime,
     upvotes: postRecord.upvotesCount,
     downvotes: postRecord.downvotesCount,
-    tags: tagsResult.map((t) => ({ tag: { title: t.title } })),
+    tags: tagsResult.map((t) => ({ tag: { title: t.title, slug: t.slug } })),
     user: {
       id: postRecord.authorId,
       name: postRecord.authorName,
@@ -108,16 +115,14 @@ async function getUserPost(username: string, postSlug: string) {
   };
 }
 
-// Helper to fetch user-created link post by username and slug (user shared a link)
-async function getUserLinkPost(username: string, postSlug: string) {
+async function getUserLinkPostUncached(username: string, postSlug: string) {
   const userRecord = await db.query.user.findFirst({
     columns: { id: true },
-    where: eq(user.username, username),
+    where: sql`lower(${user.username}) = ${username.toLowerCase()}`,
   });
 
   if (!userRecord) return null;
 
-  // Find published link post by slug that belongs to this user (no sourceId)
   const linkPostResults = await db
     .select({
       id: posts.id,
@@ -135,7 +140,6 @@ async function getUserLinkPost(username: string, postSlug: string) {
       upvotesCount: posts.upvotesCount,
       downvotesCount: posts.downvotesCount,
       type: posts.type,
-      // Author info via JOIN
       authorId: user.id,
       authorName: user.name,
       authorImage: user.image,
@@ -159,14 +163,12 @@ async function getUserLinkPost(username: string, postSlug: string) {
 
   const linkPost = linkPostResults[0];
 
-  // Fetch tags separately using explicit JOIN
   const tagsResult = await db
     .select({ title: tag.title })
     .from(post_tags)
     .innerJoin(tag, eq(post_tags.tagId, tag.id))
     .where(eq(post_tags.postId, linkPost.id));
 
-  // Map to expected shape
   return {
     ...linkPost,
     published: linkPost.publishedAt,
@@ -184,8 +186,7 @@ async function getUserLinkPost(username: string, postSlug: string) {
   };
 }
 
-// Helper to fetch link post by source slug and article slug (uses new posts table)
-async function getFeedArticle(
+async function getFeedArticleUncached(
   sourceSlug: string,
   articleSlugOrShortId: string,
 ) {
@@ -195,7 +196,6 @@ async function getFeedArticle(
 
   if (!source) return null;
 
-  // Find link post by slug that belongs to this source - using explicit JOIN
   const linkPostResults = await db
     .select({
       id: posts.id,
@@ -211,7 +211,6 @@ async function getFeedArticle(
       createdAt: posts.createdAt,
       updatedAt: posts.updatedAt,
       showComments: posts.showComments,
-      // Source info
       sourceName: feed_sources.name,
       sourceSlug: feed_sources.slug,
       sourceLogo: feed_sources.logoUrl,
@@ -233,7 +232,6 @@ async function getFeedArticle(
 
   const linkPost = linkPostResults[0];
 
-  // Map to expected shape for backwards compatibility
   return {
     ...linkPost,
     shortId: linkPost.slug.split("-").pop() || "",
@@ -250,40 +248,144 @@ async function getFeedArticle(
   };
 }
 
-// Helper to fetch link content (uses new posts table - same as getFeedArticle)
-async function getLinkContent(sourceSlug: string, contentSlug: string) {
-  // Delegate to getFeedArticle since they query the same table now
-  return getFeedArticle(sourceSlug, contentSlug);
+// Per-request dedupe: generateMetadata and the page body run the same
+// resolution cascade; cache() makes each (resolver, args) pair hit the DB once.
+const getUserPost = cache(getUserPostUncached);
+const getUserLinkPost = cache(getUserLinkPostUncached);
+const getFeedArticle = cache(getFeedArticleUncached);
+const resolveMemberCanonicalByUrlId = cache(
+  resolveMemberCanonicalByUrlIdUncached,
+);
+const exactPublishedPostExists = cache(exactPublishedPostExistsUncached);
+
+async function getUserArticleContent(username: string, contentSlug: string) {
+  return getUserPost(username, contentSlug);
 }
 
-// Helper to fetch user article content (uses new posts table - same as getUserPost)
-async function getUserArticleContent(username: string, contentSlug: string) {
-  // Delegate to getUserPost since they query the same table now
-  return getUserPost(username, contentSlug);
+// Resolve a member post by its urlId to its canonical username + slug.
+// Aggregated/source content (no author) is excluded; a miss returns null so
+// callers fall back to username+slug resolution.
+async function resolveMemberCanonicalByUrlIdUncached(urlId: string) {
+  if (!urlId) return null;
+
+  const [match] = await db
+    .select({
+      slug: posts.slug,
+      username: user.username,
+      type: posts.type,
+    })
+    .from(posts)
+    .innerJoin(user, eq(posts.authorId, user.id))
+    .where(
+      and(
+        eq(posts.urlId, urlId),
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+        inArray(posts.type, [
+          "article",
+          "discussion",
+          "question",
+          "til",
+          "resource",
+          "link",
+        ]),
+      ),
+    )
+    .limit(1);
+
+  if (!match || !match.username || !match.slug) return null;
+  return { username: match.username, slug: match.slug, type: match.type };
+}
+
+// Discussions and questions live under the /d/ namespace. Everything else
+// (articles, TIL, resource, link) stays at /{username}/{slug}.
+function isDiscussionKind(type: string | null | undefined): boolean {
+  return type === "discussion" || type === "question";
+}
+
+// Does a published post live at the EXACT (username, slug) requested? Suppresses
+// urlId-based redirects so a slug whose trailing token collides with another
+// post's urlId isn't hijacked (301'd) to that other post.
+async function exactPublishedPostExistsUncached(
+  username: string,
+  slug: string,
+): Promise<boolean> {
+  const [match] = await db
+    .select({ id: posts.id })
+    .from(posts)
+    .innerJoin(user, eq(posts.authorId, user.id))
+    .where(
+      and(
+        sql`lower(${user.username}) = ${username.toLowerCase()}`,
+        eq(posts.slug, slug),
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+      ),
+    )
+    .limit(1);
+
+  return !!match;
+}
+
+// 301 to canonical when the request's urlId resolves to a member post whose
+// canonical path differs (title edit / username rename). Discussion/question
+// kinds always 301 to /d/{slug}.
+async function redirectMemberToCanonical(username: string, slug: string) {
+  const canonical = await resolveMemberCanonicalByUrlId(parseUrlId(slug));
+  if (!canonical) return;
+
+  // Discussions/questions always move to /d/, even if an exact post exists here.
+  if (isDiscussionKind(canonical.type)) {
+    permanentRedirect(`/d/${canonical.slug}`);
+  }
+
+  // Hijack guard: if a real post already lives at the EXACT requested URL, the
+  // token collided with another post's urlId — let the normal render path serve
+  // the correct post (the discussion redirect above stays unconditional).
+  if (await exactPublishedPostExists(username, slug)) {
+    return;
+  }
+
+  const canonicalPath = `/${canonical.username}/${canonical.slug}`;
+  if (canonicalMismatch(`/${username}/${slug}`, canonicalPath)) {
+    permanentRedirect(canonicalPath);
+  }
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const { username, slug } = params;
 
-  // First try user post (legacy Post table)
-  const userPost = await getUserPost(username, slug);
+  // 301 stale member URLs (title edits / username renames) before metadata work.
+  await redirectMemberToCanonical(username, slug);
+
+  // Same viewerId as the page body so the cache()d resolver runs once per request.
+  const session = await getServerAuthSession();
+  const userPost = await getUserPost(username, slug, session?.user?.id);
   if (userPost) {
+    // Discussions/questions canonicalize to /d/{slug}; redirect before metadata.
+    if (isDiscussionKind(userPost.type)) {
+      permanentRedirect(`/d/${userPost.slug}`);
+    }
     const tags = userPost.tags.map((tag) => tag.tag.title);
-    const host = (await headers()).get("host") || "";
     const authorName = userPost.user.name || "Unknown";
 
     return {
       title: `${userPost.title} | by ${authorName} | Codú`,
       authors: {
         name: authorName,
-        url: `https://www.${host}/${userPost.user.username}`,
+        // Author URLs always point at the canonical production host —
+        // host-header values vary on previews.
+        url: `${SITE_ORIGIN}/${userPost.user.username}`,
       },
       keywords: tags,
       description: userPost.excerpt ?? undefined,
       openGraph: {
         description: userPost.excerpt ?? undefined,
         type: "article",
+        url: `/${userPost.user.username ?? username}/${userPost.slug}`,
+        publishedTime: userPost.published ?? undefined,
+        modifiedTime: userPost.updatedAt ?? undefined,
         images: [
           `/og?title=${encodeURIComponent(
             userPost.title,
@@ -298,29 +400,34 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userPost.title)}`],
       },
       alternates: {
-        canonical: userPost.canonicalUrl,
+        // Cross-posted content points at the original; native posts
+        // self-canonical at the stored handle casing.
+        canonical:
+          userPost.canonicalUrl ??
+          `/${userPost.user.username ?? username}/${userPost.slug}`,
       },
     };
   }
 
-  // Then try user ARTICLE content (new unified Content table)
   const userArticle = await getUserArticleContent(username, slug);
   if (userArticle && userArticle.user) {
     const tags = userArticle.tags?.map((t) => t.tag.title) || [];
-    const host = (await headers()).get("host") || "";
     const articleAuthorName = userArticle.user.name || "Unknown";
 
     return {
       title: `${userArticle.title} | by ${articleAuthorName} | Codú`,
       authors: {
         name: articleAuthorName,
-        url: `https://www.${host}/${userArticle.user.username}`,
+        url: `${SITE_ORIGIN}/${userArticle.user.username}`,
       },
       keywords: tags,
       description: userArticle.excerpt,
       openGraph: {
         description: userArticle.excerpt || "",
         type: "article",
+        url: `/${userArticle.user.username ?? username}/${userArticle.slug}`,
+        publishedTime: userArticle.published ?? undefined,
+        modifiedTime: userArticle.updatedAt ?? undefined,
         images: [
           `/og?title=${encodeURIComponent(
             userArticle.title,
@@ -335,22 +442,22 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: [`/og?title=${encodeURIComponent(userArticle.title)}`],
       },
       alternates: {
-        canonical: userArticle.canonicalUrl,
+        canonical:
+          userArticle.canonicalUrl ??
+          `/${userArticle.user.username ?? username}/${userArticle.slug}`,
       },
     };
   }
 
-  // Try user-created link post (user shared a link)
   const userLinkPost = await getUserLinkPost(username, slug);
   if (userLinkPost && userLinkPost.user) {
-    const host = (await headers()).get("host") || "";
     const linkAuthorName = userLinkPost.user.name || "Unknown";
 
     return {
       title: `${userLinkPost.title} | shared by ${linkAuthorName} | Codú`,
       authors: {
         name: linkAuthorName,
-        url: `https://www.${host}/${userLinkPost.user.username}`,
+        url: `${SITE_ORIGIN}/${userLinkPost.user.username}`,
       },
       description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
       openGraph: {
@@ -359,565 +466,141 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         images: userLinkPost.coverImage ? [userLinkPost.coverImage] : undefined,
         siteName: "Codú",
       },
+      // Member-shared links keep Codú as canonical (aggregated links point to source).
+      alternates: {
+        canonical: `/${userLinkPost.user.username ?? username}/${userLinkPost.slug}`,
+      },
     };
   }
 
-  // Then try feed article (legacy aggregated_article table)
+  // Aggregated/source content moved to /s/{sourceSlug}/{slug} — 301 rather than
+  // emit feed metadata at the legacy URL.
   const feedArticle = await getFeedArticle(username, slug);
   if (feedArticle) {
-    return {
-      title: `${feedArticle.title} | Codú Feed`,
-      description:
-        feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
-      openGraph: {
-        title: feedArticle.title,
-        description:
-          feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
-        images:
-          feedArticle.ogImageUrl || feedArticle.imageUrl
-            ? [feedArticle.ogImageUrl || feedArticle.imageUrl!]
-            : undefined,
-      },
-    };
-  }
-
-  // Try unified content table (new LINK type items)
-  const linkContent = await getLinkContent(username, slug);
-  if (linkContent) {
-    return {
-      title: `${linkContent.title} | Codú Feed`,
-      description:
-        linkContent.excerpt || `Discussion about ${linkContent.title}`,
-      openGraph: {
-        title: linkContent.title,
-        description:
-          linkContent.excerpt || `Discussion about ${linkContent.title}`,
-        images:
-          linkContent.ogImageUrl || linkContent.imageUrl
-            ? [linkContent.ogImageUrl || linkContent.imageUrl!]
-            : undefined,
-      },
-    };
+    permanentRedirect(`/s/${username}/${feedArticle.slug}`);
   }
 
   return { title: "Content Not Found" };
 }
-
-const parseJSON = (str: string): JSONContent | null => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return null;
-  }
-};
-
-const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
-  const rawHtml = generateHTML(jsonContent, [...RenderExtensions]);
-  return sanitizeHtml(rawHtml, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-      "img",
-      "iframe",
-      "h1",
-      "h2",
-    ]),
-    allowedAttributes: {
-      ...sanitizeHtml.defaults.allowedAttributes,
-      img: ["src", "alt", "title", "width", "height", "class"],
-      iframe: ["src", "width", "height", "frameborder", "allowfullscreen"],
-      "*": ["class", "id", "style"],
-    },
-    allowedIframeHostnames: [
-      "www.youtube.com",
-      "youtube.com",
-      "www.youtube-nocookie.com",
-    ],
-  });
-};
 
 const UnifiedPostPage = async (props: Props) => {
   const params = await props.params;
   const session = await getServerAuthSession();
   const { username, slug } = params;
 
+  // 301 stale member URLs (title edits / username renames) to canonical.
+  await redirectMemberToCanonical(username, slug);
+
   const host = (await headers()).get("host") || "";
 
-  // First try user post
-  const userPost = await getUserPost(username, slug);
+  const userPost = await getUserPost(username, slug, session?.user?.id);
 
   if (userPost) {
-    // Render user article
-    const bodyContent = userPost.body ?? "";
-    const parsedBody = parseJSON(bodyContent);
-    const isTiptapContent = parsedBody?.type === "doc";
-
-    let renderedContent: string | RenderableTreeNode;
-
-    if (isTiptapContent && parsedBody) {
-      const jsonContent = parsedBody;
-      renderedContent = renderSanitizedTiptapContent(jsonContent);
-    } else {
-      const ast = Markdoc.parse(bodyContent);
-      const transformedContent = Markdoc.transform(ast, config);
-      renderedContent = Markdoc.renderers.react(transformedContent, React, {
-        components: markdocComponents,
-      }) as unknown as string;
+    // Discussions/questions live under /d/{slug} — redirect before rendering.
+    if (isDiscussionKind(userPost.type)) {
+      permanentRedirect(`/d/${userPost.slug}`);
     }
 
-    // Prepare JSON-LD structured data
-    const articleSchema = getArticleSchema({
-      title: userPost.title,
-      excerpt: userPost.excerpt,
-      slug: userPost.slug,
-      publishedAt: userPost.published,
-      updatedAt: userPost.updatedAt,
-      readingTime: userPost.readTimeMins,
-      canonicalUrl: userPost.canonicalUrl,
-      tags: userPost.tags.map((t) => ({ title: t.tag.title })),
-      author: {
-        name: userPost.user.name,
-        username: userPost.user.username,
-        image: userPost.user.image,
-        bio: userPost.user.bio,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: userPost.user.name || "Author",
-        url: `https://www.codu.co/${userPost.user.username}`,
-      },
-      { name: userPost.title },
-    ]);
+    // Handle resolution is case-insensitive; only the stored casing renders.
+    if (userPost.user.username && userPost.user.username !== username) {
+      permanentRedirect(`/${userPost.user.username}/${userPost.slug}`);
+    }
 
     return (
-      <>
-        {/* JSON-LD Structured Data for SEO */}
-        <JsonLd data={articleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          {/* Breadcrumb navigation */}
-          <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-            <Link
-              href="/feed"
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
-              Feed
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link
-              href={`/${userPost.user.username}`}
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
-              {userPost.user.name}
-            </Link>
-          </nav>
-
-          {/* Article card - contains everything in one cohesive unit */}
-          <article className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
-            {/* Author info */}
-            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
-              <Link
-                href={`/${userPost.user.username}`}
-                className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
-              >
-                {userPost.user.image ? (
-                  <img
-                    src={userPost.user.image}
-                    alt=""
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
-                    {userPost.user.name?.charAt(0).toUpperCase() || "?"}
-                  </div>
-                )}
-                <span className="font-medium">{userPost.user.name}</span>
-              </Link>
-              {userPost.published && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <time>
-                    {new Date(userPost.published).toLocaleDateString("en-IE", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </time>
-                </>
-              )}
-              {userPost.readTimeMins && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>{userPost.readTimeMins} min read</span>
-                </>
-              )}
-            </div>
-
-            {/* Article content */}
-            <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
-              {!isTiptapContent && <h1>{userPost.title}</h1>}
-
-              {isTiptapContent ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: renderedContent ?? <NotFound />,
-                  }}
-                  className="tiptap-content"
-                />
-              ) : (
-                <div>
-                  {Markdoc.renderers.react(renderedContent, React, {
-                    components: markdocComponents,
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Tags */}
-            {userPost.tags.length > 0 && (
-              <section className="mt-6 flex flex-wrap gap-3">
-                {userPost.tags.map(({ tag }) => (
-                  <Link
-                    href={`/feed?tag=${tag.title.toLowerCase()}`}
-                    key={tag.title}
-                    className="rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700"
-                  >
-                    {getCamelCaseFromLower(tag.title)}
-                  </Link>
-                ))}
-              </section>
-            )}
-
-            {/* Compact inline author bio */}
-            <div className="mt-8">
-              <InlineAuthorBio
-                name={userPost.user.name || "Unknown"}
-                username={userPost.user.username || ""}
-                image={userPost.user.image}
-                bio={userPost.user.bio}
-              />
-            </div>
-
-            {/* Action bar - just above discussion */}
-            <div className="mt-8">
-              <ArticleActionBarWrapper
-                postId={userPost.id}
-                postTitle={userPost.title}
-                postUrl={`https://${host}/${userPost.user.username}/${userPost.slug}`}
-                postUsername={userPost.user.username || ""}
-                initialUpvotes={userPost.upvotes ?? 0}
-                initialDownvotes={userPost.downvotes ?? 0}
-              />
-            </div>
-
-            {/* Discussion section - inside the card */}
-            <section id="discussion" className="mt-8">
-              {userPost.showComments ? (
-                <DiscussionArea contentId={userPost.id} noWrapper />
-              ) : (
-                <div className="py-4">
-                  <p className="italic text-neutral-500 dark:text-neutral-400">
-                    Comments are disabled for this post
-                  </p>
-                </div>
-              )}
-            </section>
-          </article>
-        </div>
-
-        {session && session?.user?.role === "ADMIN" && (
-          <ArticleAdminPanel session={session} postId={userPost.id} />
-        )}
-      </>
+      <PostReader
+        post={userPost}
+        session={session}
+        host={host}
+        canonicalPath={`/${userPost.user.username}/${userPost.slug}`}
+        commentsDisabledLabel="post"
+      />
     );
   }
 
-  // Then try user ARTICLE content (new unified Content table)
   const userArticle = await getUserArticleContent(username, slug);
 
   if (userArticle && userArticle.user && userArticle.body) {
-    // Render user article from Content table
-    const parsedBody = parseJSON(userArticle.body);
-    const isTiptapContent = parsedBody?.type === "doc";
-
-    let renderedContent: string | RenderableTreeNode;
-
-    if (isTiptapContent && parsedBody) {
-      const jsonContent = parsedBody;
-      renderedContent = renderSanitizedTiptapContent(jsonContent);
-    } else {
-      const ast = Markdoc.parse(userArticle.body);
-      const transformedContent = Markdoc.transform(ast, config);
-      renderedContent = Markdoc.renderers.react(transformedContent, React, {
-        components: markdocComponents,
-      }) as unknown as string;
+    if (isDiscussionKind(userArticle.type)) {
+      permanentRedirect(`/d/${userArticle.slug}`);
     }
 
-    // Prepare JSON-LD structured data
-    const articleSchema = getArticleSchema({
-      title: userArticle.title,
-      excerpt: userArticle.excerpt,
-      slug: userArticle.slug,
-      publishedAt: userArticle.publishedAt,
-      updatedAt: userArticle.updatedAt,
-      readingTime: userArticle.readTimeMins,
-      canonicalUrl: userArticle.canonicalUrl,
-      tags: userArticle.tags?.map((t) => ({ title: t.tag.title })),
-      author: {
-        name: userArticle.user.name,
-        username: userArticle.user.username,
-        image: userArticle.user.image,
-        bio: userArticle.user.bio,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: userArticle.user.name || "Author",
-        url: `https://www.codu.co/${userArticle.user.username}`,
-      },
-      { name: userArticle.title },
-    ]);
+    if (userArticle.user.username && userArticle.user.username !== username) {
+      permanentRedirect(`/${userArticle.user.username}/${userArticle.slug}`);
+    }
 
     return (
-      <>
-        {/* JSON-LD Structured Data for SEO */}
-        <JsonLd data={articleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-
-        <div className="mx-auto max-w-3xl px-4 py-8">
-          {/* Breadcrumb navigation */}
-          <nav className="mb-6 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
-            <Link
-              href="/feed"
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
-              Feed
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link
-              href={`/${userArticle.user.username}`}
-              className="hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
-              {userArticle.user.name}
-            </Link>
-          </nav>
-
-          {/* Article card - contains everything in one cohesive unit */}
-          <article className="rounded-lg border border-neutral-200 bg-white p-6 dark:border-neutral-700 dark:bg-neutral-900">
-            {/* Author info */}
-            <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400">
-              <Link
-                href={`/${userArticle.user.username}`}
-                className="flex items-center gap-2 hover:text-neutral-700 dark:hover:text-neutral-200"
-              >
-                {userArticle.user.image ? (
-                  <img
-                    src={userArticle.user.image}
-                    alt=""
-                    className="h-5 w-5 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
-                    {userArticle.user.name?.charAt(0).toUpperCase() || "?"}
-                  </div>
-                )}
-                <span className="font-medium">{userArticle.user.name}</span>
-              </Link>
-              {userArticle.publishedAt && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <time>
-                    {new Date(userArticle.publishedAt).toLocaleDateString(
-                      "en-IE",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      },
-                    )}
-                  </time>
-                </>
-              )}
-              {userArticle.readTimeMins && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>{userArticle.readTimeMins} min read</span>
-                </>
-              )}
-            </div>
-
-            {/* Article content */}
-            <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
-              {!isTiptapContent && <h1>{userArticle.title}</h1>}
-
-              {isTiptapContent ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: renderedContent ?? <NotFound />,
-                  }}
-                  className="tiptap-content"
-                />
-              ) : (
-                <div>
-                  {Markdoc.renderers.react(renderedContent, React, {
-                    components: markdocComponents,
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Tags */}
-            {userArticle.tags && userArticle.tags.length > 0 && (
-              <section className="mt-6 flex flex-wrap gap-3">
-                {userArticle.tags.map(({ tag }) => (
-                  <Link
-                    href={`/feed?tag=${tag.title.toLowerCase()}`}
-                    key={tag.title}
-                    className="rounded-full bg-gradient-to-r from-orange-400 to-pink-600 px-3 py-1 text-xs font-bold text-white hover:bg-pink-700"
-                  >
-                    {getCamelCaseFromLower(tag.title)}
-                  </Link>
-                ))}
-              </section>
-            )}
-
-            {/* Compact inline author bio */}
-            <div className="mt-8">
-              <InlineAuthorBio
-                name={userArticle.user.name || "Unknown"}
-                username={userArticle.user.username || ""}
-                image={userArticle.user.image}
-                bio={userArticle.user.bio}
-              />
-            </div>
-
-            {/* Action bar - just above discussion */}
-            <div className="mt-8">
-              <ArticleActionBarWrapper
-                postId={userArticle.id}
-                postTitle={userArticle.title}
-                postUrl={`https://${host}/${userArticle.user.username}/${userArticle.slug}`}
-                postUsername={userArticle.user.username || ""}
-                initialUpvotes={userArticle.upvotes ?? 0}
-                initialDownvotes={userArticle.downvotes ?? 0}
-              />
-            </div>
-
-            {/* Discussion section - inside the card */}
-            <section id="discussion" className="mt-8">
-              {userArticle.showComments ? (
-                <DiscussionArea contentId={userArticle.id} noWrapper />
-              ) : (
-                <div className="py-4">
-                  <p className="italic text-neutral-500 dark:text-neutral-400">
-                    Comments are disabled for this article
-                  </p>
-                </div>
-              )}
-            </section>
-          </article>
-        </div>
-
-        {session && session?.user?.role === "ADMIN" && (
-          <ArticleAdminPanel session={session} postId={userArticle.id} />
-        )}
-      </>
+      <PostReader
+        post={userArticle}
+        session={session}
+        host={host}
+        canonicalPath={`/${userArticle.user.username}/${userArticle.slug}`}
+        commentsDisabledLabel="article"
+      />
     );
   }
 
-  // Try user-created link post (user shared a link)
   const userLinkPost = await getUserLinkPost(username, slug);
 
   if (userLinkPost && userLinkPost.user) {
-    // Render user link post
-    return <UserLinkDetail username={username} contentSlug={slug} />;
+    if (userLinkPost.user.username && userLinkPost.user.username !== username) {
+      permanentRedirect(`/${userLinkPost.user.username}/${userLinkPost.slug}`);
+    }
+
+    // Member-shared links are self-canonical, so emit BlogPosting + BreadcrumbList
+    // JSON-LD like member articles.
+    const linkAuthorName = userLinkPost.user.name || "Unknown";
+    const articleSchema = getArticleSchema({
+      title: userLinkPost.title,
+      excerpt: userLinkPost.excerpt,
+      slug: userLinkPost.slug,
+      image: userLinkPost.coverImage,
+      publishedAt: userLinkPost.published,
+      updatedAt: userLinkPost.updatedAt,
+      readingTime: userLinkPost.readTimeMins,
+      // Self-canonical: omit canonicalUrl so the builder uses the Codú URL.
+      tags: userLinkPost.tags.map((t) => ({ title: t.tag.title })),
+      author: {
+        name: userLinkPost.user.name,
+        username: userLinkPost.user.username,
+        image: userLinkPost.user.image,
+        bio: userLinkPost.user.bio,
+      },
+    });
+    const breadcrumbSchema = getBreadcrumbSchema([
+      { name: "Home", url: SITE_ORIGIN },
+      {
+        name: linkAuthorName,
+        url: `${SITE_ORIGIN}/${userLinkPost.user.username}`,
+      },
+      { name: userLinkPost.title },
+    ]);
+
+    // Server-fetch the tRPC-shaped content (in-process, includes the viewer's
+    // vote) so the link body is in the crawlable HTML, not client-fetched.
+    const initialLinkContent = await serverApi()
+      .then((api) => api.content.getUserLinkBySlug({ username, slug }))
+      .catch(() => null);
+
+    return (
+      <>
+        <JsonLd data={articleSchema} />
+        <JsonLd data={breadcrumbSchema} />
+        <UserLinkDetail
+          username={username}
+          contentSlug={slug}
+          initialContent={initialLinkContent}
+        />
+      </>
+    );
   }
 
-  // Then try feed article (legacy aggregated_article table)
+  // Aggregated content now lives at /s/{sourceSlug}/{slug} — 301 there.
   const feedArticle = await getFeedArticle(username, slug);
 
   if (feedArticle) {
-    // Prepare JSON-LD structured data for feed article
-    const newsArticleSchema = getNewsArticleSchema({
-      title: feedArticle.title,
-      excerpt: feedArticle.excerpt,
-      slug: feedArticle.slug,
-      externalUrl: feedArticle.externalUrl || "",
-      coverImage: feedArticle.imageUrl || feedArticle.ogImageUrl,
-      publishedAt: feedArticle.publishedAt,
-      source: {
-        name: feedArticle.source?.name || null,
-        slug: feedArticle.source?.slug || username,
-        logoUrl: feedArticle.source?.logoUrl,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: feedArticle.source?.name || username,
-        url: `https://www.codu.co/${feedArticle.source?.slug || username}`,
-      },
-      { name: feedArticle.title },
-    ]);
-
-    // Render feed article with JSON-LD
-    return (
-      <>
-        <JsonLd data={newsArticleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-        <FeedArticleContent sourceSlug={username} articleSlug={slug} />
-      </>
-    );
+    permanentRedirect(`/s/${username}/${feedArticle.slug}`);
   }
 
-  // Try unified content table (new LINK type items)
-  const linkContent = await getLinkContent(username, slug);
-
-  if (linkContent) {
-    // Prepare JSON-LD structured data for link content
-    const newsArticleSchema = getNewsArticleSchema({
-      title: linkContent.title,
-      excerpt: linkContent.excerpt,
-      slug: linkContent.slug,
-      externalUrl: linkContent.externalUrl || "",
-      coverImage: linkContent.imageUrl || linkContent.ogImageUrl,
-      publishedAt: linkContent.publishedAt,
-      source: {
-        name: linkContent.source?.name || null,
-        slug: linkContent.source?.slug || username,
-        logoUrl: linkContent.source?.logoUrl,
-      },
-    });
-
-    const breadcrumbSchema = getBreadcrumbSchema([
-      { name: "Home", url: "https://www.codu.co" },
-      { name: "Feed", url: "https://www.codu.co/feed" },
-      {
-        name: linkContent.source?.name || username,
-        url: `https://www.codu.co/${linkContent.source?.slug || username}`,
-      },
-      { name: linkContent.title },
-    ]);
-
-    // Render link content with JSON-LD
-    return (
-      <>
-        <JsonLd data={newsArticleSchema} />
-        <JsonLd data={breadcrumbSchema} />
-        <LinkContentDetail sourceSlug={username} contentSlug={slug} />
-      </>
-    );
-  }
-
-  // Nothing found
   return notFound();
 };
 

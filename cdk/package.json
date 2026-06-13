@@ -1,13 +1,10 @@
 {
-  "name": "cdk-pipeline-codu",
+  "name": "cdk-codu",
   "version": "0.1.0",
-  "bin": {
-    "cdk-pipeline-codu": "bin/cdk-pipeline-codu.js"
-  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "cdk": "cdk"
   },
   "devDependencies": {

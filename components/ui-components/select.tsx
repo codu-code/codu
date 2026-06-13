@@ -22,7 +22,7 @@ export const Select = forwardRef(function Select(
         // Background color is moved to control and shadow is removed in dark mode so hide `before` pseudo
         "dark:before:hidden",
         // Focus ring
-        "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-blue-500",
+        "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:ring-inset after:ring-transparent after:has-[[data-focus]]:ring-2 after:has-[[data-focus]]:ring-accent",
         // Disabled state
         "has-[[data-disabled]]:opacity-50 before:has-[[data-disabled]]:bg-zinc-950/5 before:has-[[data-disabled]]:shadow-none",
       ])}
@@ -41,11 +41,11 @@ export const Select = forwardRef(function Select(
           // Options (multi-select)
           "[&_optgroup]:font-semibold",
           // Typography
-          "text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white dark:*:text-white sm:text-sm/6",
+          "text-base/6 text-zinc-950 placeholder:text-faint dark:text-fg dark:*:text-white sm:text-sm/6",
           // Border
-          "border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20",
+          "border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-hairline dark:data-[hover]:border-strong",
           // Background color
-          "bg-transparent dark:bg-white/5 dark:*:bg-zinc-800",
+          "bg-transparent dark:bg-inset dark:*:bg-zinc-800",
           // Hide default focus styles
           "focus:outline-none",
           // Invalid state

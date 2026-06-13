@@ -15,6 +15,7 @@ import { ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
 
 import { db } from "@/server/db";
+import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
 
 /**
  * 1. CONTEXT
@@ -134,3 +135,42 @@ const isAdmin = t.middleware(({ ctx, next }) => {
 
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 export const adminOnlyProcedure = t.procedure.use(isAdmin);
+
+/**
+ * Rate-limiting middleware factory. Buckets by user id when signed in,
+ * falling back to client IP, and throws TOO_MANY_REQUESTS once `limit`
+ * requests are seen within `windowMs` (see server/lib/rateLimit.ts).
+ */
+const rateLimited = (opts: {
+  /** Stable bucket name, e.g. "profile-edit" — keep unique per procedure. */
+  name: string;
+  limit: number;
+  windowMs: number;
+  message?: string;
+}) =>
+  t.middleware(async ({ ctx, next }) => {
+    const key = `${opts.name}:${
+      ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`
+    }`;
+    await enforceRateLimit({
+      key,
+      limit: opts.limit,
+      windowMs: opts.windowMs,
+      message: opts.message,
+    });
+    return next();
+  });
+
+/**
+ * Authenticated procedure with a per-user rate limit. Composes the rate-limit
+ * middleware AFTER `enforceUserIsAuthed`, so unauthenticated requests are
+ * rejected first and the bucket key is always the user id.
+ *
+ * Usage: `rateLimitedProcedure({ name: "thing-create", limit: 5, windowMs: 600_000 })`
+ */
+export const rateLimitedProcedure = (opts: {
+  name: string;
+  limit: number;
+  windowMs: number;
+  message?: string;
+}) => protectedProcedure.use(rateLimited(opts));

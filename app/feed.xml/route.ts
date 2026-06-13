@@ -1,15 +1,25 @@
 import RSS from "rss";
 import * as Sentry from "@sentry/nextjs";
 
-import { getAllPosts } from "@/server/controllers/post";
+import { db } from "@/server/db";
+import { posts } from "@/server/db/schema";
+import { and, desc, eq, inArray, isNull, lte } from "drizzle-orm";
+import { buildContentHref } from "@/server/lib/content-url";
+import { SITE_ORIGIN } from "@/config/site";
+
+// Member-written content only: articles and community text posts. Aggregated
+// source content (sourceId set) canonicalises off Codú, and bare link/resource
+// shares aren't readable items, so neither belongs in the feed.
+const FEED_TYPES = ["article", "discussion", "question", "til"] as const;
 
 export async function GET() {
   const feed = new RSS({
     title: "Codú",
-    description: "Codú - A blog for web developers.",
+    description:
+      "Codú — articles and tutorials for AI builders and indie hackers.",
     generator: "RSS for Node and Next.js",
-    feed_url: "https://www.codu.co/feed.xml",
-    site_url: "https://www.codu.co/",
+    feed_url: `${SITE_ORIGIN}/feed.xml`,
+    site_url: `${SITE_ORIGIN}/`,
     managingEditor: "Niall Maher",
     webMaster: "niall@codu.co (Niall Maher)",
     copyright: `Copyright ${new Date().getFullYear().toString()}, Codú Limited`,
@@ -19,19 +29,45 @@ export async function GET() {
   });
 
   try {
-    const allPosts = await getAllPosts();
+    const items = await db.query.posts.findMany({
+      columns: {
+        title: true,
+        excerpt: true,
+        slug: true,
+        type: true,
+        publishedAt: true,
+        updatedAt: true,
+      },
+      with: {
+        author: { columns: { username: true, name: true } },
+        tags: { with: { tag: true } },
+      },
+      where: and(
+        eq(posts.status, "published"),
+        lte(posts.publishedAt, new Date().toISOString()),
+        isNull(posts.sourceId),
+        inArray(posts.type, [...FEED_TYPES]),
+      ),
+      orderBy: [desc(posts.publishedAt)],
+      limit: 50,
+    });
 
-    if (allPosts) {
-      allPosts.map((post) => {
-        if (!post.published) return;
-        feed.item({
-          title: post.title,
-          description: post.excerpt,
-          url: `https://www.codu.co/${post.user.username}/${post.slug}`,
-          categories: post.tags.map(({ tag }) => tag.title.toLowerCase()),
-          author: post.user.name,
-          date: post.updatedAt || post.published,
-        });
+    for (const item of items) {
+      if (!item.slug || !item.publishedAt) continue;
+      const path = buildContentHref({
+        type: item.type,
+        slug: item.slug,
+        authorUsername: item.author?.username,
+      });
+      if (!path) continue;
+
+      feed.item({
+        title: item.title,
+        description: item.excerpt ?? "",
+        url: `${SITE_ORIGIN}${path}`,
+        categories: item.tags.map(({ tag }) => tag.title.toLowerCase()),
+        author: item.author?.name ?? undefined,
+        date: item.publishedAt,
       });
     }
 

@@ -48,8 +48,8 @@ export function SwitchField({
 
 const colors = {
   "dark/zinc": [
-    "[--switch-bg-ring:theme(colors.zinc.950/90%)] [--switch-bg:theme(colors.zinc.900)] dark:[--switch-bg-ring:transparent] dark:[--switch-bg:theme(colors.white/25%)]",
-    "[--switch-ring:theme(colors.zinc.950/90%)] [--switch-shadow:theme(colors.black/10%)] [--switch:white] dark:[--switch-ring:theme(colors.zinc.700/90%)]",
+    "[--switch-bg-ring:rgb(var(--color-accent))] [--switch-bg:rgb(var(--color-accent))] dark:[--switch-bg-ring:transparent]",
+    "[--switch-ring:rgb(var(--color-accent))] [--switch-shadow:theme(colors.black/10%)] [--switch:white]",
   ],
   "dark/white": [
     "[--switch-bg-ring:theme(colors.zinc.950/90%)] [--switch-bg:theme(colors.zinc.900)] dark:[--switch-bg-ring:transparent] dark:[--switch-bg:theme(colors.white)]",
@@ -160,11 +160,11 @@ export function Switch({
         // Outline and background color in forced-colors mode so switch is still visible
         "forced-colors:outline forced-colors:[--switch-bg:Highlight] dark:forced-colors:[--switch-bg:Highlight]",
         // Unchecked
-        "bg-zinc-200 ring-1 ring-inset ring-black/5 dark:bg-white/5 dark:ring-white/15",
+        "bg-zinc-200 ring-1 ring-inset ring-black/5 dark:bg-inset dark:ring-white/15",
         // Checked
         "data-[checked]:bg-[--switch-bg] data-[checked]:ring-[--switch-bg-ring] dark:data-[checked]:bg-[--switch-bg] dark:data-[checked]:ring-[--switch-bg-ring]",
         // Focus
-        "focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500",
+        "focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-accent",
         // Hover
         "data-[hover]:data-[checked]:ring-[--switch-bg-ring] data-[hover]:ring-black/15",
         "dark:data-[hover]:data-[checked]:ring-[--switch-bg-ring] dark:data-[hover]:ring-white/25",

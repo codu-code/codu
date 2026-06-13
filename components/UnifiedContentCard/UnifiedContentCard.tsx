@@ -3,20 +3,31 @@
 import { useState } from "react";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
-import {
-  BookmarkIcon,
-  ArrowTopRightOnSquareIcon,
-  ChatBubbleLeftIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/20/solid";
-import { BookmarkIcon as BookmarkOutlineIcon } from "@heroicons/react/24/outline";
 import { api } from "@/server/trpc/react";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { Temporal } from "@js-temporal/polyfill";
+import VoteControl from "@/components/Vote/VoteControl";
+import { ReportButton } from "@/components/ReportModal/ReportModal";
+import { ensureHttps } from "@/utils/url";
+import { getRelativeTime } from "@/utils/relativeTime";
 
 export type ContentType = "POST" | "LINK";
+
+// Display kind → chip label + tone (`kind` only drives the chip; behavior keys
+// off `type`). Chips share one opaque bordered-pill shape, only color varies.
+// Mirrored in components/ContentDetail/TypeBadge.tsx.
+const KIND: Record<string, { label: string; className: string }> = {
+  POST: { label: "Article", className: "border-accent/40 text-accent-soft" },
+  ARTICLE: { label: "Article", className: "border-accent/40 text-accent-soft" },
+  DISCUSSION: {
+    label: "Discussion",
+    className: "border-accent-soft/40 text-accent-soft",
+  },
+  QUESTION: { label: "Question", className: "border-info/40 text-info" },
+  TIL: { label: "TIL", className: "border-success/40 text-success" },
+  RESOURCE: { label: "Resource", className: "border-warning/40 text-warning" },
+  LINK: { label: "Link", className: "border-hairline text-muted" },
+};
 
 type AuthorInfo = {
   name: string;
@@ -33,10 +44,16 @@ type SourceInfo = {
 
 export interface UnifiedContentCardProps {
   type: ContentType;
+  /** Editorial kind for the chip (POST/ARTICLE/TIL/QUESTION/DISCUSSION/LINK). Defaults to `type`. */
+  kind?: string;
   id: string | number;
   title: string;
   excerpt?: string | null;
   slug?: string | null;
+  /** Immutable canonical resolver. For member content the slug already ends
+   * with this, so the slug stays canonical; used only as a fallback when the
+   * slug is missing (and by the upcoming /d/ + /s/ routes). */
+  urlId?: string | null;
   imageUrl?: string | null;
   externalUrl?: string | null;
   publishedAt?: string | null;
@@ -52,133 +69,70 @@ export interface UnifiedContentCardProps {
   tags?: string[];
 }
 
-// Get favicon URL from a website
-const getFaviconUrl = (
-  websiteUrl: string | null | undefined,
-): string | null => {
-  if (!websiteUrl) return null;
-  try {
-    const url = new URL(websiteUrl);
-    return `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
-  } catch {
-    return null;
-  }
-};
-
-// Get relative time string
-const getRelativeTime = (dateStr: string): string => {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-};
-
-// Ensure image URL uses https
-const ensureHttps = (url: string | null | undefined): string | null => {
-  if (!url) return null;
-  if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
-  }
-  return url;
-};
-
-// Get display hostname
-const getHostname = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    return url.hostname;
-  } catch {
-    return urlString;
-  }
-};
-
-// Get display URL (hostname + truncated path)
-const getDisplayUrl = (urlString: string): string => {
-  try {
-    const url = new URL(urlString);
-    const path =
-      url.pathname.length > 20
-        ? url.pathname.slice(0, 20) + "..."
-        : url.pathname;
-    return url.hostname + (path !== "/" ? path : "");
-  } catch {
-    return urlString.slice(0, 40) + "...";
-  }
-};
-
 const UnifiedContentCard = ({
   type,
+  kind,
   id,
   title,
   excerpt,
   slug,
+  urlId,
   imageUrl: rawImageUrl,
   externalUrl,
   publishedAt,
   readTimeMins,
   upvotes,
   downvotes,
-  userVote: initialUserVote,
+  userVote,
   isBookmarked: initialBookmarked = false,
   discussionCount = 0,
   author,
   source,
-  linkAuthor,
+  tags,
 }: UnifiedContentCardProps) => {
   const [imageError, setImageError] = useState(false);
-  const [userVote, setUserVote] = useState(initialUserVote);
-  const [votes, setVotes] = useState({ upvotes, downvotes });
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+  const [shared, setShared] = useState(false);
 
   const { data: session } = useSession();
   const utils = api.useUtils();
 
   const imageUrl = ensureHttps(rawImageUrl);
 
-  // Determine the URL for the card
-  // Priority: author (POST or user-created LINK) > source (aggregated LINK) > fallback
+  // Card URL priority (slug ends with urlId, so it stays canonical; urlId is the
+  // fallback when slug is missing): discussion /d/ > member /{username}/ >
+  // source /s/ > external link > author profile. Never emit legacy /feed/:id.
+  const editorialKind = (kind || type).toUpperCase();
+  const isDiscussion =
+    editorialKind === "DISCUSSION" || editorialKind === "QUESTION";
+
   const cardUrl =
-    author?.username && slug
-      ? `/${author.username}/${slug}` // User-created content (POST or LINK)
-      : source?.slug && slug
-        ? `/${source.slug}/${slug}` // Aggregated content with source
-        : `/feed/${id}`; // Fallback
+    isDiscussion && (slug || urlId)
+      ? `/d/${slug ?? urlId}` // Discussion/question namespace
+      : author?.username && slug
+        ? `/${author.username}/${slug}` // User-created content (POST or LINK)
+        : author?.username && urlId
+          ? `/${author.username}/${urlId}` // Member content, slug missing
+          : source?.slug && slug
+            ? `/s/${source.slug}/${slug}` // Aggregated content lives at /s/{source}/{slug}
+            : type === "LINK" && externalUrl
+              ? (ensureHttps(externalUrl) ?? "/")
+              : author?.username
+                ? `/${author.username}`
+                : "/";
 
-  // Unified content voting mutation
-  const { mutate: voteContent, status: voteStatus } =
-    api.content.vote.useMutation({
-      onMutate: async ({ voteType }) => {
-        const oldVote = userVote;
-        setUserVote(voteType);
-        setVotes((prev) => {
-          let newUpvotes = prev.upvotes;
-          let newDownvotes = prev.downvotes;
-          if (oldVote === "up") newUpvotes--;
-          if (oldVote === "down") newDownvotes--;
-          if (voteType === "up") newUpvotes++;
-          if (voteType === "down") newDownvotes++;
-          return { upvotes: newUpvotes, downvotes: newDownvotes };
-        });
-      },
-      onError: (error) => {
-        setUserVote(initialUserVote);
-        setVotes({ upvotes, downvotes });
-        toast.error("Failed to update vote");
-        Sentry.captureException(error);
-      },
-      onSettled: () => {
-        utils.content.getFeed.invalidate();
-      },
-    });
+  // Optimistic vote display lives inside VoteControl (it owns the +1/-1 from
+  // the user's current vote); we only fire the mutation and refresh the feed.
+  const { mutate: voteContent } = api.content.vote.useMutation({
+    onError: (error) => {
+      toast.error("Failed to update vote");
+      Sentry.captureException(error);
+    },
+    onSettled: () => {
+      utils.content.getFeed.invalidate();
+    },
+  });
 
-  // Unified content bookmark mutation
   const { mutate: bookmarkContent, status: bookmarkStatus } =
     api.content.bookmark.useMutation({
       onMutate: async ({ setBookmarked }) => {
@@ -194,7 +148,6 @@ const UnifiedContentCard = ({
       },
     });
 
-  // Click tracking for external links
   const { mutate: trackClick } = api.content.trackClick.useMutation();
 
   const handleVote = (voteType: "up" | "down" | null) => {
@@ -219,270 +172,187 @@ const UnifiedContentCard = ({
     }
   };
 
-  const dateTime = publishedAt
-    ? Temporal.Instant.from(new Date(publishedAt).toISOString())
-    : null;
-  const relativeTime = publishedAt ? getRelativeTime(publishedAt) : null;
-  const readableDate = dateTime
-    ? dateTime.toLocaleString(["en-IE"], {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
+  const handleShare = () => {
+    const url =
+      typeof window !== "undefined"
+        ? new URL(cardUrl, window.location.origin).toString()
+        : cardUrl;
+    void navigator.clipboard?.writeText(url).then(() => {
+      setShared(true);
+      setTimeout(() => setShared(false), 1200);
+    });
+  };
 
-  const faviconUrl = getFaviconUrl(source?.websiteUrl || externalUrl);
+  const relativeTime = publishedAt ? getRelativeTime(publishedAt) : null;
+
   const showThumbnail = imageUrl && !imageError;
-  const score = votes.upvotes - votes.downvotes;
-  const hostname = externalUrl ? getHostname(externalUrl) : null;
+  const chip = KIND[editorialKind] ?? KIND.LINK;
+  const authorName = author?.name ?? source?.name ?? null;
+  const handle = author?.username ?? source?.slug ?? null;
+  const avatarImg = author?.image ?? source?.logo ?? null;
+  // The byline name links to the profile: users at /{username}, feed sources at
+  // /s/{slug}. Members take priority, so an author present means it's a user.
+  const handleHref = author?.username
+    ? `/${author.username}`
+    : source?.slug
+      ? `/s/${source.slug}`
+      : null;
 
   return (
     <article
-      className="group my-2 rounded-lg border border-neutral-200 bg-white p-3 transition-colors hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
+      className="group rounded-lg border border-hairline bg-surface p-5 transition-colors duration-base ease-out hover:border-strong"
       data-testid="content-card"
     >
-      {/* Meta info row */}
-      <div className="mb-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-neutral-500 dark:text-neutral-400">
-        {/* Author/Source info - show author for content with valid author username */}
-        {author?.username ? (
-          <Link
-            href={`/${author.username}`}
-            className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
-          >
-            {author.image ? (
-              <img
-                src={author.image}
-                alt=""
-                className="h-4 w-4 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
-                {author.name?.charAt(0).toUpperCase() || "?"}
-              </div>
-            )}
-            <span className="font-medium">{author.name}</span>
-          </Link>
-        ) : source ? (
-          source.slug ? (
-            <Link
-              href={`/${source.slug}`}
-              className="flex items-center gap-1.5 hover:text-neutral-700 dark:hover:text-neutral-200"
-            >
-              {source.logo ? (
-                <img
-                  src={source.logo}
-                  alt=""
-                  className="h-4 w-4 rounded object-cover"
-                />
-              ) : faviconUrl ? (
-                <img src={faviconUrl} alt="" className="h-4 w-4 rounded" />
-              ) : (
-                <div className="flex h-4 w-4 items-center justify-center rounded bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
-                  {source.name?.charAt(0).toUpperCase() || "?"}
-                </div>
-              )}
-              <span className="font-medium">{source.name}</span>
-            </Link>
-          ) : (
-            <span className="flex items-center gap-1.5">
-              {source.logo ? (
-                <img
-                  src={source.logo}
-                  alt=""
-                  className="h-4 w-4 rounded object-cover"
-                />
-              ) : faviconUrl ? (
-                <img src={faviconUrl} alt="" className="h-4 w-4 rounded" />
-              ) : (
-                <div className="flex h-4 w-4 items-center justify-center rounded bg-orange-100 text-[10px] font-bold text-orange-600 dark:bg-orange-900 dark:text-orange-300">
-                  {source.name?.charAt(0).toUpperCase() || "?"}
-                </div>
-              )}
-              <span className="font-medium">{source.name}</span>
-            </span>
-          )
-        ) : null}
-
-        {/* Link author (if different from source) */}
-        {type === "LINK" &&
-          linkAuthor &&
-          linkAuthor.trim() &&
-          !["by", "by,", "by ,"].includes(linkAuthor.trim().toLowerCase()) && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="max-w-[120px] truncate">
-                {linkAuthor.replace(/^by\s+/i, "").trim()}
-              </span>
-            </>
-          )}
-
-        {/* Time */}
-        {relativeTime && (
-          <>
-            <span aria-hidden="true">·</span>
-            <time
-              dateTime={dateTime?.toString()}
-              title={readableDate || undefined}
-            >
-              {relativeTime}
-            </time>
-          </>
-        )}
-
-        {/* Read time for all content types */}
-        {readTimeMins && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>{readTimeMins} min</span>
-          </>
-        )}
-
-        {/* External link indicator */}
-        {type === "LINK" && hostname && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span className="text-neutral-400">{hostname}</span>
-          </>
-        )}
-      </div>
-
-      {/* Main content area */}
-      <div className="flex gap-3">
-        {/* Text content */}
+      <div className="flex gap-4">
         <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center whitespace-nowrap rounded-sm border bg-elevated px-2 py-0.5 font-mono text-xs ${chip.className}`}
+            >
+              {chip.label}
+            </span>
+            {avatarImg ? (
+              <img
+                src={avatarImg}
+                alt=""
+                className="h-5 w-5 rounded-full object-cover"
+              />
+            ) : authorName ? (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-[10px] font-bold text-accent">
+                {authorName.charAt(0).toUpperCase()}
+              </span>
+            ) : null}
+            {authorName &&
+              (handleHref ? (
+                <Link
+                  href={handleHref}
+                  className="whitespace-nowrap text-sm font-semibold text-fg hover:underline"
+                >
+                  {authorName}
+                </Link>
+              ) : (
+                <span className="whitespace-nowrap text-sm font-semibold text-fg">
+                  {authorName}
+                </span>
+              ))}
+            <span
+              className="whitespace-nowrap font-mono text-xs text-faint"
+              // Cards now SSR (feed initialData) and relative times derive
+              // from Date.now() — a minute boundary between server render and
+              // hydration would otherwise log a text mismatch.
+              suppressHydrationWarning
+            >
+              {handle ? `@${handle}` : ""}
+              {relativeTime ? `${handle ? " · " : ""}${relativeTime}` : ""}
+              {type === "LINK" && source?.name ? (
+                <>
+                  {" · in "}
+                  {source.slug ? (
+                    <Link
+                      href={`/s/${source.slug}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-accent-soft hover:text-accent"
+                    >
+                      {source.name}
+                    </Link>
+                  ) : (
+                    <span className="text-accent-soft">{source.name}</span>
+                  )}
+                </>
+              ) : (
+                ""
+              )}
+              {readTimeMins ? ` · ${readTimeMins} min` : ""}
+            </span>
+          </div>
+
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
-            className="block"
+            className="mt-3 block"
           >
-            <h2 className="mb-1 line-clamp-2 text-base font-semibold leading-tight text-neutral-900 hover:underline dark:text-neutral-100">
+            <h3 className="font-display text-lg font-bold leading-tight tracking-tight text-fg group-hover:text-accent">
               {title}
-            </h2>
+              {type === "LINK" && (
+                <span className="font-normal text-faint"> ↗</span>
+              )}
+            </h3>
           </Link>
-          {/* External URL display for LINK types */}
-          {type === "LINK" && externalUrl && (
-            <a
-              href={externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleExternalClick}
-              className="mb-1 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline dark:text-blue-400"
-            >
-              {getDisplayUrl(externalUrl)}
-              <ArrowTopRightOnSquareIcon className="h-3 w-3" />
-            </a>
-          )}
           {excerpt && (
-            <p className="line-clamp-2 text-sm text-neutral-600 dark:text-neutral-400">
+            <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-muted">
               {excerpt}
             </p>
           )}
         </div>
 
-        {/* Thumbnail */}
+        {/* Only render when a real image loads — no grey placeholder box. */}
         {showThumbnail && (
           <Link
             href={cardUrl}
             onClick={type === "LINK" ? handleExternalClick : undefined}
-            className="relative w-[80px] flex-shrink-0 self-start overflow-hidden rounded-lg sm:w-[120px]"
+            className="relative h-[68px] w-[104px] flex-shrink-0 self-start overflow-hidden rounded-sm border border-hairline"
           >
             <img
               src={imageUrl}
               alt=""
-              className="aspect-video w-full object-cover hover:opacity-90"
+              className="h-full w-full object-cover"
               onError={() => setImageError(true)}
             />
-            {type === "LINK" && (
-              <div className="absolute bottom-1 right-1 rounded bg-black/60 p-0.5">
-                <ArrowTopRightOnSquareIcon className="h-3 w-3 text-white" />
-              </div>
-            )}
           </Link>
         )}
       </div>
 
-      {/* Action bar */}
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        {/* Vote buttons */}
-        <div className="flex items-center rounded-full border border-neutral-200 dark:border-neutral-700">
-          <button
-            onClick={() => handleVote(userVote === "up" ? null : "up")}
-            disabled={voteStatus === "pending"}
-            className={`rounded-l-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-              userVote === "up"
-                ? "text-green-500"
-                : "text-neutral-400 dark:text-neutral-500"
-            }`}
-            aria-label="Upvote"
-          >
-            <ChevronUpIcon className="h-4 w-4" />
-          </button>
-          <span
-            className={`min-w-[1.5rem] text-center text-xs font-bold ${
-              score > 0
-                ? "text-green-500"
-                : score < 0
-                  ? "text-red-500"
-                  : "text-neutral-400 dark:text-neutral-500"
-            }`}
-          >
-            {score}
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        {tags && tags.length > 0 && (
+          <span className="min-w-0 truncate font-mono text-xs text-faint">
+            {tags.map((t) => `#${t}`).join("  ")}
           </span>
-          <button
-            onClick={() => handleVote(userVote === "down" ? null : "down")}
-            disabled={voteStatus === "pending"}
-            className={`rounded-r-full p-1 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800 ${
-              userVote === "down"
-                ? "text-red-500"
-                : "text-neutral-400 dark:text-neutral-500"
-            }`}
-            aria-label="Downvote"
-          >
-            <ChevronDownIcon className="h-4 w-4" />
-          </button>
-        </div>
-
-        {/* Comments */}
-        <Link
-          href={`${cardUrl}#discussion`}
-          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-neutral-500 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
-        >
-          <ChatBubbleLeftIcon className="h-3.5 w-3.5" />
-          <span>{discussionCount}</span>
-        </Link>
-
-        {/* Bookmark */}
-        <button
-          onClick={handleBookmark}
-          disabled={bookmarkStatus === "pending"}
-          className={`flex items-center gap-1 rounded-full p-1 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-            isBookmarked
-              ? "text-blue-500"
-              : "text-neutral-400 hover:bg-neutral-100 dark:text-neutral-500 dark:hover:bg-neutral-800"
-          }`}
-          aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"}
-          data-testid="bookmark-button"
-        >
-          {isBookmarked ? (
-            <BookmarkIcon className="h-4 w-4" />
-          ) : (
-            <BookmarkOutlineIcon className="h-4 w-4" />
-          )}
-        </button>
-
-        {/* External link button for LINKs */}
-        {type === "LINK" && externalUrl && (
-          <a
-            href={externalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleExternalClick}
-            className="ml-auto flex items-center gap-1 rounded-full px-2 py-1 text-xs text-neutral-500 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
-          >
-            <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Open</span>
-          </a>
         )}
+        <div className="ml-auto flex items-center gap-3">
+          <VoteControl
+            base={
+              upvotes -
+              downvotes -
+              (userVote === "up" ? 1 : userVote === "down" ? -1 : 0)
+            }
+            initial={userVote}
+            compact
+            onGate={!session ? () => signIn() : undefined}
+            onVote={(next) => handleVote(next)}
+          />
+          <Link
+            href={`${cardUrl}#discussion`}
+            className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-xs text-faint hover:text-muted"
+          >
+            {discussionCount} replies
+          </Link>
+          <button
+            onClick={handleBookmark}
+            disabled={bookmarkStatus === "pending"}
+            title="Save"
+            data-testid="bookmark-button"
+            className={`whitespace-nowrap font-mono text-xs transition-colors disabled:opacity-50 ${
+              isBookmarked ? "text-accent-soft" : "text-faint hover:text-muted"
+            }`}
+          >
+            {isBookmarked ? "Saved" : "Save"}
+          </button>
+          <button
+            onClick={handleShare}
+            title="Copy link"
+            className={`whitespace-nowrap font-mono text-xs transition-colors ${
+              shared ? "text-accent-soft" : "text-faint hover:text-muted"
+            }`}
+          >
+            {shared ? "Copied" : "Share"}
+          </button>
+          <ReportButton
+            type="post"
+            id={String(id)}
+            variant="icon"
+            className="text-faint hover:text-muted"
+          />
+        </div>
       </div>
     </article>
   );

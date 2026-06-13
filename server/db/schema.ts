@@ -19,9 +19,7 @@ import {
 import { relations, sql } from "drizzle-orm";
 import { type AdapterAccount } from "next-auth/adapters";
 
-// ============================================
 // ENUMS - Lowercase values
-// ============================================
 
 export const role = pgEnum("Role", ["MODERATOR", "ADMIN", "USER"]);
 
@@ -31,12 +29,21 @@ export const postType = pgEnum("post_type", [
   "discussion",
   "link",
   "resource",
+  // Relaunch low-bar contribution kinds (handoff): TIL = "today I learned"
+  // tips, question = ask-the-community posts.
+  "til",
+  "question",
 ]);
 export const postStatus = pgEnum("post_status", [
   "draft",
   "published",
   "scheduled",
   "unlisted",
+  // Auto-moderation flow (gated behind MODERATION_ENABLED): a post submitted
+  // by its author sits in `in_review` until an admin approves (→ published) or
+  // rejects (→ rejected).
+  "in_review",
+  "rejected",
 ]);
 export const voteType = pgEnum("vote_type", ["up", "down"]);
 export const feedSourceStatus = pgEnum("feed_source_status", [
@@ -61,12 +68,38 @@ export const reportStatus = pgEnum("report_status", [
   "actioned",
 ]);
 
+// Job board
+export const jobType = pgEnum("job_type", [
+  "full-time",
+  "part-time",
+  "freelancer",
+  "other",
+]);
+// Lifecycle: draft -> pending_payment -> pending (paid, awaiting moderation)
+// -> active -> expired. rejected is terminal.
+export const jobStatus = pgEnum("job_status", [
+  "draft",
+  "pending_payment",
+  "pending",
+  "active",
+  "expired",
+  "rejected",
+]);
+
+// Engagement / Build Board
+export const pointAction = pgEnum("point_action", [
+  "post_published",
+  "comment_created",
+  "upvote_received",
+  "daily_active",
+  "shipped",
+  "referral",
+]);
+
 // Legacy enums (kept for backward compatibility during migration)
 export const legacyVoteType = pgEnum("VoteType", ["UP", "DOWN"]);
 
-// ============================================
 // USER & AUTH TABLES
-// ============================================
 
 export const session = pgTable("session", {
   sessionToken: text("sessionToken").notNull().primaryKey(),
@@ -158,13 +191,37 @@ export const user = pgTable(
     levelOfStudy: text("levelOfStudy"),
     course: text("course"),
     role: role("role").default("USER").notNull(),
+    // Referral loop
+    referralCode: varchar("referral_code", { length: 16 }),
+    invitedBy: text("invited_by"),
+    // Relaunch onboarding: chosen topics ("Your topics") that tune the feed.
+    topics: text("topics")
+      .array()
+      .default(sql`'{}'::text[]`)
+      .notNull(),
+    // Experience level + focus captured in onboarding (free-form keys).
+    experienceLevel: text("experience_level"),
+    onboardedAt: timestamp("onboarded_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
   },
   (table) => {
     return {
       usernameKey: uniqueIndex("User_username_key").on(table.username),
+      // Case-insensitive uniqueness (GitHub-style): `Niall` blocks `niall`.
+      // Display casing stays in the column; routing/uniqueness use lower(username).
+      usernameLowerKey: uniqueIndex("user_username_lower_key").on(
+        sql`lower(${table.username})`,
+      ),
       emailKey: uniqueIndex("User_email_key").on(table.email),
       usernameIdIdx: index("User_username_id_idx").on(table.id, table.username),
       usernameIndex: index("User_username_index").on(table.username),
+      referralCodeKey: uniqueIndex("User_referral_code_key").on(
+        table.referralCode,
+      ),
+      invitedByIdx: index("User_invited_by_idx").on(table.invitedBy),
     };
   },
 );
@@ -205,9 +262,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
   }),
 }));
 
-// ============================================
 // FEED SOURCES (RSS)
-// ============================================
 
 export const feed_sources = pgTable(
   "feed_sources",
@@ -266,9 +321,7 @@ export const feedSourcesRelations = relations(
   }),
 );
 
-// ============================================
 // POSTS TABLE
-// ============================================
 
 export const posts = pgTable(
   "posts",
@@ -282,6 +335,9 @@ export const posts = pgTable(
 
     title: varchar("title", { length: 500 }).notNull(),
     slug: varchar("slug", { length: 300 }).notNull(),
+    // Immutable, URL-safe id used as the canonical resolver for content URLs.
+    // Nullable for now; backfilled, then made NOT NULL in a later migration.
+    urlId: varchar("url_id", { length: 16 }),
     excerpt: text("excerpt"),
     body: text("body"),
     canonicalUrl: text("canonical_url"),
@@ -289,6 +345,10 @@ export const posts = pgTable(
 
     // For link/resource types (external URLs)
     externalUrl: varchar("external_url", { length: 2000 }),
+    externalUrlNormalized: text("externalUrlNormalized"),
+
+    // Moderation
+    moderationNote: text("moderationNote"),
 
     // RSS import metadata
     sourceId: integer("source_id").references(() => feed_sources.id, {
@@ -344,6 +404,7 @@ export const posts = pgTable(
   (table) => ({
     authorIdIdx: index("posts_author_id_idx").on(table.authorId),
     slugKey: uniqueIndex("posts_slug_idx").on(table.slug),
+    urlIdKey: uniqueIndex("posts_url_id_key").on(table.urlId),
     legacyPostIdIdx: uniqueIndex("posts_legacy_post_id_idx").on(
       table.legacyPostId,
     ),
@@ -352,6 +413,9 @@ export const posts = pgTable(
     typeIdx: index("posts_type_idx").on(table.type),
     sourceIdIdx: index("posts_source_id_idx").on(table.sourceId),
     featuredIdx: index("posts_featured_idx").on(table.featured),
+    externalUrlNormalizedIdx: index("posts_external_url_normalized_idx").on(
+      table.externalUrlNormalized,
+    ),
   }),
 );
 
@@ -368,9 +432,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   reports: many(reports),
 }));
 
-// ============================================
 // COMMENTS TABLE
-// ============================================
 
 export const comments = pgTable(
   "comments",
@@ -451,9 +513,7 @@ export const commentsRelations = relations(comments, ({ one, many }) => ({
   reports: many(reports),
 }));
 
-// ============================================
 // POST VOTES
-// ============================================
 
 export const post_votes = pgTable(
   "post_votes",
@@ -488,9 +548,7 @@ export const postVotesRelations = relations(post_votes, ({ one }) => ({
   user: one(user, { fields: [post_votes.userId], references: [user.id] }),
 }));
 
-// ============================================
 // COMMENT VOTES
-// ============================================
 
 export const comment_votes = pgTable(
   "comment_votes",
@@ -528,9 +586,7 @@ export const commentVotesRelations = relations(comment_votes, ({ one }) => ({
   user: one(user, { fields: [comment_votes.userId], references: [user.id] }),
 }));
 
-// ============================================
 // BOOKMARKS
-// ============================================
 
 export const bookmarks = pgTable(
   "bookmarks",
@@ -565,9 +621,7 @@ export const bookmarksRelations = relations(bookmarks, ({ one }) => ({
   user: one(user, { fields: [bookmarks.userId], references: [user.id] }),
 }));
 
-// ============================================
 // POST TAGS
-// ============================================
 
 export const post_tags = pgTable(
   "post_tags",
@@ -595,9 +649,7 @@ export const postTagsRelations = relations(post_tags, ({ one }) => ({
   tag: one(tag, { fields: [post_tags.tagId], references: [tag.id] }),
 }));
 
-// ============================================
 // REPORTS
-// ============================================
 
 export const reports = pgTable(
   "reports",
@@ -656,9 +708,7 @@ export const reportsRelations = relations(reports, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // TAGS (shared between legacy and new system)
-// ============================================
 
 export const tag = pgTable(
   "Tag",
@@ -697,9 +747,7 @@ export const tagRelations = relations(tag, ({ many }) => ({
   legacyContentTag: many(content_tag),
 }));
 
-// ============================================
 // TAG MERGE SUGGESTIONS (for AI-powered tag cleanup)
-// ============================================
 
 export const tagMergeSuggestionStatus = pgEnum("tag_merge_suggestion_status", [
   "pending",
@@ -771,9 +819,7 @@ export const tagMergeSuggestionsRelations = relations(
   }),
 );
 
-// ============================================
 // SPONSOR INQUIRY
-// ============================================
 
 export const sponsorInquiryStatus = pgEnum("SponsorInquiryStatus", [
   "PENDING",
@@ -816,9 +862,7 @@ export const sponsor_inquiry = pgTable(
   }),
 );
 
-// ============================================
 // EMAIL CHANGE TABLES
-// ============================================
 
 export const emailChangeRequest = pgTable("EmailChangeRequest", {
   id: serial("id").primaryKey(),
@@ -863,9 +907,7 @@ export const emailChangeHistoryRelations = relations(
   }),
 );
 
-// ============================================
 // BANNED USERS
-// ============================================
 
 export const banned_users = pgTable(
   "BannedUsers",
@@ -913,9 +955,7 @@ export const banned_usersRelations = relations(banned_users, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // NOTIFICATION
-// ============================================
 
 export const notification = pgTable(
   "Notification",
@@ -978,11 +1018,9 @@ export const notificationRelations = relations(notification, ({ one }) => ({
   }),
 }));
 
-// ============================================================================
 // LEGACY TABLES (kept for backward compatibility during migration)
 // These tables are preserved from the old schema.
 // After migration verification, they can be removed.
-// ============================================================================
 
 export const post_tag = pgTable(
   "PostTag",
@@ -1678,6 +1716,11 @@ export const content_report = pgTable(
       onDelete: "cascade",
       onUpdate: "cascade",
     }),
+    // posts.id is a uuid PK, so this FK column must be uuid (not text).
+    postId: uuid("postId").references(() => posts.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
     reporterId: text("reporterId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -1711,6 +1754,7 @@ export const content_report = pgTable(
     discussionIdIndex: index("ContentReport_discussionId_index").on(
       table.discussionId,
     ),
+    postIdIndex: index("ContentReport_postId_index").on(table.postId),
   }),
 );
 
@@ -1722,6 +1766,10 @@ export const contentReportRelations = relations(content_report, ({ one }) => ({
   discussion: one(discussion, {
     fields: [content_report.discussionId],
     references: [discussion.id],
+  }),
+  post: one(posts, {
+    fields: [content_report.postId],
+    references: [posts.id],
   }),
   reporter: one(user, {
     fields: [content_report.reporterId],
@@ -1735,10 +1783,8 @@ export const contentReportRelations = relations(content_report, ({ one }) => ({
   }),
 }));
 
-// ============================================
 // Legacy Tables for Backward Compatibility
 // (RSS Aggregated Articles - to be migrated to posts table)
-// ============================================
 
 // Alias exports for new tables (camelCase naming convention)
 export {
@@ -1898,6 +1944,384 @@ export const aggregatedArticleTagRelations = relations(
     tag: one(tag, {
       fields: [aggregated_article_tag.tagId],
       references: [tag.id],
+    }),
+  }),
+);
+
+// JOB BOARD
+
+export const job = pgTable(
+  "job",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Poster relation. Keep the listing if the poster account is removed.
+    userId: text("user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+
+    companyName: varchar("company_name", { length: 100 }).notNull(),
+    companyLogo: text("company_logo"), // S3 fileLocation URL
+    jobTitle: varchar("job_title", { length: 100 }).notNull(),
+    slug: varchar("slug", { length: 300 }).notNull(),
+    jobDescription: text("job_description"), // markdown
+    jobLocation: varchar("job_location", { length: 60 }).notNull(),
+    applicationUrl: varchar("application_url", { length: 2000 }),
+    type: jobType("type").notNull(),
+
+    // Location / perk flags
+    remote: boolean("remote").default(false).notNull(),
+    relocation: boolean("relocation").default(false).notNull(),
+    visaSponsorship: boolean("visa_sponsorship").default(false).notNull(),
+
+    // AI-native tagging (positioning toward AI builders)
+    tags: text("tags")
+      .array()
+      .default(sql`ARRAY[]::text[]`)
+      .notNull(),
+    aiNative: boolean("ai_native").default(false).notNull(),
+
+    // Lifecycle / monetization
+    status: jobStatus("status").default("draft").notNull(),
+    featured: boolean("featured").default(false).notNull(),
+
+    // Payment hooks (provider wired later)
+    priceCents: integer("price_cents"),
+    currency: varchar("currency", { length: 3 }).default("EUR").notNull(),
+    paymentProvider: varchar("payment_provider", { length: 30 }),
+    paymentRef: varchar("payment_ref", { length: 255 }),
+    paidAt: timestamp("paid_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+
+    // Moderation
+    approvedById: text("approved_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    approvedAt: timestamp("approved_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    rejectionReason: text("rejection_reason"),
+
+    // Publishing window
+    publishedAt: timestamp("published_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    expiresAt: timestamp("expires_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .notNull()
+      .$onUpdate(() => new Date().toISOString())
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => ({
+    slugKey: uniqueIndex("job_slug_idx").on(table.slug),
+    statusIdx: index("job_status_idx").on(table.status),
+    featuredIdx: index("job_featured_idx").on(table.featured),
+    typeIdx: index("job_type_idx").on(table.type),
+    userIdIdx: index("job_user_id_idx").on(table.userId),
+    publishedAtIdx: index("job_published_at_idx").on(table.publishedAt),
+    expiresAtIdx: index("job_expires_at_idx").on(table.expiresAt),
+  }),
+);
+
+export const jobRelations = relations(job, ({ one }) => ({
+  user: one(user, {
+    fields: [job.userId],
+    references: [user.id],
+    relationName: "job_poster",
+  }),
+  approvedBy: one(user, {
+    fields: [job.approvedById],
+    references: [user.id],
+    relationName: "job_approved_by",
+  }),
+}));
+
+// ENGAGEMENT — points + streaks (Build Board)
+
+// Append-only event log so any window (7-day, all-time) can be recomputed.
+export const point_event = pgTable(
+  "point_event",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    action: pointAction("action").notNull(),
+    points: integer("points").notNull(),
+    sourceType: varchar("source_type", { length: 30 }),
+    sourceId: text("source_id"),
+    // Who triggered it (e.g. the upvoter) — for distinct-user anti-gaming.
+    actorId: text("actor_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    userIdx: index("point_event_user_idx").on(table.userId),
+    userCreatedIdx: index("point_event_user_created_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+    createdIdx: index("point_event_created_idx").on(table.createdAt),
+    // Idempotency / anti-gaming: one award per (user, action, source, actor).
+    // NULLS NOT DISTINCT so self-actions (actorId NULL — post_published,
+    // comment_created, daily_active, referral) actually dedupe; a plain unique
+    // index treats NULLs as distinct, which silently disabled idempotency for
+    // every action except upvotes.
+    dedupeKey: unique("point_event_dedupe_idx")
+      .on(table.userId, table.action, table.sourceId, table.actorId)
+      .nullsNotDistinct(),
+  }),
+);
+
+export const pointEventRelations = relations(point_event, ({ one }) => ({
+  user: one(user, {
+    fields: [point_event.userId],
+    references: [user.id],
+    relationName: "point_event_user",
+  }),
+  actor: one(user, {
+    fields: [point_event.actorId],
+    references: [user.id],
+    relationName: "point_event_actor",
+  }),
+}));
+
+// One row per user — current daily-activity streak.
+export const user_streak = pgTable("user_streak", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  lastActiveOn: timestamp("last_active_on", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  }),
+  freezesAvailable: integer("freezes_available").default(0).notNull(),
+  updatedAt: timestamp("updated_at", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
+    .notNull()
+    .$onUpdate(() => new Date().toISOString())
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const userStreakRelations = relations(user_streak, ({ one }) => ({
+  user: one(user, {
+    fields: [user_streak.userId],
+    references: [user.id],
+  }),
+}));
+
+// Badges / achievements
+export const badge = pgTable("badge", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 60 }).notNull(),
+  description: text("description").notNull(),
+  emoji: varchar("emoji", { length: 8 }),
+  createdAt: timestamp("created_at", {
+    precision: 3,
+    mode: "string",
+    withTimezone: true,
+  })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const user_badge = pgTable(
+  "user_badge",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    badgeId: integer("badge_id")
+      .notNull()
+      .references(() => badge.id, { onDelete: "cascade" }),
+    awardedAt: timestamp("awarded_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    // Null until the in-app "badge unlocked" celebration has been shown; the
+    // client marks it so each badge celebrates exactly once across devices.
+    celebratedAt: timestamp("celebrated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+  },
+  (table) => ({
+    uniq: uniqueIndex("user_badge_user_badge_idx").on(
+      table.userId,
+      table.badgeId,
+    ),
+    userIdx: index("user_badge_user_idx").on(table.userId),
+  }),
+);
+
+export const badgeRelations = relations(badge, ({ many }) => ({
+  userBadges: many(user_badge),
+}));
+
+export const userBadgeRelations = relations(user_badge, ({ one }) => ({
+  user: one(user, { fields: [user_badge.userId], references: [user.id] }),
+  badge: one(badge, { fields: [user_badge.badgeId], references: [badge.id] }),
+}));
+
+// Social graph — follows
+export const follow = pgTable(
+  "follow",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    followerId: text("follower_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    followingId: text("following_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pairKey: uniqueIndex("follow_pair_idx").on(
+      table.followerId,
+      table.followingId,
+    ),
+    followerIdx: index("follow_follower_idx").on(table.followerId),
+    followingIdx: index("follow_following_idx").on(table.followingId),
+  }),
+);
+
+export const followRelations = relations(follow, ({ one }) => ({
+  follower: one(user, {
+    fields: [follow.followerId],
+    references: [user.id],
+    relationName: "follow_follower",
+  }),
+  following: one(user, {
+    fields: [follow.followingId],
+    references: [user.id],
+    relationName: "follow_following",
+  }),
+}));
+
+// POST FOLLOW (users following a discussion/post to get new-comment notifications)
+
+export const post_follow = pgTable(
+  "post_follow",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pairKey: uniqueIndex("post_follow_pair_idx").on(table.userId, table.postId),
+    postIdx: index("post_follow_post_idx").on(table.postId),
+  }),
+);
+
+export const postFollowRelations = relations(post_follow, ({ one }) => ({
+  user: one(user, {
+    fields: [post_follow.userId],
+    references: [user.id],
+  }),
+  post: one(posts, {
+    fields: [post_follow.postId],
+    references: [posts.id],
+  }),
+}));
+
+// PUBLICATION FOLLOW (users following a feed source / "publication")
+
+export const publication_follow = pgTable(
+  "publication_follow",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sourceId: integer("source_id")
+      .notNull()
+      .references(() => feed_sources.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pairKey: uniqueIndex("publication_follow_pair_idx").on(
+      table.userId,
+      table.sourceId,
+    ),
+    sourceIdx: index("publication_follow_source_idx").on(table.sourceId),
+  }),
+);
+
+export const publicationFollowRelations = relations(
+  publication_follow,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [publication_follow.userId],
+      references: [user.id],
+    }),
+    source: one(feed_sources, {
+      fields: [publication_follow.sourceId],
+      references: [feed_sources.id],
     }),
   }),
 );

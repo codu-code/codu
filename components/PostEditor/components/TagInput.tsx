@@ -192,30 +192,28 @@ export function TagInput({
   return (
     <div className={`relative ${className}`}>
       {label && (
-        <label className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <label className="eyebrow mb-2 block">
+          <span className="slash">{"// "}</span>
           {label}
         </label>
       )}
 
       <div
-        className={`flex flex-wrap items-center gap-2 rounded-lg border bg-white p-2 transition-colors focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 dark:bg-neutral-800 ${
-          error
-            ? "border-red-500 dark:border-red-500"
-            : "border-neutral-300 dark:border-neutral-600"
+        className={`flex flex-wrap items-center gap-2 rounded-md border bg-canvas p-2 transition-colors focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20 ${
+          error ? "border-red-500" : "border-hairline"
         } ${disabled ? "opacity-50" : ""}`}
       >
-        {/* Existing Tags */}
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-sm font-medium text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200"
+            className="inline-flex items-center gap-1 rounded-full bg-elevated px-3 py-1 font-mono text-sm font-medium text-fg"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
               disabled={disabled}
-              className="ml-1 rounded-full p-0.5 text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-600 dark:hover:text-neutral-200"
+              className="ml-1 rounded-full p-0.5 text-muted transition-colors hover:bg-inset hover:text-fg"
               aria-label={`Remove ${tag} tag`}
             >
               <X className="h-3 w-3" />
@@ -223,7 +221,6 @@ export function TagInput({
           </span>
         ))}
 
-        {/* Input */}
         {!isMaxReached && (
           <div className="relative flex-1">
             <input
@@ -235,18 +232,17 @@ export function TagInput({
               onFocus={() => inputValue.length >= 1 && setIsOpen(true)}
               placeholder={tags.length === 0 ? placeholder : "Add more..."}
               disabled={disabled}
-              className="w-full min-w-[120px] border-none bg-transparent px-1 py-1 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder:text-neutral-500"
+              className="w-full min-w-[120px] border-none bg-transparent px-1 py-1 text-sm text-fg placeholder:text-faint focus:outline-none focus:ring-0"
               autoComplete="off"
             />
 
-            {/* Autocomplete Dropdown */}
             {isOpen && inputValue.length >= 1 && (
               <div
                 ref={dropdownRef}
-                className="absolute left-0 top-full z-50 mt-1 max-h-64 w-72 overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+                className="absolute left-0 top-full z-50 mt-1 max-h-64 w-72 overflow-y-auto rounded-lg border border-hairline bg-elevated shadow-lg"
               >
                 {isLoading ? (
-                  <div className="flex items-center justify-center p-4 text-neutral-500">
+                  <div className="flex items-center justify-center p-4 text-muted">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     <span className="text-sm">Searching...</span>
                   </div>
@@ -260,20 +256,20 @@ export function TagInput({
                           onMouseEnter={() => setHighlightedIndex(index)}
                           className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition-colors ${
                             highlightedIndex === index
-                              ? "bg-pink-50 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                              : "text-neutral-700 hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                              ? "bg-accent/15 text-accent"
+                              : "text-muted hover:bg-surface hover:text-fg"
                           }`}
                         >
                           <span className="font-medium">
                             {suggestion.title}
                           </span>
                           <span
-                            className={`rounded-full px-2 py-0.5 text-xs ${
+                            className={`rounded-full px-2 py-0.5 font-mono text-xs ${
                               suggestion.postCount > 100
-                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                ? "bg-accent/15 text-accent"
                                 : suggestion.postCount > 10
-                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                  : "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400"
+                                  ? "bg-elevated text-muted"
+                                  : "bg-inset text-faint"
                             }`}
                           >
                             {formatCount(suggestion.postCount)} posts
@@ -283,12 +279,12 @@ export function TagInput({
                     ))}
                   </ul>
                 ) : debouncedSearch.length >= 1 ? (
-                  <div className="px-3 py-3 text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="px-3 py-3 text-sm text-muted">
                     <p className="mb-2">No matching tags found</p>
                     <button
                       type="button"
                       onClick={() => addTag(inputValue)}
-                      className="flex items-center gap-2 text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300"
+                      className="flex items-center gap-2 text-accent transition-colors hover:text-accent-soft"
                     >
                       <TagIcon className="h-3.5 w-3.5" />
                       <span>
@@ -303,23 +299,13 @@ export function TagInput({
         )}
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <p className="mt-1.5 text-sm text-red-500">{error}</p>}
 
-      {/* Help Text / Counter */}
       <div className="mt-1.5 flex items-center justify-between">
-        {helpText && (
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            {helpText}
-          </p>
-        )}
+        {helpText && <p className="text-sm text-faint">{helpText}</p>}
         <span
-          className={`text-sm ${
-            isMaxReached
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-neutral-400 dark:text-neutral-500"
+          className={`font-mono text-sm ${
+            isMaxReached ? "text-amber-500" : "text-faint"
           }`}
         >
           {tags.length}/{maxTags}

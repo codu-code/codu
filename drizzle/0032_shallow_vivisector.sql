@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "first_win_celebrated_at" timestamp(3) with time zone;

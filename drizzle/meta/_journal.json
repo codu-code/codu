@@ -141,6 +141,132 @@
       "when": 1768377165753,
       "tag": "0019_update-notification-fk",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1780779004573,
+      "tag": "0020_thick_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1780789400625,
+      "tag": "0021_clear_rockslide",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1780825783160,
+      "tag": "0022_bumpy_robbie_robertson",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1780826471537,
+      "tag": "0023_needy_spectrum",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1780830001951,
+      "tag": "0024_amazing_chamber",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1780861148408,
+      "tag": "0025_normal_nuke",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1780862237178,
+      "tag": "0026_flawless_naoko",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1780871229444,
+      "tag": "0027_abandoned_shen",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1780938706325,
+      "tag": "0028_pale_king_cobra",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1780941652495,
+      "tag": "0029_blue_nicolaos",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1780943123372,
+      "tag": "0030_green_doctor_spectrum",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1780988335732,
+      "tag": "0031_tranquil_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1781031616911,
+      "tag": "0032_shallow_vivisector",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1781105661207,
+      "tag": "0033_complex_wrecking_crew",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1781289756874,
+      "tag": "0034_dear_siren",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1781296653689,
+      "tag": "0035_badge_celebrated_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1781296890023,
+      "tag": "0036_drop_first_win_celebrated",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1781296891023,
+      "tag": "0037_backfill_onboarding_badge",
+      "breakpoints": true
     }
   ]
 }

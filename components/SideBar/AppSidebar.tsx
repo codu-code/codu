@@ -10,6 +10,8 @@ import {
   DocumentTextIcon,
   BookmarkIcon,
   Cog6ToothIcon,
+  InformationCircleIcon,
+  BriefcaseIcon,
 } from "@heroicons/react/24/outline";
 import {
   Sidebar,
@@ -31,6 +33,7 @@ import {
   linkedinUrl,
 } from "@/config/site_settings";
 import { useSidebar } from "@/context/SidebarContext";
+import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 import Twitter from "@/icons/x.svg";
 import Github from "@/icons/github.svg";
 import Linkedin from "@/icons/linkedin.svg";
@@ -43,6 +46,8 @@ const iconMap = {
   DocumentTextIcon,
   BookmarkIcon,
   Cog6ToothIcon,
+  InformationCircleIcon,
+  BriefcaseIcon,
 };
 
 const socialLinks = [
@@ -50,19 +55,19 @@ const socialLinks = [
     name: "Twitter",
     href: twitterUrl,
     Icon: Twitter,
-    customStyle: "hover:bg-twitter focus:bg-twitter",
+    customStyle: "hover:bg-elevated focus:bg-elevated",
   },
   {
     name: "GitHub",
     href: githubUrl,
     Icon: Github,
-    customStyle: "hover:bg-github focus:bg-github",
+    customStyle: "hover:bg-elevated focus:bg-elevated",
   },
   {
     name: "LinkedIn",
     href: linkedinUrl,
     Icon: Linkedin,
-    customStyle: "hover:bg-[#0A66C2] focus:bg-[#0A66C2]",
+    customStyle: "hover:bg-elevated focus:bg-elevated",
   },
 ];
 
@@ -74,6 +79,12 @@ interface AppSidebarProps {
 export function AppSidebar({ session, username }: AppSidebarProps) {
   const pathname = usePathname();
   const { isCollapsed } = useSidebar();
+
+  // Jobs is flag-gated until launch (auto-on in dev).
+  const jobsEnabled = isFlagEnabled(FEATURE_FLAGS.JOBS);
+  const navItems = sidebarNavigation.filter(
+    (item) => item.href !== "/jobs" || jobsEnabled,
+  );
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -88,10 +99,10 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar className="bg-neutral-100 dark:bg-black">
+    <Sidebar className="border-r border-hairline bg-canvas">
       <SidebarBody>
         <SidebarSection>
-          {sidebarNavigation.map((item) => {
+          {navItems.map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             return (
               <SidebarItem
@@ -101,7 +112,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
               >
                 {Icon && (
                   <Icon
-                    className={`!size-5 shrink-0 ${isActive(item.href) ? "text-neutral-800 dark:text-white" : "text-neutral-400"}`}
+                    className={`!size-5 shrink-0 ${isActive(item.href) ? "text-accent" : "text-faint"}`}
                   />
                 )}
                 <SidebarLabel
@@ -137,7 +148,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
                   >
                     {Icon && (
                       <Icon
-                        className={`!size-5 shrink-0 ${isActive(href) ? "text-neutral-800 dark:text-white" : "text-neutral-400"}`}
+                        className={`!size-5 shrink-0 ${isActive(href) ? "text-accent" : "text-faint"}`}
                       />
                     )}
                     <SidebarLabel
@@ -159,7 +170,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
         >
           {sidebarFooterNav.map((item) => (
             <SidebarItem key={item.name} href={item.href}>
-              <SidebarLabel className="text-xs text-neutral-500 dark:text-neutral-400">
+              <SidebarLabel className="text-xs text-faint">
                 {item.name}
               </SidebarLabel>
             </SidebarItem>
@@ -177,7 +188,7 @@ export function AppSidebar({ session, username }: AppSidebarProps) {
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`focus-style rounded-md p-1 text-neutral-400 transition-all duration-300 hover:scale-105 hover:text-white hover:brightness-110 focus:scale-105 focus:text-white focus:brightness-110 ${item.customStyle.toLowerCase()}`}
+              className={`focus-style rounded-md p-1 text-faint transition-all duration-300 hover:scale-105 hover:text-fg hover:brightness-110 focus:scale-105 focus:text-fg focus:brightness-110 ${item.customStyle.toLowerCase()}`}
             >
               <span className="sr-only">{item.name}</span>
               <item.Icon className="h-5 w-5" aria-hidden="true" />
