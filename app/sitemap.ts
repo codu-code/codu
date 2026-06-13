@@ -23,6 +23,27 @@ const ROUTES_TO_INDEX = [
 // (article / til / resource / member-link) lives under /{username}/{slug}.
 const DISCUSSION_TYPES = ["discussion", "question"] as const;
 
+// Each DB-backed section runs through this so a failed query degrades to an
+// empty list instead of throwing. Build/preview environments may not be able to
+// reach the database at build time (the sitemap is the only route that queries
+// it during prerender); without this, one unreachable DB fails the whole deploy.
+// `revalidate` regenerates the full sitemap at runtime once the DB is reachable,
+// so the worst case is a static-routes-only sitemap until the first revalidation.
+async function safeRows<T>(
+  label: string,
+  run: () => Promise<T[]>,
+): Promise<T[]> {
+  try {
+    return await run();
+  } catch (err) {
+    console.error(
+      `[sitemap] "${label}" query failed; omitting from sitemap`,
+      err,
+    );
+    return [];
+  }
+}
+
 // TODO: split via generateSitemaps when total URLs >5k (queries are already
 // partitioned by type, so the split is mechanical).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -30,26 +51,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Member content. Excludes cross-posted (canonicalUrl → off Codú) and
   // aggregated rows (source_id → handled separately).
-  const memberPosts = await db
-    .select({
-      slug: posts.slug,
-      type: posts.type,
-      updatedAt: posts.updatedAt,
-      createdAt: posts.createdAt,
-      publishedAt: posts.publishedAt,
-      username: user.username,
-    })
-    .from(posts)
-    .innerJoin(user, eq(posts.authorId, user.id))
-    .where(
-      and(
-        eq(posts.status, "published"),
-        lte(posts.publishedAt, now),
-        isNull(posts.canonicalUrl),
-        isNull(posts.sourceId),
-        isNotNull(user.username),
+  const memberPosts = await safeRows("member posts", () =>
+    db
+      .select({
+        slug: posts.slug,
+        type: posts.type,
+        updatedAt: posts.updatedAt,
+        createdAt: posts.createdAt,
+        publishedAt: posts.publishedAt,
+        username: user.username,
+      })
+      .from(posts)
+      .innerJoin(user, eq(posts.authorId, user.id))
+      .where(
+        and(
+          eq(posts.status, "published"),
+          lte(posts.publishedAt, now),
+          isNull(posts.canonicalUrl),
+          isNull(posts.sourceId),
+          isNotNull(user.username),
+        ),
       ),
-    );
+  );
 
   const members = memberPosts.map(
     ({ slug, type, updatedAt, createdAt, username }) => {
@@ -71,30 +94,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // published post. Advertising every thin signup profile at high priority
   // erodes crawl-budget trust at exactly relaunch time.
   const users = (
-    await db
-      .select({
-        username: user.username,
-        updatedAt: user.updatedAt,
-        createdAt: user.createdAt,
-      })
-      .from(user)
-      .where(
-        and(
-          isNotNull(user.username),
-          exists(
-            db
-              .select({ one: sql`1` })
-              .from(posts)
-              .where(
-                and(
-                  eq(posts.authorId, user.id),
-                  eq(posts.status, "published"),
-                  lte(posts.publishedAt, now),
+    await safeRows("user profiles", () =>
+      db
+        .select({
+          username: user.username,
+          updatedAt: user.updatedAt,
+          createdAt: user.createdAt,
+        })
+        .from(user)
+        .where(
+          and(
+            isNotNull(user.username),
+            exists(
+              db
+                .select({ one: sql`1` })
+                .from(posts)
+                .where(
+                  and(
+                    eq(posts.authorId, user.id),
+                    eq(posts.status, "published"),
+                    lte(posts.publishedAt, now),
+                  ),
                 ),
-              ),
+            ),
           ),
         ),
-      )
+    )
   ).map(({ username, updatedAt, createdAt }) => ({
     url: `${BASE_URL}/${username}`,
     lastModified: new Date(updatedAt || createdAt),
@@ -103,48 +128,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Tag landing pages: /tag/{slug} — only tags carrying published content.
   const tags = (
-    await db
-      .selectDistinct({ slug: tag.slug })
-      .from(tag)
-      .innerJoin(post_tags, eq(post_tags.tagId, tag.id))
-      .innerJoin(posts, eq(post_tags.postId, posts.id))
-      .where(
-        and(
-          eq(posts.status, "published"),
-          lte(posts.publishedAt, now),
-          isNotNull(tag.slug),
+    await safeRows("tags", () =>
+      db
+        .selectDistinct({ slug: tag.slug })
+        .from(tag)
+        .innerJoin(post_tags, eq(post_tags.tagId, tag.id))
+        .innerJoin(posts, eq(post_tags.postId, posts.id))
+        .where(
+          and(
+            eq(posts.status, "published"),
+            lte(posts.publishedAt, now),
+            isNotNull(tag.slug),
+          ),
         ),
-      )
+    )
   ).map(({ slug }) => ({
     url: `${BASE_URL}/tag/${slug}`,
     priority: 0.6,
   }));
 
-  // Source profiles + aggregated/RSS source articles. Wrapped in try/catch since
-  // these tables may lag migrations on a fresh environment.
-  let sources: { url: string; lastModified: Date; priority: number }[] = [];
-  let sourceArticles: { url: string; lastModified: Date; priority: number }[] =
-    [];
-
-  try {
-    // Source profiles: /s/{slug}
-    sources = (
-      await db.query.feed_sources.findMany({
+  // Source profiles: /s/{slug}
+  const sources = (
+    await safeRows("feed sources", () =>
+      db.query.feed_sources.findMany({
         where: and(
           eq(feed_sources.status, "active"),
           isNotNull(feed_sources.slug),
         ),
-      })
-    ).map(({ slug, updatedAt, createdAt }) => ({
-      url: `${BASE_URL}/s/${slug}`,
-      lastModified: new Date(updatedAt || createdAt),
-      priority: 0.6,
-    }));
+      }),
+    )
+  ).map(({ slug, updatedAt, createdAt }) => ({
+    url: `${BASE_URL}/s/${slug}`,
+    lastModified: new Date(updatedAt || createdAt),
+    priority: 0.6,
+  }));
 
-    // Aggregated source articles: /s/{sourceSlug}/{slug}. Included — they
-    // self-canonical to Codú and drive the freshness strategy.
-    sourceArticles = (
-      await db
+  // Aggregated source articles: /s/{sourceSlug}/{slug}. Included — they
+  // self-canonical to Codú and drive the freshness strategy.
+  const sourceArticles = (
+    await safeRows("source articles", () =>
+      db
         .select({
           articleSlug: posts.slug,
           sourceSlug: feed_sources.slug,
@@ -161,16 +184,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             isNotNull(feed_sources.slug),
             isNotNull(posts.slug),
           ),
-        )
-    ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
-      url: `${BASE_URL}/s/${sourceSlug}/${articleSlug}`,
-      lastModified: new Date(updatedAt || publishedAt || new Date()),
-      priority: 0.5,
-    }));
-  } catch {
-    // Tables may not exist yet if migrations haven't been run — continue with
-    // empty arrays for sources and sourceArticles.
-  }
+        ),
+    )
+  ).map(({ articleSlug, sourceSlug, publishedAt, updatedAt }) => ({
+    url: `${BASE_URL}/s/${sourceSlug}/${articleSlug}`,
+    lastModified: new Date(updatedAt || publishedAt || new Date()),
+    priority: 0.5,
+  }));
 
   // Static routes carry no lastModified — stamping new Date() every hourly
   // regeneration is fake freshness that teaches crawlers to ignore lastmod.
