@@ -4,9 +4,9 @@
 
 ![Codu Logo](https://raw.githubusercontent.com/codu-code/codu/develop/public/images/codu-gradient.png)
 
-> A space for coders
+> A community for AI builders and indie hackers
 
-Codú is the ultimate community of web developers to learn, share, and get support for your projects, either big or small. It is the perfect place to sharpen your skills and build your portfolio. In Codú, we're all here to help each other to grow as web developers. Plus, Codú makes it easier to find collaborators for your next big project.
+Codú is a community for AI builders and indie hackers. Share what you're building, learn from people shipping real projects, and get support — whether it's a weekend experiment or a product you're taking to market. Write articles, post TILs, start discussions, ask questions, and find people to build with.
 
 ---
 
@@ -75,17 +75,15 @@ npm run dev
 
 After completion of the above commands, navigate to [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-You can start your journey by modifying `pages/index.tsx`. With the auto-update feature, pages update as you edit the file.
+The app uses the Next.js App Router — routes live in the `app/` directory and hot-reload as you edit. The home feed is served from `app/(app)/page.tsx`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-Learn more about API routes [here](https://nextjs.org/docs/api-routes/introduction).
+API endpoints are [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers) under `app/api/*`, alongside the tRPC routers in `server/`.
 
 ## Environment Variables
 
 ### DATABASE_URL
 
-The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15.0).
+The `DATABASE_URL` is a connection string to a PostgreSQL database (version 15).
 
 By default, we point to a database running locally with Docker from our `docker-compose.yml` file.
 
