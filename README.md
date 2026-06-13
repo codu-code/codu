@@ -53,11 +53,13 @@ npm run db:migrate
 
 The full command can be seen in our [package.json](/package.json#16) file.
 
-> Deploy note: Vercel runs `db:migrate` automatically only on **production**
-> builds (`vercel-build`). Preview deploys do NOT migrate — when a branch adds
-> migrations, run `npm run db:migrate` against the shared dev database before
-> (or right after) opening the preview, or its new queries will hit an
-> unmigrated schema.
+> Deploy note: the Vercel Build Command runs `npm run db:migrate && npm run ci-build`
+> on **every** target, so **both preview and production builds migrate** — preview
+> against the shared dev database, production against prod. A migration that fails
+> aborts the build, so a branch carrying a broken or environment-incompatible
+> migration turns the Vercel check red. Connections require SSL
+> (`sslmode=require` in `DATABASE_URL`) because the RDS instances run with
+> `rds.force_ssl` on; local dev and e2e use Docker over localhost and need none.
 
 7. Seed the database with some mock data by running:
 
