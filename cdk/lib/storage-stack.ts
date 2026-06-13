@@ -147,8 +147,11 @@ export class StorageStack extends cdk.Stack {
       engine: rds.DatabaseInstanceEngine.postgres({
         // PG15+ is required by the schema (point_event dedupe uses
         // `UNIQUE NULLS NOT DISTINCT`, added in Postgres 15). Local dev runs
-        // postgres:15-alpine; this keeps RDS in step.
-        version: rds.PostgresEngineVersion.VER_15_8,
+        // postgres:15-alpine; this keeps RDS in step. 15.17 is the lowest 15.x
+        // RDS offers as a valid major-upgrade target from the current 14.22.
+        // Use `.of()` because this aws-cdk-lib (2.233.0) predates the
+        // VER_15_17 enum member.
+        version: rds.PostgresEngineVersion.of("15.17", "15"),
       }),
       credentials: rds.Credentials.fromPassword(
         dbUsername,
