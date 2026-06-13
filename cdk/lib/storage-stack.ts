@@ -145,7 +145,10 @@ export class StorageStack extends cdk.Stack {
       instanceIdentifier: "codu-rds",
       databaseName: dbName,
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_14_5,
+        // PG15+ is required by the schema (point_event dedupe uses
+        // `UNIQUE NULLS NOT DISTINCT`, added in Postgres 15). Local dev runs
+        // postgres:15-alpine; this keeps RDS in step.
+        version: rds.PostgresEngineVersion.VER_15_8,
       }),
       credentials: rds.Credentials.fromPassword(
         dbUsername,
@@ -164,6 +167,10 @@ export class StorageStack extends cdk.Stack {
       publiclyAccessible: true,
       deletionProtection: props?.production ?? false,
       autoMinorVersionUpgrade: true,
+      // Required for the 14.5 -> 15.x major-version upgrade; RDS rejects a
+      // major engine change without it. Safe to leave enabled (it permits, it
+      // doesn't force, future major upgrades via CDK).
+      allowMajorVersionUpgrade: true,
       backupRetention: props?.production
         ? cdk.Duration.days(7) // 7 days retention for production
         : cdk.Duration.days(1), // 1 day retention for non-production (minimum allowed)
