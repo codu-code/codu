@@ -46,9 +46,9 @@ test.describe("Moderation gate: publish routes articles to in_review", () => {
       await page.goto("http://localhost:3000/?type=article");
       await page.waitForSelector("article");
       // The post is in_review (not published) so it must never appear publicly.
-      await expect(
-        page.getByRole("heading", { name: FEED_TITLE }),
-      ).toHaveCount(0);
+      await expect(page.getByRole("heading", { name: FEED_TITLE })).toHaveCount(
+        0,
+      );
     } finally {
       await deletePostBySlug(FEED_SLUG);
     }
@@ -151,10 +151,7 @@ test.describe("Moderation: flag a live post, hide it from the queue", () => {
     await expect(card.first()).toBeVisible({ timeout: 15000 });
 
     // Admin hides the post (published → in_review, reports resolved).
-    await reportedSection
-      .getByRole("button", { name: "Hide" })
-      .first()
-      .click();
+    await reportedSection.getByRole("button", { name: "Hide" }).first().click();
     await expect(page.getByText("Post hidden and moved to review")).toBeVisible(
       { timeout: 15000 },
     );

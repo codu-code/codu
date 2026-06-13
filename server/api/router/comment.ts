@@ -214,8 +214,7 @@ export const commentRouter = createTRPCRouter({
     name: "comment-edit",
     limit: 20,
     windowMs: 10 * 60_000,
-    message:
-      "You're editing comments too fast. Take a breather and try again.",
+    message: "You're editing comments too fast. Take a breather and try again.",
   })
     .input(EditCommentSchema)
     .mutation(async ({ input, ctx }) => {

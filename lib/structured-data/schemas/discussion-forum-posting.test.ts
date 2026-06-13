@@ -54,9 +54,7 @@ describe("getDiscussionForumPostingSchema", () => {
 
   it("strips HTML from the OP text", () => {
     const schema = getDiscussionForumPostingSchema(baseInput);
-    expect(schema.text).toBe(
-      "I'm curious what people are actually running.",
-    );
+    expect(schema.text).toBe("I'm curious what people are actually running.");
     expect(schema.text).not.toContain("<strong>");
   });
 

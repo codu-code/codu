@@ -357,7 +357,7 @@ const ModerationQueue = () => {
           <p className="eyebrow m-0">
             <span className="slash">{"// "}</span>reported (live)
           </p>
-          <span className="rounded-full bg-danger/12 px-2 py-0.5 font-mono text-xs text-danger">
+          <span className="bg-danger/12 rounded-full px-2 py-0.5 font-mono text-xs text-danger">
             {reportedPosts.data?.length ?? 0} flagged
           </span>
         </div>
@@ -388,8 +388,8 @@ const ModerationQueue = () => {
                     {post.title || "Untitled"}
                   </p>
                   <p className="font-mono text-xs text-faint">
-                    @{post.authorUsername ?? "unknown"} ·{" "}
-                    {post.reportCount} report
+                    @{post.authorUsername ?? "unknown"} · {post.reportCount}{" "}
+                    report
                     {post.reportCount === 1 ? "" : "s"}
                     {post.latestReportAt
                       ? ` · ${getRelativeTime(post.latestReportAt)}`

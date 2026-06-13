@@ -6,10 +6,7 @@ import {
   getBreadcrumbSchema,
   getNewsArticleSchema,
 } from "@/lib/structured-data";
-import {
-  getFeedArticle,
-  resolveAggregatedCanonical,
-} from "./_resolvers";
+import { getFeedArticle, resolveAggregatedCanonical } from "./_resolvers";
 import FeedArticleContent from "./_feedArticleContent";
 
 type Props = { params: Promise<{ sourceSlug: string; slug: string }> };

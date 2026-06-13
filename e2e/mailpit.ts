@@ -63,9 +63,7 @@ export async function waitForEmail(
     const messages = await listMessages();
     const match = messages.find(
       (m) =>
-        m.To.some(
-          (t) => t.Address.toLowerCase() === address.toLowerCase(),
-        ) &&
+        m.To.some((t) => t.Address.toLowerCase() === address.toLowerCase()) &&
         (!opts.subjectContains ||
           m.Subject.toLowerCase().includes(opts.subjectContains.toLowerCase())),
     );

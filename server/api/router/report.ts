@@ -191,7 +191,8 @@ export const reportRouter = createTRPCRouter({
       if (targetCount !== 1) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Must provide exactly one of contentId, discussionId, postId",
+          message:
+            "Must provide exactly one of contentId, discussionId, postId",
         });
       }
 

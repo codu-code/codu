@@ -46,7 +46,10 @@ export default function Error({
     art(),
     gap(),
     line(seg("$ ", C.punc), seg("codu render ", C.out), seg(route, C.path)),
-    line(seg("  ✗ 500: ", C.err), seg("the server tripped over its own feet", C.out)),
+    line(
+      seg("  ✗ 500: ", C.err),
+      seg("the server tripped over its own feet", C.out),
+    ),
     ...(error.digest
       ? [line(seg("  ↳ ref: ", C.faint), seg(error.digest, C.key))]
       : []),

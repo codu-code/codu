@@ -74,13 +74,12 @@ export const getFeedArticle = cache(async function getFeedArticle(
   };
 });
 
-export type FeedArticle = NonNullable<Awaited<ReturnType<typeof getFeedArticle>>>;
+export type FeedArticle = NonNullable<
+  Awaited<ReturnType<typeof getFeedArticle>>
+>;
 
 // Alias retained for the legacy `getLinkContent` call sites.
-export async function getLinkContent(
-  sourceSlug: string,
-  contentSlug: string,
-) {
+export async function getLinkContent(sourceSlug: string, contentSlug: string) {
   return getFeedArticle(sourceSlug, contentSlug);
 }
 

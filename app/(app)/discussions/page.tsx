@@ -27,7 +27,8 @@ export default async function Page(props: Props) {
 
   // Mirror the client's derivation exactly (view is NOT session-gated there)
   // so the SSR page attaches as initialData to the same query key.
-  const view = sp.view === "following" ? ("following" as const) : ("all" as const);
+  const view =
+    sp.view === "following" ? ("following" as const) : ("all" as const);
   const sort =
     sp.sort === "active" || sp.sort === "top" ? sp.sort : ("recent" as const);
 

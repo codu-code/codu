@@ -224,5 +224,7 @@ function noteFrom(v: {
   category: string;
   reason: string;
 }): string | null {
-  return v.verdict === "review" ? `${v.category}: ${v.reason}`.slice(0, 500) : null;
+  return v.verdict === "review"
+    ? `${v.category}: ${v.reason}`.slice(0, 500)
+    : null;
 }

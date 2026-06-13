@@ -16,8 +16,9 @@ describe("parseVerdict", () => {
   });
   it("extracts JSON embedded in surrounding prose", () => {
     expect(
-      parseVerdict('Sure! {"verdict":"review","category":"nsfw","reason":"x"} done')
-        .verdict,
+      parseVerdict(
+        'Sure! {"verdict":"review","category":"nsfw","reason":"x"} done',
+      ).verdict,
     ).toBe("review");
   });
   it("defaults to allow (fail-open) on unparseable garbage", () => {

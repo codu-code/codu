@@ -305,9 +305,7 @@ export async function deletePostBySlug(slug: string) {
       .from(posts)
       .where(eq(posts.slug, slug));
     for (const row of rows) {
-      await db
-        .delete(content_report)
-        .where(eq(content_report.postId, row.id));
+      await db.delete(content_report).where(eq(content_report.postId, row.id));
     }
     await db.delete(posts).where(eq(posts.slug, slug));
   } catch (err) {
@@ -477,4 +475,3 @@ export async function unbanUserInDb(userId: string) {
     throw Error(`Error while unbanning E2E user: ${err}`);
   }
 }
-

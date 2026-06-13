@@ -18,9 +18,7 @@ const ENDPOINT = "https://api.indexnow.org/indexnow";
  * with localhost / unreachable URLs (which the service rejects and which can
  * harm the key's standing). Any non-www.codu.co host is also dropped.
  */
-export async function submitToIndexNow(
-  urls: string | string[],
-): Promise<void> {
+export async function submitToIndexNow(urls: string | string[]): Promise<void> {
   try {
     if (process.env.NODE_ENV !== "production") return;
 

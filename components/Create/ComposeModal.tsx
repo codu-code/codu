@@ -138,11 +138,7 @@ export function ComposeModal({
     if (published ? !canPost : !canSaveDraft) return;
     setSavingDraft(!published);
     const externalUrl =
-      tab === "link"
-        ? url.startsWith("http")
-          ? url
-          : `https://${url}`
-        : null;
+      tab === "link" ? (url.startsWith("http") ? url : `https://${url}`) : null;
     // Only persist an absolute http(s) image — OG tags sometimes hand back garbage.
     const httpImage =
       metaImage && /^https?:\/\//i.test(metaImage) ? metaImage : null;

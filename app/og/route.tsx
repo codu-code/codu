@@ -23,7 +23,10 @@ export async function GET(request: Request) {
       throw new Error("Missing required parameter: title");
     }
 
-    const metaLine = [date ? formatDate(date) : null, readTime ? `${readTime} min read` : null]
+    const metaLine = [
+      date ? formatDate(date) : null,
+      readTime ? `${readTime} min read` : null,
+    ]
       .filter(Boolean)
       .join(" · ");
 

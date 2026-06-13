@@ -95,46 +95,53 @@ const BADGE_RULES: { key: string; test: (s: BadgeStats) => boolean }[] = [
 export async function checkBadges(userId: string): Promise<void> {
   try {
     if (!userId) return;
-    const [[pts], [streak], [postRow], [refRow], [commentRow], [u], [followRow]] =
-      await Promise.all([
-        db
-          .select({
-            total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
-          })
-          .from(point_event)
-          .where(eq(point_event.userId, userId)),
-        db
-          .select({ longest: user_streak.longestStreak })
-          .from(user_streak)
-          .where(eq(user_streak.userId, userId))
-          .limit(1),
-        db
-          .select({ c: sql<number>`count(*)` })
-          .from(point_event)
-          .where(
-            and(
-              eq(point_event.userId, userId),
-              eq(point_event.action, "post_published"),
-            ),
+    const [
+      [pts],
+      [streak],
+      [postRow],
+      [refRow],
+      [commentRow],
+      [u],
+      [followRow],
+    ] = await Promise.all([
+      db
+        .select({
+          total: sql<number>`coalesce(sum(${point_event.points}), 0)`,
+        })
+        .from(point_event)
+        .where(eq(point_event.userId, userId)),
+      db
+        .select({ longest: user_streak.longestStreak })
+        .from(user_streak)
+        .where(eq(user_streak.userId, userId))
+        .limit(1),
+      db
+        .select({ c: sql<number>`count(*)` })
+        .from(point_event)
+        .where(
+          and(
+            eq(point_event.userId, userId),
+            eq(point_event.action, "post_published"),
           ),
-        db
-          .select({ c: sql<number>`count(*)` })
-          .from(user)
-          .where(eq(user.invitedBy, userId)),
-        db
-          .select({ c: sql<number>`count(*)` })
-          .from(comments)
-          .where(eq(comments.authorId, userId)),
-        db
-          .select({ topics: user.topics })
-          .from(user)
-          .where(eq(user.id, userId))
-          .limit(1),
-        db
-          .select({ c: sql<number>`count(*)` })
-          .from(follow)
-          .where(eq(follow.followerId, userId)),
-      ]);
+        ),
+      db
+        .select({ c: sql<number>`count(*)` })
+        .from(user)
+        .where(eq(user.invitedBy, userId)),
+      db
+        .select({ c: sql<number>`count(*)` })
+        .from(comments)
+        .where(eq(comments.authorId, userId)),
+      db
+        .select({ topics: user.topics })
+        .from(user)
+        .where(eq(user.id, userId))
+        .limit(1),
+      db
+        .select({ c: sql<number>`count(*)` })
+        .from(follow)
+        .where(eq(follow.followerId, userId)),
+    ]);
 
     const stats: BadgeStats = {
       points: Number(pts?.total ?? 0),

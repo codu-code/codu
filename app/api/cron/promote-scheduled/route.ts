@@ -40,7 +40,10 @@ async function promoteDueScheduledPosts() {
     .from(posts)
     .leftJoin(user, eq(posts.authorId, user.id))
     .where(
-      and(eq(posts.status, "scheduled"), lte(posts.publishedAt, now.toISOString())),
+      and(
+        eq(posts.status, "scheduled"),
+        lte(posts.publishedAt, now.toISOString()),
+      ),
     )
     .limit(100);
 

@@ -49,7 +49,8 @@ describe("getArticleSchema", () => {
   it("uses canonicalUrl for mainEntityOfPage when set (member link-posts)", () => {
     const schema = getArticleSchema({
       ...baseArticle,
-      canonicalUrl: "https://www.codu.co/niall-maher-p13/building-agents-bedrock",
+      canonicalUrl:
+        "https://www.codu.co/niall-maher-p13/building-agents-bedrock",
     });
     expect(schema.mainEntityOfPage).toBe(
       "https://www.codu.co/niall-maher-p13/building-agents-bedrock",

@@ -390,9 +390,7 @@ export const adminRouter = createTRPCRouter({
             status: "in_review",
             // Carry the moderator's note (if any) into the review queue so the
             // reason a live post was pulled is visible to the next reviewer.
-            ...(input.note !== undefined
-              ? { moderationNote: input.note }
-              : {}),
+            ...(input.note !== undefined ? { moderationNote: input.note } : {}),
           })
           .where(eq(posts.id, input.id))
           .returning();

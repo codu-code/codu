@@ -253,7 +253,9 @@ async function getFeedArticleUncached(
 const getUserPost = cache(getUserPostUncached);
 const getUserLinkPost = cache(getUserLinkPostUncached);
 const getFeedArticle = cache(getFeedArticleUncached);
-const resolveMemberCanonicalByUrlId = cache(resolveMemberCanonicalByUrlIdUncached);
+const resolveMemberCanonicalByUrlId = cache(
+  resolveMemberCanonicalByUrlIdUncached,
+);
 const exactPublishedPostExists = cache(exactPublishedPostExistsUncached);
 
 async function getUserArticleContent(username: string, contentSlug: string) {

@@ -17,8 +17,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   return {
     title: `${source.name} | Codú Feed`,
-    description:
-      source.tagline || `Articles from ${source.name} on Codú Feed`,
+    description: source.tagline || `Articles from ${source.name} on Codú Feed`,
     alternates: { canonical: `/s/${source.slug}` },
     openGraph: {
       title: source.name,

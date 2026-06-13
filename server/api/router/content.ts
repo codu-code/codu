@@ -677,11 +677,7 @@ export const contentRouter = createTRPCRouter({
         // Ping IndexNow (fire-and-forget, guarded inside the lib). Skip
         // cross-posted content — its canonical lives off Codú.
         if (!input.canonicalUrl) {
-          const url = memberPostUrl(
-            dbType,
-            slug,
-            ctx.session.user.username,
-          );
+          const url = memberPostUrl(dbType, slug, ctx.session.user.username);
           if (url) void submitToIndexNow(url);
         }
       }
@@ -1461,11 +1457,7 @@ export const contentRouter = createTRPCRouter({
 
         // Regenerate the slug on first publish (draft → published) when the gate
         // path above didn't already set it.
-        if (
-          !goingLive &&
-          existing[0].status === "draft" &&
-          existing[0].title
-        ) {
+        if (!goingLive && existing[0].status === "draft" && existing[0].title) {
           const slugUrlId = existing[0].urlId ?? mintUrlId();
           if (!existing[0].urlId) updateData.urlId = slugUrlId;
           updateData.slug = buildSlug(existing[0].title, slugUrlId);

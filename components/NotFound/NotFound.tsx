@@ -30,10 +30,22 @@ export default function NotFound() {
     art(),
     gap(),
     line(seg("$ ", C.punc), seg("codu navigate ", C.out), seg(route, C.path)),
-    line(seg("  ✗ 404: ", C.err), seg("nothing shipped to this route (yet)", C.out)),
-    line(seg("  ↳ not all who wander are lost — some are just debugging in prod 🔥", C.hi)),
+    line(
+      seg("  ✗ 404: ", C.err),
+      seg("nothing shipped to this route (yet)", C.out),
+    ),
+    line(
+      seg(
+        "  ↳ not all who wander are lost — some are just debugging in prod 🔥",
+        C.hi,
+      ),
+    ),
     gap(),
-    line(seg("Type ", C.out), seg("help", C.hi), seg(" to find your way around.", C.out)),
+    line(
+      seg("Type ", C.out),
+      seg("help", C.hi),
+      seg(" to find your way around.", C.out),
+    ),
     gap(),
   ];
 

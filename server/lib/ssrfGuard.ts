@@ -19,12 +19,7 @@ const BLOCKED_HOSTNAMES = new Set(["localhost", "0.0.0.0"]);
 function parseIpv4(host: string): [number, number, number, number] | null {
   const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
   if (!m) return null;
-  const octets = m.slice(1, 5).map(Number) as [
-    number,
-    number,
-    number,
-    number,
-  ];
+  const octets = m.slice(1, 5).map(Number) as [number, number, number, number];
   if (octets.some((o) => o < 0 || o > 255)) return null;
   return octets;
 }

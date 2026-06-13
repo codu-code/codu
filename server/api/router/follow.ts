@@ -17,8 +17,7 @@ export const followRouter = createTRPCRouter({
     name: "user-follow",
     limit: 30,
     windowMs: 10 * 60_000,
-    message:
-      "You're following people too fast. Take a breather and try again.",
+    message: "You're following people too fast. Take a breather and try again.",
   })
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {

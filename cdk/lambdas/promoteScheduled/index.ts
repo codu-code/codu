@@ -56,9 +56,7 @@ exports.handler = async function () {
 
   // Surface failures in CloudWatch so a broken route / bad secret is visible.
   if (!response.ok) {
-    throw new Error(
-      `promote-scheduled returned ${response.status}: ${body}`,
-    );
+    throw new Error(`promote-scheduled returned ${response.status}: ${body}`);
   }
 
   return {

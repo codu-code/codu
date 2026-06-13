@@ -66,12 +66,42 @@ function Banner({ grid }: { grid: number[][] }) {
 /* The site map the shell knows how to reach (real Codú routes). */
 type Route = { path: string; label: string; names: string[]; desc: string };
 const ROUTES: Route[] = [
-  { path: "/", label: "home", names: ["home", "feed", "index"], desc: "latest from the community" },
-  { path: "/discussions", label: "discussions", names: ["discussions", "discussion", "threads", "ask"], desc: "questions & threads" },
-  { path: "/jobs", label: "jobs", names: ["jobs", "job", "hiring", "work"], desc: "roles for product engineers" },
-  { path: "/notifications", label: "notifications", names: ["notifications", "notifs", "inbox"], desc: "your mentions & replies" },
-  { path: "/saved", label: "saved", names: ["saved", "bookmarks"], desc: "posts you bookmarked" },
-  { path: "/settings", label: "settings", names: ["settings", "config", "prefs", "account"], desc: "account & topics" },
+  {
+    path: "/",
+    label: "home",
+    names: ["home", "feed", "index"],
+    desc: "latest from the community",
+  },
+  {
+    path: "/discussions",
+    label: "discussions",
+    names: ["discussions", "discussion", "threads", "ask"],
+    desc: "questions & threads",
+  },
+  {
+    path: "/jobs",
+    label: "jobs",
+    names: ["jobs", "job", "hiring", "work"],
+    desc: "roles for product engineers",
+  },
+  {
+    path: "/notifications",
+    label: "notifications",
+    names: ["notifications", "notifs", "inbox"],
+    desc: "your mentions & replies",
+  },
+  {
+    path: "/saved",
+    label: "saved",
+    names: ["saved", "bookmarks"],
+    desc: "posts you bookmarked",
+  },
+  {
+    path: "/settings",
+    label: "settings",
+    names: ["settings", "config", "prefs", "account"],
+    desc: "account & topics",
+  },
 ];
 const resolveRoute = (q: string): Route | null => {
   if (!q) return null;
@@ -121,7 +151,13 @@ export interface TerminalShellProps {
   extraHelp?: [string, string][];
 }
 
-function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellProps) {
+function Shell({
+  code,
+  banner,
+  intro,
+  extraCommands,
+  extraHelp,
+}: TerminalShellProps) {
   const router = useRouter();
 
   const nav = (path: string) => {
@@ -211,7 +247,10 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
   const lsOut = (): Entry[] => [
     line(seg("drwxr-xr-x  ", C.faint), seg("codu.co/", C.path)),
     ...ROUTES.map((r) =>
-      line(seg("  " + (r.label + "/").padEnd(16), C.user), seg(r.desc, C.faint)),
+      line(
+        seg("  " + (r.label + "/").padEnd(16), C.user),
+        seg(r.desc, C.faint),
+      ),
     ),
     line(
       seg("  " + "get-started/".padEnd(16), C.hi),
@@ -255,7 +294,9 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
     if (n === "date") return [line(seg(new Date().toString(), C.out))];
     if (n === "echo") return [line(seg(args.join(" "), C.out))];
     if (n === "sudo")
-      return [line(seg("permission denied: ", C.err), seg("nice try 😏", C.out))];
+      return [
+        line(seg("permission denied: ", C.err), seg("nice try 😏", C.out)),
+      ];
     if (n === "coffee" || n === "make")
       return [
         line(
@@ -266,7 +307,10 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
     if (n === code) return [art()];
     if (n === "exit" || n === "quit" || n === "q")
       return [
-        line(seg("there’s no escape from here… try ", C.out), seg("home", C.hi)),
+        line(
+          seg("there’s no escape from here… try ", C.out),
+          seg("home", C.hi),
+        ),
       ];
     if (n === "history")
       return cmdHist.current.length
@@ -277,7 +321,10 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
             ),
           )
         : [line(seg("(no history yet)", C.faint))];
-    if (n === "join" || (n === "open" && (arg === "get-started" || arg === "join"))) {
+    if (
+      n === "join" ||
+      (n === "open" && (arg === "get-started" || arg === "join"))
+    ) {
       join();
       return [line(seg("→ ", C.hi), seg("opening get-started…", C.out))];
     }
@@ -310,7 +357,9 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
     const direct = resolveRoute(n);
     if (direct && direct.names.includes(n)) {
       nav(direct.path);
-      return [line(seg("→ ", C.hi), seg("opening " + direct.label + "…", C.out))];
+      return [
+        line(seg("→ ", C.hi), seg("opening " + direct.label + "…", C.out)),
+      ];
     }
 
     // variant-supplied commands (e.g. `retry` on the 500). Checked after the
@@ -350,7 +399,9 @@ function Shell({ code, banner, intro, extraCommands, extraHelp }: TerminalShellP
       e.preventDefault();
       if (!list.length) return;
       histIdx.current =
-        histIdx.current < 0 ? list.length - 1 : Math.max(0, histIdx.current - 1);
+        histIdx.current < 0
+          ? list.length - 1
+          : Math.max(0, histIdx.current - 1);
       setInput(list[histIdx.current]);
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -421,7 +472,8 @@ export default function TerminalShell(props: TerminalShellProps) {
         aria-hidden
         className="pointer-events-none absolute inset-[-10%] bg-grid-dots bg-[length:22px_22px] opacity-40"
         style={{
-          maskImage: "radial-gradient(60% 55% at 50% 42%, #000, transparent 78%)",
+          maskImage:
+            "radial-gradient(60% 55% at 50% 42%, #000, transparent 78%)",
           WebkitMaskImage:
             "radial-gradient(60% 55% at 50% 42%, #000, transparent 78%)",
         }}
