@@ -140,19 +140,32 @@ export class StorageStack extends cdk.Stack {
       1,
     );
 
+    // PG15 engine, shared by the instance and its parameter group so they can
+    // never drift. `.of()` because this aws-cdk-lib (2.233.0) predates the
+    // VER_15_17 enum; 15.17 is the lowest 15.x RDS offers as a valid
+    // major-upgrade target from 14.22. PG15+ is required by the schema —
+    // point_event dedupe uses `UNIQUE NULLS NOT DISTINCT` (Postgres 15). Local
+    // dev runs postgres:15-alpine, keeping RDS in step.
+    const pgVersion = rds.PostgresEngineVersion.of("15.17", "15");
+
+    // Pin `rds.force_ssl` ON explicitly rather than inheriting it from the
+    // default.postgres15 group, whose default flipped 0 -> 1 vs postgres14 and
+    // silently required SSL after the major upgrade. All app + migrate
+    // connections must therefore carry `sslmode=require` in DATABASE_URL.
+    const parameterGroup = new rds.ParameterGroup(this, "db-parameter-group", {
+      engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
+      description: "Codú Postgres 15 — force_ssl pinned on",
+      parameters: {
+        "rds.force_ssl": "1",
+      },
+    });
+
     // RDS
     this.db = new rds.DatabaseInstance(this, "db-instance", {
       instanceIdentifier: "codu-rds",
       databaseName: dbName,
-      engine: rds.DatabaseInstanceEngine.postgres({
-        // PG15+ is required by the schema (point_event dedupe uses
-        // `UNIQUE NULLS NOT DISTINCT`, added in Postgres 15). Local dev runs
-        // postgres:15-alpine; this keeps RDS in step. 15.17 is the lowest 15.x
-        // RDS offers as a valid major-upgrade target from the current 14.22.
-        // Use `.of()` because this aws-cdk-lib (2.233.0) predates the
-        // VER_15_17 enum member.
-        version: rds.PostgresEngineVersion.of("15.17", "15"),
-      }),
+      engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
+      parameterGroup,
       credentials: rds.Credentials.fromPassword(
         dbUsername,
         cdk.SecretValue.ssmSecure("/env/db/password", "1"),
