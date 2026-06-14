@@ -19,7 +19,7 @@ export default async function Page(props: Props) {
   if (!company) return notFound();
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-4xl px-0 py-4 sm:px-6 sm:py-8 lg:px-8">
       <div className="overflow-hidden rounded-lg bg-white shadow dark:bg-neutral-800">
         <div className="border-b border-neutral-200 p-6 dark:border-neutral-700">
           <div className="flex flex-col items-center gap-6 sm:flex-row">

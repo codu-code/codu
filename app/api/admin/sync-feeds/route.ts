@@ -11,6 +11,7 @@ import { eq } from "drizzle-orm";
 import Parser from "rss-parser";
 import { customAlphabet } from "nanoid";
 import { fetchOgImage } from "@/lib/og-image";
+import { ensureHttps, unwrapDoubledUrl } from "@/utils/url";
 
 // Generate Reddit-style short IDs: lowercase + numbers, 7 characters
 const generateShortId = customAlphabet(
@@ -128,10 +129,14 @@ function extractImageUrl(item: Parser.Item): string | null {
     | { url?: string; type?: string }
     | undefined;
 
-  if (mediaContent?.$?.url) return mediaContent.$.url;
-  if (mediaThumbnail?.$?.url) return mediaThumbnail.$.url;
+  // Some feeds (e.g. HackerNoon's media:thumbnail) prefix an already-absolute
+  // CDN URL with their own origin, producing a 404ing doubled URL — unwrap it.
+  if (mediaContent?.$?.url)
+    return ensureHttps(unwrapDoubledUrl(mediaContent.$.url));
+  if (mediaThumbnail?.$?.url)
+    return ensureHttps(unwrapDoubledUrl(mediaThumbnail.$.url));
   if (enclosure?.url && enclosure.type?.startsWith("image/"))
-    return enclosure.url;
+    return ensureHttps(unwrapDoubledUrl(enclosure.url));
 
   return null;
 }
@@ -246,7 +251,9 @@ export async function POST(request: Request) {
 
           // Fetch OG image from the article URL
           try {
-            const ogImageUrl = await fetchOgImage(item.link);
+            const ogImageUrl = ensureHttps(
+              unwrapDoubledUrl(await fetchOgImage(item.link)),
+            );
             if (ogImageUrl) {
               await db
                 .update(aggregated_article)

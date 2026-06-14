@@ -119,7 +119,7 @@ const UserLinkDetail = ({ username, contentSlug, initialContent }: Props) => {
 
   if (status === "pending") {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-0 py-4 sm:px-4 sm:py-8">
         <div className="animate-pulse">
           <div className="mb-4 h-6 w-24 rounded bg-elevated" />
           <div className="mb-4 h-4 w-48 rounded bg-elevated" />
@@ -134,7 +134,7 @@ const UserLinkDetail = ({ username, contentSlug, initialContent }: Props) => {
 
   if (status === "error" || !linkContent) {
     return (
-      <div className="mx-auto max-w-prose px-4 py-8">
+      <div className="mx-auto max-w-prose px-0 py-4 sm:px-4 sm:py-8">
         <Link
           href="/"
           className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
@@ -173,7 +173,7 @@ const UserLinkDetail = ({ username, contentSlug, initialContent }: Props) => {
   const isOwner = session?.user?.id === linkContent.author?.id;
 
   return (
-    <article className="mx-auto max-w-prose px-4 py-8">
+    <article className="mx-auto max-w-prose px-0 py-4 sm:px-4 sm:py-8">
       <Link
         href="/"
         className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"

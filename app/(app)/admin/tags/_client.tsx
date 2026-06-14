@@ -208,7 +208,7 @@ const TagsAdmin = () => {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-0 py-4 sm:px-4 sm:py-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <p className="eyebrow">

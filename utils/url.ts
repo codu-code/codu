@@ -29,6 +29,26 @@ export function safeExternalHref(
   return parsed.protocol === "https:" ? url.trim() : undefined;
 }
 
+// `https://host[:port]/<absolute-url>` — an upstream feed prefixed its own
+// origin onto an already-absolute URL. Anchored so the embedded scheme must sit
+// immediately after the host's first slash: this is the precise shape of the
+// bug and avoids mangling a scheme that legitimately appears deeper in the path
+// (path-based image proxies, a slug containing `http://`) or in a query string.
+const DOUBLED_ORIGIN = /^https?:\/\/[^/]+\/(https?:\/\/.+)$/i;
+
+/**
+ * Unwraps a URL that an upstream feed prefixed with its own origin, leaving an
+ * already-absolute URL doubled up — e.g. HackerNoon's `media:thumbnail` serves
+ * `https://hackernoon.com/https://cdn.hackernoon.com/x.png`, which 404s. Returns
+ * the inner URL; a normal URL is returned unchanged.
+ */
+export function unwrapDoubledUrl(
+  url: string | null | undefined,
+): string | null {
+  if (!url) return null;
+  return DOUBLED_ORIGIN.exec(url)?.[1] ?? url;
+}
+
 /** Upgrades an `http://` URL to `https://`. Returns null for empty input. */
 export function ensureHttps(url: string | null | undefined): string | null {
   if (!url) return null;

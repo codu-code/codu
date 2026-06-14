@@ -13,6 +13,7 @@ import { eq, and, isNotNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import Parser from "rss-parser";
 import crypto from "crypto";
+import { ensureHttps, unwrapDoubledUrl } from "../utils/url";
 
 const parser = new Parser({
   timeout: 10000,
@@ -230,6 +231,10 @@ async function fetchAndProcessFeed(source: FeedSource) {
       } else {
         console.log(`    ✓ ${readTimeMins} min read`);
       }
+
+      // Some feeds (e.g. HackerNoon's media:thumbnail) prefix an already-
+      // absolute CDN URL with their own origin, producing a 404ing doubled URL.
+      imageUrl = ensureHttps(unwrapDoubledUrl(imageUrl));
 
       // Rate limit: small delay between fetches
       await delay(200);

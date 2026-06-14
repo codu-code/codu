@@ -140,7 +140,8 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
         aria-label="Search Codú"
         className="w-full max-w-[600px] overflow-hidden rounded-xl border border-strong bg-elevated shadow-lg"
       >
-        <div className="flex items-center gap-3 border-b border-hairline px-5 py-4">
+        {/* A subtle thin accent line marks the active field — no focus ring. */}
+        <div className="flex items-center gap-3 border-b border-hairline px-5 py-4 transition-colors focus-within:border-accent">
           <span className="text-lg leading-none text-faint">⌕</span>
           <input
             autoFocus
@@ -154,11 +155,32 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
             role="combobox"
             aria-expanded="true"
             aria-controls="cmdk-list"
-            className="flex-1 bg-transparent text-lg text-fg outline-none placeholder:text-faint"
+            // The global focus-visible ring resolves to blue here; opt out and
+            // let the parent's focus-within accent underline mark the field.
+            className="flex-1 bg-transparent text-lg text-fg outline-none ring-0 ring-offset-0 placeholder:text-faint focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          <kbd className="rounded-sm border border-hairline px-1.5 py-0.5 font-mono text-[11px] text-faint">
+          {/* Desktop closes with the Esc key; mobile gets a tap target. */}
+          <kbd className="hidden rounded-sm border border-hairline px-1.5 py-0.5 font-mono text-[11px] text-faint sm:inline-flex">
             Esc
           </kbd>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close search"
+            className="-mr-1 flex h-8 w-8 items-center justify-center rounded-md text-faint transition-colors hover:bg-surface hover:text-fg sm:hidden"
+          >
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
         </div>
 
         <div
