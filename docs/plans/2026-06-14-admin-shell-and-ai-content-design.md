@@ -44,7 +44,7 @@ app/
 ```
 
 `AppShell` is **not global** — it is scoped to `(app)`. A sibling group escapes it
-structurally, with no runtime flag. The only reason it *feels* global is that
+structurally, with no runtime flag. The only reason it _feels_ global is that
 nearly everything was dropped into `(app)`, and the two pages that wanted no rails
 (`/speakers`, `/volunteer`) used a runtime hack: the `BARE_ROUTES` array inside
 `AppShell` that conditionally drops the rails. That hack is the smell — a page in

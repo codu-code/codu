@@ -1,5 +1,3 @@
-import { getServerAuthSession } from "@/server/auth";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import ModerationQueue from "./_client";
 
@@ -8,13 +6,8 @@ export const metadata = {
   description: "Review and manage reported content",
 };
 
-export default async function Page() {
-  const session = await getServerAuthSession();
-
-  if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/");
-  }
-
+// Admin-role gate is enforced in app/(admin)/layout.tsx.
+export default function Page() {
   return (
     <Suspense>
       <ModerationQueue />
