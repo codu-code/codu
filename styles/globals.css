@@ -161,6 +161,32 @@ body {
   outline-offset: 2px;
 }
 
+/* @tailwindcss/forms paints a hardcoded blue (#2563eb) focus ring + border on
+   every form control. Recolour both to the brand accent so input focus matches
+   the mint focus language used everywhere else (links/buttons already get a mint
+   :focus-visible ring). Unlayered, so it reliably overrides the plugin's
+   @layer base styles. The plugin's thin ring (shown on :focus, pointer and
+   keyboard) is kept as the focus indicator — only the colour changes. */
+[type="text"]:focus,
+[type="email"]:focus,
+[type="url"]:focus,
+[type="password"]:focus,
+[type="number"]:focus,
+[type="date"]:focus,
+[type="datetime-local"]:focus,
+[type="month"]:focus,
+[type="search"]:focus,
+[type="tel"]:focus,
+[type="time"]:focus,
+[type="week"]:focus,
+[multiple]:focus,
+input:not([type]):focus,
+textarea:focus,
+select:focus {
+  --tw-ring-color: rgb(var(--color-accent));
+  border-color: rgb(var(--color-accent));
+}
+
 /* ── Eyebrow / kicker: the signature mono "// label" device ── */
 .eyebrow {
   @apply font-mono text-xs uppercase tracking-label text-accent;
