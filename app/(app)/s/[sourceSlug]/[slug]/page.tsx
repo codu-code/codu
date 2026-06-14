@@ -8,6 +8,7 @@ import {
 } from "@/lib/structured-data";
 import { getFeedArticle, resolveAggregatedCanonical } from "./_resolvers";
 import FeedArticleContent from "./_feedArticleContent";
+import { ogPostImage } from "@/lib/og/url";
 
 type Props = { params: Promise<{ sourceSlug: string; slug: string }> };
 
@@ -19,17 +20,32 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     return { title: "Content Not Found" };
   }
 
+  const description =
+    feedArticle.excerpt || `Discussion about ${feedArticle.title}`;
+  const ogImage = ogPostImage({
+    kind: "link",
+    title: feedArticle.title,
+    authorName:
+      feedArticle.sourceAuthor || feedArticle.source.name || sourceSlug,
+    authorKey: feedArticle.source.slug || sourceSlug,
+    source: feedArticle.source.name,
+    cover: feedArticle.ogImageUrl || feedArticle.imageUrl,
+    updatedAt: feedArticle.updatedAt,
+  });
+
   return {
     title: `${feedArticle.title} | Codú Feed`,
-    description: feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
+    description,
     openGraph: {
       title: feedArticle.title,
-      description:
-        feedArticle.excerpt || `Discussion about ${feedArticle.title}`,
-      images:
-        feedArticle.ogImageUrl || feedArticle.imageUrl
-          ? [feedArticle.ogImageUrl || feedArticle.imageUrl!]
-          : undefined,
+      description,
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: feedArticle.title,
+      description,
+      images: [ogImage],
     },
     alternates: {
       // Self-canonical: these are snippet + outbound-link listings (not full-body

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { api } from "@/server/trpc/react";
 import { type RouterOutputs } from "@/server/trpc/shared";
 import { UnifiedContentCard } from "@/components/UnifiedContentCard";
+import { hueFromString } from "@/utils/hue";
 
 type SourceProfile = RouterOutputs["publication"]["getBySlug"];
 
@@ -16,14 +17,6 @@ type Props = {
    * articles are in the SSR HTML for crawlers; per-user state (isFollowing,
    * votes, bookmarks) hydrates via the immediate background refetch. */
   initialProfile: SourceProfile;
-};
-
-// Deterministic hue from the slug (sum of char codes mod 360). Math.random is
-// unavailable here, and the publication tile colour must be stable per source.
-const hueFromSlug = (slug: string): number => {
-  let sum = 0;
-  for (let i = 0; i < slug.length; i++) sum += slug.charCodeAt(i);
-  return sum % 360;
 };
 
 // Two-letter initials for the square logo tile.
@@ -91,7 +84,7 @@ const SourceProfileContent = ({ sourceSlug, initialProfile }: Props) => {
     );
   }
 
-  const hue = hueFromSlug(pub.slug ?? sourceSlug);
+  const hue = hueFromString(pub.slug ?? sourceSlug);
   const initials = initialsFromName(pub.name);
   const isFollowing = optimisticFollowing ?? pub.isFollowing;
 

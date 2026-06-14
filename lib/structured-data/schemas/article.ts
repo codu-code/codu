@@ -3,6 +3,7 @@ import { getOrganizationRef } from "./organization";
 import { getPersonRef } from "./person";
 
 import { SITE_ORIGIN as BASE_URL } from "@/config/site";
+import { ogPostImage } from "@/lib/og/url";
 
 interface ArticleData {
   title: string;
@@ -37,7 +38,15 @@ export function getArticleSchema(
   // image URL with article metadata.
   const ogImageUrl =
     article.image ||
-    `${BASE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name || "")}&readTime=${article.readingTime || 5}&date=${article.updatedAt || article.publishedAt || ""}`;
+    `${BASE_URL}${ogPostImage({
+      kind: "article",
+      title: article.title,
+      authorName: article.author.name || "Unknown",
+      authorKey: article.author.username || article.author.name || "Unknown",
+      tags: article.tags?.map((t) => t.title),
+      readMins: article.readingTime || 5,
+      updatedAt: article.updatedAt || article.publishedAt,
+    })}`;
 
   // Determine the canonical URL
   const mainEntityUrl =

@@ -13,6 +13,17 @@ import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
 import { serverApi } from "@/server/trpc/caller";
 import { JsonLd } from "@/components/JsonLd";
 import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
+import { ogPostImage } from "@/lib/og/url";
+
+// Bare host for a link's "via {source}" chip, e.g. "anthropic.com".
+const hostFromUrl = (value?: string | null): string | undefined => {
+  if (!value) return undefined;
+  try {
+    return new URL(value).hostname.replace(/^www\./, "");
+  } catch {
+    return undefined;
+  }
+};
 
 type Props = { params: Promise<{ username: string; slug: string }> };
 
@@ -68,6 +79,7 @@ async function getUserPostUncached(
       authorImage: user.image,
       authorUsername: user.username,
       authorBio: user.bio,
+      authorJobTitle: user.jobTitle,
     })
     .from(posts)
     .leftJoin(user, eq(posts.authorId, user.id))
@@ -111,6 +123,7 @@ async function getUserPostUncached(
       image: postRecord.authorImage,
       username: postRecord.authorUsername,
       bio: postRecord.authorBio,
+      jobTitle: postRecord.authorJobTitle,
     },
   };
 }
@@ -145,6 +158,7 @@ async function getUserLinkPostUncached(username: string, postSlug: string) {
       authorImage: user.image,
       authorUsername: user.username,
       authorBio: user.bio,
+      authorJobTitle: user.jobTitle,
     })
     .from(posts)
     .leftJoin(user, eq(posts.authorId, user.id))
@@ -182,6 +196,7 @@ async function getUserLinkPostUncached(username: string, postSlug: string) {
       image: linkPost.authorImage,
       username: linkPost.authorUsername,
       bio: linkPost.authorBio,
+      jobTitle: linkPost.authorJobTitle,
     },
   };
 }
@@ -369,6 +384,16 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     }
     const tags = userPost.tags.map((tag) => tag.tag.title);
     const authorName = userPost.user.name || "Unknown";
+    const postOgImage = ogPostImage({
+      kind: "article",
+      title: userPost.title,
+      authorName,
+      authorRole: userPost.user.jobTitle,
+      authorKey: userPost.user.username ?? authorName,
+      tags,
+      readMins: userPost.readTimeMins,
+      updatedAt: userPost.updatedAt,
+    });
 
     return {
       title: `${userPost.title} | by ${authorName} | Codú`,
@@ -386,18 +411,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         url: `/${userPost.user.username ?? username}/${userPost.slug}`,
         publishedTime: userPost.published ?? undefined,
         modifiedTime: userPost.updatedAt ?? undefined,
-        images: [
-          `/og?title=${encodeURIComponent(
-            userPost.title,
-          )}&readTime=${userPost.readTimeMins}&author=${encodeURIComponent(
-            authorName,
-          )}&date=${userPost.updatedAt}`,
-        ],
+        images: [postOgImage],
         siteName: "Codú",
       },
       twitter: {
+        card: "summary_large_image",
         description: userPost.excerpt ?? undefined,
-        images: [`/og?title=${encodeURIComponent(userPost.title)}`],
+        images: [postOgImage],
       },
       alternates: {
         // Cross-posted content points at the original; native posts
@@ -413,6 +433,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (userArticle && userArticle.user) {
     const tags = userArticle.tags?.map((t) => t.tag.title) || [];
     const articleAuthorName = userArticle.user.name || "Unknown";
+    const articleOgImage = ogPostImage({
+      kind: "article",
+      title: userArticle.title,
+      authorName: articleAuthorName,
+      authorKey: userArticle.user.username ?? articleAuthorName,
+      tags,
+      readMins: userArticle.readTimeMins || 5,
+      updatedAt: userArticle.updatedAt,
+    });
 
     return {
       title: `${userArticle.title} | by ${articleAuthorName} | Codú`,
@@ -428,18 +457,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         url: `/${userArticle.user.username ?? username}/${userArticle.slug}`,
         publishedTime: userArticle.published ?? undefined,
         modifiedTime: userArticle.updatedAt ?? undefined,
-        images: [
-          `/og?title=${encodeURIComponent(
-            userArticle.title,
-          )}&readTime=${userArticle.readTimeMins || 5}&author=${encodeURIComponent(
-            userArticle.user.name || "",
-          )}&date=${userArticle.updatedAt}`,
-        ],
+        images: [articleOgImage],
         siteName: "Codú",
       },
       twitter: {
+        card: "summary_large_image",
         description: userArticle.excerpt || "",
-        images: [`/og?title=${encodeURIComponent(userArticle.title)}`],
+        images: [articleOgImage],
       },
       alternates: {
         canonical:
@@ -452,6 +476,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const userLinkPost = await getUserLinkPost(username, slug);
   if (userLinkPost && userLinkPost.user) {
     const linkAuthorName = userLinkPost.user.name || "Unknown";
+    const linkOgImage = ogPostImage({
+      kind: "link",
+      title: userLinkPost.title,
+      authorName: linkAuthorName,
+      authorRole: userLinkPost.user.jobTitle,
+      authorKey: userLinkPost.user.username ?? linkAuthorName,
+      tags: userLinkPost.tags.map((t) => t.tag.title),
+      source: hostFromUrl(userLinkPost.externalUrl),
+      cover: userLinkPost.coverImage,
+      updatedAt: userLinkPost.updatedAt,
+    });
 
     return {
       title: `${userLinkPost.title} | shared by ${linkAuthorName} | Codú`,
@@ -463,8 +498,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       openGraph: {
         title: userLinkPost.title,
         description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
-        images: userLinkPost.coverImage ? [userLinkPost.coverImage] : undefined,
+        images: [linkOgImage],
         siteName: "Codú",
+      },
+      twitter: {
+        card: "summary_large_image",
+        description: userLinkPost.excerpt || `Link shared by ${linkAuthorName}`,
+        images: [linkOgImage],
       },
       // Member-shared links keep Codú as canonical (aggregated links point to source).
       alternates: {

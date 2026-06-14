@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import { posts, post_tags, tag, user, feed_sources } from "@/server/db/schema";
 import { and, desc, eq, lte } from "drizzle-orm";
 import { getCamelCaseFromLower } from "@/utils/utils";
+import { ogMainImage } from "@/lib/og/url";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -114,6 +115,8 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     tagRow.description ||
     `Articles, discussions, and resources tagged #${label} on Codú.`;
 
+  const ogImage = ogMainImage("articles");
+
   return {
     title,
     description,
@@ -122,6 +125,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title,
       description,
       siteName: "Codú",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
     },
   };
 }

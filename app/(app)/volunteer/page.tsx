@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { VolunteerClient } from "./_client";
+import { ogMainImage } from "@/lib/og/url";
+
+const OG_IMAGE = ogMainImage("home");
 
 const PAGE_URL = "https://www.codu.co/volunteer";
 const PAGE_TITLE = "Volunteer with Codú — Help grow our community";
@@ -25,11 +28,13 @@ export const metadata: Metadata = {
     description: PAGE_DESCRIPTION,
     url: PAGE_URL,
     type: "website",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "Volunteer with Codú",
     description: PAGE_DESCRIPTION,
+    images: [OG_IMAGE],
   },
 };
 

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { SITE_ORIGIN } from "@/config/site";
+import { ogMainImage } from "@/lib/og/url";
 import { getServerAuthSession } from "@/server/auth";
 import "@/styles/globals.css";
 import Fathom from "@/components/Fathom/Fathom";
@@ -78,7 +79,7 @@ export const metadata = {
     siteName: "Codú",
     images: [
       {
-        url: `${SITE_ORIGIN}/images/og/home-og.png`,
+        url: ogMainImage("home"),
         width: 1200,
         height: 630,
         alt: "Codú — the community for AI builders & indie hackers",
@@ -86,6 +87,13 @@ export const metadata = {
     ],
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Codú — The community for AI builders & indie hackers",
+    description:
+      "Codú is the community for AI builders and indie hackers. Learn to build with AI, share what you ship, and grow with people doing the same.",
+    images: [ogMainImage("home")],
   },
 };
 

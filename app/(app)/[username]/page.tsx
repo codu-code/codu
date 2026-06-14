@@ -4,10 +4,11 @@ import Content from "./_usernameClient";
 import { getServerAuthSession } from "@/server/auth";
 import { type Metadata } from "next";
 import { db } from "@/server/db";
-import { feed_sources } from "@/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { feed_sources, follow } from "@/server/db/schema";
+import { count, eq, sql } from "drizzle-orm";
 import { JsonLd } from "@/components/JsonLd";
 import { getProfilePageSchema } from "@/lib/structured-data";
+import { ogProfileImage } from "@/lib/og/url";
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -18,9 +19,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   // Case-insensitive handle resolution (GitHub-style) on lower(username).
   const profile = await db.query.user.findFirst({
     columns: {
+      id: true,
       bio: true,
       name: true,
       username: true,
+      location: true,
+      jobTitle: true,
+      topics: true,
+      createdAt: true,
+      updatedAt: true,
     },
     where: (users) => sql`lower(${users.username}) = ${username.toLowerCase()}`,
   });
@@ -31,6 +38,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     // Short enough to survive SERP truncation (~60 chars).
     const title = `${name || handle} (@${handle}) | Codú`;
     const description = `${name || handle}'s profile on Codú. ${bio ? `Bio: ${bio}` : "View their posts and contributions."}`;
+
+    const [followerRow] = await db
+      .select({ value: count() })
+      .from(follow)
+      .where(eq(follow.followingId, profile.id));
+    const joined = `Joined ${new Date(profile.createdAt).toLocaleString("en-US", { month: "short", year: "numeric" })}`;
+    const ogImage = ogProfileImage({
+      name: name || handle,
+      key: handle,
+      role: profile.jobTitle,
+      location: profile.location,
+      bio,
+      followers: followerRow?.value ?? 0,
+      joined,
+      interests: profile.topics,
+      updatedAt: profile.updatedAt,
+    });
 
     return {
       title,
@@ -44,7 +68,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         type: "profile",
         images: [
           {
-            url: "/images/og/home-og.png",
+            url: ogImage,
             width: 1200,
             height: 630,
             alt: `${name || username}'s profile on Codú`,
@@ -56,7 +80,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         card: "summary_large_image",
         title,
         description,
-        images: ["/images/og/home-og.png"],
+        images: [ogImage],
       },
     };
   }

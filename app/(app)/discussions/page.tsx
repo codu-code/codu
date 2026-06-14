@@ -1,19 +1,29 @@
 import Content from "./_client";
 import { getServerAuthSession } from "@/server/auth";
 import { serverApi } from "@/server/trpc/caller";
+import { ogMainImage } from "@/lib/og/url";
+
+const ogDescription =
+  "Ask questions, swap patterns, and get unstuck. The place to learn out loud with other builders working with AI.";
+const ogImage = ogMainImage("discussions");
 
 export const metadata = {
   title: "Discussions — Codú",
-  description:
-    "Ask questions, swap patterns, and get unstuck. The place to learn out loud with other builders working with AI.",
+  description: ogDescription,
   // Canonical to the bare path so ?sort/?filter param variants don't get indexed.
   alternates: { canonical: "/discussions" },
   openGraph: {
     title: "Discussions — Codú",
-    description:
-      "Ask questions, swap patterns, and get unstuck. The place to learn out loud with other builders working with AI.",
+    description: ogDescription,
     type: "website",
     siteName: "Codú",
+    images: [ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Discussions — Codú",
+    description: ogDescription,
+    images: [ogImage],
   },
 };
 
