@@ -112,5 +112,30 @@ export class CronStack extends cdk.Stack {
     promoteScheduledRule.addTarget(
       new targets.LambdaFunction(promoteScheduledFn),
     );
+
+    // Nightly Content-Review Invoker Lambda — reads CRON_SECRET from SSM and
+    // POSTs the app's /api/cron/daily-review route (topic tagging, sentiment,
+    // quality scoring, moderation re-screen, digest). Same thin-invoker pattern
+    // as PromoteScheduled.
+    const dailyReviewFn = new NodejsFunction(this, "DailyReviewLambda", {
+      timeout: cdk.Duration.seconds(60),
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(__dirname, "/../lambdas/dailyReview/index.ts"),
+      depsLockFilePath: path.join(
+        __dirname,
+        "/../lambdas/dailyReview/package-lock.json",
+      ),
+      role: lambdaRole,
+      bundling: {
+        nodeModules: ["@aws-sdk/client-ssm"],
+      },
+    });
+
+    // Run daily at 6:00 AM UTC (after the 5:00 AM vote reconciliation).
+    const dailyReviewRule = new events.Rule(this, "DailyReviewRule", {
+      schedule: events.Schedule.expression("cron(0 6 * * ? *)"),
+    });
+
+    dailyReviewRule.addTarget(new targets.LambdaFunction(dailyReviewFn));
   }
 }

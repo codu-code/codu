@@ -14,6 +14,7 @@ import {
   varchar,
   unique,
   uuid,
+  real,
 } from "drizzle-orm/pg-core";
 
 import { relations, sql } from "drizzle-orm";
@@ -67,6 +68,21 @@ export const reportStatus = pgEnum("report_status", [
   "dismissed",
   "actioned",
 ]);
+// Who raised a report: a human ("user") or the automated review cron ("system").
+export const reportSource = pgEnum("report_source", ["user", "system"]);
+
+// AI content pipeline (see docs/plans/2026-06-14-admin-shell-and-ai-content-design.md)
+export const sentiment = pgEnum("sentiment", [
+  "positive",
+  "neutral",
+  "negative",
+]);
+// Curated topic vocabulary lifecycle: active (usable) or pending (model-proposed,
+// awaiting admin approval).
+export const topicStatus = pgEnum("topic_status", ["active", "pending"]);
+// Provenance of a post<->topic edge. The nightly cron only ever rewrites its own
+// `ai` edges; `manual` edges (set by an admin) are never touched.
+export const tagSource = pgEnum("tag_source", ["ai", "manual"]);
 
 // Job board
 export const jobType = pgEnum("job_type", [
@@ -430,6 +446,8 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   bookmarks: many(bookmarks),
   tags: many(post_tags),
   reports: many(reports),
+  metadata: one(post_metadata),
+  aiTopics: many(post_topic),
 }));
 
 // COMMENTS TABLE
@@ -478,6 +496,14 @@ export const comments = pgTable(
       mode: "string",
       withTimezone: true,
     }), // Soft delete for "[deleted]" placeholders
+
+    // Nightly auto-moderation watermark: last time the review cron screened this
+    // comment. NULL or < updatedAt => the comment re-enters the moderation pass.
+    moderatedAt: timestamp("moderated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
 
     // Migration tracking: references legacy Comment.id
     legacyCommentId: integer("legacy_comment_id"),
@@ -659,9 +685,12 @@ export const reports = pgTable(
     commentId: uuid("comment_id").references(() => comments.id, {
       onDelete: "cascade",
     }),
-    reporterId: text("reporter_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+    // Nullable: system (auto-flagged) reports have no human reporter.
+    reporterId: text("reporter_id").references(() => user.id, {
+      onDelete: "cascade",
+    }),
+    // "user" = human report, "system" = raised by the nightly review cron.
+    source: reportSource("source").default("user").notNull(),
     reason: reportReason("reason").notNull(),
     details: text("details"),
     status: reportStatus("status").default("pending").notNull(),
@@ -706,6 +735,106 @@ export const reportsRelations = relations(reports, ({ one }) => ({
     references: [user.id],
     relationName: "reportsReviewed",
   }),
+}));
+
+// AI CONTENT METADATA (nightly review cron — Phase 2)
+// See docs/plans/2026-06-14-admin-shell-and-ai-content-design.md
+
+// Per-post signal envelope, 1:1 with posts. Separate table (not columns on
+// posts) keeps the hot posts row lean and lets the cron write without bumping
+// posts.updatedAt. `analyzedAt` IS the incremental watermark.
+export const post_metadata = pgTable(
+  "post_metadata",
+  {
+    postId: uuid("post_id")
+      .primaryKey()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    sentiment: sentiment("sentiment"),
+    sentimentScore: real("sentiment_score"),
+    qualityScore: real("quality_score"),
+    qualityReason: text("quality_reason"),
+    // The Bedrock model that produced this row; NULL means a human set it (so
+    // the cron skips overwriting manually-curated values).
+    modelId: text("model_id"),
+    analyzedAt: timestamp("analyzed_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    }),
+    // Bump in code to force re-analysis of every post on the next run.
+    schemaVersion: integer("schema_version").default(1).notNull(),
+  },
+  (table) => ({
+    analyzedAtIdx: index("post_metadata_analyzed_at_idx").on(table.analyzedAt),
+  }),
+);
+
+export const postMetadataRelations = relations(post_metadata, ({ one }) => ({
+  post: one(posts, {
+    fields: [post_metadata.postId],
+    references: [posts.id],
+  }),
+}));
+
+// Controlled topic vocabulary so AI + manual tags share one clean namespace and
+// LLM free-text ("RAG"/"rag"/"retrieval-augmented") can't drift.
+export const topic = pgTable(
+  "topic",
+  {
+    id: serial("id").primaryKey().notNull(),
+    slug: varchar("slug", { length: 60 }).notNull(),
+    label: varchar("label", { length: 80 }).notNull(),
+    status: topicStatus("status").default("active").notNull(),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    slugKey: uniqueIndex("topic_slug_key").on(table.slug),
+    statusIdx: index("topic_status_idx").on(table.status),
+  }),
+);
+
+export const topicRelations = relations(topic, ({ many }) => ({
+  posts: many(post_topic),
+}));
+
+// Normalized post<->topic edges that power personalized ranking. `source`
+// distinguishes AI suggestions from admin-curated tags; the cron only rewrites
+// `ai` edges.
+export const post_topic = pgTable(
+  "post_topic",
+  {
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    topicId: integer("topic_id")
+      .notNull()
+      .references(() => topic.id, { onDelete: "cascade" }),
+    confidence: real("confidence"), // nullable: manual tags have none
+    source: tagSource("source").default("ai").notNull(),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.postId, table.topicId] }),
+    topicIdIdx: index("post_topic_topic_id_idx").on(table.topicId),
+    sourceIdx: index("post_topic_source_idx").on(table.source),
+  }),
+);
+
+export const postTopicRelations = relations(post_topic, ({ one }) => ({
+  post: one(posts, { fields: [post_topic.postId], references: [posts.id] }),
+  topic: one(topic, { fields: [post_topic.topicId], references: [topic.id] }),
 }));
 
 // TAGS (shared between legacy and new system)
