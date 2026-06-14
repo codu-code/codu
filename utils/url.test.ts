@@ -29,6 +29,15 @@ describe("unwrapDoubledUrl", () => {
     ).toBe("https://img.proxy/optimize?url=https://cdn.site/x.png");
   });
 
+  it("leaves a scheme that appears deeper in the path untouched", () => {
+    // A slug or nested path segment that contains `http://` is NOT a doubled
+    // origin — only a scheme immediately after the host counts.
+    const slug = "https://blog.com/2021/http-vs-https/cover.png";
+    expect(unwrapDoubledUrl(slug)).toBe(slug);
+    const nested = "https://cdn.site.com/a/https://b/x.png";
+    expect(unwrapDoubledUrl(nested)).toBe(nested);
+  });
+
   it("passes through null/empty", () => {
     expect(unwrapDoubledUrl(null)).toBeNull();
     expect(unwrapDoubledUrl(undefined)).toBeNull();
