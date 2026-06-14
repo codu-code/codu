@@ -26,8 +26,7 @@ interface NavItem {
   soon?: boolean;
 }
 
-// Sidebar sections. `soon` items are Phase 2/3 surfaces (see
-// docs/plans/2026-06-14-admin-shell-and-ai-content-design.md) — shown as the
+// Sidebar sections. `soon` items are planned surfaces — shown as the
 // roadmap but not linked until their routes exist.
 const NAV: NavItem[] = [
   { name: "Overview", href: "/admin", icon: Squares2X2Icon },

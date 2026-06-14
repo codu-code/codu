@@ -76,3 +76,8 @@ ssmSetup.zsh
 # Local-only deploy notes (never commit)
 local.md
 logs/
+
+# AI assistant local config / worktrees / scratch (never commit)
+.claude/
+.cursor/
+.aider*

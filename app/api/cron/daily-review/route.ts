@@ -36,7 +36,7 @@ import sendEmail from "@/utils/sendEmail";
 // use admin-session auth); unset secret refuses to run (500), wrong/missing
 // token 401. Wired via AWS Lambda + EventBridge (cdk/lib/cron-stack.ts).
 //
-// Four incremental passes (see docs/plans/2026-06-14-admin-shell-and-ai-content-design.md):
+// Four incremental passes:
 //   1. topic + sentiment tagging (posts)
 //   2. quality / spam scoring (posts)        — passes 1+2 share one Bedrock call
 //   3. re-screen moderation (posts + comments) -> reports queue (source=system)

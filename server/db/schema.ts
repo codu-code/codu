@@ -71,7 +71,7 @@ export const reportStatus = pgEnum("report_status", [
 // Who raised a report: a human ("user") or the automated review cron ("system").
 export const reportSource = pgEnum("report_source", ["user", "system"]);
 
-// AI content pipeline (see docs/plans/2026-06-14-admin-shell-and-ai-content-design.md)
+// AI content pipeline (nightly review cron): sentiment/topic/quality signals.
 export const sentiment = pgEnum("sentiment", [
   "positive",
   "neutral",
@@ -737,8 +737,7 @@ export const reportsRelations = relations(reports, ({ one }) => ({
   }),
 }));
 
-// AI CONTENT METADATA (nightly review cron — Phase 2)
-// See docs/plans/2026-06-14-admin-shell-and-ai-content-design.md
+// AI CONTENT METADATA (nightly review cron)
 
 // Per-post signal envelope, 1:1 with posts. Separate table (not columns on
 // posts) keeps the hot posts row lean and lets the cron write without bumping
