@@ -4,6 +4,8 @@ import {
   comments,
   posts,
   feed_sources as feedSources,
+  topic,
+  user_topic_pref,
 } from "@/server/db/schema";
 import { buildCommentHref } from "@/server/lib/content-url";
 import {
@@ -84,6 +86,50 @@ export const profileRouter = createTRPCRouter({
         topics: row?.topics ?? topics,
         onboardedAt: row?.onboardedAt ?? null,
       };
+    }),
+
+  // Follow/mute topics from the controlled vocabulary — drives the "For you" feed.
+  getTopicPrefs: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db
+      .select({
+        topicId: user_topic_pref.topicId,
+        slug: topic.slug,
+        label: topic.label,
+        pref: user_topic_pref.pref,
+      })
+      .from(user_topic_pref)
+      .innerJoin(topic, eq(user_topic_pref.topicId, topic.id))
+      .where(eq(user_topic_pref.userId, ctx.session.user.id));
+  }),
+
+  setTopicPref: protectedProcedure
+    .input(
+      z.object({
+        topicId: z.number().int().positive(),
+        pref: z.enum(["follow", "mute", "none"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (input.pref === "none") {
+        await ctx.db
+          .delete(user_topic_pref)
+          .where(
+            and(
+              eq(user_topic_pref.userId, userId),
+              eq(user_topic_pref.topicId, input.topicId),
+            ),
+          );
+        return { topicId: input.topicId, pref: null };
+      }
+      await ctx.db
+        .insert(user_topic_pref)
+        .values({ userId, topicId: input.topicId, pref: input.pref })
+        .onConflictDoUpdate({
+          target: [user_topic_pref.userId, user_topic_pref.topicId],
+          set: { pref: input.pref },
+        });
+      return { topicId: input.topicId, pref: input.pref };
     }),
 
   edit: rateLimitedProcedure({
