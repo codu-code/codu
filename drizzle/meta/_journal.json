@@ -267,6 +267,13 @@
       "when": 1781296891023,
       "tag": "0037_backfill_onboarding_badge",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1781464677918,
+      "tag": "0038_ai_content_metadata",
+      "breakpoints": true
     }
   ]
 }

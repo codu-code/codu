@@ -1,0 +1,8 @@
+{
+  "name": "daily-review-lambda",
+  "version": "1.0.0",
+  "description": "Thin invoker Lambda to trigger the nightly content-review cron route",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.509.0"
+  }
+}
