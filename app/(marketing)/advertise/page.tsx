@@ -2,11 +2,27 @@ import type { Metadata } from "next";
 import { Eyebrow } from "@/components/ds";
 import { AdvertiseTiers } from "@/components/Advertise/AdvertiseTiers";
 import type { SponsorInterest } from "@/schema/sponsor";
+import { ogMainImage } from "@/lib/og/url";
+
+const ogTitle = "Advertise with Codú — Reach a global community of AI builders";
+const ogDescription =
+  "Partner with Codú to reach a global community of AI builders and indie hackers. A few honest placements: a newsletter slot, a featured job, or an ongoing feed partnership.";
+const ogImage = ogMainImage("advertise");
 
 export const metadata: Metadata = {
-  title: "Advertise with Codú — Reach a global community of AI builders",
-  description:
-    "Partner with Codú to reach a global community of AI builders and indie hackers. A few honest placements: a newsletter slot, a featured job, or an ongoing feed partnership.",
+  title: ogTitle,
+  description: ogDescription,
+  openGraph: {
+    title: ogTitle,
+    description: ogDescription,
+    images: [ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: ogTitle,
+    description: ogDescription,
+    images: [ogImage],
+  },
 };
 
 const tiers: {

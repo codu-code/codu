@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import { type Metadata } from "next";
 import { SITE_ORIGIN } from "@/config/site";
+import { ogPostImage } from "@/lib/og/url";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { posts, user, post_tags, tag, comments } from "@/server/db/schema";
@@ -171,6 +172,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const authorName = post.user.name || "Unknown";
+  const ogImage = ogPostImage({
+    kind: "discussion",
+    title: post.title,
+    authorName,
+    authorKey: post.user.username ?? authorName,
+    tags: post.tags.map((t) => t.tag.title),
+    updatedAt: post.updatedAt,
+  });
 
   return {
     title: `${post.title} — Discussion | Codú`,
@@ -187,15 +196,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       url: canonical,
       publishedTime: post.published ?? undefined,
       modifiedTime: post.updatedAt ?? undefined,
-      images: [
-        `/og?title=${encodeURIComponent(
-          post.title,
-        )}&author=${encodeURIComponent(authorName)}&date=${post.updatedAt}`,
-      ],
+      images: [ogImage],
     },
     twitter: {
+      card: "summary_large_image",
       description: post.excerpt ?? undefined,
-      images: [`/og?title=${encodeURIComponent(post.title)}`],
+      images: [ogImage],
     },
   };
 }

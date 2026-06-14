@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Eyebrow, NewsletterCapture } from "@/components/ds";
 import { twitterUrl, linkedinUrl } from "@/config/site_settings";
+import { ogMainImage } from "@/lib/og/url";
+
+const ogImage = ogMainImage("about");
 
 export const metadata: Metadata = {
   title: "About Codú — The community for AI builders & indie hackers",
@@ -11,7 +14,14 @@ export const metadata: Metadata = {
     title: "About Codú — The community for AI builders & indie hackers",
     description:
       "Learn to build with AI, share what you ship, and grow with people doing the same. Free to join.",
-    images: "/images/og/home-og.png",
+    images: [ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Codú — The community for AI builders & indie hackers",
+    description:
+      "Learn to build with AI, share what you ship, and grow with people doing the same. Free to join.",
+    images: [ogImage],
   },
 };
 

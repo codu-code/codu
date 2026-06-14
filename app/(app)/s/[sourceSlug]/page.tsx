@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { type Metadata } from "next";
 import { getSourceProfile } from "./_resolvers";
 import SourceProfileContent from "./_sourceProfileClient";
+import { ogPublicationImage } from "@/lib/og/url";
 
 type Props = { params: Promise<{ sourceSlug: string }> };
 
@@ -15,15 +16,30 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     return { title: "Publication Not Found" };
   }
 
+  const description =
+    source.tagline || `Articles from ${source.name} on Codú Feed`;
+  const ogImage = ogPublicationImage({
+    name: source.name,
+    key: source.slug ?? sourceSlug,
+    tagline: source.tagline,
+    articleCount: source.articleCount,
+    followers: source.followerCount,
+  });
+
   return {
     title: `${source.name} | Codú Feed`,
-    description: source.tagline || `Articles from ${source.name} on Codú Feed`,
+    description,
     alternates: { canonical: `/s/${source.slug}` },
     openGraph: {
       title: source.name,
-      description:
-        source.tagline || `Articles from ${source.name} on Codú Feed`,
-      images: source.logoUrl ? [source.logoUrl] : undefined,
+      description,
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: source.name,
+      description,
+      images: [ogImage],
     },
   };
 }
