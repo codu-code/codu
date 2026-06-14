@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import * as Sentry from "@sentry/nextjs";
 import { api } from "@/server/trpc/react";
@@ -8,7 +8,7 @@ import { signIn, useSession } from "next-auth/react";
 import { toast } from "sonner";
 import VoteControl from "@/components/Vote/VoteControl";
 import { ReportButton } from "@/components/ReportModal/ReportModal";
-import { ensureHttps } from "@/utils/url";
+import { ensureHttps, unwrapDoubledUrl } from "@/utils/url";
 import { getRelativeTime } from "@/utils/relativeTime";
 
 export type ContentType = "POST" | "LINK";
@@ -94,10 +94,18 @@ const UnifiedContentCard = ({
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [shared, setShared] = useState(false);
 
+  // SSR race: a broken <img> begins loading during HTML parse and its `error`
+  // event can fire before React hydrates and attaches `onError`, so the handler
+  // never runs and the broken image sticks. This ref callback runs on mount — a
+  // loaded-but-zero-size image already failed — and hides it like onError would.
+  const checkBrokenImage = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.naturalWidth === 0) setImageError(true);
+  }, []);
+
   const { data: session } = useSession();
   const utils = api.useUtils();
 
-  const imageUrl = ensureHttps(rawImageUrl);
+  const imageUrl = ensureHttps(unwrapDoubledUrl(rawImageUrl));
 
   // Card URL priority (slug ends with urlId, so it stays canonical; urlId is the
   // fallback when slug is missing): discussion /d/ > member /{username}/ >
@@ -200,7 +208,7 @@ const UnifiedContentCard = ({
 
   return (
     <article
-      className="group rounded-lg border border-hairline bg-surface p-5 transition-colors duration-base ease-out hover:border-strong"
+      className="group rounded-lg border border-hairline bg-surface p-4 transition-colors duration-base ease-out hover:border-strong sm:p-5"
       data-testid="content-card"
     >
       <div className="flex gap-4">
@@ -226,17 +234,17 @@ const UnifiedContentCard = ({
               (handleHref ? (
                 <Link
                   href={handleHref}
-                  className="whitespace-nowrap text-sm font-semibold text-fg hover:underline"
+                  className="min-w-0 max-w-full truncate text-sm font-semibold text-fg hover:underline"
                 >
                   {authorName}
                 </Link>
               ) : (
-                <span className="whitespace-nowrap text-sm font-semibold text-fg">
+                <span className="min-w-0 max-w-full truncate text-sm font-semibold text-fg">
                   {authorName}
                 </span>
               ))}
             <span
-              className="whitespace-nowrap font-mono text-xs text-faint"
+              className="min-w-0 basis-full truncate font-mono text-xs text-faint"
               // Cards now SSR (feed initialData) and relative times derive
               // from Date.now() — a minute boundary between server render and
               // hydration would otherwise log a text mismatch.
@@ -293,6 +301,7 @@ const UnifiedContentCard = ({
             className="relative h-[68px] w-[104px] flex-shrink-0 self-start overflow-hidden rounded-sm border border-hairline"
           >
             <img
+              ref={checkBrokenImage}
               src={imageUrl}
               alt=""
               className="h-full w-full object-cover"

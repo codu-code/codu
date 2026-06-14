@@ -29,6 +29,24 @@ export function safeExternalHref(
   return parsed.protocol === "https:" ? url.trim() : undefined;
 }
 
+/**
+ * Unwraps a URL that an upstream feed prefixed with its own origin, leaving an
+ * already-absolute URL doubled up — e.g. HackerNoon's `media:thumbnail` serves
+ * `https://hackernoon.com/https://cdn.hackernoon.com/x.png`, which 404s. We
+ * slice from the LAST embedded scheme so the inner, real URL wins. A normal URL
+ * (only scheme at index 0) and a `?url=https://...` proxy param are left intact.
+ */
+export function unwrapDoubledUrl(
+  url: string | null | undefined,
+): string | null {
+  if (!url) return null;
+  // Ignore a scheme that appears inside the query string — only unwrap when the
+  // embedded scheme sits in the path (before any `?`).
+  const path = url.split("?")[0];
+  const i = Math.max(path.lastIndexOf("http://"), path.lastIndexOf("https://"));
+  return i > 0 ? url.slice(i) : url;
+}
+
 /** Upgrades an `http://` URL to `https://`. Returns null for empty input. */
 export function ensureHttps(url: string | null | undefined): string | null {
   if (!url) return null;
