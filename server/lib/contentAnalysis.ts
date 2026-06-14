@@ -4,9 +4,7 @@ import { bedrockClient, isBedrockEnabled } from "@/server/lib/bedrock";
 import { screenContent } from "@/server/lib/moderation";
 import { fetchPageText } from "@/server/lib/fetchPage";
 
-// Bump to force the nightly cron to re-analyse every post (compared against
-// post_metadata.schemaVersion). Increment when this prompt or the output shape
-// changes in a way that should invalidate existing rows.
+// Bump to force re-analysis of every post (vs post_metadata.schemaVersion).
 export const ANALYSIS_SCHEMA_VERSION = 1;
 
 export type Sentiment = "positive" | "neutral" | "negative";
@@ -63,12 +61,7 @@ Reply with ONLY this JSON shape:
 Use moderation category "none" and reason "" for an allow.`;
 }
 
-/**
- * Heuristic-only fallback when Bedrock isn't configured (local/dev/test). Mirrors
- * autoReview's fail-open contract: we still produce a moderation verdict from the
- * cheap screenContent heuristic, but skip the AI-only signals (topics/sentiment/
- * quality) by leaving them empty/null so the cron writes nothing misleading.
- */
+// Fallback when Bedrock is off: heuristic moderation only, no AI signals.
 function heuristicAnalysis(input: AnalyzePostInput): ContentAnalysis {
   const result = screenContent({ title: input.title, body: input.body });
   return {
@@ -88,14 +81,8 @@ function heuristicAnalysis(input: AnalyzePostInput): ContentAnalysis {
   };
 }
 
-/**
- * Analyse a single post with Bedrock: topic tagging, sentiment, quality scoring
- * and a moderation verdict in ONE model call. Gated and FAIL-OPEN, exactly like
- * autoReview():
- *  - Bedrock not configured -> heuristic moderation only, no AI signals.
- *  - On ANY thrown error -> capture to Sentry and return the heuristic result so
- *    a model/infra failure never blocks or corrupts the pipeline.
- */
+// One Bedrock call -> topics + sentiment + quality + moderation. Fail-open: any
+// error falls back to the heuristic so a model failure never blocks the pipeline.
 export async function analyzePost(
   input: AnalyzePostInput,
   vocab: TopicVocabEntry[],
@@ -157,12 +144,8 @@ function clamp(n: unknown, min: number, max: number): number | null {
   return Math.min(max, Math.max(min, n));
 }
 
-/**
- * Parse the model's JSON. Defensive: unknown/garbage topics are dropped (only
- * slugs present in the vocab survive), and an unparseable response falls back to
- * the heuristic (fail-open). A parseable response with an unexpected moderation
- * verdict routes to review (fail-safe), matching autoReview's asymmetry.
- */
+// Parse the model's JSON. Unknown topics are dropped; unparseable input falls
+// back to the heuristic; an unexpected verdict routes to review.
 export function parseAnalysis(
   raw: string,
   vocab: TopicVocabEntry[],

@@ -65,7 +65,7 @@ const SourceProfileContent = ({ sourceSlug, initialProfile }: Props) => {
   // first render (including SSR) is the real profile rather than a skeleton.
   if (status === "error" || !pub) {
     return (
-      <div className="mx-auto max-w-2xl px-0 py-4 sm:px-4 sm:py-8 text-fg">
+      <div className="mx-auto max-w-2xl px-0 py-4 text-fg sm:px-4 sm:py-8">
         <div className="bg-danger/12 rounded-lg border border-danger/30 p-6 text-center">
           <h1 className="text-lg font-semibold text-danger">
             Publication Not Found

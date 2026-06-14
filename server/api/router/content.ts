@@ -30,6 +30,7 @@ import {
   user,
   comments,
   point_event,
+  post_metadata,
 } from "@/server/db/schema";
 import {
   and,
@@ -46,6 +47,11 @@ import {
   inArray,
 } from "drizzle-orm";
 import { increment } from "./utils";
+import { rankCandidates, hasProfileSignal } from "@/server/lib/feedRanking";
+import {
+  loadUserProfile,
+  loadTopicsByPost,
+} from "@/server/lib/feedPersonalization";
 import { applyGate, notifyAdminOfReview } from "@/server/lib/moderation";
 import { runDedupeAndGate } from "@/server/lib/dedupe";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
@@ -1603,5 +1609,113 @@ export const contentRouter = createTRPCRouter({
           bio: linkPost.authorBio,
         },
       };
+    }),
+
+  // Personalized "For you" feed: re-rank a recent candidate window by the user's
+  // topic follows/mutes and learned affinity. Cold start (no signal) falls back
+  // to recency, so a new user sees the normal feed.
+  getForYouFeed: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().int().min(1).max(50).optional(),
+        offset: z.number().int().min(0).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const limit = input?.limit ?? 25;
+      const offset = input?.offset ?? 0;
+      const WINDOW = 200;
+
+      const profile = await loadUserProfile(ctx.db, userId);
+
+      const userVotes = ctx.db
+        .select({ postId: post_votes.postId, voteType: post_votes.voteType })
+        .from(post_votes)
+        .where(eq(post_votes.userId, userId))
+        .as("userVotes");
+      const userBookmarks = ctx.db
+        .select({ postId: bookmarks.postId })
+        .from(bookmarks)
+        .where(eq(bookmarks.userId, userId))
+        .as("userBookmarks");
+
+      const rows = await ctx.db
+        .select({
+          id: posts.id,
+          type: posts.type,
+          title: posts.title,
+          excerpt: posts.excerpt,
+          externalUrl: posts.externalUrl,
+          imageUrl: posts.coverImage,
+          ogImageUrl: posts.coverImage,
+          slug: posts.slug,
+          urlId: posts.urlId,
+          publishedAt: posts.publishedAt,
+          upvotes: posts.upvotesCount,
+          downvotes: posts.downvotesCount,
+          clickCount: posts.viewsCount,
+          readTimeMins: posts.readingTime,
+          userId: posts.authorId,
+          sourceId: posts.sourceId,
+          sourceAuthor: posts.sourceAuthor,
+          createdAt: posts.createdAt,
+          sourceName: feed_sources.name,
+          sourceSlug: feed_sources.slug,
+          sourceLogo: feed_sources.logoUrl,
+          sourceWebsite: feed_sources.websiteUrl,
+          sourceCategory: feed_sources.category,
+          authorName: user.name,
+          authorUsername: user.username,
+          authorImage: user.image,
+          userVote: userVotes.voteType,
+          isBookmarked: sql<boolean>`${userBookmarks.postId} IS NOT NULL`,
+          qualityScore: post_metadata.qualityScore,
+        })
+        .from(posts)
+        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+        .leftJoin(user, eq(posts.authorId, user.id))
+        .leftJoin(post_metadata, eq(post_metadata.postId, posts.id))
+        .leftJoin(userVotes, eq(posts.id, userVotes.postId))
+        .leftJoin(userBookmarks, eq(posts.id, userBookmarks.postId))
+        .where(
+          and(
+            eq(posts.status, "published"),
+            or(
+              lte(posts.publishedAt, new Date().toISOString()),
+              isNull(posts.publishedAt),
+            )!,
+          ),
+        )
+        .orderBy(desc(posts.publishedAt))
+        .limit(WINDOW);
+
+      const personalized = hasProfileSignal(profile);
+      let ordered = rows;
+      if (personalized) {
+        const topicsByPost = await loadTopicsByPost(
+          ctx.db,
+          rows.map((r) => r.id),
+        );
+        const candidates = rows.map((r) => ({
+          id: r.id,
+          publishedAt: r.publishedAt,
+          score: r.upvotes - r.downvotes,
+          qualityScore: r.qualityScore,
+          topicIds: topicsByPost.get(r.id) ?? [],
+          row: r,
+        }));
+        ordered = rankCandidates(candidates, profile, Date.now()).map(
+          (c) => c.item.row,
+        );
+      }
+
+      const items = ordered
+        .slice(offset, offset + limit)
+        .map((item) => ({ ...item, type: toFrontendType(item.type) }));
+      const nextOffset =
+        ordered.length > offset + limit ? offset + limit : undefined;
+
+      return { items, nextOffset, personalized };
     }),
 });

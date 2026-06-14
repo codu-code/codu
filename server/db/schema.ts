@@ -71,7 +71,7 @@ export const reportStatus = pgEnum("report_status", [
 // Who raised a report: a human ("user") or the automated review cron ("system").
 export const reportSource = pgEnum("report_source", ["user", "system"]);
 
-// AI content pipeline (see docs/plans/2026-06-14-admin-shell-and-ai-content-design.md)
+// AI content pipeline (nightly review cron): sentiment/topic/quality signals.
 export const sentiment = pgEnum("sentiment", [
   "positive",
   "neutral",
@@ -83,6 +83,9 @@ export const topicStatus = pgEnum("topic_status", ["active", "pending"]);
 // Provenance of a post<->topic edge. The nightly cron only ever rewrites its own
 // `ai` edges; `manual` edges (set by an admin) are never touched.
 export const tagSource = pgEnum("tag_source", ["ai", "manual"]);
+// Explicit per-user topic preference for feed personalization: a followed topic
+// boosts matching posts, a muted topic filters them out.
+export const topicPref = pgEnum("topic_pref", ["follow", "mute"]);
 
 // Job board
 export const jobType = pgEnum("job_type", [
@@ -737,12 +740,9 @@ export const reportsRelations = relations(reports, ({ one }) => ({
   }),
 }));
 
-// AI CONTENT METADATA (nightly review cron — Phase 2)
-// See docs/plans/2026-06-14-admin-shell-and-ai-content-design.md
+// AI CONTENT METADATA (nightly review cron)
 
-// Per-post signal envelope, 1:1 with posts. Separate table (not columns on
-// posts) keeps the hot posts row lean and lets the cron write without bumping
-// posts.updatedAt. `analyzedAt` IS the incremental watermark.
+// Per-post AI signals, 1:1 with posts. `analyzedAt` is the incremental watermark.
 export const post_metadata = pgTable(
   "post_metadata",
   {
@@ -753,15 +753,12 @@ export const post_metadata = pgTable(
     sentimentScore: real("sentiment_score"),
     qualityScore: real("quality_score"),
     qualityReason: text("quality_reason"),
-    // The Bedrock model that produced this row; NULL means a human set it (so
-    // the cron skips overwriting manually-curated values).
-    modelId: text("model_id"),
+    modelId: text("model_id"), // NULL = human-curated; cron skips those rows
     analyzedAt: timestamp("analyzed_at", {
       precision: 3,
       mode: "string",
       withTimezone: true,
     }),
-    // Bump in code to force re-analysis of every post on the next run.
     schemaVersion: integer("schema_version").default(1).notNull(),
   },
   (table) => ({
@@ -836,6 +833,86 @@ export const postTopicRelations = relations(post_topic, ({ one }) => ({
   post: one(posts, { fields: [post_topic.postId], references: [posts.id] }),
   topic: one(topic, { fields: [post_topic.topicId], references: [topic.id] }),
 }));
+
+// FEED PERSONALIZATION (explicit prefs + implicit affinity)
+
+// Explicit, user-controlled topic preferences. Follows boost matching posts in
+// the personalized feed; mutes filter them out. Predictable and transparent.
+export const user_topic_pref = pgTable(
+  "user_topic_pref",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    topicId: integer("topic_id")
+      .notNull()
+      .references(() => topic.id, { onDelete: "cascade" }),
+    pref: topicPref("pref").notNull(),
+    createdAt: timestamp("created_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.topicId] }),
+    userIdIdx: index("user_topic_pref_user_id_idx").on(table.userId),
+  }),
+);
+
+export const userTopicPrefRelations = relations(user_topic_pref, ({ one }) => ({
+  user: one(user, {
+    fields: [user_topic_pref.userId],
+    references: [user.id],
+  }),
+  topic: one(topic, {
+    fields: [user_topic_pref.topicId],
+    references: [topic.id],
+  }),
+}));
+
+// Implicit topic affinity derived from a user's interactions (votes, bookmarks,
+// comments) through post_topic edges, with time decay. Recomputed incrementally
+// by the nightly cron for recently-active users.
+export const user_topic_affinity = pgTable(
+  "user_topic_affinity",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    topicId: integer("topic_id")
+      .notNull()
+      .references(() => topic.id, { onDelete: "cascade" }),
+    score: real("score").notNull(), // >= 0; higher = stronger inferred interest
+    updatedAt: timestamp("updated_at", {
+      precision: 3,
+      mode: "string",
+      withTimezone: true,
+    })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.topicId] }),
+    userIdIdx: index("user_topic_affinity_user_id_idx").on(table.userId),
+  }),
+);
+
+export const userTopicAffinityRelations = relations(
+  user_topic_affinity,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [user_topic_affinity.userId],
+      references: [user.id],
+    }),
+    topic: one(topic, {
+      fields: [user_topic_affinity.topicId],
+      references: [topic.id],
+    }),
+  }),
+);
 
 // TAGS (shared between legacy and new system)
 

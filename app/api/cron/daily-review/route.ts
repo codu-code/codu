@@ -30,31 +30,25 @@ import {
   type TopicVocabEntry,
 } from "@/server/lib/contentAnalysis";
 import { autoReview } from "@/server/lib/autoReview";
+import {
+  findRecentlyActiveUsers,
+  recomputeUserAffinity,
+} from "@/server/lib/topicAffinity";
 import sendEmail from "@/utils/sendEmail";
 
-// Nightly review cron. Auth via Bearer CRON_SECRET (a headless scheduler can't
-// use admin-session auth); unset secret refuses to run (500), wrong/missing
-// token 401. Wired via AWS Lambda + EventBridge (cdk/lib/cron-stack.ts).
-//
-// Four incremental passes (see docs/plans/2026-06-14-admin-shell-and-ai-content-design.md):
-//   1. topic + sentiment tagging (posts)
-//   2. quality / spam scoring (posts)        — passes 1+2 share one Bedrock call
-//   3. re-screen moderation (posts + comments) -> reports queue (source=system)
-//   4. daily digest -> email the founder only when something needs attention
-//
-// Everything is incremental (per-row analyzedAt / moderatedAt watermark) and
-// capped per run, so an empty worklist is a near-zero-cost no-op and a backfill
-// can't blow the Lambda timeout. Each item is isolated (try/catch + Sentry) so
-// one bad row never kills the batch.
+// Nightly review cron (auth via CRON_SECRET; invoked by EventBridge — see
+// cdk/lib/cron-stack.ts). Incremental, capped passes that no-op on an empty
+// worklist: topic/sentiment tagging, quality scoring, post+comment moderation
+// re-screen, affinity recompute, and a digest email. Each item is isolated
+// (try/catch + Sentry) so one bad row never kills the batch.
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const POST_CAP = 100;
 const COMMENT_CAP = 200;
-// Sentinel modelId for rows scored by the cheap heuristic (Bedrock disabled), so
-// they're distinguishable from human-curated rows (modelId IS NULL) and can be
-// upgraded once Bedrock is enabled.
+// Sentinel modelId for heuristic-scored rows (Bedrock off), so they're distinct
+// from human-curated rows (modelId IS NULL) and can be upgraded once it's on.
 const HEURISTIC_MODEL = "heuristic";
 
 function isAuthorized(request: Request): boolean {
@@ -124,10 +118,8 @@ async function reviewPosts(
   const bedrock = isBedrockEnabled();
   const now = new Date().toISOString();
 
-  // Incremental worklist: published posts that have never been analysed, whose
-  // AI metadata is stale (post edited / schema bumped), or that only have a
-  // heuristic placeholder now that Bedrock is available. Rows with modelId IS
-  // NULL are human-curated and deliberately skipped.
+  // Worklist: published posts never analysed, stale (edited / schema bumped), or
+  // a heuristic placeholder now Bedrock is on. modelId IS NULL = human-curated, skip.
   const staleBranches = [
     gt(posts.updatedAt, post_metadata.analyzedAt),
     lt(post_metadata.schemaVersion, ANALYSIS_SCHEMA_VERSION),
@@ -384,6 +376,25 @@ async function sendDigest(summary: {
   return true;
 }
 
+const AFFINITY_USER_CAP = 500;
+
+// Recompute implicit topic affinity for users who interacted in the last 24h.
+async function reviewAffinity(): Promise<{ usersUpdated: number }> {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const now = Date.now();
+  const users = await findRecentlyActiveUsers(db, since, AFFINITY_USER_CAP);
+  let usersUpdated = 0;
+  for (const userId of users) {
+    try {
+      await recomputeUserAffinity(db, userId, now);
+      usersUpdated += 1;
+    } catch (err) {
+      Sentry.captureException(err);
+    }
+  }
+  return { usersUpdated };
+}
+
 async function loadVocab(): Promise<{
   vocab: TopicVocabEntry[];
   slugToId: Map<string, number>;
@@ -414,6 +425,7 @@ async function handle(request: Request) {
     const { vocab, slugToId } = await loadVocab();
     const postResult = await reviewPosts(vocab, slugToId);
     const commentResult = await reviewComments();
+    const affinityResult = await reviewAffinity();
 
     const summary = {
       postsAnalyzed: postResult.analyzed,
@@ -421,6 +433,7 @@ async function handle(request: Request) {
       proposedTopics: postResult.proposed,
       commentsModerated: commentResult.moderated,
       commentsFlagged: commentResult.flagged,
+      affinityUsersUpdated: affinityResult.usersUpdated,
     };
 
     const digestSent = await sendDigest(summary);
