@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { type Session } from "next-auth";
 import { FEATURE_FLAGS, isFlagEnabled } from "@/utils/flags";
 
@@ -105,6 +106,33 @@ export function NavDrawer({
             ✕
           </button>
         </div>
+
+        {/* Logged-out auth CTAs live here on mobile — the top bar drops them to
+            make room for the search icon. */}
+        {!session && (
+          <div className="mb-3 flex flex-col gap-2 px-1">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                signIn();
+              }}
+              className="primary-button w-full justify-center"
+            >
+              Join free
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                signIn();
+              }}
+              className="w-full rounded-md border border-strong px-3 py-2 text-center text-sm font-semibold text-fg transition-colors hover:bg-surface"
+            >
+              Log in
+            </button>
+          </div>
+        )}
 
         <nav className="flex flex-col gap-0.5">
           {nav.map((item) => {

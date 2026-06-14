@@ -189,7 +189,10 @@ const FeedFilters = ({
     typeValue !== "all" || sort !== "recent" || tagValue !== ALL_TOPICS;
 
   return (
-    <div className="flex items-center gap-2" data-testid="feed-filters">
+    <div
+      className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1"
+      data-testid="feed-filters"
+    >
       {isDirty && (
         <button
           type="button"

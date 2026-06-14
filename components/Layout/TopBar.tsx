@@ -73,12 +73,14 @@ export function TopBar({
         </Link>
       </div>
 
+      {/* Desktop: a full search field that opens the ⌘K palette. Hidden on
+          mobile, where a compact icon button in the right cluster takes over. */}
       <button
         type="button"
         onClick={onOpenPalette}
-        className="flex w-full min-w-0 max-w-[440px] items-center gap-2 justify-self-center rounded-full border border-hairline bg-surface py-1.5 pl-3.5 pr-2.5 text-left transition-colors duration-base ease-out hover:border-strong"
+        className="hidden w-full min-w-0 max-w-[440px] items-center gap-2 justify-self-center rounded-full border border-hairline bg-surface py-1.5 pl-3.5 pr-2.5 text-left transition-colors duration-base ease-out hover:border-strong focus:outline-none focus-visible:border-accent focus-visible:ring-0 focus-visible:ring-offset-0 min-[721px]:flex"
       >
-        <span className="text-sm leading-none text-faint">⌕</span>
+        <SearchIcon className="h-[18px] w-[18px] shrink-0 text-faint" />
         <span className="min-w-0 flex-1 truncate text-sm text-faint">
           Search…
         </span>
@@ -89,6 +91,7 @@ export function TopBar({
 
       {session ? (
         <div className="flex items-center gap-3 justify-self-end">
+          <SearchIconButton onClick={onOpenPalette} />
           <Link
             href="/notifications"
             aria-label="Notifications"
@@ -160,21 +163,60 @@ export function TopBar({
         </div>
       ) : (
         <div className="flex items-center gap-3 justify-self-end">
-          <button
-            onClick={() => signIn()}
-            className="whitespace-nowrap text-sm font-semibold text-fg"
-          >
-            Log in
-          </button>
-          <button
-            onClick={() => signIn()}
-            className="primary-button whitespace-nowrap"
-          >
-            Join free
-          </button>
+          <SearchIconButton onClick={onOpenPalette} />
+          {/* Log in / Join free move into the hamburger drawer on mobile — hide
+              the whole cluster (wrapping the parent beats primary-button's own
+              display, which would otherwise survive a bare `hidden`). */}
+          <div className="hidden items-center gap-3 min-[721px]:flex">
+            <button
+              onClick={() => signIn()}
+              className="whitespace-nowrap text-sm font-semibold text-fg"
+            >
+              Log in
+            </button>
+            <button
+              onClick={() => signIn()}
+              className="primary-button whitespace-nowrap"
+            >
+              Join free
+            </button>
+          </div>
         </div>
       )}
     </header>
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.4-3.4" />
+    </svg>
+  );
+}
+
+/** Mobile-only search affordance: the full search field collapses to this icon
+ *  button (≤sm), which opens the same ⌘K palette. */
+function SearchIconButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Search"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-fg hover:bg-elevated min-[721px]:hidden"
+    >
+      <SearchIcon className="h-[22px] w-[22px]" />
+    </button>
   );
 }
 

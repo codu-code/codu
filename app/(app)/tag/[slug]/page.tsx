@@ -165,7 +165,7 @@ export default async function TagPage(props: Props) {
   const nextHref = hasNextPage ? `/tag/${slug}?page=${page + 1}` : null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
       <p className="eyebrow">
         <span className="slash">{"// "}</span>
         Tag

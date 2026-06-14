@@ -162,7 +162,12 @@ const FeedPage = ({ initialFeed }: { initialFeed?: FeedFirstPage | null }) => {
               {t.label}
             </button>
           ))}
-          <div className="ml-auto pl-4">{filterCluster}</div>
+          {/* Mobile: filters drop to their own full-width row below the tabs
+              instead of cramming under them. Desktop: inline, pushed right.
+              No overflow clip here — it would hide the FilterPill popovers. */}
+          <div className="order-last flex w-full justify-end pt-1 min-[640px]:order-none min-[640px]:ml-auto min-[640px]:w-auto min-[640px]:pl-4 min-[640px]:pt-0">
+            {filterCluster}
+          </div>
         </div>
       ) : (
         <div className="flex items-center border-b border-hairline pb-2">

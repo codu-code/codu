@@ -265,7 +265,9 @@ body {
 @media (max-width: 720px) {
   .app-main {
     grid-template-columns: minmax(0, 1fr);
-    padding-bottom: 6rem;
+    /* Small side gutters on mobile (not the desktop clamp) so cards get the
+       full reading width and don't overflow the viewport. */
+    padding: 1.25rem 0.75rem 6rem;
   }
   .app-leftrail {
     display: none;

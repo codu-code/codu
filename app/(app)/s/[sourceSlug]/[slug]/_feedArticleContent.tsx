@@ -42,7 +42,7 @@ const FeedArticleContent = ({ sourceSlug, article }: Props) => {
   const safeExternalUrl = safeExternalHref(article.externalUrl);
 
   return (
-    <article className="mx-auto max-w-prose px-4 py-8">
+    <article className="mx-auto max-w-prose px-0 py-4 sm:px-4 sm:py-8">
       <Link
         href="/"
         className="mb-6 inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
