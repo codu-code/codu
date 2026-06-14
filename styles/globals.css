@@ -165,8 +165,8 @@ body {
    every form control. Recolour both to the brand accent so input focus matches
    the mint focus language used everywhere else (links/buttons already get a mint
    :focus-visible ring). Unlayered, so it reliably overrides the plugin's
-   @layer base styles. The thin ring doubles as the keyboard focus indicator, so
-   a11y is preserved — only the colour changes. */
+   @layer base styles. The plugin's thin ring (shown on :focus, pointer and
+   keyboard) is kept as the focus indicator — only the colour changes. */
 [type="text"]:focus,
 [type="email"]:focus,
 [type="url"]:focus,
@@ -180,6 +180,7 @@ body {
 [type="time"]:focus,
 [type="week"]:focus,
 [multiple]:focus,
+input:not([type]):focus,
 textarea:focus,
 select:focus {
   --tw-ring-color: rgb(var(--color-accent));

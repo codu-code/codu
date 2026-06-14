@@ -17,21 +17,28 @@ describe("posts relational config", () => {
     ({ db } = await import("@/server/db"));
   });
 
-  it("registers relations on the join tables (no alias collision)", () => {
+  it("registers relations on all four aliased join tables (no collision)", () => {
     const schema = db._.schema;
-    expect(Object.keys(schema.post_tags.relations)).toContain("post");
-    expect(Object.keys(schema.post_tags.relations)).toContain("tag");
+    // All four tables that have a camelCase alias re-export must keep their
+    // relations registered under the canonical snake_case key.
+    expect(Object.keys(schema.post_tags.relations)).toEqual(
+      expect.arrayContaining(["post", "tag"]),
+    );
     expect(Object.keys(schema.post_votes.relations)).toContain("post");
+    expect(Object.keys(schema.comment_votes.relations)).toContain("comment");
+    expect(Object.keys(schema.feed_sources.relations)).toContain("user");
   });
 
-  it("builds the nested relational query used by /feed.xml", () => {
+  it("builds relational queries that walk the previously-broken relations", () => {
     expect(() =>
       db.query.posts
         .findMany({
           columns: { title: true },
           with: {
-            author: { columns: { username: true } },
-            tags: { with: { tag: true } },
+            author: { columns: { username: true } }, // used by /feed.xml
+            tags: { with: { tag: true } }, // post_tags
+            votes: true, // post_votes
+            source: true, // feed_sources (one)
           },
           limit: 1,
         })
