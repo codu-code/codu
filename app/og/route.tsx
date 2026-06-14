@@ -31,13 +31,20 @@ async function logo(origin: string) {
   const res = await fetch(`${origin}/og/wordmark-white.png`);
   const bytes = new Uint8Array(await res.arrayBuffer());
   let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  for (let i = 0; i < bytes.length; i++)
+    binary += String.fromCharCode(bytes[i]);
   return (_logo = `data:image/png;base64,${btoa(binary)}`);
 }
 
 const list = (v: string | null) =>
-  v ? v.split(",").map((s) => s.trim()).filter(Boolean) : undefined;
-const num = (v: string | null, d = 0) => (v != null && v !== "" ? Number(v) : d);
+  v
+    ? v
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : undefined;
+const num = (v: string | null, d = 0) =>
+  v != null && v !== "" ? Number(v) : d;
 
 export async function GET(req: Request) {
   try {

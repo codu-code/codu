@@ -28,7 +28,8 @@ export type OgMainId =
   | "jobs"
   | "weekly";
 
-export const ogMainImage = (id: OgMainId): string => ogUrl({ type: "main", id });
+export const ogMainImage = (id: OgMainId): string =>
+  ogUrl({ type: "main", id });
 
 export type OgPostImageInput = {
   kind: "article" | "discussion" | "link";
@@ -56,7 +57,9 @@ export const ogPostImage = (post: OgPostImageInput): string =>
     hue: hueFromString(post.authorKey),
     tags: post.tags?.slice(0, 2).join(","),
     pub: post.publicationName,
-    pubHue: post.publicationKey ? hueFromString(post.publicationKey) : undefined,
+    pubHue: post.publicationKey
+      ? hueFromString(post.publicationKey)
+      : undefined,
     source: post.source,
     read: post.readMins ? `${post.readMins} min` : undefined,
     cover: post.cover,
