@@ -227,7 +227,7 @@ select:focus {
   @apply px-6 py-3 text-base;
 }
 
-/* App shell — sticky top bar + 3-column rail grid. Breakpoints (1080 / 720) are
+/* App shell — sticky top bar + 3-column rail grid. Breakpoints (1300 / 720) are
    bespoke to the handoff, so they're raw media queries rather than Tailwind's
    lg/md. */
 .app-topbar {
@@ -246,10 +246,10 @@ select:focus {
 }
 
 .app-main {
-  max-width: 1180px;
+  max-width: 1300px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr) 300px;
+  grid-template-columns: 200px minmax(0, 1fr) 280px;
   gap: clamp(1.5rem, 2.4vw, 2.5rem);
   padding: 2rem clamp(1rem, 3vw, 2rem) 4rem;
 }
@@ -278,10 +278,12 @@ select:focus {
   padding-top: 1.5rem;
 }
 
-@media (max-width: 1080px) {
+/* Rail folds away when there isn't room — the center column keeps its ~672px
+   reading measure rather than stretching. */
+@media (max-width: 1300px) {
   .app-main {
     grid-template-columns: 200px minmax(0, 1fr);
-    max-width: 832px;
+    max-width: 968px;
   }
   .app-rightrail {
     display: none;
@@ -293,7 +295,7 @@ select:focus {
     grid-template-columns: minmax(0, 1fr);
     /* Small side gutters on mobile (not the desktop clamp) so cards get the
        full reading width and don't overflow the viewport. */
-    padding: 1.25rem 0.75rem 6rem;
+    padding: 1.25rem 1rem 6rem;
   }
   .app-leftrail {
     display: none;
@@ -327,6 +329,23 @@ select:focus {
   @apply prose-neutral dark:prose-invert lg:prose-lg;
 
   margin-top: 1.5rem;
+  /* A slightly tighter measure than prose-lg's default for a calmer rhythm in
+     the ~672px reading column. */
+  line-height: 1.62;
+}
+
+/* Body copy sits a step down from the headings (Medium-style); headings and
+   bold lift to the primary text colour. Everything is keyed off the design
+   tokens so it flips correctly in dark mode. */
+.prose :where(p, ul, ol) {
+  color: rgb(var(--color-muted));
+}
+.prose :where(h1, h2, h3, h4) {
+  @apply font-display tracking-tight;
+  color: rgb(var(--color-fg));
+}
+.prose :where(strong, b) {
+  color: rgb(var(--color-fg));
 }
 
 .prose .anchor {
@@ -344,7 +363,14 @@ select:focus {
 }
 
 .prose a {
-  @apply transition-all;
+  @apply text-accent-soft underline transition-all;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.prose blockquote {
+  @apply border-accent;
+  border-left-width: 3px;
+  color: rgb(var(--color-muted));
 }
 .prose blockquote p::before {
   content: none;
@@ -360,11 +386,13 @@ select:focus {
 }
 
 .prose pre {
-  @apply border-2 border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-black;
+  @apply border border-hairline bg-inset;
 }
 
-.prose code {
-  @apply rounded-lg border border-neutral-100 bg-neutral-100 px-1 py-0.5 font-mono text-neutral-800 dark:border-neutral-800 dark:bg-black dark:text-neutral-200;
+/* Inline code only — fenced blocks keep their own treatment below. */
+.prose :not(pre) > code {
+  @apply rounded-sm border border-hairline bg-inset px-1 py-0.5 font-mono text-accent-soft;
+  font-size: 0.86em;
 }
 
 .prose code:after {
@@ -376,8 +404,7 @@ select:focus {
 }
 
 .prose pre code {
-  @apply p-0 text-neutral-800 dark:text-neutral-200;
-  border: initial;
+  @apply border-0 bg-transparent p-0 text-fg;
 }
 
 .prose img {
