@@ -339,6 +339,11 @@ select:focus {
    tokens so it flips correctly in dark mode. */
 .prose :where(p, ul, ol) {
   color: rgb(var(--color-muted));
+  line-height: 1.62;
+}
+/* Don't dim paragraph text while the author is writing. */
+.tiptap :where(p, ul, ol) {
+  color: inherit;
 }
 .prose :where(h1, h2, h3, h4) {
   @apply font-display tracking-tight;
@@ -391,7 +396,7 @@ select:focus {
 
 /* Inline code only — fenced blocks keep their own treatment below. */
 .prose :not(pre) > code {
-  @apply rounded-sm border border-hairline bg-inset px-1 py-0.5 font-mono text-accent-soft;
+  @apply rounded-sm border border-hairline bg-inset px-1 py-0.5 font-mono text-fg;
   font-size: 0.86em;
 }
 
