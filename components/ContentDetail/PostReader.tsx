@@ -176,7 +176,7 @@ const PostReader = async ({
       {articleSchema && <JsonLd data={articleSchema} />}
       {breadcrumbSchema && <JsonLd data={breadcrumbSchema} />}
 
-      <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
+      <div className="mx-auto max-w-prose py-4 sm:py-8">
         <nav className="mb-6 flex items-center gap-2 text-sm text-muted">
           <Link href="/" className="hover:text-fg">
             Feed
