@@ -42,13 +42,14 @@ export const getPresignedUrl = async (
   const Key = getKey(config, extension);
 
   const putCommand = new PutObjectCommand({
-    Bucket: process.env.S3_BUCKET_NAME,
+    // Trim: a stray space in S3_BUCKET_NAME (invisible in host UIs) makes S3
+    // reject every PUT with 400 InvalidBucketName.
+    Bucket: process.env.S3_BUCKET_NAME?.trim(),
     Key,
     ContentType: `image/${fileType}`,
     ContentLength: fileSize,
   });
 
-  // @FIX TS ERROR
   const putUrl = await getSignedUrl(s3Client, putCommand, {
     expiresIn: 3600,
   });
