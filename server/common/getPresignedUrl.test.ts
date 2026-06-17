@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 
 // Regression guard: a trailing space in S3_BUCKET_NAME (or the keys) once made
 // every presigned PUT fail with 400 InvalidBucketName. These values must be
@@ -13,6 +13,12 @@ describe("getPresignedUrl whitespace hardening", () => {
     process.env.ACCESS_KEY = "AKIATESTKEY1234567890 ";
     process.env.SECRET_KEY = "secretsecretsecretsecretsecretsecret1234\n";
     ({ getPresignedUrl } = await import("@/server/common/getPresignedUrl"));
+  });
+
+  afterAll(() => {
+    delete process.env.ACCESS_KEY;
+    delete process.env.SECRET_KEY;
+    delete process.env.S3_BUCKET_NAME;
   });
 
   it("trims a trailing space in S3_BUCKET_NAME so the PUT targets the real bucket", async () => {
