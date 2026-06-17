@@ -1,14 +1,17 @@
 import { S3Client } from "@aws-sdk/client-s3";
 
-const hasAccessKeys = process.env.ACCESS_KEY && process.env.SECRET_KEY;
+// Trim: stray whitespace in the key env vars otherwise breaks SigV4 signing.
+const accessKeyId = process.env.ACCESS_KEY?.trim();
+const secretAccessKey = process.env.SECRET_KEY?.trim();
+const hasAccessKeys = accessKeyId && secretAccessKey;
 
 export const s3Client = new S3Client({
   region: "eu-west-1",
   ...(hasAccessKeys
     ? {
         credentials: {
-          accessKeyId: process.env.ACCESS_KEY || "",
-          secretAccessKey: process.env.SECRET_KEY || "",
+          accessKeyId,
+          secretAccessKey,
         },
       }
     : {}),
