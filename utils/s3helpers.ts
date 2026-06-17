@@ -27,5 +27,7 @@ export const uploadFile = async (signedUrl: string, file: File) => {
   });
 
   const fileLocation = response.url.split("?")[0];
-  return { ...response, fileLocation };
+  // Pull fields off explicitly — spreading a Response drops its prototype
+  // getters (ok/status), leaving callers to read `undefined` for `ok`.
+  return { ok: response.ok, status: response.status, fileLocation };
 };
