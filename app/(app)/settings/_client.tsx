@@ -201,8 +201,12 @@ const Settings = ({ profile }: { profile: User }) => {
       return;
     }
 
-    const response = await uploadFile(signedUrl, file);
-    const { fileLocation } = response;
+    const { ok, fileLocation } = await uploadFile(signedUrl, file);
+    if (!ok) {
+      setProfilePhoto({ status: "error", url: "" });
+      return;
+    }
+
     await updateUserPhotoUrl({
       url: fileLocation,
     });

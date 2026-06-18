@@ -242,8 +242,11 @@ const AdminSourcesPage = () => {
         },
         async onSuccess(signedUrl) {
           try {
-            const response = await uploadFile(signedUrl, file);
-            const { fileLocation } = response;
+            const { ok, fileLocation } = await uploadFile(signedUrl, file);
+            if (!ok) {
+              toast.error("Failed to upload logo, please try again.");
+              return;
+            }
             setEditingSource({
               ...editingSource,
               logoUrl: fileLocation,

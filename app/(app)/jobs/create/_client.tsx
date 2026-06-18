@@ -127,8 +127,8 @@ export default function Content() {
           );
         }
 
-        const { fileLocation } = await uploadFile(signedUrl, file);
-        if (!fileLocation) {
+        const { ok, fileLocation } = await uploadFile(signedUrl, file);
+        if (!ok || !fileLocation) {
           setUploadStatus("error");
           return toast.error(
             "Something went wrong uploading the logo, please retry.",
