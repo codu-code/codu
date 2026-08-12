@@ -120,8 +120,9 @@ const PostReader = async ({
   commentsDisabledLabel = "post",
   emitArticleSchema = true,
 }: PostReaderProps) => {
-  // Only reachable by the author (the resolver only returns non-published posts
-  // when viewerId matches the author's id).
+  // Only reachable by the author or an admin (the resolvers only return
+  // non-published posts when viewerId matches the author's id, or the viewer is
+  // an admin previewing from the moderation queue).
   const isAwaitingReview = post.status === "in_review";
   const isRejected = post.status === "rejected";
   const bodyContent = post.body ?? "";

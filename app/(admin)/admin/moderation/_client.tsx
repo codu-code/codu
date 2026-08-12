@@ -40,6 +40,40 @@ const reasonLabels: Record<ReportReason, string> = {
 const chipBase =
   "rounded-full px-2 py-0.5 font-mono text-xs uppercase tracking-label";
 
+type PreviewablePost = {
+  type: string | null;
+  slug: string | null;
+  externalUrl: string | null;
+  authorUsername: string | null;
+};
+
+// Where to send a moderator to actually read the thing they're judging.
+// Discussions and questions live under /d/; a shared link IS its destination,
+// so it points off-site; everything else renders at /{username}/{slug}, where
+// the reader grants admins the same bypass the author has — so an in_review
+// post previews exactly as readers would eventually see it.
+function postPreviewHref(post: PreviewablePost): string | null {
+  if (post.type === "link") return post.externalUrl;
+  if (!post.slug) return null;
+  if (post.type === "discussion" || post.type === "question") {
+    return `/d/${post.slug}`;
+  }
+  if (!post.authorUsername) return null;
+  return `/${post.authorUsername}/${post.slug}`;
+}
+
+const PreviewLink = ({ post }: { post: PreviewablePost }) => {
+  const href = postPreviewHref(post);
+  if (!href) return null;
+
+  return (
+    <Link href={href} target="_blank" className="secondary-button">
+      <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+      Preview
+    </Link>
+  );
+};
+
 // datetime-local is in the moderator's LOCAL time, so shift the `min` boundary
 // by the tz offset before slicing to "YYYY-MM-DDTHH:mm".
 function localDateTimeMin(): string {
@@ -263,6 +297,11 @@ const ModerationQueue = () => {
                     @{post.authorUsername ?? "unknown"} ·{" "}
                     {getRelativeTime(post.createdAt!)}
                   </p>
+                  {post.excerpt && (
+                    <p className="mt-1 line-clamp-2 text-sm text-muted">
+                      {post.excerpt}
+                    </p>
+                  )}
                   {post.moderationNote && (
                     <p className="mt-1 text-sm text-muted">
                       <span className="font-medium text-fg">Reason:</span>{" "}
@@ -270,7 +309,8 @@ const ModerationQueue = () => {
                     </p>
                   )}
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <PreviewLink post={post} />
                   <button
                     className="primary-button"
                     disabled={isModerating}
