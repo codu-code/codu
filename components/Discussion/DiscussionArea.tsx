@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Menu,
   MenuButton,
@@ -91,12 +91,19 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
       },
     });
 
-  const { mutate: vote, status: voteStatus } = api.discussion.vote.useMutation({
-    onSettled() {
-      refetch();
-    },
-    onError() {
+  // Bumped to remount every VoteControl, which owns its own optimistic state.
+  // Only needed when a vote fails and that local state has to resync with the
+  // server; a successful vote needs no refetch, so the thread never reflows.
+  const [voteResetKey, setVoteResetKey] = useState(0);
+
+  const { mutate: vote } = api.discussion.vote.useMutation({
+    async onError() {
       toast.error("Something went wrong, try again.");
+      // Refetch BEFORE remounting: the controls seed their state on mount, so
+      // bumping the key first would reseed them from the pre-vote cache and
+      // strand every earlier successful vote showing its old count.
+      await refetch();
+      setVoteResetKey((key) => key + 1);
     },
   });
 
@@ -105,7 +112,6 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     voteType: "up" | "down" | null,
   ) => {
     if (!session) return signIn();
-    if (voteStatus === "pending") return;
     vote({ discussionId, voteType });
   };
 
@@ -129,13 +135,71 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   type Discussions = typeof discussions;
   type Children = typeof firstChild;
 
+  // "Top" ranks by score, but re-ranking on every vote makes comments jump
+  // around while somebody is reading them. So each comment's sort score is
+  // frozen the first time we see it and reused from then on: the thread still
+  // reorders by votes, it just does it on the next load instead of mid-read.
+  // (The date-based sorts need no freezing — createdAt never changes.)
+  //
+  // The trade-off is deliberate: a tab left open for hours keeps the ranking it
+  // loaded with, even after other people's votes arrive with a later refetch.
+  // Re-picking the sort below drops the snapshot, so a reader who wants the
+  // current ranking has one click to get it.
+  const frozenSortScores = useRef(new Map<string, number>());
+  const frozenForSort = useRef<SortOrder>(sortOrder);
+
+  // Minimal shape the tree walkers below need, so they can recurse without
+  // depending on the full inferred tRPC comment type.
+  type ScoredNode = { id: string; score: number; children?: ScoredNode[] };
+
+  // Identity of the comment *set*, which changes only when comments are added
+  // or removed — not when their scores change. Drives the capture below.
+  const commentSetKey = useMemo(() => {
+    const ids: string[] = [];
+    const collect = (items: ScoredNode[] | undefined) => {
+      items?.forEach((item) => {
+        ids.push(item.id);
+        collect(item.children);
+      });
+    };
+    collect(discussions as ScoredNode[] | undefined);
+    return ids.join(",");
+  }, [discussions]);
+
+  const sortScores = useMemo(() => {
+    // Re-picking a sort is a deliberate "show me the current ranking", so let
+    // that re-rank from live scores. Passive vote traffic must not.
+    if (frozenForSort.current !== sortOrder) {
+      frozenForSort.current = sortOrder;
+      frozenSortScores.current.clear();
+    }
+    const captured = frozenSortScores.current;
+    const capture = (items: ScoredNode[] | undefined) => {
+      items?.forEach((item) => {
+        if (!captured.has(item.id)) captured.set(item.id, item.score);
+        capture(item.children);
+      });
+    };
+    capture(discussions as ScoredNode[] | undefined);
+    return new Map(captured);
+    // Intentionally keyed on the comment set rather than `discussions` itself:
+    // a score changing must NOT re-capture, or the freeze does nothing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commentSetKey, sortOrder]);
+
   const sortDiscussions = (
     items: Discussions | Children | undefined,
   ): typeof items => {
     if (!items) return items;
     const sorted = [...items].sort((a, b) => {
       if (sortOrder === "top") {
-        return b.score - a.score;
+        const scoreDiff =
+          (sortScores.get(b.id) ?? b.score) - (sortScores.get(a.id) ?? a.score);
+        if (scoreDiff !== 0) return scoreDiff;
+        // Newest-first within a score tie, so ordering stays deterministic.
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       }
       if (sortOrder === "oldest") {
         return (
@@ -368,6 +432,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
 
                   <div className="mt-2 flex items-center gap-2">
                     <VoteControl
+                      key={`${id}-${voteResetKey}`}
                       base={
                         score -
                         (userVote === "up" ? 1 : userVote === "down" ? -1 : 0)
