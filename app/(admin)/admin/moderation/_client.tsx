@@ -40,39 +40,21 @@ const reasonLabels: Record<ReportReason, string> = {
 const chipBase =
   "rounded-full px-2 py-0.5 font-mono text-xs uppercase tracking-label";
 
-type PreviewablePost = {
-  type: string | null;
-  slug: string | null;
-  externalUrl: string | null;
-  authorUsername: string | null;
-};
-
-// Where to send a moderator to actually read the thing they're judging.
-// Discussions and questions live under /d/; a shared link IS its destination,
-// so it points off-site; everything else renders at /{username}/{slug}, where
-// the reader grants admins the same bypass the author has — so an in_review
-// post previews exactly as readers would eventually see it.
-function postPreviewHref(post: PreviewablePost): string | null {
-  if (post.type === "link") return post.externalUrl;
-  if (!post.slug) return null;
-  if (post.type === "discussion" || post.type === "question") {
-    return `/d/${post.slug}`;
-  }
-  if (!post.authorUsername) return null;
-  return `/${post.authorUsername}/${post.slug}`;
-}
-
-const PreviewLink = ({ post }: { post: PreviewablePost }) => {
-  const href = postPreviewHref(post);
-  if (!href) return null;
-
-  return (
-    <Link href={href} target="_blank" className="secondary-button">
-      <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-      Preview
-    </Link>
-  );
-};
+// Read the submission before deciding on it. The preview is an admin-side,
+// read-only render (see app/(admin)/admin/moderation/preview/[postId]) rather
+// than the public URL: an unapproved post has no public URL yet, and the public
+// reader would put vote/bookmark/comment controls on a post that may be about
+// to be rejected. Keyed by id, so it is available for every queued post.
+const PreviewLink = ({ postId }: { postId: string }) => (
+  <Link
+    href={`/admin/moderation/preview/${postId}`}
+    target="_blank"
+    className="secondary-button"
+  >
+    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+    Preview
+  </Link>
+);
 
 // datetime-local is in the moderator's LOCAL time, so shift the `min` boundary
 // by the tz offset before slicing to "YYYY-MM-DDTHH:mm".
@@ -310,7 +292,7 @@ const ModerationQueue = () => {
                   )}
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <PreviewLink post={post} />
+                  <PreviewLink postId={post.id} />
                   <button
                     className="primary-button"
                     disabled={isModerating}

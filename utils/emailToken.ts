@@ -3,20 +3,14 @@ import { user } from "@/server/db/schema";
 import crypto from "crypto";
 import sendEmail from "./sendEmail";
 import { eq } from "drizzle-orm";
-
-function getBaseUrl() {
-  if (typeof window !== "undefined") return "";
-  const env = process.env.DOMAIN_NAME || process.env.VERCEL_URL;
-  if (env) return "https://" + env;
-  return "http://localhost:3000";
-}
+import { getAppOrigin } from "@/server/lib/url";
 
 export const generateEmailToken = () => {
   return crypto.randomBytes(64).toString("hex");
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const verificationLink = `${getBaseUrl()}/verify-email?token=${token}`;
+  const verificationLink = `${getAppOrigin()}/verify-email?token=${token}`;
   const subject = "Confirm your email — one tap and you're in";
   const htmlMessage = `
     <!DOCTYPE html>
