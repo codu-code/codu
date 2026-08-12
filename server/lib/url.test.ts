@@ -57,6 +57,16 @@ describe("getAppOrigin", () => {
     expect(getAppOrigin()).toBe(SITE_ORIGIN);
   });
 
+  // A fork deploying to production without VERCEL_PROJECT_PRODUCTION_URL must
+  // not have its verification links point at codu.co.
+  it("prefers a configured auth origin over the canonical one in production", () => {
+    clearEnv();
+    process.env.VERCEL_ENV = "production";
+    process.env.VERCEL_URL = "fork-a1b2c3.vercel.app";
+    process.env.NEXTAUTH_URL = "https://myfork.example/api/auth";
+    expect(getAppOrigin()).toBe("https://myfork.example");
+  });
+
   it("still uses the deployment URL on a preview deploy", () => {
     clearEnv();
     process.env.VERCEL_ENV = "preview";

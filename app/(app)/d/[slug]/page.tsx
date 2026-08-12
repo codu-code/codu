@@ -7,11 +7,12 @@ import { ogPostImage } from "@/lib/og/url";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { posts, user, post_tags, tag, comments } from "@/server/db/schema";
-import { eq, and, lte, inArray, or, isNull, asc, type SQL } from "drizzle-orm";
+import { eq, and, inArray, or, isNull, asc, type SQL } from "drizzle-orm";
 import PostReader, {
   type ReaderPost,
 } from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
+import { postVisibilityFilter } from "@/server/lib/postVisibility";
 import { JsonLd } from "@/components/JsonLd";
 import {
   getDiscussionForumPostingSchema,
@@ -37,13 +38,6 @@ async function getDiscussionPostUncached(
       ? eq(posts.urlId, urlId)
       : or(eq(posts.urlId, urlId), eq(posts.slug, slug))!;
 
-  const publicFilter = and(
-    eq(posts.status, "published"),
-    lte(posts.publishedAt, new Date().toISOString()),
-  );
-
-  // Owner bypass: the author may view their own in_review/rejected discussion;
-  // everyone else only sees published.
   const [row] = await db
     .select({
       id: posts.id,
@@ -73,15 +67,7 @@ async function getDiscussionPostUncached(
       and(
         idMatch,
         inArray(posts.type, ["discussion", "question"]),
-        viewerId
-          ? or(
-              publicFilter,
-              and(
-                eq(posts.authorId, viewerId),
-                inArray(posts.status, ["in_review", "rejected"]),
-              ),
-            )
-          : publicFilter,
+        postVisibilityFilter({ viewerId }),
       ),
     )
     .limit(1);

@@ -20,15 +20,19 @@ export function getAppOrigin(): string {
   const explicit = process.env.DOMAIN_NAME;
   if (explicit) return toOrigin(explicit);
 
-  if (process.env.VERCEL_ENV === "production") {
+  const isProduction = process.env.VERCEL_ENV === "production";
+
+  if (isProduction) {
     // Set by Vercel to the project's production domain in every environment.
     const productionDomain = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-    return productionDomain ? toOrigin(productionDomain) : SITE_ORIGIN;
+    if (productionDomain) return toOrigin(productionDomain);
+  } else {
+    const deployment = process.env.VERCEL_URL;
+    if (deployment) return toOrigin(deployment);
   }
 
-  const deployment = process.env.VERCEL_URL;
-  if (deployment) return toOrigin(deployment);
-
+  // A configured auth origin comes before the hardcoded one so a fork that
+  // sets NEXTAUTH_URL is never sent to codu.co.
   const raw = process.env.NEXTAUTH_URL || process.env.AUTH_URL;
   if (raw) {
     try {
@@ -37,7 +41,8 @@ export function getAppOrigin(): string {
       /* fall through */
     }
   }
-  return "http://localhost:3000";
+
+  return isProduction ? SITE_ORIGIN : "http://localhost:3000";
 }
 
 // Env values arrive both bare (`www.codu.co`) and with a scheme.

@@ -6,10 +6,11 @@ import { type Metadata } from "next";
 import { SITE_ORIGIN } from "@/config/site";
 import { db } from "@/server/db";
 import { posts, user, feed_sources, post_tags, tag } from "@/server/db/schema";
-import { eq, and, lte, inArray, or, sql } from "drizzle-orm";
+import { eq, and, lte, inArray, sql } from "drizzle-orm";
 import UserLinkDetail from "./_userLinkDetail";
 import PostReader from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
+import { postVisibilityFilter } from "@/server/lib/postVisibility";
 import { serverApi } from "@/server/trpc/caller";
 import { JsonLd } from "@/components/JsonLd";
 import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
@@ -40,22 +41,7 @@ async function getUserPostUncached(
 
   if (!userRecord) return null;
 
-  // Owner bypass: the author may view their own in_review/rejected post;
-  // everyone else only sees published posts whose publish time has passed.
-  const isAuthor = !!viewerId && viewerId === userRecord.id;
-
-  const visibilityFilter = isAuthor
-    ? or(
-        and(
-          eq(posts.status, "published"),
-          lte(posts.publishedAt, new Date().toISOString()),
-        ),
-        inArray(posts.status, ["in_review", "rejected"]),
-      )
-    : and(
-        eq(posts.status, "published"),
-        lte(posts.publishedAt, new Date().toISOString()),
-      );
+  const visibilityFilter = postVisibilityFilter({ viewerId });
 
   const postResults = await db
     .select({

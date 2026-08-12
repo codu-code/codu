@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import z from "zod";
 import { db } from "@/server/db";
 import { posts, user, post_tags, tag } from "@/server/db/schema";
 import { PostBody, renderPostBody } from "@/components/ContentDetail/PostBody";
 import { getCamelCaseFromLower } from "@/utils/utils";
 import { safeExternalHref } from "@/utils/url";
+import { moderationPreviewFilter } from "@/server/lib/postVisibility";
 
 export const metadata = {
   title: "Preview - Codú Admin",
@@ -29,38 +31,46 @@ type Props = { params: Promise<{ postId: string }> };
 export default async function Page({ params }: Props) {
   const { postId } = await params;
 
-  const [record] = await db
-    .select({
-      id: posts.id,
-      title: posts.title,
-      body: posts.body,
-      excerpt: posts.excerpt,
-      type: posts.type,
-      status: posts.status,
-      slug: posts.slug,
-      externalUrl: posts.externalUrl,
-      coverImage: posts.coverImage,
-      readingTime: posts.readingTime,
-      createdAt: posts.createdAt,
-      moderationNote: posts.moderationNote,
-      authorName: user.name,
-      authorUsername: user.username,
-    })
-    .from(posts)
-    .leftJoin(user, eq(posts.authorId, user.id))
-    .where(eq(posts.id, postId))
-    .limit(1);
+  // posts.id is a uuid column, so a mistyped or truncated id would make
+  // Postgres throw a cast error (a 500) before the not-found check below.
+  if (!z.string().uuid().safeParse(postId).success) notFound();
 
+  const [rows, tags] = await Promise.all([
+    db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        body: posts.body,
+        excerpt: posts.excerpt,
+        type: posts.type,
+        status: posts.status,
+        slug: posts.slug,
+        externalUrl: posts.externalUrl,
+        coverImage: posts.coverImage,
+        readingTime: posts.readingTime,
+        createdAt: posts.createdAt,
+        moderationNote: posts.moderationNote,
+        authorName: user.name,
+        authorUsername: user.username,
+      })
+      .from(posts)
+      .leftJoin(user, eq(posts.authorId, user.id))
+      // Submitted work only. A moderator has business reading anything that
+      // entered the pipeline; a private draft is not that.
+      .where(and(eq(posts.id, postId), moderationPreviewFilter()))
+      .limit(1),
+    db
+      .select({ title: tag.title, slug: tag.slug })
+      .from(post_tags)
+      .innerJoin(tag, eq(post_tags.tagId, tag.id))
+      .where(eq(post_tags.postId, postId)),
+  ]);
+
+  const record = rows[0];
   if (!record) notFound();
 
   const renderedBody = renderPostBody(record.body);
   const externalHref = safeExternalHref(record.externalUrl);
-
-  const tags = await db
-    .select({ title: tag.title, slug: tag.slug })
-    .from(post_tags)
-    .innerJoin(tag, eq(post_tags.tagId, tag.id))
-    .where(eq(post_tags.postId, record.id));
 
   return (
     <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">

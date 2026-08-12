@@ -75,9 +75,18 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     data: discussionsResponse,
     refetch,
     status: discussionStatus,
-  } = api.discussion.get.useQuery({
-    contentId,
-  });
+  } = api.discussion.get.useQuery(
+    { contentId },
+    {
+      // "Top" ranks by score, so any refetch can re-rank the thread. Refetching
+      // on window focus would do that to someone who just tabbed back mid-read,
+      // which is the jumping this component is trying to avoid. The explicit
+      // refetches after create/edit/delete stay — those follow an action the
+      // reader took, so a reflow there is expected.
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
+    },
+  );
 
   const { mutate, status: createDiscussionStatus } =
     api.discussion.create.useMutation({
@@ -101,8 +110,18 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   );
 
   const { mutateAsync: vote } = api.discussion.vote.useMutation({
-    onError(error, variables) {
-      toast.error(error.message || "Something went wrong, try again.");
+    async onError(error, variables) {
+      // Rate limiting is the one failure whose message is written for readers;
+      // anything else can carry driver/schema text, so keep it generic.
+      toast.error(
+        error.data?.code === "TOO_MANY_REQUESTS"
+          ? error.message
+          : "Something went wrong, try again.",
+      );
+      // Refetch BEFORE remounting. A successful vote does not refetch, so the
+      // cache can be behind by any votes cast this session; reseeding a control
+      // from it without refreshing first would strand those showing old counts.
+      await refetch();
       setVoteResetKeys((keys) => ({
         ...keys,
         [variables.discussionId]: (keys[variables.discussionId] ?? 0) + 1,
@@ -176,10 +195,17 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     items: Discussions | Children | undefined,
   ): typeof items => {
     if (!items) return items;
-    // Array#sort is stable, so equal scores keep the server's order.
     const sorted = [...items].sort((a, b) => {
       if (sortOrder === "top") {
-        return b.score - a.score;
+        if (b.score !== a.score) return b.score - a.score;
+        // Ties need an explicit order: the server sorts by ltree path, which is
+        // built from a random uuid, so leaning on sort stability would leave
+        // equal-score comments (most of a young thread) in arbitrary order.
+        // Oldest first, so "Top" degrades to chronological rather than to a
+        // copy of "New", and a fresh comment lands somewhere predictable.
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
       }
       if (sortOrder === "oldest") {
         return (
