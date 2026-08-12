@@ -7,12 +7,11 @@ import { ogPostImage } from "@/lib/og/url";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { posts, user, post_tags, tag, comments } from "@/server/db/schema";
-import { eq, and, inArray, or, isNull, asc, type SQL } from "drizzle-orm";
+import { eq, and, lte, inArray, or, isNull, asc, type SQL } from "drizzle-orm";
 import PostReader, {
   type ReaderPost,
 } from "@/components/ContentDetail/PostReader";
 import { parseUrlId, canonicalMismatch } from "@/server/lib/content-url";
-import { postVisibilityFilter } from "@/server/lib/postVisibility";
 import { JsonLd } from "@/components/JsonLd";
 import {
   getDiscussionForumPostingSchema,
@@ -27,7 +26,6 @@ type Props = { params: Promise<{ slug: string }> };
 async function getDiscussionPostUncached(
   slug: string,
   viewerId?: string | null,
-  viewerIsAdmin = false,
 ): Promise<ReaderPost | null> {
   const urlId = parseUrlId(slug);
   if (!urlId) return null;
@@ -39,6 +37,13 @@ async function getDiscussionPostUncached(
       ? eq(posts.urlId, urlId)
       : or(eq(posts.urlId, urlId), eq(posts.slug, slug))!;
 
+  const publicFilter = and(
+    eq(posts.status, "published"),
+    lte(posts.publishedAt, new Date().toISOString()),
+  );
+
+  // Owner bypass: the author may view their own in_review/rejected discussion;
+  // everyone else only sees published.
   const [row] = await db
     .select({
       id: posts.id,
@@ -68,7 +73,15 @@ async function getDiscussionPostUncached(
       and(
         idMatch,
         inArray(posts.type, ["discussion", "question"]),
-        postVisibilityFilter({ viewerId, viewerIsAdmin }),
+        viewerId
+          ? or(
+              publicFilter,
+              and(
+                eq(posts.authorId, viewerId),
+                inArray(posts.status, ["in_review", "rejected"]),
+              ),
+            )
+          : publicFilter,
       ),
     )
     .limit(1);
@@ -147,11 +160,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
   // Same viewerId as the page body so the cache()d resolver runs once per request.
   const session = await getServerAuthSession();
-  const post = await getDiscussionPost(
-    slug,
-    session?.user?.id,
-    session?.user?.role === "ADMIN",
-  );
+  const post = await getDiscussionPost(slug, session?.user?.id);
 
   if (!post) {
     return { title: "Discussion Not Found" };
@@ -201,11 +210,7 @@ const DiscussionPage = async (props: Props) => {
   const { slug } = await props.params;
   const session = await getServerAuthSession();
 
-  const post = await getDiscussionPost(
-    slug,
-    session?.user?.id,
-    session?.user?.role === "ADMIN",
-  );
+  const post = await getDiscussionPost(slug, session?.user?.id);
 
   if (!post) return notFound();
 
