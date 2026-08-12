@@ -80,7 +80,12 @@ export default defineConfig({
      is triggered by `pull_request_target`, so the workflow file always comes
      from the BASE branch while the code comes from the PR head. A build step
      added to the workflow would not run until after merge — but this config
-     does, so the two can never disagree. */
+     does, so the two can never disagree.
+
+     `start:e2e` also sets AUTH_TRUST_HOST: a production build runs with
+     NODE_ENV=production, where NextAuth stops trusting the request host unless
+     told to, and every session lookup fails with UntrustedHost. Dev never hits
+     this because it trusts the host implicitly. */
   webServer: {
     command: process.env.CI
       ? "npm run build:e2e && npm run start:e2e"
