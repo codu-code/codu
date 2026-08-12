@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Menu,
   MenuButton,
@@ -91,28 +91,61 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
       },
     });
 
-  // Bumped to remount every VoteControl, which owns its own optimistic state.
-  // Only needed when a vote fails and that local state has to resync with the
-  // server; a successful vote needs no refetch, so the thread never reflows.
-  const [voteResetKey, setVoteResetKey] = useState(0);
+  // VoteControl owns its own optimistic state, so a failed vote has to be told
+  // to resync. Bumping this comment's key remounts just that control, which
+  // reseeds from the cache — which never saw the failed vote, so it is the
+  // truth. Keyed per comment so one failure cannot discard the optimistic state
+  // of votes on other comments (or ones still in flight).
+  const [voteResetKeys, setVoteResetKeys] = useState<Record<string, number>>(
+    {},
+  );
 
-  const { mutate: vote } = api.discussion.vote.useMutation({
-    async onError() {
-      toast.error("Something went wrong, try again.");
-      // Refetch BEFORE remounting: the controls seed their state on mount, so
-      // bumping the key first would reseed them from the pre-vote cache and
-      // strand every earlier successful vote showing its old count.
-      await refetch();
-      setVoteResetKey((key) => key + 1);
+  const { mutateAsync: vote } = api.discussion.vote.useMutation({
+    onError(error, variables) {
+      toast.error(error.message || "Something went wrong, try again.");
+      setVoteResetKeys((keys) => ({
+        ...keys,
+        [variables.discussionId]: (keys[variables.discussionId] ?? 0) + 1,
+      }));
     },
   });
+
+  // One request in flight per comment, with the newest click replacing any
+  // queued one. Without this, double-clicking an arrow fires two overlapping
+  // requests whose writes can land in either order, leaving the stored vote
+  // disagreeing with what the reader sees — and burning rate-limit budget.
+  const voteQueues = useRef(
+    new Map<string, { running: boolean; next?: "up" | "down" | null }>(),
+  );
+
+  const drainVotes = async (discussionId: string) => {
+    const queue = voteQueues.current.get(discussionId);
+    if (!queue || queue.running) return;
+
+    queue.running = true;
+    while (queue.next !== undefined) {
+      const voteType = queue.next;
+      queue.next = undefined;
+      try {
+        await vote({ discussionId, voteType });
+      } catch {
+        // onError has already reported and resynced this comment; drop
+        // whatever was queued behind the failure rather than replaying it.
+        break;
+      }
+    }
+    queue.running = false;
+  };
 
   const voteDiscussion = (
     discussionId: string,
     voteType: "up" | "down" | null,
   ) => {
     if (!session) return signIn();
-    vote({ discussionId, voteType });
+    const queue = voteQueues.current.get(discussionId) ?? { running: false };
+    queue.next = voteType;
+    voteQueues.current.set(discussionId, queue);
+    void drainVotes(discussionId);
   };
 
   const discussions = discussionsResponse?.data;
@@ -135,71 +168,18 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
   type Discussions = typeof discussions;
   type Children = typeof firstChild;
 
-  // "Top" ranks by score, but re-ranking on every vote makes comments jump
-  // around while somebody is reading them. So each comment's sort score is
-  // frozen the first time we see it and reused from then on: the thread still
-  // reorders by votes, it just does it on the next load instead of mid-read.
-  // (The date-based sorts need no freezing — createdAt never changes.)
-  //
-  // The trade-off is deliberate: a tab left open for hours keeps the ranking it
-  // loaded with, even after other people's votes arrive with a later refetch.
-  // Re-picking the sort below drops the snapshot, so a reader who wants the
-  // current ranking has one click to get it.
-  const frozenSortScores = useRef(new Map<string, number>());
-  const frozenForSort = useRef<SortOrder>(sortOrder);
-
-  // Minimal shape the tree walkers below need, so they can recurse without
-  // depending on the full inferred tRPC comment type.
-  type ScoredNode = { id: string; score: number; children?: ScoredNode[] };
-
-  // Identity of the comment *set*, which changes only when comments are added
-  // or removed — not when their scores change. Drives the capture below.
-  const commentSetKey = useMemo(() => {
-    const ids: string[] = [];
-    const collect = (items: ScoredNode[] | undefined) => {
-      items?.forEach((item) => {
-        ids.push(item.id);
-        collect(item.children);
-      });
-    };
-    collect(discussions as ScoredNode[] | undefined);
-    return ids.join(",");
-  }, [discussions]);
-
-  const sortScores = useMemo(() => {
-    // Re-picking a sort is a deliberate "show me the current ranking", so let
-    // that re-rank from live scores. Passive vote traffic must not.
-    if (frozenForSort.current !== sortOrder) {
-      frozenForSort.current = sortOrder;
-      frozenSortScores.current.clear();
-    }
-    const captured = frozenSortScores.current;
-    const capture = (items: ScoredNode[] | undefined) => {
-      items?.forEach((item) => {
-        if (!captured.has(item.id)) captured.set(item.id, item.score);
-        capture(item.children);
-      });
-    };
-    capture(discussions as ScoredNode[] | undefined);
-    return new Map(captured);
-    // Intentionally keyed on the comment set rather than `discussions` itself:
-    // a score changing must NOT re-capture, or the freeze does nothing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [commentSetKey, sortOrder]);
-
+  // Ordering is derived from `discussions`, so it only changes when that data
+  // changes. A successful vote deliberately does not refetch (see the mutation
+  // above), which is what stops a liked comment from re-ranking under the
+  // reader — the new count lives in VoteControl until the next load.
   const sortDiscussions = (
     items: Discussions | Children | undefined,
   ): typeof items => {
     if (!items) return items;
+    // Array#sort is stable, so equal scores keep the server's order.
     const sorted = [...items].sort((a, b) => {
       if (sortOrder === "top") {
-        const scoreDiff =
-          (sortScores.get(b.id) ?? b.score) - (sortScores.get(a.id) ?? a.score);
-        if (scoreDiff !== 0) return scoreDiff;
-        // Newest-first within a score tie, so ordering stays deterministic.
-        return (
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+        return b.score - a.score;
       }
       if (sortOrder === "oldest") {
         return (
@@ -432,7 +412,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
 
                   <div className="mt-2 flex items-center gap-2">
                     <VoteControl
-                      key={`${id}-${voteResetKey}`}
+                      key={`${id}-${voteResetKeys[id] ?? 0}`}
                       base={
                         score -
                         (userVote === "up" ? 1 : userVote === "down" ? -1 : 0)
