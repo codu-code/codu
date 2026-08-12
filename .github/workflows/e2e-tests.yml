@@ -41,6 +41,9 @@ jobs:
     env:
       DATABASE_URL: "postgresql://postgres:secret@localhost:5432/postgres"
       NEXTAUTH_URL: http://localhost:3000/api/auth
+      # A production build sets NODE_ENV=production, which would otherwise turn
+      # off the passwordless provider that dev enables implicitly.
+      EMAIL_AUTH_ENABLED: "true"
       GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
       GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -90,6 +93,12 @@ jobs:
         run: |
           npm run db:migrate
           npm run db:seed
+
+      # Playwright serves this build (see webServer in playwright.config.ts).
+      # Tests used to run against `next dev`, where the first hit on a route
+      # blocked on an on-demand compile for longer than the assertion timeouts.
+      - name: Build app
+        run: npm run build:e2e
 
       - name: Run Playwright tests
         id: playwright-tests
