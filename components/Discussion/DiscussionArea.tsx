@@ -82,13 +82,14 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
       // on window focus would do that to someone who just tabbed back mid-read,
       // which is the jumping this component is trying to avoid. The explicit
       // refetches after create/edit/delete stay — those follow an action the
-      // reader took, so a reflow there is expected.
+      // reader took, so a reflow there is expected. The trade-off: a tab left
+      // open does not pick up other people's new comments until you post,
+      // navigate or reload.
       refetchOnWindowFocus: false,
-      staleTime: 60_000,
     },
   );
 
-  const { mutate, status: createDiscussionStatus } =
+  const { mutateAsync: createDiscussion, status: createDiscussionStatus } =
     api.discussion.create.useMutation({
       onSuccess: () => {
         refetch();
@@ -148,8 +149,11 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
       try {
         await vote({ discussionId, voteType });
       } catch {
-        // onError has already reported and resynced this comment; drop
-        // whatever was queued behind the failure rather than replaying it.
+        // Stop on failure rather than replaying whatever was queued behind it:
+        // the common cause is rate limiting, and draining into it would just
+        // fail again. onError has already toasted and resynced this comment's
+        // control to the server state, so the reader can see what stuck.
+        queue.next = undefined;
         break;
       }
     }
@@ -169,7 +173,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
 
   const discussions = discussionsResponse?.data;
 
-  const { mutate: editDiscussion, status: editStatus } =
+  const { mutateAsync: editDiscussion, status: editStatus } =
     api.discussion.edit.useMutation({
       onSuccess: () => {
         refetch();
@@ -198,13 +202,13 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     const sorted = [...items].sort((a, b) => {
       if (sortOrder === "top") {
         if (b.score !== a.score) return b.score - a.score;
-        // Ties need an explicit order: the server sorts by ltree path, which is
-        // built from a random uuid, so leaning on sort stability would leave
-        // equal-score comments (most of a young thread) in arbitrary order.
-        // Oldest first, so "Top" degrades to chronological rather than to a
-        // copy of "New", and a fresh comment lands somewhere predictable.
+        // Ties need an explicit order: the server sorts by ltree path, built
+        // from a random uuid, so leaning on sort stability would leave
+        // equal-score comments — most of a young thread — in arbitrary order.
+        // Newest first, so a comment you just posted is at the top of the
+        // default view rather than buried at the bottom of the zero-score run.
         return (
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       }
       if (sortOrder === "oldest") {
@@ -233,7 +237,7 @@ const DiscussionArea = ({ contentId, noWrapper = false }: Props) => {
     }
 
     try {
-      await mutate({
+      await createDiscussion({
         body,
         contentId,
         parentId,

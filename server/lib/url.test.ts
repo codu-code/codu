@@ -50,10 +50,18 @@ describe("getAppOrigin", () => {
     expect(getAppOrigin()).toBe("https://www.codu.co");
   });
 
-  it("falls back to the canonical origin if the production domain is unset", () => {
+  // Nothing configured at all: the deployment URL is a poor origin to email,
+  // but it beats sending a fork's users to somebody else's domain.
+  it("falls back to the deployment URL before the canonical origin", () => {
     clearEnv();
     process.env.VERCEL_ENV = "production";
     process.env.VERCEL_URL = "codu-a1b2c3.vercel.app";
+    expect(getAppOrigin()).toBe("https://codu-a1b2c3.vercel.app");
+  });
+
+  it("falls back to the canonical origin when there is nothing else", () => {
+    clearEnv();
+    process.env.VERCEL_ENV = "production";
     expect(getAppOrigin()).toBe(SITE_ORIGIN);
   });
 

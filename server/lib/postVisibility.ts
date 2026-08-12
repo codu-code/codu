@@ -1,17 +1,19 @@
 import { and, eq, inArray, lte, or, type SQL } from "drizzle-orm";
-import { posts } from "@/server/db/schema";
+import { posts, postStatus } from "@/server/db/schema";
 
 /**
- * Statuses a post can be in and still be readable by someone other than its
- * author. `draft` is deliberately absent: a draft is private work in progress,
- * and nothing — not the public reader, not the moderation preview — should
- * surface one to anybody else.
+ * Every post status except `draft`. A draft is private work in progress, so
+ * nothing — not the public reader, not the moderation preview — surfaces one to
+ * anybody but its author. Everything else has been submitted in some form.
+ *
+ * Derived from the enum rather than listed by hand: spelling out a subset meant
+ * `scheduled` (which is what approve-with-schedule produces) and `unlisted`
+ * were silently missing, so the preview 404'd on posts an admin had just
+ * approved. A new status now joins this list automatically.
  */
-export const NON_DRAFT_STATUSES = [
-  "published",
-  "in_review",
-  "rejected",
-] as const;
+export const NON_DRAFT_STATUSES = postStatus.enumValues.filter(
+  (status) => status !== "draft",
+);
 
 /**
  * Who may see a post on the public reader routes.
@@ -43,10 +45,10 @@ export function postVisibilityFilter(viewer: {
 }
 
 /**
- * Which posts a moderator may open in the review preview. Everything that has
- * been submitted — queued, already rejected, or live and since reported — but
- * never a private draft.
+ * Which posts a moderator may open in the review preview: anything submitted —
+ * queued, scheduled, already rejected, or live and since reported — but never a
+ * private draft.
  */
 export function moderationPreviewFilter(): SQL {
-  return inArray(posts.status, [...NON_DRAFT_STATUSES]);
+  return inArray(posts.status, NON_DRAFT_STATUSES);
 }

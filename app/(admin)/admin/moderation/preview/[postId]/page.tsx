@@ -44,13 +44,10 @@ export default async function Page({ params }: Props) {
         excerpt: posts.excerpt,
         type: posts.type,
         status: posts.status,
-        slug: posts.slug,
         externalUrl: posts.externalUrl,
         coverImage: posts.coverImage,
         readingTime: posts.readingTime,
-        createdAt: posts.createdAt,
         moderationNote: posts.moderationNote,
-        authorName: user.name,
         authorUsername: user.username,
       })
       .from(posts)
@@ -71,6 +68,8 @@ export default async function Page({ params }: Props) {
 
   const renderedBody = renderPostBody(record.body);
   const externalHref = safeExternalHref(record.externalUrl);
+  // Member-supplied, like externalUrl — same scheme guard applies.
+  const coverHref = safeExternalHref(record.coverImage);
 
   return (
     <div className="mx-auto max-w-3xl px-0 py-4 sm:px-4 sm:py-8">
@@ -105,6 +104,18 @@ export default async function Page({ params }: Props) {
 
       {record.excerpt && (
         <p className="mb-6 text-base text-muted">{record.excerpt}</p>
+      )}
+
+      {/* The cover image is the most visible part of a post on feed and profile
+          cards, so a moderator has to see it before approving — clean body copy
+          under an abusive image would otherwise sail through. */}
+      {coverHref && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={coverHref}
+          alt=""
+          className="mb-6 max-h-80 w-full rounded-lg border border-hairline object-cover"
+        />
       )}
 
       {/* A link submission is judged on both halves: the member's own framing
@@ -146,7 +157,14 @@ export default async function Page({ params }: Props) {
 
       {record.body ? (
         <article className="prose max-w-none dark:prose-invert">
-          <PostBody {...renderedBody} />
+          <PostBody
+            {...renderedBody}
+            emptyFallback={
+              <p className="font-mono text-sm text-faint">
+                {"// body is empty"}
+              </p>
+            }
+          />
         </article>
       ) : (
         <p className="font-mono text-sm text-faint">{"// no body submitted"}</p>

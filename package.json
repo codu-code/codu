@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "dev:e2e": "ENV=E2E next dev",
-    "build:e2e": "ENV=E2E next build",
-    "start:e2e": "ENV=E2E next start",
+    "build:e2e": "ENV=E2E EMAIL_AUTH_ENABLED=true next build",
+    "start:e2e": "ENV=E2E EMAIL_AUTH_ENABLED=true next start",
     "build": "next build",
     "ci-build": "next build",
     "vercel-build": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npm run db:migrate; fi && next build",

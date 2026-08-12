@@ -76,11 +76,18 @@ export default defineConfig({
      admin-nav, editor-publish, bookmark, feed and moderation specs fail there
      while the same suite stayed green locally. A prebuilt server has no
      per-route compile step, so those assertions see the page immediately.
-     The workflow runs `build:e2e` before invoking Playwright. */
+     The build runs here rather than as a workflow step on purpose: the e2e job
+     is triggered by `pull_request_target`, so the workflow file always comes
+     from the BASE branch while the code comes from the PR head. A build step
+     added to the workflow would not run until after merge — but this config
+     does, so the two can never disagree. */
   webServer: {
-    command: process.env.CI ? "npm run start:e2e" : "npm run dev:e2e",
+    command: process.env.CI
+      ? "npm run build:e2e && npm run start:e2e"
+      : "npm run dev:e2e",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // Generous: on CI this covers a cold production build, not just boot.
+    timeout: process.env.CI ? 600_000 : 120_000,
   },
 });

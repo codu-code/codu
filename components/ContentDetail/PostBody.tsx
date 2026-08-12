@@ -5,7 +5,6 @@ import { generateHTML } from "@tiptap/core";
 import sanitizeHtml from "sanitize-html";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
-import NotFound from "@/components/NotFound/NotFound";
 import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
 
 // A post body is either tiptap JSON (newer editor) or markdoc source. Both the
@@ -64,11 +63,17 @@ export function renderPostBody(body: string | null): {
  * The rendered body only. The heading is the caller's business: the reader
  * prints the title above markdoc bodies (tiptap bodies carry their own H1),
  * and the admin preview always shows its own header.
+ *
+ * `emptyFallback` covers a tiptap body that parses but renders to nothing. What
+ * to show there depends on the surface — the public reader treats it as a
+ * missing page, the moderation preview as an empty submission — so the caller
+ * decides rather than this component hardcoding a full-page 404.
  */
 export const PostBody = ({
   isTiptap,
   content,
-}: ReturnType<typeof renderPostBody>) => {
+  emptyFallback = null,
+}: ReturnType<typeof renderPostBody> & { emptyFallback?: React.ReactNode }) => {
   if (isTiptap) {
     return content ? (
       <div
@@ -76,7 +81,7 @@ export const PostBody = ({
         className="tiptap-content"
       />
     ) : (
-      <NotFound />
+      emptyFallback
     );
   }
 

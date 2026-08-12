@@ -31,7 +31,7 @@ export function getAppOrigin(): string {
     if (deployment) return toOrigin(deployment);
   }
 
-  // A configured auth origin comes before the hardcoded one so a fork that
+  // A configured auth origin comes before anything hardcoded, so a fork that
   // sets NEXTAUTH_URL is never sent to codu.co.
   const raw = process.env.NEXTAUTH_URL || process.env.AUTH_URL;
   if (raw) {
@@ -40,6 +40,13 @@ export function getAppOrigin(): string {
     } catch {
       /* fall through */
     }
+  }
+
+  // Last resort on a production deploy with nothing configured: the deployment
+  // URL is the wrong origin to email out, but it is at least THIS deployment.
+  // SITE_ORIGIN would send a fork's users to somebody else's site.
+  if (isProduction && process.env.VERCEL_URL) {
+    return toOrigin(process.env.VERCEL_URL);
   }
 
   return isProduction ? SITE_ORIGIN : "http://localhost:3000";

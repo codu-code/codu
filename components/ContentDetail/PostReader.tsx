@@ -4,6 +4,7 @@ import DiscussionArea from "@/components/Discussion/DiscussionArea";
 import { ArticleActionBarWrapper } from "@/components/ArticleActionBar";
 import InlineAuthorBio from "@/components/ContentDetail/InlineAuthorBio";
 import { PostBody, renderPostBody } from "@/components/ContentDetail/PostBody";
+import NotFound from "@/components/NotFound/NotFound";
 import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { JsonLd } from "@/components/JsonLd";
 import { getCamelCaseFromLower, slugifyTag } from "@/utils/utils";
@@ -205,7 +206,7 @@ const PostReader = async ({
           <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
             {!isTiptapContent && <h1>{post.title}</h1>}
 
-            <PostBody {...renderedBody} />
+            <PostBody {...renderedBody} emptyFallback={<NotFound />} />
           </div>
 
           {post.tags.length > 0 && (
