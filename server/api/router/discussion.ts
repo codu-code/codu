@@ -294,39 +294,35 @@ export const discussionRouter = createTRPCRouter({
         });
       }
 
-      const existingVote = await ctx.db
-        .select({ id: comment_votes.id, voteType: comment_votes.voteType })
-        .from(comment_votes)
-        .where(
-          and(
-            eq(comment_votes.commentId, commentId),
-            eq(comment_votes.userId, userId),
-          ),
-        )
-        .limit(1);
-
       // Vote counts are kept in sync by trigger (tr_comment_vote_counts).
+      // Write without reading first: a read-then-write races itself when the
+      // same user's clicks overlap (two requests both see "no vote" and both
+      // INSERT, tripping comment_votes_comment_id_user_id_key). Delete-by-key
+      // and upsert are each a single statement, so whichever request commits
+      // last simply wins.
       if (voteType === null) {
-        if (existingVote.length > 0) {
-          await ctx.db
-            .delete(comment_votes)
-            .where(eq(comment_votes.id, existingVote[0].id));
-        }
+        await ctx.db
+          .delete(comment_votes)
+          .where(
+            and(
+              eq(comment_votes.commentId, commentId),
+              eq(comment_votes.userId, userId),
+            ),
+          );
         return { voteType: null };
-      } else if (existingVote.length === 0) {
-        await ctx.db.insert(comment_votes).values({
+      }
+
+      await ctx.db
+        .insert(comment_votes)
+        .values({
           commentId,
           userId,
           voteType: voteType as "up" | "down",
+        })
+        .onConflictDoUpdate({
+          target: [comment_votes.commentId, comment_votes.userId],
+          set: { voteType: voteType as "up" | "down" },
         });
-        return { voteType };
-      } else if (existingVote[0].voteType !== voteType) {
-        await ctx.db
-          .update(comment_votes)
-          .set({ voteType: voteType as "up" | "down" })
-          .where(eq(comment_votes.id, existingVote[0].id));
-        return { voteType };
-      }
 
       return { voteType };
     }),
