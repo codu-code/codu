@@ -205,12 +205,19 @@ export const adminRouter = createTRPCRouter({
 
   // Auto-moderation queue: posts awaiting human review (status `in_review`).
   // `moderationNote` surfaces WHY a post was flagged (auto-mod reason, etc.).
+  // `excerpt` gives a moderator a first impression in the queue itself, while
+  // `type` and `externalUrl` decide where its Preview link points: /d/{slug}
+  // for discussions and questions, the linked page for shared links, and
+  // /{user}/{slug} for everything the site renders itself.
   listInReview: adminOnlyProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db
       .select({
         id: posts.id,
         title: posts.title,
         slug: posts.slug,
+        type: posts.type,
+        excerpt: posts.excerpt,
+        externalUrl: posts.externalUrl,
         authorId: posts.authorId,
         authorUsername: user.username,
         authorName: user.name,
