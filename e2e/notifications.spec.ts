@@ -249,12 +249,11 @@ test.describe("Notifications Page", () => {
         .first()
         .fill(replyText);
 
-      // Submit the reply - click the Reply button within the reply form
-      // The submit button has the same text "Reply" as the expand button, but it's the last one
-      await commentSection
-        .getByRole("button", { name: "Reply", exact: true })
-        .last()
-        .click();
+      // Submit the reply. "Reply" is also the label of every comment's
+      // expand-reply button, so match the editor's submit button by test id —
+      // only one editor is open at a time, so this is unambiguous even once
+      // the comment has nested children.
+      await commentSection.getByTestId("discussion-submit").first().click();
 
       // Verify reply was posted - this confirms the mutation completed and notification was created
       await expect(page.getByText(replyText)).toBeVisible({ timeout: 15000 });

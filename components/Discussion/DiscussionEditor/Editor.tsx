@@ -103,8 +103,12 @@ export function DiscussionEditor({
           >
             Cancel
           </button>
+          {/* Stable hook for tests: the submit label ("Reply") is also the
+              label of every comment's expand-reply button, so picking this one
+              out by text alone is ambiguous once a thread has nesting. */}
           <button
             type="button"
+            data-testid="discussion-submit"
             onClick={handleSubmit}
             disabled={isSubmitting || isEmpty}
             className="primary-button px-4 py-1.5 text-sm"

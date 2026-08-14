@@ -1,6 +1,12 @@
 import { test, expect } from "playwright/test";
 import { randomUUID } from "crypto";
-import { articleContent, articleExcerpt, loggedInAsUserOne } from "./utils";
+import {
+  articleContent,
+  articleExcerpt,
+  createArticle,
+  deletePostBySlug,
+  loggedInAsUserOne,
+} from "./utils";
 
 // Post-relaunch: the feed is the homepage at "/". The old /articles and
 // /feed?type=article routes 308-redirect to "/?type=article". Basic feed
@@ -219,46 +225,50 @@ test.describe("Authenticated Article Flows", () => {
     await expect(page.getByLabel("Upvote").first()).toBeVisible();
   });
 
-  test("Should be able to bookmark an article", async ({ page }) => {
-    await page.goto(PUBLISHED_ARTICLE_URL);
-    await page.waitForLoadState("domcontentloaded");
-
-    // Reader action bar bookmark button toggles between "Save" and "Saved".
-    // Another parallel test may have already saved it, so handle both states.
-    const saveButton = page.getByRole("button", { name: "Save", exact: true });
-    const savedButton = page.getByRole("button", {
-      name: "Saved",
-      exact: true,
+  test("Should be able to bookmark an article", async ({ page }, testInfo) => {
+    // Bookmarks are per-user and every browser project runs as the SAME e2e
+    // user, so a shared article turns this into a cross-project race: one
+    // project saves it while another is asserting it is still unsaved.
+    // (Serial mode only orders tests within a project, not across them.)
+    // Each project therefore bookmarks an article of its own.
+    const slug = `e2e-bookmark-${testInfo.project.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")}`;
+    await createArticle({
+      title: "E2E bookmark target",
+      slug,
+      excerpt: "Bookmark target",
+      body: "Bookmark target body",
     });
 
-    const isSaved = await savedButton.isVisible().catch(() => false);
+    try {
+      await page.goto(`http://localhost:3000/e2e-test-user-one-111/${slug}`);
+      await page.waitForLoadState("domcontentloaded");
 
-    if (isSaved) {
-      // Already bookmarked - unbookmark then rebookmark to test the flow
-      await savedButton.scrollIntoViewIfNeeded();
+      const saveButton = page.getByRole("button", {
+        name: "Save",
+        exact: true,
+      });
+      const savedButton = page.getByRole("button", {
+        name: "Saved",
+        exact: true,
+      });
+
+      await expect(saveButton).toBeVisible({ timeout: 15000 });
+      await expect(saveButton).toBeEnabled({ timeout: 5000 });
+      await saveButton.scrollIntoViewIfNeeded();
       await Promise.all([
         page.waitForResponse(
           (resp) =>
             resp.url().includes("trpc") && resp.url().includes("bookmark"),
         ),
-        savedButton.click(),
+        saveButton.click(),
       ]);
-      await expect(saveButton).toBeVisible({ timeout: 15000 });
+
+      // Button text should change to "Saved"
+      await expect(savedButton).toBeVisible({ timeout: 30000 });
+    } finally {
+      await deletePostBySlug(slug);
     }
-
-    // Now bookmark the article
-    await expect(saveButton).toBeVisible({ timeout: 15000 });
-    await expect(saveButton).toBeEnabled({ timeout: 5000 });
-    await saveButton.scrollIntoViewIfNeeded();
-    await Promise.all([
-      page.waitForResponse(
-        (resp) =>
-          resp.url().includes("trpc") && resp.url().includes("bookmark"),
-      ),
-      saveButton.click(),
-    ]);
-
-    // Button text should change to "Saved"
-    await expect(savedButton).toBeVisible({ timeout: 30000 });
   });
 });
