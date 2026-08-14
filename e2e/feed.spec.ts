@@ -129,6 +129,13 @@ test.describe("Authenticated Feed Page", () => {
     page,
     isMobile,
   }) => {
+    if (!isMobile) {
+      // The right rail folds away under 1300px (see .app-main in globals.css),
+      // and the default desktop viewport is 1280 — so widen past the breakpoint
+      // before asserting the rail is there.
+      await page.setViewportSize({ width: 1440, height: 900 });
+    }
+
     await page.goto("http://localhost:3000/");
     await page.waitForSelector("article");
 
