@@ -68,10 +68,31 @@ export default defineConfig({
 
   outputDir: "playwright-report",
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests.
+
+     CI serves a production build instead. Against `next dev`, the FIRST visit
+     to each route waits on an on-demand Turbopack compile, which on a cold
+     runner routinely outlasts the 10s expect timeout — that is what made the
+     admin-nav, editor-publish, bookmark, feed and moderation specs fail there
+     while the same suite stayed green locally. A prebuilt server has no
+     per-route compile step, so those assertions see the page immediately.
+     The build runs here rather than as a workflow step on purpose: the e2e job
+     is triggered by `pull_request_target`, so the workflow file always comes
+     from the BASE branch while the code comes from the PR head. A build step
+     added to the workflow would not run until after merge — but this config
+     does, so the two can never disagree.
+
+     `start:e2e` also sets AUTH_TRUST_HOST: a production build runs with
+     NODE_ENV=production, where NextAuth stops trusting the request host unless
+     told to, and every session lookup fails with UntrustedHost. Dev never hits
+     this because it trusts the host implicitly. */
   webServer: {
-    command: "npm run dev:e2e",
+    command: process.env.CI
+      ? "npm run build:e2e && npm run start:e2e"
+      : "npm run dev:e2e",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
+    // Generous: on CI this covers a cold production build, not just boot.
+    timeout: process.env.CI ? 600_000 : 120_000,
   },
 });

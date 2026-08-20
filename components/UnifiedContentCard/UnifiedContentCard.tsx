@@ -276,6 +276,7 @@ const UnifiedContentCard = ({
 
           <Link
             href={cardUrl}
+            data-testid="content-card-link"
             onClick={type === "LINK" ? handleExternalClick : undefined}
             className="mt-3 block"
           >

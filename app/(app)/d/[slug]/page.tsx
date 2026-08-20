@@ -27,7 +27,6 @@ type Props = { params: Promise<{ slug: string }> };
 async function getDiscussionPostUncached(
   slug: string,
   viewerId?: string | null,
-  viewerIsAdmin = false,
 ): Promise<ReaderPost | null> {
   const urlId = parseUrlId(slug);
   if (!urlId) return null;
@@ -68,7 +67,7 @@ async function getDiscussionPostUncached(
       and(
         idMatch,
         inArray(posts.type, ["discussion", "question"]),
-        postVisibilityFilter({ viewerId, viewerIsAdmin }),
+        postVisibilityFilter({ viewerId }),
       ),
     )
     .limit(1);
@@ -147,11 +146,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
   // Same viewerId as the page body so the cache()d resolver runs once per request.
   const session = await getServerAuthSession();
-  const post = await getDiscussionPost(
-    slug,
-    session?.user?.id,
-    session?.user?.role === "ADMIN",
-  );
+  const post = await getDiscussionPost(slug, session?.user?.id);
 
   if (!post) {
     return { title: "Discussion Not Found" };
@@ -201,11 +196,7 @@ const DiscussionPage = async (props: Props) => {
   const { slug } = await props.params;
   const session = await getServerAuthSession();
 
-  const post = await getDiscussionPost(
-    slug,
-    session?.user?.id,
-    session?.user?.role === "ADMIN",
-  );
+  const post = await getDiscussionPost(slug, session?.user?.id);
 
   if (!post) return notFound();
 

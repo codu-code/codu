@@ -5,9 +5,15 @@ import {
   E2E_ROUTING_SOURCE_SLUG,
 } from "./constants";
 
+// Honour DATABASE_URL so the suite can be pointed at a throwaway database
+// instead of always writing into whatever is on localhost:5432/postgres.
+const E2E_DATABASE_URL =
+  process.env.DATABASE_URL ??
+  "postgresql://postgres:secret@127.0.0.1:5432/postgres";
+
 export const teardown = async () => {
   try {
-    const db = postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres");
+    const db = postgres(E2E_DATABASE_URL);
 
     // Relaunch content lives in the new `posts` / `comments` tables (author_id),
     // not the legacy "Post" / "Comment" tables (userId). Clean both so reruns

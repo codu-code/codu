@@ -35,10 +35,14 @@ import {
 } from "./constants";
 import { eq } from "drizzle-orm";
 
+// Honour DATABASE_URL so the suite can be pointed at a throwaway database
+// instead of always writing into whatever is on localhost:5432/postgres.
+const E2E_DATABASE_URL =
+  process.env.DATABASE_URL ??
+  "postgresql://postgres:secret@127.0.0.1:5432/postgres";
+
 export const setup = async () => {
-  const db = drizzle(
-    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
-  );
+  const db = drizzle(postgres(E2E_DATABASE_URL));
 
   // Helper to generate short ID for slugs
   const generateShortId = () => {

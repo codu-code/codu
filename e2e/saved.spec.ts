@@ -1,5 +1,5 @@
 import { test, expect } from "playwright/test";
-import { loggedInAsUserOne } from "./utils";
+import { createArticle, deletePostBySlug, loggedInAsUserOne } from "./utils";
 
 // Run saved tests serially to prevent parallel bookmark toggling conflicts.
 // These tests mutate the shared e2e user's bookmark state, so other specs
@@ -51,9 +51,22 @@ test.describe("Authenticated Saved Page", () => {
 
   test("Should bookmark from the article reader and appear in saved items", async ({
     page,
-  }) => {
-    // Bookmark a specific article via its reader "Save" action.
-    await page.goto(PUBLISHED_ARTICLE_URL);
+  }, testInfo) => {
+    // Serial mode above only orders tests within one project; all four browser
+    // projects run in parallel as the SAME e2e user, so a shared article still
+    // races — one project saves it while another asserts it is unsaved. Each
+    // project bookmarks its own article instead.
+    const slug = `e2e-saved-target-${testInfo.project.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")}`;
+    await createArticle({
+      title: "E2E saved target",
+      slug,
+      excerpt: "Saved target",
+      body: "Saved target body",
+    });
+
+    await page.goto(`http://localhost:3000/e2e-test-user-one-111/${slug}`);
     await page.waitForLoadState("domcontentloaded");
 
     // exact: true so "Save" doesn't also match "Saved".
@@ -62,20 +75,6 @@ test.describe("Authenticated Saved Page", () => {
       name: "Saved",
       exact: true,
     });
-
-    // If already saved (parallel runs), unsave first so we test the save flow.
-    const isSaved = await savedButton.isVisible().catch(() => false);
-    if (isSaved) {
-      await savedButton.scrollIntoViewIfNeeded();
-      await Promise.all([
-        page.waitForResponse(
-          (resp) =>
-            resp.url().includes("trpc") && resp.url().includes("bookmark"),
-        ),
-        savedButton.click(),
-      ]);
-      await expect(saveButton).toBeVisible({ timeout: 10000 });
-    }
 
     // Now bookmark it.
     await expect(saveButton).toBeVisible({ timeout: 15000 });
@@ -93,13 +92,14 @@ test.describe("Authenticated Saved Page", () => {
 
     // The /saved page should load with either the saved article or (if a
     // parallel test unbookmarked it) the empty state.
+    // With a per-project fixture nothing else can unbookmark it, so the saved
+    // page must actually list it — no "or the empty state" escape hatch.
     await page.goto("http://localhost:3000/saved");
-    await expect(
-      page
-        .locator("article")
-        .first()
-        .or(page.getByText(/nothing saved yet/i)),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("E2E saved target").first()).toBeVisible({
+      timeout: 15000,
+    });
+
+    await deletePostBySlug(slug);
   });
 
   test("Should bookmark from the feed card Save action", async ({ page }) => {

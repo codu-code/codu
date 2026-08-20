@@ -169,8 +169,11 @@ test.describe("No routeless /[id] regression", () => {
   }) => {
     await page.goto(`${BASE}/`);
 
+    // The card's FIRST anchor is the author handle ("/{username}"), which is a
+    // real page but reads as a bare single-segment path to the shape check
+    // below — target the card's content link instead.
     const firstCardLink = page
-      .locator('[data-testid="content-card"] a')
+      .locator('[data-testid="content-card-link"]')
       .first();
     await expect(firstCardLink).toBeVisible({ timeout: 30000 });
     await expect(firstCardLink).toHaveAttribute("href", /.+/);

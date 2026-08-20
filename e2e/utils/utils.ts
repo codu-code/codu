@@ -18,10 +18,14 @@ import {
   E2E_ADMIN_ID,
 } from "../constants";
 
-// All E2E DB helpers talk to the same local Postgres the global setup seeds
-// (see e2e/setup.ts). Centralised here so individual helpers don't re-declare
-// the connection string.
-const E2E_DB_URL = "postgresql://postgres:secret@127.0.0.1:5432/postgres";
+// All E2E DB helpers talk to the same Postgres the global setup seeds (see
+// e2e/setup.ts). Centralised here so individual helpers don't re-declare the
+// connection string — four of them used to, which meant a run pointed at a
+// scratch DATABASE_URL still wrote fixtures into the default database and then
+// failed on foreign keys.
+const E2E_DB_URL =
+  process.env.DATABASE_URL ??
+  "postgresql://postgres:secret@127.0.0.1:5432/postgres";
 const e2eDb = () => drizzle(postgres(E2E_DB_URL));
 
 /**
@@ -156,9 +160,7 @@ export async function createArticle({
   publishedAt = new Date().toISOString(),
   authorId = E2E_USER_ONE_ID,
 }: CreateArticleInput) {
-  const db = drizzle(
-    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
-  );
+  const db = drizzle(postgres(E2E_DB_URL));
 
   try {
     const result = await db
@@ -197,9 +199,7 @@ export async function createLinkPost({
   publishedAt = null,
   authorId = E2E_USER_ONE_ID,
 }: CreateLinkPostInput) {
-  const db = drizzle(
-    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
-  );
+  const db = drizzle(postgres(E2E_DB_URL));
 
   try {
     const result = await db
@@ -243,9 +243,7 @@ export async function createNotification({
   postId,
   commentId,
 }: CreateNotificationInput) {
-  const db = drizzle(
-    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
-  );
+  const db = drizzle(postgres(E2E_DB_URL));
 
   try {
     // If no postId provided, get a published post to use
@@ -279,9 +277,7 @@ export async function createNotification({
 }
 
 export async function clearNotifications(userId: string) {
-  const db = drizzle(
-    postgres("postgresql://postgres:secret@127.0.0.1:5432/postgres"),
-  );
+  const db = drizzle(postgres(E2E_DB_URL));
 
   try {
     await db.delete(notification).where(eq(notification.userId, userId));

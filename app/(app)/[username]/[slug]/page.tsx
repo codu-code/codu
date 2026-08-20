@@ -32,7 +32,6 @@ async function getUserPostUncached(
   username: string,
   postSlug: string,
   viewerId?: string | null,
-  viewerIsAdmin = false,
 ) {
   // Case-insensitive handle resolution (GitHub-style), matching the profile page.
   const userRecord = await db.query.user.findFirst({
@@ -42,7 +41,7 @@ async function getUserPostUncached(
 
   if (!userRecord) return null;
 
-  const visibilityFilter = postVisibilityFilter({ viewerId, viewerIsAdmin });
+  const visibilityFilter = postVisibilityFilter({ viewerId });
 
   const postResults = await db
     .select({
@@ -363,12 +362,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   // Same viewerId as the page body so the cache()d resolver runs once per request.
   const session = await getServerAuthSession();
-  const userPost = await getUserPost(
-    username,
-    slug,
-    session?.user?.id,
-    session?.user?.role === "ADMIN",
-  );
+  const userPost = await getUserPost(username, slug, session?.user?.id);
   if (userPost) {
     // Discussions/questions canonicalize to /d/{slug}; redirect before metadata.
     if (isDiscussionKind(userPost.type)) {
@@ -525,12 +519,7 @@ const UnifiedPostPage = async (props: Props) => {
 
   const host = (await headers()).get("host") || "";
 
-  const userPost = await getUserPost(
-    username,
-    slug,
-    session?.user?.id,
-    session?.user?.role === "ADMIN",
-  );
+  const userPost = await getUserPost(username, slug, session?.user?.id);
 
   if (userPost) {
     // Discussions/questions live under /d/{slug} — redirect before rendering.

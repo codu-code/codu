@@ -1,20 +1,13 @@
 import React from "react";
-import type { RenderableTreeNode } from "@markdoc/markdoc";
-import Markdoc from "@markdoc/markdoc";
 import Link from "next/link";
-import type { JSONContent } from "@tiptap/core";
-import { generateHTML } from "@tiptap/core";
-import sanitizeHtml from "sanitize-html";
-import { markdocComponents } from "@/markdoc/components";
-import { config } from "@/markdoc/config";
 import DiscussionArea from "@/components/Discussion/DiscussionArea";
 import { ArticleActionBarWrapper } from "@/components/ArticleActionBar";
 import InlineAuthorBio from "@/components/ContentDetail/InlineAuthorBio";
-import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
+import { PostBody, renderPostBody } from "@/components/ContentDetail/PostBody";
 import NotFound from "@/components/NotFound/NotFound";
+import ArticleAdminPanel from "@/components/ArticleAdminPanel/ArticleAdminPanel";
 import { JsonLd } from "@/components/JsonLd";
 import { getCamelCaseFromLower, slugifyTag } from "@/utils/utils";
-import { RenderExtensions } from "@/components/editor/editor/extensions/render-extensions";
 import { getArticleSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 import { db } from "@/server/db";
 import { comments } from "@/server/db/schema";
@@ -51,37 +44,6 @@ export interface ReaderPost {
 }
 
 type ReaderSession = Session | null;
-
-const parseJSON = (str: string): JSONContent | null => {
-  try {
-    return JSON.parse(str);
-  } catch {
-    return null;
-  }
-};
-
-const renderSanitizedTiptapContent = (jsonContent: JSONContent) => {
-  const rawHtml = generateHTML(jsonContent, [...RenderExtensions]);
-  return sanitizeHtml(rawHtml, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
-      "img",
-      "iframe",
-      "h1",
-      "h2",
-    ]),
-    allowedAttributes: {
-      ...sanitizeHtml.defaults.allowedAttributes,
-      img: ["src", "alt", "title", "width", "height", "class"],
-      iframe: ["src", "width", "height", "frameborder", "allowfullscreen"],
-      "*": ["class", "id", "style"],
-    },
-    allowedIframeHostnames: [
-      "www.youtube.com",
-      "youtube.com",
-      "www.youtube-nocookie.com",
-    ],
-  });
-};
 
 // Mirrors discussion.getContentDiscussionCount so the reader renders the same
 // "Discussion {N}" heading as the source-content reader.
@@ -120,25 +82,12 @@ const PostReader = async ({
   commentsDisabledLabel = "post",
   emitArticleSchema = true,
 }: PostReaderProps) => {
-  // Only reachable by the author or an admin (the resolvers only return
-  // non-published posts when viewerId matches the author's id, or the viewer is
-  // an admin previewing from the moderation queue).
+  // Only reachable by the author (the resolver only returns non-published posts
+  // when viewerId matches the author's id).
   const isAwaitingReview = post.status === "in_review";
   const isRejected = post.status === "rejected";
-  const bodyContent = post.body ?? "";
-  const parsedBody = parseJSON(bodyContent);
-  const isTiptapContent = parsedBody?.type === "doc";
-
-  // Tiptap branch: sanitized HTML string. Markdoc branch: the transformed tree,
-  // rendered to React exactly once at the render site below.
-  let renderedContent: string | RenderableTreeNode;
-
-  if (isTiptapContent && parsedBody) {
-    renderedContent = renderSanitizedTiptapContent(parsedBody);
-  } else {
-    const ast = Markdoc.parse(bodyContent);
-    renderedContent = Markdoc.transform(ast, config);
-  }
+  const renderedBody = renderPostBody(post.body);
+  const isTiptapContent = renderedBody.isTiptap;
 
   const articleSchema = emitArticleSchema
     ? getArticleSchema({
@@ -257,24 +206,7 @@ const PostReader = async ({
           <div className="prose mx-auto max-w-none dark:prose-invert lg:prose-lg">
             {!isTiptapContent && <h1>{post.title}</h1>}
 
-            {isTiptapContent ? (
-              renderedContent ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: renderedContent as string,
-                  }}
-                  className="tiptap-content"
-                />
-              ) : (
-                <NotFound />
-              )
-            ) : (
-              <div>
-                {Markdoc.renderers.react(renderedContent, React, {
-                  components: markdocComponents,
-                })}
-              </div>
-            )}
+            <PostBody {...renderedBody} emptyFallback={<NotFound />} />
           </div>
 
           {post.tags.length > 0 && (
