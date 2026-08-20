@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type Page, type Locator } from "playwright/test";
 import { randomUUID } from "crypto";
 import {
   loggedInAsUserOne,
@@ -7,6 +7,24 @@ import {
   clearNotifications,
 } from "./utils";
 import { E2E_USER_ONE_ID, E2E_USER_TWO_ID } from "./constants";
+
+// A comment that has actually been posted renders inside its own
+// `section.group/comment`. Asserting on bare text instead matches the editor's
+// textarea too, which resolves the moment `fill()` runs — so the test would
+// carry on (and swap users) while the create request was still in flight, and
+// the comment landed under whoever was authenticated by the time it went out.
+const postedComment = (page: Page, text: string) =>
+  page.locator("section.group\\/comment").filter({ hasText: text }).first();
+
+// Click a discussion editor's submit and wait for the create to come back, so
+// the assertions (and any user switch) happen after the comment really exists
+// rather than racing the in-flight request.
+const submitAndWait = async (page: Page, scope: Page | Locator = page) => {
+  await Promise.all([
+    page.waitForResponse((r) => r.url().includes("discussion.create")),
+    scope.getByTestId("discussion-submit").first().click(),
+  ]);
+};
 
 // Run notification tests serially to prevent race conditions when multiple browser
 // workers create/clear notifications for the same users simultaneously
@@ -164,10 +182,12 @@ test.describe("Notifications Page", () => {
         .getByPlaceholder("What are your thoughts?")
         .first()
         .fill(commentText);
-      await page.getByRole("button", { name: "Comment", exact: true }).click();
+      await submitAndWait(page);
 
       // Verify comment was posted - this confirms the mutation completed and notification was created
-      await expect(page.getByText(commentText)).toBeVisible({ timeout: 15000 });
+      await expect(postedComment(page, commentText)).toBeVisible({
+        timeout: 15000,
+      });
 
       // Now log in as user one and check notifications
       await loggedInAsUserOne(page);
@@ -210,10 +230,10 @@ test.describe("Notifications Page", () => {
         .getByPlaceholder("What are your thoughts?")
         .first()
         .fill(originalComment);
-      await page.getByRole("button", { name: "Comment", exact: true }).click();
+      await submitAndWait(page);
 
       // Verify comment was posted
-      await expect(page.getByText(originalComment)).toBeVisible({
+      await expect(postedComment(page, originalComment)).toBeVisible({
         timeout: 15000,
       });
 
@@ -223,7 +243,7 @@ test.describe("Notifications Page", () => {
         "http://localhost:3000/e2e-test-user-one-111/e2e-test-slug-published",
       );
 
-      await expect(page.getByText(originalComment)).toBeVisible({
+      await expect(postedComment(page, originalComment)).toBeVisible({
         timeout: 15000,
       });
 
@@ -253,10 +273,12 @@ test.describe("Notifications Page", () => {
       // expand-reply button, so match the editor's submit button by test id —
       // only one editor is open at a time, so this is unambiguous even once
       // the comment has nested children.
-      await commentSection.getByTestId("discussion-submit").first().click();
+      await submitAndWait(page, commentSection);
 
       // Verify reply was posted - this confirms the mutation completed and notification was created
-      await expect(page.getByText(replyText)).toBeVisible({ timeout: 15000 });
+      await expect(postedComment(page, replyText)).toBeVisible({
+        timeout: 15000,
+      });
 
       // Log back in as user one and check for notification
       await loggedInAsUserOne(page);

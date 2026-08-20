@@ -149,6 +149,12 @@ const rateLimited = (opts: {
   message?: string;
 }) =>
   t.middleware(async ({ ctx, next }) => {
+    // The e2e suite drives every browser project through the same handful of
+    // seeded users, so it blows per-user limits (discussion-create allows 10
+    // per 10 minutes) and later projects get silently throttled. Never set this
+    // outside a test environment.
+    if (process.env.RATE_LIMIT_DISABLED === "true") return next();
+
     const key = `${opts.name}:${
       ctx.session?.user?.id ?? `ip:${clientIpFromHeaders(ctx.headers)}`
     }`;
