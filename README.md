@@ -51,7 +51,7 @@ For a more detailed guide on setting them up [go to the Environment Variables se
 npm run db:migrate
 ```
 
-The full command can be seen in our [package.json](/package.json#16) file.
+The full command can be seen in our [package.json](/package.json) file.
 
 > Deploy note: the Vercel Build Command runs `npm run db:migrate && npm run ci-build`
 > on **every** target, so **both preview and production builds migrate** — preview
@@ -67,7 +67,7 @@ The full command can be seen in our [package.json](/package.json#16) file.
 npm run db:seed
 ```
 
-The full command can be seen in our [package.json](/package.json#19) file.
+The full command can be seen in our [package.json](/package.json) file.
 
 8. Finally, run the development server:
 
@@ -103,7 +103,7 @@ The email E2E spec (`e2e/email.spec.ts`) asserts delivery through Mailpit's API;
 
 ### GITHUB_ID and GITHUB_SECRET
 
-Currently, we only allow authentication via GitHub. To enable this, you need to have a `GITHUB_ID` and `GITHUB_SECRET` value.
+We support sign-in with GitHub, GitLab, and email (passwordless). GitHub is the simplest to set up for local development. To enable it, you need to have a `GITHUB_ID` and `GITHUB_SECRET` value. GitLab works the same way with `GITLAB_ID` and `GITLAB_SECRET`, which are optional locally.
 
 Set up your GitHub ID & Secret on GitHub:
 
@@ -131,7 +131,7 @@ In order to use Passwordless login locally, you need to have an `ACCESS_KEY` and
 
 Check out the example `.env` file [here](./sample.env) to see how to populate these values.
 
-**Note:** Currently, the AWS region of the SNS service is hardcoded to "eu-west-1"; it may be necessary to change this if your SNS service is in a different region.
+**Note:** Currently, the AWS region of the SES service is hardcoded to "eu-west-1"; it may be necessary to change this if your SES service is in a different region.
 
 ### NEXTAUTH_URL
 
