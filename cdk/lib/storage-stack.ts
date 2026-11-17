@@ -174,6 +174,9 @@ export class StorageStack extends cdk.Stack {
       databaseName: dbName,
       engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
       parameterGroup,
+      // The instance was created under rds-ca-2019, whose server certificate
+      // expired in August 2024, so no client could verify the connection.
+      caCertificate: rds.CaCertificate.RDS_CA_RSA2048_G1,
       credentials: rds.Credentials.fromPassword(
         dbUsername,
         cdk.SecretValue.ssmSecure("/env/db/password", "1"),
