@@ -53,4 +53,27 @@ describe("isPubliclyFetchableHost", () => {
   it("handles IPv4-mapped IPv6 loopback", () => {
     expect(isPubliclyFetchableHost("::ffff:127.0.0.1")).toBe(false);
   });
+
+  it("handles IPv4-mapped IPv6 as the URL parser serialises it", () => {
+    const hostOf = (url: string) => new URL(url).hostname;
+
+    expect(hostOf("http://[::ffff:169.254.169.254]/")).toBe(
+      "[::ffff:a9fe:a9fe]",
+    );
+    expect(
+      isPubliclyFetchableHost(hostOf("http://[::ffff:169.254.169.254]/")),
+    ).toBe(false);
+    expect(isPubliclyFetchableHost(hostOf("http://[::ffff:127.0.0.1]/"))).toBe(
+      false,
+    );
+    expect(isPubliclyFetchableHost(hostOf("http://[::ffff:10.0.0.5]/"))).toBe(
+      false,
+    );
+    expect(isPubliclyFetchableHost(hostOf("http://[::192.168.1.1]/"))).toBe(
+      false,
+    );
+    expect(isPubliclyFetchableHost(hostOf("http://[::ffff:8.8.8.8]/"))).toBe(
+      true,
+    );
+  });
 });

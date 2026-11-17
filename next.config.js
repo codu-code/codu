@@ -23,9 +23,30 @@ const REMOTE_PATTERNS = [
   protocol: "https",
 }));
 
+// Production is also reachable on *.vercel.app aliases, which search engines
+// treat as a duplicate site. Send those hosts to the project's production
+// domain. /api is left alone because server rendering calls its own deployment
+// URL, and preview deploys keep their vercel.app hosts. A project whose
+// production domain is itself a vercel.app host (a fork) is not redirected.
+const PRODUCTION_HOST = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+const VERCEL_HOST_REDIRECTS =
+  process.env.VERCEL_ENV === "production" &&
+  PRODUCTION_HOST &&
+  !PRODUCTION_HOST.endsWith(".vercel.app")
+    ? [
+        {
+          source: "/:path((?!api(?:/|$)).*)",
+          has: [{ type: "host", value: ".*\\.vercel\\.app" }],
+          destination: `https://${PRODUCTION_HOST}/:path`,
+          permanent: true,
+        },
+      ]
+    : [];
+
 const config = {
   async redirects() {
     return [
+      ...VERCEL_HOST_REDIRECTS,
       {
         source: "/newsletter",
         destination: "https://newsletter.codu.co",

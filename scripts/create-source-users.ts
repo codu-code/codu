@@ -9,9 +9,9 @@
  */
 
 import { db } from "@/server/db";
-import { user, feed_sources } from "@/server/db/schema";
-import { eq, isNull } from "drizzle-orm";
-import crypto from "crypto";
+import { feed_sources } from "@/server/db/schema";
+import { isNull } from "drizzle-orm";
+import { buildSourceUsername, createSourceUser } from "@/server/lib/sourceUser";
 
 const isDryRun = process.argv.includes("--dry-run");
 
@@ -51,45 +51,13 @@ async function createSourceUsers(): Promise<{
   let created = 0;
 
   for (const source of sourcesWithoutUsers) {
-    // Generate a unique username from slug or name
-    const baseUsername =
-      source.slug ||
-      source.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "-")
-        .substring(0, 30);
-    const username = `source-${baseUsername}`;
-
-    // Generate a unique email (not used for login, just for uniqueness)
-    const email = `source-${source.id}@feeds.codu.co`;
+    const username = buildSourceUsername(source);
 
     console.log(`  Creating user for: ${source.name} (${username})`);
 
     if (!isDryRun) {
       try {
-        // Create user for this source
-        const userId = crypto.randomUUID();
-
-        await db.insert(user).values({
-          id: userId,
-          username: username,
-          name: source.name,
-          email: email,
-          image: source.logoUrl || "/images/person.png",
-          bio:
-            source.description?.substring(0, 200) ||
-            `Content from ${source.name}`,
-          websiteUrl: source.websiteUrl || "",
-          // Feed source users don't need email notifications
-          emailNotifications: false,
-          newsletter: false,
-        });
-
-        // Link the user to the feed source
-        await db
-          .update(feed_sources)
-          .set({ userId: userId })
-          .where(eq(feed_sources.id, source.id));
+        const userId = await createSourceUser(db, source);
 
         created++;
         console.log(`    ✓ Created user ${userId} for source ${source.id}`);

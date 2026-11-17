@@ -28,9 +28,7 @@ export const C = {
 
 export type Seg = { t: string; c: string };
 export type Entry =
-  | { type: "line"; parts: Seg[] }
-  | { type: "art" }
-  | { type: "gap" };
+  { type: "line"; parts: Seg[] } | { type: "art" } | { type: "gap" };
 
 export const seg = (t: string, c?: string): Seg => ({ t, c: c || C.out });
 export const line = (...parts: Seg[]): Entry => ({ type: "line", parts });

@@ -80,7 +80,11 @@ function titleCase(slug: string): string {
     .join(" ");
 }
 
-/** Raise a system (auto-flagged) report unless one is already pending. */
+/**
+ * Raise a system (auto-flagged) report, at most once per post or comment: a
+ * pending report is not duplicated, and one a moderator has already ruled on
+ * is not raised again by a later re-analysis.
+ */
 async function raiseSystemReport(opts: {
   postId?: string;
   commentId?: string;
@@ -93,9 +97,7 @@ async function raiseSystemReport(opts: {
   const existing = await db
     .select({ id: reports.id })
     .from(reports)
-    .where(
-      and(target, eq(reports.source, "system"), eq(reports.status, "pending")),
-    )
+    .where(and(target, eq(reports.source, "system")))
     .limit(1);
   if (existing.length > 0) return false;
 

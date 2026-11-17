@@ -3,6 +3,7 @@ import {
   CreateReportSchema,
   GetReportsSchema,
   ReviewReportSchema,
+  DismissSystemReportSchema,
 } from "@/schema/report";
 import * as Sentry from "@sentry/nextjs";
 import sendEmail from "@/utils/sendEmail";
@@ -11,6 +12,7 @@ import {
   protectedProcedure,
   adminOnlyProcedure,
 } from "../trpc";
+import { countOpenSystemReports } from "./utils";
 import { TRPCError } from "@trpc/server";
 import { createCommentReportEmailTemplate } from "@/utils/createCommentReportEmailTemplate";
 import { createArticleReportEmailTemplate } from "@/utils/createArticleReportEmailTemplate";
@@ -20,6 +22,7 @@ import {
   posts,
   user,
   content_report,
+  reports,
   aggregated_article,
   feed_source,
 } from "@/server/db/schema";
@@ -415,12 +418,16 @@ export const reportRouter = createTRPCRouter({
       };
     }),
 
-  // Admin: Get report counts by status
+  // Admin: Get report counts by status. `pending` also counts the system
+  // (auto-flagged) reports waiting in `reports`, which the moderation queue
+  // lists alongside member reports.
   getCounts: adminOnlyProcedure.query(async () => {
-    const [pending] = await db
+    const [pendingMember] = await db
       .select({ count: count() })
       .from(content_report)
       .where(eq(content_report.status, "PENDING"));
+
+    const pending = pendingMember.count + (await countOpenSystemReports(db));
 
     const [reviewed] = await db
       .select({ count: count() })
@@ -438,11 +445,11 @@ export const reportRouter = createTRPCRouter({
       .where(eq(content_report.status, "ACTIONED"));
 
     return {
-      pending: pending.count,
+      pending,
       reviewed: reviewed.count,
       dismissed: dismissed.count,
       actioned: actioned.count,
-      total: pending.count + reviewed.count + dismissed.count + actioned.count,
+      total: pending + reviewed.count + dismissed.count + actioned.count,
     };
   }),
 
@@ -476,6 +483,39 @@ export const reportRouter = createTRPCRouter({
         .returning();
 
       return updatedReport;
+    }),
+
+  // Admin: Dismiss a pending system (auto-flagged) report. These live in
+  // `reports`, whose ids are a separate sequence from content_report's, so
+  // they get their own procedure rather than sharing `review`.
+  dismissSystem: adminOnlyProcedure
+    .input(DismissSystemReportSchema)
+    .mutation(async ({ input, ctx }) => {
+      const [dismissedReport] = await db
+        .update(reports)
+        .set({
+          status: "dismissed",
+          actionTaken: "Report dismissed by admin",
+          reviewedById: ctx.session.user.id,
+          reviewedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(reports.id, input.reportId),
+            eq(reports.source, "system"),
+            eq(reports.status, "pending"),
+          ),
+        )
+        .returning();
+
+      if (!dismissedReport) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Report not found",
+        });
+      }
+
+      return dismissedReport;
     }),
 
   // Admin: Get a single report by ID

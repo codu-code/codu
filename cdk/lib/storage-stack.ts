@@ -85,7 +85,7 @@ export class StorageStack extends cdk.Stack {
 
     // Lambda for resizing avatar uploads
     const s3AvatarEventHandler = new NodejsFunction(this, "ResizeAvatar", {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, "/../lambdas/avatarResize/index.js"),
       timeout: cdk.Duration.seconds(120),
       depsLockFilePath: path.join(
@@ -94,12 +94,16 @@ export class StorageStack extends cdk.Stack {
       ),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
+        // sharp ships per-platform binaries. Bundling on the deploying machine
+        // would package that machine's build (e.g. darwin-arm64), which cannot
+        // load on Lambda, so always install inside the Lambda build image.
+        forceDockerBundling: true,
       },
     });
 
     // Lambda for resizing uploads
     const s3UploadEventHandler = new NodejsFunction(this, "ResizeUploads", {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, "/../lambdas/uploadResize/index.js"),
       timeout: cdk.Duration.seconds(120),
       depsLockFilePath: path.join(
@@ -108,6 +112,10 @@ export class StorageStack extends cdk.Stack {
       ),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
+        // sharp ships per-platform binaries. Bundling on the deploying machine
+        // would package that machine's build (e.g. darwin-arm64), which cannot
+        // load on Lambda, so always install inside the Lambda build image.
+        forceDockerBundling: true,
       },
     });
 

@@ -23,6 +23,7 @@ export default [
       ".next/**",
       "node_modules/**",
       "cdk/**",
+      ".claude/**",
     ],
   },
   ...nextConfig,
@@ -45,6 +46,11 @@ export default [
       "no-unused-vars": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
       "no-console": "warn",
+      // eslint-plugin-react-hooks 7.1 began flagging existing, working code
+      // under these React Compiler rules. Surface them without failing CI
+      // until those components are reworked.
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
     },
   },
   {

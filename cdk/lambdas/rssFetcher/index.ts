@@ -101,14 +101,11 @@ function generateSlug(title: string, shortId: string): string {
 function extractImageUrl(item: Parser.Item): string | null {
   // Try different common image locations in RSS feeds
   const mediaContent = (item as Record<string, unknown>).mediaContent as
-    | { $?: { url?: string } }
-    | undefined;
+    { $?: { url?: string } } | undefined;
   const mediaThumbnail = (item as Record<string, unknown>).mediaThumbnail as
-    | { $?: { url?: string } }
-    | undefined;
+    { $?: { url?: string } } | undefined;
   const enclosure = item.enclosure as
-    | { url?: string; type?: string }
-    | undefined;
+    { url?: string; type?: string } | undefined;
 
   if (mediaContent?.$?.url) {
     return mediaContent.$.url;

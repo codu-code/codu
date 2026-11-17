@@ -3,6 +3,7 @@ import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { posts, user, tag, feed_sources } from "@/server/db/schema";
 import { enforceRateLimit, clientIpFromHeaders } from "@/server/lib/rateLimit";
+import { buildContentHref } from "@/server/lib/content-url";
 
 // Live, debounced site search — replaces the external Algolia dependency.
 // Cheap but abusable, so it's defended on three fronts: a per-identifier rate
@@ -94,11 +95,7 @@ export const searchRouter = createTRPCRouter({
           title: p.title,
           type: p.type,
           upvotes: p.upvotes,
-          href: p.authorUsername
-            ? `/${p.authorUsername}/${p.slug}`
-            : p.sourceSlug
-              ? `/${p.sourceSlug}/${p.slug}`
-              : `/articles/${p.slug}`,
+          href: buildContentHref(p) ?? `/articles/${p.slug}`,
         })),
         people: peopleRows
           .filter((u) => u.username)

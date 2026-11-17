@@ -12,8 +12,9 @@ test.describe("Command palette search", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    // The top-bar trigger renders the placeholder text "Search…" + a ⌘K kbd.
-    await page.getByRole("button").filter({ hasText: "Search" }).click();
+    // The top-bar trigger is a "Search…" field on desktop and an icon button
+    // labelled "Search" on mobile; only one of the two is rendered visible.
+    await page.getByRole("button", { name: /^Search/ }).click();
 
     // The palette dialog should appear.
     await expect(page.getByRole("dialog", { name: "Search Codú" })).toBeVisible(
@@ -27,7 +28,7 @@ test.describe("Command palette search", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    await page.getByRole("button").filter({ hasText: "Search" }).click();
+    await page.getByRole("button", { name: /^Search/ }).click();
     await expect(page.getByRole("dialog", { name: "Search Codú" })).toBeVisible(
       { timeout: 10000 },
     );
@@ -49,7 +50,7 @@ test.describe("Command palette search", () => {
     await page.goto("http://localhost:3000/feed");
     await page.waitForSelector("article");
 
-    await page.getByRole("button").filter({ hasText: "Search" }).click();
+    await page.getByRole("button", { name: /^Search/ }).click();
     const dialog = page.getByRole("dialog", { name: "Search Codú" });
     await expect(dialog).toBeVisible({ timeout: 10000 });
 

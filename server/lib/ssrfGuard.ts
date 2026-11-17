@@ -45,7 +45,8 @@ function isBlockedIpv4(octets: [number, number, number, number]): boolean {
 /**
  * True if an IPv6 address (normalised, lowercase) is loopback, unspecified,
  * link-local (fe80::/10), or unique-local (fc00::/7). Handles the IPv4-mapped
- * form (::ffff:a.b.c.d) by delegating to the IPv4 check.
+ * form, dotted (::ffff:a.b.c.d) or hex (::ffff:hhhh:hhhh), by delegating to
+ * the IPv4 check.
  */
 function isBlockedIpv6(host: string): boolean {
   let h = host.toLowerCase();
@@ -60,6 +61,15 @@ function isBlockedIpv6(host: string): boolean {
   if (mapped) {
     const v4 = parseIpv4(mapped[1]);
     if (v4) return isBlockedIpv4(v4);
+  }
+
+  // The same addresses as the URL parser serialises them: `new URL()` turns
+  // [::ffff:169.254.169.254] into [::ffff:a9fe:a9fe].
+  const mappedHex = h.match(/^::(?:ffff:)?([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+  if (mappedHex) {
+    const high = parseInt(mappedHex[1], 16);
+    const low = parseInt(mappedHex[2], 16);
+    return isBlockedIpv4([high >> 8, high & 0xff, low >> 8, low & 0xff]);
   }
 
   // fe80::/10 link-local

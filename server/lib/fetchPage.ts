@@ -3,6 +3,7 @@ import { isHostFetchable } from "./ssrfGuard";
 const MAX_TEXT_LENGTH = 4000;
 const MAX_BODY_BYTES = 200 * 1024; // 200KB cap on fetched HTML
 const DEFAULT_TIMEOUT_MS = 4000;
+const MAX_REDIRECTS = 5;
 
 /**
  * Turn raw HTML into a short, readable plain-text snippet for moderation:
@@ -29,66 +30,82 @@ export function extractReadableText(html: string): string {
 }
 
 /**
- * Fetch a URL and return readable text for moderation pre-visiting. Best
- * effort only: bounded by a timeout, follows redirects, caps the body at
- * 200KB, and returns "" on ANY error (never throws). NOT unit-tested
- * (network); only extractReadableText + the SSRF guard are.
+ * Fetch a public page's HTML. Best effort only: bounded by a timeout, caps the
+ * body at 200KB, and returns "" on ANY error (never throws).
  *
- * SSRF guard: the author-supplied host is validated (incl. DNS resolution)
- * against a denylist of internal/metadata/private targets before we fetch.
- * If it's not publicly fetchable we return "" WITHOUT fetching — autoReview
- * falls back to allow when the body is empty, so failing closed is safe.
+ * SSRF guard: the URL is untrusted, so its host is validated (incl. DNS
+ * resolution) against a denylist of internal/metadata/private targets before
+ * we fetch, and again for every redirect hop. A target that is not publicly
+ * fetchable yields "" WITHOUT being fetched.
  *
- * Residual risk: we keep redirect:"follow", so only the INITIAL host is
- * validated; a redirect could still land on an internal host (redirect-based
- * DNS rebinding), and the resolved IP could change between the guard's lookup
- * and the actual connection. This is a pragmatic denylist, not a perfect
- * anti-rebinding fortress; the blast radius is limited because the fetched
- * body only ever feeds Bedrock (blind SSRF).
+ * Residual risk: the resolved IP could still change between the guard's lookup
+ * and the actual connection (DNS rebinding). This is a pragmatic denylist, not
+ * a perfect anti-rebinding fortress.
  */
-export async function fetchPageText(
+export async function fetchPublicHtml(
   url: string,
-  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+  {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    userAgent = "CoduModerationBot/1.0",
+  }: { timeoutMs?: number; userAgent?: string } = {},
 ): Promise<string> {
-  // Validate the target host before any network call. Never throw.
-  let hostname: string;
-  try {
-    hostname = new URL(url).hostname;
-  } catch {
-    return "";
-  }
-  if (!(await isHostFetchable(hostname))) return "";
-
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow",
-      headers: { "User-Agent": "CoduModerationBot/1.0" },
-    });
-    if (!res.ok || !res.body) return "";
+    let target = url;
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+      const { protocol, hostname } = new URL(target);
+      if (protocol !== "http:" && protocol !== "https:") return "";
+      if (!(await isHostFetchable(hostname))) return "";
 
-    // Read at most MAX_BODY_BYTES so a huge/streaming page can't blow memory.
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let html = "";
-    let bytes = 0;
-    while (bytes < MAX_BODY_BYTES) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytes += value.byteLength;
-      html += decoder.decode(value, { stream: true });
+      const res = await fetch(target, {
+        signal: controller.signal,
+        redirect: "manual",
+        headers: { "User-Agent": userAgent },
+      });
+
+      const location = res.headers.get("location");
+      if (res.status >= 300 && res.status < 400 && location) {
+        target = new URL(location, target).toString();
+        continue;
+      }
+      if (!res.ok || !res.body) return "";
+
+      // Read at most MAX_BODY_BYTES so a huge/streaming page can't blow memory.
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let html = "";
+      let bytes = 0;
+      while (bytes < MAX_BODY_BYTES) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        html += decoder.decode(value, { stream: true });
+      }
+      try {
+        await reader.cancel();
+      } catch {
+        // ignore cancel errors
+      }
+      return html;
     }
-    try {
-      await reader.cancel();
-    } catch {
-      // ignore cancel errors
-    }
-    return extractReadableText(html);
+    return "";
   } catch {
     return "";
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Fetch a URL and return readable text for moderation pre-visiting. Returns ""
+ * when the page can't be fetched — autoReview falls back to allow when the
+ * body is empty, so failing closed is safe.
+ */
+export async function fetchPageText(
+  url: string,
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+): Promise<string> {
+  const html = await fetchPublicHtml(url, { timeoutMs });
+  return html ? extractReadableText(html) : "";
 }

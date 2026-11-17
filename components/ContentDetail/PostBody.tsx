@@ -1,7 +1,8 @@
 import React from "react";
 import Markdoc, { type RenderableTreeNode } from "@markdoc/markdoc";
 import type { JSONContent } from "@tiptap/core";
-import { generateHTML } from "@tiptap/core";
+// The server entry point; the default export needs a browser DOM.
+import { generateHTML } from "@tiptap/html/server";
 import sanitizeHtml from "sanitize-html";
 import { markdocComponents } from "@/markdoc/components";
 import { config } from "@/markdoc/config";
