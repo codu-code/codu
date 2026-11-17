@@ -94,6 +94,10 @@ export class StorageStack extends cdk.Stack {
       ),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
+        // sharp ships per-platform binaries. Bundling on the deploying machine
+        // would package that machine's build (e.g. darwin-arm64), which cannot
+        // load on Lambda, so always install inside the Lambda build image.
+        forceDockerBundling: true,
       },
     });
 
@@ -108,6 +112,10 @@ export class StorageStack extends cdk.Stack {
       ),
       bundling: {
         nodeModules: ["sharp", "@aws-sdk/client-s3"],
+        // sharp ships per-platform binaries. Bundling on the deploying machine
+        // would package that machine's build (e.g. darwin-arm64), which cannot
+        // load on Lambda, so always install inside the Lambda build image.
+        forceDockerBundling: true,
       },
     });
 
