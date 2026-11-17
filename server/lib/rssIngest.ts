@@ -108,8 +108,8 @@ export function extractImageUrl(item: FeedItem): string | null {
 
 /**
  * True when an item should become a post: it has a link, a title and a
- * parseable publish date within the last 30 days, and its link is not already
- * stored for the source.
+ * parseable publish date within the last 30 days (a future date would pin it
+ * to the top of the feed), and its link is not already stored for the source.
  */
 export function isIngestable(
   item: FeedItem,
@@ -119,7 +119,11 @@ export function isIngestable(
   if (!item.link || !item.title || !item.pubDate) return false;
 
   const publishedAt = new Date(item.pubDate).getTime();
-  if (Number.isNaN(publishedAt) || publishedAt < now.getTime() - MAX_AGE_MS) {
+  if (
+    Number.isNaN(publishedAt) ||
+    publishedAt < now.getTime() - MAX_AGE_MS ||
+    publishedAt > now.getTime()
+  ) {
     return false;
   }
 

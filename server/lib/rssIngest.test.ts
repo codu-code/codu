@@ -97,6 +97,11 @@ describe("isIngestable", () => {
     expect(isIngestable(item({ pubDate }), none, now)).toBe(false);
   });
 
+  it("skips items dated in the future", () => {
+    const pubDate = new Date("2026-06-09T12:00:01.000Z").toUTCString();
+    expect(isIngestable(item({ pubDate }), none, now)).toBe(false);
+  });
+
   it("skips items whose link is already stored for the source", () => {
     expect(
       isIngestable(item(), new Set(["https://example.com/rag"]), now),

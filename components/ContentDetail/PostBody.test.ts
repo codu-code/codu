@@ -46,7 +46,7 @@ describe("renderPostBody", () => {
     expect(content).toContain('src="https://www.youtube.com/embed/dQw4w9WgXcQ');
   });
 
-  it("strips script content and event handlers from tiptap bodies", () => {
+  it("escapes markup in text and drops unsafe image URLs", () => {
     const body = JSON.stringify({
       type: "doc",
       content: [
@@ -55,17 +55,16 @@ describe("renderPostBody", () => {
           attrs: { level: 1 },
           content: [{ type: "text", text: "<script>alert(1)</script>" }],
         },
-        {
-          type: "image",
-          attrs: { src: "https://example.com/a.png", onerror: "alert(1)" },
-        },
+        { type: "image", attrs: { src: "javascript:alert(1)" } },
+        { type: "image", attrs: { src: "https://example.com/safe.png" } },
       ],
     });
 
     const { content } = renderPostBody(body);
 
     expect(content).not.toContain("<script>");
-    expect(content).not.toContain("onerror");
+    expect(content).not.toContain("javascript:");
+    expect(content).toContain('src="https://example.com/safe.png"');
   });
 
   it("treats a non-JSON body as markdoc source", () => {

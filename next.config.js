@@ -35,7 +35,7 @@ const VERCEL_HOST_REDIRECTS =
   !PRODUCTION_HOST.endsWith(".vercel.app")
     ? [
         {
-          source: "/:path((?!api/).*)",
+          source: "/:path((?!api(?:/|$)).*)",
           has: [{ type: "host", value: ".*\\.vercel\\.app" }],
           destination: `https://${PRODUCTION_HOST}/:path`,
           permanent: true,

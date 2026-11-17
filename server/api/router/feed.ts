@@ -432,6 +432,13 @@ export const feedRouter = createTRPCRouter({
       }
 
       const slug = slugifyTitle(input.name);
+      if (!slug) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The name needs at least one letter (a-z) or number",
+        });
+      }
+
       const slugTaken = await ctx.db.query.feed_sources.findFirst({
         where: eq(feed_sources.slug, slug),
       });
@@ -445,7 +452,7 @@ export const feedRouter = createTRPCRouter({
         ),
       });
 
-      if (!slug || slugTaken || usernameTaken) {
+      if (slugTaken || usernameTaken) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "A feed source with this name already exists",
