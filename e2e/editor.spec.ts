@@ -134,7 +134,10 @@ test.describe("Article Editor", () => {
 
     test("Should apply bold formatting via keyboard shortcut", async ({
       page,
+      isMobile,
     }) => {
+      test.skip(isMobile, "Touch devices have no modifier-key shortcuts");
+
       await page.goto(CREATE_URL);
 
       // Type some text
@@ -157,7 +160,10 @@ test.describe("Article Editor", () => {
 
     test("Should apply italic formatting via keyboard shortcut", async ({
       page,
+      isMobile,
     }) => {
+      test.skip(isMobile, "Touch devices have no modifier-key shortcuts");
+
       await page.goto(CREATE_URL);
 
       // Type some text
