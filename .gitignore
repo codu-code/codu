@@ -81,3 +81,9 @@ logs/
 .claude/
 .cursor/
 .aider*
+
+# Local MCP server config (may hold personal API keys)
+.mcp.json
+
+# Written by `next dev`
+AGENTS.md

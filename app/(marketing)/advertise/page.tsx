@@ -12,6 +12,7 @@ const ogImage = ogMainImage("advertise");
 export const metadata: Metadata = {
   title: ogTitle,
   description: ogDescription,
+  alternates: { canonical: "/advertise" },
   openGraph: {
     title: ogTitle,
     description: ogDescription,

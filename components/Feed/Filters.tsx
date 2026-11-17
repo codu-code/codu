@@ -123,13 +123,7 @@ export function FilterPill({
 
 type SortOption = "recent" | "trending" | "popular";
 type ContentType =
-  | "ARTICLE"
-  | "LINK"
-  | "TIL"
-  | "QUESTION"
-  | "VIDEO"
-  | "DISCUSSION"
-  | null;
+  "ARTICLE" | "LINK" | "TIL" | "QUESTION" | "VIDEO" | "DISCUSSION" | null;
 
 type TopicOption = { slug: string; title: string };
 

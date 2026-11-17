@@ -4,19 +4,28 @@ import z from "zod";
 import * as Sentry from "@sentry/nextjs";
 
 import { createTRPCRouter, adminOnlyProcedure } from "../trpc";
+import { countOpenSystemReports } from "./utils";
 import {
   banned_users,
   session,
   user,
   posts,
+  comments,
   content_report,
+  reports,
   feed_sources,
   notification,
 } from "@/server/db/schema";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { runPostGoLiveSideEffects } from "@/server/lib/post-go-live";
 import { POST_APPROVED } from "@/utils/notifications";
-import { buildSlug } from "@/server/lib/content-url";
+import {
+  buildCommentHref,
+  buildContentHref,
+  buildSlug,
+} from "@/server/lib/content-url";
+import { groupReportedPosts, toLegacyReason } from "@/server/lib/reportedPosts";
 import { mintUrlId } from "@/server/lib/url-id";
 
 export const adminRouter = createTRPCRouter({
@@ -34,6 +43,9 @@ export const adminRouter = createTRPCRouter({
       .from(content_report)
       .where(eq(content_report.status, "PENDING"));
 
+    // System (auto-flagged) reports live in `reports`, not `content_report`.
+    const pendingSystemReports = await countOpenSystemReports(ctx.db);
+
     const [bannedUsersCount] = await ctx.db
       .select({ count: count() })
       .from(banned_users);
@@ -46,7 +58,7 @@ export const adminRouter = createTRPCRouter({
     return {
       totalUsers: usersCount.count,
       publishedPosts: postsCount.count,
-      pendingReports: pendingReports.count,
+      pendingReports: pendingReports.count + pendingSystemReports,
       bannedUsers: bannedUsersCount.count,
       activeFeedSources: activeSourcesCount.count,
     };
@@ -229,12 +241,13 @@ export const adminRouter = createTRPCRouter({
     return rows;
   }),
 
-  // Live posts (status `published`) that have at least one PENDING report.
-  // These are flagged-but-still-public; an admin can Hide (→ in_review) or
-  // Dismiss the report(s). Two-step query: find the flagged post ids + counts,
-  // then attach the latest report reason/details and the open report ids.
+  // Live posts (status `published`) that have at least one open report, from a
+  // member (`content_report`) or the nightly review cron (`reports`). These are
+  // flagged-but-still-public; an admin can Hide (→ in_review) or Dismiss the
+  // report(s). The two tables' ids are returned in separate fields
+  // (`reportIds` / `systemReportIds`) because their sequences overlap.
   listReportedPosts: adminOnlyProcedure.query(async ({ ctx }) => {
-    // Pending post reports joined to their (live) post + author.
+    // Pending member reports joined to their (live) post + author.
     const pendingReports = await ctx.db
       .select({
         reportId: content_report.id,
@@ -261,48 +274,104 @@ export const adminRouter = createTRPCRouter({
       .orderBy(desc(content_report.createdAt))
       .limit(200);
 
-    // Group by post. Rows are newest-first, so the first row seen for a post is
-    // its latest report (used for the headline reason/details).
-    const byPost = new Map<
-      string,
-      {
-        id: string;
-        title: string | null;
-        slug: string | null;
-        authorId: string;
-        authorUsername: string | null;
-        authorName: string | null;
-        reportCount: number;
-        reportIds: number[];
-        latestReason: string;
-        latestDetails: string | null;
-        latestReportAt: string | null;
-      }
-    >();
+    // Pending system reports, joined the same way.
+    const pendingSystemReports = await ctx.db
+      .select({
+        reportId: reports.id,
+        reason: reports.reason,
+        details: reports.details,
+        reportCreatedAt: reports.createdAt,
+        postId: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        authorId: posts.authorId,
+        authorUsername: user.username,
+        authorName: user.name,
+      })
+      .from(reports)
+      .innerJoin(posts, eq(reports.postId, posts.id))
+      .leftJoin(user, eq(posts.authorId, user.id))
+      .where(
+        and(
+          eq(reports.status, "pending"),
+          eq(reports.source, "system"),
+          eq(posts.status, "published"),
+        ),
+      )
+      .orderBy(desc(reports.createdAt))
+      .limit(200);
 
-    for (const row of pendingReports) {
-      const existing = byPost.get(row.postId);
-      if (existing) {
-        existing.reportCount += 1;
-        existing.reportIds.push(row.reportId);
-      } else {
-        byPost.set(row.postId, {
-          id: row.postId,
-          title: row.title,
-          slug: row.slug,
-          authorId: row.authorId,
-          authorUsername: row.authorUsername,
-          authorName: row.authorName,
-          reportCount: 1,
-          reportIds: [row.reportId],
-          latestReason: row.reason,
-          latestDetails: row.details,
-          latestReportAt: row.reportCreatedAt,
-        });
-      }
-    }
+    return groupReportedPosts(pendingReports, pendingSystemReports);
+  }),
 
-    return Array.from(byPost.values());
+  // Comments the nightly review cron has flagged (pending system reports in
+  // `reports`). Soft-deleted comments stay listed so their report can still be
+  // dismissed. `reportId` is a `reports` id — see report.dismissSystem.
+  listFlaggedComments: adminOnlyProcedure.query(async ({ ctx }) => {
+    // The comment's author and its parent post's author are both users; the
+    // latter drives member hrefs.
+    const postAuthor = alias(user, "post_author");
+
+    const rows = await ctx.db
+      .select({
+        reportId: reports.id,
+        reason: reports.reason,
+        details: reports.details,
+        reportCreatedAt: reports.createdAt,
+        commentId: comments.id,
+        body: comments.body,
+        deletedAt: comments.deletedAt,
+        authorUsername: user.username,
+        parentTitle: posts.title,
+        parentType: posts.type,
+        parentSlug: posts.slug,
+        sourceSlug: feed_sources.slug,
+        postAuthorUsername: postAuthor.username,
+      })
+      .from(reports)
+      .innerJoin(comments, eq(reports.commentId, comments.id))
+      .innerJoin(posts, eq(comments.postId, posts.id))
+      .leftJoin(user, eq(comments.authorId, user.id))
+      .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
+      .leftJoin(postAuthor, eq(posts.authorId, postAuthor.id))
+      .where(and(eq(reports.status, "pending"), eq(reports.source, "system")))
+      .orderBy(desc(reports.createdAt))
+      .limit(200);
+
+    return rows.map((row) => {
+      const parent = {
+        sourceSlug: row.sourceSlug,
+        authorUsername: row.postAuthorUsername,
+      };
+      // No public URL for the parent (a member post whose author has no
+      // username) means no link, rather than a broken one.
+      const hasPublicUrl =
+        buildContentHref({
+          type: row.parentType,
+          slug: row.parentSlug,
+          ...parent,
+        }) !== null;
+
+      return {
+        reportId: row.reportId,
+        reason: toLegacyReason(row.reason),
+        details: row.details,
+        reportedAt: row.reportCreatedAt,
+        commentId: row.commentId,
+        body: row.body,
+        isDeleted: row.deletedAt !== null,
+        authorUsername: row.authorUsername,
+        parentTitle: row.parentTitle,
+        href: hasPublicUrl
+          ? buildCommentHref({
+              commentId: row.commentId,
+              parentType: row.parentType,
+              parentSlug: row.parentSlug,
+              ...parent,
+            })
+          : null,
+      };
+    });
   }),
 
   // Moderate a post from the queue.
@@ -312,8 +381,8 @@ export const adminRouter = createTRPCRouter({
   //  - hide    : published → in_review (a live, reported post leaves the public
   //              feed and re-enters the review queue for a human decision)
   // Nothing is ever deleted. When hiding/rejecting a post that has open
-  // reports, those reports are resolved (set to ACTIONED) so they leave the
-  // flagged queue.
+  // reports (member or system), those reports are resolved (set to actioned)
+  // so they leave the flagged queue.
   moderatePost: adminOnlyProcedure
     .input(
       z.object({
@@ -366,22 +435,29 @@ export const adminRouter = createTRPCRouter({
         });
       }
 
-      // Resolve any open reports for a post (set to ACTIONED) so it leaves the
-      // flagged queue once a moderator hides or rejects it.
+      // Resolve any open reports for a post (set to actioned) so it leaves the
+      // flagged queue once a moderator hides or rejects it. Member reports and
+      // system reports live in separate tables with their own status enums.
       const resolveOpenReports = async () => {
+        const resolution = {
+          actionTaken: "Resolved by moderator",
+          reviewedById: ctx.session.user.id,
+          reviewedAt: new Date().toISOString(),
+        };
         await ctx.db
           .update(content_report)
-          .set({
-            status: "ACTIONED",
-            actionTaken: "Resolved by moderator",
-            reviewedById: ctx.session.user.id,
-            reviewedAt: new Date().toISOString(),
-          })
+          .set({ status: "ACTIONED", ...resolution })
           .where(
             and(
               eq(content_report.postId, input.id),
               eq(content_report.status, "PENDING"),
             ),
+          );
+        await ctx.db
+          .update(reports)
+          .set({ status: "actioned", ...resolution })
+          .where(
+            and(eq(reports.postId, input.id), eq(reports.status, "pending")),
           );
       };
 
@@ -417,6 +493,25 @@ export const adminRouter = createTRPCRouter({
         await resolveOpenReports();
         return rejected;
       }
+
+      // Approving is a moderator ruling that the post is fine, so any system
+      // flag still open against it is dismissed rather than resurfacing once
+      // the post is live again.
+      await ctx.db
+        .update(reports)
+        .set({
+          status: "dismissed",
+          actionTaken: "Post approved by moderator",
+          reviewedById: ctx.session.user.id,
+          reviewedAt: new Date().toISOString(),
+        })
+        .where(
+          and(
+            eq(reports.postId, input.id),
+            eq(reports.source, "system"),
+            eq(reports.status, "pending"),
+          ),
+        );
 
       // Ensure the post has a stable slug before approving (now) or scheduling.
       // The slug's trailing token must be the post's urlId (parseUrlId

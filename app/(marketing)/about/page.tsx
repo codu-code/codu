@@ -8,6 +8,7 @@ const ogImage = ogMainImage("about");
 
 export const metadata: Metadata = {
   title: "About Codú — The community for AI builders & indie hackers",
+  alternates: { canonical: "/about" },
   description:
     "Codú is the community for AI builders and indie hackers. Learn to build with AI, share what you ship, and grow with people doing the same.",
   openGraph: {

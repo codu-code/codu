@@ -78,6 +78,8 @@ export async function GET() {
     });
   } catch (error) {
     Sentry.captureException(error);
-    return new Response("An error occurred while generating the feed.");
+    return new Response("An error occurred while generating the feed.", {
+      status: 500,
+    });
   }
 }

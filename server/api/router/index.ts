@@ -1,7 +1,6 @@
 import { createTRPCRouter } from "../trpc";
 import { postRouter } from "./post";
 import { profileRouter } from "./profile";
-import { commentRouter } from "./comment";
 import { notificationRouter } from "./notification";
 import { adminRouter } from "./admin";
 import { reportRouter } from "./report";
@@ -15,15 +14,11 @@ import { engagementRouter } from "./engagement";
 import { followRouter } from "./follow";
 import { publicationRouter } from "./publication";
 import { searchRouter } from "./search";
-
-// Legacy routers (kept for backward compatibility during migration)
 import { discussionRouter } from "./discussion";
 import { contentRouter } from "./content";
 
 export const appRouter = createTRPCRouter({
-  // Primary routers (using new schema)
   post: postRouter,
-  comment: commentRouter,
   profile: profileRouter,
   notification: notificationRouter,
   admin: adminRouter,
@@ -39,8 +34,8 @@ export const appRouter = createTRPCRouter({
   publication: publicationRouter,
   search: searchRouter,
 
-  // Legacy routers (for backward compatibility)
-  // TODO: Remove once all frontend is migrated
+  // `discussion` is the comments router; `content` serves the feed and post
+  // authoring. Like `post`, both use the `posts`/`comments` tables.
   discussion: discussionRouter,
   content: contentRouter,
 });

@@ -3,7 +3,6 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 import {
   GetUnifiedFeedSchema,
-  GetContentByIdSchema,
   GetContentBySlugSchema,
   CreateContentSchema,
   UpdateContentSchema,
@@ -11,7 +10,6 @@ import {
   VoteContentSchema,
   BookmarkContentSchema,
   TrackClickContentSchema,
-  GetUserContentSchema,
   GetSavedContentSchema,
   EditDraftContentSchema,
   PublishContentSchema,
@@ -28,7 +26,6 @@ import {
   follow,
   tag as dbTag,
   user,
-  comments,
   point_event,
   post_metadata,
 } from "@/server/db/schema";
@@ -40,9 +37,7 @@ import {
   lt,
   lte,
   sql,
-  isNotNull,
   isNull,
-  count,
   exists,
   inArray,
 } from "drizzle-orm";
@@ -86,12 +81,7 @@ function calculateReadTime(body: string | null | undefined): number {
 }
 
 type DbPostType =
-  | "article"
-  | "discussion"
-  | "link"
-  | "resource"
-  | "til"
-  | "question";
+  "article" | "discussion" | "link" | "resource" | "til" | "question";
 
 function toDbType(frontendType: string): DbPostType {
   const typeMap: Record<string, DbPostType> = {
@@ -337,8 +327,7 @@ export const contentRouter = createTRPCRouter({
       const results = await query;
 
       let nextCursor:
-        | { id: string; publishedAt?: string; score?: number }
-        | undefined;
+        { id: string; publishedAt?: string; score?: number } | undefined;
       if (results.length > limit) {
         const lastItem = results.pop()!;
         const score = lastItem.upvotes - lastItem.downvotes;
@@ -357,196 +346,6 @@ export const contentRouter = createTRPCRouter({
       return {
         items: mappedItems,
         nextCursor,
-      };
-    }),
-
-  getById: publicProcedure
-    .input(GetContentByIdSchema)
-    .query(async ({ ctx, input }) => {
-      const userId = ctx.session?.user?.id;
-
-      const results = await ctx.db
-        .select({
-          id: posts.id,
-          type: posts.type,
-          title: posts.title,
-          body: posts.body,
-          excerpt: posts.excerpt,
-          externalUrl: posts.externalUrl,
-          imageUrl: posts.coverImage,
-          ogImageUrl: posts.coverImage,
-          slug: posts.slug,
-          canonicalUrl: posts.canonicalUrl,
-          coverImage: posts.coverImage,
-          publishedAt: posts.publishedAt,
-          upvotes: posts.upvotesCount,
-          downvotes: posts.downvotesCount,
-          clickCount: posts.viewsCount,
-          readTimeMins: posts.readingTime,
-          showComments: posts.showComments,
-          userId: posts.authorId,
-          sourceId: posts.sourceId,
-          sourceAuthor: posts.sourceAuthor,
-          createdAt: posts.createdAt,
-          updatedAt: posts.updatedAt,
-          sourceName: feed_sources.name,
-          sourceSlug: feed_sources.slug,
-          sourceLogo: feed_sources.logoUrl,
-          sourceWebsite: feed_sources.websiteUrl,
-          sourceCategory: feed_sources.category,
-          authorName: user.name,
-          authorUsername: user.username,
-          authorImage: user.image,
-        })
-        .from(posts)
-        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
-        .leftJoin(user, eq(posts.authorId, user.id))
-        .where(eq(posts.id, input.id))
-        .limit(1);
-
-      if (results.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Content not found",
-        });
-      }
-
-      const item = results[0];
-
-      let userVote: "up" | "down" | null = null;
-      let isBookmarked = false;
-
-      if (userId) {
-        const [voteResult, bookmarkResult] = await Promise.all([
-          ctx.db
-            .select({ voteType: post_votes.voteType })
-            .from(post_votes)
-            .where(
-              and(
-                eq(post_votes.postId, input.id),
-                eq(post_votes.userId, userId),
-              ),
-            )
-            .limit(1),
-          ctx.db
-            .select({ id: bookmarks.id })
-            .from(bookmarks)
-            .where(
-              and(eq(bookmarks.postId, input.id), eq(bookmarks.userId, userId)),
-            )
-            .limit(1),
-        ]);
-
-        userVote = voteResult[0]?.voteType ?? null;
-        isBookmarked = bookmarkResult.length > 0;
-      }
-
-      const commentsCountResult = await ctx.db
-        .select({ count: count() })
-        .from(comments)
-        .where(eq(comments.postId, input.id));
-
-      return {
-        ...item,
-        type: toFrontendType(item.type),
-        userVote,
-        isBookmarked,
-        discussionCount: commentsCountResult[0]?.count ?? 0,
-      };
-    }),
-
-  getBySlug: publicProcedure
-    .input(GetContentBySlugSchema)
-    .query(async ({ ctx, input }) => {
-      const userId = ctx.session?.user?.id;
-
-      const results = await ctx.db
-        .select({
-          id: posts.id,
-          type: posts.type,
-          title: posts.title,
-          body: posts.body,
-          excerpt: posts.excerpt,
-          externalUrl: posts.externalUrl,
-          imageUrl: posts.coverImage,
-          ogImageUrl: posts.coverImage,
-          slug: posts.slug,
-          canonicalUrl: posts.canonicalUrl,
-          coverImage: posts.coverImage,
-          publishedAt: posts.publishedAt,
-          upvotes: posts.upvotesCount,
-          downvotes: posts.downvotesCount,
-          clickCount: posts.viewsCount,
-          readTimeMins: posts.readingTime,
-          showComments: posts.showComments,
-          userId: posts.authorId,
-          sourceId: posts.sourceId,
-          sourceAuthor: posts.sourceAuthor,
-          createdAt: posts.createdAt,
-          updatedAt: posts.updatedAt,
-          sourceName: feed_sources.name,
-          sourceSlug: feed_sources.slug,
-          sourceLogo: feed_sources.logoUrl,
-          sourceWebsite: feed_sources.websiteUrl,
-          sourceCategory: feed_sources.category,
-          authorName: user.name,
-          authorUsername: user.username,
-          authorImage: user.image,
-        })
-        .from(posts)
-        .leftJoin(feed_sources, eq(posts.sourceId, feed_sources.id))
-        .leftJoin(user, eq(posts.authorId, user.id))
-        .where(eq(posts.slug, input.slug))
-        .limit(1);
-
-      if (results.length === 0) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Content not found",
-        });
-      }
-
-      const item = results[0];
-
-      let userVote: "up" | "down" | null = null;
-      let isBookmarked = false;
-
-      if (userId) {
-        const [voteResult, bookmarkResult] = await Promise.all([
-          ctx.db
-            .select({ voteType: post_votes.voteType })
-            .from(post_votes)
-            .where(
-              and(
-                eq(post_votes.postId, item.id),
-                eq(post_votes.userId, userId),
-              ),
-            )
-            .limit(1),
-          ctx.db
-            .select({ id: bookmarks.id })
-            .from(bookmarks)
-            .where(
-              and(eq(bookmarks.postId, item.id), eq(bookmarks.userId, userId)),
-            )
-            .limit(1),
-        ]);
-
-        userVote = voteResult[0]?.voteType ?? null;
-        isBookmarked = bookmarkResult.length > 0;
-      }
-
-      const commentsCountResult = await ctx.db
-        .select({ count: count() })
-        .from(comments)
-        .where(eq(comments.postId, item.id));
-
-      return {
-        ...item,
-        type: toFrontendType(item.type),
-        userVote,
-        isBookmarked,
-        discussionCount: commentsCountResult[0]?.count ?? 0,
       };
     }),
 
@@ -1038,66 +837,6 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getUserContent: publicProcedure
-    .input(GetUserContentSchema)
-    .query(async ({ ctx, input }) => {
-      const { userId: targetUserId, type, limit, cursor } = input;
-      const currentUserId = ctx.session?.user?.id;
-
-      const conditions = [eq(posts.authorId, targetUserId)];
-
-      // Only show published content unless viewing own profile
-      if (currentUserId !== targetUserId) {
-        conditions.push(eq(posts.status, "published"));
-      }
-
-      if (type) {
-        const dbType = toDbType(type);
-        conditions.push(eq(posts.type, dbType));
-      }
-
-      if (cursor?.publishedAt) {
-        conditions.push(lte(posts.publishedAt, cursor.publishedAt));
-      }
-
-      const results = await ctx.db
-        .select({
-          id: posts.id,
-          type: posts.type,
-          title: posts.title,
-          excerpt: posts.excerpt,
-          slug: posts.slug,
-          publishedAt: posts.publishedAt,
-          upvotes: posts.upvotesCount,
-          downvotes: posts.downvotesCount,
-          published: sql<boolean>`${posts.status} = 'published'`,
-          createdAt: posts.createdAt,
-        })
-        .from(posts)
-        .where(and(...conditions))
-        .orderBy(desc(posts.publishedAt))
-        .limit(limit + 1);
-
-      let nextCursor: { id: string; publishedAt?: string } | undefined;
-      if (results.length > limit) {
-        const lastItem = results.pop()!;
-        nextCursor = {
-          id: lastItem.id,
-          publishedAt: lastItem.publishedAt || undefined,
-        };
-      }
-
-      const mappedItems = results.map((item) => ({
-        ...item,
-        type: toFrontendType(item.type),
-      }));
-
-      return {
-        items: mappedItems,
-        nextCursor,
-      };
-    }),
-
   mySavedContent: protectedProcedure
     .input(GetSavedContentSchema)
     .query(async ({ ctx, input }) => {
@@ -1154,31 +893,6 @@ export const contentRouter = createTRPCRouter({
         nextCursor,
       };
     }),
-
-  getCategories: publicProcedure.query(async ({ ctx }) => {
-    const results = await ctx.db
-      .selectDistinct({ category: feed_sources.category })
-      .from(feed_sources)
-      .where(isNotNull(feed_sources.category));
-
-    return results
-      .map((r) => r.category)
-      .filter((c): c is string => c !== null)
-      .sort();
-  }),
-
-  getTypeCounts: publicProcedure.query(async ({ ctx }) => {
-    const results = await ctx.db
-      .select({
-        type: posts.type,
-        count: count(),
-      })
-      .from(posts)
-      .where(eq(posts.status, "published"))
-      .groupBy(posts.type);
-
-    return results;
-  }),
 
   editDraft: protectedProcedure
     .input(EditDraftContentSchema)

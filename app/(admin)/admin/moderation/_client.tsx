@@ -122,11 +122,29 @@ const ModerationQueue = () => {
       },
     });
 
+  // System (auto-flagged) reports live in their own table with their own ids,
+  // so they are dismissed through a separate mutation from member reports.
+  const { mutate: dismissSystemReport, isPending: isDismissingSystem } =
+    api.report.dismissSystem.useMutation({
+      onSuccess: () => {
+        toast.success("Report dismissed");
+        utils.admin.listReportedPosts.invalidate();
+        utils.admin.listFlaggedComments.invalidate();
+        utils.report.getCounts.invalidate();
+      },
+      onError: () => {
+        toast.error("Failed to dismiss report");
+      },
+    });
+
   // Auto-moderation queue (posts awaiting review).
   const inReview = api.admin.listInReview.useQuery();
 
-  // Live posts that have been flagged by users (open reports on published posts).
+  // Live posts with open reports, from members or the nightly review.
   const reportedPosts = api.admin.listReportedPosts.useQuery();
+
+  // Comments flagged by the nightly review.
+  const flaggedComments = api.admin.listFlaggedComments.useQuery();
 
   const { mutate: moderatePost, isPending: isModerating } =
     api.admin.moderatePost.useMutation({
@@ -167,7 +185,10 @@ const ModerationQueue = () => {
   };
 
   // Dismiss all open reports for a reported-live post (the post stays published).
-  const handleDismissReportedPost = (reportIds: number[]) => {
+  const handleDismissReportedPost = (
+    reportIds: number[],
+    systemReportIds: number[],
+  ) => {
     reportIds.forEach((reportId) =>
       reviewReport({
         reportId,
@@ -175,6 +196,7 @@ const ModerationQueue = () => {
         actionTaken: "Reports dismissed by admin",
       }),
     );
+    systemReportIds.forEach((reportId) => dismissSystemReport({ reportId }));
     utils.admin.listReportedPosts.invalidate();
   };
 
@@ -373,7 +395,7 @@ const ModerationQueue = () => {
         </div>
       </section>
 
-      {/* Reported (live) — published posts users have flagged */}
+      {/* Reported (live) — published posts flagged by users or the nightly review */}
       <section className="card mb-8 p-5">
         <div className="mb-4 flex items-center justify-between">
           <p className="eyebrow m-0">
@@ -427,6 +449,11 @@ const ModerationQueue = () => {
                       {reasonLabels[post.latestReason as ReportReason] ??
                         post.latestReason}
                     </span>
+                    {post.systemReportIds.length > 0 && (
+                      <span className={`${chipBase} bg-info/12 text-info`}>
+                        Auto-flagged
+                      </span>
+                    )}
                     {post.latestDetails && (
                       <span className="text-sm text-muted">
                         {post.latestDetails}
@@ -457,8 +484,98 @@ const ModerationQueue = () => {
                   </button>
                   <button
                     className="secondary-button px-3 py-1.5 text-sm"
-                    disabled={isReviewing}
-                    onClick={() => handleDismissReportedPost(post.reportIds)}
+                    disabled={isReviewing || isDismissingSystem}
+                    onClick={() =>
+                      handleDismissReportedPost(
+                        post.reportIds,
+                        post.systemReportIds,
+                      )
+                    }
+                  >
+                    <XCircleIcon className="h-4 w-4" />
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Flagged comments — comments the nightly review has auto-flagged */}
+      <section className="card mb-8 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="eyebrow m-0">
+            <span className="slash">{"// "}</span>flagged comments
+          </p>
+          <span className="bg-danger/12 rounded-full px-2 py-0.5 font-mono text-xs text-danger">
+            {flaggedComments.data?.length ?? 0} flagged
+          </span>
+        </div>
+
+        {flaggedComments.isLoading && (
+          <p className="font-mono text-xs text-faint">Loading…</p>
+        )}
+
+        {!flaggedComments.isLoading &&
+          (flaggedComments.data?.length ?? 0) === 0 && (
+            <p className="font-mono text-xs text-faint">
+              {"// no flagged comments"}
+            </p>
+          )}
+
+        <div className="space-y-3">
+          {flaggedComments.data?.map((comment) => (
+            <div
+              key={comment.reportId}
+              className="border-b border-hairline pb-3 last:border-0 last:pb-0"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="line-clamp-3 text-fg">{comment.body}</p>
+                  <p className="font-mono text-xs text-faint">
+                    @{comment.authorUsername ?? "unknown"} on{" "}
+                    {comment.parentTitle || "Untitled"} ·{" "}
+                    {getRelativeTime(comment.reportedAt)}
+                    {comment.isDeleted ? " · deleted" : ""}
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`${chipBase} ${
+                        reasonColors[comment.reason as ReportReason] ??
+                        "border border-hairline text-muted"
+                      }`}
+                    >
+                      {reasonLabels[comment.reason as ReportReason] ??
+                        comment.reason}
+                    </span>
+                    <span className={`${chipBase} bg-info/12 text-info`}>
+                      Auto-flagged
+                    </span>
+                    {comment.details && (
+                      <span className="text-sm text-muted">
+                        {comment.details}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {comment.href && (
+                    <Link
+                      href={comment.href}
+                      target="_blank"
+                      className="secondary-button px-3 py-1.5 text-sm"
+                    >
+                      <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                      View
+                    </Link>
+                  )}
+                  <button
+                    className="secondary-button px-3 py-1.5 text-sm"
+                    disabled={isDismissingSystem}
+                    onClick={() =>
+                      dismissSystemReport({ reportId: comment.reportId })
+                    }
                   >
                     <XCircleIcon className="h-4 w-4" />
                     Dismiss

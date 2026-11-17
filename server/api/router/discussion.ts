@@ -186,8 +186,8 @@ export const discussionRouter = createTRPCRouter({
         excludeUserIds: [postData[0].authorId, parentAuthorId],
       });
 
-      // Same engagement as the legacy comment.create path: comment points +
-      // badge check (commenting is the onboarding badge's final step).
+      // Comment points + badge check (commenting is the onboarding badge's
+      // final step).
       await award({
         userId,
         action: "comment_created",

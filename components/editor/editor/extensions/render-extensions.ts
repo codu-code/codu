@@ -7,7 +7,7 @@ import StarterKit from "@tiptap/starter-kit";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TiptapLink from "@tiptap/extension-link";
 import Link from "@tiptap/extension-link";
-import TextStyle from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import { Markdown } from "tiptap-markdown";
 import { InputRule } from "@tiptap/core";
 import UpdatedImage from "./updated-image";
@@ -26,6 +26,8 @@ export const RenderExtensions = [
   Text,
   StarterKit.configure({
     document: false,
+    // Link is configured explicitly below.
+    link: false,
     bulletList: {
       HTMLAttributes: {
         class: "list-disc list-outside leading-3 -mt-2",
