@@ -167,6 +167,13 @@ export async function rateLimit(
 export async function enforceRateLimit(
   opts: RateLimitOptions & { message?: string },
 ): Promise<void> {
+  // The e2e suite drives every browser project through the same handful of
+  // seeded users, so it blows per-user limits (publishing allows 10 per 5
+  // minutes) and later projects get silently throttled. Checked here so every
+  // limit honours it, whether applied as middleware or inline in a procedure.
+  // Never set this outside a test environment.
+  if (process.env.RATE_LIMIT_DISABLED === "true") return;
+
   const { success } = await rateLimit(opts);
   if (!success) {
     throw new TRPCError({
