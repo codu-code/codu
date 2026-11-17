@@ -188,6 +188,9 @@ exports.handler = async function () {
 
     const client = new Client({
       connectionString: DATABASE_URL,
+      // RDS rejects unencrypted connections (rds.force_ssl). The certificate is
+      // verified against the RDS CA bundle loaded via NODE_EXTRA_CA_CERTS.
+      ssl: true,
     });
 
     await client.connect();

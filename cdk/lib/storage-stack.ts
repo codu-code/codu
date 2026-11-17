@@ -162,7 +162,8 @@ export class StorageStack extends cdk.Stack {
     // connections must therefore carry `sslmode=require` in DATABASE_URL.
     const parameterGroup = new rds.ParameterGroup(this, "db-parameter-group", {
       engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
-      description: "Codú Postgres 15 — force_ssl pinned on",
+      // ASCII only: RDS rejects a description with non-ASCII characters.
+      description: "Codu Postgres 15 - force_ssl pinned on",
       parameters: {
         "rds.force_ssl": "1",
       },
@@ -174,6 +175,9 @@ export class StorageStack extends cdk.Stack {
       databaseName: dbName,
       engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
       parameterGroup,
+      // The instance was created under rds-ca-2019, whose server certificate
+      // expired in August 2024, so no client could verify the connection.
+      caCertificate: rds.CaCertificate.RDS_CA_RSA2048_G1,
       credentials: rds.Credentials.fromPassword(
         dbUsername,
         cdk.SecretValue.ssmSecure("/env/db/password", "1"),
