@@ -162,7 +162,8 @@ export class StorageStack extends cdk.Stack {
     // connections must therefore carry `sslmode=require` in DATABASE_URL.
     const parameterGroup = new rds.ParameterGroup(this, "db-parameter-group", {
       engine: rds.DatabaseInstanceEngine.postgres({ version: pgVersion }),
-      description: "Codú Postgres 15 — force_ssl pinned on",
+      // ASCII only: RDS rejects a description with non-ASCII characters.
+      description: "Codu Postgres 15 - force_ssl pinned on",
       parameters: {
         "rds.force_ssl": "1",
       },
