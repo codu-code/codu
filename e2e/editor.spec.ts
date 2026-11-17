@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect, type Page } from "playwright/test";
 import { loggedInAsUserOne, articleContent } from "./utils";
 
 // Test constants
@@ -47,6 +47,16 @@ const SELECTORS = {
   switchToRichTextButton: 'button:has-text("Switch to Rich Text")',
 };
 
+// The TipTap body only mounts on the client, so its presence is the signal
+// that the form has hydrated. Input typed before that point is discarded,
+// which slower engines (WebKit on CI) hit when a test types straight away.
+async function openEditor(page: Page) {
+  await page.goto(CREATE_URL);
+  await expect(page.locator(SELECTORS.editorContent)).toBeVisible({
+    timeout: 15000,
+  });
+}
+
 // ============================================
 // UNAUTHENTICATED ACCESS TESTS
 // ============================================
@@ -86,21 +96,21 @@ test.describe("Article Editor", () => {
 
   test.describe("Basic Functionality", () => {
     test("Should load the article editor by default", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
       // No tabs anymore — the editor opens straight into the article.
       await expect(page.locator(SELECTORS.titleInput)).toBeVisible();
       await expect(page.locator(SELECTORS.editorContent)).toBeVisible();
     });
 
     test("Should allow entering title text", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
       const title = "Test Article Title";
       await page.locator(SELECTORS.titleInput).fill(title);
       await expect(page.locator(SELECTORS.titleInput)).toHaveValue(title);
     });
 
     test("Should allow entering content in TipTap editor", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Click into the editor and type
       await page.locator(SELECTORS.editorContent).click();
@@ -114,7 +124,7 @@ test.describe("Article Editor", () => {
 
   test.describe("Toolbar Functionality", () => {
     test("Should show toolbar with formatting buttons", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Wait for toolbar to load
       await page.waitForSelector(SELECTORS.editorContent);
@@ -138,7 +148,7 @@ test.describe("Article Editor", () => {
     }) => {
       test.skip(isMobile, "Touch devices have no modifier-key shortcuts");
 
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Type some text
       await page.locator(SELECTORS.editorContent).click();
@@ -164,7 +174,7 @@ test.describe("Article Editor", () => {
     }) => {
       test.skip(isMobile, "Touch devices have no modifier-key shortcuts");
 
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Type some text
       await page.locator(SELECTORS.editorContent).click();
@@ -185,7 +195,7 @@ test.describe("Article Editor", () => {
 
   test.describe("Markdown Mode", () => {
     test("Should switch to markdown mode", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Enter some content first
       await page.locator(SELECTORS.editorContent).click();
@@ -201,7 +211,7 @@ test.describe("Article Editor", () => {
     });
 
     test("Should switch back to rich text mode", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Enter content and switch to markdown
       await page.locator(SELECTORS.editorContent).click();
@@ -218,7 +228,7 @@ test.describe("Article Editor", () => {
 
   test.describe("Preview Mode", () => {
     test("Should toggle to preview mode", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Enter title and content
       await page.locator(SELECTORS.titleInput).fill("Preview Test Title");
@@ -236,7 +246,7 @@ test.describe("Article Editor", () => {
     });
 
     test("Should return to edit mode from preview", async ({ page }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Enter content and go to preview
       await page.locator(SELECTORS.titleInput).fill("Test Title");
@@ -262,13 +272,13 @@ test.describe("Tags Input", () => {
   });
 
   test("Should show tags input section", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
     await expect(page.locator('text="Tags"')).toBeVisible();
     await expect(page.locator(SELECTORS.tagInput)).toBeVisible();
   });
 
   test("Should add tag on Enter key", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // First click on the tag input area to focus it
     await page.locator(SELECTORS.tagInput).first().fill("javascript");
@@ -279,7 +289,7 @@ test.describe("Tags Input", () => {
   });
 
   test("Should add tag on comma", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     await page.locator(SELECTORS.tagInput).first().fill("react,");
 
@@ -288,7 +298,7 @@ test.describe("Tags Input", () => {
   });
 
   test("Should remove tag with X button", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Add a tag
     await page.locator(SELECTORS.tagInput).first().fill("typescript");
@@ -305,7 +315,7 @@ test.describe("Tags Input", () => {
   });
 
   test("Should enforce max 5 tags limit", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Add 5 tags
     const tags = ["tag1", "tag2", "tag3", "tag4", "tag5"];
@@ -322,7 +332,7 @@ test.describe("Tags Input", () => {
   });
 
   test("Should prevent duplicate tags", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Add a tag twice
     await page.locator(SELECTORS.tagInput).first().fill("duplicate");
@@ -347,12 +357,12 @@ test.describe("More Options Accordion", () => {
   });
 
   test("Should show More Options button", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
     await expect(page.locator(SELECTORS.moreOptionsButton)).toBeVisible();
   });
 
   test("Should expand accordion on click", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Click to expand
     await page.locator(SELECTORS.moreOptionsButton).click();
@@ -362,7 +372,7 @@ test.describe("More Options Accordion", () => {
   });
 
   test("Should allow entering excerpt text", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
     await page.locator(SELECTORS.moreOptionsButton).click();
 
     const excerptText = "This is a custom excerpt for the article.";
@@ -374,7 +384,7 @@ test.describe("More Options Accordion", () => {
   });
 
   test("Should allow entering canonical URL", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
     await page.locator(SELECTORS.moreOptionsButton).click();
 
     const canonicalUrl = "https://mysite.com/original-post";
@@ -390,7 +400,7 @@ test.describe("More Options Accordion", () => {
   }) => {
     // User-facing scheduling was removed — only admin.moderatePost schedules.
     // Guard against the toggle quietly returning to the editor.
-    await page.goto(CREATE_URL);
+    await openEditor(page);
     await page.locator(SELECTORS.moreOptionsButton).click();
 
     await expect(page.locator(SELECTORS.canonicalUrlInput)).toBeVisible();
@@ -411,7 +421,7 @@ test.describe("Publish Button Validation", () => {
     test("Publish button should be disabled when title is empty", async ({
       page,
     }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Add only body content (more than 10 chars)
       await page.locator(SELECTORS.editorContent).click();
@@ -430,7 +440,7 @@ test.describe("Publish Button Validation", () => {
     test("Publish button should be disabled when body is empty", async ({
       page,
     }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Add only title (more than 5 chars)
       await page.locator(SELECTORS.titleInput).fill("My Article Title Here");
@@ -446,7 +456,7 @@ test.describe("Publish Button Validation", () => {
     test("Publish button should be disabled when title is too short", async ({
       page,
     }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Title less than 5 chars
       await page.locator(SELECTORS.titleInput).fill("Hi");
@@ -466,7 +476,7 @@ test.describe("Publish Button Validation", () => {
     test("Publish button should be enabled when title and body are valid", async ({
       page,
     }) => {
-      await page.goto(CREATE_URL);
+      await openEditor(page);
 
       // Valid title (5+ chars)
       await page.locator(SELECTORS.titleInput).fill("Valid Title Here");
@@ -498,7 +508,7 @@ test.describe("Draft Management", () => {
   test("Should show Save Draft button when content exists", async ({
     page,
   }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter valid content
     await page.locator(SELECTORS.titleInput).fill("Draft Article Title");
@@ -513,7 +523,7 @@ test.describe("Draft Management", () => {
   });
 
   test("Should show saved time indicator after auto-save", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter valid content - title first
     await page.locator(SELECTORS.titleInput).fill("Draft Article Title");
@@ -534,7 +544,7 @@ test.describe("Draft Management", () => {
   });
 
   test("Should show Share Draft button after auto-save", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter valid content - title first
     await page.locator(SELECTORS.titleInput).fill("Test Draft for Sharing");
@@ -555,7 +565,7 @@ test.describe("Draft Management", () => {
   });
 
   test("Auto-save should update URL with post ID", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter valid content that meets auto-save requirements
     await page.locator(SELECTORS.titleInput).fill("Auto Save Test Title");
@@ -580,7 +590,7 @@ test.describe("Publish Flow", () => {
   });
 
   test("Should show confirmation modal for article", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
     await page.waitForLoadState("domcontentloaded");
 
     // Wait for title input to be visible
@@ -613,7 +623,7 @@ test.describe("Publish Flow", () => {
   });
 
   test("Should close modal on 'Maybe later'", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter valid content
     await page.locator(SELECTORS.titleInput).fill("Test Modal Close");
@@ -647,7 +657,7 @@ test.describe("Publish Flow", () => {
   });
 
   test("Should publish and redirect to article page", async ({ page }) => {
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter valid content
     const title = `E2E Publish Test ${Date.now()}`;
@@ -706,7 +716,7 @@ test.describe("Mobile Responsive Tests", () => {
   test("Should show editor on mobile viewport", async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Editor should be visible
     await expect(page.locator(SELECTORS.titleInput)).toBeVisible();
@@ -715,7 +725,7 @@ test.describe("Mobile Responsive Tests", () => {
 
   test("Publish button should be visible on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto(CREATE_URL);
+    await openEditor(page);
 
     // Enter content
     await page.locator(SELECTORS.titleInput).fill("Mobile Test Title");
