@@ -1,12 +1,6 @@
 export type FeedSort = "recent" | "trending" | "popular";
 export type FeedContentType =
-  | "ARTICLE"
-  | "LINK"
-  | "TIL"
-  | "QUESTION"
-  | "VIDEO"
-  | "DISCUSSION"
-  | null;
+  "ARTICLE" | "LINK" | "TIL" | "QUESTION" | "VIDEO" | "DISCUSSION" | null;
 
 export const VALID_FEED_SORTS: FeedSort[] = ["recent", "trending", "popular"];
 // Lowercase type values for URL params (converted to uppercase for the API)

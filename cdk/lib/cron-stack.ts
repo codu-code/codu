@@ -43,7 +43,7 @@ export class CronStack extends cdk.Stack {
     // RSS Feed Fetcher Lambda
     const rssFetcherFn = new NodejsFunction(this, "RSSFetcherLambda", {
       timeout: cdk.Duration.seconds(300), // 5 minutes for processing multiple feeds
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, "/../lambdas/rssFetcher/index.ts"),
       depsLockFilePath: path.join(
         __dirname,
@@ -65,7 +65,7 @@ export class CronStack extends cdk.Stack {
     // Vote Count Reconciliation Lambda
     const voteReconcileFn = new NodejsFunction(this, "VoteReconcileLambda", {
       timeout: cdk.Duration.seconds(120),
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, "/../lambdas/voteReconcile/index.ts"),
       depsLockFilePath: path.join(
         __dirname,
@@ -91,7 +91,7 @@ export class CronStack extends cdk.Stack {
       "PromoteScheduledLambda",
       {
         timeout: cdk.Duration.seconds(60),
-        runtime: lambda.Runtime.NODEJS_20_X,
+        runtime: lambda.Runtime.NODEJS_22_X,
         entry: path.join(__dirname, "/../lambdas/promoteScheduled/index.ts"),
         depsLockFilePath: path.join(
           __dirname,
@@ -119,7 +119,7 @@ export class CronStack extends cdk.Stack {
     // as PromoteScheduled.
     const dailyReviewFn = new NodejsFunction(this, "DailyReviewLambda", {
       timeout: cdk.Duration.seconds(60),
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, "/../lambdas/dailyReview/index.ts"),
       depsLockFilePath: path.join(
         __dirname,

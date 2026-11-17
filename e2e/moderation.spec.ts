@@ -138,6 +138,9 @@ test.describe("Moderation: flag a live post, hide it from the queue", () => {
     await expect(page.getByText("Report submitted successfully")).toBeVisible({
       timeout: 15000,
     });
+    // Closing the modal drops ?report= with a client-side navigation. Let it
+    // settle so it cannot interrupt the admin page load below.
+    await page.waitForURL((url) => !url.searchParams.has("report"));
 
     // Admin sees it in the moderation queue's "reported (live)" section.
     await loggedInAsAdmin(page);

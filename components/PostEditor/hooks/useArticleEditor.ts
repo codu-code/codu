@@ -76,6 +76,8 @@ export function useArticleEditor({
       },
     },
     immediatelyRender: false,
+    // The toolbar reads editor.isActive() during render.
+    shouldRerenderOnTransaction: true,
     onCreate: ({ editor }) => {
       // Register the upload plugin
       editor.registerPlugin(S3ImageUploadPlugin());
@@ -101,7 +103,7 @@ export function useArticleEditor({
   // Sync initial content when editor is ready
   useEffect(() => {
     if (editor && initialContent && !editor.getText().trim()) {
-      editor.commands.setContent(initialContent);
+      editor.commands.setContent(initialContent, { emitUpdate: false });
       lastContentRef.current = initialContent;
     }
   }, [editor, initialContent]);
@@ -141,7 +143,7 @@ export function useArticleEditor({
       setMode("markdown");
     } else {
       // Markdown → Rich: Load markdown into TipTap
-      editor.commands.setContent(markdownContent);
+      editor.commands.setContent(markdownContent, { emitUpdate: false });
       setMode("rich");
     }
   }, [mode, editor, markdownContent]);
@@ -162,7 +164,7 @@ export function useArticleEditor({
   }, [getMarkdown]);
 
   const clearContent = useCallback(() => {
-    editor?.commands.clearContent();
+    editor?.commands.clearContent(false);
     setMarkdownContent("");
     lastContentRef.current = "";
   }, [editor]);
@@ -172,7 +174,7 @@ export function useArticleEditor({
       setMarkdownContent(markdown);
       lastContentRef.current = markdown;
       if (editor && mode === "rich") {
-        editor.commands.setContent(markdown);
+        editor.commands.setContent(markdown, { emitUpdate: false });
       }
     },
     [editor, mode],

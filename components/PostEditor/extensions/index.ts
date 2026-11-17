@@ -7,9 +7,16 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Youtube from "@tiptap/extension-youtube";
-import { Markdown } from "tiptap-markdown";
+import { Markdown, type MarkdownStorage } from "tiptap-markdown";
 import { InputRule } from "@tiptap/core";
 import { common, createLowlight } from "lowlight";
+
+// tiptap-markdown does not register its storage on the editor type.
+declare module "@tiptap/core" {
+  interface Storage {
+    markdown: MarkdownStorage;
+  }
+}
 
 // Create lowlight instance with common languages
 const lowlight = createLowlight(common);
@@ -30,6 +37,12 @@ export const getArticleExtensions = (
     horizontalRule: false,
     // Disable built-in code block - we use CodeBlockLowlight for syntax highlighting
     codeBlock: false,
+    // Link is configured explicitly below.
+    link: false,
+    // Posts are stored as markdown, which has no underline syntax.
+    underline: false,
+    // An always-present empty last paragraph would leak into saved markdown.
+    trailingNode: false,
     bulletList: {
       HTMLAttributes: {
         class: "list-disc list-outside ml-6 my-4",

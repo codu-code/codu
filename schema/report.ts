@@ -67,3 +67,13 @@ export const ReviewReportSchema = z.object({
 });
 
 export type ReviewReportInput = z.TypeOf<typeof ReviewReportSchema>;
+
+// Admin: Dismiss a system (auto-flagged) report. `reportId` is a `reports` id,
+// a separate sequence from the ContentReport ids ReviewReportSchema takes.
+export const DismissSystemReportSchema = z.object({
+  reportId: z.number(),
+});
+
+export type DismissSystemReportInput = z.TypeOf<
+  typeof DismissSystemReportSchema
+>;

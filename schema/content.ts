@@ -37,13 +37,6 @@ export const GetUnifiedFeedSchema = z.object({
 
 export type GetUnifiedFeedInput = z.TypeOf<typeof GetUnifiedFeedSchema>;
 
-// Get Content by ID
-export const GetContentByIdSchema = z.object({
-  id: z.string(),
-});
-
-export type GetContentByIdInput = z.TypeOf<typeof GetContentByIdSchema>;
-
 // Get Content by Slug
 export const GetContentBySlugSchema = z.object({
   slug: z.string().min(1).max(300),
@@ -114,21 +107,6 @@ export const TrackClickContentSchema = z.object({
 });
 
 export type TrackClickContentInput = z.TypeOf<typeof TrackClickContentSchema>;
-
-// Get User's Content Schema
-export const GetUserContentSchema = z.object({
-  userId: z.string(),
-  type: ContentTypeSchema.nullish(),
-  limit: z.number().min(1).max(100).default(20),
-  cursor: z
-    .object({
-      id: z.string(),
-      publishedAt: z.string().optional(),
-    })
-    .nullish(),
-});
-
-export type GetUserContentInput = z.TypeOf<typeof GetUserContentSchema>;
 
 // Get Saved Content Schema
 export const GetSavedContentSchema = z.object({

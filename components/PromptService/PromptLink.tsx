@@ -12,9 +12,7 @@ interface LinkProps {
   className?: string;
   close?: (
     focusableElement?:
-      | HTMLElement
-      | MutableRefObject<HTMLElement | null>
-      | undefined,
+      HTMLElement | MutableRefObject<HTMLElement | null> | undefined,
   ) => void;
 }
 

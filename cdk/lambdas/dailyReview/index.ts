@@ -45,7 +45,7 @@ exports.handler = async function () {
 
   console.log(`Invoking ${url}`);
 
-  // Node 20 runtime ships a global fetch — no node-fetch dependency needed.
+  // The Lambda Node runtime ships a global fetch — no node-fetch dependency needed.
   const response = await fetch(url, {
     method: "POST",
     headers: {

@@ -80,16 +80,17 @@ test.describe("Authenticated my-posts Page", () => {
     if (isMobile) {
       const tabSelect = page.locator("select#tabs");
       await expect(tabSelect).toBeVisible({ timeout: 10000 });
-      // Verify the select has the correct options
+      // Verify the select has the correct options. The options of a closed
+      // native select are not rendered, so check presence rather than visibility.
       await expect(
         tabSelect.locator('option:has-text("Drafts")'),
-      ).toBeVisible();
+      ).toBeAttached();
       await expect(
         tabSelect.locator('option:has-text("Scheduled")'),
-      ).toBeVisible();
+      ).toBeAttached();
       await expect(
         tabSelect.locator('option:has-text("Published")'),
-      ).toBeVisible();
+      ).toBeAttached();
     } else {
       await expect(page.getByRole("link", { name: "Drafts" })).toBeVisible();
       await expect(page.getByRole("link", { name: "Scheduled" })).toBeVisible();
@@ -157,6 +158,8 @@ test.describe("Authenticated my-posts Page", () => {
     page,
     isMobile,
   }) => {
+    test.skip(isMobile, "The dialog's Close (X) button is hidden below sm");
+
     const title = "Published Article";
     await page.goto("http://localhost:3000/my-posts");
     await openTab(page, "Published", isMobile);

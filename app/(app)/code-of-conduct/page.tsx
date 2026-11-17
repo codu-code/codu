@@ -2,6 +2,7 @@ import { Eyebrow } from "@/components/ds";
 
 export const metadata = {
   title: "Code of conduct",
+  alternates: { canonical: "/code-of-conduct" },
   description:
     "We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone",
 };
