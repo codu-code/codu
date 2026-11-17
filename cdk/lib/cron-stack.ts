@@ -40,6 +40,12 @@ export class CronStack extends cdk.Stack {
 
     lambdaRole.addToPolicy(policy);
 
+    // Node 20+ Lambda runtimes no longer trust the Amazon RDS CAs by default,
+    // so the lambdas that connect to RDS over TLS load the bundled CA file.
+    const rdsCaEnvironment = {
+      NODE_EXTRA_CA_CERTS: "/var/runtime/ca-cert.pem",
+    };
+
     // RSS Feed Fetcher Lambda
     const rssFetcherFn = new NodejsFunction(this, "RSSFetcherLambda", {
       timeout: cdk.Duration.seconds(300), // 5 minutes for processing multiple feeds
@@ -50,6 +56,7 @@ export class CronStack extends cdk.Stack {
         "/../lambdas/rssFetcher/package-lock.json",
       ),
       role: lambdaRole,
+      environment: rdsCaEnvironment,
       bundling: {
         nodeModules: ["@aws-sdk/client-ssm", "pg", "rss-parser"],
       },
@@ -72,6 +79,7 @@ export class CronStack extends cdk.Stack {
         "/../lambdas/voteReconcile/package-lock.json",
       ),
       role: lambdaRole,
+      environment: rdsCaEnvironment,
       bundling: {
         nodeModules: ["@aws-sdk/client-ssm", "pg"],
       },
