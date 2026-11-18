@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - develop
@@ -21,7 +21,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -43,13 +42,13 @@ jobs:
       NEXTAUTH_URL: http://localhost:3000/api/auth
       GITHUB_ID: ${{ secrets.E2E_GITHUB_ID }}
       GITHUB_SECRET: ${{ secrets.E2E_GITHUB_SECRET }}
-      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      # Fork PRs get no secrets; e2e seeds sessions directly, so any value works.
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'e2e-placeholder-secret' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Setup Node.js
